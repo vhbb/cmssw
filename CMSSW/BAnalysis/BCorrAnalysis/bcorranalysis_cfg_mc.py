@@ -27,7 +27,6 @@ process.TFileService = cms.Service("TFileService",
 )
 
 process.bhadrons = cms.EDProducer('MCBHadronProducer',
-                                      jetsrc  = cms.InputTag('selectedPatJetsAK5PF'),
                                       quarkId = cms.uint32(5)
                                   )
 
