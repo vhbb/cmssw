@@ -20,9 +20,9 @@ process.bcandidates = cms.EDProducer('BCandidateProducer',
         src = cms.InputTag('selectedVertices','',''),
         primaryVertices = cms.InputTag('offlinePrimaryVerticesWithBS','',''),
 	minDRUnique = cms.untracked.double(0.4),
-	minvecSumIMifsmallDRUnique = cms.untracked.double(4.5),	
-	minCosPAtomerge = cms.untracked.double(0.9),
-	maxPtreltomerge = cms.untracked.double(2.0)	
+        minvecSumIMifsmallDRUnique = cms.untracked.double(5.5),
+        minCosPAtomerge = cms.untracked.double(0.99),
+        maxPtreltomerge = cms.untracked.double(7777.0)
 
 )
 
