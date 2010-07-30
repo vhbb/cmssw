@@ -13,7 +13,7 @@
 //
 // Original Author:  Andrea RIZZI
 //         Created:  Wed Dec  3 12:14:27 CET 2008
-// $Id: MCBHadronProducer.cc,v 1.10 2010/06/24 09:29:32 wehrlilu Exp $
+// $Id: MCBHadronProducer.cc,v 1.1 2010/07/29 17:45:00 leo Exp $
 //
 //
 
@@ -38,7 +38,6 @@
 // class decleration
 //
 
-
 class MCBHadronProducer : public edm::EDProducer {
    public:
       explicit MCBHadronProducer(const edm::ParameterSet&);
@@ -57,7 +56,6 @@ class MCBHadronProducer : public edm::EDProducer {
 
       // ----------member data ---------------------------
 
-      edm::InputTag jetsrc_;
       int noEvent;
 
 
@@ -75,8 +73,7 @@ typedef std::set<const reco::Candidate *>::iterator candsetit;
 
 //constructors and destructor
 
-MCBHadronProducer::MCBHadronProducer(const edm::ParameterSet& iConfig) :
-  jetsrc_(iConfig.getParameter<edm::InputTag>("jetsrc"))
+MCBHadronProducer::MCBHadronProducer(const edm::ParameterSet& iConfig) 
 
 {
  produces<SimBHadronCollection>(); 
@@ -112,7 +109,7 @@ void
 MCBHadronProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   noEvent++;
-  //std::cout << "Event NO " << noEvent << std::endl;
+  ////std::cout << "Event NO " << noEvent << std::endl;
    using namespace edm;
    using namespace reco;
 
@@ -130,7 +127,7 @@ MCBHadronProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
      int pdgid = gpc[i].pdgId();
      int pdid = abs(pdgid);
      if(((pdid/100)==5 || (pdid/1000)==5) && ((pdid%10)==1 || (pdid%10)==2 )) {
-
+       //std::cout << "B found at " << i << " pdgid " << pdgid << std::endl;
 ///////////////////TEST FOR NON-PYTHIA
 //        bool btake = true;
 //        for(unsigned int dn=0; dn<gpc[i].numberOfDaughters(); dn++){
@@ -148,14 +145,12 @@ MCBHadronProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
        if((*output).size()>0) removeMothers(gpc[i], *output);
 
        SimBHadron sbh(gpc[i]); 
-       
        sbh.decPosition.SetXYZ((*gpc[i].daughter(0)).vx(),(*gpc[i].daughter(0)).vy(),(*gpc[i].daughter(0)).vz());
        setMoDauQuantities(gpc[i], sbh);
-       
        output->push_back(sbh);
      }
    } 
-
+   //std::cout << "number of b " << output->size() << std::endl;
    std::auto_ptr<SimBHadronCollection> pOut(output);
    iEvent.put(pOut);
 
@@ -176,10 +171,9 @@ MCBHadronProducer::endJob() {
 
 void 
 MCBHadronProducer::removeMothers(const reco::Candidate &gp, SimBHadronCollection &out){
-
   for(SBHit it = out.begin(); it != out.end(); it++){
     if(gp.p4()==(*it).p4()) {
-      int t3 = (*it).pdgId();
+      //int t3 = (*it).pdgId();
       SBHit temp = it;
       out.erase(temp);
       it--;
@@ -195,13 +189,12 @@ MCBHadronProducer::removeMothers(const reco::Candidate &gp, SimBHadronCollection
       
 void 
 MCBHadronProducer::setMoDauQuantities(reco::GenParticle gp, SimBHadron &bh){
-
   bh.quarkstatus = -1;
   bh.brotherstatus = -1;
   
   std::set<const reco::Candidate *> bquarks; 
   findbquarks(gp, bquarks);
- 
+
   int id2 = gp.pdgId(); 
   bool bmes = false; 
   if(id2/1000==0) bmes = true;
@@ -227,32 +220,31 @@ MCBHadronProducer::setMoDauQuantities(reco::GenParticle gp, SimBHadron &bh){
       }
     }
   }
-
   if(bquarks.size()!=1) {
-    //std::cout << "MORE THAN ONE B/BBAR!!!\n";
+    ////std::cout << "MORE THAN ONE B/BBAR!!!\n";
   }
   else{
     candsetit it = bquarks.begin();
     bh.quarkstatus = (*it)->status(); 
     for(unsigned int m=0; m<(*it)->numberOfMothers(); m++){
-      bh.motherids.push_back((*it)->mother(m)->pdgId());	 
+      bh.motherids.push_back((*it)->mother(m)->pdgId());
     }
-    for(unsigned int d=0; d<((*it)->mother())->numberOfDaughters(); d++){
-      int id1 = ((*it)->mother())->daughter(d)->pdgId();
-      if(abs(id1)==5 && ((*it)->mother())->daughter(d)->p4() != (*it)->p4()){
-	if(id1!=(*it)->pdgId()) bh.brotherstatus = ((*it)->mother())->daughter(d)->status();
+    if((*it)->numberOfMothers()>0){
+      for(unsigned int d=0; d<((*it)->mother())->numberOfDaughters(); d++){
+	int id1 = ((*it)->mother())->daughter(d)->pdgId();
+	if(abs(id1)==5 && ((*it)->mother())->daughter(d)->p4() != (*it)->p4()){
+	  if(id1!=(*it)->pdgId()) bh.brotherstatus = ((*it)->mother())->daughter(d)->status();
+	}
       }
     }
   }
-
-
+  
 
 }
 
 void 
 MCBHadronProducer::findbquarks(const reco::Candidate &gp, std::set<const reco::Candidate *> &set){
   for(unsigned int m=0; m<gp.numberOfMothers(); m++){
-    
     if(abs((*gp.mother(m)).pdgId())==5) {
       //const reco::Candidate *temp = gp.mother(m);
       bool hasbmother = false;
