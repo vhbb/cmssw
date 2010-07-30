@@ -13,7 +13,7 @@
 //
 // Original Author:  Lukas Wehrli (IPP/ETHZ) [wehrlilu]
 //         Created:  Wed May 26 10:41:33 CEST 2010
-// $Id: BCorrAnalyzer.cc,v 1.10 2010/07/19 12:15:34 wehrlilu Exp $
+// $Id: BCorrAnalyzer.cc,v 1.1 2010/07/29 16:53:05 leo Exp $
 //
 //
 
@@ -199,6 +199,9 @@ struct event{
   float ptHardestGJ; 
   float ptHardestPJ; 
   float ptHardestPGJ; 
+  float etaHardestGJ; 
+  float etaHardestPJ; 
+  float etaHardestPGJ; 
   float eventNo;
   float runNo;
   float pthat; 
@@ -461,7 +464,7 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    Handle<GenJetCollection> GJC;
    GenJetCollection gjc;
 
-   double ptHardestGJ = -1;
+   double ptHardestGJ = -1, etaHardestGJ=-1; 
    int proc1 = -1, proc2 = -1;  //1FCR, 2FEX, 3GSP, 4FourB
 
    if(isData_==0){
@@ -509,7 +512,10 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      gjc = *(GJC.product());
      ///////////////////////////////////////////
      for(unsigned int i=0; i<gjc.size(); i++)
-       if(gjc[i].pt()>ptHardestGJ) ptHardestGJ = gjc[i].pt();
+       if(gjc[i].pt()>ptHardestGJ) {
+	 ptHardestGJ = gjc[i].pt();
+	 etaHardestGJ = gjc[i].eta();
+       }
      
    }
 
@@ -622,10 +628,11 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      if(selectedJet)PFJet_JetIDLoose[PFJet_nJets] = 1;
      
      //GenJet maxPt check
-     if(jet->genJet())
-       if(jet->genJet()->pt()>ptHardestPGJ){ ptHardestPGJ = jet->genJet()->pt(); etaHardestPGJ = jet->genJet()->eta();} 
-     if(jet->pt()>ptHardestPJ) {ptHardestPJ = jet->pt(); etaHardestPJ = jet->eta();}
-       
+     if(selectedJet){
+       if(jet->genJet())
+	 if(jet->genJet()->pt()>ptHardestPGJ){ ptHardestPGJ = jet->genJet()->pt(); etaHardestPGJ = jet->genJet()->eta();} 
+       if(jet->pt()>ptHardestPJ) {ptHardestPJ = jet->pt(); etaHardestPJ = jet->eta();}
+     }
      
      //Var filling
      PFJet_nHEF[PFJet_nJets] = jet->neutralHadronEnergyFraction();
@@ -900,6 +907,9 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    sevents.ptHardestGJ = ptHardestGJ; 
    sevents.ptHardestPJ = ptHardestPJ; 
    sevents.ptHardestPGJ = ptHardestPGJ; 
+   sevents.etaHardestGJ = etaHardestGJ; 
+   sevents.etaHardestPJ = etaHardestPJ; 
+   sevents.etaHardestPGJ = etaHardestPGJ; 
    sevents.eventNo = iEvent.id().event();
    sevents.runNo = iEvent.id().run();
    sevents.pthat = pthat; 
@@ -1014,6 +1024,8 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    for(unsigned int i=0; i<bcandids.size(); i++){
      sbcands = bcandids[i]; 
+     sbcands.ptHardestPJ = ptHardestPJ;
+     sbcands.etaHardestPJ = etaHardestPJ;
      sbcands.nSelected = goodVert; 
      sbcands.ndRmatched = nmat; 
      sbcands.jet6 = b6; 
@@ -1261,7 +1273,7 @@ BCorrAnalyzer::beginJob()
   //TFileDirectory sdtBCands = fs_->mkdir("tbcandidates","tree for bcandidates");
 
   tEvents = /*(&sdtEvents)*/ fs_->make<TTree>("tEvents","event properties");
-  tEvents->Branch("BEvents", &sevents.nB, "nB/I:nV/I:nMat/I:process/I:eventProcId/I:dRvv/F:dEtavv/F:dPhivv/F:dRbb/F:dEtabb/F:dPhibb/F:massV1/F:massV2/F:massV3/F:ptV1/F:ptV2/F:ptV3/F:etaV1/F:etaV2/F:etaV3/F:phiV1/F:phiV2/F:phiV3/F:dist3D1/F:dist3D2/F:dist3D3/F:distSig3D1/F:distSig3D2/F:distSig3D3/F:dist2D1/F:dist2D2/F:dist2D3/F:distSig2D1/F:distSig2D2/F:distSig2D3/F:massB1/F:massB2/F:ptB1/F:ptB2/F:etaB1/F:etaB2/F:phiB1/F:phiB2/F:ptHardestGJ/F:ptHardestPJ/F:ptHardestPGJ/F:ptHardestGJ/F:etaHardestPJ/F:etaHardestPGJ/F:eventNo/F:runNo/F:pthat/F:flavors/I:jet6/I:jet10/I:jet10nobptx/I:jet15/I:jet15hcalnf/I:jet30/I:jet50/I", 128000);
+  tEvents->Branch("BEvents", &sevents.nB, "nB/I:nV/I:nMat/I:process/I:eventProcId/I:dRvv/F:dEtavv/F:dPhivv/F:dRbb/F:dEtabb/F:dPhibb/F:massV1/F:massV2/F:massV3/F:ptV1/F:ptV2/F:ptV3/F:etaV1/F:etaV2/F:etaV3/F:phiV1/F:phiV2/F:phiV3/F:dist3D1/F:dist3D2/F:dist3D3/F:distSig3D1/F:distSig3D2/F:distSig3D3/F:dist2D1/F:dist2D2/F:dist2D3/F:distSig2D1/F:distSig2D2/F:distSig2D3/F:massB1/F:massB2/F:ptB1/F:ptB2/F:etaB1/F:etaB2/F:phiB1/F:phiB2/F:ptHardestGJ/F:ptHardestPJ/F:ptHardestPGJ/F:etaHardestGJ/F:etaHardestPJ/F:etaHardestPGJ/F:eventNo/F:runNo/F:pthat/F:flavors/I:jet6/I:jet10/I:jet10nobptx/I:jet15/I:jet15hcalnf/I:jet30/I:jet50/I", 128000);
 
   //run info
   tEvents->Branch("pthat",&pthat,"pthat/D");
@@ -1354,7 +1366,7 @@ BCorrAnalyzer::beginJob()
 
 
   tBCands = /*(&sdtBCands)*/ fs_->make<TTree>("tBCands","bcandidate properties");
-  tBCands->Branch("BCands", &sbcands.massBcand, "massBcand/F:massVert/F:gamma/F:pt/F:eta/F:phi/F:dist3D/F:distSig3D/F:dist2D/F:distSig2D/F:dist3D_norm/F:eventNo/F:runNo/F:pthat/F:nvert/I:nSelected/I:ndRmatched/I:flavor/I:jet6/I:jet10/I:jet10nobptx/I:jet15/I:jet15hcalnf/I:jet30/I:jet50/I:process/I:eventProcId/I:selected/O:dRmatched/O", 128000);
+  tBCands->Branch("BCands", &sbcands.massBcand, "massBcand/F:massVert/F:gamma/F:pt/F:eta/F:phi/F:dist3D/F:distSig3D/F:dist2D/F:distSig2D/F:dist3D_norm/F:eventNo/F:runNo/F:pthat/F:ptHardestPJ/F:etaHardestPJ/F:nvert/I:nSelected/I:ndRmatched/I:flavor/I:jet6/I:jet10/I:jet10nobptx/I:jet15/I:jet15hcalnf/I:jet30/I:jet50/I:process/I:eventProcId/I:selected/O:dRmatched/O", 128000);
 
 
   hdR = /*(&sdpEvents)*/fs_->make<TH1F>("ivf_hdR","hdR",20,0,10);
