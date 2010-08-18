@@ -109,8 +109,8 @@ addJetCollection(process,cms.InputTag('ak5PFJets'),
                     jetIdLabel   = "ak5"
                     )
 
-process.patJets.embedCaloTowers = cms.bool(True)
-process.patJetsAK5PF.embedPFCandidates = cms.bool(True)
+process.selectedPatJets.embedCaloTowers = cms.bool(True)
+process.selectedPatJetsAK5PF.embedPFCandidates = cms.bool(True)
 process.patJetCorrFactorsAK5PF.corrSample  = "Spring10"
 process.patJetCorrFactors.corrSample  = "Spring10"
 process.selectedPatJets.cut = cms.string("pt>10.")
