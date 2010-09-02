@@ -27,8 +27,8 @@ process.GlobalTag.globaltag = 'GR10_P_V7::All'
 
 process.source = cms.Source("PoolSource",
                                 fileNames = cms.untracked.vstring(
-    '/store/data/Commissioning10/MinimumBias/RECO/May6thPDSkim2_SD_JetMETTau-v1/0124/7219C828-095D-DF11-8D9E-0018F3D0963C.root'
-#    'file:/scratch/leo/2010A/448026D1-8866-DF11-96B3-001D09F295FB.root'
+#    '/store/data/Commissioning10/MinimumBias/RECO/May6thPDSkim2_SD_JetMETTau-v1/0124/7219C828-095D-DF11-8D9E-0018F3D0963C.root'
+    'file:/shome/leo/Installations/CMSSW_3_7_0_patch2/src/Analysis/SimpleBAnalysis/test/3CE6FE16-F29E-DF11-8BD3-003048F118C4.root'
     )) 
 
 
@@ -52,7 +52,8 @@ from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.out = cms.OutputModule("PoolOutputModule",
                                fileName = cms.untracked.string('reducedPAT.root'),
-                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('filter ', 'vertexFilter') ),
+                               #SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('filter ', 'vertexFilter') ),
+                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('filter ') ),
                                outputCommands = cms.untracked.vstring('drop *',
                                                                       'keep *_selectedPatElectrons*_*_*',
                                                                       'keep *_selectedPatMuons*_*_*',
@@ -109,12 +110,27 @@ addJetCollection(process,cms.InputTag('ak5PFJets'),
                     jetIdLabel   = "ak5"
                     )
 
+process.patJets.embedCaloTowers = cms.bool(True)
+process.patJetsAK5PF.embedPFCandidates = cms.bool(True)
 process.selectedPatJets.embedCaloTowers = cms.bool(True)
 process.selectedPatJetsAK5PF.embedPFCandidates = cms.bool(True)
 process.patJetCorrFactorsAK5PF.corrSample  = "Spring10"
 process.patJetCorrFactors.corrSample  = "Spring10"
 process.selectedPatJets.cut = cms.string("pt>10.")
 process.selectedPatJetsAK5PF.cut = cms.string("pt>8.")
+
+
+### Event Filter
+process.goodPFJets = cms.EDFilter("PtMinCandViewSelector",
+                                  src = cms.InputTag("selectedPatJetsAK5PF"),
+                                  ptMin = cms.double(30)
+                                  )
+
+process.EventPFJetFilter = cms.EDFilter("CandViewCountFilter",
+                                        src = cms.InputTag("goodPFJets"),
+                                        minNumber = cms.uint32(1),
+                                        filter = cms.bool(True)   # otherwise it won't filter the events, just produce an empty vertex collection.
+                            )
 
 
 
@@ -179,17 +195,19 @@ process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertexHighEffBJetTags_cfi"
 
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')
 
-process.vertexFilter = cms.Path(
-    #process.hltLevel1GTSeed *
-    process.bit40 *
-    process.bptxAnd *
-    process.scrapingVeto *
-    #process.hltPhysicsDeclared *
-    process.oneGoodVertexFilter* 
-    #process.singleJetHLTFilter+
-    process.HBHENoiseFilter*
-    process.inclusiveVertexing*process.inclusiveMergedVertices*process.selectedVertices*process.bcandidates
-)
+#process.vertexFilter = cms.Path(
+#    #process.hltLevel1GTSeed *
+#    process.bit40 *
+#    process.bptxAnd *
+#    process.scrapingVeto *
+#    #process.hltPhysicsDeclared *
+#    process.oneGoodVertexFilter* 
+#    #process.singleJetHLTFilter+
+#    process.HBHENoiseFilter*
+#    process.goodPFJets*
+#    process.EventPFJetFilter*
+#    process.inclusiveVertexing*process.inclusiveMergedVertices*process.selectedVertices*process.bcandidates
+#)
 
 process.filter = cms.Path(
     #    process.hltLevel1GTSeed *
@@ -200,10 +218,13 @@ process.filter = cms.Path(
     process.oneGoodVertexFilter*
     #process.singleJetHLTFilter+
     process.HBHENoiseFilter*
-    process.simpleSecondaryVertexHighPurBJetTags*
-    process.simpleSecondaryVertexHighEffBJetTags*
+    #process.simpleSecondaryVertexHighPurBJetTags*
+    #process.simpleSecondaryVertexHighEffBJetTags*
     #process.dump
-    process.patDefaultSequence
+    process.patDefaultSequence*
+    process.goodPFJets*
+    process.EventPFJetFilter*
+    process.inclusiveVertexing*process.inclusiveMergedVertices*process.selectedVertices*process.bcandidates
     
     )
 
