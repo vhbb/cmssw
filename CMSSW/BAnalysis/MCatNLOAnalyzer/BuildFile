@@ -1,0 +1,20 @@
+<use name=FWCore/Framework>
+<use name=FWCore/PluginManager>
+<use name=FWCore/ParameterSet>
+<use name=CommonTools/UtilAlgos>
+<use name=DataFormats/GeometryCommonDetAlgo>
+<use name=DataFormats/GeometryVector>
+<use name=DataFormats/Candidate>
+<use name=DataFormats/Math>
+<use name=DataFormats/HepMCCandidate>
+<use name=DataFormats/PatCandidates>
+<use name=rootmath>
+<use name=rootcore>
+<use name=root>
+<flags EDM_PLUGIN=1>
+<export>
+   <lib name=BAnalysisMCatNLOAnalyzer>
+   <use name=FWCore/Framework>
+   <use name=FWCore/PluginManager>
+   <use name=FWCore/ParameterSet>
+</export>
