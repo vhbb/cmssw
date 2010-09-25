@@ -13,7 +13,7 @@
 //
 // Original Author:  Lukas Wehrli (IPP/ETHZ) [wehrlilu]
 //         Created:  Wed May 26 10:41:33 CEST 2010
-// $Id: BCorrAnalyzer.cc,v 1.1 2010/07/29 16:53:05 leo Exp $
+// $Id: BCorrAnalyzer.cc,v 1.2 2010/07/30 10:06:47 wehrlilu Exp $
 //
 //
 
@@ -59,6 +59,7 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/PatCandidates/interface/TriggerPath.h"
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
+#include "DataFormats/BTauReco/interface/TrackIPTagInfo.h"
 
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -74,7 +75,7 @@
 
 
 #include "RecoBTag/SecondaryVertex/interface/SecondaryVertex.h"
-
+#include "DataFormats/BTauReco/interface/TrackIPTagInfo.h"
 #include <vector>
 
 #define MAXJETS 100
@@ -82,7 +83,7 @@
 
 #define runPrescale 136393
 
-#define DEBUG 1
+#define DEBUG 0
 
 using namespace std;
 
@@ -213,6 +214,8 @@ struct event{
   int jet15hcalnf; 
   int jet30; 
   int jet50; 
+  int nposIPverttracks;
+  int nnegIPverttracks;
 
 };
 
@@ -773,6 +776,69 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	return; 
    }
 
+   int nnegIP=0, nposIP=0; 
+   //NEW TEST OF IP SIGNS
+   if(svc.size()>0){
+     //------------------IP Tag IInfos-----------------------
+     Handle<reco::TrackIPTagInfoCollection> TIPTIC;
+     iEvent.getByLabel("impactParameterTagInfosAK5PF", TIPTIC);
+     const reco::TrackIPTagInfoCollection iptic = *(TIPTIC.product());
+     std::cout << "Size of iptic " << iptic.size() << std::endl;
+     
+//      //loop over jets
+//      for(unsigned int j=0; j<iptic.size(); j++){
+//        const GlobalVector axis = iptic[j].axis(); 
+//        const edm::RefVector<TrackCollection> tracks = iptic[j].selectedTracks(); 
+//        const std::vector<TrackIPTagInfo::TrackIPData> ipdatas = iptic[j].impactParameterData(); 
+//        std::cout << j << " axis " << axis.x() << " " << axis.y() << " " << axis.z() << std::endl;
+//        //loop over selected tracks: 
+//        unsigned int ntr=0; 
+//        for(edm::RefVector<TrackCollection>::const_iterator it= tracks.begin(); it!=tracks.end(); it++, ntr++){
+// 	 std::cout << "track " << ntr << " pt " << (*it)->pt() << " ip3d " << ipdatas[ntr].ip3d.value() << std::endl;
+//        }
+//      }
+
+     //loop over vertex
+     for(unsigned int v=0; v<svc.size(); v++){
+       std::cout << "vertex " << v << std::endl;
+       //find dR to jets:
+       Vertex rv = svc[v]; 
+       GlobalVector fldir = flightDirection(pv,rv); 
+       unsigned int matJet = -1; 
+       double minDR = 10.0; 
+       for(unsigned int j=0; j<iptic.size(); j++){
+	 GlobalVector axis = iptic[j].axis();
+	 double dR = deltaR(fldir,axis);
+	 if(dR<minDR){
+	   minDR=dR; 
+	   matJet = j;
+	 }
+       }
+    if(matJet==-1) std::cout << "NO JET!!!\n";
+//        std::cout << "MATCHING JET: " << matJet << "\n";
+       const edm::RefVector<TrackCollection> tracks = iptic[matJet].selectedTracks(); 
+       const std::vector<TrackIPTagInfo::TrackIPData> ipdatas = iptic[matJet].impactParameterData(); 
+
+       unsigned int nvtr=0; 
+       //loop over tracks in vertex
+       for(Vertex::trackRef_iterator it=svc[v].tracks_begin(); it!=svc[v].tracks_end(); it++, nvtr++){
+	 double vtrpt = (*it)->pt();
+	 std::cout << "vtr " << nvtr << " pt " << (*it)->pt() << "\n";
+	 unsigned int ntr=0; 
+	 for(edm::RefVector<TrackCollection>::const_iterator jtit= tracks.begin(); jtit!=tracks.end(); jtit++, ntr++){
+	   if((*jtit)->pt()==vtrpt){
+// 	     std::cout << "found " << ipdatas[ntr].ip3d.value() << std::endl;
+	     if(ipdatas[ntr].ip3d.value()>0) nposIP++;
+	     else nnegIP++; 
+	   }
+	 }
+
+       }
+     }//end loop over vertex
+   }  
+   //END NEW TEST OF IP SIGNS
+
+
    int goodVert=0, index1 = -1, index2 = -1, index3 = -1; 
    //index3: if three selected it is third selected, otherwise if two selected it is the first remaining one
    std::set<brsvpair> pairs;
@@ -921,6 +987,8 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    sevents.jet15hcalnf = b15hcalnf; 
    sevents.jet30 = b30; 
    sevents.jet50 = b50; 
+   sevents.nposIPverttracks = nposIP; 
+   sevents.nnegIPverttracks = nnegIP; 
 
 
    if(sbhc.size()==2){
@@ -1268,12 +1336,13 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 void 
 BCorrAnalyzer::beginJob()
 {
+
   //  TFileDirectory sdtEvents = fs_->mkdir("tevents","tree for events");
   //TFileDirectory sdpEvents = fs_->mkdir("pevents","plots for events");
   //TFileDirectory sdtBCands = fs_->mkdir("tbcandidates","tree for bcandidates");
 
   tEvents = /*(&sdtEvents)*/ fs_->make<TTree>("tEvents","event properties");
-  tEvents->Branch("BEvents", &sevents.nB, "nB/I:nV/I:nMat/I:process/I:eventProcId/I:dRvv/F:dEtavv/F:dPhivv/F:dRbb/F:dEtabb/F:dPhibb/F:massV1/F:massV2/F:massV3/F:ptV1/F:ptV2/F:ptV3/F:etaV1/F:etaV2/F:etaV3/F:phiV1/F:phiV2/F:phiV3/F:dist3D1/F:dist3D2/F:dist3D3/F:distSig3D1/F:distSig3D2/F:distSig3D3/F:dist2D1/F:dist2D2/F:dist2D3/F:distSig2D1/F:distSig2D2/F:distSig2D3/F:massB1/F:massB2/F:ptB1/F:ptB2/F:etaB1/F:etaB2/F:phiB1/F:phiB2/F:ptHardestGJ/F:ptHardestPJ/F:ptHardestPGJ/F:etaHardestGJ/F:etaHardestPJ/F:etaHardestPGJ/F:eventNo/F:runNo/F:pthat/F:flavors/I:jet6/I:jet10/I:jet10nobptx/I:jet15/I:jet15hcalnf/I:jet30/I:jet50/I", 128000);
+  tEvents->Branch("BEvents", &sevents.nB, "nB/I:nV/I:nMat/I:process/I:eventProcId/I:dRvv/F:dEtavv/F:dPhivv/F:dRbb/F:dEtabb/F:dPhibb/F:massV1/F:massV2/F:massV3/F:ptV1/F:ptV2/F:ptV3/F:etaV1/F:etaV2/F:etaV3/F:phiV1/F:phiV2/F:phiV3/F:dist3D1/F:dist3D2/F:dist3D3/F:distSig3D1/F:distSig3D2/F:distSig3D3/F:dist2D1/F:dist2D2/F:dist2D3/F:distSig2D1/F:distSig2D2/F:distSig2D3/F:massB1/F:massB2/F:ptB1/F:ptB2/F:etaB1/F:etaB2/F:phiB1/F:phiB2/F:ptHardestGJ/F:ptHardestPJ/F:ptHardestPGJ/F:etaHardestGJ/F:etaHardestPJ/F:etaHardestPGJ/F:eventNo/F:runNo/F:pthat/F:flavors/I:jet6/I:jet10/I:jet10nobptx/I:jet15/I:jet15hcalnf/I:jet30/I:jet50/I:nposIPverttracks/I:nnegIPverttracks/I", 128000);
 
   //run info
   tEvents->Branch("pthat",&pthat,"pthat/D");
