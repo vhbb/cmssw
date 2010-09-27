@@ -50,6 +50,10 @@ map<string,double> varDouble;
 map<string,float*> varFloatArr;
 map<string, int> varInt;
 map<string, int*> varIntArr;
+TH1F *hcorrIVF; 
+double xMax_IVFCorr;
+double xMin_IVFCorr;
+double binW_IVFCorr;
 
 //categories labels
 string lab_fl[] = {"2b","1b1c","1b1l","1b1o",
@@ -72,6 +76,7 @@ int analyzeJetEvent(string SET, double W);
 int analyzeIVFEvent(event thisEvent, string SET, double W);
 void sumHisto(string SET, string HLT);
 
+void corrFunctionIVF(string strigger);
 float delta_phi(float phi1, float phi2);
 float delta_R(float phi1, float phi2, float eta1, float eta2);
 
@@ -143,6 +148,13 @@ void analyze(string SET="Data", string HLT="HLT_Jet15U", int SET_n=-1){
     setBranches(myTree);
     event thisEv; 
     myTree->SetBranchAddress("BEvents",&thisEv);
+
+    //IVF correction
+    if(HLT=="HLT_Jet30U") corrFunctionIVF("jet30");
+    else if(HLT=="HLT_Jet50U") corrFunctionIVF("jet50");
+    else if(HLT=="HLT_Jet15U") corrFunctionIVF("jet15");
+
+//     std::cout << "corr " << hcorrIVF << std::endl;
 
     //event loop
     int counter = 0;
@@ -262,6 +274,8 @@ int analyzeJetEvent(string SET, double W){
 //IVF analyzer
 int analyzeIVFEvent(event thisEv, string SET, double W){
   //selecting events with only 2 b ??? Lukas, is this necessary?
+  //yes, we want to have events with exactly two B since otherwise 
+  //it is not clear which are the B's produced in same process
   if( thisEv.nV!=2 && thisEv.nB!=2) return 1;
   histos["bVert_N"]->Fill(thisEv.nV, W);
 
@@ -277,6 +291,15 @@ int analyzeIVFEvent(event thisEv, string SET, double W){
       histos["Vert_pt_selvert"]->Fill(thisEv.ptV1,W); 
       histos["Vert_pt_selvert"]->Fill(thisEv.ptV2,W); 
       
+      //corrected plots
+      if(hcorrIVF!=0){
+	double weight = hcorrIVF->GetBinContent((int)((thisEv.dRvv-xMin_IVFCorr)/binW_IVFCorr+1.)); 
+	histos["Vert_dR_2b_CORR"]->Fill(thisEv.dRvv,W*weight);
+	histos["Vert_dPhi_2b_CORR"]->Fill(fabs(thisEv.dPhivv),W*weight);
+	histos["Vert_dEta_2b_CORR"]->Fill(fabs(thisEv.dEtavv),W*weight);
+      }
+      else std::cout << "NO FILE FOR CORRECTED IVF PLOTS LOADED\n";
+
       if(SET!="Data"){
 	string diFl="";
 	if(thisEv.flavors==55){ diFl = "2b"; flavCat=0; }
@@ -467,9 +490,9 @@ void createCommonHistos(string SET){
     for(int hC=0; hC< nLabelsC; hC++){
       histos[labels[h]+"_dR_2b"+labelsC[hC]] = new TH1F((labels[h]+"_dR_2b"+labelsC[hC]).c_str() ,"",60,0,6);  
       histos[labels[h]+"_dR_2b"+labelsC[hC]]->Sumw2();
-      histos[labels[h]+"_dPhi_2b"+labelsC[hC]] = new TH1F((labels[h]+"_dPhi_2b"+labelsC[hC]).c_str() ,"",60,0,6);  
+      histos[labels[h]+"_dPhi_2b"+labelsC[hC]] = new TH1F((labels[h]+"_dPhi_2b"+labelsC[hC]).c_str() ,"",32,0,3.2);  
       histos[labels[h]+"_dPhi_2b"+labelsC[hC]]->Sumw2();
-      histos[labels[h]+"_dEta_2b"+labelsC[hC]] = new TH1F((labels[h]+"_dEta_2b"+labelsC[hC]).c_str() ,"",60,0,6);  
+      histos[labels[h]+"_dEta_2b"+labelsC[hC]] = new TH1F((labels[h]+"_dEta_2b"+labelsC[hC]).c_str() ,"",100,0,10);  
       histos[labels[h]+"_dEta_2b"+labelsC[hC]]->Sumw2();
     }
     
@@ -478,8 +501,8 @@ void createCommonHistos(string SET){
 
       for(int f=0;f< lab_fl_n;f++){
 	histos[labels[h]+"_dR_2b_"+lab_fl[f]] = new TH1F( (labels[h]+"_dR_2b_"+lab_fl[f]).c_str(),"",60,0,6); histos[labels[h]+"_dR_2b_"+lab_fl[f] ]->Sumw2();
-	histos[labels[h]+"_dEta_2b_"+lab_fl[f]] = new TH1F( (labels[h]+"_dEta_2b_"+lab_fl[f]).c_str(),"",60,0,6); histos[labels[h]+"_dEta_2b_"+lab_fl[f] ]->Sumw2();
-	histos[labels[h]+"_dPhi_2b_"+lab_fl[f]] = new TH1F( (labels[h]+"_dPhi_2b_"+lab_fl[f]).c_str(),"",60,0,6); histos[labels[h]+"_dPhi_2b_"+lab_fl[f] ]->Sumw2();
+	histos[labels[h]+"_dEta_2b_"+lab_fl[f]] = new TH1F( (labels[h]+"_dEta_2b_"+lab_fl[f]).c_str(),"",100,0,10); histos[labels[h]+"_dEta_2b_"+lab_fl[f] ]->Sumw2();
+	histos[labels[h]+"_dPhi_2b_"+lab_fl[f]] = new TH1F( (labels[h]+"_dPhi_2b_"+lab_fl[f]).c_str(),"",32,0,3.2); histos[labels[h]+"_dPhi_2b_"+lab_fl[f] ]->Sumw2();
       }  
     }
   }
@@ -557,6 +580,14 @@ void createIVFHistos(string SET){
   }
 
 
+}
+
+void corrFunctionIVF(string strigger){
+  TFile *fCorr = TFile::Open("/scratch/wehrlilu/efficCurves.root","UPDATE");
+  fCorr->GetObject((strigger+"/corrfunc").c_str(),hcorrIVF);
+  xMax_IVFCorr = hcorrIVF->GetXaxis()->GetXmax();
+  xMin_IVFCorr = hcorrIVF->GetXaxis()->GetXmin();
+  binW_IVFCorr = (xMax_IVFCorr-xMin_IVFCorr)/hcorrIVF->GetXaxis()->GetNbins();
 }
 
 float delta_phi(float phi1, float phi2){
