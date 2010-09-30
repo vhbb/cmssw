@@ -24,6 +24,7 @@
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/ESHandle.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -59,8 +60,9 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/PatCandidates/interface/TriggerPath.h"
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
-#include "DataFormats/BTauReco/interface/TrackIPTagInfo.h"
-
+#include "DataFormats/HLTReco/interface/TriggerObject.h"
+#include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
+#include "PhysicsTools/PatUtils/interface/TriggerHelper.h"
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -73,9 +75,20 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
-
 #include "RecoBTag/SecondaryVertex/interface/SecondaryVertex.h"
 #include "DataFormats/BTauReco/interface/TrackIPTagInfo.h"
+
+//btag eff from DB
+#include "RecoBTag/PerformanceDB/interface/BtagPerformance.h"
+#include "RecoBTag/Records/interface/BTagPerformanceRecord.h"
+#include "CondFormats/PhysicsToolsObjects/interface/BinningPointByMap.h"
+
+
+//Residual JEC DATA ONLY!!!
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+
 #include <vector>
 
 #define MAXJETS 100
@@ -123,35 +136,6 @@ struct bcandid{
   bool selected; 
   bool dRmatched; 
 }; 
-/*
-struct bcandid{
-  float massBcand;
-  float massVert;
-  float gamma;
-  float pt; 
-  float eta; 
-  float phi;
-  float dist3D; 
-  float distSig3D;
-  float dist2D; 
-  float distSig2D;
-  float dist3D_norm;
-  float eventNo; 
-  float runNo;
-  float ptHardestPJ; 
-  float etaHardestPJ; 
-  int nvert; 
-  int nSelected; 
-  int jet6; 
-  int jet10; 
-  int jet10nobptx; 
-  int jet15; 
-  int jet15hcalnf; 
-  int jet30; 
-  int jet50; 
-  bool selected; 
-}; 
-*/
 
 struct event{
   int nB; 
@@ -216,7 +200,6 @@ struct event{
   int jet50; 
   int nposIPverttracks;
   int nnegIPverttracks;
-
 };
 
 struct brsvpair{
@@ -310,6 +293,7 @@ class BCorrAnalyzer : public edm::EDAnalyzer {
   int CaloJet_JetIDLoose[MAXJETS], CaloJet_JetIDTight[MAXJETS];
   int CaloJet_JetFlavour[MAXJETS];
   float CaloJet_emEF[MAXJETS], CaloJet_fHPD[MAXJETS], CaloJet_n90Hits[MAXJETS], CaloJet_fRBX[MAXJETS];
+  float CaloJet_JECErr[MAXJETS];
 
   int PFJet_nJets;
   float PFJet_pt[MAXJETS], PFJet_eta[MAXJETS], PFJet_phi[MAXJETS], PFJet_E[MAXJETS];
@@ -317,8 +301,9 @@ class BCorrAnalyzer : public edm::EDAnalyzer {
   int PFJet_JetIDLoose[MAXJETS], PFJet_JetFlavour[MAXJETS];
   float PFJet_nHEF[MAXJETS], PFJet_nEmEF[MAXJETS], PFJet_cHEF[MAXJETS], PFJet_cEmEF[MAXJETS];
   int PFJet_cMult[MAXJETS], PFJet_nConst[MAXJETS];
+  float PFJet_JECErr[MAXJETS];
 
-  vector<string> WP;
+  vector<string> WP, WP_CAP;
   vector<string> BALGO;
   map<string, float> WPVALUES;
   map<string, float> varFloat;
@@ -326,8 +311,33 @@ class BCorrAnalyzer : public edm::EDAnalyzer {
   map<string, int*> varIntArr;
   map<string, int> varInt;
   map<string, int> varTrigger;
+  map<string, float> varTriggerFloat;
+  vector<string> triggerPaths;
+
+  BinningPointByMap p; //this maps the points to be evaluated
+
+  map< string, edm::ESHandle<BtagPerformance> > btageff_H;
+  map< string, const BtagPerformance *> btageff;//= *(perfH.product());
+
+  string BCorrMethod_;
 
 
+  //residual corrections DATA ONLY!
+  string JEC_PATH;
+  edm::FileInPath* fipRes;
+  edm::FileInPath* fipUnc;
+  JetCorrectorParameters *ResJetCorParCALO ;
+  JetCorrectionUncertainty *jecUncCALO;
+  vector<JetCorrectorParameters> vParamCALO;
+  FactorizedJetCorrector *JECCALO;
+  
+
+  edm::FileInPath* fipResPF;
+  edm::FileInPath* fipUncPF;
+  JetCorrectorParameters *ResJetCorParPF ;
+  JetCorrectionUncertainty *jecUncPF;
+  vector<JetCorrectorParameters> vParamPF;
+  FactorizedJetCorrector *JECPF;
 
 };
 
@@ -341,35 +351,33 @@ BCorrAnalyzer::BCorrAnalyzer(const edm::ParameterSet& iConfig):
   maxEtaVertex(iConfig.getUntrackedParameter<double>("maxEtaVertex",2.0))
 
 {
+  triggerPaths.push_back("HLT_L1_BscMinBiasOR_BptxPlusORMinus");
+  triggerPaths.push_back("HLT_L1_BscMinBiasOR_BptxPlusORMinus_NoBPTX");
+  triggerPaths.push_back("HLT_MinBias");
+  triggerPaths.push_back("HLT_MinBiasBSC");
+  triggerPaths.push_back("HLT_MinBiasBSC_NoBPTX");
+  triggerPaths.push_back("HLT_L1Jet6U");
+  triggerPaths.push_back("HLT_L1Jet10U");
+  triggerPaths.push_back("HLT_Jet15U");
+  triggerPaths.push_back("HLT_Jet30U");
+  triggerPaths.push_back("HLT_Jet50U");
+  triggerPaths.push_back("HLT_Jet70U");
+  triggerPaths.push_back("HLT_Jet100U");
 
-  varTrigger["HLT_L1_BscMinBiasOR_BptxPlusORMinus"] = 0;
-  varTrigger["HLT_L1_BscMinBiasOR_BptxPlusORMinus_NoBPTX"] = 0;
-  varTrigger["HLT_MinBias"] = 0;
-  varTrigger["HLT_MinBiasBSC"] = 0;
-  varTrigger["HLT_MinBiasBSC_NoBPTX"] = 0;
-
-  varTrigger["HLT_L1_BscMinBiasOR_BptxPlusORMinus_prescale"] = -1;
-  varTrigger["HLT_L1_BscMinBiasOR_BptxPlusORMinus_NoBPTX_prescale"] = -1;
-  varTrigger["HLT_MinBias_prescale"] = -1;
-  varTrigger["HLT_MinBiasBSC_prescale"] = -1;
-  varTrigger["HLT_MinBiasBSC_NoBPTX_prescale"] = -1;
-
-  varTrigger["HLT_L1Jet6U"] = 0;
-  varTrigger["HLT_L1Jet10U"] = 0;
-  varTrigger["HLT_HT100U"] = 0;
-  varTrigger["HLT_Jet15U"] = 0;
-  varTrigger["HLT_Jet30U"] = 0;
-  varTrigger["HLT_Jet50U"] = 0;
-  varTrigger["HLT_HT100U"] = 0;
-
-  varTrigger["HLT_L1Jet6U_prescale"] = -1;
-  varTrigger["HLT_L1Jet10U_prescale"] = -1;
-  varTrigger["HLT_HT100U_prescale"] = -1;
-  varTrigger["HLT_Jet15U_prescale"] = -1;
-  varTrigger["HLT_Jet30U_prescale"] = -1;
-  varTrigger["HLT_Jet50U_prescale"] = -1;
-  varTrigger["HLT_HT100U_prescale"] = -1;
-
+  for(vector<string>::iterator tp=triggerPaths.begin(); tp!=triggerPaths.end();tp++){
+    string tp2 = (*tp);
+    varTrigger[tp2] = 0;
+    varTrigger[tp2+"_prescale"] = 0;
+    varTriggerFloat[tp2+"_pt"] = 0;
+    varTriggerFloat[tp2+"_eta"] = 0;
+    varTriggerFloat[tp2+"_CaloJet_pt"] = 0;
+    varTriggerFloat[tp2+"_CaloJet_eta"] = 0;
+    varTrigger[tp2+"_CaloJet_idx"] = -1;
+    varTrigger[tp2+"_PFJet_idx"] = -1;
+    varTriggerFloat[tp2+"_PFJet_pt"] = 0;
+    varTriggerFloat[tp2+"_PFJet_eta"] = 0;
+  }
+    
   BALGO.push_back("tche");
   BALGO.push_back("tchp");
   BALGO.push_back("ssvhe");
@@ -380,7 +388,14 @@ BCorrAnalyzer::BCorrAnalyzer(const edm::ParameterSet& iConfig):
   WP.push_back("tchpt");
   WP.push_back("ssvhem");
   WP.push_back("ssvhet");
-  WP.push_back("ssvhp");
+  WP.push_back("ssvhpt");
+
+  //capitalizing the names for beff retrieval (sigh...)
+  for(vector<string>::iterator wp = WP.begin(); wp!=WP.end(); wp++){
+    string tempName =""; //wants capital letters
+    for(int l=0;l< (int)(*wp).length(); l++) tempName+=toupper((*wp)[l]);
+    WP_CAP.push_back( tempName );
+  }
 
   CaloJetSelection_minPt_ = iConfig.getUntrackedParameter<double>("CaloJetSelection_minPt" );
   CaloJetSelection_maxEta_ = iConfig.getUntrackedParameter<double>("CaloJetSelection_maxEta" );
@@ -397,6 +412,8 @@ BCorrAnalyzer::BCorrAnalyzer(const edm::ParameterSet& iConfig):
   PFJetSelection_CHF_= iConfig.getUntrackedParameter<double>("PFJetSelection_CHF" );
   PFJetSelection_CM_ = iConfig.getUntrackedParameter<double>("PFJetSelection_CM" );
   PFJetSelection_NCONST_ = iConfig.getUntrackedParameter<double>("PFJetSelection_NCONST" );
+
+  BCorrMethod_ = iConfig.getUntrackedParameter<string>("BCorrMethod" );
 
   for(vector<string>::iterator wp = WP.begin(); wp!=WP.end(); wp++){
     string wpn = (*wp);
@@ -430,6 +447,14 @@ BCorrAnalyzer::BCorrAnalyzer(const edm::ParameterSet& iConfig):
     varFloat["PFJet_deltaPhi_2bjet_"+wpn] = -99;
     varFloat["PFJet_deltaR_2bjet_"+wpn] = -99;
 
+    varFloatArr["PFJet_btag_"+wpn+"_beff"] = new float[MAXJETS]; varFloatArr["PFJet_btag_"+wpn+"_befferr"]= new float[MAXJETS];
+    varFloatArr["PFJet_btag_"+wpn+"_ceff"]= new float[MAXJETS]; varFloatArr["PFJet_btag_"+wpn+"_cefferr"]= new float[MAXJETS];
+    varFloatArr["PFJet_btag_"+wpn+"_leff"]= new float[MAXJETS]; varFloatArr["PFJet_btag_"+wpn+"_lefferr"]= new float[MAXJETS];
+
+    varFloatArr["CaloJet_btag_"+wpn+"_beff"]= new float[MAXJETS]; varFloatArr["CaloJet_btag_"+wpn+"_befferr"]= new float[MAXJETS];
+    varFloatArr["CaloJet_btag_"+wpn+"_ceff"]= new float[MAXJETS]; varFloatArr["CaloJet_btag_"+wpn+"_cefferr"]= new float[MAXJETS];
+    varFloatArr["CaloJet_btag_"+wpn+"_leff"]= new float[MAXJETS]; varFloatArr["CaloJet_btag_"+wpn+"_lefferr"]= new float[MAXJETS];
+
   }
 
   for(vector<string>::iterator balg = BALGO.begin(); balg!=BALGO.end(); balg++){
@@ -452,6 +477,9 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
    using namespace reco;
+   using namespace pat;
+   using namespace pat::helper;
+   
 
    //Run info
    eventLumiSection = iEvent.luminosityBlock();
@@ -553,14 +581,15 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      }
    }
 
+   Handle<pat::TriggerEvent> triggerEvent;
    //prescales
    if(isData_==1){
-     Handle<pat::TriggerEvent> triggerEvent;
      iEvent.getByLabel("patTriggerEvent", triggerEvent);
      pat::TriggerEvent const * trig = &*triggerEvent;
 
      if ( trig->wasRun() && trig->wasAccept() ) {
-       for(map<string,int>::iterator hlt=varTrigger.begin(); hlt!=varTrigger.end(); hlt++){
+       
+for(map<string,int>::iterator hlt=varTrigger.begin(); hlt!=varTrigger.end(); hlt++){
 	 pat::TriggerPath const * Path = trig->path( hlt->first );
 	 if(!Path) continue;
 	 varTrigger[hlt->first+"_prescale"] = -1;
@@ -594,19 +623,67 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    Vertex pv = pvc[0];
    
 
+   //BTag eff
+   string BCorr_avail[3] = {"b","c","l"};
+   for(vector<string>::iterator wp = WP_CAP.begin(); wp!=WP_CAP.end(); wp++){
+     for(int ba=0; ba<3;ba++){
+       string wpName = BCorrMethod_+"Calo"+(*wp)+BCorr_avail[ba]; 
+       iSetup.get<BTagPerformanceRecord>().get(wpName, btageff_H[wpName]);    
+       const BtagPerformance & perf = *(btageff_H[wpName].product());
+       btageff[wpName] = (&perf);
+
+       wpName = BCorrMethod_+"Pf"+(*wp)+BCorr_avail[ba];
+       iSetup.get<BTagPerformanceRecord>().get(wpName, btageff_H[wpName]);
+        const BtagPerformance & perf2 = *(btageff_H[wpName].product());
+       btageff[wpName] = (&perf2);
+
+     }
+   }
+   
+
+
    //------------------PFJets-----------------------
    double ptHardestPJ = -1, ptHardestPGJ = -1;
    double etaHardestPJ = -1, etaHardestPGJ = -1;
 
-   Handle< View< pat::Jet > > pfjets;
+   //Handle< View< pat::Jet > > pfjets;
+   Handle<  pat::JetCollection > pfjets;
    iEvent.getByLabel(PFJetCollection_,pfjets);
 
    PFJet_nJets=0;
    map<string, vector<pat::Jet> > bpfjets;
 
-   for(edm::View<pat::Jet>::const_iterator jet=pfjets->begin(); jet!=pfjets->end(); ++jet){
+   // PAT trigger helper for trigger matching information
+   const TriggerMatchHelper matchHelper;
+   // kinematics comparison
+   map <string, const pat::TriggerObjectMatch *>  triggerMatches, triggerMatchesCALO;
+   if(isData_==1){
+     for(vector<string>::iterator tp=triggerPaths.begin(); tp!=triggerPaths.end();tp++){
+       string tp2 = (*tp);
+       tp2 = tp2.replace( tp2.begin()+tp2.rfind("_"), tp2.begin()+tp2.rfind("_")+1,"" );
+       triggerMatches[(*tp)] = triggerEvent->triggerObjectMatchResult( "selectedJetTriggerMatch"+tp2 ) ;
+       triggerMatchesCALO[(*tp)] = triggerEvent->triggerObjectMatchResult( "selectedJetTriggerMatch"+tp2+"CALO" ) ;
+     }
+   }
+   //for(edm::View<pat::Jet>::const_iterator jet=pfjets->begin(); jet!=pfjets->end(); ++jet){
+   for(pat::JetCollection::const_iterator jet=pfjets->begin(); jet!=pfjets->end(); ++jet){
 
      double jetPt=jet->pt(); double jetEta=jet->eta();
+     double corr=1, corr_err=0;
+
+     if(isData_!=0){
+       JECPF->setJetEta(jetEta);
+       JECPF->setJetPt(jetPt); // here you put the L2L3 Corrected jet pt
+       corr = JECPF->getCorrection();
+       jetPt *= corr;
+       jecUncPF->setJetEta(jetEta);
+       jecUncPF->setJetPt(jetPt);
+       corr_err = jecUncPF->getUncertainty(true);
+     }
+
+     //JEC uncertainty
+     jecUncPF->setJetEta(jetEta);
+     jecUncPF->setJetPt(jetPt);
 
      PFJet_JetIDLoose[PFJet_nJets] = 0;
      if( jetPt <= PFJetSelection_minPt_) continue;
@@ -634,10 +711,12 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      if(selectedJet){
        if(jet->genJet())
 	 if(jet->genJet()->pt()>ptHardestPGJ){ ptHardestPGJ = jet->genJet()->pt(); etaHardestPGJ = jet->genJet()->eta();} 
-       if(jet->pt()>ptHardestPJ) {ptHardestPJ = jet->pt(); etaHardestPJ = jet->eta();}
+       if(jetPt>ptHardestPJ) {ptHardestPJ = jetPt; etaHardestPJ = jet->eta();}
      }
      
      //Var filling
+     PFJet_JECErr[PFJet_nJets] =  corr_err;
+
      PFJet_nHEF[PFJet_nJets] = jet->neutralHadronEnergyFraction();
      PFJet_nEmEF[PFJet_nJets] =  jet->neutralEmEnergyFraction();
      PFJet_cHEF[PFJet_nJets] = jet->chargedHadronEnergyFraction();
@@ -645,9 +724,9 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      PFJet_cMult[PFJet_nJets] =  jet->chargedMultiplicity();
      PFJet_nConst[PFJet_nJets] =  jet->nConstituents();
      
-     PFJet_px[PFJet_nJets] = jet->px();  PFJet_py[PFJet_nJets] = jet->py(); PFJet_pz[PFJet_nJets] = jet->pz();
+     PFJet_px[PFJet_nJets] = corr*jet->px();  PFJet_py[PFJet_nJets] = corr*jet->py(); PFJet_pz[PFJet_nJets] = corr*jet->pz();
      PFJet_pt[PFJet_nJets] = jetPt; PFJet_eta[PFJet_nJets] = jetEta; PFJet_phi[PFJet_nJets] = jet->phi();
-     PFJet_E[PFJet_nJets] = jet->energy();
+     PFJet_E[PFJet_nJets] = corr*jet->energy();
      
      if(isData_==0) PFJet_JetFlavour[PFJet_nJets] =jet->partonFlavour();
      
@@ -666,10 +745,10 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        if((*wp)=="tchem" || (*wp)=="tchel") balgo = "tche";
        else if ((*wp)=="tchpm" || (*wp)=="tchpt") balgo = "tchp";
        else if ((*wp)=="ssvhem" || (*wp)=="sshhet") balgo = "ssvhe";
-       else if ((*wp)=="ssvhp" ) balgo = "ssvhp";
+       else if ((*wp)=="ssvhpt" ) balgo = "ssvhp";
        
        if( varFloatArr["PFJet_btag_"+balgo][PFJet_nJets] > WPVALUES[(*wp)]) bpfjets[(*wp)].push_back((*jet));
-       }
+     }
    
      PFJet_nJets++;
    }//end jets
@@ -678,18 +757,64 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    //bjets quantity
    for(vector<string>::iterator wp = WP.begin(); wp!=WP.end(); wp++){
      string wpn = (*wp);
-     
+   
+     varInt["PFJet_btag_"+wpn+"_nsel"] = bpfjets[wpn].size();
+
      for(int b=0;b<varInt["PFJet_btag_"+wpn+"_nsel"];b++){
-       varFloatArr["PFJet_btag_"+wpn+"_pt"][b] = bpfjets[wpn][b].pt();
+       double corr=1;
+       if(isData_!=0){
+	 JECPF->setJetEta(bpfjets[wpn][b].eta());
+	 JECPF->setJetPt(bpfjets[wpn][b].pt()); // here you put the L2L3 Corrected jet pt
+	 corr = JECPF->getCorrection();
+       }
+
+       varFloatArr["PFJet_btag_"+wpn+"_pt"][b] = corr*bpfjets[wpn][b].pt();
        varFloatArr["PFJet_btag_"+wpn+"_eta"][b] = bpfjets[wpn][b].eta();
        varFloatArr["PFJet_btag_"+wpn+"_phi"][b] = bpfjets[wpn][b].phi();
        varIntArr["PFJet_btag_"+wpn+"_JetFlavour"][b] = bpfjets[wpn][b].partonFlavour();
        string discr = "";
        if(wpn=="tchel" || wpn=="tchem") discr ="trackCountingHighEffBJetTags";
        else if(wpn=="tchpm" || wpn=="tchpt") discr = "trackCountingHighPurBJetTags";
-       else if(wpn=="ssvpm" || wpn=="ssvpt") discr = "simpleSecondaryVertexHighEffBJetTags";
-       else if(wpn=="ssvhp") discr = "simpleSecondaryVertexHighPurBJetTags";
+       else if(wpn=="ssvhem" || wpn=="ssvhet") discr = "simpleSecondaryVertexHighEffBJetTags";
+       else if(wpn=="ssvhpt") discr = "simpleSecondaryVertexHighPurBJetTags";
        varFloatArr["PFJet_btag_"+wpn+"_discr"][b] = bpfjets[wpn][b].bDiscriminator(discr.c_str());
+       
+       string wpnC =""; //wants capital letters
+       for(int l=0;l< (int)wpn.length(); l++) wpnC += toupper(wpn[l]);
+       
+       p.reset(); p.insert(BinningVariables::JetAbsEta,fabs(bpfjets[wpn][b].eta()) ); p.insert(BinningVariables::JetEt, bpfjets[wpn][b].pt());
+       string name = BCorrMethod_+"Pf"+wpnC; //MC, Calo, SSVHPT, b eff
+
+       varFloatArr["PFJet_btag_"+wpn+"_beff"][b] = btageff[name+"b"]->getResult(PerformanceResult::BTAGBEFF, p); 
+       varFloatArr["PFJet_btag_"+wpn+"_befferr"][b] = btageff[name+"b"]->getResult(PerformanceResult::BTAGBERR, p);
+       varFloatArr["PFJet_btag_"+wpn+"_ceff"][b] = btageff[name+"c"]->getResult(PerformanceResult::BTAGCEFF, p);
+       varFloatArr["PFJet_btag_"+wpn+"_cefferr"][b] = btageff[name+"c"]->getResult(PerformanceResult::BTAGCERR, p);
+       varFloatArr["PFJet_btag_"+wpn+"_leff"][b] = btageff[name+"l"]->getResult(PerformanceResult::BTAGLEFF, p);
+       varFloatArr["PFJet_btag_"+wpn+"_lefferr"][b] = btageff[name+"l"]->getResult(PerformanceResult::BTAGLERR, p);
+     }
+   }
+
+   
+   // trigger match
+   if(isData_==1){
+     for(vector<string>::iterator tp=triggerPaths.begin(); tp!=triggerPaths.end();tp++){
+       int jet_c=0;
+       for ( size_t jet = 0; jet < pfjets->size(); ++jet ) { 
+	 const reco::CandidateBaseRef candBaseRef( JetRef( pfjets, jet ) );
+	 const pat::TriggerObjectRef trigRef( matchHelper.triggerMatchObject(candBaseRef, triggerMatches[ (*tp) ], iEvent, *triggerEvent ));
+	 if ( trigRef.isAvailable() ) { // check references (necessary!)
+	   double corr=1;
+	   if(isData_!=0){
+	     JECPF->setJetEta(candBaseRef->eta());
+	     JECPF->setJetPt(candBaseRef->pt()); // here you put the L2L3 Corrected jet pt
+	     corr = JECPF->getCorrection();
+	   }
+	   varTriggerFloat[ (*tp)+"_PFJet_pt"] = corr*candBaseRef->pt();
+	   varTriggerFloat[ (*tp)+"_PFJet_eta"] = candBaseRef->eta();
+	   varTrigger[ (*tp)+"_PFJet_idx"] = jet_c++;
+	   break;
+	 }
+       }
      }
    }
 
@@ -703,13 +828,25 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 				     JetIDSelectionFunctor::TIGHT );
    pat::strbitset retTight = jetIDTight.getBitTemplate();
 
-   Handle< View< pat::Jet > > jets;
+   //Handle< View< pat::Jet > > jets;
+   Handle<  pat::JetCollection > jets;
    iEvent.getByLabel(JetCollection_,jets);
    CaloJet_nJets=0;
    map<string, vector<pat::Jet> > bjets;
-   for(edm::View<pat::Jet>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
+   //for(edm::View<pat::Jet>::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
+   for(pat::JetCollection::const_iterator jet=jets->begin(); jet!=jets->end(); ++jet){
      double jetPt=jet->pt(); double jetEta=jet->eta();
+     double corr=1, corr_err=0;
+     if(isData_!=0){
+       JECCALO->setJetEta(jetEta);
+       JECCALO->setJetPt(jetPt); // here you put the L2L3 Corrected jet pt
+       corr = JECCALO->getCorrection();
+       jetPt *= corr;
+       jecUncCALO->setJetEta(jetEta);
+       jecUncCALO->setJetPt(jetPt);
+       corr_err = jecUncCALO->getUncertainty(true);
 
+     }
      //JetID
      CaloJet_JetIDLoose[CaloJet_nJets] = 0;
      CaloJet_JetIDTight[CaloJet_nJets] = 0;
@@ -725,13 +862,14 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      if( jetIDTight(*jet, retTight)) CaloJet_JetIDTight[CaloJet_nJets] = 1;;
 
      //Var Filling
+     CaloJet_JECErr[CaloJet_nJets] =  corr_err;
      CaloJet_emEF[CaloJet_nJets] = jet->emEnergyFraction();
      CaloJet_fHPD[CaloJet_nJets] = jet->jetID().fHPD;
      CaloJet_n90Hits[CaloJet_nJets] = jet->jetID().n90Hits;
      CaloJet_fRBX[ CaloJet_nJets] = jet->jetID().fRBX;
-     CaloJet_px[CaloJet_nJets] = jet->px();  CaloJet_py[CaloJet_nJets] = jet->py(); CaloJet_pz[CaloJet_nJets] = jet->pz();
+     CaloJet_px[CaloJet_nJets] = corr*jet->px();  CaloJet_py[CaloJet_nJets] = corr*jet->py(); CaloJet_pz[CaloJet_nJets] = corr*jet->pz();
      CaloJet_pt[CaloJet_nJets] = jetPt; CaloJet_eta[CaloJet_nJets] = jetEta; CaloJet_phi[CaloJet_nJets] = jet->phi();
-     CaloJet_E[CaloJet_nJets] = jet->energy();
+     CaloJet_E[CaloJet_nJets] = corr*jet->energy();
      CaloJet_emEF[CaloJet_nJets] = jet->emEnergyFraction(); CaloJet_fHPD[CaloJet_nJets] = jet->jetID().fHPD; CaloJet_n90Hits[CaloJet_nJets] = jet->jetID().n90Hits;
      
      if(isData_==0) CaloJet_JetFlavour[CaloJet_nJets] =jet->partonFlavour();
@@ -758,7 +896,70 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      }
      CaloJet_nJets++;
    }//end jets
-   
+
+   //bjets quantity
+   for(vector<string>::iterator wp = WP.begin(); wp!=WP.end(); wp++){
+     string wpn = (*wp);
+
+     varInt["CaloJet_btag_"+wpn+"_nsel"] = bjets[wpn].size();
+
+     for(int b=0;b<varInt["CaloJet_btag_"+wpn+"_nsel"];b++){
+       double corr=1;
+       if(isData_!=0){
+	 JECCALO->setJetEta(bjets[wpn][b].eta());
+	 JECCALO->setJetPt(bjets[wpn][b].pt()); // here you put the L2L3 Corrected jet pt
+	 corr = JECCALO->getCorrection();
+       }
+
+       varFloatArr["CaloJet_btag_"+wpn+"_pt"][b] = corr*bjets[wpn][b].pt();
+       varFloatArr["CaloJet_btag_"+wpn+"_eta"][b] = bjets[wpn][b].eta();
+       varFloatArr["CaloJet_btag_"+wpn+"_phi"][b] = bjets[wpn][b].phi();
+       varIntArr["CaloJet_btag_"+wpn+"_JetFlavour"][b] = bjets[wpn][b].partonFlavour();
+       string discr = "";
+       if(wpn=="tchel" || wpn=="tchem") discr ="trackCountingHighEffBJetTags";
+       else if(wpn=="tchpm" || wpn=="tchpt") discr = "trackCountingHighPurBJetTags";
+       else if(wpn=="ssvhem" || wpn=="ssvhet") discr = "simpleSecondaryVertexHighEffBJetTags";
+       else if(wpn=="ssvhpt") discr = "simpleSecondaryVertexHighPurBJetTags";
+       varFloatArr["CaloJet_btag_"+wpn+"_discr"][b] = bjets[wpn][b].bDiscriminator(discr.c_str());
+
+       string wpnC =""; //wants capital letters
+       for(int l=0;l< (int)wpn.length(); l++) wpnC += toupper(wpn[l]);
+
+       p.reset(); p.insert(BinningVariables::JetAbsEta,fabs(bjets[wpn][b].eta()) ); p.insert(BinningVariables::JetEt, bjets[wpn][b].pt());
+       string name = BCorrMethod_+"Calo"+wpnC; //MC, Calo, SSVHPT, b eff
+
+       varFloatArr["CaloJet_btag_"+wpn+"_beff"][b] = btageff[name+"b"]->getResult(PerformanceResult::BTAGBEFF, p);
+       varFloatArr["CaloJet_btag_"+wpn+"_befferr"][b] = btageff[name+"b"]->getResult(PerformanceResult::BTAGBERR, p);
+       varFloatArr["CaloJet_btag_"+wpn+"_ceff"][b] = btageff[name+"c"]->getResult(PerformanceResult::BTAGCEFF, p);
+       varFloatArr["CaloJet_btag_"+wpn+"_cefferr"][b] = btageff[name+"c"]->getResult(PerformanceResult::BTAGCERR, p);
+       varFloatArr["CaloJet_btag_"+wpn+"_leff"][b] = btageff[name+"l"]->getResult(PerformanceResult::BTAGLEFF, p);
+       varFloatArr["CaloJet_btag_"+wpn+"_lefferr"][b] = btageff[name+"l"]->getResult(PerformanceResult::BTAGLERR, p);
+     }
+   }
+
+   // Trigger objects
+   if(isData_==1){
+     for(vector<string>::iterator tp=triggerPaths.begin(); tp!=triggerPaths.end();tp++){
+       int jet_c=0;
+       for ( size_t jet = 0; jet < jets->size(); ++jet ) { // loop over muon references (PAT muons have been used in the matcher in task 3)
+	 const reco::CandidateBaseRef candBaseRef( JetRef( jets, jet ) );
+	 const pat::TriggerObjectRef trigRef( matchHelper.triggerMatchObject(candBaseRef, triggerMatchesCALO[ (*tp) ], iEvent, *triggerEvent ));
+	 if ( trigRef.isAvailable() ) { // check references (necessary!)
+	   double corr=1;
+	   if(isData_!=0){
+	     JECCALO->setJetEta(candBaseRef->eta());
+	     JECCALO->setJetPt(candBaseRef->pt()); // here you put the L2L3 Corrected jet pt
+	     corr = JECCALO->getCorrection();
+	   }
+	   varTriggerFloat[ (*tp)+"_pt"] = trigRef->pt();
+	   varTriggerFloat[ (*tp)+"_eta"] = trigRef->eta();
+	   varTriggerFloat[ (*tp)+"_CaloJet_pt"] = corr*candBaseRef->pt();
+	   varTriggerFloat[ (*tp)+"_CaloJet_eta"] = candBaseRef->eta();
+	   varTrigger[ (*tp)+"_CaloJet_idx"] = jet_c++;
+	 }
+       }
+     }
+   }
 
    //------------------Secondary Vertices-----------------------
    Handle<std::vector<reco::Vertex> > SVC;
@@ -775,8 +976,7 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	std::cout << "COLLECTIONS SIZE MISMATCH\n\n";
 	return; 
    }
-
-   int nnegIP=0, nposIP=0; 
+   int nnegIP=0, nposIP=0;
    //NEW TEST OF IP SIGNS
    if(svc.size()>0){
      //------------------IP Tag IInfos-----------------------
@@ -785,59 +985,58 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      const reco::TrackIPTagInfoCollection iptic = *(TIPTIC.product());
      std::cout << "Size of iptic " << iptic.size() << std::endl;
      
-//      //loop over jets
-//      for(unsigned int j=0; j<iptic.size(); j++){
-//        const GlobalVector axis = iptic[j].axis(); 
-//        const edm::RefVector<TrackCollection> tracks = iptic[j].selectedTracks(); 
-//        const std::vector<TrackIPTagInfo::TrackIPData> ipdatas = iptic[j].impactParameterData(); 
-//        std::cout << j << " axis " << axis.x() << " " << axis.y() << " " << axis.z() << std::endl;
-//        //loop over selected tracks: 
-//        unsigned int ntr=0; 
-//        for(edm::RefVector<TrackCollection>::const_iterator it= tracks.begin(); it!=tracks.end(); it++, ntr++){
-// 	 std::cout << "track " << ntr << " pt " << (*it)->pt() << " ip3d " << ipdatas[ntr].ip3d.value() << std::endl;
-//        }
-//      }
-
+     //      //loop over jets
+     //      for(unsigned int j=0; j<iptic.size(); j++){
+     //        const GlobalVector axis = iptic[j].axis();
+     //        const edm::RefVector<TrackCollection> tracks = iptic[j].selectedTracks();
+     //        const std::vector<TrackIPTagInfo::TrackIPData> ipdatas = iptic[j].impactParameterData();
+     //        std::cout << j << " axis " << axis.x() << " " << axis.y() << " " << axis.z() << std::endl;
+     //        //loop over selected tracks:
+     //        unsigned int ntr=0;
+     //        for(edm::RefVector<TrackCollection>::const_iterator it= tracks.begin(); it!=tracks.end(); it++, ntr++){
+     //       std::cout << "track " << ntr << " pt " << (*it)->pt() << " ip3d " << ipdatas[ntr].ip3d.value() << std::endl;
+     //        }
+     //      }
+         
      //loop over vertex
      for(unsigned int v=0; v<svc.size(); v++){
-       std::cout << "vertex " << v << std::endl;
+       //std::cout << "vertex " << v << std::endl;
        //find dR to jets:
-       Vertex rv = svc[v]; 
-       GlobalVector fldir = flightDirection(pv,rv); 
-       unsigned int matJet = -1; 
-       double minDR = 10.0; 
+       Vertex rv = svc[v];
+       GlobalVector fldir = flightDirection(pv,rv);
+       unsigned int matJet = -1;
+       double minDR = 10.0;
        for(unsigned int j=0; j<iptic.size(); j++){
 	 GlobalVector axis = iptic[j].axis();
 	 double dR = deltaR(fldir,axis);
 	 if(dR<minDR){
-	   minDR=dR; 
+	   minDR=dR;
 	   matJet = j;
 	 }
        }
-    if(matJet==-1) std::cout << "NO JET!!!\n";
-//        std::cout << "MATCHING JET: " << matJet << "\n";
-       const edm::RefVector<TrackCollection> tracks = iptic[matJet].selectedTracks(); 
-       const std::vector<TrackIPTagInfo::TrackIPData> ipdatas = iptic[matJet].impactParameterData(); 
-
-       unsigned int nvtr=0; 
+       //if(matJet==-1) std::cout << "NO JET!!!\n";
+       //        std::cout << "MATCHING JET: " << matJet << "\n";
+       const edm::RefVector<TrackCollection> tracks = iptic[matJet].selectedTracks();
+       const std::vector<TrackIPTagInfo::TrackIPData> ipdatas = iptic[matJet].impactParameterData();
+       
+       unsigned int nvtr=0;
        //loop over tracks in vertex
        for(Vertex::trackRef_iterator it=svc[v].tracks_begin(); it!=svc[v].tracks_end(); it++, nvtr++){
 	 double vtrpt = (*it)->pt();
-	 std::cout << "vtr " << nvtr << " pt " << (*it)->pt() << "\n";
-	 unsigned int ntr=0; 
+	 //std::cout << "vtr " << nvtr << " pt " << (*it)->pt() << "\n";
+	 unsigned int ntr=0;
 	 for(edm::RefVector<TrackCollection>::const_iterator jtit= tracks.begin(); jtit!=tracks.end(); jtit++, ntr++){
 	   if((*jtit)->pt()==vtrpt){
-// 	     std::cout << "found " << ipdatas[ntr].ip3d.value() << std::endl;
+	     //           std::cout << "found " << ipdatas[ntr].ip3d.value() << std::endl;
 	     if(ipdatas[ntr].ip3d.value()>0) nposIP++;
-	     else nnegIP++; 
+	     else nnegIP++;
 	   }
 	 }
-
+	 
        }
      }//end loop over vertex
-   }  
+   }
    //END NEW TEST OF IP SIGNS
-
 
    int goodVert=0, index1 = -1, index2 = -1, index3 = -1; 
    //index3: if three selected it is third selected, otherwise if two selected it is the first remaining one
@@ -987,9 +1186,8 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    sevents.jet15hcalnf = b15hcalnf; 
    sevents.jet30 = b30; 
    sevents.jet50 = b50; 
-   sevents.nposIPverttracks = nposIP; 
-   sevents.nnegIPverttracks = nnegIP; 
-
+   sevents.nposIPverttracks = nposIP;
+   sevents.nnegIPverttracks = nnegIP;
 
    if(sbhc.size()==2){
      sevents.dRbb = deltaR(sbhc[0].p4(), sbhc[1].p4());
@@ -1337,12 +1535,30 @@ void
 BCorrAnalyzer::beginJob()
 {
 
+  JEC_PATH ="CondFormats/JetMETObjects/data/" ;
+
+  fipRes = new edm::FileInPath(JEC_PATH+"Spring10DataV2_L2L3Residual_AK5Calo.txt");
+  ResJetCorParCALO = new JetCorrectorParameters(fipRes->fullPath());
+  vParamCALO.push_back(*ResJetCorParCALO);
+  JECCALO = new FactorizedJetCorrector(vParamCALO);
+  fipUnc = new edm::FileInPath(JEC_PATH+"Spring10DataV2_Uncertainty_AK5Calo.txt");
+  jecUncCALO = new JetCorrectionUncertainty(fipUnc->fullPath());
+
+  fipResPF = new edm::FileInPath(JEC_PATH+"Spring10DataV2_L2L3Residual_AK5PF.txt");
+  ResJetCorParPF = new JetCorrectorParameters(fipResPF->fullPath());
+  vParamPF.push_back(*ResJetCorParPF);
+  JECPF = new FactorizedJetCorrector(vParamPF);
+  fipUncPF = new edm::FileInPath(JEC_PATH+"Spring10DataV2_Uncertainty_AK5PF.txt");
+  jecUncPF = new JetCorrectionUncertainty(fipUncPF->fullPath());
+
+
   //  TFileDirectory sdtEvents = fs_->mkdir("tevents","tree for events");
   //TFileDirectory sdpEvents = fs_->mkdir("pevents","plots for events");
   //TFileDirectory sdtBCands = fs_->mkdir("tbcandidates","tree for bcandidates");
 
   tEvents = /*(&sdtEvents)*/ fs_->make<TTree>("tEvents","event properties");
   tEvents->Branch("BEvents", &sevents.nB, "nB/I:nV/I:nMat/I:process/I:eventProcId/I:dRvv/F:dEtavv/F:dPhivv/F:dRbb/F:dEtabb/F:dPhibb/F:massV1/F:massV2/F:massV3/F:ptV1/F:ptV2/F:ptV3/F:etaV1/F:etaV2/F:etaV3/F:phiV1/F:phiV2/F:phiV3/F:dist3D1/F:dist3D2/F:dist3D3/F:distSig3D1/F:distSig3D2/F:distSig3D3/F:dist2D1/F:dist2D2/F:dist2D3/F:distSig2D1/F:distSig2D2/F:distSig2D3/F:massB1/F:massB2/F:ptB1/F:ptB2/F:etaB1/F:etaB2/F:phiB1/F:phiB2/F:ptHardestGJ/F:ptHardestPJ/F:ptHardestPGJ/F:etaHardestGJ/F:etaHardestPJ/F:etaHardestPGJ/F:eventNo/F:runNo/F:pthat/F:flavors/I:jet6/I:jet10/I:jet10nobptx/I:jet15/I:jet15hcalnf/I:jet30/I:jet50/I:nposIPverttracks/I:nnegIPverttracks/I", 128000);
+
 
   //run info
   tEvents->Branch("pthat",&pthat,"pthat/D");
@@ -1365,6 +1581,11 @@ BCorrAnalyzer::beginJob()
     tEvents->Branch(( t->first ).c_str(), &(varTrigger[ t->first ]),(t->first+"/I").c_str());
   }
 
+  for( map<string, float>::iterator t = varTriggerFloat.begin(); t!=varTriggerFloat.end(); t++){
+    tEvents->Branch(( t->first ).c_str(), &(varTriggerFloat[ t->first ]),(t->first+"/F").c_str());
+  }
+
+
   //PFJets
   tEvents->Branch("PFJet_nJets",&PFJet_nJets,"PFJet_nJets/I");
   tEvents->Branch("PFJet_px",PFJet_px,"PFJet_px[PFJet_nJets]/F");
@@ -1383,6 +1604,7 @@ BCorrAnalyzer::beginJob()
   tEvents->Branch("PFJet_cEmEF",PFJet_cEmEF,"PFJet_cEmEF[PFJet_nJets]/F");
   tEvents->Branch("PFJet_cMult",PFJet_cMult,"PFJet_cMult[PFJet_nJets]/I");
   tEvents->Branch("PFJet_nConst",PFJet_nConst,"PFJet_nConst[PFJet_nJets]/I");
+  tEvents->Branch("PFJet_JECErr",PFJet_JECErr,"PFJet_JECErr[PFJet_nJets]/F");
 
 
   for(vector<string>::iterator balg = BALGO.begin(); balg!=BALGO.end(); balg++){
@@ -1398,8 +1620,17 @@ BCorrAnalyzer::beginJob()
     tEvents->Branch(("PFJet_btag_"+wpn+"_phi").c_str(),(varFloatArr["PFJet_btag_"+wpn+"_phi"]),("PFJet_btag_"+wpn+"_phi[PFJet_btag_"+wpn+"_nsel]/F").c_str() );
     tEvents->Branch(("PFJet_btag_"+wpn+"_discr").c_str(),(varFloatArr["PFJet_btag_"+wpn+"_discr"]),("PFJet_btag_"+wpn+"_discr[PFJet_btag_"+wpn+"_nsel]/F").c_str() );
     tEvents->Branch(("PFJet_btag_"+wpn+"_JetFlavour").c_str(),(varIntArr["PFJet_btag_"+wpn+"_JetFlavour"]),("PFJet_btag_"+wpn+"_JetFlavour[PFJet_btag_"+wpn+"_nsel]/I").c_str() );
+
+    tEvents->Branch(("PFJet_btag_"+wpn+"_beff").c_str(),(varFloatArr["PFJet_btag_"+wpn+"_beff"]),("PFJet_btag_"+wpn+"_beff[PFJet_btag_"+wpn+"_nsel]/F").c_str() );
+    tEvents->Branch(("PFJet_btag_"+wpn+"_ceff").c_str(),(varFloatArr["PFJet_btag_"+wpn+"_ceff"]),("PFJet_btag_"+wpn+"_ceff[PFJet_btag_"+wpn+"_nsel]/F").c_str() );
+    tEvents->Branch(("PFJet_btag_"+wpn+"_leff").c_str(),(varFloatArr["PFJet_btag_"+wpn+"_leff"]),("PFJet_btag_"+wpn+"_leff[PFJet_btag_"+wpn+"_nsel]/F").c_str() );
+    tEvents->Branch(("PFJet_btag_"+wpn+"_befferr").c_str(),(varFloatArr["PFJet_btag_"+wpn+"_befferr"]),("PFJet_btag_"+wpn+"_befferr[PFJet_btag_"+wpn+"_nsel]/F").c_str() );
+    tEvents->Branch(("PFJet_btag_"+wpn+"_cefferr").c_str(),(varFloatArr["PFJet_btag_"+wpn+"_cefferr"]),("PFJet_btag_"+wpn+"_cefferr[PFJet_btag_"+wpn+"_nsel]/F").c_str() );
+    tEvents->Branch(("PFJet_btag_"+wpn+"_lefferr").c_str(),(varFloatArr["PFJet_btag_"+wpn+"_lefferr"]),("PFJet_btag_"+wpn+"_lefferr[PFJet_btag_"+wpn+"_nsel]/F").c_str() );
+
   }
 
+  //CaloJets
   tEvents->Branch("CaloJet_nJets",&CaloJet_nJets,"CaloJet_nJets/I");
   tEvents->Branch("CaloJet_px",CaloJet_px,"CaloJet_px[CaloJet_nJets]/F");
   tEvents->Branch("CaloJet_py",CaloJet_py,"CaloJet_py[CaloJet_nJets]/F");
@@ -1415,6 +1646,7 @@ BCorrAnalyzer::beginJob()
   tEvents->Branch("CaloJet_fHPD",CaloJet_fHPD,"CaloJet_fHPD[CaloJet_nJets]/F");
   tEvents->Branch("CaloJet_n90Hits",CaloJet_n90Hits,"CaloJet_n90Hits[CaloJet_nJets]/F");
   tEvents->Branch("CaloJet_fRBX",CaloJet_fRBX,"CaloJet_fRBX[CaloJet_nJets]/F");
+  tEvents->Branch("CaloJet_JECErr",CaloJet_JECErr,"CaloJet_JECErr[CaloJet_nJets]/F");
   
   for(vector<string>::iterator balg = BALGO.begin(); balg!=BALGO.end(); balg++){
     string balgo= (*balg);
@@ -1429,6 +1661,15 @@ BCorrAnalyzer::beginJob()
     tEvents->Branch(("CaloJet_btag_"+wpn+"_phi").c_str(),(varFloatArr["CaloJet_btag_"+wpn+"_phi"]),("CaloJet_btag_"+wpn+"_phi[CaloJet_btag_"+wpn+"_nsel]/F").c_str() );
     tEvents->Branch(("CaloJet_btag_"+wpn+"_discr").c_str(),(varFloatArr["CaloJet_btag_"+wpn+"_discr"]),("CaloJet_btag_"+wpn+"_discr[CaloJet_btag_"+wpn+"_nsel]/F").c_str() );
     tEvents->Branch(("CaloJet_btag_"+wpn+"_JetFlavour").c_str(),(varIntArr["CaloJet_btag_"+wpn+"_JetFlavour"]),("CaloJet_btag_"+wpn+"_JetFlavour[CaloJet_btag_"+wpn+"_nsel]/I").c_str() );
+
+    tEvents->Branch(("CaloJet_btag_"+wpn+"_beff").c_str(),(varFloatArr["CaloJet_btag_"+wpn+"_beff"]),("CaloJet_btag_"+wpn+"_beff[CaloJet_btag_"+wpn+"_nsel]/F").c_str() );
+    tEvents->Branch(("CaloJet_btag_"+wpn+"_ceff").c_str(),(varFloatArr["CaloJet_btag_"+wpn+"_ceff"]),("CaloJet_btag_"+wpn+"_ceff[CaloJet_btag_"+wpn+"_nsel]/F").c_str() );
+    tEvents->Branch(("CaloJet_btag_"+wpn+"_leff").c_str(),(varFloatArr["CaloJet_btag_"+wpn+"_leff"]),("CaloJet_btag_"+wpn+"_leff[CaloJet_btag_"+wpn+"_nsel]/F").c_str() );
+    tEvents->Branch(("CaloJet_btag_"+wpn+"_befferr").c_str(),(varFloatArr["CaloJet_btag_"+wpn+"_befferr"]),("CaloJet_btag_"+wpn+"_befferr[CaloJet_btag_"+wpn+"_nsel]/F").c_str() );
+    tEvents->Branch(("CaloJet_btag_"+wpn+"_cefferr").c_str(),(varFloatArr["CaloJet_btag_"+wpn+"_cefferr"]),("CaloJet_btag_"+wpn+"_cefferr[CaloJet_btag_"+wpn+"_nsel]/F").c_str() );
+    tEvents->Branch(("CaloJet_btag_"+wpn+"_lefferr").c_str(),(varFloatArr["CaloJet_btag_"+wpn+"_lefferr"]),("CaloJet_btag_"+wpn+"_lefferr[CaloJet_btag_"+wpn+"_nsel]/F").c_str() );
+
+
   }
 
 
@@ -1464,66 +1705,6 @@ BCorrAnalyzer::beginJob()
 // ------------ method called once each job just after ending the event loop  ------------
 void 
 BCorrAnalyzer::endJob() {
-  /*
-  std::cout << "efficMatBV1 "; 
-  for(unsigned int i1=0; i1<8; i1++){
-    for(unsigned int i2=0; i2<8; i2++){
-      for(unsigned int i3=0; i3<8; i3++){
-	for(unsigned int i4=0; i4<8; i4++){
-	  for(unsigned int i5=0; i5<8; i5++){
-	    for(unsigned int i6=0; i6<8; i6++){
-	      std::cout <<  norm[i1][i2][i3] << " ";
-
-	    }
-	  }
-	}
-      }
-    }
-  }
-  
-  std::cout << std::endl;
-  std::cout << "efficMatBV2 "; 
-
-  for(unsigned int i1=0; i1<8; i1++){
-    for(unsigned int i2=0; i2<8; i2++){
-      for(unsigned int i3=0; i3<8; i3++){
-// 	std::cout << "NORM " << norm[i1][i2][i3] << "\n";
-	for(unsigned int i4=0; i4<8; i4++){
-	  for(unsigned int i5=0; i5<8; i5++){
-	    for(unsigned int i6=0; i6<8; i6++){
-// 	      if(count[i1][i2][i3][i4][i5][i6]!=0) std::cout << i1 << i2 << i3 << i4 << i5 << i6 << "    " << count[i1][i2][i3][i4][i5][i6] << std::endl;
-	      std::cout << count[i1][i2][i3][i4][i5][i6] << " "; 
-	    }
-	  }
-	}
-      }
-    }
-  }
-  std::cout << std::endl;
-
-  std::cout << "efficMatJET1 "; 
-  for(unsigned int i1=0; i1<8; i1++){
-    for(unsigned int i2=0; i2<8; i2++){
-      for(unsigned int i3=0; i3<8; i3++){
-	for(unsigned int i4=0; i4<8; i4++){
-	  std::cout << normJet[i1][i2] << " ";
-	}
-      }
-    }
-  }
-  std::cout << "\nefficMatJET2 "; 
-  for(unsigned int i1=0; i1<8; i1++){
-    for(unsigned int i2=0; i2<8; i2++){
-      for(unsigned int i3=0; i3<8; i3++){
-	for(unsigned int i4=0; i4<8; i4++){
-	  std::cout << countJet[i1][i2][i3][i4] << " ";
-	}
-      }
-    }
-  }
-  */
-  std::cout << std::endl;
-  std::cout << std::endl;
 
 }
 
