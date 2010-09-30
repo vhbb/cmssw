@@ -20,15 +20,25 @@ process.load('Configuration/EventContent/EventContent_cff')
 #process.GlobalTag.globaltag = 'GR_R_35X_V8B::All'
 #process.GlobalTag.globaltag = 'GR10_P_V5::All'
 #process.GlobalTag.globaltag = 'GR_R_37X_V6A::All'
+#from 137436 
 process.GlobalTag.globaltag = 'GR10_P_V7::All'
 #process.GlobalTag.globaltag = 'GR_R_36X_V11A::All'
 #process.GlobalTag.globaltag = 'GR_R_36X_V12B::All'
+#Jun14th
 #process.GlobalTag.globaltag = 'GR_R_36X_V12A::All'
 
 process.source = cms.Source("PoolSource",
                                 fileNames = cms.untracked.vstring(
-#    '/store/data/Commissioning10/MinimumBias/RECO/May6thPDSkim2_SD_JetMETTau-v1/0124/7219C828-095D-DF11-8D9E-0018F3D0963C.root'
-    'file:/shome/leo/Installations/CMSSW_3_7_0_patch2/src/Analysis/SimpleBAnalysis/test/3CE6FE16-F29E-DF11-8BD3-003048F118C4.root'
+    #'/store/data/Run2010A/EG/RECO/v4/000/144/112/FA1804F7-D9B3-DF11-9D71-001D09F26C5C.root'
+'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/735/04AFE369-DD63-DF11-8CFE-0025B3E063F0.root',
+'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/794/B205E0DD-4865-DF11-896F-001A64789E40.root',
+'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/793/3658106B-4B65-DF11-9BB7-00E081B08CC7.root',
+'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/787/786E4A71-4965-DF11-B987-003048D45FD6.root',
+'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/777/D6CBB081-DC63-DF11-A67F-0025B3E05DB6.root',
+'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/771/EC6C2805-DF63-DF11-9D21-00E081791867.root',
+'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/735/98DC5094-D963-DF11-83A2-0025B3E05D5C.root',
+'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/735/8ADB2D7C-DD63-DF11-8761-002481E14F1E.root'
+#    'file:/shome/leo/Installations/CMSSW_3_7_0_patch2/src/Analysis/SimpleBAnalysis/test/3CE6FE16-F29E-DF11-8BD3-003048F118C4.root'
     )) 
 
 
@@ -73,11 +83,15 @@ process.out = cms.OutputModule("PoolOutputModule",
                                                                       'keep *_offlinePrimaryVertices*_*_*',
                                                                       # TRIGGER
                                                                       'keep edmTriggerResults_TriggerResults*_*_*',
+                                                                      'keep L1GlobalTriggerReadoutRecord_gtDigis_*_*',
                                                                       'keep *_hltTriggerSummaryAOD_*_*',
+                                                                      'keep patTriggerAlgorithms_patTrigger_*_*',
                                                                       'keep patTriggerObjects_patTrigger_*_*',
                                                                       'keep patTriggerFilters_patTrigger_*_*',
                                                                       'keep patTriggerPaths_patTrigger_*_*',
                                                                       'keep patTriggerEvent_patTriggerEvent_*_*',
+                                                                      'keep patTriggerObjectStandAlones_patTrigger_*_*',
+                                                                      'keep patTriggerObjectStandAlonesedmAssociation_*_*_*',
                                                                       #SV
                                                                       'keep *_bcandidates_*_*',
                                                                       'keep *_selectedVertices_*_*'
@@ -118,6 +132,7 @@ process.patJetCorrFactorsAK5PF.corrSample  = "Spring10"
 process.patJetCorrFactors.corrSample  = "Spring10"
 process.selectedPatJets.cut = cms.string("pt>10.")
 process.selectedPatJetsAK5PF.cut = cms.string("pt>8.")
+
 
 
 ### Event Filter
@@ -218,8 +233,8 @@ process.filter = cms.Path(
     process.oneGoodVertexFilter*
     #process.singleJetHLTFilter+
     process.HBHENoiseFilter*
-    #process.simpleSecondaryVertexHighPurBJetTags*
-    #process.simpleSecondaryVertexHighEffBJetTags*
+    process.simpleSecondaryVertexHighPurBJetTags*
+    process.simpleSecondaryVertexHighEffBJetTags*
     #process.dump
     process.patDefaultSequence*
     process.goodPFJets*
