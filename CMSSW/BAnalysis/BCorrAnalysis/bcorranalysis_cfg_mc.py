@@ -3,16 +3,19 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("BCA")
 
 process.load("FWCore.MessageService.MessageLogger_cfi")
+process.MessageLogger.cerr.threshold = "ERROR"
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
     fileNames = cms.untracked.vstring(
-    #'/store/user/leo/JetMETTau/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Run2010A-PromptReco-v4-Runs_139460-139965/0409b26ad4f90c0ce2038da6d13e58f2/reducedPATV8_JetMETTau_Run2010A-PromptReco-v4-Runs_139460-139965_7_1_LHW.root'
-    #'/store/user/leo/QCD_Pt80-herwig/BJetsPatDumpV8b-CMSSW_3_7_0_patch2-Spring10-START3X_V26-v1/fe983afb43c677d8daa662736af06b64/reducedPATV8b-QCD_Pt80-herwig_Spring10-START3X_V26_S09-v1_17_1_Emw.root'
-    '/store/user/leo/QCD_Pt170-herwigjimmy/BJetsPatDumpV8b-CMSSW_3_7_0_patch2-Spring10-START3X_V26-v1/fe983afb43c677d8daa662736af06b64/reducedPATV8b_11_1_USC.root'
-)
+    '/store/user/leo/QCD_Pt30-herwig/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Spring10-START3X_V26-v1/fe983afb43c677d8daa662736af06b64/reducedPATV8b-QCD_Pt30-herwig_Spring10-START3X_V26_S09-v1_9_1_baK.root',
+    '/store/user/leo/QCD_Pt30-herwig/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Spring10-START3X_V26-v1/fe983afb43c677d8daa662736af06b64/reducedPATV8b-QCD_Pt30-herwig_Spring10-START3X_V26_S09-v1_8_1_YFW.root',
+    '/store/user/leo/QCD_Pt30-herwig/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Spring10-START3X_V26-v1/fe983afb43c677d8daa662736af06b64/reducedPATV8b-QCD_Pt30-herwig_Spring10-START3X_V26_S09-v1_7_1_1OC.root',
+    '/store/user/leo/QCD_Pt30-herwig/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Spring10-START3X_V26-v1/fe983afb43c677d8daa662736af06b64/reducedPATV8b-QCD_Pt30-herwig_Spring10-START3X_V26_S09-v1_6_1_H5Q.root'
+    
+    )
                             
 )
 
@@ -20,6 +23,9 @@ process.options = cms.untracked.PSet(
     SkipEvent = cms.untracked.vstring('ProductNotFound'),
     wantSummary = cms.untracked.bool(True)
     )
+
+process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
+process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
 
 
 process.TFileService = cms.Service("TFileService",
@@ -50,6 +56,7 @@ process.bcanalyzer = cms.EDAnalyzer('BCorrAnalyzer',
                                     minInvM = cms.untracked.double(1.4),
                                     mindistSig3D = cms.untracked.double(5.0),
                                     maxEtaVertex = cms.untracked.double(2.0),
+                                    BCorrMethod = cms.untracked.string("MC"),
                                     
                                     #Jet analysis
                                     JetCollection      = cms.untracked.InputTag("selectedPatJets"),
@@ -79,6 +86,7 @@ process.bcanalyzer = cms.EDAnalyzer('BCorrAnalyzer',
                                     BTag_ssvhem = cms.untracked.double(2.02),
                                     BTag_ssvhet = cms.untracked.double(3.4),
                                     BTag_ssvhp = cms.untracked.double(2.),
+                                    BTag_ssvhpt = cms.untracked.double(2.),
                                     
                                     jetID = cms.PSet(useRecHits = cms.bool(True),
                                                      hbheRecHitsColl = cms.InputTag("hbhereco"),
