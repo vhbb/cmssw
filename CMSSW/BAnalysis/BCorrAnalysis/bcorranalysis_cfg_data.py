@@ -6,8 +6,16 @@ process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = "ERROR"
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = cms.string('GR10_P_V6::All')
 process.load("Configuration.StandardSequences.MagneticField_cff")
+
+
+
+#from 137436
+process.GlobalTag.globaltag = 'GR10_P_V7::All'
+#Jul16th
+#process.GlobalTag.globaltag = 'GR_R_36X_V12B::All'
+#Jun14th
+#process.GlobalTag.globaltag = 'GR_R_36X_V12A::All'
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
@@ -116,12 +124,14 @@ from PhysicsTools.PatAlgos.triggerLayer1.triggerEventProducer_cfi import *
 process.load("BAnalysis.BCorrAnalysis.triggermatch_PF_cfi")
 process.load("BAnalysis.BCorrAnalysis.triggermatch_CALO_cfi")
 
+process.patTriggerMatcher += process.selectedJetTriggerMatchHLTL1Jet6U
 process.patTriggerMatcher += process.selectedJetTriggerMatchHLTL1Jet10U
 process.patTriggerMatcher += process.selectedJetTriggerMatchHLTJet15U
 process.patTriggerMatcher += process.selectedJetTriggerMatchHLTJet30U
 process.patTriggerMatcher += process.selectedJetTriggerMatchHLTJet50U
 process.patTriggerMatcher += process.selectedJetTriggerMatchHLTJet70U
 process.patTriggerMatcher += process.selectedJetTriggerMatchHLTJet100U
+process.patTriggerMatcher += process.selectedJetTriggerMatchHLTL1Jet6UCALO
 process.patTriggerMatcher += process.selectedJetTriggerMatchHLTL1Jet10UCALO
 process.patTriggerMatcher += process.selectedJetTriggerMatchHLTJet15UCALO
 process.patTriggerMatcher += process.selectedJetTriggerMatchHLTJet30UCALO
@@ -130,9 +140,9 @@ process.patTriggerMatcher += process.selectedJetTriggerMatchHLTJet70UCALO
 process.patTriggerMatcher += process.selectedJetTriggerMatchHLTJet100UCALO
 
 
-process.patTriggerEvent.patTriggerMatches = [ "selectedJetTriggerMatchHLTL1Jet10U","selectedJetTriggerMatchHLTJet15U","selectedJetTriggerMatchHLTJet30U",
+process.patTriggerEvent.patTriggerMatches = [ "selectedJetTriggerMatchHLTL1Jet6U","selectedJetTriggerMatchHLTL1Jet10U","selectedJetTriggerMatchHLTJet15U","selectedJetTriggerMatchHLTJet30U",
                                               "selectedJetTriggerMatchHLTJet50U","selectedJetTriggerMatchHLTJet70U","selectedJetTriggerMatchHLTJet100U",
-                                              "selectedJetTriggerMatchHLTL1Jet10UCALO","selectedJetTriggerMatchHLTJet15UCALO","selectedJetTriggerMatchHLTJet30UCALO",
+                                              "selectedJetTriggerMatchHLTL1Jet6UCALO","selectedJetTriggerMatchHLTL1Jet10UCALO","selectedJetTriggerMatchHLTJet15UCALO","selectedJetTriggerMatchHLTJet30UCALO",
                                               "selectedJetTriggerMatchHLTJet50UCALO","selectedJetTriggerMatchHLTJet70UCALO","selectedJetTriggerMatchHLTJet100UCALO"
                                               ]
 
