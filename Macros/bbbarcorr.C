@@ -174,6 +174,8 @@ void analyze(string SET="Data", string HLT="HLT_Jet15U", int SET_n=-1){
       if(HLT=="HLT_Jet30U") corrFunctionIVF("jet30");
       else if(HLT=="HLT_Jet50U") corrFunctionIVF("jet50");
       else if(HLT=="HLT_Jet15U") corrFunctionIVF("jet15");
+      else if(HLT=="HLT_L1Jet6U") corrFunctionIVF("jet6");
+
     }else{
       cout << "Warning: IVF correction file not found" << endl;
     }
@@ -478,6 +480,7 @@ void sumHisto(string SET, string HLT){
   system( command.c_str() );
 }
 
+/// summing data histos with loaded prescales
 void sumHistoPrescaled(string SET, string HLT){
   files = getFiles(SET,HLT);
 
@@ -588,6 +591,7 @@ vector<TFile*> getFiles(string SET, string HLT){
     files.push_back( TFile::Open( (DIR+"anV3-MinimumBias-Commissioning10-SD_JetMETTau-Jun14thSkim_v1-V9.root").c_str() ) ); lumi.push_back(totLumi);
     if(HLT=="HLT_Jet15U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(1);
     else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
+    //add here and in the other samples L1Jet6U prescales
     
     totLumi = 4900;totalLumis.push_back(totLumi);grandTotal+=totLumi;
     files.push_back( TFile::Open( (DIR+"anV3-JetMETTau-Run2010A-Jun14thReReco_v2-V9.root").c_str() ) ); lumi.push_back(totLumi);
@@ -707,6 +711,7 @@ void setTrigger(string HLT){
   if(HLT=="HLT_Jet15U"){ jet1_minPt =56;  jet1_maxPt =84;jet1_minPt_lab ="56";  jet1_maxPt_lab ="84"; }
   else if(HLT=="HLT_Jet30U"){ jet1_minPt =84;  jet1_maxPt =120; jet1_minPt_lab ="84";  jet1_maxPt_lab ="120"; }
   else if(HLT=="HLT_Jet50U"){ jet1_minPt =120;  jet1_maxPt =10000000; jet1_minPt_lab ="120";  jet1_maxPt_lab ="";}
+  else if(HLT=="HLT_L1Jet6U"){ jet1_minPt =37;  jet1_maxPt =56; jet1_minPt_lab ="37";  jet1_maxPt_lab ="56";}
 
 }
 
