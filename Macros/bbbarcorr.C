@@ -581,53 +581,58 @@ vector<TFile*> getFiles(string SET, string HLT){
   minPthat.clear(); maxPthat.clear(); xsec.clear();
   
   if(SET=="Data"){
-    /*
-    totLumi = 6900; totalLumis.push_back(totLumi); grandTotal+=totLumi;
-    files.push_back( TFile::Open( (DIR+"anV3-MinimumBias-Commissioning10-GOODCOLL-Jun14thSkim_v1-V9.root").c_str() ) ); lumi.push_back(totLumi);
-    if(HLT=="HLT_Jet15U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(1);
-    else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
-    */
-    totLumi = 8000; totalLumis.push_back(totLumi); grandTotal+=totLumi;
-    files.push_back( TFile::Open( (DIR+"anV3-MinimumBias-Commissioning10-SD_JetMETTau-Jun14thSkim_v1-V9.root").c_str() ) ); lumi.push_back(totLumi);
-    if(HLT=="HLT_Jet15U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(1);
-    else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
-    //add here and in the other samples L1Jet6U prescales
+    if(HLT=="HLT_L1Jet6U"){
+      cout << "please insert here the proper files" << endl;
+    }
     
-    totLumi = 4900;totalLumis.push_back(totLumi);grandTotal+=totLumi;
-    files.push_back( TFile::Open( (DIR+"anV3-JetMETTau-Run2010A-Jun14thReReco_v2-V9.root").c_str() ) ); lumi.push_back(totLumi);
-    if(HLT=="HLT_Jet15U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(1);
-    else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
+    else{
+      /*
+	totLumi = 6900; totalLumis.push_back(totLumi); grandTotal+=totLumi;
+	files.push_back( TFile::Open( (DIR+"anV3-MinimumBias-Commissioning10-GOODCOLL-Jun14thSkim_v1-V9.root").c_str() ) ); lumi.push_back(totLumi);
+	if(HLT=="HLT_Jet15U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(1);
+	else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
+      */
+      totLumi = 8000; totalLumis.push_back(totLumi); grandTotal+=totLumi;
+      files.push_back( TFile::Open( (DIR+"anV3-MinimumBias-Commissioning10-SD_JetMETTau-Jun14thSkim_v1-V9.root").c_str() ) ); lumi.push_back(totLumi);
+      if(HLT=="HLT_Jet15U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(1);
+      else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
 
-    totLumi = 58600;totalLumis.push_back(totLumi);grandTotal+=totLumi;
-    files.push_back( TFile::Open( (DIR+"anV3-JetMETTau-PromptReco-v4_Runs137437-139558-V9.root").c_str() ) ); lumi.push_back(totLumi);
-    if(HLT=="HLT_Jet15U") lumiFactor.push_back(totLumi/4100); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(1);
-    else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
-
-    totLumi = 82100;totalLumis.push_back(totLumi);grandTotal+=totLumi;
-    files.push_back( TFile::Open( (DIR+"anV3-JetMETTau-Run2010A-Jul16thReReco-v1-V9.root").c_str() ) ); lumi.push_back(totLumi);
-    if(HLT=="HLT_Jet15U") lumiFactor.push_back(totLumi/1960); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(totLumi/24600);
-    else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
-
-    totLumi = 64600;totalLumis.push_back(totLumi);grandTotal+=totLumi;
-    files.push_back( TFile::Open( (DIR+"anV3-JetMETTau-PromptReco-v4_Runs140160-140388-V9.root").c_str() ) ); lumi.push_back(totLumi);
-    if(HLT=="HLT_Jet15U") lumiFactor.push_back(totLumi/1100); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(totLumi/11000);
-    else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
-
-    totLumi = 41100;totalLumis.push_back(totLumi);grandTotal+=totLumi;
-    files.push_back( TFile::Open( (DIR+"anV3-JetMETTau-PromptReco-v4_Runs140389-141887-V9.root").c_str() ) ); lumi.push_back(totLumi);
-    if(HLT=="HLT_Jet15U") lumiFactor.push_back(totLumi/760); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(totLumi/7600);
-    else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
-
-    totLumi = 1450000; totalLumis.push_back(totLumi);grandTotal+=totLumi;
-    files.push_back( TFile::Open( (DIR+"anV3-JetMET-Run2010A-PromptReco-v4_Runs141950-143731-V9B.root").c_str() ) ); lumi.push_back(totLumi);
-    if(HLT=="HLT_Jet15U") lumiFactor.push_back(totLumi/7000); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(totLumi/140600);
-    else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
-
-    totLumi = 1342100; totalLumis.push_back(totLumi);grandTotal+=totLumi;
-    files.push_back( TFile::Open( (DIR+"anV3-JetMET-Run2010A-PromptReco-v4_Runs143732-144114-V9B.root").c_str() ) ); lumi.push_back(totLumi);
-    if(HLT=="HLT_Jet15U") lumiFactor.push_back(totLumi/2500); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(totLumi/49200);
-    else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
-
+      
+      totLumi = 4900;totalLumis.push_back(totLumi);grandTotal+=totLumi;
+      files.push_back( TFile::Open( (DIR+"anV3-JetMETTau-Run2010A-Jun14thReReco_v2-V9.root").c_str() ) ); lumi.push_back(totLumi);
+      if(HLT=="HLT_Jet15U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(1);
+      else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
+      
+      totLumi = 58600;totalLumis.push_back(totLumi);grandTotal+=totLumi;
+      files.push_back( TFile::Open( (DIR+"anV3-JetMETTau-PromptReco-v4_Runs137437-139558-V9.root").c_str() ) ); lumi.push_back(totLumi);
+      if(HLT=="HLT_Jet15U") lumiFactor.push_back(totLumi/4100); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(1);
+      else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
+      
+      totLumi = 82100;totalLumis.push_back(totLumi);grandTotal+=totLumi;
+      files.push_back( TFile::Open( (DIR+"anV3-JetMETTau-Run2010A-Jul16thReReco-v1-V9.root").c_str() ) ); lumi.push_back(totLumi);
+      if(HLT=="HLT_Jet15U") lumiFactor.push_back(totLumi/1960); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(totLumi/24600);
+      else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
+      
+      totLumi = 64600;totalLumis.push_back(totLumi);grandTotal+=totLumi;
+      files.push_back( TFile::Open( (DIR+"anV3-JetMETTau-PromptReco-v4_Runs140160-140388-V9.root").c_str() ) ); lumi.push_back(totLumi);
+      if(HLT=="HLT_Jet15U") lumiFactor.push_back(totLumi/1100); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(totLumi/11000);
+      else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
+      
+      totLumi = 41100;totalLumis.push_back(totLumi);grandTotal+=totLumi;
+      files.push_back( TFile::Open( (DIR+"anV3-JetMETTau-PromptReco-v4_Runs140389-141887-V9.root").c_str() ) ); lumi.push_back(totLumi);
+      if(HLT=="HLT_Jet15U") lumiFactor.push_back(totLumi/760); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(totLumi/7600);
+      else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
+      
+      totLumi = 1450000; totalLumis.push_back(totLumi);grandTotal+=totLumi;
+      files.push_back( TFile::Open( (DIR+"anV3-JetMET-Run2010A-PromptReco-v4_Runs141950-143731-V9B.root").c_str() ) ); lumi.push_back(totLumi);
+      if(HLT=="HLT_Jet15U") lumiFactor.push_back(totLumi/7000); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(totLumi/140600);
+      else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
+      
+      totLumi = 1342100; totalLumis.push_back(totLumi);grandTotal+=totLumi;
+      files.push_back( TFile::Open( (DIR+"anV3-JetMET-Run2010A-PromptReco-v4_Runs143732-144114-V9B.root").c_str() ) ); lumi.push_back(totLumi);
+      if(HLT=="HLT_Jet15U") lumiFactor.push_back(totLumi/2500); else if(HLT=="HLT_Jet30U") lumiFactor.push_back(totLumi/49200);
+      else if(HLT=="HLT_Jet50U") lumiFactor.push_back(1); else if(HLT=="HLT_Jet70U") lumiFactor.push_back(1);  else if(HLT=="HLT_Jet100U") lumiFactor.push_back(1);
+    }  
     float grandScaledTotal=0;
     cout <<"--- "<<HLT << " Total Lumi: "<< grandTotal/1000 << "/nb" << endl;
     for (int l=0;l<(int)lumiFactor.size();l++) {
@@ -636,7 +641,7 @@ vector<TFile*> getFiles(string SET, string HLT){
     }
     cout << "--- Effective Lumi: " << grandScaledTotal/1000 << "/nb" << endl;
   }
-
+  
   else if(SET=="Pythia6"){
     minPthat.push_back(15); maxPthat.push_back(30);
     files.push_back( TFile::Open( (DIR+"anV3-QCD_Pt15_Spring10-V8b.root").c_str() ) ); 
