@@ -51,12 +51,12 @@ string LABEL = "";
 string DIR="/scratch/leo/";
 
 //file containing btag purity fit
-string jetCorrFile = "histo-Pythia6-flavourComp.root";
+string jetCorrFile = "histo-btagPurity-Pythia6.root";
 TFile *f_jetPurity;
 TF1 *f_jet_pur_pt;
 
 //file containing the IVF corrections:
-string ivfCorrFile = "/scratch/leo/efficCurves.root";
+string ivfCorrFile = "histo-bvertEffic-Pythia6.root";
 
 ///variables
 map <string, TH1F*> histos;
@@ -181,7 +181,7 @@ void analyze(string SET="Data", string HLT="HLT_Jet15U", int SET_n=-1){
     }
     //BTag eff correction
     if(stat(jetCorrFile.c_str(),&stFileInfo) == 0){
-      f_jetPurity = TFile::Open("histo-Pythia6-flavourComp.root");
+      f_jetPurity = TFile::Open(jetCorrFile.c_str());
       f_jetPurity->GetObject("f_purity_pt", f_jet_pur_pt);
     }else{
       cout << "Warning: Jet correction file not found" << endl;
@@ -288,6 +288,7 @@ int analyzeJetEvent(string SET, double W){
   histos["Jet_eta_2b"]->Fill(  varFloatArr["Jet_eta"][bj1],W);
   histos["Jet_eta_2b"]->Fill(  varFloatArr["Jet_eta"][bj2],W);
   
+  float ptAsymm = fabs(varFloatArr["Jet_pt"][bj1]-varFloatArr["Jet_pt"][bj2])/( varFloatArr["Jet_pt"][bj1]+varFloatArr["Jet_pt"][bj2]);
   histos["Jet_ptAsymm_2b"]->Fill( fabs(varFloatArr["Jet_pt"][bj1]-varFloatArr["Jet_pt"][bj2])/( varFloatArr["Jet_pt"][bj1]+varFloatArr["Jet_pt"][bj2]),W);
 
   float newW = varFloatArr["Jet_bEff"][0]*varFloatArr["Jet_bEff"][1];
@@ -296,6 +297,7 @@ int analyzeJetEvent(string SET, double W){
   histos["Jet_dR_2b_CORR"]->Fill(dR,newW*W);
   histos["Jet_dPhi_2b_CORR"]->Fill(dPhi,newW*W);
   histos["Jet_dEta_2b_CORR"]->Fill(dEta,newW*W);
+  histos["Jet_ptAsymm_2b_CORR"]->Fill( ptAsymm,newW*W );
 
 
   //invariant mass
@@ -337,6 +339,8 @@ int analyzeJetEvent(string SET, double W){
     histos["Jet_dPhi_2b_"+diFl]->Fill( dPhi,W );
     histos["Jet_dEta_2b_"+diFl]->Fill( dEta,W );
     histos["Jet_2bJets_Mass_"+diFl]->Fill(invM,W);
+    histos["Jet_ptAsymm_2b_"+diFl]->Fill( ptAsymm,W );
+
     histos2D["Jet_dEtadPhi_2b_"+diFl]->Fill( dEta,dPhi, W);
     histos2D["Jet_pt1pt2_2b_"+diFl]->Fill(varFloatArr["Jet_pt"][bj1], varFloatArr["Jet_pt"][bj2],W);
 
@@ -356,6 +360,8 @@ int analyzeIVFEvent(event thisEv, string SET, double W){
   //yes, we want to have events with exactly two B since otherwise 
   //it is not clear which are the B's produced in same process
   if( thisEv.nV!=2 && thisEv.nB!=2) return 1;
+
+  if(fabs(thisEv.etaB1)>=2.0 && fabs(thisEv.etaB2)>=2.0) return 1;
   histos["bVert_N"]->Fill(thisEv.nV, W);
 
   int flavCat = -1, matCat=-1; 
@@ -643,9 +649,10 @@ vector<TFile*> getFiles(string SET, string HLT){
   }
   
   else if(SET=="Pythia6"){
-    minPthat.push_back(15); maxPthat.push_back(30);
-    files.push_back( TFile::Open( (DIR+"anV3-QCD_Pt15_Spring10-V8b.root").c_str() ) ); 
-    xsec.push_back(876215000.0); //nEvents.push_back(6090500);
+    //low stat
+    //minPthat.push_back(15); maxPthat.push_back(30);
+    //files.push_back( TFile::Open( (DIR+"anV3-QCD_Pt15_Spring10-V8b.root").c_str() ) ); 
+    //xsec.push_back(876215000.0); //nEvents.push_back(6090500);
 
     minPthat.push_back(30); maxPthat.push_back(80);
     files.push_back( TFile::Open( (DIR+"anV3-QCD_Pt30_Spring10-V8b.root").c_str() ) ); 
@@ -764,6 +771,7 @@ void createJetHistos(string SET){
   histos["Jet_pt_2b"] = new TH1F("Jet_pt_2b","",200,0,2000);  histos["Jet_pt_2b"]->Sumw2();
   histos["Jet_eta_2b"] = new TH1F("Jet_eta_2b","",100,-3,3);  histos["Jet_eta_2b"]->Sumw2();
   histos["Jet_ptAsymm_2b"] = new TH1F("Jet_ptAsymm_2b","",100,0,1); histos["Jet_ptAsymm_2b"]->Sumw2();
+  histos["Jet_ptAsymm_2b_CORR"] = new TH1F("Jet_ptAsymm_2b_CORR","",100,0,1); histos["Jet_ptAsymm_2b_CORR"]->Sumw2();
 
   histos["Jet_bJets_pt"] = new TH1F("Jet_bJets_pt","",200,0,2000); histos["Jet_bJets_pt"]->Sumw2();
   histos["Jet_bJets_eta"] = new TH1F("Jet_bJets_eta","",100,-3,3); histos["Jet_bJets_eta"]->Sumw2();
@@ -778,6 +786,8 @@ void createJetHistos(string SET){
   if(SET!="Data"){
     int lab_fl_n= (int) ( (float)sizeof(lab_fl))/((float) sizeof(string));
     for(int f=0;f<lab_fl_n;f++){
+      histos["Jet_ptAsymm_2b_"+lab_fl[f]] = new TH1F( ("Jet_ptAsymm_2b_"+lab_fl[f]).c_str(),"",100,0,1); histos["Jet_ptAsymm_2b_"+lab_fl[f] ]->Sumw2();
+
       histos["Jet_pt_2b_"+lab_fl[f]] = new TH1F( ("Jet_pt_2b_"+lab_fl[f]).c_str(),"",200,0,2000); histos["Jet_pt_2b_"+lab_fl[f] ]->Sumw2();
       histos["Jet_2bJets_Mass_"+lab_fl[f]] = new TH1F( ("Jet_2bJets_Mass_"+lab_fl[f]).c_str(),";mass(bjet,bjet;events)",200,0,2000); histos["Jet_2bJets_Mass_"+lab_fl[f]]->Sumw2();
       histos2D["Jet_dEtadPhi_2b_"+lab_fl[f]] = new TH2F(("Jet_dEtadPhi_2b_"+lab_fl[f]).c_str(),";#Delta #eta;#Delta #phi",100,0,10,32,0,3.2); histos2D["Jet_dEtadPhi_2b_"+lab_fl[f]]->Sumw2();
@@ -796,6 +806,8 @@ void createJetHistos(string SET){
     histos["Jet_bJetsMC_eta"] = new TH1F("Jet_bJetsMC_eta","",100,-3,3); histos["Jet_bJetsMC_eta"]->Sumw2();
     histos["Jet_cJetsMC_eta"] = new TH1F("Jet_cJetsMC_eta","",100,-3,3); histos["Jet_cJetsMC_eta"]->Sumw2();
     histos["Jet_lJetsMC_eta"] = new TH1F("Jet_lJetsMC_eta","",100,-3,3); histos["Jet_lJetsMC_eta"]->Sumw2();
+
+
   }
 
 
