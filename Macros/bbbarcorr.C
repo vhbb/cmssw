@@ -28,12 +28,15 @@
 ////////////////////////
 
 ///Configuration
-//general selection cuts
+////general selection cuts
+//Jets
 float BJET_PT = 30;
 float BJET_ETA = 2;
 float JET1_ETA = 3;
 float JET_PT = BJET_PT;
 float JET_ETA = 2;
+//Bcands
+float BCAND_ETA = 2;
 
 //btag cuts
 string BALGO = "ssvhp";
@@ -361,7 +364,7 @@ int analyzeIVFEvent(event thisEv, string SET, double W){
   //it is not clear which are the B's produced in same process
   if( thisEv.nV!=2 && thisEv.nB!=2) return 1;
 
-  if(fabs(thisEv.etaB1)>=2.0 && fabs(thisEv.etaB2)>=2.0) return 1;
+  if(fabs(thisEv.etaB1)>=BCAND_ETA && fabs(thisEv.etaB2)>=BCAND_ETA) return 1;
   histos["bVert_N"]->Fill(thisEv.nV, W);
 
   int flavCat = -1, matCat=-1; 
