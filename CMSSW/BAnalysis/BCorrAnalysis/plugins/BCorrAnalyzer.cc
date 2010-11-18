@@ -13,7 +13,7 @@
 //
 // Original Author:  Lukas Wehrli (IPP/ETHZ) [wehrlilu]
 //         Created:  Wed May 26 10:41:33 CEST 2010
-// $Id: BCorrAnalyzer.cc,v 1.2 2010/07/30 10:06:47 wehrlilu Exp $
+// $Id: BCorrAnalyzer.cc,v 1.4 2010/09/30 17:04:14 leo Exp $
 //
 //
 
@@ -242,7 +242,7 @@ class BCorrAnalyzer : public edm::EDAnalyzer {
       bcandid sbcands; 
       edm::InputTag vertexsrc_, simbsrc_, offlinePrimaryVertices_, trigressrc_;
 
-      double minInvMass, distSig3Dmin, maxEtaVertex;
+      double minInvMass, distSig3Dmin, maxEtaVertex, minPtVertex;
       TH1F *hdR, *hdEta, *hdPhi; 
 
       float count[8][8][8][8][8][8]; 
@@ -348,7 +348,8 @@ BCorrAnalyzer::BCorrAnalyzer(const edm::ParameterSet& iConfig):
   trigressrc_(iConfig.getParameter<edm::InputTag>("trigressrc")),
   minInvMass(iConfig.getUntrackedParameter<double>("minInvM",1.4)),
   distSig3Dmin(iConfig.getUntrackedParameter<double>("mindistSig3D",5.0)),
-  maxEtaVertex(iConfig.getUntrackedParameter<double>("maxEtaVertex",2.0))
+  maxEtaVertex(iConfig.getUntrackedParameter<double>("maxEtaVertex",2.0)),
+  minPtVertex(iConfig.getUntrackedParameter<double>("minPtVertex",8.0))
 
 {
   triggerPaths.push_back("HLT_L1_BscMinBiasOR_BptxPlusORMinus");
@@ -1002,10 +1003,11 @@ for(map<string,int>::iterator hlt=varTrigger.begin(); hlt!=varTrigger.end(); hlt
      for(unsigned int v=0; v<svc.size(); v++){
        //std::cout << "vertex " << v << std::endl;
        //find dR to jets:
-       Vertex rv = svc[v];
-       GlobalVector fldir = flightDirection(pv,rv);
-       unsigned int matJet = -1;
-       double minDR = 10.0;
+       Vertex rv = svc[v]; 
+       GlobalVector fldir = flightDirection(pv,rv); 
+       unsigned int matJet = 777; 
+       double minDR = 10.0; 
+
        for(unsigned int j=0; j<iptic.size(); j++){
 	 GlobalVector axis = iptic[j].axis();
 	 double dR = deltaR(fldir,axis);
@@ -1014,12 +1016,12 @@ for(map<string,int>::iterator hlt=varTrigger.begin(); hlt!=varTrigger.end(); hlt
 	   matJet = j;
 	 }
        }
-       //if(matJet==-1) std::cout << "NO JET!!!\n";
-       //        std::cout << "MATCHING JET: " << matJet << "\n";
-       const edm::RefVector<TrackCollection> tracks = iptic[matJet].selectedTracks();
-       const std::vector<TrackIPTagInfo::TrackIPData> ipdatas = iptic[matJet].impactParameterData();
-       
-       unsigned int nvtr=0;
+       //if(matJet==777) std::cout << "NO JET!!!\n";
+//        std::cout << "MATCHING JET: " << matJet << "\n";
+       const edm::RefVector<TrackCollection> tracks = iptic[matJet].selectedTracks(); 
+       const std::vector<TrackIPTagInfo::TrackIPData> ipdatas = iptic[matJet].impactParameterData(); 
+
+       unsigned int nvtr=0; 
        //loop over tracks in vertex
        for(Vertex::trackRef_iterator it=svc[v].tracks_begin(); it!=svc[v].tracks_end(); it++, nvtr++){
 	 double vtrpt = (*it)->pt();
@@ -1055,7 +1057,7 @@ for(map<string,int>::iterator hlt=varTrigger.begin(); hlt!=varTrigger.end(); hlt
      SecondaryVertex sv(pv,rv,axis,true);
      curbc.selected=false; 
      curbc.dRmatched = false;
-     if(lcc[i].p4().M()>minInvMass && sv.dist3d().significance()>distSig3Dmin && fabs(flightDirection(pv,rv).eta())<maxEtaVertex) {
+     if(lcc[i].p4().M()>minInvMass && sv.dist3d().significance()>distSig3Dmin && fabs(flightDirection(pv,rv).eta())<maxEtaVertex && lcc[i].p4().Pt()>minPtVertex) {
        goodVert++; 
        if(index1==-1) index1=i; 
        else {
