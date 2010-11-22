@@ -17,85 +17,41 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load('Configuration/EventContent/EventContent_cff')
 
 
-#process.GlobalTag.globaltag = 'GR_R_35X_V8B::All'
-#process.GlobalTag.globaltag = 'GR10_P_V5::All'
-#process.GlobalTag.globaltag = 'GR_R_37X_V6A::All'
-#from 137436 
-#process.GlobalTag.globaltag = 'GR10_P_V7::All'
-#Jul16th
-process.GlobalTag.globaltag = 'GR_R_36X_V12B::All'
-#Jun14th
-#process.GlobalTag.globaltag = 'GR_R_36X_V12A::All'
+process.GlobalTag.globaltag = 'GR_R_38X_V14::All'
 
 process.source = cms.Source("PoolSource",
                                 fileNames = cms.untracked.vstring(
     #'/store/data/Run2010A/EG/RECO/v4/000/144/112/FA1804F7-D9B3-DF11-9D71-001D09F26C5C.root'
-'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/735/04AFE369-DD63-DF11-8CFE-0025B3E063F0.root',
-'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/794/B205E0DD-4865-DF11-896F-001A64789E40.root',
-'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/793/3658106B-4B65-DF11-9BB7-00E081B08CC7.root',
-'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/787/786E4A71-4965-DF11-B987-003048D45FD6.root',
-'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/777/D6CBB081-DC63-DF11-A67F-0025B3E05DB6.root',
-'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/771/EC6C2805-DF63-DF11-9D21-00E081791867.root',
-'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/735/98DC5094-D963-DF11-83A2-0025B3E05D5C.root',
-'/store/data/Commissioning10/MinimumBias/RECO/v9/000/135/735/8ADB2D7C-DD63-DF11-8761-002481E14F1E.root'
-#    'file:/shome/leo/Installations/CMSSW_3_7_0_patch2/src/Analysis/SimpleBAnalysis/test/3CE6FE16-F29E-DF11-8BD3-003048F118C4.root'
+    '/store/data/Run2010B/MuOnia/RECO/PromptReco-v2/000/146/713/E2ACD01C-05CA-DF11-8DF1-003048F024DE.root',
+    '/store/data/Run2010B/MuOnia/RECO/PromptReco-v2/000/146/713/38FCC647-07CA-DF11-90F4-001D09F254CE.root',
+    '/store/data/Run2010B/MuOnia/RECO/PromptReco-v2/000/146/713/243890B9-08CA-DF11-9886-001D09F241B9.root',
+    '/store/data/Run2010B/MuOnia/RECO/PromptReco-v2/000/146/713/8A2505BD-0ACA-DF11-A1B5-003048F024FA.root',
+    '/store/data/Run2010B/MuOnia/RECO/PromptReco-v2/000/146/713/22304547-07CA-DF11-86E4-001D09F28F11.root',
+    '/store/data/Run2010B/MuOnia/RECO/PromptReco-v2/000/146/713/5C8A6AB9-08CA-DF11-A6CB-001D09F2437B.root',
+    '/store/data/Run2010B/MuOnia/RECO/PromptReco-v2/000/146/713/5445D44B-0ECA-DF11-B888-001D09F2441B.root',
+    '/store/data/Run2010B/MuOnia/RECO/PromptReco-v2/000/146/713/94303675-FDC9-DF11-A6B8-001D09F2A465.root',
+    '/store/data/Run2010B/MuOnia/RECO/PromptReco-v2/000/146/713/726A87FC-02CA-DF11-AB1E-001617C3B76A.root',
+    '/store/data/Run2010B/MuOnia/RECO/PromptReco-v2/000/146/713/D2585EB4-16CA-DF11-9E6C-0019B9F581C9.root',
+    '/store/data/Run2010B/MuOnia/RECO/PromptReco-v2/000/146/713/5A66CC84-0BCA-DF11-B63E-0030487CD7EA.root',
+    '/store/data/Run2010B/MuOnia/RECO/PromptReco-v2/000/146/713/0A39850E-0ACA-DF11-852F-001D09F23A34.root'
     )) 
-
-
-##HLT Filter
-import HLTrigger.HLTfilters.hltHighLevel_cfi
-process.singleJetHLTFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone()
-process.singleJetHLTFilter.TriggerResultsTag = cms.InputTag("TriggerResults","","HLT")
-process.singleJetHLTFilter.HLTPaths = ["HLT_L1Jet6U", "HLT_L1Jet10U", "HLT_Jet15U"]
-process.singleJetHLTFilter.andOr = cms.bool(True) # how to deal with multiple triggers: True (OR) accept if ANY is true, False (AND) accept if ALL are true
 
 
 ## Standard PAT Configuration File
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
+from PhysicsTools.PatAlgos.tools.trigTools import *
 ### RBX noise filter
 process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
 
 
 ## Output Module Configuration (expects a path 'p')
-from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
+#from PhysicsTools.PatAlgos.patEventContent_cff import patEventContent
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
 process.out = cms.OutputModule("PoolOutputModule",
                                fileName = cms.untracked.string('reducedPAT.root'),
-                               #SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('filter ', 'vertexFilter') ),
-                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('filter ') ),
-                               outputCommands = cms.untracked.vstring('drop *',
-                                                                      'keep *_selectedPatElectrons*_*_*',
-                                                                      'keep *_selectedPatMuons*_*_*',
-                                                                      'keep *_selectedPatJets*_*_*',
-                                                                      'keep *_patMETs*_*_*',
-                                                                      #'keep *_selectedPatPFParticles*_*_*',
-                                                                      "keep *_impactParameterTagInfos*_*_*",
-                                                                      "keep *_secondaryVertexTagInfos_*_*",
-                                                                      # GEN
-                                                                      'keep recoGenParticles_genParticles*_*_*',
-                                                                      'keep GenEventInfoProduct_*_*_*',
-                                                                      'keep GenRunInfoProduct_*_*_*',
-                                                                      # RECO
-                                                                      'keep recoTracks_generalTracks*_*_*',
-                                                                      #'keep *_towerMaker_*_*',
-                                                                      'keep *_offlineBeamSpot_*_*',
-                                                                      'keep *_offlinePrimaryVertices*_*_*',
-                                                                      # TRIGGER
-                                                                      'keep edmTriggerResults_TriggerResults*_*_*',
-                                                                      'keep L1GlobalTriggerReadoutRecord_gtDigis_*_*',
-                                                                      'keep *_hltTriggerSummaryAOD_*_*',
-                                                                      'keep patTriggerAlgorithms_patTrigger_*_*',
-                                                                      'keep patTriggerObjects_patTrigger_*_*',
-                                                                      'keep patTriggerFilters_patTrigger_*_*',
-                                                                      'keep patTriggerPaths_patTrigger_*_*',
-                                                                      'keep patTriggerEvent_patTriggerEvent_*_*',
-                                                                      'keep patTriggerObjectStandAlones_patTrigger_*_*',
-                                                                      'keep patTriggerObjectStandAlonesedmAssociation_*_*_*',
-                                                                      #SV
-                                                                      'keep *_bcandidates_*_*',
-                                                                      'keep *_selectedVertices_*_*'
-                                                                      ) 
+                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('filter') ),
+                               outputCommands = cms.untracked.vstring('drop *' )
                                )
 
 from PhysicsTools.PatAlgos.tools.coreTools import *
@@ -109,36 +65,41 @@ switchOnTrigger( process )
 from PhysicsTools.PatAlgos.tools.metTools import *
 addPfMET(process, 'PF')
 
-from PhysicsTools.PatAlgos.tools.jetTools import *
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
-addJetCollection(process,cms.InputTag('ak5PFJets'),
-                    'AK5', 'PF',
+switchJetCollection(process,cms.InputTag('ak5PFJets'),
                     doJTA        = True,
                     doBTagging   = True,
-                    jetCorrLabel = ('AK5', 'PF'),
-                    doType1MET   = False,
-                    doL1Cleaning = False,
-                    doL1Counters = False,
-                    genJetCollection=cms.InputTag("ak5PFJets"),
-                    doJetID      = True,
-                    jetIdLabel   = "ak5"
+                    jetCorrLabel = ('AK5PF', cms.vstring(['L2Relative', 'L3Absolute'])),
+                    doType1MET   = True,
+                    #genJetCollection=cms.InputTag("ak5GenJets"),
+                    doJetID      = True
                     )
+process.selectedPatJets.cut = cms.string("pt>8.")
+process.patJets.embedPFCandidates = cms.bool(True)
+process.selectedPatJets.embedPFCandidates = cms.bool(True)
 
-process.patJets.embedCaloTowers = cms.bool(True)
-process.patJetsAK5PF.embedPFCandidates = cms.bool(True)
-process.selectedPatJets.embedCaloTowers = cms.bool(True)
-process.selectedPatJetsAK5PF.embedPFCandidates = cms.bool(True)
-process.patJetCorrFactorsAK5PF.corrSample  = "Spring10"
-process.patJetCorrFactors.corrSample  = "Spring10"
-process.selectedPatJets.cut = cms.string("pt>10.")
-process.selectedPatJetsAK5PF.cut = cms.string("pt>8.")
+removeMCMatching(process, ['All'])
 
+###Trigger Matching
+#process.load( "PhysicsTools.PatAlgos.triggerLayer1.triggerProducer_cff" )
+process.load("BAnalysis.BCorrAnalysis.triggermatch_PF_cfi")
+from PhysicsTools.PatAlgos.tools.coreTools import removeCleaning
+removeCleaning( process )
+## Switch on PAT trigger
+#from PhysicsTools.PatAlgos.tools.trigTools import *
+switchOnTrigger( process ) # This is optional and can be omitted.
+switchOnTriggerMatching( process, ['selectedJetTriggerMatchHLTL1Jet6U','selectedJetTriggerMatchHLTL1Jet10U',
+                                   'selectedJetTriggerMatchHLTJet15U','selectedJetTriggerMatchHLTJet30U',
+                                   'selectedJetTriggerMatchHLTJet50U','selectedJetTriggerMatchHLTJet70U',
+                                   'selectedJetTriggerMatchHLTJet100U'] )
+# Switch to selected PAT objects in the trigger matching
+removeCleaningFromTriggerMatching( process )
 
 
 ### Event Filter
 process.goodPFJets = cms.EDFilter("PtMinCandViewSelector",
-                                  src = cms.InputTag("selectedPatJetsAK5PF"),
-                                  ptMin = cms.double(30)
+                                  src = cms.InputTag("selectedPatJets"),
+                                  ptMin = cms.double(20)
                                   )
 
 process.EventPFJetFilter = cms.EDFilter("CandViewCountFilter",
@@ -146,7 +107,11 @@ process.EventPFJetFilter = cms.EDFilter("CandViewCountFilter",
                                         minNumber = cms.uint32(1),
                                         filter = cms.bool(True)   # otherwise it won't filter the events, just produce an empty vertex collection.
                             )
-
+process.trackFilter = cms.EDFilter("TrackSelector",
+                                   filter = cms.bool(False),
+                                   src = cms.InputTag("generalTracks"),
+                                   cut = cms.string("pt > 1.0")
+                                 )
 
 
 ###Sec vertex
@@ -199,51 +164,76 @@ process.bit40 = hltLevel1GTSeed.clone(L1TechTriggerSeeding = cms.bool(True), L1S
 #Require a good vertex
 process.oneGoodVertexFilter = cms.EDFilter("VertexSelector",
                                            src = cms.InputTag("offlinePrimaryVertices"),
-                                           cut = cms.string("!isFake && ndof > 4 && abs(z) <= 15 && position.Rho <= 2"),
+                                           cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2"),
                                            filter = cms.bool(True),   # otherwise it won't filter the events, just produce an empty vertex collection.
                                            )
 
+process.dump=cms.EDAnalyzer('EventContentAnalyzer')
 ### rerunning btag (for 35X samples)
 process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertex3TrkES_cfi")
 process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertexHighPurBJetTags_cfi")
 process.load("RecoBTag.SecondaryVertex.simpleSecondaryVertexHighEffBJetTags_cfi")
 
-process.dump=cms.EDAnalyzer('EventContentAnalyzer')
-
-#process.vertexFilter = cms.Path(
-#    #process.hltLevel1GTSeed *
-#    process.bit40 *
-#    process.bptxAnd *
-#    process.scrapingVeto *
-#    #process.hltPhysicsDeclared *
-#    process.oneGoodVertexFilter* 
-#    #process.singleJetHLTFilter+
-#    process.HBHENoiseFilter*
-#    process.goodPFJets*
-#    process.EventPFJetFilter*
-#    process.inclusiveVertexing*process.inclusiveMergedVertices*process.selectedVertices*process.bcandidates
-#)
 
 process.filter = cms.Path(
-    #    process.hltLevel1GTSeed *
+    ##process.dump*
+    ##    process.hltLevel1GTSeed *
     process.bit40 *
     process.bptxAnd *
     process.scrapingVeto *
-    #    process.hltPhysicsDeclared *
+    ##    process.hltPhysicsDeclared *
     process.oneGoodVertexFilter*
-    #process.singleJetHLTFilter+
     process.HBHENoiseFilter*
     process.simpleSecondaryVertexHighPurBJetTags*
     process.simpleSecondaryVertexHighEffBJetTags*
-    #process.dump
     process.patDefaultSequence*
     process.goodPFJets*
     process.EventPFJetFilter*
+    process.trackFilter*
     process.inclusiveVertexing*process.inclusiveMergedVertices*process.selectedVertices*process.bcandidates
     
     )
 
 #process.schedule = cms.Schedule(process.filter, process.sv, process.pat)
+process.out = cms.OutputModule("PoolOutputModule",
+                               fileName = cms.untracked.string('reducedPAT.root'),
+                               SelectEvents   = cms.untracked.PSet( SelectEvents = cms.vstring('filter') ),
+                               outputCommands = cms.untracked.vstring('drop *',
+                                                                      'keep *_selectedPatElectrons*_*_*',
+                                                                      'keep *_selectedPatMuons*_*_*',
+                                                                      'keep *_selectedPatJets*_*_*',
+                                                                      'keep *_patMETs*_*_*',
+                                                                      #'keep *_selectedPatPFParticles*_*_*',
+                                                                      "keep *_impactParameterTagInfos*_*_*",
+                                                                      "keep *_secondaryVertexTagInfos_*_*",
+                                                                      # GEN
+                                                                      'keep recoGenParticles_genParticles*_*_*',
+                                                                      'keep GenEventInfoProduct_*_*_*',
+                                                                      'keep GenRunInfoProduct_*_*_*',
+                                                                      # RECO
+                                                                      'keep recoTracks_generalTracks*_*_*',
+                                                                      #'keep *_towerMaker_*_*',
+                                                                      'keep *_offlineBeamSpot_*_*',
+                                                                      'keep *_offlinePrimaryVertices*_*_*',
+                                                                      # TRIGGER
+                                                                      'keep edmTriggerResults_TriggerResults*_*_*',
+                                                                      'keep L1GlobalTriggerReadoutRecord_gtDigis_*_*',
+                                                                      'keep *_hltTriggerSummaryAOD_*_*',
+                                                                      'keep patTriggerAlgorithms_patTrigger_*_*',
+                                                                      'keep patTriggerObjects_patTrigger_*_*',
+                                                                      'keep patTriggerFilters_patTrigger_*_*',
+                                                                      'keep patTriggerPaths_patTrigger_*_*',
+                                                                      'keep patTriggerEvent_patTriggerEvent_*_*',
+                                                                      'keep patTriggerObjectStandAlones_patTrigger_*_*',
+                                                                      'keep *_patTrigger*_*_*',
+                                                                      'keep patTrigger*_patTrigger_*_*',
+                                                                      'keep patTriggerObjectStandAlonesedmAssociation_*_*_*',
+                                                                      'keep *_*TriggerMatch_*_*',
+                                                                      #SV
+                                                                      'keep *_bcandidates_*_*',
+                                                                      'keep *_selectedVertices*_*_*'
+                                                                      )
+                               )
 
 process.outpath = cms.EndPath(process.out)
 
