@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 selectedJetTriggerMatchHLTL1Jet10U = cms.EDProducer(
             "PATTriggerMatcherDRDPtLessByR"                    # match by DeltaR only, best match by DeltaR
-                        , src     = cms.InputTag( 'selectedPatJetsAK5PF' )
+                        , src     = cms.InputTag( 'selectedPatJets' )
                         , matched = cms.InputTag( 'patTrigger' )          # default producer label as defined in PhysicsTools/PatAlgos/python/triggerLayer1/triggerProducer_cfi.py
                         , andOr                      = cms.bool( False )  # AND
                         , filterIdsEnum              = cms.vstring( '*' ) # wildcard, overlaps with 'filterIds'
@@ -22,7 +22,7 @@ selectedJetTriggerMatchHLTL1Jet10U = cms.EDProducer(
 
 selectedJetTriggerMatchHLTL1Jet6U = cms.EDProducer(
                 "PATTriggerMatcherDRDPtLessByR"                    # match by DeltaR only, best match by DeltaR
-                                        , src     = cms.InputTag( 'selectedPatJetsAK5PF' )
+                                        , src     = cms.InputTag( 'selectedPatJets' )
                                         , matched = cms.InputTag( 'patTrigger' )          # default producer label as defined in PhysicsTools/PatAlgos/python/triggerLayer1/triggerProducer_cfi.py
                                         , andOr                      = cms.bool( False )  # AND
                                         , filterIdsEnum              = cms.vstring( '*' ) # wildcard, overlaps with 'filterIds'
@@ -43,7 +43,7 @@ selectedJetTriggerMatchHLTL1Jet6U = cms.EDProducer(
 
 selectedJetTriggerMatchHLTJet15U = cms.EDProducer(
         "PATTriggerMatcherDRDPtLessByR"                    # match by DeltaR only, best match by DeltaR
-            , src     = cms.InputTag( 'selectedPatJetsAK5PF' )
+            , src     = cms.InputTag( 'selectedPatJets' )
             , matched = cms.InputTag( 'patTrigger' )          # default producer label as defined in PhysicsTools/PatAlgos/python/triggerLayer1/triggerProducer_cfi.py
             , andOr                      = cms.bool( False )  # AND
             , filterIdsEnum              = cms.vstring( '*' ) # wildcard, overlaps with 'filterIds'
@@ -63,7 +63,7 @@ selectedJetTriggerMatchHLTJet15U = cms.EDProducer(
 
 selectedJetTriggerMatchHLTJet30U = cms.EDProducer(
         "PATTriggerMatcherDRDPtLessByR"                    # match by DeltaR only, best match by DeltaR
-            , src     = cms.InputTag( 'selectedPatJetsAK5PF' )
+            , src     = cms.InputTag( 'selectedPatJets' )
             , matched = cms.InputTag( 'patTrigger' )          # default producer label as defined in PhysicsTools/PatAlgos/python/triggerLayer1/triggerProducer_cfi.py
             , andOr                      = cms.bool( False )  # AND
             , filterIdsEnum              = cms.vstring( '*' ) # wildcard, overlaps with 'filterIds'
@@ -83,7 +83,7 @@ selectedJetTriggerMatchHLTJet30U = cms.EDProducer(
 
 selectedJetTriggerMatchHLTJet50U = cms.EDProducer(
             "PATTriggerMatcherDRDPtLessByR"                    # match by DeltaR only, best match by DeltaR
-                        , src     = cms.InputTag( 'selectedPatJetsAK5PF' )
+                        , src     = cms.InputTag( 'selectedPatJets' )
                         , matched = cms.InputTag( 'patTrigger' )          # default producer label as defined in PhysicsTools/PatAlgos/python/triggerLayer1/triggerProducer_cfi.py
                         , andOr                      = cms.bool( False )  # AND
                         , filterIdsEnum              = cms.vstring( '*' ) # wildcard, overlaps with 'filterIds'
@@ -103,7 +103,7 @@ selectedJetTriggerMatchHLTJet50U = cms.EDProducer(
 
 selectedJetTriggerMatchHLTJet70U = cms.EDProducer(
             "PATTriggerMatcherDRDPtLessByR"                    # match by DeltaR only, best match by DeltaR
-                        , src     = cms.InputTag( 'selectedPatJetsAK5PF' )
+                        , src     = cms.InputTag( 'selectedPatJets' )
                         , matched = cms.InputTag( 'patTrigger' )          # default producer label as defined in PhysicsTools/PatAlgos/python/triggerLayer1/triggerProducer_cfi.py
                         , andOr                      = cms.bool( False )  # AND
                         , filterIdsEnum              = cms.vstring( '*' ) # wildcard, overlaps with 'filterIds'
@@ -123,7 +123,7 @@ selectedJetTriggerMatchHLTJet70U = cms.EDProducer(
 
 selectedJetTriggerMatchHLTJet100U = cms.EDProducer(
             "PATTriggerMatcherDRDPtLessByR"                    # match by DeltaR only, best match by DeltaR
-                        , src     = cms.InputTag( 'selectedPatJetsAK5PF' )
+                        , src     = cms.InputTag( 'selectedPatJets' )
                         , matched = cms.InputTag( 'patTrigger' )          # default producer label as defined in PhysicsTools/PatAlgos/python/triggerLayer1/triggerProducer_cfi.py
                         , andOr                      = cms.bool( False )  # AND
                         , filterIdsEnum              = cms.vstring( '*' ) # wildcard, overlaps with 'filterIds'

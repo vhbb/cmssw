@@ -2,30 +2,55 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("BCA")
 
+from PhysicsTools.PatAlgos.patTemplate_cfg import *
+from PhysicsTools.PatAlgos.tools.trigTools import *
+
+process.setName_("BCA")
+
+
+#process = cms.Process("BCA")
+
 process.load("FWCore.MessageService.MessageLogger_cfi")
 process.MessageLogger.cerr.threshold = "ERROR"
+process.load("Configuration.StandardSequences.Geometry_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.GlobalTag.globaltag = cms.string('START38_V13::All')
+process.load("Configuration.StandardSequences.MagneticField_cff")
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
     # replace 'myfile.root' with the source file you want to use
     fileNames = cms.untracked.vstring(
-    '/store/user/leo/QCD_Pt30-herwig/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Spring10-START3X_V26-v1/fe983afb43c677d8daa662736af06b64/reducedPATV8b-QCD_Pt30-herwig_Spring10-START3X_V26_S09-v1_9_1_baK.root',
-    '/store/user/leo/QCD_Pt30-herwig/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Spring10-START3X_V26-v1/fe983afb43c677d8daa662736af06b64/reducedPATV8b-QCD_Pt30-herwig_Spring10-START3X_V26_S09-v1_8_1_YFW.root',
-    '/store/user/leo/QCD_Pt30-herwig/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Spring10-START3X_V26-v1/fe983afb43c677d8daa662736af06b64/reducedPATV8b-QCD_Pt30-herwig_Spring10-START3X_V26_S09-v1_7_1_1OC.root',
-    '/store/user/leo/QCD_Pt30-herwig/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Spring10-START3X_V26-v1/fe983afb43c677d8daa662736af06b64/reducedPATV8b-QCD_Pt30-herwig_Spring10-START3X_V26_S09-v1_6_1_H5Q.root'
-    
-    )
+    #'/store/user/leo/JetMETTau/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Run2010A-PromptReco-v4-Runs_139460-139965/0409b26ad4f90c0ce2038da6d13e58f2/reducedPATV8_JetMETTau_Run2010A-PromptReco-v4-Runs_139460-139965_7_1_LHW.root'
+    #'/store/user/leo/QCD_Pt80-herwig/BJetsPatDumpV8b-CMSSW_3_7_0_patch2-Spring10-START3X_V26-v1/fe983afb43c677d8daa662736af06b64/reducedPATV8b-QCD_Pt80-herwig_Spring10-START3X_V26_S09-v1_17_1_Emw.root'
+    #'/store/user/leo/JetMETTau/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Run2010A-PromptReco-v4-Runs_139460-139965/0409b26ad4f90c0ce2038da6d13e58f2/reducedPATV8_JetMETTau_Run2010A-PromptReco-v4-Runs_139460-139965_7_1_LHW.root'
+    #'/store/user/leo/JetMET/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Run2010A-PromptReco-v4_Runs141950-143731-2/95f977e9e64c4e6df50e2f0afa9a2a31/reducedPAT_30_2_KE8.root'
+    'file:/shome/leo/Installations/CMSSW_3_8_6/src/Pattuplizer/reducedPAT.root'
+)
                             
 )
+
+
+#process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1011")
+#process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1011")
+process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
+process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
+
+process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
+#to be removed
+process.ak5PFL2Relative.useCondDB = False
+process.ak5PFL3Absolute.useCondDB = False
+process.ak5PFResidual.useCondDB = False
+process.ak5CaloL2Relative.useCondDB = False
+process.ak5CaloL3Absolute.useCondDB = False
+process.ak5CaloResidual.useCondDB = False
+
 
 process.options = cms.untracked.PSet(
     SkipEvent = cms.untracked.vstring('ProductNotFound'),
     wantSummary = cms.untracked.bool(True)
     )
-
-process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDBMC36X")
-process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
 
 
 process.TFileService = cms.Service("TFileService",
@@ -33,7 +58,7 @@ process.TFileService = cms.Service("TFileService",
 )
 
 process.bhadrons = cms.EDProducer('MCBHadronProducer',
-                                      quarkId = cms.uint32(5)
+                                  quarkId = cms.uint32(5)
                                   )
 
 process.bcandidates = cms.EDProducer('BCandidateProducer',
@@ -56,28 +81,18 @@ process.bcanalyzer = cms.EDAnalyzer('BCorrAnalyzer',
                                     minInvM = cms.untracked.double(1.4),
                                     mindistSig3D = cms.untracked.double(5.0),
                                     maxEtaVertex = cms.untracked.double(2.0),
-                                    BCorrMethod = cms.untracked.string("MC"),
                                     
                                     #Jet analysis
                                     JetCollection      = cms.untracked.InputTag("selectedPatJets"),
                                     GenJetCollection      = cms.untracked.InputTag("ak5GenJets"),
-                                    PFJetCollection      = cms.untracked.InputTag("selectedPatJetsAK5PF"),
+                                    PFJetCollection      = cms.untracked.InputTag("selectedPatJets"),
+
+                                    BCorrMethod = cms.untracked.string("MC"),
                                     
                                     isData       = cms.untracked.int32(0),
-                                    CaloJetSelection_minPt = cms.untracked.double(10),
-                                    CaloJetSelection_maxEta = cms.untracked.double(5),
-                                    CaloJetSelection_EMF = cms.untracked.double(0.01),
-                                    CaloJetSelection_fHPD = cms.untracked.double(0.98),
-                                    CaloJetSelection_n90Hits = cms.untracked.double(1),
-                                    
+
                                     PFJetSelection_minPt = cms.untracked.double(8),
                                     PFJetSelection_maxEta= cms.untracked.double(5),
-                                    PFJetSelection_NHF= cms.untracked.double(1),
-                                    PFJetSelection_NEF= cms.untracked.double(1),
-                                    PFJetSelection_CEF= cms.untracked.double(1),
-                                    PFJetSelection_CHF= cms.untracked.double(0.0),
-                                    PFJetSelection_CM= cms.untracked.double(0.0),
-                                    PFJetSelection_NCONST= cms.untracked.double(1),
                                     
                                     BTag_tchel = cms.untracked.double(1.9),
                                     BTag_tchem = cms.untracked.double(3.99),
@@ -85,7 +100,6 @@ process.bcanalyzer = cms.EDAnalyzer('BCorrAnalyzer',
                                     BTag_tchpt = cms.untracked.double(4.31),
                                     BTag_ssvhem = cms.untracked.double(2.02),
                                     BTag_ssvhet = cms.untracked.double(3.4),
-                                    BTag_ssvhp = cms.untracked.double(2.),
                                     BTag_ssvhpt = cms.untracked.double(2.),
                                     
                                     jetID = cms.PSet(useRecHits = cms.bool(True),
@@ -99,6 +113,17 @@ process.bcanalyzer = cms.EDAnalyzer('BCorrAnalyzer',
                                     )
 
 
-process.p = cms.Path(process.bhadrons * process.bcandidates * process.bcanalyzer)
+
+process.dump=cms.EDAnalyzer('EventContentAnalyzer')
+
+process.p = cms.Path(  #process.matchPATPF*
+                       #process.matchPATCALO*
+                       #process.selectedJetTriggerMatchHLTJet15U*
+                       #process.selectedJetTriggerMatchHLTJet30U*
+                       # patTriggerEvent*
+    process.bhadrons *process.bcandidates *
+    #process.dump
+    process.bcanalyzer
+    )
 
 
