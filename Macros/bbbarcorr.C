@@ -36,9 +36,12 @@ float BJET_ETA = 2;
 float JET1_ETA = 3;
 float JET_PT = BJET_PT;
 float JET_ETA = 2;
+//Bhads
+float BHAD_ETA = 2;
+float BHAD_PT = 15;
 //Bcands
 float BCAND_ETA = 2;
-float BCAND_PT = 15;
+float BCAND_PT = 8;
 
 //btag cuts
 string BALGO = "ssvhp";
@@ -110,7 +113,7 @@ string lab_fl[] = {"2b","1b1c","1b1l","1b1o",
 	       "1c1c","1c1l","1c1o",
 	       "1l1l","1l1o",
 	       "2o"};
-string lab_eff[] = {"efficnum","efficden","puritynum","purityden"};
+string lab_eff[] = {"efficnum","efficden","puritynum","puritydenNONBB","puritydenBB"};
 string lab_cat[] = {"cat2bmat","cat2bnotmat","cat2bnotkin","cat0b","catmanyb","catnocat"};
 string lab_proc[] = {"fcr","fex","gsp","otherproc"};
 
@@ -219,6 +222,8 @@ void analyze(string SET="Data", string HLT="HLT_Jet15U", int SET_n=-1){
 
       //checking for leading jet
       if( varIntArr["Jet_IDLoose"][0]!=1) continue;
+
+      //TO COMPARE WITH PLOTS IN PAS: NO ETA CUT ON LEADING JET
       if( fabs(  varFloatArr["Jet_eta"][0]) > JET1_ETA) continue;
 
       //ljet hlt plot
@@ -313,7 +318,7 @@ int analyzeJetEvent(event thisEv, string SET, double W){
   //jet-MC Bhadr eff
     if( thisEv.nB==2 ) {
       //BHadron - BJet eff: matching
-      if(thisEv.ptB1>BCAND_PT && thisEv.ptB2>BCAND_PT && fabs(thisEv.etaB1)<BCAND_ETA && fabs(thisEv.etaB2)<BCAND_ETA){
+      if(thisEv.ptB1>BHAD_PT && thisEv.ptB2>BHAD_PT && fabs(thisEv.etaB1)<BHAD_ETA && fabs(thisEv.etaB2)<BHAD_ETA){
 	if(bestBH1_dR < measure){
 	  histos["BHadr_BHadrJetMatched_pt"]->Fill(thisEv.ptB1,W);
 	  histos["BHadr_BHadrJetMatched_eta"]->Fill(thisEv.etaB1,W);
@@ -459,16 +464,25 @@ int analyzeIVFEvent(event thisEv, string SET, double W){
   //selecting events with only 2 b ??? Lukas, is this necessary?
   //yes, we want to have events with exactly two B since otherwise 
   //it is not clear which are the B's produced in same process
-  if( thisEv.nV!=2 ) return 1;
+
+  //////////////
+  //NO! THERE ARE HISTOS WITH ONLY B OR ONLY VERTICES REQUIRED!!!
+//   if( thisEv.nV!=2 ) return 1;
   
-  if(SET!="Data" && thisEv.nB!=2) return 1;
-  if(SET!="Data" && fabs(thisEv.etaB1)>=BCAND_ETA && fabs(thisEv.etaB2)>=BCAND_ETA) return 1;
+//   if(SET!="Data" && thisEv.nB!=2) return 1;
+//   if(SET!="Data" && fabs(thisEv.etaB1)>=BHAD_ETA && fabs(thisEv.etaB2)>=BHAD_ETA) return 1;
+  //////////////
+
+  //not 2V AND not 2B -->skip event
+  if(thisEv.nB!=2 && thisEv.nV!=2) return 1; 
+
   histos["bVert_N"]->Fill(thisEv.nV, W);
 
   int flavCat = -1, matCat=-1; 
-  if(thisEv.dRvv>-700 && fabs(thisEv.etaV1)<BCAND_ETA && fabs(thisEv.etaV2)<BCAND_ETA){
+//   if(thisEv.dRvv>-700 && fabs(thisEv.etaV1)<BCAND_ETA && fabs(thisEv.etaV2)<BCAND_ETA){
+  if(thisEv.dRvv>-700){
     //mass sum cut
-    if((thisEv.massV1 + thisEv.massV2) > 4.5){
+    if((thisEv.massV1 + thisEv.massV2) > 4.5 && thisEv.ptV1>BCAND_PT && thisEv.ptV2>BCAND_PT){//ADD PT CUT ON VERTEX HERE and/or ETA CUT ON VERTEX
       histos["Vert_dR_2b"]->Fill(thisEv.dRvv,W);
       histos2D["Vert_dRvsJet1pt_2b"]->Fill(thisEv.dRvv,varFloatArr["Jet_pt"][ 0],W);
 
@@ -481,18 +495,21 @@ int analyzeIVFEvent(event thisEv, string SET, double W){
       
       //corrected plots
       if(hcorrIVF!=0){
-	double weight = hcorrIVF->GetBinContent((int)((thisEv.dRvv-xMin_IVFCorr)/binW_IVFCorr+1.)); 
+// 	double weight = hcorrIVF->GetBinContent((int)((thisEv.dRvv-xMin_IVFCorr)/binW_IVFCorr+1.)); 
+	double weight = hcorrIVF->GetBinContent(hcorrIVF->FindBin(thisEv.dRvv)); 
+
 	histos["Vert_dR_2b_CORR"]->Fill(thisEv.dRvv,W*weight);
 	histos2D["Vert_dRvsJet1pt_2b_CORR"]->Fill(thisEv.dRvv,varFloatArr["Jet_pt"][ 0],W*weight);
 
 	histos["Vert_dPhi_2b_CORR"]->Fill(fabs(thisEv.dPhivv),W*weight);
 	histos["Vert_dEta_2b_CORR"]->Fill(fabs(thisEv.dEtavv),W*weight);
 
-	double weightError = hcorrIVF->GetBinError((int)((thisEv.dRvv-xMin_IVFCorr)/binW_IVFCorr+1.) )/weight;
-	double we2 = weightError*weightError;
-	histos["Vert_dR_2b_ErrCORR"]->Fill(thisEv.dRvv,we2);
-	histos["Vert_dEta_2b_ErrCORR"]->Fill(thisEv.dEtavv,we2);
-        histos["Vert_dPhi_2b_ErrCORR"]->Fill(thisEv.dPhivv,we2);
+// 	double weightError = hcorrIVF->GetBinError((int)((thisEv.dRvv-xMin_IVFCorr)/binW_IVFCorr+1.) )/weight;
+	double weightError = hcorrIVF->GetBinError(hcorrIVF->FindBin(thisEv.dRvv));
+// 	double we2 = weightError*weightError; //-->Add the errors linearly due to correlation
+	histos["Vert_dR_2b_ErrCORR"]->Fill(thisEv.dRvv,weightError);
+	histos["Vert_dEta_2b_ErrCORR"]->Fill(thisEv.dEtavv,weightError);
+        histos["Vert_dPhi_2b_ErrCORR"]->Fill(thisEv.dPhivv,weightError);
 
 
       }
@@ -517,7 +534,7 @@ int analyzeIVFEvent(event thisEv, string SET, double W){
 	string myCat="catnotcat"; 
 	if(thisEv.nB==2){
 	  //B kinematics
-	  if(thisEv.ptB1>BCAND_PT && thisEv.ptB2>BCAND_PT && fabs(thisEv.etaB1)<BCAND_ETA && fabs(thisEv.etaB2)<BCAND_ETA){
+	  if(thisEv.ptB1>BHAD_PT && thisEv.ptB2>BHAD_PT && fabs(thisEv.etaB1)<BHAD_ETA && fabs(thisEv.etaB2)<BHAD_ETA){
 	    if(thisEv.nMat==2){ myCat="cat2bmat"; matCat=0;}
 	    else { myCat="cat2bnotmat"; matCat=1;}
 	  }
@@ -539,36 +556,46 @@ int analyzeIVFEvent(event thisEv, string SET, double W){
 	histos["Vert_dR_2b_"+myProc]->Fill(thisEv.dRvv,W);
 	histos["Vert_dPhi_2b_"+myProc]->Fill(thisEv.dPhivv,W);
 	histos["Vert_dEta_2b_"+myProc]->Fill(thisEv.dEtavv,W);
-
+      }
       
       //V kinematics
-      if(thisEv.ptV1>8 && thisEv.ptV2>8){
-	histos["Vert_dR_purityden"]->Fill(thisEv.dRvv,W);
-	histos["Vert_dPhi_purityden"]->Fill(fabs(thisEv.dPhivv),W);
-	histos["Vert_dEta_purityden"]->Fill(fabs(thisEv.dEtavv),W);
-	
+      if(thisEv.ptV1>BCAND_PT && thisEv.ptV2>BCAND_PT){
+	if(thisEv.nB==0){
+	  histos["Vert_dR_puritydenNONBB"]->Fill(thisEv.dRvv,W);
+	  histos["Vert_dPhi_puritydenNONBB"]->Fill(fabs(thisEv.dPhivv),W);
+	  histos["Vert_dEta_puritydenNONBB"]->Fill(fabs(thisEv.dEtavv),W);
+	}
+	else{
+	  histos["Vert_dR_puritydenBB"]->Fill(thisEv.dRvv,W);
+	  histos["Vert_dPhi_puritydenBB"]->Fill(fabs(thisEv.dPhivv),W);
+	  histos["Vert_dEta_puritydenBB"]->Fill(fabs(thisEv.dEtavv),W);
+	}
+
 	//2B
 	if(thisEv.nB==2){
 	  //B kinematics
-	  if(thisEv.ptB1>BCAND_PT && thisEv.ptB2>BCAND_PT && fabs(thisEv.etaB1)<BCAND_ETA && fabs(thisEv.etaB2)<BCAND_ETA){
-	    histos["Vert_dR_efficnum"]->Fill(thisEv.dRbb,W);
-	    histos["Vert_dR_puritynum"]->Fill(thisEv.dRbb,W);
-	    histos["Vert_dPhi_efficnum"]->Fill(fabs(thisEv.dPhibb),W);
-	    histos["Vert_dPhi_puritynum"]->Fill(fabs(thisEv.dPhibb),W);
-	    histos["Vert_dEta_efficnum"]->Fill(fabs(thisEv.dEtabb),W);
-	    histos["Vert_dEta_puritynum"]->Fill(fabs(thisEv.dEtabb),W);
+	  if(thisEv.ptB1>BHAD_PT && thisEv.ptB2>BHAD_PT && fabs(thisEv.etaB1)<BHAD_ETA && fabs(thisEv.etaB2)<BHAD_ETA){
+	    if(thisEv.nMat==2){
+	      histos["Vert_dR_efficnum"]->Fill(thisEv.dRbb,W);
+	      histos["Vert_dR_puritynum"]->Fill(thisEv.dRbb,W);
+	      histos["Vert_dPhi_efficnum"]->Fill(fabs(thisEv.dPhibb),W);
+	      histos["Vert_dPhi_puritynum"]->Fill(fabs(thisEv.dPhibb),W);
+	      histos["Vert_dEta_efficnum"]->Fill(fabs(thisEv.dEtabb),W);
+	      histos["Vert_dEta_puritynum"]->Fill(fabs(thisEv.dEtabb),W);
+	    }
 	  }
 	}
       }
+      
 
-      if(flavCat!=-1 && matCat!=-1)
-	histos2D["Vert_flavCat_vs_matCat"]->Fill(flavCat,matCat,W);
-      }
-    }
-  }
+//       if(flavCat!=-1 && matCat!=-1)
+// 	histos2D["Vert_flavCat_vs_matCat"]->Fill(flavCat,matCat,W);
+//       }
+    }//end mass sum and pt cut
+  }//end if dRvv>-777 --> 2 vertex
   
   //2B, Bkinematics
-  if(thisEv.nB==2 && thisEv.ptB1>BCAND_PT && thisEv.ptB2>BCAND_PT && fabs(thisEv.etaB1)<BCAND_ETA && fabs(thisEv.etaB2)<BCAND_ETA) {
+  if(thisEv.nB==2 && thisEv.ptB1>BHAD_PT && thisEv.ptB2>BHAD_PT && fabs(thisEv.etaB1)<BHAD_ETA && fabs(thisEv.etaB2)<BHAD_ETA) {
     histos["Vert_dR_efficden"]->Fill(thisEv.dRbb,W);
     histos["Vert_dPhi_efficden"]->Fill(fabs(thisEv.dPhibb),W);
     histos["Vert_dEta_efficden"]->Fill(fabs(thisEv.dEtabb),W);
@@ -938,7 +965,10 @@ void setTrigger(string HLT){
   else if(HLT=="HLT_Jet50UOpen"){ jet1_minPt =120;  jet1_maxPt =10000000; jet1_minPt_lab ="120";  jet1_maxPt_lab ="";}
 
 
-
+//   /////////////////////////////
+//   //TEMP: 
+//   jet1_maxPt =10000000; 
+//   ////////////////////////////////
 }
 
 
