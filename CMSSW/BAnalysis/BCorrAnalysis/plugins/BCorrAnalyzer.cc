@@ -13,7 +13,7 @@
 //
 // Original Author:  Lukas Wehrli (IPP/ETHZ) [wehrlilu]
 //         Created:  Wed May 26 10:41:33 CEST 2010
-// $Id: BCorrAnalyzer.cc,v 1.5 2010/11/18 14:16:35 wehrlilu Exp $
+// $Id: BCorrAnalyzer.cc,v 1.6 2010/11/19 11:44:28 wehrlilu Exp $
 //
 //
 
@@ -132,6 +132,7 @@ struct bcandid{
   int jet30; 
   int jet50; 
   int jet70; 
+  int jet100; 
   int process; //see event
   int eventProcId;
   bool selected; 
@@ -200,6 +201,7 @@ struct event{
   int jet30; 
   int jet50; 
   int jet70; 
+  int jet100; 
   int nposIPverttracks;
   int nnegIPverttracks;
 };
@@ -563,8 +565,8 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    bool wantTable = false; 
 
    edm::TriggerNames const&  triggerNames = iEvent.triggerNames(*hltTR);
-   int number6 = 777, number10 = 777, number10nobptx = 777, number15hcalnf = 777, number15 = 777, number30 = 777, number50 = 777, number70 = 777; 
-   unsigned int b6 = 0, b10 = 0, b10nobptx = 0, b15hcalnf = 0, b15 = 0, b30 = 0, b50 = 0, b70 = 0; 
+   int number6 = 777, number10 = 777, number10nobptx = 777, number15hcalnf = 777, number15 = 777, number30 = 777, number50 = 777, number70 = 777, number100 = 777; 
+   unsigned int b6 = 0, b10 = 0, b10nobptx = 0, b15hcalnf = 0, b15 = 0, b30 = 0, b50 = 0, b70 = 0, b100 = 0; 
 
    for (unsigned i = 0; i < triggerNames.size(); ++i) {
      std::string trigName = triggerNames.triggerName(i);
@@ -579,6 +581,7 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      if(trigName=="HLT_Jet30U") number30 = i;
      if(trigName=="HLT_Jet50U") number50 = i;
      if(trigName=="HLT_Jet70U") number70 = i;
+     if(trigName=="HLT_Jet100U") number100 = i;
 
      if(wantTable){
        std::cout << i << " " << triggerNames.triggerName(i) << " status: " << hltTR->accept(i) << std::endl;
@@ -620,6 +623,8 @@ for(map<string,int>::iterator hlt=varTrigger.begin(); hlt!=varTrigger.end(); hlt
    else if(hltTR->accept(number50)) b50 = 1; 
    if(number70==777) b70 = 2;
    else if(hltTR->accept(number70)) b70 = 1;
+   if(number100==777) b100 = 2;
+   else if(hltTR->accept(number100)) b100 = 1;
 
 
    //------------------Primary Vertices-----------------------
@@ -1194,6 +1199,7 @@ for(map<string,int>::iterator hlt=varTrigger.begin(); hlt!=varTrigger.end(); hlt
    sevents.jet30 = b30; 
    sevents.jet50 = b50; 
    sevents.jet70 = b70; 
+   sevents.jet100 = b100; 
    sevents.nposIPverttracks = nposIP;
    sevents.nnegIPverttracks = nnegIP;
 
@@ -1310,6 +1316,7 @@ for(map<string,int>::iterator hlt=varTrigger.begin(); hlt!=varTrigger.end(); hlt
      sbcands.jet30 = b30; 
      sbcands.jet50 = b50;
      sbcands.jet70 = b70;
+     sbcands.jet100 = b100;
      sbcands.process = proc1;
      sbcands.eventProcId = eventProcId;
      tBCands->Fill();
@@ -1566,7 +1573,7 @@ BCorrAnalyzer::beginJob()
   //TFileDirectory sdtBCands = fs_->mkdir("tbcandidates","tree for bcandidates");
 
   tEvents = /*(&sdtEvents)*/ fs_->make<TTree>("tEvents","event properties");
-  tEvents->Branch("BEvents", &sevents.nB, "nB/I:nV/I:nMat/I:process/I:eventProcId/I:dRvv/F:dEtavv/F:dPhivv/F:dRbb/F:dEtabb/F:dPhibb/F:massV1/F:massV2/F:massV3/F:ptV1/F:ptV2/F:ptV3/F:etaV1/F:etaV2/F:etaV3/F:phiV1/F:phiV2/F:phiV3/F:dist3D1/F:dist3D2/F:dist3D3/F:distSig3D1/F:distSig3D2/F:distSig3D3/F:dist2D1/F:dist2D2/F:dist2D3/F:distSig2D1/F:distSig2D2/F:distSig2D3/F:massB1/F:massB2/F:ptB1/F:ptB2/F:etaB1/F:etaB2/F:phiB1/F:phiB2/F:ptHardestGJ/F:ptHardestPJ/F:ptHardestPGJ/F:etaHardestGJ/F:etaHardestPJ/F:etaHardestPGJ/F:eventNo/F:runNo/F:pthat/F:flavors/I:jet6/I:jet10/I:jet10nobptx/I:jet15/I:jet15hcalnf/I:jet30/I:jet50/I:jet70/I:nposIPverttracks/I:nnegIPverttracks/I", 128000);
+  tEvents->Branch("BEvents", &sevents.nB, "nB/I:nV/I:nMat/I:process/I:eventProcId/I:dRvv/F:dEtavv/F:dPhivv/F:dRbb/F:dEtabb/F:dPhibb/F:massV1/F:massV2/F:massV3/F:ptV1/F:ptV2/F:ptV3/F:etaV1/F:etaV2/F:etaV3/F:phiV1/F:phiV2/F:phiV3/F:dist3D1/F:dist3D2/F:dist3D3/F:distSig3D1/F:distSig3D2/F:distSig3D3/F:dist2D1/F:dist2D2/F:dist2D3/F:distSig2D1/F:distSig2D2/F:distSig2D3/F:massB1/F:massB2/F:ptB1/F:ptB2/F:etaB1/F:etaB2/F:phiB1/F:phiB2/F:ptHardestGJ/F:ptHardestPJ/F:ptHardestPGJ/F:etaHardestGJ/F:etaHardestPJ/F:etaHardestPGJ/F:eventNo/F:runNo/F:pthat/F:flavors/I:jet6/I:jet10/I:jet10nobptx/I:jet15/I:jet15hcalnf/I:jet30/I:jet50/I:jet70/I:jet100/I:nposIPverttracks/I:nnegIPverttracks/I", 128000);
 
 
   //run info
@@ -1685,7 +1692,7 @@ BCorrAnalyzer::beginJob()
 
 
   tBCands = /*(&sdtBCands)*/ fs_->make<TTree>("tBCands","bcandidate properties");
-  tBCands->Branch("BCands", &sbcands.massBcand, "massBcand/F:massVert/F:gamma/F:pt/F:eta/F:phi/F:dist3D/F:distSig3D/F:dist2D/F:distSig2D/F:dist3D_norm/F:eventNo/F:runNo/F:pthat/F:ptHardestPJ/F:etaHardestPJ/F:nvert/I:nSelected/I:ndRmatched/I:flavor/I:jet6/I:jet10/I:jet10nobptx/I:jet15/I:jet15hcalnf/I:jet30/I:jet50/I:jet70/I:process/I:eventProcId/I:selected/O:dRmatched/O", 128000);
+  tBCands->Branch("BCands", &sbcands.massBcand, "massBcand/F:massVert/F:gamma/F:pt/F:eta/F:phi/F:dist3D/F:distSig3D/F:dist2D/F:distSig2D/F:dist3D_norm/F:eventNo/F:runNo/F:pthat/F:ptHardestPJ/F:etaHardestPJ/F:nvert/I:nSelected/I:ndRmatched/I:flavor/I:jet6/I:jet10/I:jet10nobptx/I:jet15/I:jet15hcalnf/I:jet30/I:jet50/I:jet70/I:jet100/I:process/I:eventProcId/I:selected/O:dRmatched/O", 128000);
 
 
   hdR = /*(&sdpEvents)*/fs_->make<TH1F>("ivf_hdR","hdR",20,0,10);
