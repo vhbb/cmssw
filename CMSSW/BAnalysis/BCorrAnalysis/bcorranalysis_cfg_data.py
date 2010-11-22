@@ -26,7 +26,7 @@ process.source = cms.Source("PoolSource",
     #'/store/user/leo/QCD_Pt80-herwig/BJetsPatDumpV8b-CMSSW_3_7_0_patch2-Spring10-START3X_V26-v1/fe983afb43c677d8daa662736af06b64/reducedPATV8b-QCD_Pt80-herwig_Spring10-START3X_V26_S09-v1_17_1_Emw.root'
     #'/store/user/leo/JetMETTau/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Run2010A-PromptReco-v4-Runs_139460-139965/0409b26ad4f90c0ce2038da6d13e58f2/reducedPATV8_JetMETTau_Run2010A-PromptReco-v4-Runs_139460-139965_7_1_LHW.root'
     #'/store/user/leo/JetMET/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Run2010A-PromptReco-v4_Runs141950-143731-2/95f977e9e64c4e6df50e2f0afa9a2a31/reducedPAT_30_2_KE8.root'
-    'file:/shome/leo/Installations/CMSSW_3_8_6/src/Pattuplizer/reducedPAT.root'
+    'file:/shome/leo/Installations/Tests/CMSSW_3_8_6/src/Pattuplizer/reducedPAT.root'
 )
                             
 )
@@ -39,12 +39,12 @@ process.load ("RecoBTag.PerformanceDB.BTagPerformanceDBMC36X")
 
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 #to be removed
-process.ak5PFL2Relative.useCondDB = False
-process.ak5PFL3Absolute.useCondDB = False
-process.ak5PFResidual.useCondDB = False
-process.ak5CaloL2Relative.useCondDB = False
-process.ak5CaloL3Absolute.useCondDB = False
-process.ak5CaloResidual.useCondDB = False
+#process.ak5PFL2Relative.useCondDB = False
+#process.ak5PFL3Absolute.useCondDB = False
+#process.ak5PFResidual.useCondDB = False
+#process.ak5CaloL2Relative.useCondDB = False
+#process.ak5CaloL3Absolute.useCondDB = False
+#process.ak5CaloResidual.useCondDB = False
 
 
 process.options = cms.untracked.PSet(
@@ -82,7 +82,7 @@ process.bcanalyzer = cms.EDAnalyzer('BCorrAnalyzer',
                                     JetCollection      = cms.untracked.InputTag("selectedPatJets"),
                                     GenJetCollection      = cms.untracked.InputTag("ak5GenJets"),
                                     PFJetCollection      = cms.untracked.InputTag("selectedPatJets"),
-
+                                    
                                     BCorrMethod = cms.untracked.string("MC"),
                                     
                                     isData       = cms.untracked.int32(1),

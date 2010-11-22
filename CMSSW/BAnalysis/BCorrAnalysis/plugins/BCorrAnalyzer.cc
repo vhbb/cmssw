@@ -13,7 +13,7 @@
 //
 // Original Author:  Lukas Wehrli (IPP/ETHZ) [wehrlilu]
 //         Created:  Wed May 26 10:41:33 CEST 2010
-// $Id: BCorrAnalyzer.cc,v 1.7 2010/11/22 07:48:54 wehrlilu Exp $
+// $Id: BCorrAnalyzer.cc,v 1.8 2010/11/22 13:18:34 leo Exp $
 //
 //
 
@@ -55,6 +55,7 @@
 #include "DataFormats/BTauReco/interface/JetTag.h"
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 #include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
+#include "JetMETCorrections/Objects/interface/JetCorrector.h"
 
 //Trigger headers
 #include "FWCore/Common/interface/TriggerNames.h"
@@ -249,11 +250,8 @@ class BCorrAnalyzer : public edm::EDAnalyzer {
       bcandid sbcands; 
       edm::InputTag vertexsrc_, simbsrc_, offlinePrimaryVertices_, trigressrc_;
 
-<<<<<<< BCorrAnalyzer.cc
   double minInvMass, distSig3Dmin, maxEtaVertex, minPtVertex;
-=======
-      double minInvMass, distSig3Dmin, maxEtaVertex, minPtVertex;
->>>>>>> 1.7
+  
       TH1F *hdR, *hdEta, *hdPhi; 
 
       float count[8][8][8][8][8][8]; 
@@ -333,6 +331,7 @@ class BCorrAnalyzer : public edm::EDAnalyzer {
   vector<JetCorrectorParameters> vParamPF;
   FactorizedJetCorrector *JECPF;
 
+
 };
 
 BCorrAnalyzer::BCorrAnalyzer(const edm::ParameterSet& iConfig):
@@ -342,14 +341,9 @@ BCorrAnalyzer::BCorrAnalyzer(const edm::ParameterSet& iConfig):
   trigressrc_(iConfig.getParameter<edm::InputTag>("trigressrc")),
   minInvMass(iConfig.getUntrackedParameter<double>("minInvM",1.4)),
   distSig3Dmin(iConfig.getUntrackedParameter<double>("mindistSig3D",5.0)),
-<<<<<<< BCorrAnalyzer.cc
-  maxEtaVertex(iConfig.getUntrackedParameter<double>("maxEtaVertex",2.0)),
-  minPtVertex(iConfig.getUntrackedParameter<double>("minPtVertex",8.0))
-=======
   maxEtaVertex(iConfig.getUntrackedParameter<double>("maxEtaVertex",2.0)),
   minPtVertex(iConfig.getUntrackedParameter<double>("minPtVertex",8.0))
 
->>>>>>> 1.7
 {
   triggerPaths.push_back("HLT_L1_BscMinBiasOR_BptxPlusORMinus");
   triggerPaths.push_back("HLT_L1_BscMinBiasOR_BptxPlusORMinus_NoBPTX");
@@ -538,13 +532,8 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    bool wantTable = false; 
 
    edm::TriggerNames const&  triggerNames = iEvent.triggerNames(*hltTR);
-<<<<<<< BCorrAnalyzer.cc
-   int number6 = 777, number10 = 777, number10nobptx = 777, number15hcalnf = 777, number15 = 777, number30 = 777, number50 = 777, number70=777, number100=777; 
-   unsigned int b6 = 0, b10 = 0, b10nobptx = 0, b15hcalnf = 0, b15 = 0, b30 = 0, b50 = 0, b70=0, b100=0; 
-=======
    int number6 = 777, number10 = 777, number10nobptx = 777, number15hcalnf = 777, number15 = 777, number30 = 777, number50 = 777, number70 = 777, number100 = 777; 
    unsigned int b6 = 0, b10 = 0, b10nobptx = 0, b15hcalnf = 0, b15 = 0, b30 = 0, b50 = 0, b70 = 0, b100 = 0; 
->>>>>>> 1.7
 
    for (unsigned i = 0; i < triggerNames.size(); ++i) {
      std::string trigName = triggerNames.triggerName(i);
@@ -558,14 +547,8 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      if(trigName=="HLT_Jet15U") number15 = i;
      if(trigName=="HLT_Jet30U") number30 = i;
      if(trigName=="HLT_Jet50U") number50 = i;
-<<<<<<< BCorrAnalyzer.cc
      if(trigName=="HLT_Jet70U") number70 = i;
      if(trigName=="HLT_Jet100U") number100 = i;
-
-=======
-     if(trigName=="HLT_Jet70U") number70 = i;
-     if(trigName=="HLT_Jet100U") number100 = i;
->>>>>>> 1.7
 
      if(wantTable){
        std::cout << i << " " << triggerNames.triggerName(i) << " status: " << hltTR->accept(i) << std::endl;
@@ -605,18 +588,10 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    else if(hltTR->accept(number30)) b30 = 1; 
    if(number50==777) b50 = 2; 
    else if(hltTR->accept(number50)) b50 = 1; 
-<<<<<<< BCorrAnalyzer.cc
    if(number70==777) b70 = 2;
    else if(hltTR->accept(number70)) b70 = 1;
    if(number100==777) b100 = 2;
    else if(hltTR->accept(number100)) b100 = 1;
-=======
-   if(number70==777) b70 = 2;
-   else if(hltTR->accept(number70)) b70 = 1;
-   if(number100==777) b100 = 2;
-   else if(hltTR->accept(number100)) b100 = 1;
-
->>>>>>> 1.7
 
    //------------------Primary Vertices-----------------------
    edm::Handle<reco::VertexCollection> primaryVertexCollection;
@@ -677,6 +652,7 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    PFJetIDSelectionFunctor jetIDTight( PFJetIDSelectionFunctor::FIRSTDATA, PFJetIDSelectionFunctor::TIGHT );
    pat::strbitset retTight = jetIDTight.getBitTemplate();
+
 
    for(pat::JetCollection::const_iterator jet=pfjets->begin(); jet!=pfjets->end(); ++jet){
      double jetPt=jet->pt(); double jetEta=jet->eta();
@@ -851,7 +827,6 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      Handle<reco::TrackIPTagInfoCollection> TIPTIC;
      iEvent.getByLabel("impactParameterTagInfos", TIPTIC);
      const reco::TrackIPTagInfoCollection iptic = *(TIPTIC.product());
-     std::cout << "Size of iptic " << iptic.size() << std::endl;
      
      //      //loop over jets
      //      for(unsigned int j=0; j<iptic.size(); j++){
@@ -870,18 +845,12 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      for(unsigned int v=0; v<svc.size(); v++){
        //std::cout << "vertex " << v << std::endl;
        //find dR to jets:
-<<<<<<< BCorrAnalyzer.cc
-       Vertex rv = svc[v];
-       GlobalVector fldir = flightDirection(pv,rv);
-       unsigned int matJet = 777;
-       double minDR = 10.0;
-=======
        Vertex rv = svc[v]; 
        GlobalVector fldir = flightDirection(pv,rv); 
        unsigned int matJet = 777; 
        double minDR = 10.0; 
 
->>>>>>> 1.7
+
        for(unsigned int j=0; j<iptic.size(); j++){
 	 GlobalVector axis = iptic[j].axis();
 	 double dR = deltaR(fldir,axis);
@@ -890,21 +859,14 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	   matJet = j;
 	 }
        }
-<<<<<<< BCorrAnalyzer.cc
-       //if(matJet==777) std::cout << "NO JET!!!\n";
-       //        std::cout << "MATCHING JET: " << matJet << "\n";
-       const edm::RefVector<TrackCollection> tracks = iptic[matJet].selectedTracks();
-       const std::vector<TrackIPTagInfo::TrackIPData> ipdatas = iptic[matJet].impactParameterData();
-       
-       unsigned int nvtr=0;
-=======
+
        //if(matJet==777) std::cout << "NO JET!!!\n";
 //        std::cout << "MATCHING JET: " << matJet << "\n";
        const edm::RefVector<TrackCollection> tracks = iptic[matJet].selectedTracks(); 
        const std::vector<TrackIPTagInfo::TrackIPData> ipdatas = iptic[matJet].impactParameterData(); 
 
        unsigned int nvtr=0; 
->>>>>>> 1.7
+
        //loop over tracks in vertex
        for(Vertex::trackRef_iterator it=svc[v].tracks_begin(); it!=svc[v].tracks_end(); it++, nvtr++){
 	 double vtrpt = (*it)->pt();
