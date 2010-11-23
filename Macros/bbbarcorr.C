@@ -223,7 +223,6 @@ void analyze(string SET="Data", string HLT="HLT_Jet15U", int SET_n=-1){
       //checking for leading jet
       if( varIntArr["Jet_IDLoose"][0]!=1) continue;
 
-      //TO COMPARE WITH PLOTS IN PAS: NO ETA CUT ON LEADING JET
       if( fabs(  varFloatArr["Jet_eta"][0]) > JET1_ETA) continue;
 
       //ljet hlt plot
@@ -476,6 +475,7 @@ int analyzeIVFEvent(event thisEv, string SET, double W){
   //not 2V AND not 2B -->skip event
   if(thisEv.nB!=2 && thisEv.nV!=2) return 1; 
 
+
   histos["bVert_N"]->Fill(thisEv.nV, W);
 
   int flavCat = -1, matCat=-1; 
@@ -492,7 +492,7 @@ int analyzeIVFEvent(event thisEv, string SET, double W){
       histos["Vert_dRingoodEv"]->Fill(thisEv.eventNo, thisEv.dRvv*W); //for Lukas: is this a TH1F or a TH2F?
       histos["Vert_pt_selvert"]->Fill(thisEv.ptV1,W); 
       histos["Vert_pt_selvert"]->Fill(thisEv.ptV2,W); 
-      
+
       //corrected plots
       if(hcorrIVF!=0){
 // 	double weight = hcorrIVF->GetBinContent((int)((thisEv.dRvv-xMin_IVFCorr)/binW_IVFCorr+1.)); 
@@ -514,7 +514,7 @@ int analyzeIVFEvent(event thisEv, string SET, double W){
 
       }
       //else std::cout << "NO FILE FOR CORRECTED IVF PLOTS LOADED\n";
-      
+
       if(SET!="Data"){
 	string diFl="";
 	if(thisEv.flavors==55){ diFl = "2b"; flavCat=0; }
@@ -556,50 +556,52 @@ int analyzeIVFEvent(event thisEv, string SET, double W){
 	histos["Vert_dR_2b_"+myProc]->Fill(thisEv.dRvv,W);
 	histos["Vert_dPhi_2b_"+myProc]->Fill(thisEv.dPhivv,W);
 	histos["Vert_dEta_2b_"+myProc]->Fill(thisEv.dEtavv,W);
-      }
-      
-      //V kinematics
-      if(thisEv.ptV1>BCAND_PT && thisEv.ptV2>BCAND_PT){
-	if(thisEv.nB==0){
-	  histos["Vert_dR_puritydenNONBB"]->Fill(thisEv.dRvv,W);
-	  histos["Vert_dPhi_puritydenNONBB"]->Fill(fabs(thisEv.dPhivv),W);
-	  histos["Vert_dEta_puritydenNONBB"]->Fill(fabs(thisEv.dEtavv),W);
-	}
-	else{
-	  histos["Vert_dR_puritydenBB"]->Fill(thisEv.dRvv,W);
-	  histos["Vert_dPhi_puritydenBB"]->Fill(fabs(thisEv.dPhivv),W);
-	  histos["Vert_dEta_puritydenBB"]->Fill(fabs(thisEv.dEtavv),W);
-	}
 
-	//2B
-	if(thisEv.nB==2){
-	  //B kinematics
-	  if(thisEv.ptB1>BHAD_PT && thisEv.ptB2>BHAD_PT && fabs(thisEv.etaB1)<BHAD_ETA && fabs(thisEv.etaB2)<BHAD_ETA){
-	    if(thisEv.nMat==2){
-	      histos["Vert_dR_efficnum"]->Fill(thisEv.dRbb,W);
-	      histos["Vert_dR_puritynum"]->Fill(thisEv.dRbb,W);
-	      histos["Vert_dPhi_efficnum"]->Fill(fabs(thisEv.dPhibb),W);
-	      histos["Vert_dPhi_puritynum"]->Fill(fabs(thisEv.dPhibb),W);
-	      histos["Vert_dEta_efficnum"]->Fill(fabs(thisEv.dEtabb),W);
-	      histos["Vert_dEta_puritynum"]->Fill(fabs(thisEv.dEtabb),W);
+      
+	//V kinematics
+	if(thisEv.ptV1>BCAND_PT && thisEv.ptV2>BCAND_PT){
+	  if(thisEv.nB==0){
+	    histos["Vert_dR_puritydenNONBB"]->Fill(thisEv.dRvv,W);
+	    histos["Vert_dPhi_puritydenNONBB"]->Fill(fabs(thisEv.dPhivv),W);
+	    histos["Vert_dEta_puritydenNONBB"]->Fill(fabs(thisEv.dEtavv),W);
+	  }
+	  else{
+	    histos["Vert_dR_puritydenBB"]->Fill(thisEv.dRvv,W);
+	    histos["Vert_dPhi_puritydenBB"]->Fill(fabs(thisEv.dPhivv),W);
+	    histos["Vert_dEta_puritydenBB"]->Fill(fabs(thisEv.dEtavv),W);
+	  }
+
+	  //2B
+	  if(thisEv.nB==2){
+	    //B kinematics
+	    if(thisEv.ptB1>BHAD_PT && thisEv.ptB2>BHAD_PT && fabs(thisEv.etaB1)<BHAD_ETA && fabs(thisEv.etaB2)<BHAD_ETA){
+	      if(thisEv.nMat==2){
+		histos["Vert_dR_efficnum"]->Fill(thisEv.dRbb,W);
+		histos["Vert_dR_puritynum"]->Fill(thisEv.dRbb,W);
+		histos["Vert_dPhi_efficnum"]->Fill(fabs(thisEv.dPhibb),W);
+		histos["Vert_dPhi_puritynum"]->Fill(fabs(thisEv.dPhibb),W);
+		histos["Vert_dEta_efficnum"]->Fill(fabs(thisEv.dEtabb),W);
+		histos["Vert_dEta_puritynum"]->Fill(fabs(thisEv.dEtabb),W);
+	      }
 	    }
 	  }
 	}
-      }
-      
+      }//end only for MC
+
 
 //       if(flavCat!=-1 && matCat!=-1)
 // 	histos2D["Vert_flavCat_vs_matCat"]->Fill(flavCat,matCat,W);
 //       }
     }//end mass sum and pt cut
   }//end if dRvv>-777 --> 2 vertex
-  
+
   //2B, Bkinematics
-  if(thisEv.nB==2 && thisEv.ptB1>BHAD_PT && thisEv.ptB2>BHAD_PT && fabs(thisEv.etaB1)<BHAD_ETA && fabs(thisEv.etaB2)<BHAD_ETA) {
+  if(SET!="Data" && thisEv.nB==2 && thisEv.ptB1>BHAD_PT && thisEv.ptB2>BHAD_PT && fabs(thisEv.etaB1)<BHAD_ETA && fabs(thisEv.etaB2)<BHAD_ETA) {
     histos["Vert_dR_efficden"]->Fill(thisEv.dRbb,W);
     histos["Vert_dPhi_efficden"]->Fill(fabs(thisEv.dPhibb),W);
     histos["Vert_dEta_efficden"]->Fill(fabs(thisEv.dEtabb),W);
   }
+
   return 0;
 }
 
