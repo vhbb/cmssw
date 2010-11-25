@@ -13,7 +13,7 @@
 //
 // Original Author:  Lukas Wehrli (IPP/ETHZ) [wehrlilu]
 //         Created:  Wed May 12 09:34:25 CEST 2010
-// $Id: BCandidateProducer.cc,v 1.6 2010/07/29 15:55:52 leo Exp $
+// $Id: BCandidateProducer.cc,v 1.1 2010/07/29 16:34:24 leo Exp $
 //
 //
 
@@ -117,6 +117,7 @@ BCandidateProducer::BCandidateProducer(const edm::ParameterSet& iConfig):
   produces<reco::VertexCollection>();
   //produces<reco::VertexCollection>("NotSelected");
    produces<std::vector<reco::LeafCandidate> >();
+   produces<std::vector<int> >();
   
 }
 
@@ -206,6 +207,10 @@ BCandidateProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    if(ownVertices.size()!=bCandmoms.size()) std::cout << "SIZE MISMATCH\n\n\n";
    else if(debug) std::cout << "NUMBER BCANDID: " << ownVertices.size() << "\n";
+
+   //store number of tracks of bcandidates as ints in vector
+   std::auto_ptr<std::vector<int> > bcandNtracks( new std::vector<int>() );
+
    for(unsigned int v=0; v<ownVertices.size(); v++){
      if(bCandmoms[v].M() < ownVertices[v].invm) std::cout << "MASS ERROR";
     
@@ -213,21 +218,25 @@ BCandidateProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
      Vertex::Point p(ownVertices[v].vert.x(),ownVertices[v].vert.y(),ownVertices[v].vert.z());
  
      double charge = 0.0;
+     int ntracksBC = 0; 
      for(std::set<reco::TrackRef>::const_iterator it=bCandtrackSets[v].begin(); it!=bCandtrackSets[v].end(); it++){
-       charge += (*it)->charge(); 
+       charge += (*it)->charge();
+       ntracksBC++;  
      }
 
      LeafCandidate lc(charge, bCandmoms[v], p); 
      blc->push_back(lc); 
-
+     bcandNtracks->push_back(ntracksBC); 
    }
-   
+
+ 
    std::auto_ptr<VertexCollection> bvertColl(bvertices);
    std::auto_ptr<VertexCollection> nonbvertColl(nonbvertices);
    std::auto_ptr<std::vector<reco::LeafCandidate> > bcandColl(blc); 
    //iEvent.put(bvertColl,"Selected");
    iEvent.put(bvertColl);
    iEvent.put(bcandColl);
+   iEvent.put(bcandNtracks); 
 
 
  
