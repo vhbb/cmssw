@@ -13,7 +13,7 @@
 //
 // Original Author:  Lukas Wehrli (IPP/ETHZ) [wehrlilu]
 //         Created:  Thu Aug 19 08:50:46 CEST 2010
-// $Id$
+// $Id: MCatNLOAnalyzer.cc,v 1.1 2010/09/08 11:24:40 wehrlilu Exp $
 //
 //
 
@@ -56,6 +56,7 @@ class MCatNLOAnalyzer : public edm::EDAnalyzer {
       edm::InputTag simbsrc_;
       double maxEta, minPt;
       double maxPThat, minPThat;  
+      double ptcutLeadingJet; 
       TH1F *hdR, *hdEta, *hdPhi, *hpthat;
       
 
@@ -77,7 +78,8 @@ MCatNLOAnalyzer::MCatNLOAnalyzer(const edm::ParameterSet& iConfig):
   maxEta(iConfig.getUntrackedParameter<double>("maxEta",2.4)),
   minPt(iConfig.getUntrackedParameter<double>("minPt",15)),
   maxPThat(iConfig.getUntrackedParameter<double>("maxPThat",0.0)),
-  minPThat(iConfig.getUntrackedParameter<double>("minPThat",10000.0))
+  minPThat(iConfig.getUntrackedParameter<double>("minPThat",10000.0)),
+  ptcutLeadingJet(iConfig.getUntrackedParameter<double>("ptcutLeadingJet",84.0))
 
 {
    //now do what ever initialization is needed
@@ -158,8 +160,8 @@ MCatNLOAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
        }
    }
 
-   //leading jet cut at 84 (corresponding to cut of hlt_jet30u trigger)
-   if(ptHardestGJ>84){
+   //leading jet cut at ptcutLeadingJet ((84 corresponding to cut of hlt_jet30u trigger))
+   if(ptHardestGJ>ptcutLeadingJet){
 // 	std::cout << "LJ ok";
 	if(sbhc.size()==2){
 	  //kinematic cuts on b: as done for data and other mc event generators
