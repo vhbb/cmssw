@@ -13,7 +13,7 @@
 //
 // Original Author:  Lukas Wehrli (IPP/ETHZ) [wehrlilu]
 //         Created:  Wed May 26 10:41:33 CEST 2010
-// $Id: BCorrAnalyzer.cc,v 1.8 2010/11/22 13:18:34 leo Exp $
+// $Id: BCorrAnalyzer.cc,v 1.9 2010/11/22 15:45:19 leo Exp $
 //
 //
 
@@ -49,7 +49,7 @@
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 #include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
-#include "RecoJets/JetProducers/interface/JetIDHelper.h"
+#include "RecoJets/JetAlgorithms/interface/JetIDHelper.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
@@ -270,6 +270,10 @@ class BCorrAnalyzer : public edm::EDAnalyzer {
   edm::InputTag trigTag_;
   const edm::ParameterSet   jetID_;
 
+  string JEC_PATH_;
+  string JET_RES_FILE_;
+  string JET_UNC_FILE_;
+
   reco::helper::JetIDHelper jetIDHelper;
 
   std::string JetAlgoLabel_;
@@ -279,7 +283,8 @@ class BCorrAnalyzer : public edm::EDAnalyzer {
   float BTag_tchpm_, BTag_tchpt_;
   float BTag_ssvm_, BTag_ssvt_;
   float BTag_ssvhp_;
-
+  
+  edm::InputTag impactParameterTagInfos_;
   //an var
   int PtHatEff;
   int TotalEvts;
@@ -301,6 +306,15 @@ class BCorrAnalyzer : public edm::EDAnalyzer {
   float PFJet_nHEF[MAXJETS], PFJet_nEmEF[MAXJETS], PFJet_cHEF[MAXJETS], PFJet_cEmEF[MAXJETS];
   int PFJet_cMult[MAXJETS], PFJet_nConst[MAXJETS];
   float PFJet_JECErr[MAXJETS];
+
+  int GenJet_nJets;
+  float GenJet_pt[MAXJETS], GenJet_eta[MAXJETS], GenJet_phi[MAXJETS], GenJet_E[MAXJETS];
+  float GenJet_px[MAXJETS], GenJet_py[MAXJETS],GenJet_pz[MAXJETS];
+
+  int PFGenJet_nJets;
+  float PFGenJet_pt[MAXJETS], PFGenJet_eta[MAXJETS], PFGenJet_phi[MAXJETS], PFGenJet_E[MAXJETS], PFGenJet_JetFlavour[MAXJETS];
+  float PFGenJet_px[MAXJETS], PFGenJet_py[MAXJETS],PFGenJet_pz[MAXJETS];
+
 
   vector<string> WP, WP_CAP;
   vector<string> BALGO;
@@ -394,6 +408,10 @@ BCorrAnalyzer::BCorrAnalyzer(const edm::ParameterSet& iConfig):
   PFJetSelection_minPt_ = iConfig.getUntrackedParameter<double>("PFJetSelection_minPt" );
   PFJetSelection_maxEta_= iConfig.getUntrackedParameter<double>("PFJetSelection_maxEta" );
 
+  JEC_PATH_ = iConfig.getUntrackedParameter<string>("JEC_PATH" );
+  JET_RES_FILE_  = iConfig.getUntrackedParameter<string>("JEC_RES_FILE" );
+  JET_UNC_FILE_ = iConfig.getUntrackedParameter<string>("JEC_UNC_FILE" );
+
   BCorrMethod_ = iConfig.getUntrackedParameter<string>("BCorrMethod" );
 
   for(vector<string>::iterator wp = WP.begin(); wp!=WP.end(); wp++){
@@ -404,6 +422,9 @@ BCorrAnalyzer::BCorrAnalyzer(const edm::ParameterSet& iConfig):
   isData_ = iConfig.getUntrackedParameter<int>("isData" );
 
   PFJetCollection_ = iConfig.getUntrackedParameter<edm::InputTag>("PFJetCollection" );
+  GenJetCollection_ = iConfig.getUntrackedParameter<edm::InputTag>("GenJetCollection" );
+
+  impactParameterTagInfos_ = iConfig.getUntrackedParameter<edm::InputTag>("impactParameterTagInfos" );
 
   for(vector<string>::iterator wp = WP.begin(); wp!=WP.end(); wp++){
     string wpn = (*wp);
@@ -504,15 +525,24 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      gpc = *(GPC.product());
      
      //------------------GenJets------------------------------
-     iEvent.getByLabel("ak5GenJets", GJC);
+     GenJet_nJets = 0;
+     iEvent.getByLabel(GenJetCollection_, GJC);
      gjc = *(GJC.product());
      ///////////////////////////////////////////
-     for(unsigned int i=0; i<gjc.size(); i++)
+     for(unsigned int i=0; i<gjc.size(); i++){
        if(gjc[i].pt()>ptHardestGJ) {
 	 ptHardestGJ = gjc[i].pt();
 	 etaHardestGJ = gjc[i].eta();
        }
-     
+       GenJet_pt[GenJet_nJets] = gjc[i].pt();
+       GenJet_px[GenJet_nJets] = gjc[i].px();
+       GenJet_py[GenJet_nJets] = gjc[i].py();
+       GenJet_pz[GenJet_nJets] = gjc[i].pz();
+       GenJet_E[GenJet_nJets] = gjc[i].energy();
+       GenJet_phi[GenJet_nJets] = gjc[i].phi();
+       GenJet_eta[GenJet_nJets] = gjc[i].eta();
+       GenJet_nJets++;
+     }
    }
 
 
@@ -557,11 +587,12 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    Handle<pat::TriggerEvent> triggerEvent;
    //prescales
-   if(isData_==1){
+   //if(isData_==1){
+   try{
      iEvent.getByLabel("patTriggerEvent", triggerEvent);
      pat::TriggerEvent const * trig = &*triggerEvent;
      if ( trig->wasRun() && trig->wasAccept() ) {
-
+       
        for(map<string,int>::iterator hlt=varTrigger.begin(); hlt!=varTrigger.end(); hlt++){
 	 
 	 pat::TriggerPath const * Path = trig->path( hlt->first );
@@ -570,10 +601,15 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	 varTrigger[hlt->first+"_prescale"] = -1;
 	 if(!Path->wasRun()) continue;
 	 if(eventRunNumber < runPrescale || Path->wasError() ) continue;
-	 varTrigger[ hlt->first+"_prescale"] = Path->prescale();
+	 if(isData_==1) varTrigger[ hlt->first+"_prescale"] = Path->prescale();
        }
      }
    }
+   catch(...) { 
+     //nothing 
+   }
+     
+     //}
    if(number6==777) b6 = 2; 
    else if(hltTR->accept(number6)) b6 = 1; 
    if(number10==777) b10 = 2; 
@@ -634,7 +670,7 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    
    const TriggerMatchHelper matchHelper;
    // kinematics comparison
-   map <string, const pat::TriggerObjectMatch *>  triggerMatches, triggerMatchesCALO;
+   map <string, const pat::TriggerObjectMatch *>  triggerMatches;
    if(isData_==1){
      for(vector<string>::iterator tp=triggerPaths.begin(); tp!=triggerPaths.end();tp++){
        string tp2 = (*tp);
@@ -692,8 +728,17 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      
      //GenJet maxPt check
      if(selectedJet){
-       if(jet->genJet())
+       if(jet->genJet()){
 	 if(jet->genJet()->pt()>ptHardestPGJ){ ptHardestPGJ = jet->genJet()->pt(); etaHardestPGJ = jet->genJet()->eta();} 
+	 PFGenJet_pt[PFJet_nJets] = jet->genJet()->pt();
+	 PFGenJet_px[PFJet_nJets] = jet->genJet()->px();
+	 PFGenJet_py[PFJet_nJets] = jet->genJet()->py();
+	 PFGenJet_pz[PFJet_nJets] = jet->genJet()->pz();
+	 PFGenJet_E[PFJet_nJets] = jet->genJet()->energy();
+	 PFGenJet_phi[PFJet_nJets] = jet->genJet()->phi();
+	 PFGenJet_eta[PFJet_nJets] = jet->genJet()->eta();
+	 PFGenJet_JetFlavour[PFJet_nJets] = jet->partonFlavour();
+       }
        if(jetPt>ptHardestPJ) {ptHardestPJ = jetPt; etaHardestPJ = jet->eta();}
      }
      
@@ -825,7 +870,7 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    if(svc.size()>0){
      //------------------IP Tag IInfos-----------------------
      Handle<reco::TrackIPTagInfoCollection> TIPTIC;
-     iEvent.getByLabel("impactParameterTagInfos", TIPTIC);
+     iEvent.getByLabel(impactParameterTagInfos_, TIPTIC);
      const reco::TrackIPTagInfoCollection iptic = *(TIPTIC.product());
      
      //      //loop over jets
@@ -1385,15 +1430,15 @@ BCorrAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 void 
 BCorrAnalyzer::beginJob()
 {
+  //JEC_PATH ="CondFormats/JetMETObjects/data/" ;
 
-  JEC_PATH ="JetMETCorrections/Modules/test/" ;
-
-  fipResPF = new edm::FileInPath(JEC_PATH+"START38_V13_AK5PF_L2L3Residual.txt");
-  ResJetCorParPF = new JetCorrectorParameters(fipResPF->fullPath());
+  cout << JEC_PATH_+JET_RES_FILE_ << endl;
+  //fipResPF = new edm::FileInPath(JEC_PATH_+JET_RES_FILE_);
+  ResJetCorParPF = new JetCorrectorParameters(JEC_PATH_+JET_RES_FILE_);
   vParamPF.push_back(*ResJetCorParPF);
   JECPF = new FactorizedJetCorrector(vParamPF);
-  fipUncPF = new edm::FileInPath(JEC_PATH+"START38_V13_AK5PF_Uncertainty.txt");
-  jecUncPF = new JetCorrectionUncertainty(fipUncPF->fullPath());
+  //fipUncPF = new edm::FileInPath(JEC_PATH_+JET_UNC_FILE_);
+  jecUncPF = new JetCorrectionUncertainty(JEC_PATH_+JET_UNC_FILE_);
 
 
   //  TFileDirectory sdtEvents = fs_->mkdir("tevents","tree for events");
@@ -1476,6 +1521,24 @@ BCorrAnalyzer::beginJob()
     tEvents->Branch(("PFJet_btag_"+wpn+"_lefferr").c_str(),(varFloatArr["PFJet_btag_"+wpn+"_lefferr"]),("PFJet_btag_"+wpn+"_lefferr[PFJet_btag_"+wpn+"_nsel]/F").c_str() );
 
   }
+  //GenJets
+  tEvents->Branch("GenJet_nJets",&GenJet_nJets,"GenJet_nJets/I");
+  tEvents->Branch("GenJet_px",GenJet_px,"GenJet_px[GenJet_nJets]/F");
+  tEvents->Branch("GenJet_py",GenJet_py,"GenJet_py[GenJet_nJets]/F");
+  tEvents->Branch("GenJet_pz",GenJet_pz,"GenJet_pz[GenJet_nJets]/F");
+  tEvents->Branch("GenJet_pt",GenJet_pt,"GenJet_pt[GenJet_nJets]/F");
+  tEvents->Branch("GenJet_eta",GenJet_eta,"GenJet_eta[GenJet_nJets]/F");
+  tEvents->Branch("GenJet_phi",GenJet_phi,"GenJet_phi[GenJet_nJets]/F");
+  tEvents->Branch("GenJet_E",GenJet_E,"GenJet_E[GenJet_nJets]/F");
+  //PFGenJets
+  tEvents->Branch("PFGenJet_px",PFGenJet_px,"PFGenJet_px[PFJet_nJets]/F");
+  tEvents->Branch("PFGenJet_py",PFGenJet_py,"PFGenJet_py[PFJet_nJets]/F");
+  tEvents->Branch("PFGenJet_pz",PFGenJet_pz,"PFGenJet_pz[PFJet_nJets]/F");
+  tEvents->Branch("PFGenJet_pt",PFGenJet_pt,"PFGenJet_pt[PFJet_nJets]/F");
+  tEvents->Branch("PFGenJet_eta",PFGenJet_eta,"PFGenJet_eta[PFJet_nJets]/F");
+  tEvents->Branch("PFGenJet_phi",PFGenJet_phi,"PFGenJet_phi[PFJet_nJets]/F");
+  tEvents->Branch("PFGenJet_E",PFGenJet_E,"PFGenJet_E[PFJet_nJets]/F");
+  tEvents->Branch("PFGenJet_JetFlavour",PFGenJet_JetFlavour,"PFGenJet_JetFlavour[PFJet_nJets]/I");
 
 
   tBCands = /*(&sdtBCands)*/ fs_->make<TTree>("tBCands","bcandidate properties");

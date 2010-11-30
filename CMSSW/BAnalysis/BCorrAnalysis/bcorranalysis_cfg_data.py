@@ -2,10 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("BCA")
 
-from PhysicsTools.PatAlgos.patTemplate_cfg import *
+#from PhysicsTools.PatAlgos.patTemplate_cfg import *
 from PhysicsTools.PatAlgos.tools.trigTools import *
-
-process.setName_("BCA")
 
 
 #process = cms.Process("BCA")
@@ -26,7 +24,7 @@ process.source = cms.Source("PoolSource",
     #'/store/user/leo/QCD_Pt80-herwig/BJetsPatDumpV8b-CMSSW_3_7_0_patch2-Spring10-START3X_V26-v1/fe983afb43c677d8daa662736af06b64/reducedPATV8b-QCD_Pt80-herwig_Spring10-START3X_V26_S09-v1_17_1_Emw.root'
     #'/store/user/leo/JetMETTau/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Run2010A-PromptReco-v4-Runs_139460-139965/0409b26ad4f90c0ce2038da6d13e58f2/reducedPATV8_JetMETTau_Run2010A-PromptReco-v4-Runs_139460-139965_7_1_LHW.root'
     #'/store/user/leo/JetMET/BJetsPatDumpV8-CMSSW_3_7_0_patch2-Run2010A-PromptReco-v4_Runs141950-143731-2/95f977e9e64c4e6df50e2f0afa9a2a31/reducedPAT_30_2_KE8.root'
-    'file:/shome/leo/Installations/Tests/CMSSW_3_8_6/src/Pattuplizer/reducedPAT.root'
+    'file:/shome/leo/Installations/CMSSW_3_8_6/src/BAnalysis/BCorrAnalysis/reducedPAT_1_1_ODA_DATA.root'
 )
                             
 )
@@ -86,7 +84,10 @@ process.bcanalyzer = cms.EDAnalyzer('BCorrAnalyzer',
                                     BCorrMethod = cms.untracked.string("MC"),
                                     
                                     isData       = cms.untracked.int32(1),
-                                    
+                                    JEC_PATH = cms.untracked.string(""),
+                                    JEC_RES_FILE = cms.untracked.string("START38_V13_AK5PF_L2L3Residual.txt"),
+                                    JEC_UNC_FILE = cms.untracked.string("START38_V13_AK5PF_Uncertainty.txt"),
+
                                     PFJetSelection_minPt = cms.untracked.double(8),
                                     PFJetSelection_maxEta= cms.untracked.double(5),
                                     
@@ -104,7 +105,9 @@ process.bcanalyzer = cms.EDAnalyzer('BCorrAnalyzer',
                                                      hfRecHitsColl   = cms.InputTag("hfreco"),
                                                      ebRecHitsColl   = cms.InputTag("ecalRecHit", "EcalRecHitsEB"),
                                                      eeRecHitsColl   = cms.InputTag("ecalRecHit", "EcalRecHitsEE")
-                                                     )
+                                                     ),
+                                    impactParameterTagInfos = cms.untracked.InputTag("impactParameterTagInfosAOD")
+                                    
                                     
                                     )
 
@@ -112,14 +115,47 @@ process.bcanalyzer = cms.EDAnalyzer('BCorrAnalyzer',
 
 process.dump=cms.EDAnalyzer('EventContentAnalyzer')
 
+##Vertex producer
+process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
+process.load('RecoVertex/AdaptiveVertexFinder/inclusiveVertexing_cff')
+process.inclusiveMergedVertices = process.vertexMerger.clone()
+process.inclusiveMergedVertices.secondaryVertices = cms.InputTag("inclusiveVertices")
+process.inclusiveMergedVertices.maxFraction = 0.2
+process.inclusiveMergedVertices.minSignificance = 10.
+
+process.load("RecoBTag/SecondaryVertex/bVertexFilter_cfi")
+process.selectedVertices = process.bVertexFilter.clone()
+process.selectedVertices.secondaryVertices = cms.InputTag("inclusiveMergedVertices")
+process.selectedVertices.minVertices = 0
+process.selectedVertices.vertexFilter.multiplicityMin = 3
+
+process.inclusiveVertexFinder.clusterScale = 1.
+process.inclusiveVertexFinder.clusterMinAngleCosine = 0.5
+
+process.bcandidates = cms.EDProducer('BCandidateProducer',
+                                                                                                               src = cms.InputTag('selectedVertices','',''),
+                                                                                                               primaryVertices =
+                                                                                                               cms.InputTag('offlinePrimaryVerticesWithBS','',''),
+                                                                                                               minDRUnique = cms.untracked.double(0.4),
+                                                                                                               minvecSumIMifsmallDRUnique = cms.untracked.double(5.5),
+                                                                                                               minCosPAtomerge = cms.untracked.double(0.99),
+                                                                                                               maxPtreltomerge = cms.untracked.double(7777.0)
+                                                                                                               )
+
+
+
+
 process.p = cms.Path(  #process.matchPATPF*
-                       #process.matchPATCALO*
+    #process.matchPATCALO*
                        #process.selectedJetTriggerMatchHLTJet15U*
-                       #process.selectedJetTriggerMatchHLTJet30U*
-                       # patTriggerEvent*
-                       process.bcandidates *
-                       #process.dump
-                       process.bcanalyzer
-                       )
+    #process.selectedJetTriggerMatchHLTJet30U*
+    # patTriggerEvent*
+    process.inclusiveVertexing
+    *process.inclusiveMergedVertices
+    *process.selectedVertices*
+    process.bcandidates *
+    #process.dump
+    process.bcanalyzer
+    )
 
 
