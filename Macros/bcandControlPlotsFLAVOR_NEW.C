@@ -73,8 +73,8 @@ void controlPlots(string todr="dist3D"){
 
 
   TFile *fMC1 = TFile::Open((dirMC+"anV3-QCD_Pt15_Spring10-V8b.root").c_str()); 
-  //TFile *fMC2 = TFile::Open((dirMC+"anV3-QCD_Pt30_Spring10-V8b.root").c_str()); 
-  TFile *fMC2 = TFile::Open((dirMC+"anV3-InclusiveBB_Pt30_Spring10-V8b.root").c_str()); 
+  TFile *fMC2 = TFile::Open((dirMC+"anV3-QCD_Pt30_Spring10-V8b.root").c_str()); 
+  //TFile *fMC2 = TFile::Open((dirMC+"anV3-InclusiveBB_Pt30_Spring10-V8b.root").c_str()); 
   TFile *fMC3 = TFile::Open((dirMC+"anV3-QCD_Pt80_Spring10-V8b.root").c_str()); 
   TFile *fMC4 = TFile::Open((dirMC+"anV3-QCD_Pt170_Spring10-V8b.root").c_str()); 
   TFile *fMC5 = TFile::Open((dirMC+"anV3-QCD_Pt300_Spring10-V8b.root").c_str()); 
@@ -115,21 +115,21 @@ void controlPlots(string todr="dist3D"){
   //c->SetBottomMargin(0.1); 
   //c->Range(-1.266217,-1.997143,9.02958,4.963989);
 
-  tMC1->Draw(("BCands." + toDraw + ">>hMC1_b").c_str(),(cut+" && BCands.flavor==5").c_str());
-  tMC2->Draw(("BCands." + toDraw + ">>hMC2_b").c_str(),(cut+" && BCands.flavor==5").c_str());
-  tMC3->Draw(("BCands." + toDraw + ">>hMC3_b").c_str(),(cut+" && BCands.flavor==5").c_str());
+  tMC1->Draw(("BCands." + toDraw + ">>hMC1_b").c_str(),(cut+" && BCands.flavor==5 && BCands.pthat<30").c_str());
+  tMC2->Draw(("BCands." + toDraw + ">>hMC2_b").c_str(),(cut+" && BCands.flavor==5 && BCands.pthat<80").c_str());
+  tMC3->Draw(("BCands." + toDraw + ">>hMC3_b").c_str(),(cut+" && BCands.flavor==5 && BCands.pthat<170").c_str());
   tMC4->Draw(("BCands." + toDraw + ">>hMC4_b").c_str(),(cut+" && BCands.flavor==5").c_str());
-  tMC5->Draw(("BCands." + toDraw + ">>hMC5_b").c_str(),(cut+" && BCands.flavor==5").c_str());
-  tMC1->Draw(("BCands." + toDraw + ">>hMC1_c").c_str(),(cut+" && BCands.flavor==4").c_str());
-  tMC2->Draw(("BCands." + toDraw + ">>hMC2_c").c_str(),(cut+" && BCands.flavor==4").c_str());
-  tMC3->Draw(("BCands." + toDraw + ">>hMC3_c").c_str(),(cut+" && BCands.flavor==4").c_str());
+//   tMC5->Draw(("BCands." + toDraw + ">>hMC5_b").c_str(),(cut+" && BCands.flavor==5").c_str());
+  tMC1->Draw(("BCands." + toDraw + ">>hMC1_c").c_str(),(cut+" && BCands.flavor==4 && BCands.pthat<30").c_str());
+  tMC2->Draw(("BCands." + toDraw + ">>hMC2_c").c_str(),(cut+" && BCands.flavor==4 && BCands.pthat<80").c_str());
+  tMC3->Draw(("BCands." + toDraw + ">>hMC3_c").c_str(),(cut+" && BCands.flavor==4 && BCands.pthat<170").c_str());
   tMC4->Draw(("BCands." + toDraw + ">>hMC4_c").c_str(),(cut+" && BCands.flavor==4").c_str());
-  tMC5->Draw(("BCands." + toDraw + ">>hMC5_c").c_str(),(cut+" && BCands.flavor==4").c_str());
-  tMC1->Draw(("BCands." + toDraw + ">>hMC1_l").c_str(),(cut+" && BCands.flavor==1").c_str());
-  tMC2->Draw(("BCands." + toDraw + ">>hMC2_l").c_str(),(cut+" && BCands.flavor==1").c_str());
-  tMC3->Draw(("BCands." + toDraw + ">>hMC3_l").c_str(),(cut+" && BCands.flavor==1").c_str());
+//   tMC5->Draw(("BCands." + toDraw + ">>hMC5_c").c_str(),(cut+" && BCands.flavor==4").c_str());
+  tMC1->Draw(("BCands." + toDraw + ">>hMC1_l").c_str(),(cut+" && BCands.flavor==1 && BCands.pthat<30").c_str());
+  tMC2->Draw(("BCands." + toDraw + ">>hMC2_l").c_str(),(cut+" && BCands.flavor==1 && BCands.pthat<80").c_str());
+  tMC3->Draw(("BCands." + toDraw + ">>hMC3_l").c_str(),(cut+" && BCands.flavor==1 && BCands.pthat<170").c_str());
   tMC4->Draw(("BCands." + toDraw + ">>hMC4_l").c_str(),(cut+" && BCands.flavor==1").c_str());
-  tMC5->Draw(("BCands." + toDraw + ">>hMC5_l").c_str(),(cut+" && BCands.flavor==1").c_str());
+//   tMC5->Draw(("BCands." + toDraw + ">>hMC5_l").c_str(),(cut+" && BCands.flavor==1").c_str());
   tDATA->Draw(("BCands." + toDraw + ">>hDATA").c_str(),(cut).c_str());
 
 
@@ -141,31 +141,30 @@ void controlPlots(string todr="dist3D"){
 //   hDATA->SetFillColor(0);
 
   hMC1_b->Scale(143.866);
-  //hMC2_b->Scale(12.1072);
-  hMC2_b->Scale(4.06863); //incl. BB
+  hMC2_b->Scale(12.1072);
+  //hMC2_b->Scale(4.06863); //incl. BB
   hMC3_b->Scale(0.310862);
   hMC4_b->Scale(0.0082391);
-  //hMC4_b->Scale();
   hMC1_c->Scale(143.866);
-//   hMC2_c->Scale(12.1072);
-  hMC2_c->Scale(4.06863); //incl. BB
+  hMC2_c->Scale(12.1072);
+  //hMC2_c->Scale(4.06863); //incl. BB
   hMC3_c->Scale(0.310862);
   hMC4_c->Scale(0.0082391);
   hMC1_l->Scale(143.866);
-//   hMC2_l->Scale(12.1072);
-  hMC2_l->Scale(4.06863); //incl. BB
+  hMC2_l->Scale(12.1072);
+  //hMC2_l->Scale(4.06863); //incl. BB
   hMC3_l->Scale(0.310862);
   hMC4_l->Scale(0.0082391);
 
-  //hMCcombined_b->Add(hMC1_b);
+  hMCcombined_b->Add(hMC1_b);
   hMCcombined_b->Add(hMC2_b);
   hMCcombined_b->Add(hMC3_b);
   hMCcombined_b->Add(hMC4_b);
-  //hMCcombined_c->Add(hMC1_c);
+  hMCcombined_c->Add(hMC1_c);
   hMCcombined_c->Add(hMC2_c);
   hMCcombined_c->Add(hMC3_c);
   hMCcombined_c->Add(hMC4_c);
-  //hMCcombined_l->Add(hMC1_l);
+  hMCcombined_l->Add(hMC1_l);
   hMCcombined_l->Add(hMC2_l);
   hMCcombined_l->Add(hMC3_l);
   hMCcombined_l->Add(hMC4_l);
