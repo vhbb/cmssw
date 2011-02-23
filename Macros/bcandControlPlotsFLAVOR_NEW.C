@@ -8,6 +8,14 @@
 
 void controlPlots(string todr="dist3D"){
   gStyle->SetOptStat(0);
+  gROOT->ProcessLine(".L ~/tdrstyle.C");
+  setTDRStyle();
+  //style modifications:
+  gStyle->SetErrorX(0.5);
+  gStyle->SetPadTopMargin(0.08);//.005
+  gStyle->SetPadBottomMargin(0.10);//0.13
+  gStyle->SetMarkerStyle(1); 
+
   bool haveFracInLeg = 0; 
 
 //   string dir="/shome/wehrlilu/SecVtx/SVProd/SVVALIDATION/forbatchjobs/temp/BBC/CMSSW_3_7_0_patch2/crab/analyze/rootfiles/"; 
@@ -15,7 +23,8 @@ void controlPlots(string todr="dist3D"){
 //   string dirDATA="dataFiles/withIP/";
 
   string dirMC="/scratch/leo/";
-  string dirDATA="/scratch/wehrlilu/BBCORR/MACROS/TREES/DATA/"; 
+//   string dirDATA="/scratch/wehrlilu/BBCORR/MACROS/TREES/DATA/"; 
+  string dirDATA="dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat/store/user/wehrlilu/FILES/DATA/"; 
 
   string cut="BCands.selected==1 && BCands.jet30==1 && BCands.ptHardestPJ>84";
 
@@ -29,13 +38,13 @@ void controlPlots(string todr="dist3D"){
   string toDraw, axis; 
   int nbins; double lower, upper; 
 
-  string yaxis="# of B candidates";
+  string yaxis="number of B candidates";
 
   if(todr=="mass"){
     //mass
     toDraw="massBcand";
-    axis="vertex mass [GeV]";
-    nbins=40; lower=0.0, upper=8.0; 
+    axis="vertex mass (GeV)";
+    nbins=60; lower=0.0, upper=8.0; 
     cut="BCands.distSig3D>5.0 && abs(BCands.eta)<2.0 && BCands.jet30==1 && BCands.ptHardestPJ>84";
   }
 
@@ -64,9 +73,11 @@ void controlPlots(string todr="dist3D"){
 
 
   TFile *fMC1 = TFile::Open((dirMC+"anV3-QCD_Pt15_Spring10-V8b.root").c_str()); 
-  TFile *fMC2 = TFile::Open((dirMC+"anV3-QCD_Pt30_Spring10-V8b.root").c_str()); 
+  //TFile *fMC2 = TFile::Open((dirMC+"anV3-QCD_Pt30_Spring10-V8b.root").c_str()); 
+  TFile *fMC2 = TFile::Open((dirMC+"anV3-InclusiveBB_Pt30_Spring10-V8b.root").c_str()); 
   TFile *fMC3 = TFile::Open((dirMC+"anV3-QCD_Pt80_Spring10-V8b.root").c_str()); 
   TFile *fMC4 = TFile::Open((dirMC+"anV3-QCD_Pt170_Spring10-V8b.root").c_str()); 
+  TFile *fMC5 = TFile::Open((dirMC+"anV3-QCD_Pt300_Spring10-V8b.root").c_str()); 
 
 
   TFile *fDATA = TFile::Open((dirDATA+"mergedDATA.root").c_str()); 
@@ -75,20 +86,24 @@ void controlPlots(string todr="dist3D"){
   TTree *tMC2 = (TTree*)fMC2->Get("bcanalyzer/tBCands");
   TTree *tMC3 = (TTree*)fMC3->Get("bcanalyzer/tBCands");
   TTree *tMC4 = (TTree*)fMC4->Get("bcanalyzer/tBCands");
+  TTree *tMC5 = (TTree*)fMC5->Get("bcanalyzer/tBCands");
   TTree *tDATA = (TTree*)fDATA->Get("bcanalyzer/tBCands");
 
   TH1F *hMC1_b= new TH1F("hMC1_b","",nbins,lower,upper);
   TH1F *hMC2_b= new TH1F("hMC2_b","",nbins,lower,upper);
   TH1F *hMC3_b= new TH1F("hMC3_b","",nbins,lower,upper);
   TH1F *hMC4_b= new TH1F("hMC4_b","",nbins,lower,upper);
+  TH1F *hMC5_b= new TH1F("hMC5_b","",nbins,lower,upper);
   TH1F *hMC1_c= new TH1F("hMC1_c","",nbins,lower,upper);
   TH1F *hMC2_c= new TH1F("hMC2_c","",nbins,lower,upper);
   TH1F *hMC3_c= new TH1F("hMC3_c","",nbins,lower,upper);
   TH1F *hMC4_c= new TH1F("hMC4_c","",nbins,lower,upper);
+  TH1F *hMC5_c= new TH1F("hMC5_c","",nbins,lower,upper);
   TH1F *hMC1_l= new TH1F("hMC1_l","",nbins,lower,upper);
   TH1F *hMC2_l= new TH1F("hMC2_l","",nbins,lower,upper);
   TH1F *hMC3_l= new TH1F("hMC3_l","",nbins,lower,upper);
   TH1F *hMC4_l= new TH1F("hMC4_l","",nbins,lower,upper);
+  TH1F *hMC5_l= new TH1F("hMC5_l","",nbins,lower,upper);
 
   TH1F *hMCcombined_b= new TH1F("hMCcombined_b","",nbins,lower,upper);
   TH1F *hMCcombined_c= new TH1F("hMCcombined_c","",nbins,lower,upper);
@@ -97,19 +112,24 @@ void controlPlots(string todr="dist3D"){
 
   TCanvas *c = new TCanvas("quantFLAV",axis.c_str(),100,300,500,500);
   c->SetLeftMargin(0.1229839);
+  //c->SetBottomMargin(0.1); 
+  //c->Range(-1.266217,-1.997143,9.02958,4.963989);
 
   tMC1->Draw(("BCands." + toDraw + ">>hMC1_b").c_str(),(cut+" && BCands.flavor==5").c_str());
   tMC2->Draw(("BCands." + toDraw + ">>hMC2_b").c_str(),(cut+" && BCands.flavor==5").c_str());
   tMC3->Draw(("BCands." + toDraw + ">>hMC3_b").c_str(),(cut+" && BCands.flavor==5").c_str());
   tMC4->Draw(("BCands." + toDraw + ">>hMC4_b").c_str(),(cut+" && BCands.flavor==5").c_str());
+  tMC5->Draw(("BCands." + toDraw + ">>hMC5_b").c_str(),(cut+" && BCands.flavor==5").c_str());
   tMC1->Draw(("BCands." + toDraw + ">>hMC1_c").c_str(),(cut+" && BCands.flavor==4").c_str());
   tMC2->Draw(("BCands." + toDraw + ">>hMC2_c").c_str(),(cut+" && BCands.flavor==4").c_str());
   tMC3->Draw(("BCands." + toDraw + ">>hMC3_c").c_str(),(cut+" && BCands.flavor==4").c_str());
   tMC4->Draw(("BCands." + toDraw + ">>hMC4_c").c_str(),(cut+" && BCands.flavor==4").c_str());
+  tMC5->Draw(("BCands." + toDraw + ">>hMC5_c").c_str(),(cut+" && BCands.flavor==4").c_str());
   tMC1->Draw(("BCands." + toDraw + ">>hMC1_l").c_str(),(cut+" && BCands.flavor==1").c_str());
   tMC2->Draw(("BCands." + toDraw + ">>hMC2_l").c_str(),(cut+" && BCands.flavor==1").c_str());
   tMC3->Draw(("BCands." + toDraw + ">>hMC3_l").c_str(),(cut+" && BCands.flavor==1").c_str());
   tMC4->Draw(("BCands." + toDraw + ">>hMC4_l").c_str(),(cut+" && BCands.flavor==1").c_str());
+  tMC5->Draw(("BCands." + toDraw + ">>hMC5_l").c_str(),(cut+" && BCands.flavor==1").c_str());
   tDATA->Draw(("BCands." + toDraw + ">>hDATA").c_str(),(cut).c_str());
 
 
@@ -121,27 +141,31 @@ void controlPlots(string todr="dist3D"){
 //   hDATA->SetFillColor(0);
 
   hMC1_b->Scale(143.866);
-  hMC2_b->Scale(12.1072);
+  //hMC2_b->Scale(12.1072);
+  hMC2_b->Scale(4.06863); //incl. BB
   hMC3_b->Scale(0.310862);
   hMC4_b->Scale(0.0082391);
+  //hMC4_b->Scale();
   hMC1_c->Scale(143.866);
-  hMC2_c->Scale(12.1072);
+//   hMC2_c->Scale(12.1072);
+  hMC2_c->Scale(4.06863); //incl. BB
   hMC3_c->Scale(0.310862);
   hMC4_c->Scale(0.0082391);
   hMC1_l->Scale(143.866);
-  hMC2_l->Scale(12.1072);
+//   hMC2_l->Scale(12.1072);
+  hMC2_l->Scale(4.06863); //incl. BB
   hMC3_l->Scale(0.310862);
   hMC4_l->Scale(0.0082391);
 
-  hMCcombined_b->Add(hMC1_b);
+  //hMCcombined_b->Add(hMC1_b);
   hMCcombined_b->Add(hMC2_b);
   hMCcombined_b->Add(hMC3_b);
   hMCcombined_b->Add(hMC4_b);
-  hMCcombined_c->Add(hMC1_c);
+  //hMCcombined_c->Add(hMC1_c);
   hMCcombined_c->Add(hMC2_c);
   hMCcombined_c->Add(hMC3_c);
   hMCcombined_c->Add(hMC4_c);
-  hMCcombined_l->Add(hMC1_l);
+  //hMCcombined_l->Add(hMC1_l);
   hMCcombined_l->Add(hMC2_l);
   hMCcombined_l->Add(hMC3_l);
   hMCcombined_l->Add(hMC4_l);
@@ -203,13 +227,25 @@ void controlPlots(string todr="dist3D"){
   
   hMCcombined_b->GetXaxis()->SetTitle(axis.c_str()); 
   hMCcombined_b->GetYaxis()->SetTitle(yaxis.c_str()); 
-  hMCcombined_b->GetYaxis()->SetTitleOffset(1.3);
-  hMCcombined_b->SetFillColor(kRed); 
-  hMCcombined_b->SetLineColor(kRed); 
-  hMCcombined_c->SetFillColor(kGreen); 
-  hMCcombined_c->SetLineColor(kGreen); 
-  hMCcombined_l->SetFillColor(kBlue); 
-  hMCcombined_l->SetLineColor(kBlue); 
+//   hMCcombined_b->GetYaxis()->SetTitleOffset(1.3);
+  hMCcombined_b->GetYaxis()->SetTitleOffset(1.1);
+  //new
+  hMCcombined_b->GetYaxis()->SetTitleSize(0.05);
+  hMCcombined_b->GetYaxis()->SetLabelSize(0.04);
+  hMCcombined_b->GetXaxis()->SetTitleSize(0.0435);
+  hMCcombined_b->GetXaxis()->SetLabelSize(0.04);
+
+
+  Int_t ci; 
+  ci = TColor::GetColor("#ff7777"); 
+  hMCcombined_b->SetFillColor(2); //kRed or ci
+  hMCcombined_b->SetLineColor(2); //kRed or ci (bright red)
+  ci = TColor::GetColor("#00cc00");
+  hMCcombined_c->SetFillColor(ci); //kGreen
+  hMCcombined_c->SetLineColor(ci); //kGreen
+  ci = TColor::GetColor("#AABBff");
+  hMCcombined_l->SetFillColor(ci); //kBlue 
+  hMCcombined_l->SetLineColor(ci); //kBlue
   hDATA->SetMarkerStyle(21); 
   
 
@@ -225,7 +261,9 @@ void controlPlots(string todr="dist3D"){
   hDATA->Draw("samesPE");
 
   //leg
-  TLegend *leg = new TLegend(0.70,0.75,0.9,0.9); 
+//   TLegend *leg = new TLegend(0.70,0.75,0.9,0.9); 
+  TLegend *leg = new TLegend(0.6,0.7,0.8,0.85,NULL,"brNDC");
+  leg->SetBorderSize(0);
   leg->SetFillColor(0); 
   leg->AddEntry(hDATA,"Data","PE");
   if(haveFracInLeg){
@@ -243,7 +281,10 @@ void controlPlots(string todr="dist3D"){
 
   //cms label 
   double axismax  = hMCcombined_b->GetMaximum();
-  TLatex *   tex = new TLatex(0,axismax+axismax/50.0,"CMS #sqrt{s} = 7 TeV, L = 3 pb^{-1}");
+  if(todr=="mass") TLatex *   tex = new TLatex(0,35566.42,"CMS    #sqrt{s} = 7 TeV, L = 3.1 pb^{-1}");
+  else{
+    TLatex *   tex = new TLatex(0,axismax+axismax/50.0,"CMS #sqrt{s} = 7 TeV, L = 3 pb^{-1}");
+  }
   tex->SetTextSize(0.040); //0.044
   tex->SetLineWidth(2);
   tex->Draw();
