@@ -25,24 +25,28 @@ TH1F *makeNonEqualBinning(TH1F *histo){
 }
 
 void addQCDandInclBBALLTP(){
-  //string DIR = "/shome/wehrlilu/SecVtx/SVProd/SVVALIDATION/forbatchjobs/temp/BBC/FIXLEOMACRO/CMSSW_3_7_0_patch2/src/UserCode/BbCorrelation/Macros/SUMFILES/MC/"; 
+//   string DIR2 = "/scratch/wehrlilu/BBCORR/MACROS/";
+  string DIR2 = "/scratch/leo/finalOpenBins36X_No6U_NewDPhiBins/";
 
-  string DIR = "/scratch/wehrlilu/BBCORR/MACROS/SUMFILES/MC/";
-
-
-  string file15qcd = DIR+"histo-Pythia6-HLT_Jet15U-BBCorr_scaledEff-total_ETACUTOPEN.root"; 
-  string file30qcd = DIR+"histo-Pythia6-HLT_Jet30U-BBCorr_scaledEff-total_ETACUTOPEN.root"; 
-  string file50qcd = DIR+"histo-Pythia6-HLT_Jet50U-BBCorr_scaledEff-total_ETACUTOPEN.root"; 
-  string file15inclbb = DIR+"histo-HLT_Jet15U-BBCorr_scaledEff-anV3-InclusiveBB_Pt30_Spring10-V8b_ETACUTOPEN.root"; 
-  string file30inclbb = DIR+"histo-HLT_Jet30U-BBCorr_scaledEff-anV3-InclusiveBB_Pt30_Spring10-V8b_ETACUTOPEN.root"; 
-  string file50inclbb = DIR+"histo-HLT_Jet50U-BBCorr_scaledEff-anV3-InclusiveBB_Pt30_Spring10-V8b_ETACUTOPEN.root"; 
+//   string file15qcd = DIR2+"histo-Pythia6-HLT_Jet15U-BBCorr_scaledEff-total.root"; 
+//   string file30qcd = DIR2+"histo-Pythia6-HLT_Jet30U-BBCorr_scaledEff-total.root"; 
+//   string file50qcd = DIR2+"histo-Pythia6-HLT_Jet50U-BBCorr_scaledEff-total.root"; 
+//   string file15inclbb = DIR2+"Pythia6BB/histo-HLT_Jet15U-BBCorr_scaledEff-anV3-InclusiveBB_Pt30_Spring10-V8b.root"; 
+//   string file30inclbb = DIR2+"Pythia6BB/histo-HLT_Jet30U-BBCorr_scaledEff-anV3-InclusiveBB_Pt30_Spring10-V8b.root"; 
+//   string file50inclbb = DIR2+"Pythia6BB/histo-HLT_Jet50U-BBCorr_scaledEff-anV3-InclusiveBB_Pt30_Spring10-V8b.root"; 
+  string file15qcd = DIR2+"histo-Pythia6-HLT_Jet15U-BBCorr_HadrJetMatchPt_OpenHLT-total.root"; 
+  string file30qcd = DIR2+"histo-Pythia6-HLT_Jet30U-BBCorr_HadrJetMatchPt_OpenHLT-total.root"; 
+  string file50qcd = DIR2+"histo-Pythia6-HLT_Jet50U-BBCorr_HadrJetMatchPt_OpenHLT-total.root"; 
+  string file15inclbb = DIR2+"histo-Pythia6BB-HLT_Jet15U-BBCorr_HadrJetMatchPt_OpenHLT-total.root"; 
+  string file30inclbb = DIR2+"histo-Pythia6BB-HLT_Jet30U-BBCorr_HadrJetMatchPt_OpenHLT-total.root"; 
+  string file50inclbb = DIR2+"histo-Pythia6BB-HLT_Jet50U-BBCorr_HadrJetMatchPt_OpenHLT-total.root"; 
 
   string strigger = "jet15"; addQCDandInclBB(file15qcd, file15inclbb, strigger, true); 
   strigger = "jet30"; addQCDandInclBB(file30qcd,file30inclbb,strigger, false); 
   strigger = "jet50"; addQCDandInclBB(file50qcd,file50inclbb,strigger, false); 
 }
 
-void addQCDandInclBB(string fileQCD="SUMFILES/MC/histo-Pythia6-HLT_Jet30U-BBCorr_scaledEff-total_ETACUTOPEN.root", string fileinclBB="SUMFILES/MC/histo-HLT_Jet30U-BBCorr_scaledEff-anV3-InclusiveBB_Pt30_Spring10-V8b_ETACUTOPEN.root", string strigger="jet30", bool recreate=true){
+void addQCDandInclBB(string fileQCD="SUMFILES/MC/histo-Pythia6-HLT_Jet30U-BBCorr_scaledEff-total_ETACUTOPEN.root", string fileinclBB="SUMFILES/MC/Pythia6BB/histo-HLT_Jet30U-BBCorr_scaledEff-anV3-InclusiveBB_Pt30_Spring10-V8b_ETACUTOPEN.root", string strigger="jet30", bool recreate=true){
 
 //   string strigger="jet30"; 
 
@@ -102,8 +106,8 @@ void addQCDandInclBB(string fileQCD="SUMFILES/MC/histo-Pythia6-HLT_Jet30U-BBCorr
 
   //output file
   TFile *fout; 
-  if(recreate) fout = (TFile*)TFile::Open("efficCorrection.root","RECREATE"); 
-  else fout = (TFile*)TFile::Open("efficCorrection.root","UPDATE"); 
+  if(recreate) fout = (TFile*)TFile::Open("efficCorrection_IVF_CURRENT.root","RECREATE"); 
+  else fout = (TFile*)TFile::Open("efficCorrection_IVF_CURRENT.root","UPDATE"); 
   fout->cd();
   fout->mkdir(strigger.c_str());
   fout->cd(strigger.c_str());
@@ -319,12 +323,22 @@ void addQCDandInclBB(string fileQCD="SUMFILES/MC/histo-Pythia6-HLT_Jet30U-BBCorr
 }
 
 void plotBBvsQCDvsCombined(string histo="corrfunc", string strigger="jet30"){
-  gStyle->SetOptStat(0); 
-  fout = (TFile*)TFile::Open(("efficCorrection" + strigger + ".root").c_str(),"READ"); 
+  
+  gStyle->SetOptStat(0);
+  
+//   TFile *fout = (TFile*)TFile::Open("efficCorrection_IVF.root","READ"); 
+
+  //FILE USED FOR PAPER:
+  TFile *fout = (TFile*)TFile::Open("/scratch/leo/finalOpenBins36X_No6U/histo-bvertEffic-Pythia6.root","READ"); 
+  //CURRENT FILE
+  //TFile *fout = (TFile*)TFile::Open("./efficCorrection_IVF_CURRENT.root","READ"); 
+
   TH1F *hcomb, *hbb, *hqcd; 
   fout->GetObject((strigger+"/"+histo).c_str(),hcomb);
   fout->GetObject((strigger+"/"+histo+"bb").c_str(),hbb);
   fout->GetObject((strigger+"/"+histo+"qcd").c_str(),hqcd);
+
+  
   string striggerFull = "HLT_Jet30U";
   if(strigger == "jet15") striggerFull = "HLT_Jet15U";
   if(strigger == "jet50") striggerFull = "HLT_Jet50U";
@@ -408,6 +422,6 @@ void plotBBvsQCDvsCombined(string histo="corrfunc", string strigger="jet30"){
   tex2->SetLineWidth(2);
   tex2->Draw();
 
-
+  
 
 }
