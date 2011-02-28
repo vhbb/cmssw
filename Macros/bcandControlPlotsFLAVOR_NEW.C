@@ -45,13 +45,13 @@ void controlPlots(string todr="dist3D"){
     toDraw="massBcand";
     axis="vertex mass (GeV)";
     nbins=60; lower=0.0, upper=8.0; 
-    cut="BCands.distSig3D>5.0 && abs(BCands.eta)<2.0 && BCands.jet30==1 && BCands.ptHardestPJ>84";
+    cut="BCands.distSig3D>5.0 && abs(BCands.eta)<2.0 && BCands.pt>8 && BCands.jet30==1 && BCands.ptHardestPJ>84";
   }
 
   if(todr=="dist3D"){
   //dist3D
   string toDraw="dist3D";
-  string axis="flight distance (3D) [cm]";
+  string axis="3D flight distance (cm)";
 //   int nbins=50; double lower=0.0, upper=10.0; 
   int nbins=40; double lower=0.0, upper=4.0; 
   }
@@ -59,14 +59,15 @@ void controlPlots(string todr="dist3D"){
   if(todr=="distSig3D"){
   //distSig3D
   string toDraw="distSig3D";
-  string axis="flight distance significance (3D)";
-  int nbins=40; double lower=0.0, upper=300.0; 
+  string axis="3D flight distance significance";
+  int nbins=400; double lower=0.0, upper=300.0; 
+  cut="BCands.massBcand>1.4 && abs(BCands.eta)<2.0 && BCands.pt>8 && BCands.jet30==1 && BCands.ptHardestPJ>84";
   }
 
   if(todr=="pt"){
   //distSig3D
   string toDraw="pt";
-  string axis="transverse momentum [GeV]";
+  string axis="transverse momentum (GeV)";
   int nbins=40; double lower=0.0, upper=300.0; 
   }
 
@@ -252,16 +253,35 @@ void controlPlots(string todr="dist3D"){
 //   histoQc->SetLineColor(kGreen+2);
 //   histoQl->SetLineColor(kBlue+1);
 
+  TLegend *leg; 
 
+
+  //changes because of npad (to be made before drawing)
+  if(todr=="distSig3D"){
+    hMCcombined_b->SetMinimum(0.05);
+    hMCcombined_b->SetMaximum(7070);
+    TH1F *hMCcombined_bi =  hMCcombined_b->Clone(); 
+    TH1F *hMCcombined_ci =  hMCcombined_c->Clone(); 
+    TH1F *hMCcombined_li =  hMCcombined_l->Clone(); 
+    TH1F *hDATAi = hDATA->Clone(); 
+    hMCcombined_b->Rebin(10); 
+    hMCcombined_c->Rebin(10); 
+    hMCcombined_l->Rebin(10); 
+    hDATA->Rebin(10); 
+    hMCcombined_b->GetXaxis()->SetRange(1,39);
+    leg = new TLegend(0.328629,0.720339,0.5302419,0.8898305,NULL,"brNDC");
+
+  }
+  else{
+    leg = new TLegend(0.6,0.7,0.8,0.85,NULL,"brNDC");
+  }
   //draw
-  hMCcombined_b->Draw();
-  hMCcombined_c->Draw("sames");
-  hMCcombined_l->Draw("sames");
-  hDATA->Draw("samesPE");
+  hMCcombined_b->DrawCopy();
+  hMCcombined_c->DrawCopy("sames");
+  hMCcombined_l->DrawCopy("sames");
+  hDATA->DrawCopy("samesPE");
 
   //leg
-//   TLegend *leg = new TLegend(0.70,0.75,0.9,0.9); 
-  TLegend *leg = new TLegend(0.6,0.7,0.8,0.85,NULL,"brNDC");
   leg->SetBorderSize(0);
   leg->SetFillColor(0); 
   leg->AddEntry(hDATA,"Data","PE");
@@ -279,14 +299,73 @@ void controlPlots(string todr="dist3D"){
 
 
   //cms label 
-  double axismax  = hMCcombined_b->GetMaximum();
+//   double axismax  = hMCcombined_b->GetMaximum();
   if(todr=="mass") TLatex *   tex = new TLatex(0,35566.42,"CMS    #sqrt{s} = 7 TeV, L = 3.1 pb^{-1}");
+  else if(todr=="dist3D"){
+    TLatex *   tex = new TLatex(0,36247.64,"CMS    #sqrt{s} = 7 TeV, L = 3.1 pb^{-1}");
+  }
+  else if(todr=="distSig3D"){
+    //TLatex *   tex = new TLatex(0,36247.64,"CMS    #sqrt{s} = 7 TeV, L = 3.1 pb^{-1}");
+    TLatex *   tex = new TLatex(0,13333.58,"CMS    #sqrt{s} = 7 TeV, L = 3.1 pb^{-1}");
+    TPad *npad = new TPad("npad", "",0.5604839,0.5063559,0.9475806,0.8855932);
+    npad->Draw();
+    npad->cd();
+    npad->Range(-2.161763,-106.7171,25.79117,954.5241);
+    npad->SetFillColor(10);
+    npad->SetBorderMode(0);
+    npad->SetBorderSize(2);
+    npad->SetTickx(1);
+    npad->SetTicky(1);
+    npad->SetRightMargin(0.01041655);
+    npad->SetTopMargin(0.01117313);
+    npad->SetFrameFillColor(0);
+    npad->SetFrameFillStyle(0);
+    npad->SetFrameBorderMode(0);
+    npad->SetFrameFillStyle(0);
+    npad->SetFrameBorderMode(0);
+
+    hMCcombined_bi->SetMinimum(0);
+    hMCcombined_bi->SetMaximum(942.6667); 
+    hMCcombined_bi->GetXaxis()->SetRange(2,34);
+    hMCcombined_bi->GetXaxis()->SetNdivisions(3);
+    hMCcombined_bi->GetXaxis()->SetLabelFont(42);
+    hMCcombined_bi->GetXaxis()->SetLabelOffset(0.007);
+    hMCcombined_bi->GetXaxis()->SetLabelSize(0.06);
+    hMCcombined_bi->GetXaxis()->SetTitleSize(0.06);
+    hMCcombined_bi->GetXaxis()->SetTitleOffset(0.9);
+    hMCcombined_bi->GetXaxis()->SetTitleFont(42);
+    hMCcombined_bi->GetYaxis()->SetNdivisions(5);
+    hMCcombined_bi->GetYaxis()->SetLabelFont(42);
+    hMCcombined_bi->GetYaxis()->SetLabelOffset(0.007);
+    hMCcombined_bi->GetYaxis()->SetLabelSize(0.06);
+    hMCcombined_bi->GetYaxis()->SetTitleSize(0.05);
+    hMCcombined_bi->GetYaxis()->SetTitleOffset(1.1);
+    hMCcombined_bi->GetYaxis()->SetTitleFont(42);
+    hMCcombined_bi->GetZaxis()->SetLabelFont(42);
+    hMCcombined_bi->GetZaxis()->SetLabelOffset(0.007);
+    hMCcombined_bi->GetZaxis()->SetLabelSize(0.05);
+    hMCcombined_bi->GetZaxis()->SetTitleSize(0.06);
+    hMCcombined_bi->GetZaxis()->SetTitleFont(42);
+    hMCcombined_bi->GetXaxis()->SetTitle("");
+    hMCcombined_bi->GetYaxis()->SetTitle("");
+
+    hDATAi->SetMarkerSize(0.6);
+
+    hMCcombined_bi->Draw("");
+    hMCcombined_ci->Draw("sames");
+    hMCcombined_li->Draw("sames");
+    hDATAi->Draw("samesPE");
+    npad->Modified();
+   
+    c->cd(); 
+  }
   else{
-    TLatex *   tex = new TLatex(0,axismax+axismax/50.0,"CMS #sqrt{s} = 7 TeV, L = 3 pb^{-1}");
+    TLatex *   tex = new TLatex(0,1000000,"CMS #sqrt{s} = 7 TeV, L = 3 pb^{-1}");
   }
   tex->SetTextSize(0.040); //0.044
   tex->SetLineWidth(2);
   tex->Draw();
+  gPad->RedrawAxis();
 
 
 }
