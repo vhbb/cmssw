@@ -97,6 +97,7 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 
   string mc_draw_option = "E3same"; //"histLsame","E2same","histCsame"
   int boxcolor = kGray+2; //kRed-10
+  int bandcolor = kYellow-7; 
   int boxstyle = 3005; //Gray; //kRed-10
   //int boxcolor = kOrange-4; //kOrange-4; Gray; //kRed-10
 
@@ -206,7 +207,8 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   double systErrCORRECTION = 0.13; 
   double systErrLUMI = 0.43; 
   bool addErrCorrectionQuadratic = true; 
-  for(unsigned int i=0; i<data15_toterr->GetNbinsX(); i++){
+  std::cout << "TEST TEST TEST " << data15_toterr->GetNbinsX() << "\n";
+  for(unsigned int i=0; i<=data15_toterr->GetNbinsX(); i++){
     //LATER
     if(addFlatErrorForCorrectionSyst){
 	double toterr = sqrt(data15_toterr->GetBinError(i)*data15_toterr->GetBinError(i) +  (systErrCORRECTION*data15_toterr->GetBinContent(i))*(systErrCORRECTION*data15_toterr->GetBinContent(i)) +  (systErr15*data15_toterr->GetBinContent(i))*(systErr15*data15_toterr->GetBinContent(i)));
@@ -304,9 +306,9 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 //   data15_toterrLUMI->SetMarkerStyle(21); 
 //   data30_toterrLUMI->SetMarkerStyle(25); 
 //   data50_toterrLUMI->SetMarkerStyle(20); 
-  data15_toterrLUMI->SetFillColor(boxcolor); 
-  data30_toterrLUMI->SetFillColor(boxcolor); 
-  data50_toterrLUMI->SetFillColor(boxcolor); 
+  data15_toterrLUMI->SetFillColor(bandcolor); 
+  data30_toterrLUMI->SetFillColor(bandcolor); 
+  data50_toterrLUMI->SetFillColor(bandcolor); 
   mc15->SetFillColor(8);
   mc15->SetLineWidth(3);
   mc15->SetLineColor(8);
@@ -390,7 +392,9 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   if(todraw=="dPhi"){
     data15->SetMinimum(3); 
   }
-//   std::cout << "LUMITEST " << data15_toterrLUMI->GetBinError(1) << " " << data15_toterrLUMI->GetBinContent(1) << std::endl;
+  int bb=8; 
+  std::cout << "LUMITEST " << data15_toterrLUMI->GetBinError(bb) << " " << data15_toterrLUMI->GetBinContent(bb) 
+	    << " " << data15_toterrLUMI->GetBinCenter(bb) << std::endl;
 
   data15->DrawCopy("E1"); 
   data15_toterrLUMI->Draw("E3same"); 
