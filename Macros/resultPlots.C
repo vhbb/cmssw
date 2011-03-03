@@ -4,7 +4,38 @@
 #include <sstream>
 #include <iostream>
 
+//std::string toterrorstyle = "E1same";
+std::string toterrorstyle = "E1same";
+int se=0;
+TCanvas *  cucorrcomp1;
+TCanvas *    cucorrcomp1_1;
+TCanvas *    cucorrcomp1_2;
+TCanvas *    cucorrcomp2;
+TCanvas *    cucorrcomp2_1;
+TCanvas *    cucorrcomp2_2;
+
+
+bool mcinnonratio=false;
+bool mginnonratio=false;
+bool cainnonratio=false;
+
 void resultPlots(string todraw="dR", bool corrected=true, string output="finalPlots.root"){
+  gROOT->ProcessLine(".L ~/tdrstyle.C");
+  setTDRStyle();
+
+  //style modifications:
+  gStyle->SetErrorX(0.5);
+  gStyle->SetPadTopMargin(0.08);//.005
+  gStyle->SetPadBottomMargin(0.10);//0.13
+  gStyle->SetMarkerStyle(1); 
+
+  string fileMC15="/scratch/leo/finalOpenBins36X_No6U_NewDPhiBins/histo-Pythia6-HLT_Jet15U-BBCorr_HadrJetMatchPt_OpenHLT-total.root";
+  string fileMC30="/scratch/leo/finalOpenBins36X_No6U_NewDPhiBins/histo-Pythia6-HLT_Jet30U-BBCorr_HadrJetMatchPt_OpenHLT-total.root";
+  string fileMC50="/scratch/leo/finalOpenBins36X_No6U_NewDPhiBins/histo-Pythia6-HLT_Jet50U-BBCorr_HadrJetMatchPt_OpenHLT-total.root";
+
+  string fileDATA15="/scratch/leo/finalOpenBins36X_No6U_NewDPhiBins/histo-Data-HLT_Jet15U-BBCorr_HadrJetMatchPt_OpenHLT-total.root";
+  string fileDATA30="/scratch/leo/finalOpenBins36X_No6U_NewDPhiBins/histo-Data-HLT_Jet30U-BBCorr_HadrJetMatchPt_OpenHLT-total.root";
+  string fileDATA50="/scratch/leo/finalOpenBins36X_No6U_NewDPhiBins/histo-Data-HLT_Jet50U-BBCorr_HadrJetMatchPt_OpenHLT-total.root";
 
   ////
   //non ratio plots
@@ -24,7 +55,7 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
       ratioOffsetLin_lumi->SetBinError(i,0.0);  
     }
     //others
-    double DratioOffsetLin = 6.0; 
+    double DratioOffsetLin = 4.5; 
     TH1F *ratioOffsetLin = new TH1F("offset","offset",15,0,6); 
     for(unsigned int i=0; i<=15; i++) {
       ratioOffsetLin->SetBinContent(i,DratioOffsetLin);  
@@ -32,14 +63,14 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
     }
   }
   else if(todraw=="dPhi"){
-    TH1F *ratioOffsetLin_lumi = new TH1F("offsetlumi","offset",8,0,3.2); 
+    TH1F *ratioOffsetLin_lumi = new TH1F("offsetlumi","offset",8,0,3.141592); //3.2
     for(unsigned int i=0; i<=8; i++) {
       ratioOffsetLin_lumi->SetBinContent(i,DratioOffsetLin_lumi);  
       ratioOffsetLin_lumi->SetBinError(i,0.0);  
     }
     //others
-    double DratioOffsetLin = 4.0; 
-    TH1F *ratioOffsetLin = new TH1F("offset","offset",8,0,3.2); 
+    double DratioOffsetLin = 3.5; 
+    TH1F *ratioOffsetLin = new TH1F("offset","offset",8,0,3.141592); 
     for(unsigned int i=0; i<=8; i++) {
       ratioOffsetLin->SetBinContent(i,DratioOffsetLin);  
       ratioOffsetLin->SetBinError(i,0.0);  
@@ -57,12 +88,19 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 
   ////
   //mc event generators to include
-  bool bmadgraph=true; int madgCol = kBlue-7; int madgColF = kBlue-7; //4
-  bool bmcatnlo=true; int mcatCol = kRed-7; int mcatColF = kRed-7; //2
+  bool bmadgraph=true; int madgCol = kBlue+2; int madgColF = kBlue+2; //4
+  bool bmcatnlo=true; int mcatCol = kRed; int mcatColF = kRed; //2
   bool bcascade=true; int cascCol = kMagenta-7; int cascColF = kMagenta-7; //6
-  string mc_draw_option = "E3same"; //"histLsame","E2same","histCsame"
-  int boxcolor = kGray; //kRed-10
+// //   bool bmadgraph=true; int madgCol = kBlue-7; int madgColF = kBlue-7; //4 kBlue+1 better
+// //   bool bmcatnlo=true; int mcatCol = kRed; int mcatColF = kRed; //2
+// //   bool bcascade=true; int cascCol = kMagenta-8; int cascColF = kMagenta-8; //6
 
+  string mc_draw_option = "E3same"; //"histLsame","E2same","histCsame"
+  int boxcolor = kGray+2; //kRed-10
+  int boxstyle = 3005; //Gray; //kRed-10
+  //int boxcolor = kOrange-4; //kOrange-4; Gray; //kRed-10
+
+  bool withPhaseSpace = true;
   ////
 
   ////
@@ -86,15 +124,6 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 
 
   //scaled to 1/pb
-//   string fileMC="/shome/wehrlilu/SecVtx/SVProd/SVVALIDATION/forbatchjobs/temp/BBC/CMSSW_3_7_0_patch2/crab/analyze/rootoutput/temp8215_finalBinEffic/defaultAddedBins.root";
-//   string fileDATA="/shome/wehrlilu/SecVtx/SVProd/SVVALIDATION/forbatchjobs/temp/BBC/CMSSW_3_7_0_patch2/crab/analyze/rootoutput/temp8215_finalBinEffic/defaultAddedDATABins.root";
-  string fileMC15="/scratch/wehrlilu/BBCORR/MACROS/SUMFILES/MC/histo-Pythia6-HLT_Jet15U-BBCorr_scaledEff-total_ETACUTOPEN.root";
-  string fileMC30="/scratch/wehrlilu/BBCORR/MACROS/SUMFILES/MC/histo-Pythia6-HLT_Jet30U-BBCorr_scaledEff-total_ETACUTOPEN.root";
-  string fileMC50="/scratch/wehrlilu/BBCORR/MACROS/SUMFILES/MC/histo-Pythia6-HLT_Jet50U-BBCorr_scaledEff-total_ETACUTOPEN.root";
-
-  string fileDATA15="/scratch/wehrlilu/BBCORR/MACROS/SUMFILES/DATA/histo-Data-HLT_Jet15U-BBCorr_scaledEff-total_ETACUTOPEN.root";
-  string fileDATA30="/scratch/wehrlilu/BBCORR/MACROS/SUMFILES/DATA/histo-Data-HLT_Jet30U-BBCorr_scaledEff-total_ETACUTOPEN.root";
-  string fileDATA50="/scratch/wehrlilu/BBCORR/MACROS/SUMFILES/DATA/histo-Data-HLT_Jet50U-BBCorr_scaledEff-total_ETACUTOPEN.root";
 
 
 
@@ -171,40 +200,42 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 
   ////
   //first rebin, then add errors from error histo and other syst error and then rescale: 
-  double systErr = 0.113; 
+  double systErr15 = 0.11; 
+  double systErr30 = 0.095; 
+  double systErr50 = 0.08; 
   double systErrCORRECTION = 0.13; 
-  double systErrLUMI = 0.4; 
+  double systErrLUMI = 0.43; 
   bool addErrCorrectionQuadratic = true; 
   for(unsigned int i=0; i<data15_toterr->GetNbinsX(); i++){
     //LATER
     if(addFlatErrorForCorrectionSyst){
-	double toterr = sqrt(data15_toterr->GetBinError(i)*data15_toterr->GetBinError(i) +  (systErrCORRECTION*data15_toterr->GetBinContent(i))*(systErrCORRECTION*data15_toterr->GetBinContent(i)) +  (systErr*data15_toterr->GetBinContent(i))*(systErr*data15_toterr->GetBinContent(i)));
+	double toterr = sqrt(data15_toterr->GetBinError(i)*data15_toterr->GetBinError(i) +  (systErrCORRECTION*data15_toterr->GetBinContent(i))*(systErrCORRECTION*data15_toterr->GetBinContent(i)) +  (systErr15*data15_toterr->GetBinContent(i))*(systErr15*data15_toterr->GetBinContent(i)));
 	data15_toterr->SetBinError(i,toterr); 
-	double toterr = sqrt(data30_toterr->GetBinError(i)*data30_toterr->GetBinError(i) +  (systErrCORRECTION*data30_toterr->GetBinContent(i))*(systErrCORRECTION*data30_toterr->GetBinContent(i)) +  (systErr*data30_toterr->GetBinContent(i))*(systErr*data30_toterr->GetBinContent(i)));
+	double toterr = sqrt(data30_toterr->GetBinError(i)*data30_toterr->GetBinError(i) +  (systErrCORRECTION*data30_toterr->GetBinContent(i))*(systErrCORRECTION*data30_toterr->GetBinContent(i)) +  (systErr30*data30_toterr->GetBinContent(i))*(systErr30*data30_toterr->GetBinContent(i)));
 	data30_toterr->SetBinError(i,toterr); 
-	double toterr = sqrt(data50_toterr->GetBinError(i)*data50_toterr->GetBinError(i) +  (systErrCORRECTION*data50_toterr->GetBinContent(i))*(systErrCORRECTION*data50_toterr->GetBinContent(i)) +  (systErr*data50_toterr->GetBinContent(i))*(systErr*data50_toterr->GetBinContent(i)));
+	double toterr = sqrt(data50_toterr->GetBinError(i)*data50_toterr->GetBinError(i) +  (systErrCORRECTION*data50_toterr->GetBinContent(i))*(systErrCORRECTION*data50_toterr->GetBinContent(i)) +  (systErr50*data50_toterr->GetBinContent(i))*(systErr50*data50_toterr->GetBinContent(i)));
 	data50_toterr->SetBinError(i,toterr); 
 
     }
     else{
       if(addErrCorrectionQuadratic){ //add squares of error of correction
-	double toterr = sqrt(data15_toterr->GetBinError(i)*data15_toterr->GetBinError(i) + data15_err->GetBinContent(i)*data15_err->GetBinContent(i) +  (systErr*data15_toterr->GetBinContent(i))*(systErr*data15_toterr->GetBinContent(i)));
+	double toterr = sqrt(data15_toterr->GetBinError(i)*data15_toterr->GetBinError(i) + data15_err->GetBinContent(i)*data15_err->GetBinContent(i) +  (systErr15*data15_toterr->GetBinContent(i))*(systErr15*data15_toterr->GetBinContent(i)));
 	data15_toterr->SetBinError(i,toterr); 
 	
-	double toterr = sqrt(data30_toterr->GetBinError(i)*data30_toterr->GetBinError(i) + data30_err->GetBinContent(i)*data30_err->GetBinContent(i) +  (systErr*data30_toterr->GetBinContent(i))*(systErr*data30_toterr->GetBinContent(i))); 
+	double toterr = sqrt(data30_toterr->GetBinError(i)*data30_toterr->GetBinError(i) + data30_err->GetBinContent(i)*data30_err->GetBinContent(i) +  (systErr30*data30_toterr->GetBinContent(i))*(systErr30*data30_toterr->GetBinContent(i))); 
 	data30_toterr->SetBinError(i,toterr); 
 	
-	double toterr = sqrt(data50_toterr->GetBinError(i)*data50_toterr->GetBinError(i) + data50_err->GetBinContent(i)*data50_err->GetBinContent(i) +  (systErr*data50_toterr->GetBinContent(i))*(systErr*data50_toterr->GetBinContent(i))); 
+	double toterr = sqrt(data50_toterr->GetBinError(i)*data50_toterr->GetBinError(i) + data50_err->GetBinContent(i)*data50_err->GetBinContent(i) +  (systErr50*data50_toterr->GetBinContent(i))*(systErr50*data50_toterr->GetBinContent(i))); 
     data50_toterr->SetBinError(i,toterr); 
       }
       else{ //add error linear
-	double toterr = sqrt(data15_toterr->GetBinError(i)*data15_toterr->GetBinError(i) + data15_err->GetBinContent(i) +  (systErr*data15_toterr->GetBinContent(i))*(systErr*data15_toterr->GetBinContent(i))); 
+	double toterr = sqrt(data15_toterr->GetBinError(i)*data15_toterr->GetBinError(i) + data15_err->GetBinContent(i) +  (systErr15*data15_toterr->GetBinContent(i))*(systErr15*data15_toterr->GetBinContent(i))); 
 	data15_toterr->SetBinError(i,toterr); 
 	
-	double toterr = sqrt(data30_toterr->GetBinError(i)*data30_toterr->GetBinError(i) + data30_err->GetBinContent(i) +  (systErr*data30_toterr->GetBinContent(i))*(systErr*data30_toterr->GetBinContent(i))); 
+	double toterr = sqrt(data30_toterr->GetBinError(i)*data30_toterr->GetBinError(i) + data30_err->GetBinContent(i) +  (systErr30*data30_toterr->GetBinContent(i))*(systErr30*data30_toterr->GetBinContent(i))); 
 	data30_toterr->SetBinError(i,toterr); 
 	
-	double toterr = sqrt(data50_toterr->GetBinError(i)*data50_toterr->GetBinError(i) + data50_err->GetBinContent(i) +  (systErr*data50_toterr->GetBinContent(i))*(systErr*data50_toterr->GetBinContent(i))); 
+	double toterr = sqrt(data50_toterr->GetBinError(i)*data50_toterr->GetBinError(i) + data50_err->GetBinContent(i) +  (systErr50*data50_toterr->GetBinContent(i))*(systErr50*data50_toterr->GetBinContent(i))); 
       data50_toterr->SetBinError(i,toterr); 
       }
     }
@@ -273,13 +304,14 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 //   data15_toterrLUMI->SetMarkerStyle(21); 
 //   data30_toterrLUMI->SetMarkerStyle(25); 
 //   data50_toterrLUMI->SetMarkerStyle(20); 
-  data15_toterrLUMI->SetFillColor(kYellow-7); 
-  data30_toterrLUMI->SetFillColor(kYellow-7); 
-  data50_toterrLUMI->SetFillColor(kYellow-7); 
+  data15_toterrLUMI->SetFillColor(boxcolor); 
+  data30_toterrLUMI->SetFillColor(boxcolor); 
+  data50_toterrLUMI->SetFillColor(boxcolor); 
   mc15->SetFillColor(8);
   mc15->SetLineWidth(3);
   mc15->SetLineColor(8);
   mc15->SetMarkerColor(8);
+//  mc15->SetLineStyle(3);
   mc30->SetFillColor(8);
   mc30->SetLineWidth(3);
   mc30->SetLineColor(8);
@@ -310,6 +342,8 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   std::cout << "AXISMAX " << axismax << std::endl;
   data15->GetYaxis()->SetRangeUser(min*0.2,axismax); 
 
+//   std::cout << "axismax " << axismax << " " << data15->GetMaximum() << "\n";
+
   ////
 
   ////
@@ -317,18 +351,18 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   data15->GetYaxis()->SetTitleOffset(1.5);
   data15->SetTitle("");
   if(todraw=="dR") {
-    if(!corrected) data15->GetYaxis()->SetTitle("#frac{d #sigma}{d #Delta R} uncorrected [pb]");
-    else data15->GetYaxis()->SetTitle("#frac{d #sigma}{d #Delta R} [pb]");
+    if(!corrected) data15->GetYaxis()->SetTitle("#frac{d #sigma}{d #Delta R} uncorrected (pb)");
+    else data15->GetYaxis()->SetTitle("#frac{d #sigma}{d #Delta R} (pb)");
     data15->GetXaxis()->SetTitle("#Delta R");
   }
   else if (todraw=="dPhi") {
-    if(!corrected) data15->GetYaxis()->SetTitle("#frac{d #sigma}{d #Delta #phi} uncorrected [pb]");
-    else data15->GetYaxis()->SetTitle("#frac{d #sigma}{d #Delta #phi} [pb]");
+    if(!corrected) data15->GetYaxis()->SetTitle("#frac{d #sigma}{d #Delta #phi} uncorrected (pb)");
+    else data15->GetYaxis()->SetTitle("#frac{d #sigma}{d #Delta #phi} (pb)");
     data15->GetXaxis()->SetTitle("#Delta #phi");
   }
   else if (todraw=="dEta") {
-    if(!corrected) data15->GetYaxis()->SetTitle("#frac{d #sigma}{d #Delta #eta} uncorrected [pb]");
-    else data15->GetYaxis()->SetTitle("#frac{d #sigma}{d #Delta #eta} [pb]");
+    if(!corrected) data15->GetYaxis()->SetTitle("#frac{d #sigma}{d #Delta #eta} uncorrected (pb)");
+    else data15->GetYaxis()->SetTitle("#frac{d #sigma}{d #Delta #eta} (pb)");
     data15->GetXaxis()->SetTitle("#Delta #eta");
   }
   ////
@@ -346,10 +380,16 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 
   /////////////////
   //LUMINORM
-  TCanvas *cucorrcomp1 = new TCanvas(("lumi_"+todraw).c_str(),"DATA vs. MC before correction (lumi)",100,100,500,500);
+  cucorrcomp1 = new TCanvas(("lumi_"+todraw).c_str(),"DATA vs. MC before correction (lumi)",100,100,500,500);
   cucorrcomp1->SetLogy();
   cucorrcomp1->SetLeftMargin(0.16);
-
+  cucorrcomp1->SetTicky();
+  cucorrcomp1->SetTickx();
+  
+  //range
+  if(todraw=="dPhi"){
+    data15->SetMinimum(3); 
+  }
 //   std::cout << "LUMITEST " << data15_toterrLUMI->GetBinError(1) << " " << data15_toterrLUMI->GetBinContent(1) << std::endl;
 
   data15->DrawCopy("E1"); 
@@ -369,8 +409,13 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   ////
   //Legend and CMS label
   //TLegend *leg = new TLegend(0.5,0.72,0.9,0.9);
-  TLegend *leg = new TLegend(0.17,0.15,0.55,0.35);
+  //BEFORE ANDREA CHANGE TLegend *leg = new TLegend(0.15,0.18,0.56,0.38);
+//   TLegend *leg = new TLegend(0.15,0.18,0.56,0.42);
+  TLegend *leg = new TLegend(0.18,0.15,0.59,0.39); //DPHI???
+
+
   leg->SetFillColor(0);
+  leg->SetFillStyle(0);
   leg->SetShadowColor(0);
   leg->SetBorderSize(0); 
 //   leg->AddEntry(data15,"leading jet p_{t}>56 GeV","PE");
@@ -378,22 +423,41 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 //   leg->AddEntry(data50,"leading jet p_{t}>120 GeV","PE");
   std::stringstream ssSFNR; ssSFNR << scaleFactorNR;
   std::stringstream ssSFNR2; ssSFNR2 << scaleFactorNR*scaleFactorNR; 
+//  leg->AddEntry((TObject *)0,"data:","");
+//   leg->AddEntry(data15,("Data (p^{leading jet}_{t} >56 GeV) #times" + ssSFNR2.str() + "").c_str(),"PE");
+//   leg->AddEntry(data30,("Data (p^{leading jet}_{t} >84 GeV) #times" + ssSFNR.str() + "").c_str(),"PE");
+//   leg->AddEntry(data50,"Data (p^{leading jet}_{t} >120 GeV)","PE");
+  leg->AddEntry(data15,("Data (p^{Jet}_{T} >56 GeV) #times" + ssSFNR2.str() + "").c_str(),"PE");
+  leg->AddEntry(data30,("Data (p^{Jet}_{T} >84 GeV) #times" + ssSFNR.str() + "").c_str(),"PE");
+  leg->AddEntry(data50,"Data (p^{Jet}_{T} >120 GeV)","PE");
 
-  leg->AddEntry(data15,("leading jet p_{t}>56 GeV (#times " + ssSFNR2.str() + ")").c_str(),"PE");
-  leg->AddEntry(data30,("leading jet p_{t}>84 GeV (#times " + ssSFNR.str() + ")").c_str(),"PE");
-  leg->AddEntry(data50,"leading jet p_{t}>120 GeV","PE");
-  leg->AddEntry(mc15,"Pythia","l");
+  leg->AddEntry(mc15,"PYTHIA","F");
+  leg->SetEntrySeparation(0.4); //BEFORE ANDREA CHANGE
   leg->Draw();  
-  TLatex *   tex = new TLatex(0.0,axismax*1.5,"CMS #sqrt{s} = 7 TeV, L = 3 pb^{-1}"); //without scale factor 21 | with scale factor 210
-  tex->SetTextSize(0.040); //0.044
+  TLatex *   tex = new TLatex(0.0,axismax*1.5,"CMS    #sqrt{s} = 7 TeV, L = 3.1 pb^{-1}"); //without scale factor 21 | with scale factor 210
+  tex->SetTextSize(0.045); //0.040
   tex->SetLineWidth(2);
   tex->Draw();
+  TLatex * texPS = new TLatex(0.954708,160289.7,"#splitline{p_{T}^{B} > 15 GeV, |\\eta^{B}| < 2.0}{|\\eta^{Jet}| < 3.0} "); 
+  texPS->SetTextSize(0.031);//0.025
+  texPS->SetLineWidth(2);
+  if(withPhaseSpace) {
+    if(todraw=="dR"){
+      texPS->SetY(152879); 
+      texPS->SetX(0.84); //0.954708
+    }
+    if(todraw=="dPhi"){
+      texPS->SetY(205023.5); 
+      texPS->SetX(1.101064); 
+    }
+  }  
+  if(withPhaseSpace) texPS->Draw(); 
   gPad->RedrawAxis();
   ////
   /////////////////
 
   ////
-  //area normalizatin
+  //area normalization
   double factor = (double)nbinsMC/(double)nbins; 
   double intd15 = data15->Integral();
   double intm15 = mc15_a->Integral()/factor;
@@ -409,9 +473,16 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 
   /////////////////
   //AREANORM
-  TCanvas *cucorrcomp1_1 = new TCanvas(("final_area_"+todraw).c_str(),"DATA vs. MC after correction (area)",100,300,500,500);
+  cucorrcomp1_1 = new TCanvas(("final_area_"+todraw).c_str(),"DATA vs. MC after correction (area)",100,300,500,500);
   cucorrcomp1_1->SetLogy();
   cucorrcomp1_1->SetLeftMargin(0.16);
+  cucorrcomp1_1->SetTicky();
+  cucorrcomp1_1->SetTickx();
+
+  //range
+  if(todraw=="dPhi"){
+    data15->SetMinimum(5); 
+  }
 
   data15->DrawCopy("E1"); 
   mc15_a->DrawCopy("E2same"); 
@@ -425,6 +496,7 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   data50->DrawCopy("E1same");
   leg->Draw();
   tex->Draw();
+  if(withPhaseSpace) texPS->Draw(); 
   gPad->RedrawAxis();
   /////////////////
   
@@ -433,8 +505,23 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 
   /////////////////////////////
   //MADGRAPH
-  if(bmadgraph && corrected){
-    TFile *fmadgraph = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/MADGRAPH/MADGRAPHaddedBins.root","");
+  if(bmadgraph/* && corrected*/){
+
+//     TFile *fmadgraph1 = TFile::Open("/scratch/leo/finalOpenBins36X_No6U/histo-MadgraphBB-HLT_Jet15U-BBCorr_HadrJetMatchPt_OpenHLT-total.root","");
+//     TFile *fmadgraph2 = TFile::Open("/scratch/leo/finalOpenBins36X_No6U/histo-MadgraphBB-HLT_Jet30U-BBCorr_HadrJetMatchPt_OpenHLT-total.root","");
+//     TFile *fmadgraph3 = TFile::Open("/scratch/leo/finalOpenBins36X_No6U/histo-MadgraphBB-HLT_Jet50U-BBCorr_HadrJetMatchPt_OpenHLT-total.root","");
+//     TFile *fmadgraph1 = TFile::Open("/scratch/leo/finalOpenBins36X_No6U_NewDPhiBins/histo-MadgraphBB-HLT_Jet15U-BBCorr_HadrJetMatchPt_OpenHLT-total.root","");
+//     TFile *fmadgraph2 = TFile::Open("/scratch/leo/finalOpenBins36X_No6U_NewDPhiBins/histo-MadgraphBB-HLT_Jet30U-BBCorr_HadrJetMatchPt_OpenHLT-total.root","");
+//     TFile *fmadgraph3 = TFile::Open("/scratch/leo/finalOpenBins36X_No6U_NewDPhiBins/histo-MadgraphBB-HLT_Jet50U-BBCorr_HadrJetMatchPt_OpenHLT-total.root","");
+//BEFORE ANDREA CHANGE
+    TFile *fmadgraph1 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/MADGRAPH/histo-MadgraphBBMC-HLT_Jet15U-BBCorr_HadrJetMatchPt_OpenHLT-total.root","");
+    TFile *fmadgraph2 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/MADGRAPH/histo-MadgraphBBMC-HLT_Jet30U-BBCorr_HadrJetMatchPt_OpenHLT-total.root","");
+    TFile *fmadgraph3 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/MADGRAPH/histo-MadgraphBBMC-HLT_Jet50U-BBCorr_HadrJetMatchPt_OpenHLT-total.root","");
+
+//     TFile *fmadgraph1 = TFile::Open("/scratch/leo/finalOpenBins36X_No6U_NewDPhiBins/histo-MadgraphBBMC-HLT_Jet15U-BBCorr_HadrJetMatchPt_OpenHLT-total.root","");
+//     TFile *fmadgraph2 = TFile::Open("/scratch/leo/finalOpenBins36X_No6U_NewDPhiBins/histo-MadgraphBBMC-HLT_Jet30U-BBCorr_HadrJetMatchPt_OpenHLT-total.root","");
+//     TFile *fmadgraph3 = TFile::Open("/scratch/leo/finalOpenBins36X_No6U_NewDPhiBins/histo-MadgraphBBMC-HLT_Jet50U-BBCorr_HadrJetMatchPt_OpenHLT-total.root","");
+
 
     TH1F *mg15_a, *mg30_a, *mg50_a;
     TH1F *mg15_b, *mg30_b, *mg50_b;
@@ -442,9 +529,9 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 //     fmadgraph15->GetObject("sum4",mg15_a); mg15_a->Sumw2();
 //     fmadgraph30->GetObject("sum4",mg30_a); mg30_a->Sumw2();
 //     fmadgraph50->GetObject("sum4",mg50_a); mg50_a->Sumw2();
-    fmadgraph->GetObject(("jet15/Vert_" + todraw + "_efficden").c_str(),mg15_a); mg15_a->Sumw2();
-    fmadgraph->GetObject(("jet30/Vert_" + todraw + "_efficden").c_str(),mg30_a); mg30_a->Sumw2();
-    fmadgraph->GetObject(("jet50/Vert_" + todraw + "_efficden").c_str(),mg50_a); mg50_a->Sumw2();
+    fmadgraph1->GetObject(("Vert_" + todraw + "_efficden").c_str(),mg15_a); mg15_a->Sumw2();
+    fmadgraph2->GetObject(("Vert_" + todraw + "_efficden").c_str(),mg30_a); mg30_a->Sumw2();
+    fmadgraph3->GetObject(("Vert_" + todraw + "_efficden").c_str(),mg50_a); mg50_a->Sumw2();
     mg15_a->Rebin(rebin); 
     mg30_a->Rebin(rebin); 
     mg50_a->Rebin(rebin); 
@@ -490,11 +577,14 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
     mg50_a->Scale(intd50/intmg50_a);
     
     //no mg in non-ratio plots
-//     mg15_a->DrawCopy("E2same");
-//     mg30_a->DrawCopy("E2same");
-//     mg50_a->DrawCopy("E2same");
-//     leg->AddEntry(mg15_a,"Madgraph","l");
+if(mginnonratio)
+{
+     mg15_a->DrawCopy("E2same");
+     mg30_a->DrawCopy("E2same");
+     mg50_a->DrawCopy("E2same");
+     leg->AddEntry(mg15_a,"MadGraph","l");
     /////
+}
   }
   /////////////////////////////
 
@@ -502,9 +592,12 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   /////////////////////////////
   //MC@NLO
   if(bmcatnlo && corrected){
-    TFile *fmcatnlo15 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/MCATNLO/MCATNLO_cobinedEta2_jet15.root","");
-    TFile *fmcatnlo30 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/MCATNLO/MCATNLO_cobinedEta2_jet30.root","");
-    TFile *fmcatnlo50 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/MCATNLO/MCATNLO_cobinedEta2_jet50.root","");
+//     TFile *fmcatnlo15 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/MCATNLO/MCATNLO_cobinedEta2_jet15.root","");
+//     TFile *fmcatnlo30 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/MCATNLO/MCATNLO_cobinedEta2_jet30.root","");
+//     TFile *fmcatnlo50 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/MCATNLO/MCATNLO_cobinedEta2_jet50.root","");
+    TFile *fmcatnlo15 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/MCATNLO/mcatnlo_combined_phiToPi_jet15.root","");
+    TFile *fmcatnlo30 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/MCATNLO/mcatnlo_combined_phiToPi_jet30.root","");
+    TFile *fmcatnlo50 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/MCATNLO/mcatnlo_combined_phiToPi_jet50.root","");
 
     TH1F *mcat15_a, *mcat30_a, *mcat50_a;
     TH1F *mcat15_b, *mcat30_b, *mcat50_b;
@@ -512,6 +605,7 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
     fmcatnlo15->GetObject(("h" + todraw + "_mcatnlo").c_str(),mcat15_a); mcat15_a->Sumw2();
     fmcatnlo30->GetObject(("h" + todraw + "_mcatnlo").c_str(),mcat30_a); mcat30_a->Sumw2();
     fmcatnlo50->GetObject(("h" + todraw + "_mcatnlo").c_str(),mcat50_a); mcat50_a->Sumw2();
+  
 
     mcat15_a->Rebin(4); 
     mcat30_a->Rebin(4); 
@@ -556,11 +650,12 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
     mcat50_a->Scale(intd50/intmcat50_a);
     //no mcat in non-ratio plots
 //     std::cout << "int mcat " << mcat15_a->Integral() << std::endl;
-//     mcat15_a->DrawCopy("E2same");
-//     mcat30_a->DrawCopy("E2same");
-//     mcat50_a->DrawCopy("E2same");
-//     leg->AddEntry(mcat15_a,"MC@NLO","l");
-    ////
+if(mcinnonratio)
+{     mcat15_a->DrawCopy("E2same");
+     mcat30_a->DrawCopy("E2same");
+     mcat50_a->DrawCopy("E2same");
+     leg->AddEntry(mcat15_a,"MC@NLO","l");
+}   ////
   }
   /////////////////////////////
 
@@ -568,9 +663,14 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   //CASCADE
   if(bcascade && corrected){
     //beforeAddingGG 
-    TFile *fcascade1 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/CASCADE/cascade-bottom-ipro=11-ifps=2-ppNEW.root","");
+//    TFile *fcascade1 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/CASCADE/cascade-bottom-ipro=11-ifps=2-ppNEW.root","");
+//     TFile *fcascade1 = TFile::Open("/scratch/arizzi/cascade-bottom-ipro=11-ptcut=100-ifps=2-scal=0.25-pp-all.root","");
+    TFile *fcascade1 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/CASCADE/cascade-bottom-ipro=11-ptcut=100-ifps=2-scal=0.25-pp-all.root","");
+
     //added gg->gg with g->bbbar
-    TFile *fcascade2 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/CASCADE/cascade-bottom-ipro=10-irpa=1-irpb=1-irpc=1-ifps=2-scal=0.25-pp.root","");
+//    TFile *fcascade2 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/CASCADE/cascade-bottom-ipro=10-irpa=1-irpb=1-irpc=1-ifps=2-scal=0.25-pp.root","");
+//     TFile *fcascade2 = TFile::Open("/scratch/arizzi/cascade2.root","");
+    TFile *fcascade2 = TFile::Open("/scratch/wehrlilu/BBCORR/MACROS/OTHERMC/CASCADE/cascade-bottom-ipro=10-ptcut=1000-irpc=1-ifps=2-scal=0.25-pp-all.root","");
 
     TH1F *mcasc15_a, *mcasc30_a, *mcasc50_a;
     TH1F *mcasc15_a1, *mcasc30_a1, *mcasc50_a1; //direct bb
@@ -585,10 +685,14 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
       fcascade2->GetObject("BPH10_010/h2101",mcasc15_a2); mcasc15_a2->Sumw2();
       fcascade2->GetObject("BPH10_010/h2102",mcasc30_a2); mcasc30_a2->Sumw2();
       fcascade2->GetObject("BPH10_010/h2103",mcasc50_a2); mcasc50_a2->Sumw2();
-      //     //ETA2.4 IS EXACTLY THE SAME!!! (FOR ALL BINS)
-      //     fcascade->GetObject("BPH10_010/h2001",mcasc15_a); mcasc15_a->Sumw2();
-      //     fcascade->GetObject("BPH10_010/h2002",mcasc30_a); mcasc30_a->Sumw2();
-      //     fcascade->GetObject("BPH10_010/h2003",mcasc50_a); mcasc50_a->Sumw2();
+      /*	
+      fcascade1->GetObject("BPH10_010/h2001",mcasc15_a1); mcasc15_a1->Sumw2();
+      fcascade1->GetObject("BPH10_010/h2002",mcasc30_a1); mcasc30_a1->Sumw2();
+      fcascade1->GetObject("BPH10_010/h2003",mcasc50_a1); mcasc50_a1->Sumw2();
+      fcascade2->GetObject("BPH10_010/h2001",mcasc15_a2); mcasc15_a2->Sumw2();
+      fcascade2->GetObject("BPH10_010/h2002",mcasc30_a2); mcasc30_a2->Sumw2();
+      fcascade2->GetObject("BPH10_010/h2003",mcasc50_a2); mcasc50_a2->Sumw2();
+      */
     }
     else if(todraw=="dPhi"){
       fcascade1->GetObject("BPH10_010/h3101",mcasc15_a1); mcasc15_a1->Sumw2();
@@ -599,15 +703,39 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
       fcascade2->GetObject("BPH10_010/h3103",mcasc50_a2); mcasc50_a2->Sumw2();
     }
 
+//     std::cout  << "CHECK BINS " << mcasc15_a1->GetXaxis()->GetXmax() << std::endl;
+//     std::cout  << "CHECK BINS " << mcasc15_a2->GetXaxis()->GetXmax() << std::endl;
+
     ////////
     //add direct bb and gsp:
-    mcasc15_a = (TH1F)mcasc15_a1->Clone();
-    mcasc30_a = (TH1F)mcasc30_a1->Clone();
-    mcasc50_a = (TH1F)mcasc50_a1->Clone();
-    mcasc15_a->Add(mcasc15_a2); 
-    mcasc30_a->Add(mcasc30_a2); 
-    mcasc50_a->Add(mcasc50_a2); 
+//     mcasc15_a = (TH1F)mcasc15_a1->Clone();
+//     mcasc30_a = (TH1F)mcasc30_a1->Clone();
+//     mcasc50_a = (TH1F)mcasc50_a1->Clone();
+    if(todraw=="dR"){
+      mcasc15_a = new TH1F("","",60,0,6); 
+      mcasc30_a = new TH1F("","",60,0,6); 
+      mcasc50_a = new TH1F("","",60,0,6); 
+    }
+    if(todraw=="dPhi"){
+      mcasc15_a = new TH1F("","",32,0,3.141592); 
+      mcasc30_a = new TH1F("","",32,0,3.141592); 
+      mcasc50_a = new TH1F("","",32,0,3.141592); 
+    }
+    for(unsigned int i=0; i<=mcasc15_a->GetNbinsX(); i++){
+      double val15 = mcasc15_a1->GetBinContent(i) + mcasc15_a2->GetBinContent(i); 
+      double val30 = mcasc30_a1->GetBinContent(i) + mcasc30_a2->GetBinContent(i); 
+      double val50 = mcasc50_a1->GetBinContent(i) + mcasc50_a2->GetBinContent(i); 
+      mcasc15_a->SetBinContent(i,val15); 
+      mcasc30_a->SetBinContent(i,val30); 
+      mcasc50_a->SetBinContent(i,val50); 
+    }
+//     mcasc15_a->Add(mcasc15_a2); 
+//     mcasc30_a->Add(mcasc30_a2); 
+//     mcasc50_a->Add(mcasc50_a2); 
     ////////
+
+//     mcasc15_a->Draw(); 
+//     return; 
 
 
     mcasc15_a->Rebin(4); 
@@ -652,13 +780,20 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
     mcasc30_a->Scale(intd30/intmcasc30_a);
     mcasc50_a->Scale(intd50/intmcasc50_a);
     //no mcasc in non-ratio plots
-//     std::cout << "int casc" << mcasc15_a->Integral() << std::endl;
-//     mcasc15_a->DrawCopy("E2same");
-//     mcasc30_a->DrawCopy("E2same");
-//     mcasc50_a->DrawCopy("E2same");
-//     leg->AddEntry(mcasc15_a,"Cascade","l");
-    ////
+if(cainnonratio)
+ {
+     std::cout << "int casc" << mcasc15_a->Integral() << std::endl;
+     mcasc15_a->DrawCopy("E2same");
+     mcasc30_a->DrawCopy("E2same");
+     mcasc50_a->DrawCopy("E2same");
+     leg->AddEntry(mcasc15_a,"Cascade","l");
+}   ////
   }
+
+  if(withPhaseSpace) texPS->Draw();
+
+  gPad->RedrawAxis();
+
   /////////////////////////////
 //------------------------------------------------------------------------
 
@@ -683,7 +818,7 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   intm50 = mc50_b->Integral(firstBinMC,nbinsMC)/factor;
 
   double scale15, scale30, scale50; 
-  std::cout << "firstBin/Center (data   mc) " << firstBin << "/" << data15->GetBinCenter(firstBin) << " " << firstBinMC << "/" << mc15_b->GetBinCenter(firstBinMC) << std::endl;
+//   std::cout << "firstBin/Center (data   mc) " << firstBin << "/" << data15->GetBinCenter(firstBin) << " " << firstBinMC << "/" << mc15_b->GetBinCenter(firstBinMC) << std::endl;
     scale15 = intd15/intm15; 
     scale30 = intd30/intm30; 
     scale50 = intd50/intm50; 
@@ -701,9 +836,11 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 
   /////////////////
   //B2BNORM
-  TCanvas *cucorrcomp1_2 = new TCanvas(("final_btb_"+todraw).c_str(),"DATA vs. MC after correction (back-to-back)",100,500,500,500);
+  cucorrcomp1_2 = new TCanvas(("final_btb_"+todraw).c_str(),"DATA vs. MC after correction (back-to-back)",100,500,500,500);
   cucorrcomp1_2->SetLogy();
   cucorrcomp1_2->SetLeftMargin(0.16);
+  cucorrcomp1_2->SetTicky();
+  cucorrcomp1_2->SetTickx();
 
   if(todraw=="dR"){
     TH1F *line = new TH1F("line","line",15,0,6); 
@@ -717,28 +854,33 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
     TBox *box = new TBox(2.4,0,4.4,axismax-axismax/15.0);
     box->SetFillColor(boxcolor); 
     box->SetLineColor(boxcolor); 
+    box->SetFillStyle(boxstyle); 
   }
   else if(todraw=="dPhi"){
-    TH1F *line = new TH1F("line","line",8,0,3.2); 
-    TH1F *sepline = new TH1F("sepline","sepline",8,0,3.2); 
+    TH1F *line = new TH1F("line","line",8,0,3.141592); 
+    TH1F *sepline = new TH1F("sepline","sepline",8,0,3.141592); 
     for(unsigned int i=0; i<=8; i++) {
       line->SetBinContent(i,1);  
       line->SetBinError(i,0);  
       sepline->SetBinContent(i,0);  
       sepline->SetBinError(i,0);  
     }
-    TBox *box = new TBox(2.4,0,3.2,axismax-axismax/15.0);
+    //$HERE
+    TBox *box = new TBox(2.356194,0,3.141592,axismax-axismax/15.0);
     box->SetFillColor(boxcolor); 
     box->SetLineColor(boxcolor); 
+    box->SetFillStyle(boxstyle); 
+    data15->SetMinimum(5); 
   }
   data15->DrawCopy("E1"); 
   box->Draw("same"); 
   mc15_b->DrawCopy("E2same"); 
   mc30_b->DrawCopy("E2same"); 
   mc50_b->DrawCopy("E2same");
-  data15_toterr->DrawCopy("E1same"); 
-  data30_toterr->DrawCopy("E1same"); 
-  data50_toterr->DrawCopy("E1same"); 
+
+  data15_toterr->DrawCopy(toterrorstyle.c_str()); 
+  data30_toterr->DrawCopy(toterrorstyle.c_str()); 
+  data50_toterr->DrawCopy(toterrorstyle.c_str()); 
   data15->DrawCopy("E1same"); 
   data30->DrawCopy("E1same"); 
   data50->DrawCopy("E1same"); 
@@ -750,9 +892,12 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   TLegend *legB = leg->Clone(); 
   TH1F *dummy = new TH1F(); dummy->SetFillColor(boxcolor);
   dummy->SetLineColor(boxcolor); 
-  legB->AddEntry(dummy, "Normalization region","F");
+  dummy->SetFillStyle(boxstyle); 
+  legB->AddEntry(dummy, "Normalisation region","F");
   legB->Draw();
   tex->Draw();
+
+  if(withPhaseSpace) texPS->Draw();
   gPad->RedrawAxis();
   /////////////////
 
@@ -761,17 +906,21 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 
   /////////////////////////////
   //MADGRAPH
-  if(bmadgraph && corrected){
+  if(bmadgraph /*&& corrected*/){
     double intmg15_b = mg15_b->Integral(firstBin,nbins); 
     double intmg30_b = mg30_b->Integral(firstBin,nbins); 
     double intmg50_b = mg50_b->Integral(firstBin,nbins); 
+
     mg15_b->Scale(intd15/intmg15_b);
     mg30_b->Scale(intd30/intmg30_b);
     mg50_b->Scale(intd50/intmg50_b);
     //no mg in non-ratio plots
-//     mg15_b->DrawCopy("E2same");
-//     mg30_b->DrawCopy("E2same");
-//     mg50_b->DrawCopy("E2same");
+if(mginnonratio)
+{
+     mg15_b->DrawCopy("E2same");
+     mg30_b->DrawCopy("E2same");
+     mg50_b->DrawCopy("E2same");
+}
   }
   /////////////////////////////
 
@@ -785,9 +934,11 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
     mcat30_b->Scale(intd30/intmcat30_b);
     mcat50_b->Scale(intd50/intmcat50_b);
     //no mcat in non-ratio plot
-//     mcat15_b->DrawCopy("E2same");
-//     mcat30_b->DrawCopy("E2same");
-//     mcat50_b->DrawCopy("E2same");
+if(mcinnonratio){
+     mcat15_b->DrawCopy("E2same");
+     mcat30_b->DrawCopy("E2same");
+     mcat50_b->DrawCopy("E2same");
+}
   }
   /////////////////////////////
 
@@ -801,9 +952,11 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
     mcasc30_b->Scale(intd30/intmcasc30_b);
     mcasc50_b->Scale(intd50/intmcasc50_b);
     //no mcasc in non-ratio plot
-//     mcasc15_b->DrawCopy("E2same");
-//     mcasc30_b->DrawCopy("E2same");
-//     mcasc50_b->DrawCopy("E2same");
+if(cainnonratio){
+     mcasc15_b->DrawCopy("E2same");
+     mcasc30_b->DrawCopy("E2same");
+     mcasc50_b->DrawCopy("E2same");
+}
   }
   /////////////////////////////
 //------------------------------------------------------------------------
@@ -857,8 +1010,9 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   
   ////
   //divide histos, scale
-  if(!corrected) data15_r->GetYaxis()->SetTitle("Ratio to Pythia (uncorrected)");
-  else  data15_r->GetYaxis()->SetTitle("Ratio to Pythia"); 
+  if(!corrected) data15_r->GetYaxis()->SetTitle("ratio to PYTHIA (uncorrected)");
+  else  data15_r->GetYaxis()->SetTitle("ratio to PYTHIA"); 
+  data15_r->GetYaxis()->SetTitleOffset(1); //new
 //   //%%%
 //   std::cout << "ERROR DIVIDE TEST \nDAT: " << data15_r->GetBinContent(1) << " +- " << data15_r->GetBinError(1) << std::endl;
 //   std::cout << "MC : " << mc15->GetBinContent(1) << " +- " << mc15->GetBinError(1) << std::endl;
@@ -887,17 +1041,17 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   }
   else{
     //add offset
-    std::cout << "errortest " << data15_r->GetBinError(1)
-	      << " " << data15_r->GetBinError(3) << std::endl;
+//     std::cout << "errortest " << data15_r->GetBinError(1)
+// 	      << " " << data15_r->GetBinError(3) << std::endl;
     data15_r->Add(ratioOffsetLin_lumi,2.0); 
-    std::cout << "errortest " << data15_r->GetBinError(1)
-	      << " " << data15_r->GetBinError(3) << std::endl;
+//     std::cout << "errortest " << data15_r->GetBinError(1)
+// 	      << " " << data15_r->GetBinError(3) << std::endl;
     data30_r->Add(ratioOffsetLin_lumi); 
     data15_toterr_r->Add(ratioOffsetLin_lumi,2.0); 
     data30_toterr_r->Add(ratioOffsetLin_lumi); 
     data15_toterrLUMI_r->Add(ratioOffsetLin_lumi,2.0); 
     data30_toterrLUMI_r->Add(ratioOffsetLin_lumi); 
-    data15_r->GetYaxis()->SetRangeUser(0,3*DratioOffsetLin_lumi+2);
+    data15_r->GetYaxis()->SetRangeUser(0,3*DratioOffsetLin_lumi+3);
   }
   ////
 
@@ -906,6 +1060,7 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   line->SetLineWidth(2);
   line->SetFillColor(0);
   line->SetLineColor(8);
+  line->SetLineStyle(2);
   TH1F *line2, *line3, *line2_lumi, *line3_lumi, *sepline_lumi, *sepline2, *sepline2_lumi; 
   line2 = (TH1F)line->Clone();
   line3 = (TH1F)line2->Clone();
@@ -936,7 +1091,9 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   std::cout << "LUMINORM RATIO\n";
   /////////////////
   //LUMINORM
-  TCanvas *cucorrcomp2 = new TCanvas(("final_ratio_lumi_"+todraw).c_str(),"Ratio plots",700,100,500,500);
+  cucorrcomp2 = new TCanvas(("final_ratio_lumi_"+todraw).c_str(),"Ratio plots",700,100,500,500);
+  cucorrcomp2->SetTicky();
+  cucorrcomp2->SetTickx();
   if(ratioPlotsInLog) cucorrcomp2->SetLogy();
   cucorrcomp2->SetLeftMargin(0.14);
   data15_r->GetYaxis()->SetLabelSize(0.0); 
@@ -970,44 +1127,47 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 //     ssfact1_lumi << " (+ " << DratioOffsetLin_lumi << ")"; 
 //     ssfact2_lumi << " (+ " << DratioOffsetLin_lumi*2.0 << ")"; 
 //   }
-
-  TLegend *leg2 = new TLegend(0.5,0.8,0.899,0.89);
+  TLegend *leg2 = new TLegend(0.57,0.70,0.97,0.892); //0.45 0.8 0.88 0.89
+  leg2->SetEntrySeparation(0.4);
   leg2->SetFillColor(0);
   leg2->SetShadowColor(0);
   leg2->SetLineColor(0); 
-  leg2->AddEntry(data15,("leading jet p_{t}>56 GeV"+ ssfact2.str()).c_str(),"PE");
-  leg2->AddEntry(data30,("leading jet p_{t}>84 GeV" + ssfact1.str()).c_str(),"PE");
-  leg2->AddEntry(data50,"leading jet p_{t}>120 GeV","PE");
+//  leg2->AddEntry((TObject *)0,"data:","");
+  leg2->AddEntry(data15,("Data (p^{Jet}_{T} > 56 GeV) "+ ssfact2.str()).c_str(),"PE");
+  leg2->AddEntry(data30,("Data (p^{Jet}_{T} > 84 GeV) " + ssfact1.str()).c_str(),"PE");
+  leg2->AddEntry(data50,"Data (p^{Jet}_{T} > 120 GeV)","PE");
   //ratio lumi plot
-  TLegend *leg2_1 = new TLegend(0.5,0.7,0.89,0.89);
+  TLegend *leg2_1 = new TLegend(0.49,0.65,0.94,0.89); //0.45 0.7 0.88 0.89
+//  leg2_1->AddEntry((TObject *)0,"data:","");
   leg2_1->SetFillColor(0);
   leg2_1->SetShadowColor(0);
   leg2_1->SetBorderSize(0); 
-  leg2_1->AddEntry(data15,("leading jet p_{t}>56 GeV" + ssfact2_lumi.str()).c_str(),"PE");
-  leg2_1->AddEntry(data30,("leading jet p_{t}>84 GeV" + ssfact1_lumi.str()).c_str(),"PE");
-  leg2_1->AddEntry(data50,"leading jet p_{t}>120 GeV","PE");
-  leg2_1->AddEntry(mc15,"Pythia","l");
+  leg2_1->AddEntry(data15,("Data (p^{Jet}_{T} > 56 GeV) " + ssfact2_lumi.str()).c_str(),"PE");
+  leg2_1->AddEntry(data30,("Data (p^{Jet}_{T} > 84 GeV) " + ssfact1_lumi.str()).c_str(),"PE");
+  leg2_1->AddEntry(data50,"Data (p^{Jet}_{T} > 120 GeV)","PE");
+  leg2_1->AddEntry(line,"PYTHIA","l");
   //ratio area & b2b norm
-  TLegend *leg3 = new TLegend(0.2,0.75,0.48,0.89);
+  TLegend *leg3 = new TLegend(0.2,0.75,0.48,0.89); //89
   leg3->SetFillColor(0);
   leg3->SetShadowColor(0);
   leg3->SetBorderSize(0);  
-  leg3->AddEntry(mc15,"Pythia","l");	
-  if(bmadgraph) leg3->AddEntry(mg15_a,"Madgraph","l");
-  if(bmcatnlo) leg3->AddEntry(mcat15_a,"MC@NLO","l");
-  if(bcascade) leg3->AddEntry(mcasc15_a,"Cascade","l");
+  leg3->AddEntry(line,"PYTHIA","l");	
+  if(bmadgraph) leg3->AddEntry(mg15_a,"MadGraph","F");
+  if(bmcatnlo) leg3->AddEntry(mcat15_a,"MC@NLO","F");
+  if(bcascade) leg3->AddEntry(mcasc15_a,"Cascade","F");
   leg2_1->Draw();
   if(ratioPlotsInLog) {
-    TLatex *   tex2 = new TLatex(0.15,15000000,"CMS #sqrt{s} = 7 TeV, L = 3 pb^{-1}");
-    TLatex *   tex2_lumi = new TLatex(0.15,15000000,"CMS #sqrt{s} = 7 TeV, L = 3 pb^{-1}");
+    TLatex *   tex2 = new TLatex(0.15,15000000,"CMS    #sqrt{s} = 7 TeV, L = 3.1 pb^{-1}");
+    TLatex *   tex2_lumi = new TLatex(0.15,15000000,"CMS    #sqrt{s} = 7 TeV, L = 3.1 pb^{-1}");
   }
   else {
-    TLatex *   tex2_lumi = new TLatex(0.0,DratioOffsetLin_lumi*3.0+2.2,"CMS #sqrt{s} = 7 TeV, L = 3 pb^{-1}");
-    TLatex *   tex2 = new TLatex(0.0,DratioOffsetLin*3.0+2.3,"CMS #sqrt{s} = 7 TeV, L = 3 pb^{-1}");
+//     std::cout << "Label to fix " << DratioOffsetLin_lumi*3.0+2.2 << std::endl;
+    TLatex *   tex2_lumi = new TLatex(0.0,DratioOffsetLin_lumi*3.0+3.3,"CMS    #sqrt{s} = 7 TeV, L = 3.1 pb^{-1}");
+    TLatex *   tex2 = new TLatex(0.0,DratioOffsetLin*3.0+3.5,"CMS    #sqrt{s} = 7 TeV, L = 3.1 pb^{-1}");
   }
-  tex2->SetTextSize(0.040);
+  tex2->SetTextSize(0.045);//0.4
   tex2->SetLineWidth(2);
-  tex2_lumi->SetTextSize(0.040);
+  tex2_lumi->SetTextSize(0.045);//0.4
   tex2_lumi->SetLineWidth(2);
   tex2_lumi->Draw();
 
@@ -1017,7 +1177,7 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 
   //axis
   //ylabels: (look for data15_r->...->SetLabelSize(0.0); to have def. lab)
-  TLatex *t = new TLatex();
+/*  TLatex *t = new TLatex();
   t->SetTextSize(0.042); 
 //   t->SetTextFont(42); 
   t->SetTextAlign(31);
@@ -1026,7 +1186,32 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   for(int ii=0; ii<nylab; ii++){
     t->DrawTextNDC(0.13,0.083+0.1*ii, Form("%1.0f",ylabels[ii]));
   }
-  
+*/
+   TF1 *f01=new TF1("f01","x",0,DratioOffsetLin_lumi-0.1);
+   TF1 *f02=new TF1("f02","x",0,DratioOffsetLin_lumi+0.9);
+   TGaxis *A01 = new TGaxis(0,0,0,DratioOffsetLin_lumi-0.1,"f01",DratioOffsetLin_lumi*2,"-");
+   A01->SetLabelSize(0.03);
+   A01->Draw();
+   TGaxis *A02 = new TGaxis(0,DratioOffsetLin_lumi,0,DratioOffsetLin_lumi*2-0.1,"f01",DratioOffsetLin_lumi*2,"-");
+   A02->SetLabelSize(0.03);
+   A02->Draw();
+   TGaxis *A03 = new TGaxis(0,DratioOffsetLin_lumi*2,0,DratioOffsetLin_lumi*3+0.9,"f02",DratioOffsetLin_lumi*2+2,"-");
+   A03->SetLabelSize(0.03);
+   A03->Draw();
+ 
+   TLatex * texPS2 = texPS->Clone(); 
+   if(withPhaseSpace){
+     if(todraw=="dR"){
+       texPS2->SetY(11.5); //8.003708
+       texPS2->SetX(0.3533);
+     }
+     else if(todraw=="dPhi"){
+       texPS2->SetY(8.075212);
+       texPS2->SetX(0.2963577);
+     }
+     texPS2->Draw(); 
+   }
+  gPad->RedrawAxis(); 
   /////////////////
   
 
@@ -1042,8 +1227,10 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   
   ////
   //divide and scale, axis
-  if(!corrected) data15_r_a->GetYaxis()->SetTitle("Ratio to Pythia (uncorrected)"); 
-  else data15_r_a->GetYaxis()->SetTitle("Ratio to Pythia"); 
+  if(!corrected) data15_r_a->GetYaxis()->SetTitle("ratio to PYTHIA (uncorrected)"); 
+  else data15_r_a->GetYaxis()->SetTitle("ratio to PYTHIA"); 
+  data15_r_a->GetYaxis()->SetTitleOffset(1); //new
+
   data15_r_a->Divide(mc15_a); 
   data30_r_a->Divide(mc30_a); 
   data50_r_a->Divide(mc50_a); 
@@ -1064,14 +1251,16 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
     data30_r_a->Add(ratioOffsetLin); 
     data15_toterr_r_a->Add(ratioOffsetLin,2.0); 
     data30_toterr_r_a->Add(ratioOffsetLin); 
-    data15_r_a->GetYaxis()->SetRangeUser(0,3*DratioOffsetLin+2);
+    data15_r_a->GetYaxis()->SetRangeUser(0,3*DratioOffsetLin+3);
   }
   ////
 
   std::cout << "AREANORM RATIO\n";
   /////////////////
   //AREANORM
-  TCanvas *cucorrcomp2_1 = new TCanvas(("final_ratio_area_"+todraw).c_str(),"Ratio plots",700,300,500,500);
+  cucorrcomp2_1 = new TCanvas(("final_ratio_area_"+todraw).c_str(),"Ratio plots",700,300,500,500);
+  cucorrcomp2_1->SetTicky();
+  cucorrcomp2_1->SetTickx();
   if(ratioPlotsInLog) cucorrcomp2_1->SetLogy();
   cucorrcomp2_1->SetLeftMargin(0.14);
   data15_r_a->GetYaxis()->SetLabelSize(0.0);
@@ -1081,7 +1270,7 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
 //other generators
   //MADGRAPH
   if(bmadgraph && corrected){
-    std::cout << "mg bins " << mg15_a->GetNbinsX() << std::endl;
+//     std::cout << "mg bins " << mg15_a->GetNbinsX() << std::endl;
     mg15_a->Divide(mc15_a);
     mg30_a->Divide(mc30_a);
     mg50_a->Divide(mc50_a);
@@ -1093,15 +1282,18 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
       mg15_a->Add(ratioOffsetLin,2.0); 
       mg30_a->Add(ratioOffsetLin); 
     }
-    mg15_a->DrawCopy(mc_draw_option.c_str());
-    mg30_a->DrawCopy(mc_draw_option.c_str());
-    mg50_a->DrawCopy(mc_draw_option.c_str());
     mg15_a->SetFillColor(0);
     mg30_a->SetFillColor(0);
     mg50_a->SetFillColor(0);
     mg15_a->DrawCopy("Chistsame");
     mg30_a->DrawCopy("Chistsame");
     mg50_a->DrawCopy("Chistsame");
+    mg15_a->SetFillColor(madgColF);
+    mg30_a->SetFillColor(madgColF);
+    mg50_a->SetFillColor(madgColF);
+    mg15_a->DrawCopy(mc_draw_option.c_str());
+    mg30_a->DrawCopy(mc_draw_option.c_str());
+    mg50_a->DrawCopy(mc_draw_option.c_str());
   }
   //MCATNLO
   if(bmcatnlo && corrected){
@@ -1116,22 +1308,30 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
       mcat15_a->Add(ratioOffsetLin,2.0); 
       mcat30_a->Add(ratioOffsetLin); 
     }
-    mcat15_a->DrawCopy(mc_draw_option.c_str());
-    mcat30_a->DrawCopy(mc_draw_option.c_str());
-    mcat50_a->DrawCopy(mc_draw_option.c_str());
     mcat15_a->SetFillColor(0);
     mcat30_a->SetFillColor(0);
     mcat50_a->SetFillColor(0);
     mcat15_a->DrawCopy("Chistsame");
     mcat30_a->DrawCopy("Chistsame");
     mcat50_a->DrawCopy("Chistsame");
+    mcat15_a->SetFillColor(mcatColF);
+    mcat30_a->SetFillColor(mcatColF);
+    mcat50_a->SetFillColor(mcatColF);
+    mcat15_a->DrawCopy(mc_draw_option.c_str());
+    mcat30_a->DrawCopy(mc_draw_option.c_str());
+    mcat50_a->DrawCopy(mc_draw_option.c_str());
 
   }
   //CASCADE
   if(bcascade && corrected){
 //     std::cout << "CASC " << mcasc15_a->GetXaxis()->GetXmin() << " " << mcasc15_a->GetXaxis()->GetXmax() << " " << mcasc15_a->GetNbinsX() << std::endl;
 //     std::cout << "PYTH " << mc15_a->GetXaxis()->GetXmin() << " " << mc15_a->GetXaxis()->GetXmax() << " " << mc15_a->GetNbinsX() << std::endl;
+//######
+    std::cout  << "CHECK BINS " << mcasc15_a->GetNbinsX() << " " << mcasc15_a->GetXaxis()->GetXmin() << " " << mcasc15_a->GetXaxis()->GetXmax() << std::endl;
+    std::cout  << "CHECK BINS " << mc15_a->GetNbinsX() << " " << mc15_a->GetXaxis()->GetXmin() << " " << mc15_a->GetXaxis()->GetXmax() << std::endl;
+
     mcasc15_a->Divide(mc15_a);
+    std::cout << "after one\n";
     mcasc30_a->Divide(mc30_a);
     mcasc50_a->Divide(mc50_a);
 //     std::cout << "CASC " << mcasc15_a->GetXaxis()->GetXmin() << " " << mcasc15_a->GetXaxis()->GetXmax() << " " << mcasc15_a->GetNbinsX() << std::endl;
@@ -1144,15 +1344,18 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
       mcasc15_a->Add(ratioOffsetLin,2.0); 
       mcasc30_a->Add(ratioOffsetLin); 
     }
-    mcasc15_a->DrawCopy(mc_draw_option.c_str());
-    mcasc30_a->DrawCopy(mc_draw_option.c_str());
-    mcasc50_a->DrawCopy(mc_draw_option.c_str());
     mcasc15_a->SetFillColor(0);
     mcasc30_a->SetFillColor(0);
     mcasc50_a->SetFillColor(0);
     mcasc15_a->DrawCopy("Chistsame");
     mcasc30_a->DrawCopy("Chistsame");
     mcasc50_a->DrawCopy("Chistsame");
+    mcasc15_a->SetFillColor(cascColF);
+    mcasc30_a->SetFillColor(cascColF);
+    mcasc50_a->SetFillColor(cascColF);
+    mcasc15_a->DrawCopy(mc_draw_option.c_str());
+    mcasc30_a->DrawCopy(mc_draw_option.c_str());
+    mcasc50_a->DrawCopy(mc_draw_option.c_str());
 
   }
 //------------------------------------------------------------------------
@@ -1173,8 +1376,34 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   //seplines:
   sepline->Draw("same");
   sepline2->Draw("same");
+//   float axmax = data15_r_a->GetYaxis()->GetXmax();
+//   float axmin = data15_r_a->GetYaxis()->GetXmin();
+   TF1 *f1=new TF1("f1","x",0,DratioOffsetLin-0.5);
+   TGaxis *A1 = new TGaxis(0,0,0,DratioOffsetLin-0.5,"f1",DratioOffsetLin+10,"-");
+   A1->SetLabelSize(0.03);
+   A1->Draw();
+   TGaxis *A2 = new TGaxis(0,DratioOffsetLin,0,DratioOffsetLin*2-0.5,"f1",DratioOffsetLin+10,"-");
+   A2->SetLabelSize(0.03);
+   A2->Draw();
+   TGaxis *A3 = new TGaxis(0,DratioOffsetLin*2,0,DratioOffsetLin*3-0.5,"f1",DratioOffsetLin+10,"-");
+   A3->SetLabelSize(0.03);
+   A3->Draw();
 
+   TLatex * texPS3 = texPS->Clone(); 
+   if(withPhaseSpace){
+     if(todraw=="dR"){
+       texPS3->SetY(11.75); //12.22643
+       texPS3->SetX(0.3533956);
+     }
+     else if(todraw=="dPhi"){
+       texPS3->SetY(9.8); //10.00344
+       texPS3->SetX(0.2963577);
+     }
+     texPS3->Draw(); 
+   }
+  gPad->RedrawAxis(); 
 
+/*
   //axis
   //ylabels: (look for data15_r->...->SetLabelSize(0.0); to have def. lab)
   TLatex *t = new TLatex();
@@ -1184,9 +1413,10 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   const int nylab2 = 18; 
   const double ylabels2[nylab2] = {0,1,2,3,4,5,0,1,2,3,4,5,0,1,2,3,4,5}; 
   for(int ii=0; ii<nylab2; ii++){
-    t->DrawTextNDC(0.13,0.086+0.04*ii, Form("%1.0f",ylabels2[ii]));
+//ARFIX
+//    t->DrawTextNDC(0.13,0.086+0.04*ii, Form("%1.0f",ylabels2[ii]));
   }
-
+*/
 
   /////////////////
 
@@ -1203,8 +1433,10 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   
   ////
   //divide and scale, axis
-  if(!corrected) data15_r_b->GetYaxis()->SetTitle("Ratio to Pythia (uncorrected)"); 
-  else data15_r_b->GetYaxis()->SetTitle("Ratio to Pythia"); 
+  if(!corrected) data15_r_b->GetYaxis()->SetTitle("ratio to PYTHIA (uncorrected)"); 
+  else data15_r_b->GetYaxis()->SetTitle("ratio to PYTHIA"); 
+  data15_r_b->GetYaxis()->SetTitleOffset(1); //new
+
   std::cout << "## " << data15_r_b->GetBinCenter(firstBin) << " " << data15_r_b->GetBinCenter(nbins) << " " << data15_r_b->Integral(firstBin, nbins) << std::endl;
   data15_r_b->Divide(mc15_b); 
   data30_r_b->Divide(mc30_b); 
@@ -1226,14 +1458,17 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
     data30_r_b->Add(ratioOffsetLin); 
     data15_toterr_r_b->Add(ratioOffsetLin,2.0); 
     data30_toterr_r_b->Add(ratioOffsetLin); 
-    data15_r_b->GetYaxis()->SetRangeUser(0,3*DratioOffsetLin+2);
+    data15_r_b->GetYaxis()->SetRangeUser(0,3*DratioOffsetLin+3);
   }
+
   ////
 
   std::cout << "B2BNORM RATIO\n";
   /////////////////
   //B2BNORM
-  TCanvas *cucorrcomp2_2 = new TCanvas(("final_ratio_btb_"+todraw).c_str(),"Ratio plots",700,500,500,500);
+  cucorrcomp2_2 = new TCanvas(("final_ratio_btb_"+todraw).c_str(),"Ratio plots",700,500,500,500);
+  cucorrcomp2_2->SetTicky();
+  cucorrcomp2_2->SetTickx();
   if(ratioPlotsInLog) cucorrcomp2_2->SetLogy();
   cucorrcomp2_2->SetLeftMargin(0.14);
   data15_r_b->GetYaxis()->SetLabelSize(0.0);
@@ -1241,14 +1476,16 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   data15_r_b->Draw("E1");
   if(todraw=="dR"){
     if(ratioPlotsInLog) TBox *box2 = new TBox(2.4,0,4.4,1000000);
-    else TBox *box2 = new TBox(2.4,0,4.4,3*DratioOffsetLin);
+    else TBox *box2 = new TBox(2.4,0,4.4,2.8*DratioOffsetLin); //3*DratioOffsetLin
   }
   else if(todraw=="dPhi"){
-    if(ratioPlotsInLog) TBox *box2 = new TBox(2.4,0,3.2,1000000);
-    else TBox *box2 = new TBox(2.4,0,3.2,3*DratioOffsetLin);
+    //$HERE
+    if(ratioPlotsInLog) TBox *box2 = new TBox(2.356194,0,3.141592,1000000);
+    else TBox *box2 = new TBox(2.356194,0,3.141592,2.8*DratioOffsetLin);
   }
   box2->SetFillColor(boxcolor); 
   box2->SetLineColor(boxcolor); 
+  box2->SetFillStyle(boxstyle);
   box2->Draw();
 //------------------------------------------------------------------------
 //other generators
@@ -1344,19 +1581,38 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
   ////
   //vertical line
 //   l->Draw("same"); 
-  leg2->Draw();
+  TLegend * leg2a = leg2->Clone();
+  leg2a->AddEntry(dummy, "Normalisation region","F");
+  leg2a->Draw();
   leg3->Draw();
   tex2->Draw();
 
   //seplines:
   sepline->Draw("same");
   sepline2->Draw("same");
+   TGaxis *A4 = new TGaxis(0,0,0,DratioOffsetLin-0.5,"f1",DratioOffsetLin+se,"-");
+   A4->SetLabelSize(0.03);
+   A4->Draw();
+   TGaxis *A5 = new TGaxis(0,DratioOffsetLin,0,DratioOffsetLin*2-0.5,"f1",DratioOffsetLin+se,"-");
+   A5->SetLabelSize(0.03);
+   A5->Draw();
+   TGaxis *A6 = new TGaxis(0,DratioOffsetLin*2,0,DratioOffsetLin*3-0.5,"f1",DratioOffsetLin+se,"-");
+   A6->SetLabelSize(0.03);
+   A6->Draw();
+
 
   //axis
-  for(int ii=0; ii<nylab2; ii++){
-    t->DrawTextNDC(0.13,0.086+0.04*ii, Form("%1.0f",ylabels2[ii]));
-  }
+//  for(int ii=0; ii<nylab2; ii++){
+//ARFIX
+//  t->DrawTextNDC(0.13,0.086+0.04*ii, Form("%1.0f",ylabels2[ii]));
+//  }
 
+
+  if(withPhaseSpace) texPS3->Draw(); 
+  gPad->RedrawAxis();
+
+
+//   setTDRStyle();
 
   //
   /////////////////
@@ -1375,7 +1631,13 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
     ffinal->cd("corrected");
   }
   
-
+/*  cucorrcomp1->SaveAs((todraw+"_lumi.png").c_str());
+  cucorrcomp1_1->SaveAs((todraw+"_area.png").c_str());
+  cucorrcomp1_2->SaveAs((todraw+"_b2b.png").c_str());
+  cucorrcomp2->SaveAs((todraw+"_ratio_lumi.png").c_str());
+  cucorrcomp2_1->SaveAs((todraw+"_ratio_area.png").c_str());
+  cucorrcomp2_2->SaveAs((todraw+"_ratio_b2b.png").c_str());
+*/
   cucorrcomp1->Write();
   cucorrcomp1_1->Write();
   cucorrcomp1_2->Write();
@@ -1395,4 +1657,46 @@ void resultPlots(string todraw="dR", bool corrected=true, string output="finalPl
     
 }
 
+void pngAgain(std::string todraw)
+{
+
+
+ cucorrcomp1->RedrawAxis();
+ cucorrcomp1_1->RedrawAxis();
+ cucorrcomp1_2->RedrawAxis();
+ cucorrcomp2->RedrawAxis();
+ cucorrcomp2_1->RedrawAxis();
+ cucorrcomp2_2->RedrawAxis();
+  cucorrcomp1->SaveAs((todraw+"_lumi.png").c_str());
+  cucorrcomp1_1->SaveAs((todraw+"_area.png").c_str());
+  cucorrcomp1_2->SaveAs((todraw+"_b2b.png").c_str());
+  cucorrcomp2->SaveAs((todraw+"_ratio_lumi.png").c_str());
+  cucorrcomp2_1->SaveAs((todraw+"_ratio_area.png").c_str());
+  cucorrcomp2_2->SaveAs((todraw+"_ratio_b2b.png").c_str());
+
+  cucorrcomp1->SaveAs((todraw+"_lumi.pdf").c_str());
+  cucorrcomp1_1->SaveAs((todraw+"_area.pdf").c_str());
+  cucorrcomp1_2->SaveAs((todraw+"_b2b.pdf").c_str());
+  cucorrcomp2->SaveAs((todraw+"_ratio_lumi.pdf").c_str());
+  cucorrcomp2_1->SaveAs((todraw+"_ratio_area.pdf").c_str());
+  cucorrcomp2_2->SaveAs((todraw+"_ratio_b2b.pdf").c_str());
+
+
+  cucorrcomp1->SaveAs((todraw+"_lumi.root").c_str());
+  cucorrcomp1_1->SaveAs((todraw+"_area.root").c_str());
+  cucorrcomp1_2->SaveAs((todraw+"_b2b.root").c_str());
+  cucorrcomp2->SaveAs((todraw+"_ratio_lumi.root").c_str());
+  cucorrcomp2_1->SaveAs((todraw+"_ratio_area.root").c_str());
+  cucorrcomp2_2->SaveAs((todraw+"_ratio_b2b.root").c_str());
+
+  cucorrcomp1->SaveAs((todraw+"_lumi.eps").c_str());
+  cucorrcomp1_1->SaveAs((todraw+"_area.eps").c_str());
+  cucorrcomp1_2->SaveAs((todraw+"_b2b.eps").c_str());
+  cucorrcomp2->SaveAs((todraw+"_ratio_lumi.eps").c_str());
+  cucorrcomp2_1->SaveAs((todraw+"_ratio_area.eps").c_str());
+  cucorrcomp2_2->SaveAs((todraw+"_ratio_b2b.eps").c_str());
+  cucorrcomp2_2->SaveAs((todraw+"_ratio_b2b.C").c_str());
+
+
+}
 
