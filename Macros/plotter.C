@@ -89,7 +89,7 @@ struct PlotterVsPtBin
 {
  std::vector<Sample> samples;
  std::vector<PtBin>  bins;
- virtual std::string titleX() {return  "p^{Jet}_{T} (GeV)";}
+ virtual std::string titleX() {return  "leading jet p_{T} (GeV)";}
  virtual std::string titleY() {return  "";}
  virtual TLegend * legend() {
 //   TLegend * l = new TLegend(0.6,0.1,0.9,0.28);
@@ -171,6 +171,9 @@ struct PlotterVsPtBin
         x_axis=d.GetXaxis();
         options="same";
       }
+     if(name=="trendplot"){
+       d.SetFillStyle(samples[i].ds.fill); 
+     }
    }
    mx*=1.2;
    if(mi>0) mi*=0.8; 
@@ -185,7 +188,10 @@ struct PlotterVsPtBin
      mx=0.7;
      mi=-0.1;
    }
-
+   else if(name=="trendplot"){
+     mx=6.0; 
+     mi=0.0; 
+   }
    x_axis->SetTitle(titleX().c_str());
    y_axis->SetTitle(titleY().c_str());
    y_axis->SetRangeUser(mi,mx);
@@ -193,17 +199,26 @@ struct PlotterVsPtBin
    if(name=="testasymmetry") y_axis->SetTitleOffset(1.36); 
 
 //   x_axis->SetRangeUser(0,3.9);
+   if(name=="trendplot"){
+     l->SetX1NDC(0.5947581); 
+     l->SetY1NDC(0.1737288); 
+     l->SetX2NDC(0.9435484); 
+     l->SetY2NDC(0.3241525); 
+
+// 0.5947581,0.1737288,0.9435484,0.3241525
+   }
    l->Draw("same");
    TLatex * tex, * tex2; 
    tex = new TLatex(bins[0].centralValue,(mx-mi)*0.03+mx,"CMS    #sqrt{s} = 7 TeV, L = 3.1 pb^{-1}");
    if(name=="testratio" || name=="testasymmetry") tex = new TLatex(64,(mx-mi)*0.03+mx,"CMS    #sqrt{s} = 7 TeV, L = 3.1 pb^{-1}");
-
+   if(name=="trendplot")  tex = new TLatex(43.1,(mx-mi)*0.03+mx,"CMS    #sqrt{s} = 7 TeV, L = 3.1 pb^{-1}");
    tex->SetTextSize(0.040); //0.044
    tex->SetLineWidth(2);
    tex->Draw();
 
    tex2 = new TLatex(bins[0].centralValue,3.5,"#splitline{p_{T}^{B} > 15 GeV, |\\eta^{B}| < 2.0}{|\\eta^{Jet}| < 3.0} ");
    if(name=="testasymmetry") tex2 = new TLatex(bins[0].centralValue,0.6,"#splitline{p_{T}^{B} > 15 GeV, |\\eta^{B}| < 2.0}{|\\eta^{Jet}| < 3.0} ");
+   if(name=="trendplot") tex2 = new TLatex(120.2976,5.128152,"#splitline{p_{T}^{B} > 15 GeV, |\\eta^{B}| < 2.0}{|\\eta^{Jet}| < 3.0} "); 
    tex2->SetTextSize(0.04);
    tex2->SetLineWidth(2);
    tex2->Draw();
@@ -578,7 +593,7 @@ void pt(bool same=false,bool sim=false)
 
   tdrStyle->SetEndErrorSize(2);
   // tdrStyle->SetErrorMarker(20);
-  tdrStyle->SetErrorX(0.);
+//   tdrStyle->SetErrorX(0.);
   
   tdrStyle->SetMarkerStyle(20);
 
@@ -774,7 +789,7 @@ void ratio()
 
   tdrStyle->SetEndErrorSize(2);
   // tdrStyle->SetErrorMarker(20);
-  tdrStyle->SetErrorX(0.);
+//   tdrStyle->SetErrorX(0.);
   
   tdrStyle->SetMarkerStyle(20);
 
@@ -919,6 +934,216 @@ pl2.samples = samples;
 pl2.doAll("testasymmetry");
 
 }
+
+void trendRatioPlot()
+{
+
+//   gROOT->ProcessLine(".L ~/tdrstyle.C");
+  TStyle *tdrStyle = new TStyle("tdrStyle","Style for P-TDR");
+
+// For the canvas:
+  tdrStyle->SetCanvasBorderMode(0);
+  tdrStyle->SetCanvasColor(kWhite);
+  tdrStyle->SetCanvasDefH(600); //Height of canvas
+  tdrStyle->SetCanvasDefW(600); //Width of canvas
+  tdrStyle->SetCanvasDefX(0);   //POsition on screen
+  tdrStyle->SetCanvasDefY(0);
+
+// For the Pad:
+  tdrStyle->SetPadBorderMode(0);
+  // tdrStyle->SetPadBorderSize(Width_t size = 1);
+  tdrStyle->SetPadColor(kWhite);
+  tdrStyle->SetPadGridX(false);
+  tdrStyle->SetPadGridY(false);
+  tdrStyle->SetGridColor(0);
+  tdrStyle->SetGridStyle(3);
+  tdrStyle->SetGridWidth(1);
+
+// For the frame:
+  tdrStyle->SetFrameBorderMode(0);
+  tdrStyle->SetFrameBorderSize(1);
+  tdrStyle->SetFrameFillColor(0);
+  tdrStyle->SetFrameFillStyle(0);
+  tdrStyle->SetFrameLineColor(1);
+  tdrStyle->SetFrameLineStyle(1);
+  tdrStyle->SetFrameLineWidth(1);
+
+// For the histo:
+  // tdrStyle->SetHistFillColor(1);
+  // tdrStyle->SetHistFillStyle(0);
+  tdrStyle->SetHistLineColor(1);
+  tdrStyle->SetHistLineStyle(0);
+  tdrStyle->SetHistLineWidth(1);
+  // tdrStyle->SetLegoInnerR(Float_t rad = 0.5);
+  // tdrStyle->SetNumberContours(Int_t number = 20);
+
+  tdrStyle->SetEndErrorSize(2);
+  // tdrStyle->SetErrorMarker(20);
+//   tdrStyle->SetErrorX(0.);
+  
+  tdrStyle->SetMarkerStyle(20);
+
+//For the fit/function:
+  tdrStyle->SetOptFit(1);
+  tdrStyle->SetFitFormat("5.4g");
+  tdrStyle->SetFuncColor(2);
+  tdrStyle->SetFuncStyle(1);
+  tdrStyle->SetFuncWidth(1);
+
+//For the date:
+  tdrStyle->SetOptDate(0);
+  // tdrStyle->SetDateX(Float_t x = 0.01);
+  // tdrStyle->SetDateY(Float_t y = 0.01);
+
+// For the statistics box:
+  tdrStyle->SetOptFile(0);
+  tdrStyle->SetOptStat(0); // To display the mean and RMS:   SetOptStat("mr");
+  tdrStyle->SetStatColor(kWhite);
+  tdrStyle->SetStatFont(42);
+  tdrStyle->SetStatFontSize(0.025);
+  tdrStyle->SetStatTextColor(1);
+  tdrStyle->SetStatFormat("6.4g");
+  tdrStyle->SetStatBorderSize(1);
+  tdrStyle->SetStatH(0.1);
+  tdrStyle->SetStatW(0.15);
+  // tdrStyle->SetStatStyle(Style_t style = 1001);
+  // tdrStyle->SetStatX(Float_t x = 0);
+  // tdrStyle->SetStatY(Float_t y = 0);
+
+// Margins:
+  tdrStyle->SetPadTopMargin(0.05);
+  tdrStyle->SetPadBottomMargin(0.13);
+  tdrStyle->SetPadLeftMargin(0.16);
+  tdrStyle->SetPadRightMargin(0.02);
+
+// For the Global title:
+
+  tdrStyle->SetOptTitle(0);
+  tdrStyle->SetTitleFont(42);
+  tdrStyle->SetTitleColor(1);
+  tdrStyle->SetTitleTextColor(1);
+  tdrStyle->SetTitleFillColor(10);
+  tdrStyle->SetTitleFontSize(0.05);
+  // tdrStyle->SetTitleH(0); // Set the height of the title box
+  // tdrStyle->SetTitleW(0); // Set the width of the title box
+  // tdrStyle->SetTitleX(0); // Set the position of the title box
+  // tdrStyle->SetTitleY(0.985); // Set the position of the title box
+  // tdrStyle->SetTitleStyle(Style_t style = 1001);
+  // tdrStyle->SetTitleBorderSize(2);
+
+// For the axis titles:
+
+  tdrStyle->SetTitleColor(1, "XYZ");
+  tdrStyle->SetTitleFont(42, "XYZ");
+  tdrStyle->SetTitleSize(0.05, "XYZ");
+  // tdrStyle->SetTitleXSize(Float_t size = 0.02); // Another way to set the size?
+  // tdrStyle->SetTitleYSize(Float_t size = 0.02);
+  tdrStyle->SetTitleXOffset(0.9);
+  tdrStyle->SetTitleYOffset(1.25);
+  // tdrStyle->SetTitleOffset(1.1, "Y"); // Another way to set the Offset
+
+// For the axis labels:
+
+  tdrStyle->SetLabelColor(1, "XYZ");
+  tdrStyle->SetLabelFont(42, "XYZ");
+  tdrStyle->SetLabelOffset(0.007, "XYZ");
+  tdrStyle->SetLabelSize(0.04, "XYZ");
+
+// For the axis:
+
+  tdrStyle->SetAxisColor(1, "XYZ");
+  tdrStyle->SetStripDecimals(kTRUE);
+  tdrStyle->SetTickLength(0.03, "XYZ");
+  tdrStyle->SetNdivisions(510, "XYZ");
+  tdrStyle->SetPadTickX(1);  // To get tick marks on the opposite side of the frame
+  tdrStyle->SetPadTickY(1);
+
+// Change for log plots:
+  tdrStyle->SetOptLogx(0);
+  tdrStyle->SetOptLogy(0);
+  tdrStyle->SetOptLogz(0);
+
+// Postscript options:
+  tdrStyle->SetPaperSize(20.,20.);
+  // tdrStyle->SetLineScalePS(Float_t scale = 3);
+  // tdrStyle->SetLineStyleString(Int_t i, const char* text);
+  // tdrStyle->SetHeaderPS(const char* header);
+  // tdrStyle->SetTitlePS(const char* pstitle);
+
+  // tdrStyle->SetBarOffset(Float_t baroff = 0.5);
+  // tdrStyle->SetBarWidth(Float_t barwidth = 0.5);
+  // tdrStyle->SetPaintTextFormat(const char* format = "g");
+  // tdrStyle->SetPalette(Int_t ncolors = 0, Int_t* colors = 0);
+  // tdrStyle->SetTimeOffset(Double_t toffset);
+  // tdrStyle->SetHistMinimumZero(kTRUE);
+
+  tdrStyle->cd();
+
+  //style modifications:
+  gStyle->SetErrorX(0.5);
+  gStyle->SetPadTopMargin(0.08);//.005
+  gStyle->SetPadBottomMargin(0.10);//0.13
+  gStyle->SetMarkerStyle(1); 
+  gStyle->SetPalette(1);
+  gStyle->SetFuncWidth(2);
+
+
+
+// DrawStyle mcStyle;
+// mcStyle.def="E3";
+// mcStyle.legend="F";
+// mcStyle.marker=1;
+
+DrawStyle dataStyle1;
+dataStyle1.def="PE2";
+dataStyle1.legend="F";
+dataStyle1.marker=20;
+dataStyle1.fill=3002; 
+
+DrawStyle dataStyle2;
+dataStyle2.def="PE2";
+dataStyle2.legend="F";
+dataStyle2.marker=20;
+dataStyle2.fill=3003; 
+
+DrawStyle dataStyle3;
+dataStyle3.def="PE2";
+dataStyle3.legend="F";
+dataStyle3.marker=4;
+dataStyle3.fill=3004; 
+
+std::vector<PtBin> ptbins;
+//ptbins.push_back(PtBin("HLT_L1Jet6U",36,0,0,0.21));
+ptbins.push_back(PtBin("HLT_Jet15U",72,16,12,0.106,0.13));
+ptbins.push_back(PtBin("HLT_Jet30U",106,22,14,0.099,0.13));
+ptbins.push_back(PtBin("HLT_Jet50U",150,30,30,0.083,0.13));
+
+std::vector<Sample> samples;
+// samples.push_back(Sample("Pythia6","PYTHIA",8,mcStyle,"Vert_dR_efficden",false));
+// samples.push_back(Sample("MadgraphBBMC","MadGraph",kBlue+2,mcStyle,"Vert_dR_efficden",false));
+ samples.push_back(Sample("Data","Runs > 143731",8,dataStyle1,"Vert_dR_2b_CORR",false)); //after
+ samples.push_back(Sample("Data","Runs < 141950",kBlue+2,dataStyle2,"Vert_dR_2b_CORR",false)); //before
+ samples.push_back(Sample("Data","Runs 141950-143731",1,dataStyle3,"Vert_dR_2b_CORR",false)); //between
+
+///scratch/wehrlilu/BBCORR/MACROS/SUMFILES/DATA/histo-Data-HLT_Jet15U-BBCorr_scaledEff-total_ETACUTOPEN.root
+//samples[2].prefix=("/scratch/wehrlilu/BBCORR/MACROS/SUMFILES/DATA/histo");
+//samples[2].postfix=("BBCorr_scaledEff-total_ETACUTOPEN.root");
+ samples[0].prefix=("/shome/wehrlilu/BBCORR/forUdatingMacrosInCVS/CMSSW_3_8_6/src/UserCode/BbCorrelation/Macros/trendPlot/AFTER143731/histo");
+ samples[1].prefix=("/shome/wehrlilu/BBCORR/forUdatingMacrosInCVS/CMSSW_3_8_6/src/UserCode/BbCorrelation/Macros/trendPlot/BEF141950/histo");
+ samples[2].prefix=("/shome/wehrlilu/BBCORR/forUdatingMacrosInCVS/CMSSW_3_8_6/src/UserCode/BbCorrelation/Macros/trendPlot/BETWEEN/histo");
+
+PlotterRatio pl1;
+pl1.bins = ptbins;
+pl1.samples = samples;
+pl1.doAll("trendplot");
+
+// PlotterAsym pl2;
+// pl2.bins = ptbins;
+// pl2.samples = samples;
+// pl2.doAll("testasymmetry");
+
+}
+
 
 
 void systemPhaseSpace()
