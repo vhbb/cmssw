@@ -162,7 +162,7 @@ process.ak5GenJets = ak5GenJets
 process.load("RecoJets.Configuration.GenJetParticles_cff")
 from RecoJets.JetProducers.ca4GenJets_cfi import ca4GenJets
 process.ca4GenJets = ca4GenJets
-process.load("UserCode.HbbAnalyzer.caTopJets_cff")
+process.load("VHbbAnalysis.HbbAnalyzer.caTopJets_cff")
 ##process.load("TopQuarkAnalysis.TopPairBSM.CATopJetTagger_cfi")
 
 process.ca8GenJets = ca4GenJets.clone( rParam = cms.double(0.8) )
@@ -396,7 +396,7 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string('PatHistos3.root')
 )
 
-process.load("UserCode.HbbAnalyzer.simpleEleIdSequence_cff")
+process.load("VHbbAnalysis.HbbAnalyzer.simpleEleIdSequence_cff")
 process.patElectronIDs = cms.Sequence(process.simpleEleIdSequence)
 
 if isMC == 'false' :

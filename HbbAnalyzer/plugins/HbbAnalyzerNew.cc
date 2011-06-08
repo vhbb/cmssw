@@ -13,12 +13,12 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.2 2011/05/13 22:04:10 dlopes Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.1 2011/06/08 17:25:32 tboccali Exp $
 //
 //
 
-#include "UserCode/HbbAnalyzer/interface/HbbAnalyzerNew.h"
-#include "UserCode/HbbAnalyzer/interface/VHbbEvent.h"
+#include "VHbbAnalysis/HbbAnalyzer/interface/HbbAnalyzerNew.h"
+#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
 
 #define GENPTOLOR(a) TLorentzVector((a).px(), (a).py(), (a).pz(), (a).energy())
 #define GENPTOLORP(a) TLorentzVector((a)->px(), (a)->py(), (a)->pz(), (a)->energy())

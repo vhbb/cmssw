@@ -9,6 +9,6 @@
 <use   name="DataFormats/BeamSpot"/>
 <use   name="root"/>
 <use name="fastjet"/>
-<library   file="*.cc" name="UserCodeHbbAnalyzerPlugins">
+<library   file="*.cc" name="VHbbAnalysisHbbAnalyzerPlugins">
   <flags   EDM_PLUGIN="1"/>
 </library>
