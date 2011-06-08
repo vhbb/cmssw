@@ -1,0 +1,34 @@
+<lcgdict>
+  <class name="VHbbEvent"/>
+  <class name="edm::Wrapper<VHbbEvent>"/>
+
+<class name="VHbbEvent::METInfo"/>
+<class name="VHbbEvent::PUInfo"/>
+<class name="VHbbEvent::ParticleMCInfo"/>
+<class name="VHbbEvent::PrimaryVertexInfo"/>
+<class name="VHbbEvent::TriggerInfo"/>
+<class name="VHbbEvent::DiElectronInfo"/>
+
+<class name="VHbbEvent::DiMuonInfo"/>
+
+<class name="VHbbEvent::ElectronInfo"/>
+
+<class name="VHbbEvent::HardJet"/>
+
+<class name="VHbbEvent::MuonInfo"/>
+
+<class name="VHbbEvent::SimpleJet"/>
+
+<class name="VHbbEvent::TauInfo"/>
+
+<class name="std::vector<VHbbEvent::DiElectronInfo>"/>
+<class name="std::vector<VHbbEvent::DiMuonInfo>"/>
+<class name="std::vector<VHbbEvent::ElectronInfo>"/>
+<class name="std::vector<VHbbEvent::HardJet>"/>
+<class name="std::vector<VHbbEvent::MuonInfo>"/>
+<class name="std::vector<VHbbEvent::SimpleJet>"/>
+<class name="std::vector<VHbbEvent::TauInfo>"/>
+<class name="std::vector<TLorentzVector>"/>
+
+
+</lcgdict>
