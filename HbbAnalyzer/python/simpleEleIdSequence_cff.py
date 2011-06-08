@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-from Analysis.HbbAnalyzer.simpleCutBasedElectronIDSpring10_cfi import *
+from VHbbAnalysis.HbbAnalyzer.simpleCutBasedElectronIDSpring10_cfi import *
 
 
 simpleEleId95relIso = simpleCutBasedElectronID.clone()
