@@ -16,9 +16,8 @@
 <class name="VHbbEvent::HardJet"/>
 
 <class name="VHbbEvent::MuonInfo"/>
-
 <class name="VHbbEvent::SimpleJet"/>
-
+<class name="TVector2"/>
 <class name="VHbbEvent::TauInfo"/>
 
 <class name="std::vector<VHbbEvent::DiElectronInfo>"/>

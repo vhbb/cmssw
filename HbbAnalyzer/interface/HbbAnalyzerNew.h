@@ -40,6 +40,8 @@ using namespace std;
 
 #include "DataFormats/GeometryVector/interface/Phi.h"
 
+#include<TVector2.h>
+
 #include "TMatrixD.h"
 #include "TArrayD.h"
 #include "TMatrixDBase.h"
@@ -57,6 +59,8 @@ class HbbAnalyzerNew : public edm::EDProducer {
   explicit HbbAnalyzerNew(const edm::ParameterSet&);
   ~HbbAnalyzerNew();
   
+ protected:
+  TVector2 getTvect( const pat::Jet* patJet );
   
  private:
   virtual void beginJob() ;

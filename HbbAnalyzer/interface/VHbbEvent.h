@@ -2,6 +2,7 @@
 #define VHbbEvent__H 
 
 #include <TLorentzVector.h>
+#include <TVector2.h>
 #include <TMatrix.h>
 #include <vector>
 
@@ -34,6 +35,8 @@ class VHbbEvent{
     float charge;
     TLorentzVector fourMomentum;
     int bestMCid, bestMCmomid;
+    // new
+    TVector2 tVector;
   };
 
 

@@ -13,12 +13,15 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.3 2011/06/09 06:51:57 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.4 2011/06/09 07:07:12 tboccali Exp $
 //
 //
 
 #include "VHbbAnalysis/HbbAnalyzer/interface/HbbAnalyzerNew.h"
 #include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
+
+#include "DataFormats/GeometryVector/interface/VectorUtil.h"
+
 
 #define GENPTOLOR(a) TLorentzVector((a).px(), (a).py(), (a).pz(), (a).energy())
 #define GENPTOLORP(a) TLorentzVector((a)->px(), (a)->py(), (a)->pz(), (a)->energy())
@@ -526,6 +529,10 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     sj.charge=jet_iter->jetCharge();
     sj.ntracks=jet_iter->associatedTracks().size();
     sj.fourMomentum=GENPTOLORP(jet_iter);
+    //
+    // add tVector
+    //
+    sj.tVector = getTvect(&(*jet_iter));
 
     Particle::LorentzVector p4Jet = jet_iter->p4();
 
@@ -562,6 +569,8 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     sj.charge=jet_iter->jetCharge();
     sj.ntracks=jet_iter->associatedTracks().size();
     sj.fourMomentum=GENPTOLORP(jet_iter);
+
+    sj.tVector = getTvect(&(*jet_iter));
 
     Particle::LorentzVector p4Jet = jet_iter->p4();
 
@@ -650,7 +659,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     VHbbEvent::SimpleJet sj;
 
     sj.flavour = subjet_iter->partonFlavour();
-    
+    sj.tVector = getTvect(&(*subjet_iter));
     sj.tche=subjet_iter->bDiscriminator("trackCountingHighEffBJetTags");
     sj.tchp=subjet_iter->bDiscriminator("trackCountingHighPurBJetTags");
     sj.jp=subjet_iter->bDiscriminator("jetProbabilityBJetTags");
@@ -940,6 +949,52 @@ HbbAnalyzerNew::beginJob(){
 void 
 HbbAnalyzerNew::endJob() {
 }
+
+
+TVector2 HbbAnalyzerNew::getTvect( const pat::Jet* patJet ){
+
+  TVector2 t_Vect(0,0);
+  TVector2 null(0,0);
+  TVector2 ci(0,0);
+  TLorentzVector pi(0,0,0,0);
+  TLorentzVector J(0,0,0,0);
+  TVector2 r(0,0);
+  double patJetpfcPt = 1e10;
+  double r_mag = 1e10;
+  unsigned int nOfconst = 0;
+
+//re-reconstruct the jet direction with the charged tracks
+  std::vector<reco::PFCandidatePtr>
+    patJetpfc = patJet->getPFConstituents();
+  for(size_t idx = 0; idx < patJetpfc.size(); idx++){
+    if( patJetpfc.at(idx)->charge() != 0 ){
+      pi.SetPtEtaPhiE( patJetpfc.at(idx)->pt(), patJetpfc.at(idx)->eta(), patJetpfc.at(idx)->phi(), patJetpfc.at(idx)->energy() );
+      J += pi;
+      nOfconst++;
+    }
+  }
+
+// if there are less than two charged tracks do not calculate the pull (there is not enough info). It returns a null vector
+
+  if( nOfconst < 2 )
+    return null;
+
+  TVector2 v_J( J.Rapidity(), J.Phi() );
+//calculate TVector using only charged tracks
+  for(size_t idx = 0; idx < patJetpfc.size(); idx++){
+    if( patJetpfc.at(idx)->charge() != 0  ){
+      patJetpfcPt = patJetpfc.at(idx)->pt();
+      pi.SetPtEtaPhiE( patJetpfc.at(idx)->pt(), patJetpfc.at(idx)->eta(), patJetpfc.at(idx)->phi(), patJetpfc.at(idx)->energy() );
+      r.Set( pi.Rapidity() - J.Rapidity(), Geom::deltaPhi( patJetpfc.at(idx)->phi(), J.Phi() ) );
+      r_mag = r.Mod();
+      t_Vect += ( patJetpfcPt / J.Pt() ) * r_mag * r;
+    }
+  }
+
+  return t_Vect;
+  
+}
+
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(HbbAnalyzerNew);
