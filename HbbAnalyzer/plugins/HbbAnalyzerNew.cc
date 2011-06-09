@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.1 2011/06/08 17:25:32 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.2 2011/06/08 17:30:41 tboccali Exp $
 //
 //
 
@@ -37,7 +37,10 @@ HbbAnalyzerNew::HbbAnalyzerNew(const edm::ParameterSet& iConfig):
   phoLabel_(iConfig.getUntrackedParameter<edm::InputTag>("photonTag")),
   dimuLabel_(iConfig.getUntrackedParameter<edm::InputTag>("dimuTag")),
   dielecLabel_(iConfig.getUntrackedParameter<edm::InputTag>("dielecTag")),
-  hltResults_(iConfig.getUntrackedParameter<edm::InputTag>("hltResultsTag")){
+  hltResults_(iConfig.getUntrackedParameter<edm::InputTag>("hltResultsTag")),
+  runOnMC_(iConfig.getParameter<bool>("runOnMC")) {
+
+
   //
   // put the setwhatproduced etc etc
  
@@ -311,11 +314,10 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   
   Handle<GenParticleCollection> genParticles;
   
-  bool isMC=1;
   bool printJet=0;
   
   
-  if(isMC){
+  if(runOnMC_){
     
     int Hin=-99,Win=-99,Zin=-99,bin=-99,bbarin=-99;
     
@@ -527,7 +529,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     Particle::LorentzVector p4Jet = jet_iter->p4();
 
-    if(isMC){
+    if(runOnMC_){
       double minb1DR=9999.; 
       for(size_t i = 0; i < genParticles->size(); ++ i) {
 	const GenParticle & p = (*genParticles)[i];
@@ -563,7 +565,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     Particle::LorentzVector p4Jet = jet_iter->p4();
 
-    if(isMC){
+    if(runOnMC_){
       double minb2DR=9999.; 
       for(size_t i = 0; i < genParticles->size(); ++ i) {
 	const GenParticle & p = (*genParticles)[i];
@@ -737,7 +739,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     //     int muInfo[12];
     //     fillMuBlock(mu,  muInfo);
-    if(isMC){
+    if(runOnMC_){
       const GenParticle* muMc = mu->genLepton();
       if(muMc!=0){
 	mf.mcId=muMc->pdgId();
@@ -762,7 +764,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     Geom::Phi<double> deltaphi(elec->superCluster()->phi()-atan2(hbbInfo->calomet.fourMomentum.Py(),hbbInfo->calomet.fourMomentum.Px()));
     ef.acop = deltaphi.value();
     
-    if(isMC){
+    if(runOnMC_){
       const GenParticle* elecMc = elec->genLepton();
       if(elecMc!=0){
 	ef.mcId=elecMc->pdgId();

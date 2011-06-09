@@ -1,13 +1,9 @@
-                                                                     
-                                                                     
-                                                                     
-                                             
 #import configurations
 import FWCore.ParameterSet.Config as cms
 
 import os 
 
-isMC = 'true'
+isMC = 'false'
 
 # define the process
 process = cms.Process("VH")
@@ -27,7 +23,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 # source
 
-process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("file:/tmp/arizzi/trigger.root"))
+process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("/store/data/Run2011A/SingleMu//RECO/PromptReco-v4/000/166/512/A09C4C8F-9B91-E011-AF2D-0030487C8E02.root"))
 
 #process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("/store/relval/CMSSW_4_2_3/RelValTTbar/GEN-SIM-RECO/MC_42_V12-v2/0066/3026A5BD-D97B-E011-A9D7-001A92811736.root"))
 
@@ -362,9 +358,9 @@ process.goodPatJetsAK5PF = cms.EDFilter("PFJetIDSelectionFunctorFilter",
                            filterParams = pfJetIDSelector.clone(), src = cms.InputTag("selectedPatJetsAK5PF") )
 
 process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
-    runOnMC = cms.bool(True),
+    runOnMC = cms.bool(False),
     electronTag = cms.untracked.InputTag("selectedPatElectrons"),
-    hltResultsTag = cms.untracked.InputTag("TriggerResults::HLT0"),
+    hltResultsTag = cms.untracked.InputTag("TriggerResults::HLT"),
 #    tauTag = cms.untracked.InputTag("cleanPatTaus"),
     tauTag = cms.untracked.InputTag("patTaus"),
     muonTag = cms.untracked.InputTag("selectedPatMuons"),

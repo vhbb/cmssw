@@ -80,6 +80,8 @@ class HbbAnalyzerNew : public edm::EDProducer {
   edm::InputTag dimuLabel_;
   edm::InputTag dielecLabel_;
   edm::InputTag hltResults_;
+
+  bool runOnMC_;
   
   //  TMatrixD *pointerPt;
   TMatrixD *pointerEta;
