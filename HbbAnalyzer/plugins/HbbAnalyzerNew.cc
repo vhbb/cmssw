@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.2 2011/06/08 17:30:41 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.3 2011/06/09 06:51:57 tboccali Exp $
 //
 //
 
@@ -537,7 +537,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	if(abs(id)<=6 || id==21 || id==23 || abs(id)==24){
 	  double bb1DR=TMath::Sqrt((p.eta()-p4Jet.eta())*(p.eta()-p4Jet.eta())+
 				   (p.phi()-p4Jet.phi())*(p.phi()-p4Jet.phi()));
-	  if(bb1DR<minb1DR) {minb1DR=bb1DR; sj.b1BestMCid=id; if(p.mother()!=0) sj.b1BestMCmomid=p.mother()->pdgId();}
+	  if(bb1DR<minb1DR) {minb1DR=bb1DR; sj.bestMCid=id; if(p.mother()!=0) sj.bestMCmomid=p.mother()->pdgId();}
 	}
       }
     } //isMC    
@@ -573,7 +573,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	if(abs(id)<=6 || id==21 || id==23 || abs(id)==24){
 	  double bb2DR=TMath::Sqrt((p.eta()-p4Jet.eta())*(p.eta()-p4Jet.eta())+
 				   (p.phi()-p4Jet.phi())*(p.phi()-p4Jet.phi()));
-	  if(bb2DR<minb2DR) {minb2DR=bb2DR; sj.b1BestMCid=id; if(p.mother()!=0) sj.b1BestMCmomid=p.mother()->pdgId();}
+	  if(bb2DR<minb2DR) {minb2DR=bb2DR; sj.bestMCid=id; if(p.mother()!=0) sj.bestMCmomid=p.mother()->pdgId();}
 	}
       }
     }   //isMC

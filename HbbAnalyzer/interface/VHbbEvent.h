@@ -10,6 +10,8 @@ class VHbbEvent{
 
   class ParticleMCInfo {
   public:
+    ParticleMCInfo(): status(-99), momid(-99), gmomid(-99), charge(-1){}
+  public:
     int status;
     int momid;
     int gmomid;
@@ -21,17 +23,23 @@ class VHbbEvent{
   };
 
   class SimpleJet {
+    public:
+    SimpleJet(): flavour(-99), tche(-99), tchp(-99), jpb(-99), jp(-99), 
+      ssvhe(-99), csv(-99), csvmva(-99), ntracks(-99), charge(-99),
+      bestMCid(-99), bestMCmomid(-99){}
   public:
     int flavour;
     float tche,tchp, jpb,jp , ssvhe, csv, csvmva;
     int ntracks;
     float charge;
     TLorentzVector fourMomentum;
-    int b1BestMCid, b1BestMCmomid;
+    int bestMCid, bestMCmomid;
   };
 
 
-  class HardJet{
+  class HardJet {
+  public:
+    HardJet(): constituents(-99){}
   public:
     int constituents;
     TLorentzVector fourMomentum;
@@ -40,13 +48,20 @@ class VHbbEvent{
   };
 
 
-  class METInfo{
+  class METInfo {
+  public:
+    METInfo(): sumEt(-99), metSig(-99), eLong(-99){}
   public:
     float sumEt, metSig, eLong;
     TLorentzVector fourMomentum;
   };
 
   class MuonInfo {
+  public:
+    MuonInfo(): charge(-99),tIso(-99), eIso(-99), hIso(-99), 
+      acop(-99), ipDb(-99), ipErrDb(-99), zPVPt(-99),zPVProb(-99), chi2(-99), globChi2(-99),
+      cat(-99), nHits(-99), nPixelHits(-99), globNHits(-99),
+      mcId(-99), mcMomId(-99), mcgMomId(-99){}
   public:
     TLorentzVector fourMomentum;
     int charge;
@@ -59,6 +74,11 @@ class VHbbEvent{
 
   class ElectronInfo {
   public:
+    ElectronInfo() : scEta(-99), scPhi(-99), charge(-99), 
+    tIso(-99), eIso(-99), hIso(-99), 
+    acop(-99), id95(-99),id85(-99),id70(-99),id95r(-99), 
+      id70r(-99), mcId(-99), mcMomId(-99), mcgMomId (-99){}
+  public:
     TLorentzVector fourMomentum;
     float scEta, scPhi;
     int charge;
@@ -68,7 +88,12 @@ class VHbbEvent{
     int mcId, mcMomId, mcgMomId;
   };
 
-  class TauInfo {
+  class TauInfo{
+  public:
+    TauInfo()  : charge(-99), tIso(-99), eIso(-99), hIso(-99), acop(-99), 
+    idbyIso(-99),idbyTrackIso(-99),idbyTaNCfrOnePercent(-99),
+    idbyTaNCfrHalfPercent(-99), idbyTaNCfrQuarterPercent(-99), 
+      idbyTaNCfrTenthPercent(-99), idbyTaNC(-99), mcId(-99), mcMomId(-99), mcgMomId(-99) {}
   public:
     TLorentzVector fourMomentum;
     int charge;
@@ -79,7 +104,7 @@ class VHbbEvent{
   };
 
 
-  class DiMuonInfo {
+  class DiMuonInfo  {
   public:
     TLorentzVector fourMomentum;
     MuonInfo daughter1, daughter2;
@@ -94,6 +119,38 @@ class VHbbEvent{
 
 
   class TriggerInfo {
+  public:
+    TriggerInfo() :  triggerMu9(-99),
+      triggerIsoMu9(-99),
+      triggerIsoMu13_3(-99),
+      triggerMu11(-99),
+      triggerDoubleMu3(-99),
+      triggerDoubleMu3_2(-99),
+      triggerMu15(-99),
+      triggerMu15_1(-99),
+      triggerDoubleElec10(-99),
+      triggerDoubleElec15_1(-99),
+      triggerDoubleElec17_1(-99),
+      triggerMet100_1(-99),
+      triggerSingleEle1(-99),
+      triggerSingleEle2(-99),
+      triggerSingleEle3(-99),
+      triggerSingleEle4(-99),
+      triggerBtagMu1(-99),
+      triggerBtagMu2(-99),
+      triggerBtagMu0(-99),
+      triggerBtagMu11(-99),
+      triggerBtagMuJet1(-99),
+      triggerBtagMuJet2(-99),
+      triggerBtagMuJet3(-99),
+      triggerBtagMuJet4(-99),
+      triggerIsoMu15(-99),
+      triggerIsoMu17v5(-99),
+      triggerIsoMu17v6(-99) {
+      for (unsigned int i=0; i< 500; ++i){
+	flag[i]= -99;
+      }
+    }
   public:
     int flag[500];
     int triggerMu9,
@@ -130,7 +187,9 @@ class VHbbEvent{
     TVector3 firstPVInPT2,firstPVInProb;
   };
 
-  class PUInfo {
+  class PUInfo{
+  public:
+    PUInfo(): rho(-99) {}
   public:
     float rho;
   };
