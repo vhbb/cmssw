@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.4 2011/06/09 07:07:12 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.5 2011/06/09 16:51:52 tboccali Exp $
 //
 //
 
@@ -42,7 +42,6 @@ HbbAnalyzerNew::HbbAnalyzerNew(const edm::ParameterSet& iConfig):
   dielecLabel_(iConfig.getUntrackedParameter<edm::InputTag>("dielecTag")),
   hltResults_(iConfig.getUntrackedParameter<edm::InputTag>("hltResultsTag")),
   runOnMC_(iConfig.getParameter<bool>("runOnMC")) {
-
 
   //
   // put the setwhatproduced etc etc
@@ -518,7 +517,6 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     VHbbEvent::SimpleJet sj;
     sj.flavour = jet_iter->partonFlavour();
 
-
     sj.tche=jet_iter->bDiscriminator("trackCountingHighEffBJetTags");
     sj.tchp=jet_iter->bDiscriminator("trackCountingHighPurBJetTags");
     sj.jp=jet_iter->bDiscriminator("jetProbabilityBJetTags");
@@ -529,6 +527,8 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     sj.charge=jet_iter->jetCharge();
     sj.ntracks=jet_iter->associatedTracks().size();
     sj.fourMomentum=GENPTOLORP(jet_iter);
+    sj.chargedTracksFourMomentum=(getChargedTracksMomentum(&*(jet_iter)));
+    
     //
     // add tVector
     //
@@ -569,7 +569,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     sj.charge=jet_iter->jetCharge();
     sj.ntracks=jet_iter->associatedTracks().size();
     sj.fourMomentum=GENPTOLORP(jet_iter);
-
+    sj.chargedTracksFourMomentum=(getChargedTracksMomentum(&*(jet_iter)));
     sj.tVector = getTvect(&(*jet_iter));
 
     Particle::LorentzVector p4Jet = jet_iter->p4();
@@ -634,7 +634,6 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
       hj.subFourMomentum.push_back(GENPTOLORP(icandJet));
       hj.etaSub.push_back(icandJet->eta());
       hj.phiSub.push_back(icandJet->phi());
-
      
     }
     hbbInfo->hardJets.push_back(hj);
@@ -670,7 +669,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     sj.charge=subjet_iter->jetCharge();
     sj.ntracks=subjet_iter->associatedTracks().size();
     sj.fourMomentum=GENPTOLORP(subjet_iter);
-
+    sj.fourMomentum=(getChargedTracksMomentum(&*(subjet_iter)));
     hbbInfo->subJets.push_back(sj);
 
   }
@@ -950,7 +949,6 @@ void
 HbbAnalyzerNew::endJob() {
 }
 
-
 TVector2 HbbAnalyzerNew::getTvect( const pat::Jet* patJet ){
 
   TVector2 t_Vect(0,0);
@@ -963,7 +961,14 @@ TVector2 HbbAnalyzerNew::getTvect( const pat::Jet* patJet ){
   double r_mag = 1e10;
   unsigned int nOfconst = 0;
 
-//re-reconstruct the jet direction with the charged tracks
+  //  std::cout <<" ECCCCCCOOOOO "<<patJet->isPFJet()<<std::endl;
+
+  if (patJet->isPFJet() == false) {
+    return t_Vect;
+  }
+  
+
+  //re-reconstruct the jet direction with the charged tracks
   std::vector<reco::PFCandidatePtr>
     patJetpfc = patJet->getPFConstituents();
   for(size_t idx = 0; idx < patJetpfc.size(); idx++){
@@ -973,11 +978,12 @@ TVector2 HbbAnalyzerNew::getTvect( const pat::Jet* patJet ){
       nOfconst++;
     }
   }
-
 // if there are less than two charged tracks do not calculate the pull (there is not enough info). It returns a null vector
 
   if( nOfconst < 2 )
     return null;
+  
+
 
   TVector2 v_J( J.Rapidity(), J.Phi() );
 //calculate TVector using only charged tracks
@@ -991,10 +997,34 @@ TVector2 HbbAnalyzerNew::getTvect( const pat::Jet* patJet ){
     }
   }
 
+  
   return t_Vect;
   
 }
 
+TLorentzVector HbbAnalyzerNew::getChargedTracksMomentum(const pat::Jet* patJet ){
+  //  return TLorentzVector();
+  TLorentzVector pi(0,0,0,0);
+  TLorentzVector v_j1(0,0,0,0);
+
+
+  //  std::cout <<"fff ECCCCCCOOOOO "<<patJet->isPFJet()<<std::endl;
+
+  if (patJet->isPFJet() == false ){
+      v_j1 = GENPTOLORP(patJet);
+      return v_j1;
+  }
+  std::vector<reco::PFCandidatePtr>
+    j1pfc = patJet->getPFConstituents();
+  for(size_t idx = 0; idx < j1pfc.size(); idx++){
+    if( j1pfc.at(idx)->charge() != 0 ){
+      pi.SetPtEtaPhiE( j1pfc.at(idx)->pt(), j1pfc.at(idx)->eta(), j1pfc.at(idx)->phi(), j1pfc.at(idx)->energy() );
+      v_j1 += pi;
+    }
+  }
+  return v_j1;
+  //re-
+}
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(HbbAnalyzerNew);

@@ -3,7 +3,6 @@
 
 #include <TLorentzVector.h>
 #include <TVector2.h>
-#include <TMatrix.h>
 #include <vector>
 
 class VHbbEvent{
@@ -34,6 +33,8 @@ class VHbbEvent{
     int ntracks;
     float charge;
     TLorentzVector fourMomentum;
+    TLorentzVector chargedTracksFourMomentum;
+
     int bestMCid, bestMCmomid;
     // new
     TVector2 tVector;
@@ -73,7 +74,6 @@ class VHbbEvent{
     TLorentzVector mcFourMomentum;
     int mcId, mcMomId, mcgMomId;
   };
-
 
   class ElectronInfo {
   public:

@@ -42,9 +42,8 @@ using namespace std;
 
 #include<TVector2.h>
 
-#include "TMatrixD.h"
 #include "TArrayD.h"
-#include "TMatrixDBase.h"
+#include "TLorentzVector.h"
 
 #include "DataFormats/METReco/interface/PFMET.h"
 //
@@ -61,6 +60,8 @@ class HbbAnalyzerNew : public edm::EDProducer {
   
  protected:
   TVector2 getTvect( const pat::Jet* patJet );
+
+  TLorentzVector getChargedTracksMomentum(const pat::Jet* patJet );
   
  private:
   virtual void beginJob() ;
