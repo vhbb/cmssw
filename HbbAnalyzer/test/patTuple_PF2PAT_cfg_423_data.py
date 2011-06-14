@@ -22,9 +22,8 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 # source
-
-process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("/store/data/Run2011A/SingleMu//RECO/PromptReco-v4/000/166/512/A09C4C8F-9B91-E011-AF2D-0030487C8E02.root"))
-
+# on lxbuild151
+process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("file:/build1/tboccali/7C74874C-CA8E-E011-9782-001D09F25401.root"))
 #process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("/store/relval/CMSSW_4_2_3/RelValTTbar/GEN-SIM-RECO/MC_42_V12-v2/0066/3026A5BD-D97B-E011-A9D7-001A92811736.root"))
 
 
@@ -38,7 +37,7 @@ else :
 process.out1 = cms.OutputModule(
     'PoolOutputModule',
     fileName       = cms.untracked.string('PAT.edm.root'),
-    outputCommands = cms.untracked.vstring('drop *','keep *_HbbAnalyzerNew_*_*'),
+    outputCommands = cms.untracked.vstring('drop *','keep *_HbbAnalyzerNew_*_*', 'keep *_hbbCandidates_*_*'),
     dropMetaData = cms.untracked.string('ALL'),
     splitLevel = cms.untracked.int32(0)
     )
@@ -359,22 +358,23 @@ process.goodPatJetsAK5PF = cms.EDFilter("PFJetIDSelectionFunctorFilter",
 
 process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     runOnMC = cms.bool(False),
-    electronTag = cms.untracked.InputTag("selectedPatElectrons"),
-    hltResultsTag = cms.untracked.InputTag("TriggerResults::HLT"),
-#    tauTag = cms.untracked.InputTag("cleanPatTaus"),
-    tauTag = cms.untracked.InputTag("patTaus"),
-    muonTag = cms.untracked.InputTag("selectedPatMuons"),
-    jetTag = cms.untracked.InputTag("selectedPatJetsCAPF"),
-    subjetTag = cms.untracked.InputTag("selectedPatJetssubCAPF"),
-##    jetTag = cms.untracked.InputTag("selectedPatJetsCACalo"),
-    simplejet1Tag = cms.untracked.InputTag("selectedPatJets"),
-    simplejet2Tag = cms.untracked.InputTag("goodPatJetsAK5PF"),
-    simplejet3Tag = cms.untracked.InputTag("selectedPatJetsAK7Calo"),
-    simplejet4Tag = cms.untracked.InputTag("selectedPatJetsAK7PF"),
-    photonTag = cms.untracked.InputTag("selectedPatPhotons"),
-    metTag = cms.untracked.InputTag("patMETs"),
-    dimuTag = cms.untracked.InputTag("dimuons"),
-    dielecTag = cms.untracked.InputTag("dielectrons")
+    electronTag = cms.InputTag("selectedPatElectrons"),
+    hltResultsTag = cms.InputTag("TriggerResults::HLT"),
+#    tauTag = cms.InputTag("cleanPatTaus"),
+    tauTag = cms.InputTag("patTaus"),
+    muonTag = cms.InputTag("selectedPatMuons"),
+    jetTag = cms.InputTag("selectedPatJetsCAPF"),
+    subjetTag = cms.InputTag("selectedPatJetssubCAPF"),
+##    jetTag = cms.InputTag("selectedPatJetsCACalo"),
+    simplejet1Tag = cms.InputTag("selectedPatJets"),
+###					    simplejet1Tag = cms.InputTag("selectedPatJetsAK7PF"),
+    simplejet2Tag = cms.InputTag("goodPatJetsAK5PF"),
+    simplejet3Tag = cms.InputTag("selectedPatJetsAK7Calo"),
+    simplejet4Tag = cms.InputTag("selectedPatJetsAK7PF"),
+    photonTag = cms.InputTag("selectedPatPhotons"),
+    metTag = cms.InputTag("patMETs"),
+    dimuTag = cms.InputTag("dimuons"),
+    dielecTag = cms.InputTag("dielectrons")
 )
 
 process.dimuons = cms.EDProducer("CandViewShallowCloneCombiner",
@@ -389,9 +389,9 @@ process.dielectrons = cms.EDProducer("CandViewShallowCloneCombiner",
     decay = cms.string('selectedPatElectrons@+ selectedPatElectrons@-')
 )
 
-process.TFileService = cms.Service("TFileService",
-    fileName = cms.string('PatHistos3.root')
-)
+#process.TFileService = cms.Service("TFileService",
+#    fileName = cms.string('PatHistos3.root')
+#)
 
 process.load("VHbbAnalysis.HbbAnalyzer.simpleEleIdSequence_cff")
 process.patElectronIDs = cms.Sequence(process.simpleEleIdSequence)
@@ -423,8 +423,13 @@ process.patElectrons.electronIDSources = cms.PSet(
 
 
 
+process.hbbCandidates = cms.EDProducer("HbbCandidateFinder",
+				      VHbbEventLabel = cms.InputTag("")
+				      )
+
+
 # drop the meta data for dropped data
-#process.out.dropMetaData = cms.untracked.string("DROPPED")
+#process.out.dropMetaData = cms.string("DROPPED")
 
 #process.out.fileName = '/tigress-hsm/dlopes/PatEDM.root'
 
@@ -453,7 +458,8 @@ process.p = cms.Path(
                      process.dimuons*
                      process.dielectrons*
                      process.goodPatJetsAK5PF*
-                     process.HbbAnalyzerNew
+                     process.HbbAnalyzerNew*
+		     process.hbbCandidates
                      )
 
 

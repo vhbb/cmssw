@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.5 2011/06/09 16:51:52 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.6 2011/06/14 12:49:07 tboccali Exp $
 //
 //
 
@@ -27,20 +27,20 @@ Implementation:
 #define GENPTOLORP(a) TLorentzVector((a)->px(), (a)->py(), (a)->pz(), (a)->energy())
 
 HbbAnalyzerNew::HbbAnalyzerNew(const edm::ParameterSet& iConfig):
-  eleLabel_(iConfig.getUntrackedParameter<edm::InputTag>("electronTag")),
-  muoLabel_(iConfig.getUntrackedParameter<edm::InputTag>("muonTag")),
-  jetLabel_(iConfig.getUntrackedParameter<edm::InputTag>("jetTag")),
-  subjetLabel_(iConfig.getUntrackedParameter<edm::InputTag>("subjetTag")),
-  simplejet1Label_(iConfig.getUntrackedParameter<edm::InputTag>("simplejet1Tag")),
-  simplejet2Label_(iConfig.getUntrackedParameter<edm::InputTag>("simplejet2Tag")),
-  simplejet3Label_(iConfig.getUntrackedParameter<edm::InputTag>("simplejet3Tag")),
-  simplejet4Label_(iConfig.getUntrackedParameter<edm::InputTag>("simplejet4Tag")),
-  tauLabel_(iConfig.getUntrackedParameter<edm::InputTag>("tauTag")),
-  metLabel_(iConfig.getUntrackedParameter<edm::InputTag>("metTag")),
-  phoLabel_(iConfig.getUntrackedParameter<edm::InputTag>("photonTag")),
-  dimuLabel_(iConfig.getUntrackedParameter<edm::InputTag>("dimuTag")),
-  dielecLabel_(iConfig.getUntrackedParameter<edm::InputTag>("dielecTag")),
-  hltResults_(iConfig.getUntrackedParameter<edm::InputTag>("hltResultsTag")),
+  eleLabel_(iConfig.getParameter<edm::InputTag>("electronTag")),
+  muoLabel_(iConfig.getParameter<edm::InputTag>("muonTag")),
+  jetLabel_(iConfig.getParameter<edm::InputTag>("jetTag")),
+  subjetLabel_(iConfig.getParameter<edm::InputTag>("subjetTag")),
+  simplejet1Label_(iConfig.getParameter<edm::InputTag>("simplejet1Tag")),
+  simplejet2Label_(iConfig.getParameter<edm::InputTag>("simplejet2Tag")),
+  simplejet3Label_(iConfig.getParameter<edm::InputTag>("simplejet3Tag")),
+  simplejet4Label_(iConfig.getParameter<edm::InputTag>("simplejet4Tag")),
+  tauLabel_(iConfig.getParameter<edm::InputTag>("tauTag")),
+  metLabel_(iConfig.getParameter<edm::InputTag>("metTag")),
+  phoLabel_(iConfig.getParameter<edm::InputTag>("photonTag")),
+  dimuLabel_(iConfig.getParameter<edm::InputTag>("dimuTag")),
+  dielecLabel_(iConfig.getParameter<edm::InputTag>("dielecTag")),
+  hltResults_(iConfig.getParameter<edm::InputTag>("hltResultsTag")),
   runOnMC_(iConfig.getParameter<bool>("runOnMC")) {
 
   //
@@ -961,7 +961,6 @@ TVector2 HbbAnalyzerNew::getTvect( const pat::Jet* patJet ){
   double r_mag = 1e10;
   unsigned int nOfconst = 0;
 
-  //  std::cout <<" ECCCCCCOOOOO "<<patJet->isPFJet()<<std::endl;
 
   if (patJet->isPFJet() == false) {
     return t_Vect;

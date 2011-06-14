@@ -29,5 +29,11 @@
 <class name="std::vector<VHbbEvent::TauInfo>"/>
 <class name="std::vector<TLorentzVector>"/>
 
+<class name="VHbbCandidate"/>
+<class name="std::vector<VHbbCandidate>"/>
+<class name="edm::Wrapper<std::vector<VHbbCandidate> >"/>
+
+<class name="VHbbCandidate::HiggsCandidate"/>
+<class name="VHbbCandidate::VectorCandidate"/>
 
 </lcgdict>
