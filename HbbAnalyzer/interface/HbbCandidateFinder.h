@@ -48,11 +48,21 @@ class HbbCandidateFinder : public edm::EDProducer {
   explicit HbbCandidateFinder(const edm::ParameterSet&);
   ~HbbCandidateFinder();
   void produce( edm::Event&, const edm::EventSetup& );
-  
- protected:
-  
+
   float getDeltaTheta( VHbbEvent::SimpleJet * j1, VHbbEvent::SimpleJet * j2 );
+
+
+protected:
+
+  void run (const VHbbEvent*, std::auto_ptr<std::vector<VHbbCandidate> > &);
   
+  std::pair <int, int>  findDiJets (const std::vector<VHbbEvent::SimpleJet>& jets);
+
+
+  int findDiMuon (const std::vector<VHbbEvent::DiMuonInfo>&);
+  int findDiElectron (const std::vector<VHbbEvent::DiElectronInfo>&);
+
+
  private:
   virtual void beginJob() ;
   virtual void endJob() ;
