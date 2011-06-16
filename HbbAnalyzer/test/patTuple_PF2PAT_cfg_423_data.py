@@ -424,7 +424,9 @@ process.patElectrons.electronIDSources = cms.PSet(
 
 
 process.hbbCandidates = cms.EDProducer("HbbCandidateFinder",
-				      VHbbEventLabel = cms.InputTag("")
+				       VHbbEventLabel = cms.InputTag(""),
+				       verbose = cms.bool(True) ,
+				       jetPtThreshold = cms.double(30.)
 				      )
 
 

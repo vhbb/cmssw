@@ -1,9 +1,18 @@
 #include "VHbbAnalysis/HbbAnalyzer/interface/HbbCandidateFinder.h"
 
+struct CompareJetPt {
+  bool operator()( const VHbbEvent::SimpleJet& j1, const  VHbbEvent::SimpleJet& j2 ) const {
+    return j1.fourMomentum.Pt() > j2.fourMomentum.Pt();
+  }
+};
 
+  struct CompareBTag {
+    bool operator()(const  VHbbEvent::SimpleJet& j1, const  VHbbEvent::SimpleJet& j2 ) const {
+      return j1.csv > j2.csv;
+    }
+  };
 
-
-HbbCandidateFinder::HbbCandidateFinder(const edm::ParameterSet& iConfig):   vhbbevent_(iConfig.getParameter<edm::InputTag>("VHbbEventLabel")) {
+HbbCandidateFinder::HbbCandidateFinder(const edm::ParameterSet& iConfig):   vhbbevent_(iConfig.getParameter<edm::InputTag>("VHbbEventLabel")), verbose_ (iConfig.getParameter<bool>("verbose")), jetPtThreshold(iConfig.getParameter<double>("jetPtThreshold")){
   produces<std::vector<VHbbCandidate > >();
 }
 
@@ -22,7 +31,8 @@ void HbbCandidateFinder::produce( edm::Event& iEvent, const edm::EventSetup& iEv
   std::auto_ptr<std::vector<VHbbCandidate> >  vHbbCandidates( new std::vector<VHbbCandidate>  );
 
   edm::Handle<VHbbEvent>  vHbbEvent;
-  iEvent.getByLabel(vhbbevent_, vHbbEvent);
+  //  iEvent.getByLabel(vhbbevent_, vHbbEvent);
+  iEvent.getByType(vHbbEvent);
   
 
   //
@@ -32,8 +42,11 @@ void HbbCandidateFinder::produce( edm::Event& iEvent, const edm::EventSetup& iEv
   //  hbbCandidateFinderAlgo(vHbbCandidates, vHbbEvent-> result());
   // do nothing for a test
   
-  run(vHbbEvent.product(), vHbbCandidates);
+  run(vHbbEvent.product(),vHbbCandidates);
 
+
+  if (verbose_)
+    std::cout <<" Pushing VHbb candidates: "<<vHbbCandidates->size()<<std::endl;
 
   iEvent.put(vHbbCandidates);  
 
@@ -43,87 +56,154 @@ void HbbCandidateFinder::run (const VHbbEvent* event, std::auto_ptr<std::vector<
   //
   // first find the jets
   //
-  std::pair<int,int> jets = findDiJets(event->simpleJets2);
-  
-  if (jets.first<0 || jets.second<0) return ;
 
+  VHbbEvent::SimpleJet j1,j2;
+  std::vector<VHbbEvent::SimpleJet> addJets;
+  bool foundJets = findDiJets(event->simpleJets2,j1,j2,addJets) ;
+
+  if (verbose_){
+    std::cout <<" Found Dijets: "<<foundJets<< " Additional: "<<addJets.size()<< std::endl;
+  }
+  
+  if (foundJets == false) return;
   //
   // search for a dilepton - just 
   //
-  int ele =    findDiElectron(event->diElectronInfo);
-  int mu =  findDiMuon(event->diMuonInfo);
-
-  if (ele<0 && mu < 0 ) return;
+  std::vector<VHbbEvent::MuonInfo> mu;
+  findMuons(event->muInfo,mu);
+  std::vector<VHbbEvent::ElectronInfo> ele;
+  findElectrons(event->eleInfo,ele);
+  
+  if (verbose_){
+    std::cout <<" Electrons: "<< ele.size()<<std::endl;
+    std::cout <<" Muons    : "<< mu.size()<<std::endl;
+  }
+  if (ele.size()<1 && mu.size() < 1 ) return;
 
   //
   // fill!
   //
-  VHbbCandidate temp;
-  temp.H.jets.push_back(event->simpleJets2[jets.first]);
-  temp.H.jets.push_back(event->simpleJets2[jets.second]);
-  temp.H.fourMomentum = (event->simpleJets2[jets.first]).fourMomentum+(event->simpleJets2[jets.second]).fourMomentum;
-  if (mu>-1){
-    temp.V.muons.push_back((event->diMuonInfo[mu]).daughter1);
-    temp.V.muons.push_back((event->diMuonInfo[mu]).daughter2);
-    temp.V.fourMomentum  = (temp.V.muons[0]).fourMomentum+(temp.V.muons[1]).fourMomentum;
-  }else{
-    temp.V.electrons.push_back((event->diElectronInfo[ele]).daughter1);
-    temp.V.electrons.push_back((event->diElectronInfo[ele]).daughter2);
-    temp.V.fourMomentum  = (temp.V.electrons[0]).fourMomentum+(temp.V.electrons[1]).fourMomentum;
+  VHbbCandidate tempMu;
+  VHbbCandidate tempE;
+  tempMu.H.jets.push_back(j1);
+  tempMu.H.jets.push_back(j2);
+  tempMu.H.fourMomentum = (j1).fourMomentum+(j2).fourMomentum;
+  tempMu.additionalJets = addJets;
+  tempE = tempMu;
+  TLorentzVector pMu,pE;
+
+  if (mu.size()){
+    for (std::vector<VHbbEvent::MuonInfo>::iterator it = mu.begin(); it !=mu.end(); ++it){
+      tempMu.V.muons.push_back(*it);
+   }
+  }
+  if (ele.size()){
+    for (std::vector<VHbbEvent::ElectronInfo>::iterator it = ele.begin(); it !=ele.end(); ++it){
+      tempE.V.electrons.push_back(*it);
+   }
   }
 
-  candidates->push_back(temp);
-
+  if (tempMu.V.muons.size()){
+   candidates->push_back(tempMu);
+  }
+  if (tempE.V.electrons.size()){
+   candidates->push_back(tempE);
+  }
 }
 
-std::pair <int, int>  HbbCandidateFinder::findDiJets (const std::vector<VHbbEvent::SimpleJet>& jets){
+bool HbbCandidateFinder::findDiJets (const std::vector<VHbbEvent::SimpleJet>& jets, VHbbEvent::SimpleJet& j1, VHbbEvent::SimpleJet& j2,std::vector<VHbbEvent::SimpleJet>& addJets){
   
-  //
-  // select jets
-  //
-  //
+ std::vector<VHbbEvent::SimpleJet> tempJets;
+ 
+ for (unsigned int i=0 ; i< jets.size(); ++i){
+   if (jets[i].fourMomentum.Pt()> jetPtThreshold)
+     tempJets.push_back(jets[i]);
+ }
+ 
+ CompareBTag  bTagComparator;
 
-  unsigned int maxJets = jets.size();
-  int i1(-99),i2(-99);
-  float btag_max(-100);
-  //
-  // do the combinatorics
+ if (tempJets.size()<2) return false;
+ 
+ std::sort(tempJets.begin(), tempJets.end(), bTagComparator);
+ 
+ j1 = tempJets[0];
+ j2 = tempJets[1];
+ //
+ // additional jets
+ //
+ if (tempJets.size()>2){
+   for (unsigned int i=2 ; i< tempJets.size(); ++i){
+     addJets.push_back(tempJets[i]);
+   }
+ }
+  CompareJetPt ptComparator;
 
-  if (maxJets<2) return pair<int,int>(-1,-1);
+  std::sort(addJets.begin(), addJets.end(), ptComparator);
+ return true;
+}
 
-  for (unsigned int j1=0; j1<maxJets-1; j1++) {
-    for (unsigned int j2=j1+1; j2<maxJets; j2++) {
-      float j1_btag = (jets)[j1].csv;
-      float j2_btag = (jets)[j2].csv;
-      
-      if (j1_btag<=0.0 || j2_btag<=0.0) continue;
+void HbbCandidateFinder::findMuons(const std::vector<VHbbEvent::MuonInfo>& muons, std::vector<VHbbEvent::MuonInfo>& out){
+  /* Use:
+For both W -> mu nu and Z -> mu mu, we adopt the standard VBTF muon selection described in VbtfWmunuBaselineSelection. The explicit cuts are reproduced here:
 
-      if ((jets)[j1].fourMomentum.Pt()< 30. ||
-	  (jets)[j2].fourMomentum.Pt()< 30.) continue;
-
-      if (j1_btag+j2_btag>btag_max) { 
-	btag_max = j1_btag+j2_btag; 
-	i1 = j1; 
-	i2 = j2; 
-      }
+    We use RECO Muons that are both Global and Tracker
+    chi2/ndof < 10 for the global muon fit
+    The track associated to the muon must have
+        >= 1 pixel hits
+        >= 10 pixel + strip hits
+        >= 1 valid hit in the muon chambers
+        >= 2 muon stations
+        |dxy| < 0.2
+        |eta| < 2.4 
+    Relative combined isolation (R) is required to be < 0.15
+        R = [Sum pT(trks) + Et(ECAL) + Et(HCAL)] / pT(mu) computed in a cone of radius 0.3 in eta-phi 
+    pT(mu) > 20 GeV 
+  */
+  for (std::vector<VHbbEvent::MuonInfo>::const_iterator it = muons.begin(); it!= muons.end(); ++it){
+    if (
+	(*it).nPixelHits>= 1 &&
+	(*it).nHits +(*it).nPixelHits >= 10 &&
+	//
+	// sta muon not saved????
+	(*it).ipDb<.2 &&
+	((*it).hIso+(*it).eIso+(*it).tIso)/(*it).fourMomentum.Pt()<.15 &&
+	(*it).fourMomentum.Eta()<2.4 &&
+	(*it).fourMomentum.Pt()>20) {
+      out.push_back(*it);
     }
   }
-  if (i1>=0 && i2>=0) return pair<int,int>(i1,i2);
-  else return pair<int,int>(-1,-1);
 }
 
-int HbbCandidateFinder::findDiMuon (const std::vector<VHbbEvent::DiMuonInfo>& dimu){
-  int res = -99;
-  if (dimu.size()>0) res= 1;
-  return res;
 
-}
-int HbbCandidateFinder::findDiElectron (const std::vector<VHbbEvent::DiElectronInfo>& die){
-  int res = -99;
-  if (die.size()>0) res= 1;
-  return res;
-}
+void HbbCandidateFinder::findElectrons(const std::vector<VHbbEvent::ElectronInfo>& electrons, std::vector<VHbbEvent::ElectronInfo>& out){
+  /*
+We adopt the standard cut-based selection from VBTF described in detail here.
 
+    Z -> ee
+        gsf electrons
+        VBTF WP95
+        |eta|<2.5, excluding the gap 1.44 < |eta| < 1.57
+        pT(e) > 20 
+
+    W -> e nu
+        gsf electrons
+        VBTF WP80
+        |eta|<2.5, excluding the gap 1.44 < |eta| < 1.57
+        pT(e) > 30 
+  */
+
+  for (std::vector<VHbbEvent::ElectronInfo>::const_iterator it = electrons.begin(); it!= electrons.end(); ++it){
+    if (
+	// fake
+	//	(*it).id95>  &&
+	std::abs((*it).fourMomentum.Eta()) < 2.5 &&
+	!( 	std::abs((*it).fourMomentum.Eta()) < 1.57 &&	std::abs((*it).fourMomentum.Eta()) > 1.44) &&
+	(*it).fourMomentum.Pt()>30
+	){
+      out.push_back(*it);
+    }  
+  }
+}
 
 
 //define this as a plug-in

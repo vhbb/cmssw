@@ -56,19 +56,19 @@ protected:
 
   void run (const VHbbEvent*, std::auto_ptr<std::vector<VHbbCandidate> > &);
   
-  std::pair <int, int>  findDiJets (const std::vector<VHbbEvent::SimpleJet>& jets);
+ bool  findDiJets (const std::vector<VHbbEvent::SimpleJet>& , VHbbEvent::SimpleJet& , VHbbEvent::SimpleJet& ,std::vector<VHbbEvent::SimpleJet>& );
 
 
-  int findDiMuon (const std::vector<VHbbEvent::DiMuonInfo>&);
-  int findDiElectron (const std::vector<VHbbEvent::DiElectronInfo>&);
-
+ void findMuons (const std::vector<VHbbEvent::MuonInfo>& muons, std::vector<VHbbEvent::MuonInfo>& out);
+ void findElectrons(const std::vector<VHbbEvent::ElectronInfo>& electrons, std::vector<VHbbEvent::ElectronInfo>& out);
 
  private:
   virtual void beginJob() ;
   virtual void endJob() ;
   
   edm::InputTag vhbbevent_;
-
+  bool verbose_;
+  float jetPtThreshold;
   
   
 };
