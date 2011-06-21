@@ -199,7 +199,7 @@ For both W -> mu nu and Z -> mu mu, we adopt the standard VBTF muon selection de
 	(*it).ipDb<.2 &&
 	((*it).hIso+(*it).eIso+(*it).tIso)/(*it).fourMomentum.Pt()<.15 &&
 	(*it).fourMomentum.Eta()<2.4 &&
-	(*it).fourMomentum.Pt()>20) {
+	(*it).fourMomentum.Pt()>15) {
       out.push_back(*it);
     }
   }
@@ -229,7 +229,7 @@ We adopt the standard cut-based selection from VBTF described in detail here.
 	//	(*it).id95>  &&
 	std::abs((*it).fourMomentum.Eta()) < 2.5 &&
 	!( 	std::abs((*it).fourMomentum.Eta()) < 1.57 &&	std::abs((*it).fourMomentum.Eta()) > 1.44) &&
-	(*it).fourMomentum.Pt()>20 //  I use the minimum ok for both Z and W
+	(*it).fourMomentum.Pt()>15 //  I use the minimum ok for both Z and W
 	){
       out.push_back(*it);
     }  

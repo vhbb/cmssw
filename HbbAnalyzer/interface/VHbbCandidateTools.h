@@ -22,6 +22,8 @@ class VbbCandidateTools {
     temp.V.fourMomentum = temp.V.muons.muons[0].fourMomentum+temp.V.muons.muons[1].fourMomentum;
     temp.fourMomentum = temp.V.fourMomentum+ temp.H.fourMomentum;
     
+    if (temp.V.muons.muons[0].fourMomentum.Pt()<20 || temp.V.muons.muons[1].fourMomentum.Pt()<20 ) return in;
+
     if (temp.V.Pt()<150 ) return in;
     if (temp.H.Pt()<150) return in;
     if (temp.H.firstJet().csv< 0.9) return in;
