@@ -24,6 +24,7 @@
 <class name="std::vector<VHbbEvent::DiMuonInfo>"/>
 <class name="std::vector<VHbbEvent::ElectronInfo>"/>
 <class name="std::vector<VHbbEvent::HardJet>"/>
+<class name="std::vector<VHbbEvent::METInfo>"/>
 <class name="std::vector<VHbbEvent::MuonInfo>"/>
 <class name="std::vector<VHbbEvent::SimpleJet>"/>
 <class name="std::vector<VHbbEvent::TauInfo>"/>

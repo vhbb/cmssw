@@ -11,20 +11,24 @@ class VHbbCandidate {
  public:
   class VectorCandidate {
   public:
+
     TLorentzVector fourMomentum;
     std::vector<VHbbEvent::MuonInfo> muons;
     std::vector<VHbbEvent::ElectronInfo> electrons;
     std::vector<VHbbEvent::TauInfo> taus;
+    std::vector<VHbbEvent::METInfo> mets;
+    
   };
   
   class HiggsCandidate {
   public:
     TLorentzVector fourMomentum;
     std::vector<VHbbEvent::SimpleJet> jets;
+    float deltaTheta;
   public:
     VHbbEvent::SimpleJet& firstJet(){return jets[0];}
     VHbbEvent::SimpleJet& secondJet(){return jets[1];}
-  };
+ };
   
   
  public:

@@ -22,7 +22,38 @@ void HbbCandidateFinder::beginJob(){}
 void HbbCandidateFinder::endJob(){}
 
 
-float HbbCandidateFinder::getDeltaTheta( VHbbEvent::SimpleJet * j1, VHbbEvent::SimpleJet * j2 ){return -1.;}
+float HbbCandidateFinder::getDeltaTheta( const VHbbEvent::SimpleJet & j1, const VHbbEvent::SimpleJet & j2 ) const{
+
+ double deltaTheta = 1e10;
+ TLorentzVector pi(0,0,0,0);
+ TLorentzVector v_j1 = j1.chargedTracksFourMomentum;
+ TLorentzVector v_j2 = j2.chargedTracksFourMomentum;
+ 
+ if( v_j2.Mag() == 0 
+     || v_j1.Mag() == 0 )
+   return deltaTheta = 1e10;
+ 
+ //use j1 to calculate the pull vector
+ TVector2 t = j1.tVector;
+ 
+ if( t.Mod() == 0 )
+   return deltaTheta = 1e10;
+ 
+ Double_t dphi =  v_j2.Phi()- v_j1.Phi();
+ if ( dphi > M_PI ) {
+   dphi -= 2.0*M_PI;
+ } else if ( dphi <= -M_PI ) {
+   dphi += 2.0*M_PI;
+ }
+ Double_t deltaeta = v_j2.Rapidity() - v_j1.Rapidity();
+ TVector2 BBdir( deltaeta, dphi );
+ 
+ deltaTheta = t.DeltaPhi(BBdir);
+ 
+ return deltaTheta;
+ 
+}
+
 
 
 
@@ -67,49 +98,47 @@ void HbbCandidateFinder::run (const VHbbEvent* event, std::auto_ptr<std::vector<
   
   if (foundJets == false) return;
   //
-  // search for a dilepton - just 
+  // search for leptons
   //
   std::vector<VHbbEvent::MuonInfo> mu;
   findMuons(event->muInfo,mu);
   std::vector<VHbbEvent::ElectronInfo> ele;
-  findElectrons(event->eleInfo,ele);
+ findElectrons(event->eleInfo,ele);
   
+  std::vector<VHbbEvent::METInfo> met;
+  findMET(event->pfmet, met);
+
   if (verbose_){
     std::cout <<" Electrons: "<< ele.size()<<std::endl;
     std::cout <<" Muons    : "<< mu.size()<<std::endl;
+    std::cout <<" MET      : "<< met.size()<<std::endl;
   }
-  if (ele.size()<1 && mu.size() < 1 ) return;
+  if (ele.size()<1 && mu.size() < 1 && met.size()<1) return;
 
   //
   // fill!
   //
-  VHbbCandidate tempMu;
-  VHbbCandidate tempE;
-  tempMu.H.jets.push_back(j1);
-  tempMu.H.jets.push_back(j2);
-  tempMu.H.fourMomentum = (j1).fourMomentum+(j2).fourMomentum;
-  tempMu.additionalJets = addJets;
-  tempE = tempMu;
-  TLorentzVector pMu,pE;
-
-  if (mu.size()){
-    for (std::vector<VHbbEvent::MuonInfo>::iterator it = mu.begin(); it !=mu.end(); ++it){
-      tempMu.V.muons.push_back(*it);
-   }
-  }
-  if (ele.size()){
-    for (std::vector<VHbbEvent::ElectronInfo>::iterator it = ele.begin(); it !=ele.end(); ++it){
-      tempE.V.electrons.push_back(*it);
-   }
-  }
-
-  if (tempMu.V.muons.size()){
-   candidates->push_back(tempMu);
-  }
-  if (tempE.V.electrons.size()){
-   candidates->push_back(tempE);
-  }
+  VHbbCandidate temp;
+  temp.H.jets.push_back(j1);
+  temp.H.jets.push_back(j2);
+  temp.H.fourMomentum = (j1).fourMomentum+(j2).fourMomentum;
+  temp.H.deltaTheta = getDeltaTheta(j1,j2);
+  //  temp.H.deltaTheta = getDeltaTheta()
+  temp.additionalJets = addJets;
+  temp.V.mets = met;
+  temp.V.muons = mu;
+  temp.V.electrons = ele;
+  
+  candidates->push_back(temp);
 }
+
+void HbbCandidateFinder::findMET(const VHbbEvent::METInfo & met, std::vector<VHbbEvent::METInfo>& out){
+  //
+  //  just preselection: met significance > 2 
+    if (met.metSig >2 ) out.push_back(met);
+  
+}
+
 
 bool HbbCandidateFinder::findDiJets (const std::vector<VHbbEvent::SimpleJet>& jets, VHbbEvent::SimpleJet& j1, VHbbEvent::SimpleJet& j2,std::vector<VHbbEvent::SimpleJet>& addJets){
   
@@ -161,10 +190,12 @@ For both W -> mu nu and Z -> mu mu, we adopt the standard VBTF muon selection de
   */
   for (std::vector<VHbbEvent::MuonInfo>::const_iterator it = muons.begin(); it!= muons.end(); ++it){
     if (
+	(*it). globChi2<10 &&
 	(*it).nPixelHits>= 1 &&
-	(*it).nHits +(*it).nPixelHits >= 10 &&
-	//
-	// sta muon not saved????
+	(*it).globNHits >= 1 &&
+	(*it).nHits >= 10 &&
+	(*it).cat ==1 && 
+	(*it).validMuStations >=2 &&
 	(*it).ipDb<.2 &&
 	((*it).hIso+(*it).eIso+(*it).tIso)/(*it).fourMomentum.Pt()<.15 &&
 	(*it).fourMomentum.Eta()<2.4 &&
@@ -198,7 +229,7 @@ We adopt the standard cut-based selection from VBTF described in detail here.
 	//	(*it).id95>  &&
 	std::abs((*it).fourMomentum.Eta()) < 2.5 &&
 	!( 	std::abs((*it).fourMomentum.Eta()) < 1.57 &&	std::abs((*it).fourMomentum.Eta()) > 1.44) &&
-	(*it).fourMomentum.Pt()>30
+	(*it).fourMomentum.Pt()>20 //  I use the minimum ok for both Z and W
 	){
       out.push_back(*it);
     }  

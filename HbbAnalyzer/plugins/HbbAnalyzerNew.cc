@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.6 2011/06/14 12:49:07 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.7 2011/06/14 15:55:44 tboccali Exp $
 //
 //
 
@@ -740,10 +740,19 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
       const reco::HitPattern& q = gTrack->hitPattern();
       mf.globChi2=gTrack.get()->normalizedChi2();
       mf.globNHits=q.numberOfValidMuonHits();
+      mf. validMuStations = q. muonStationsWithValidHits();
     }else{
       mf.globChi2=-99;
       mf.globNHits=-99;
     }
+    //
+    // add stamuon 
+
+    //    if (mu->isStandAloneMuon()) {
+    //      reco::TrackRef sta = mu->standAloneMuon();
+    //      
+    //    }
+
 
     //     int muInfo[12];
     //     fillMuBlock(mu,  muInfo);
@@ -771,7 +780,16 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     ef.hIso=elec->hcalIso();
     Geom::Phi<double> deltaphi(elec->superCluster()->phi()-atan2(hbbInfo->calomet.fourMomentum.Py(),hbbInfo->calomet.fourMomentum.Px()));
     ef.acop = deltaphi.value();
-    
+    //
+    // fill eleids
+    //    
+    ef.id95 = elec->electronID("simpleEleId95cIso");
+    ef.id85 = elec->electronID("simpleEleId85cIso");
+    ef.id70 = elec->electronID("simpleEleId70cIso");
+    ef.id95r = elec->electronID("simpleEleId95relIso");
+    ef.id70r = elec->electronID("simpleEleId70relIso");
+    ef.id85r = elec->electronID("simpleEleId85relIso");
+
     if(runOnMC_){
       const GenParticle* elecMc = elec->genLepton();
       if(elecMc!=0){
@@ -872,12 +890,14 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	const reco::HitPattern& q = gTrack->hitPattern();
 	df.daughter1.globNHits=q.numberOfValidMuonHits();
 	df.daughter1.globChi2=gTrack.get()->normalizedChi2();
+        df.daughter1.validMuStations = q. muonStationsWithValidHits();
       }
       if(muonDau1.isGlobalMuon()){
 	TrackRef gTrack = muonDau1.globalTrack();
 	const reco::HitPattern& q = gTrack->hitPattern();
 	df.daughter2.globNHits=q.numberOfValidMuonHits();
 	df.daughter2.globChi2=gTrack.get()->normalizedChi2();
+        df.daughter2.validMuStations = q. muonStationsWithValidHits();
       }
   
     }
@@ -910,7 +930,22 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     df.daughter1.hIso = elecDau0.hcalIso();
     df.daughter2.hIso = elecDau1.hcalIso();
     
-    
+    // ids
+    df.daughter1.id95 = elecDau0.electronID("simpleEleId95cIso");
+    df.daughter1.id85 = elecDau0.electronID  ("simpleEleId85cIso");
+    df.daughter1.id70 = elecDau0.electronID  ("simpleEleId70cIso");
+    df.daughter1.id95r = elecDau0.electronID ("simpleEleId95relIso");
+    df.daughter1.id85r = elecDau0.electronID ("simpleEleId85relIso");
+    df.daughter1.id70r = elecDau0.electronID ("simpleEleId70relIso");
+
+
+    df.daughter2.id95 = elecDau1.electronID("simpleEleId95cIso");
+    df.daughter2.id85 = elecDau1.electronID  ("simpleEleId85cIso");
+    df.daughter2.id70 = elecDau1.electronID  ("simpleEleId70cIso");
+    df.daughter2.id95r = elecDau1.electronID ("simpleEleId95relIso");
+    df.daughter2.id85r = elecDau1.electronID ("simpleEleId85relIso");
+    df.daughter2.id70r = elecDau1.electronID ("simpleEleId70relIso");
+
     hbbInfo->diElectronInfo.push_back(df);
     
   }
