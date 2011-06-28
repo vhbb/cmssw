@@ -3,7 +3,7 @@
 #include "DataFormats/Common/interface/Wrapper.h"
 
 namespace { 
-  VHbbEvent pippo;
+  VHbbEvent pippodd;
   edm::Wrapper<VHbbEvent> lkj;
   VHbbCandidate pippo2;
   std::vector<VHbbCandidate> pippo3;

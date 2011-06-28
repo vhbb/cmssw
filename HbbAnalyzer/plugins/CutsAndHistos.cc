@@ -1,4 +1,4 @@
-#include "VHbbAnalysis/HbbAnalyzer/plugins/VHbbEvent.cc"
+#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
 #include "VHbbAnalysis/HbbAnalyzer/interface/CutsAndHistos.hpp"
 #include <TH1F.h>
 #include "DataFormats/GeometryVector/interface/VectorUtil.h"
