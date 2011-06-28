@@ -9,8 +9,13 @@
 
 class VHbbCandidate {
  public:
+  enum CandidateType{Zmumu, Zee, Wen, Wmun, Znn, UNKNOWN};
+
+    VHbbCandidate(){candidateType=UNKNOWN;}
+
   class VectorCandidate {
   public:
+
 
     TLorentzVector fourMomentum;
     std::vector<VHbbEvent::MuonInfo> muons;
@@ -22,7 +27,7 @@ class VHbbCandidate {
   
   class HiggsCandidate {
   public:
-    TLorentzVector fourMomentum;
+   TLorentzVector fourMomentum;
     std::vector<VHbbEvent::SimpleJet> jets;
     float deltaTheta;
   public:
@@ -30,8 +35,12 @@ class VHbbCandidate {
     VHbbEvent::SimpleJet& secondJet(){return jets[1];}
  };
   
+
+  void setCandidateType (CandidateType c){candidateType = c;}
   
  public:
+  TLorentzVector fourMomentum(){return V.fourMomentum+H.fourMomentum;}
+  CandidateType candidateType;
   HiggsCandidate H;
   VectorCandidate V;
   std::vector<VHbbEvent::SimpleJet> additionalJets;

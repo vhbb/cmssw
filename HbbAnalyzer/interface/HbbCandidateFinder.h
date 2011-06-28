@@ -25,16 +25,12 @@ using namespace std;
 #include "TTree.h"
 #include "TMath.h"
 
-
-
-
 #include <TString.h>
 
+
+#include "VHbbAnalysis/HbbAnalyzer/interface/HbbCandidateFinderAlgo.h"
 #include "VHbbAnalysis/HbbAnalyzer/interface/VHbbCandidate.h"
 #include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
-
-
-
 
 //
 // class declaration
@@ -70,9 +66,8 @@ protected:
   virtual void endJob() ;
   
   edm::InputTag vhbbevent_;
-  bool verbose_;
-  float jetPtThreshold;
-  
+ HbbCandidateFinderAlgo *algo_;
+ bool verbose_;
   
 };
 
