@@ -101,7 +101,7 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   //
   // now see which kind of andidate this can be
   // 
-  VHbbCandidateTools selector(true);
+  VHbbCandidateTools selector(verbose_);
 
   VHbbCandidate result;
   bool ok = false;
