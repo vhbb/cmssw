@@ -101,7 +101,7 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   //
   // now see which kind of andidate this can be
   // 
-  VHbbCandidateTools selector;
+  VHbbCandidateTools selector(true);
 
   VHbbCandidate result;
   bool ok = false;
@@ -109,64 +109,83 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   // first: hZmumu
   //
   
+  if (verbose_){
+    std::cout <<" START SELECTION "<<std::endl;
+  }
+  
   result = selector.getHZmumuCandidate(temp,ok);
+  if ( ok == true ){
+    result.setCandidateType(VHbbCandidate::Zmumu);
+    candidates.push_back(result);
+  }else{
+    //      HZee
+    result = selector. getHZeeCandidate(temp,ok);
     if ( ok == true ){
-      result.setCandidateType(VHbbCandidate::Zmumu);
+      result.setCandidateType(VHbbCandidate::Zee);
       candidates.push_back(result);
+      return;
     }else{
-      //      HZee
-      result = selector. getHZeeCandidate(temp,ok);
+      //HWmunu
+      result = selector. getHWmunCandidate(temp,ok);
+      if ( ok == true ){
+	result.setCandidateType(VHbbCandidate::Wmun);
+	candidates.push_back(result);
+	return;
+      }else{
+	// HWenu
+	result = selector. getHWenCandidate(temp,ok);
 	if ( ok == true ){
-	  result.setCandidateType(VHbbCandidate::Zee);
+	  result.setCandidateType(VHbbCandidate::Wen);
 	  candidates.push_back(result);
 	  return;
 	}else{
-	  //HWmunu
-	  result = selector. getHWmunCandidate(temp,ok);
+	  // HZnn
+	  result = selector. getHZnnCandidate(temp,ok);
 	  if ( ok == true ){
-	    result.setCandidateType(VHbbCandidate::Wmun);
+	    result.setCandidateType(VHbbCandidate::Znn);
 	    candidates.push_back(result);
 	    return;
-	  }else{
-	    // HWenu
-	    result = selector. getHWenCandidate(temp,ok);
-	    if ( ok == true ){
-	      result.setCandidateType(VHbbCandidate::Wen);
-	      candidates.push_back(result);
-	      return;
-	    }else{
-	      // HZnn
-	      result = selector. getHZnnCandidate(temp,ok);
-	      if ( ok == true ){
-		result.setCandidateType(VHbbCandidate::Znn);
-		candidates.push_back(result);
-		return;
-	      }
-	    }
 	  }
 	}
+      }
     }
+  }
   return;
 }
 
 void HbbCandidateFinderAlgo::findMET(const VHbbEvent::METInfo & met, std::vector<VHbbEvent::METInfo>& out){
   //
+
   //  just preselection: met significance > 2 
+
     if (met.metSig >2 ) out.push_back(met);
-  
+    if (verbose_){
+      std::cout <<" CandidateFinder: Input MET = "<<met.metSig<<" Output MET = "<<out.size()<<std::endl;
+    }
+    
 }
 
 
 bool HbbCandidateFinderAlgo::findDiJets (const std::vector<VHbbEvent::SimpleJet>& jets, VHbbEvent::SimpleJet& j1, VHbbEvent::SimpleJet& j2,std::vector<VHbbEvent::SimpleJet>& addJets){
   
  std::vector<VHbbEvent::SimpleJet> tempJets;
- 
+
+ if (verbose_){
+   std::cout <<" CandidateFinder: Input Jets = "<<jets.size()<<std::endl;
+ }
+
  for (unsigned int i=0 ; i< jets.size(); ++i){
    if (jets[i].fourMomentum.Pt()> jetPtThreshold)
      tempJets.push_back(jets[i]);
  }
  
  CompareBTag  bTagComparator;
+
+ 
+ if (verbose_){
+   std::cout <<" CandidateFinder: Intermediate Jets = "<<tempJets.size()<<std::endl;
+ }
+
 
  if (tempJets.size()<2) return false;
  
@@ -184,8 +203,15 @@ bool HbbCandidateFinderAlgo::findDiJets (const std::vector<VHbbEvent::SimpleJet>
  }
   CompareJetPt ptComparator;
 
+ if (verbose_){
+   std::cout <<" CandidateFinder: Output Jets = "<<2<<" Additional = "<<addJets.size()<<std::endl;
+ }
+
+
   std::sort(addJets.begin(), addJets.end(), ptComparator);
  return true;
+
+
 }
 
 void HbbCandidateFinderAlgo::findMuons(const std::vector<VHbbEvent::MuonInfo>& muons, std::vector<VHbbEvent::MuonInfo>& out){
@@ -220,6 +246,13 @@ For both W -> mu nu and Z -> mu mu, we adopt the standard VBTF muon selection de
       out.push_back(*it);
     }
   }
+
+    if (verbose_){
+      std::cout <<" CandidateFinder: Input Muons = "<<muons.size()<<" Output Muons = "<<out.size()<<std::endl;
+    }
+
+
+
 }
 
 
@@ -251,5 +284,10 @@ We adopt the standard cut-based selection from VBTF described in detail here.
       out.push_back(*it);
     }  
   }
+    if (verbose_){
+      std::cout <<" CandidateFinder: Input Electrons = "<<electrons.size()<<" Output Electrons = "<<out.size()<<std::endl;
+    }
+
+
 }
 

@@ -23,7 +23,8 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 # source
 # on lxbuild151
-process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("file:/build1/tboccali/7C74874C-CA8E-E011-9782-001D09F25401.root"))
+process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("file:/tmp/tboccali/trigger.root"))
+#process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("file:/build1/tboccali/7C74874C-CA8E-E011-9782-001D09F25401.root"))
 #process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("/store/relval/CMSSW_4_2_3/RelValTTbar/GEN-SIM-RECO/MC_42_V12-v2/0066/3026A5BD-D97B-E011-A9D7-001A92811736.root"))
 
 
@@ -359,7 +360,7 @@ process.goodPatJetsAK5PF = cms.EDFilter("PFJetIDSelectionFunctorFilter",
 process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     runOnMC = cms.bool(False),
     electronTag = cms.InputTag("selectedPatElectrons"),
-    hltResultsTag = cms.InputTag("TriggerResults::HLT"),
+    hltResultsTag = cms.InputTag("TriggerResults::HLT1"),
 #    tauTag = cms.InputTag("cleanPatTaus"),
     tauTag = cms.InputTag("patTaus"),
     muonTag = cms.InputTag("selectedPatMuons"),
@@ -374,7 +375,8 @@ process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     photonTag = cms.InputTag("selectedPatPhotons"),
     metTag = cms.InputTag("patMETs"),
     dimuTag = cms.InputTag("dimuons"),
-    dielecTag = cms.InputTag("dielectrons")
+    dielecTag = cms.InputTag("dielectrons"),
+    verbose = cms.untracked.bool(True)
 )
 
 process.dimuons = cms.EDProducer("CandViewShallowCloneCombiner",

@@ -3,8 +3,13 @@
 
 #include "VHbbAnalysis/HbbAnalyzer/interface/VHbbCandidate.h"
 
+#include <iostream>
+
 class VHbbCandidateTools {
  public:
+
+ VHbbCandidateTools(bool verbose = false): verbose_(verbose){}
+
   float deltaPhi(float in2, float in1){
     float dphi = in2-in1;
     if ( dphi > M_PI ) {
@@ -16,6 +21,9 @@ class VHbbCandidateTools {
   }
 
   VHbbCandidate getHZmumuCandidate(const VHbbCandidate & in, bool & ok){
+    if (verbose_){
+      std::cout <<" getHZmumuCandidate input mu "<<in.V.muons.size()<<" e "<<in.V.electrons.size()<<std::endl;
+    }
     ok = false;
     VHbbCandidate temp=in;
     if (temp.V.muons.size()!=2) return in ;
@@ -36,6 +44,10 @@ class VHbbCandidateTools {
     return temp;
   }  
   VHbbCandidate getHZeeCandidate(const VHbbCandidate & in, bool & ok){
+    if (verbose_){
+      std::cout <<" getHZeeCandidate input mu "<<in.V.muons.size()<<" e "<<in.V.electrons.size()<<std::endl;
+    }
+
     ok = false;
     VHbbCandidate temp=in;
     if (temp.V.electrons.size()!=2) return in ;
@@ -61,6 +73,10 @@ class VHbbCandidateTools {
     return temp;
   }  
   VHbbCandidate getHZnnCandidate(const VHbbCandidate & in, bool & ok){
+    if (verbose_){
+      std::cout <<" getHZnnCandidate input mu "<<in.V.muons.size()<<" e "<<in.V.electrons.size()<<" met "<<in.V.mets.size()<<std::endl;
+    }
+    
     ok = false;
     VHbbCandidate temp=in;
     if (temp.V.mets.size()!=1) return in;
@@ -68,9 +84,11 @@ class VHbbCandidateTools {
     if (temp.V.electrons.size()!=0) return in ;
     
     temp.V.fourMomentum = temp.V.mets[0].fourMomentum;
-   
+    if (verbose_) {
+      std::cout <<" debug met "<< temp.V.mets[0].metSig << " " <<  temp.V.mets[0].sumEt<< std::endl;
+    }   
     if (temp.V.mets[0].metSig<5) return in;
-    if (temp.V.mets[0].sumEt<150) return in;
+    if (temp.V.mets[0].sumEt<50) return in;
     //    if (temp.H.fourMomentum.Pt()<150)return in;
     //    if (temp.H.firstJet().csv< 0.9) return in;
     //    if (temp.H.secondJet().csv<0.5) return in;
@@ -104,6 +122,9 @@ class VHbbCandidateTools {
     //
     return in;
   }
+
+ public: 
+  bool verbose_;
 
 };
 

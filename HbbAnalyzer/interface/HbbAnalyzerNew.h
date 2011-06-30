@@ -91,6 +91,8 @@ class HbbAnalyzerNew : public edm::EDProducer {
   //  TMatrixD *pointerPt;
   TMatrixD *pointerEta;
   TMatrixD *pointerPhi;
+
+  bool verbose_;
   
 };
 

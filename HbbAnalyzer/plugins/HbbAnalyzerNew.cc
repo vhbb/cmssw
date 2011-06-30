@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.7 2011/06/14 15:55:44 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.8 2011/06/21 15:49:01 tboccali Exp $
 //
 //
 
@@ -41,7 +41,7 @@ HbbAnalyzerNew::HbbAnalyzerNew(const edm::ParameterSet& iConfig):
   dimuLabel_(iConfig.getParameter<edm::InputTag>("dimuTag")),
   dielecLabel_(iConfig.getParameter<edm::InputTag>("dielecTag")),
   hltResults_(iConfig.getParameter<edm::InputTag>("hltResultsTag")),
-  runOnMC_(iConfig.getParameter<bool>("runOnMC")) {
+  runOnMC_(iConfig.getParameter<bool>("runOnMC")), verbose_(iConfig.getUntrackedParameter<bool>("verbose")) {
 
   //
   // put the setwhatproduced etc etc
@@ -679,34 +679,44 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   // met is calomet
   //
 
-
-  for(edm::View<pat::MET>::const_iterator met = mets.begin(); met!=mets.end(); ++met){
-    hbbInfo->calomet.sumEt=met->sumEt();
-    hbbInfo->calomet.metSig=met->mEtSig();
-    hbbInfo->calomet.eLong=met->e_longitudinal();
-    hbbInfo->calomet.fourMomentum=GENPTOLORP(met);
-  }
-
   edm::Handle<edm::View<pat::MET> > metTCHandle;
   iEvent.getByLabel("patMETsTC",metTCHandle);
   edm::View<pat::MET> metsTC = *metTCHandle;
-  for(edm::View<pat::MET>::const_iterator metTC = metsTC.begin(); metTC!=metsTC.end(); ++metTC){
-    hbbInfo->calomet.sumEt=metTC->sumEt();
-    hbbInfo->calomet.metSig=metTC->mEtSig();
-    hbbInfo->calomet.eLong=metTC->e_longitudinal();
-    hbbInfo->calomet.fourMomentum=GENPTOLORP(metTC);
+  if(metsTC.size()){
+    hbbInfo->tcmet.sumEt=(metsTC[0]).sumEt();
+    hbbInfo->tcmet.metSig=(metsTC[0]).mEtSig();
+    hbbInfo->tcmet.eLong=(metsTC[0]).e_longitudinal();
+    hbbInfo->tcmet.fourMomentum=GENPTOLOR((metsTC[0]));
+    if (verbose_)     std::cout <<" METTC "<<     hbbInfo->tcmet.metSig <<" " <<     hbbInfo->tcmet.sumEt<<std::endl;
   }
+  
+  if(mets.size()){
+    hbbInfo->calomet.sumEt=(mets[0]).sumEt();
+    hbbInfo->calomet.metSig=(mets[0]).mEtSig();
+    hbbInfo->calomet.eLong=(mets[0]).e_longitudinal();
+    hbbInfo->calomet.fourMomentum=GENPTOLOR((mets[0]));
+    if (verbose_)     std::cout <<" METTC "<<     hbbInfo->calomet.metSig <<" " <<     hbbInfo->calomet.sumEt<<std::endl;
+  }
+
+  
   edm::Handle<edm::View<pat::MET> > metPFHandle;
   iEvent.getByLabel("patMETsPF",metPFHandle);
   edm::View<pat::MET> metsPF = *metPFHandle;
-  for(edm::View<pat::MET>::const_iterator metPF = metsPF.begin(); metPF!=metsPF.end(); ++metPF){
-    hbbInfo->calomet.sumEt=metPF->sumEt();
-    hbbInfo->calomet.metSig=metPF->mEtSig();
-    hbbInfo->calomet.eLong=metPF->e_longitudinal();
-    hbbInfo->calomet.fourMomentum=GENPTOLORP(metPF);
+
+  if(metsPF.size()){
+    hbbInfo->pfmet.sumEt=(metsPF[0]).sumEt();
+    hbbInfo->pfmet.metSig=(metsPF[0]).mEtSig();
+    hbbInfo->pfmet.eLong=(metsPF[0]).e_longitudinal();
+    hbbInfo->pfmet.fourMomentum=GENPTOLOR((metsPF[0]));
+    if (verbose_)     std::cout <<" METTC "<<     hbbInfo->pfmet.metSig <<" " <<     hbbInfo->pfmet.sumEt<<std::endl;
   }
 
 
+  if(verbose_){
+    std::cout << "METs: calomet "<<mets.size()<<" tcmet "<<metsTC.size()<<" pfmet "<<metsPF.size()<<std::endl;  
+  }
+
+  std::cout << " INPUT MUONS "<<muons.size()<<std::endl;
 
   for(edm::View<pat::Muon>::const_iterator mu = muons.begin(); mu!=muons.end(); ++mu){
     VHbbEvent::MuonInfo mf;
@@ -767,7 +777,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     hbbInfo->muInfo.push_back(mf);
   }
 
-
+  std::cout << " INPUT electrons "<<electrons.size()<<std::endl;
   for(edm::View<pat::Electron>::const_iterator elec = electrons.begin(); elec!=electrons.end(); ++elec){
     VHbbEvent::ElectronInfo ef;
     ef.fourMomentum=GENPTOLORP(elec);
@@ -801,6 +811,8 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     hbbInfo->eleInfo.push_back(ef);
   }
 
+
+  std::cout << " INPUT taus "<<taus.size()<<std::endl;
   for(edm::View<pat::Tau>::const_iterator tau = taus.begin(); tau!=taus.end(); ++tau){
     VHbbEvent::TauInfo tf;
     tf.fourMomentum=GENPTOLORP(tau);
@@ -949,7 +961,22 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     hbbInfo->diElectronInfo.push_back(df);
     
   }
+   if (verbose_){
+     std::cout <<" Pushing hbbInfo "<<std::endl;
+     std::cout <<" SimpleJets1 = "<<hbbInfo->simpleJets.size()<<std::endl<<
+       " SimpleJets2 = "<<hbbInfo->simpleJets2.size()<<std::endl<<
+       " SubJets = "<<hbbInfo->subJets.size()<<std::endl<<
+       " HardJets = "<<hbbInfo->hardJets.size()<<std::endl<<
+       " Muons = "<<hbbInfo->muInfo.size()<<std::endl<<
+       " Electrons = "<<hbbInfo->eleInfo.size()<<std::endl<<
+       " Taus = "<<hbbInfo->tauInfo.size()<<std::endl<<
+       " Electrons = "<<hbbInfo->eleInfo.size()<<std::endl<<
+       "--------------------- "<<std::endl;
+  }
+
+
   iEvent.put(hbbInfo);
+
 
 }
   
