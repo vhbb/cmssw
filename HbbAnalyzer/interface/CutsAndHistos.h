@@ -1,6 +1,7 @@
 #ifndef CUTANDHISTOS_H
 #define CUTANDHISTOS_H
-#include "../interface/VHbbEvent.h"
+#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
+#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbProxy.h"
 #include <string>
 #include <sstream>
 #include <vector>
@@ -8,36 +9,27 @@
 #include <TFile.h>
 
 class VHbbEvent;
-//class TFolder;
-
-/*class VHbbEventWithHypothesis : public VHbbEvent
-{
- TLorentzVector H;
- TLorentzVector V;
-};
-*/
 
 class Histos {
 public:
    virtual void book(TFile &f, std::string suffix) = 0;
-   virtual void fill(const VHbbEvent &, float w) = 0;
+   virtual void fill(VHbbProxy &, float w) = 0;
 };
 
 class Cut {
  public:
-   virtual bool pass(const VHbbEvent &) = 0;
+   virtual bool pass(VHbbProxy &) = 0;
    virtual std::string name() = 0;
-   virtual bool operator()(const VHbbEvent &e) {return pass(e); }
+   virtual bool operator()(VHbbProxy &iProxy) {return pass(iProxy); }
 };
-
 
 class CutSet : public Cut {
  public:
  void add(Cut *c) {cuts.push_back(c);}  
- bool pass(const VHbbEvent &e) {
+ bool pass(VHbbProxy &iProxy) {
   bool result=true;
   for(size_t i=0; i< cuts.size(); i++) 
-    if( ! (cuts.at(i)->pass(e)) ) 
+    if( ! (cuts.at(i)->pass(iProxy)) ) 
       result=false;
   return result;
  } 
@@ -67,11 +59,11 @@ public:
       histos.at(i)->book(f,suffix);
   }
   
-  void process(const VHbbEvent &  e,float w) 
+  void process(VHbbProxy & iProxy,float w)
   {
-    if(cutset.pass(e))
+    if(cutset.pass(iProxy))
       for(size_t i=0; i< histos.size(); i++) 
-	histos.at(i)->fill(e,w);
+	histos.at(i)->fill(iProxy,w);
   }
 
   

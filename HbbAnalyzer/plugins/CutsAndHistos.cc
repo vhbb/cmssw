@@ -1,5 +1,6 @@
 #include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
-#include "VHbbAnalysis/HbbAnalyzer/interface/CutsAndHistos.hpp"
+#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbProxy.h"
+#include "VHbbAnalysis/HbbAnalyzer/interface/CutsAndHistos.h"
 #include <TH1F.h>
 #include "DataFormats/GeometryVector/interface/VectorUtil.h"
 
@@ -7,17 +8,27 @@
 
 class HPt70Cut :  public Cut {
   std::string name() {return "HpT70";};
-  bool pass(const VHbbEvent &e) {return e.mcH.fourMomentum.Pt() > 70;} 
+  bool pass(VHbbProxy &iProxy) {
+    return iProxy.getVHbbEvent()->mcH.fourMomentum.Pt() > 70;
+  } 
 };
 
 class WPt50To150Cut:  public Cut {
   std::string name() {return "WpT50To150";};
-  bool pass(const VHbbEvent &e) {return e.mcW.fourMomentum.Pt() > 50 && e.mcW.fourMomentum.Pt() < 150;} 
+  bool pass(VHbbProxy &iProxy) {
+    const VHbbEvent* iEvent = iProxy.getVHbbEvent();
+    return ( iEvent->mcW.fourMomentum.Pt() > 50 
+	     && iEvent->mcW.fourMomentum.Pt() < 150 );
+  } 
 };
 
 class ZPt50To150Cut:  public Cut {
   std::string name() {return "ZpT50To150";};
-  bool pass(const VHbbEvent &e) {return e.mcZ.fourMomentum.Pt() > 50 && e.mcZ.fourMomentum.Pt() < 150;} 
+  bool pass(VHbbProxy &iProxy) {
+    const VHbbEvent* iEvent = iProxy.getVHbbEvent();
+    return ( iEvent->mcZ.fourMomentum.Pt() > 50 
+	     && iEvent->mcZ.fourMomentum.Pt() < 150 );
+  } 
 };
 
 // class VBoost: public Cut {
@@ -279,18 +290,21 @@ public:
     //    h_HHel = new TH1F(("HiggsHel"+suffix).c_str(),("Higgs helicity angle ("+suffix+")").c_str(), bin_hel, min_hel, max_hel );
   }
   
-  virtual void fill(const VHbbEvent &e,float w) {
+  virtual void fill(VHbbProxy &iProxy,float w) {
     //from MC
+
+    const VHbbEvent *iEvent = iProxy.getVHbbEvent();
+    const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
 
 //     HiggsCandidate H = e.HiggsCandidate;
 //     VectorCandidate V = e.VectorCandidate;
     
-    h_simHMass->Fill(e.mcH.fourMomentum.M(), w); 
-    h_simHPt->Fill(e.mcH.fourMomentum.Pt(), w); 
-    h_simZMass->Fill(e.mcZ.fourMomentum.M(), w); 
-    h_simZPt->Fill(e.mcZ.fourMomentum.Pt(), w); 
-    h_simWMass->Fill(e.mcW.fourMomentum.M(), w); 
-    h_simWPt->Fill(e.mcW.fourMomentum.Pt(), w); 
+    h_simHMass->Fill(iEvent->mcH.fourMomentum.M(), w); 
+    h_simHPt->Fill(iEvent->mcH.fourMomentum.Pt(), w); 
+    h_simZMass->Fill(iEvent->mcZ.fourMomentum.M(), w); 
+    h_simZPt->Fill(iEvent->mcZ.fourMomentum.Pt(), w); 
+    h_simWMass->Fill(iEvent->mcW.fourMomentum.M(), w); 
+    h_simWPt->Fill(iEvent->mcW.fourMomentum.Pt(), w); 
 
     //Candidates
 //     h_HMass->Fill(H.fourMomentum.M(), w); 

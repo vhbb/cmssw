@@ -11,6 +11,7 @@
 #include <TCanvas.h>
 #include <vector>
 #include "VHbbAnalysis/HbbAnalyzer/interface/HbbAnalyzerNew.h"
+#include "VHbbAnalysis/HbbAnalyzer/interface/HbbCandidateFinder.h"
 #include "VHbbAnalysis/HbbAnalyzer/src/classes.h"
 #include "VHbbAnalysis/HbbAnalyzer/plugins/CutsAndHistos.cc"
 
@@ -23,7 +24,8 @@ int main( void ){
 
   //  mkdir("./Histograms",755);
 
-  TFile f("PAT.edm.root");
+  //TFile f("../test/PAT.edm.root");
+  TFile f("../test/VHbbPAT.edm.root");
   fwlite::Event ev(&f);
 
   TFile *fout = new TFile("fout.root","RECREATE");
@@ -48,7 +50,6 @@ int main( void ){
   CutsAndHistos  noBoost(noBoostControlRegion,histosForControlRegions);
   CutsAndHistos  boost(boostRegion,histosForBoostedRegions);
 
-  //  noBoost.book(*iFolder);  
   noBoost.book(*fout);
   boost.book(*fout);
 
@@ -59,10 +60,26 @@ int main( void ){
 
     fwlite::Handle< VHbbEvent > vhbbHandle; 
     vhbbHandle.getByLabel(ev,"HbbAnalyzerNew");
-    const VHbbEvent vhbb = *vhbbHandle.product();
+    const VHbbEvent iEvent = *vhbbHandle.product();
 
-    noBoost.process(vhbb, 1);
-    boost.process(vhbb, 1);
+    fwlite::Handle< std::vector<VHbbCandidate> > vhbbCandHandle; 
+    vhbbCandHandle.getByLabel(ev,"hbbCandidates");
+    const std::vector<VHbbCandidate> iCand = *vhbbCandHandle.product();
+
+    VHbbProxy iProxy(&iEvent, &iCand);
+
+    const std::vector<VHbbCandidate> *pcand = iProxy.getVHbbCandidate();
+
+    std::cout << "pt MC higgs from proxy = " << iProxy.getVHbbEvent()->mcH.fourMomentum.Pt() << std::endl;
+    std::cout << "pt higgs = " << iEvent.mcH.fourMomentum.Pt() << std::endl;
+    if(iCand.size()>0){
+      std::cout << "pt Candidate higgs from proxy = " << pcand->at(0).H.fourMomentum.Pt() << std::endl;
+      std::cout << "pt Candidate higgs from proxy = " << iProxy.getVHbbCandidate()->at(0).H.fourMomentum.Pt() << std::endl;
+      std::cout << "pt Candidate higgs = " << iCand.at(0).H.fourMomentum.Pt() << std::endl;
+    }
+
+    noBoost.process(iProxy, 1);
+    boost.process(iProxy, 1);
 
   }
 
