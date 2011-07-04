@@ -163,23 +163,6 @@ public:
 
     TDirectory *subDir;
 
-//     TDirectory *dir = gDirectory;
-//     TIter next(dir->GetListOfKeys());
-//     TKey * key;
-//     while ((key = (TKey*)next())) {
-//       std::cout << "subdirs = " << key->GetName() << std::endl;
-//       if (key->IsFolder()) {
-// 	if( suffix.c_str() == key->GetName() ){
-
-// 	  std::cout << "subdirs = " << key->GetName() << std::endl;
-// 	}
-// // 	else 
-// // 	  subDir = gDirectory;
-//       }
-//     }
-
-//     std::cout << "subdirs = " << subDir->GetName() << std::endl;
-
     if( ! f.GetDirectory(suffix.c_str()) )
       subDir = f.mkdir(suffix.c_str());
     else 
