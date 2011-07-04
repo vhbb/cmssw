@@ -10,8 +10,9 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <vector>
-#include "VHbbAnalysis/HbbAnalyzer/interface/HbbAnalyzerNew.h"
-#include "VHbbAnalysis/HbbAnalyzer/interface/HbbCandidateFinder.h"
+//#include "VHbbAnalysis/HbbAnalyzer/interface/HbbAnalyzerNew.h"
+#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
+//#include "VHbbAnalysis/HbbAnalyzer/interface/HbbCandidateFinder.h"
 #include "VHbbAnalysis/HbbAnalyzer/src/classes.h"
 #include "VHbbAnalysis/HbbAnalyzer/plugins/CutsAndHistos.cc"
 
@@ -25,10 +26,11 @@ int main( void ){
   //  mkdir("./Histograms",755);
 
   //TFile f("../test/PAT.edm.root");
+  //  TFile f("../test/VHbbPAT.edm_6_0_HAB.root");
   TFile f("../test/VHbbPAT.edm.root");
   fwlite::Event ev(&f);
 
-  TFile *fout = new TFile("fout.root","RECREATE");
+  TFile *fout = new TFile("VHbbHistos.root","RECREATE");
 
   gROOT->SetStyle("Plain");
   gStyle->SetOptTitle(0);
@@ -37,21 +39,29 @@ int main( void ){
   gStyle->SetNumberContours(5);
 
   CutSet noBoostControlRegion;
-  noBoostControlRegion.add(new HPt70Cut);
+  noBoostControlRegion.add(new mcHPt70Cut);
   CutSet boostRegion;
-  boostRegion.add(new ZPt50To150Cut);
+  boostRegion.add(new mcZPt50To150Cut);
+  CutSet signalRegion;
+  signalRegion.add(new SignalRegion);
 
   std::vector<Histos *> histosForControlRegions;
-  histosForControlRegions.push_back(new StandardHistos);
+  histosForControlRegions.push_back(new MCHistos);
 
   std::vector<Histos *> histosForBoostedRegions;
   histosForBoostedRegions.push_back(new StandardHistos);
 
+  std::vector<Histos *> histosForSignalRegions;
+  histosForSignalRegions.push_back(new StandardHistos);
+  histosForSignalRegions.push_back(new MCHistos);
+
   CutsAndHistos  noBoost(noBoostControlRegion,histosForControlRegions);
   CutsAndHistos  boost(boostRegion,histosForBoostedRegions);
+  CutsAndHistos  signal(signalRegion,histosForSignalRegions);
 
   noBoost.book(*fout);
   boost.book(*fout);
+  signal.book(*fout);
 
   unsigned int event = 0; 
   for( ev.toBegin(); !ev.atEnd(); ++ev) {
@@ -80,6 +90,8 @@ int main( void ){
 
     noBoost.process(iProxy, 1);
     boost.process(iProxy, 1);
+    if(iCand.size()>0)
+      signal.process(iProxy, 1);
 
   }
 
