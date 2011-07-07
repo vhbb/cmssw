@@ -358,7 +358,7 @@ process.goodPatJetsAK5PF = cms.EDFilter("PFJetIDSelectionFunctorFilter",
                            filterParams = pfJetIDSelector.clone(), src = cms.InputTag("selectedPatJetsAK5PF") )
 
 process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
-    runOnMC = cms.bool(False),
+    runOnMC = cms.bool(True),
     electronTag = cms.InputTag("selectedPatElectrons"),
     hltResultsTag = cms.InputTag("TriggerResults::HLT1"),
 #    tauTag = cms.InputTag("cleanPatTaus"),
@@ -391,9 +391,8 @@ process.dielectrons = cms.EDProducer("CandViewShallowCloneCombiner",
     decay = cms.string('selectedPatElectrons@+ selectedPatElectrons@-')
 )
 
-#process.TFileService = cms.Service("TFileService",
-#    fileName = cms.string('PatHistos3.root')
-#)
+#process.Tracer = cms.Service("Tracer")
+
 
 process.load("VHbbAnalysis.HbbAnalyzer.simpleEleIdSequence_cff")
 process.patElectronIDs = cms.Sequence(process.simpleEleIdSequence)
@@ -441,8 +440,9 @@ process.hbbCandidates = cms.EDProducer("HbbCandidateFinder",
 # define path 'p'
 process.p = cms.Path(
 #process.genJetParticles*
-                     process.goodOfflinePrimaryVertices* 
+                     process.goodOfflinePrimaryVertices*
                      process.PF2PAT*
+                     process.makePatElectrons*
                      process.ak5CaloJets*
                      process.ak7CaloJets*
 #                     process.ak5GenJets*
@@ -459,6 +459,7 @@ process.p = cms.Path(
                      process.CAsubJetsProducer*
                      process.patDefaultSequence*
                      process.patPF2PATSequence* # added with usePF2PAT
+                     process.patCandidates*
                      process.dimuons*
                      process.dielectrons*
                      process.goodPatJetsAK5PF*
