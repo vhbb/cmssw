@@ -29,8 +29,8 @@ using namespace std;
 
 
 #include "VHbbAnalysis/HbbAnalyzer/interface/HbbCandidateFinderAlgo.h"
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbCandidate.h"
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidate.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
 
 //
 // class declaration

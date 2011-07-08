@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 
 import os 
 
-isMC = 'false'
+isMC = False
 
 # define the process
 process = cms.Process("VH")
@@ -30,7 +30,7 @@ process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("file:/
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-if isMC == 'false' :
+if isMC == False :
 	process.GlobalTag.globaltag = cms.string('GR_R_42_V13::All')
 else :
 	process.GlobalTag.globaltag = cms.string('START42_V12::All')
@@ -63,7 +63,7 @@ from PhysicsTools.PatAlgos.tools.coreTools import *
 #removeAllPATObjectsBut(process, ['Muons'])
 #removeSpecificPATObjects(process, ['Electrons', 'Muons', 'Taus'])
 
-if isMC == 'false' :
+if isMC == False :
 	removeMCMatching(process, ['All'])
 
 # add the trigger information to the configuration
@@ -76,7 +76,7 @@ from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerEventContent
 process.load('CommonTools.ParticleFlow.PF2PAT_cff')
 from PhysicsTools.PatAlgos.tools.pfTools import *
 
-if isMC == 'false' :
+if isMC == False :
 	usePF2PAT(process,runPF2PAT=False,jetAlgo='AK5',runOnMC=False,postfix='')
 else :
 	usePF2PAT(process,runPF2PAT=False,jetAlgo='AK5',runOnMC=True,postfix='')
@@ -358,7 +358,7 @@ process.goodPatJetsAK5PF = cms.EDFilter("PFJetIDSelectionFunctorFilter",
                            filterParams = pfJetIDSelector.clone(), src = cms.InputTag("selectedPatJetsAK5PF") )
 
 process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
-    runOnMC = cms.bool(True),
+    runOnMC = cms.bool(isMC),
     electronTag = cms.InputTag("selectedPatElectrons"),
     hltResultsTag = cms.InputTag("TriggerResults::HLT1"),
 #    tauTag = cms.InputTag("cleanPatTaus"),
@@ -397,7 +397,7 @@ process.dielectrons = cms.EDProducer("CandViewShallowCloneCombiner",
 process.load("VHbbAnalysis.HbbAnalyzer.simpleEleIdSequence_cff")
 process.patElectronIDs = cms.Sequence(process.simpleEleIdSequence)
 
-if isMC == 'false' :
+if isMC == False :
 	process.makePatElectrons = cms.Sequence(process.patElectronIDs*process.patElectronIsolation*process.patElectrons)
 else :
 	process.makePatElectrons = cms.Sequence(process.patElectronIDs*process.patElectronIsolation*process.electronMatch*process.patElectrons)

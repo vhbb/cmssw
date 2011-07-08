@@ -1,7 +1,7 @@
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbCandidate.h"
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbProxy.h"
-#include "VHbbAnalysis/HbbAnalyzer/interface/CutsAndHistos.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidate.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbProxy.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/CutsAndHistos.h"
 #include <TH1F.h>
 #include "DataFormats/GeometryVector/interface/VectorUtil.h"
 #include <sstream>

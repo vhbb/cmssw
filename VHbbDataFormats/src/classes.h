@@ -1,5 +1,5 @@
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbCandidate.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidate.h"
 #include "DataFormats/Common/interface/Wrapper.h"
 
 namespace { 

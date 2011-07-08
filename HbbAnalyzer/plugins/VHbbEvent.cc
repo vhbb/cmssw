@@ -1,3 +1,3 @@
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
 
 VHbbEvent pippo33;

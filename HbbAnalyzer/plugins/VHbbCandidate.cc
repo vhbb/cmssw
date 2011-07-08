@@ -1,3 +1,3 @@
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbCandidate.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidate.h"
 
 VHbbCandidate pippo2;

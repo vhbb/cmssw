@@ -1,8 +1,8 @@
 #ifndef HBBCANDIDATEFINDERALGO_HH
 #define HBBCANDIDATEFINDERALGO_HH
 
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbCandidate.h"
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidate.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
 
 class HbbCandidateFinderAlgo {
  public:

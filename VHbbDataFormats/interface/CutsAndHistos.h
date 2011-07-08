@@ -1,7 +1,7 @@
 #ifndef CUTANDHISTOS_H
 #define CUTANDHISTOS_H
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbProxy.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbProxy.h"
 #include <string>
 #include <sstream>
 #include <vector>

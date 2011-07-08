@@ -1,7 +1,7 @@
 #ifndef VHBBCANDIDATETOOLS_H
 #define VHBBCANDIDATETOOLS_H
 
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbCandidate.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidate.h"
 
 #include <iostream>
 

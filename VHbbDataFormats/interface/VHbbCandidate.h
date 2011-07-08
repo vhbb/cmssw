@@ -5,7 +5,7 @@
 #include <TVector2.h>
 #include <vector>
 
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
 
 class VHbbCandidate {
  public:

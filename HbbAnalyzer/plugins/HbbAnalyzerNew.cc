@@ -13,12 +13,12 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.8 2011/06/21 15:49:01 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.9 2011/06/30 08:56:27 tboccali Exp $
 //
 //
 
 #include "VHbbAnalysis/HbbAnalyzer/interface/HbbAnalyzerNew.h"
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
 
 #include "DataFormats/GeometryVector/interface/VectorUtil.h"
 

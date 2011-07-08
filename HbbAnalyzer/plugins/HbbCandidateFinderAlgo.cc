@@ -1,5 +1,5 @@
 #include "VHbbAnalysis/HbbAnalyzer/interface/HbbCandidateFinderAlgo.h"
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbCandidateTools.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidateTools.h"
 
 #include <iostream>
 #include<cstdlib>

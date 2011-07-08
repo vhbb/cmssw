@@ -11,10 +11,10 @@
 #include <TCanvas.h>
 #include <vector>
 //#include "VHbbAnalysis/HbbAnalyzer/interface/HbbAnalyzerNew.h"
-#include "VHbbAnalysis/HbbAnalyzer/interface/VHbbEvent.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
 //#include "VHbbAnalysis/HbbAnalyzer/interface/HbbCandidateFinder.h"
-#include "VHbbAnalysis/HbbAnalyzer/src/classes.h"
-#include "VHbbAnalysis/HbbAnalyzer/plugins/CutsAndHistos.cc"
+#include "VHbbAnalysis/VHbbDataFormats/src/classes.h"
+#include "VHbbAnalysis/VHbbDataFormats/src/CutsAndHistos.cc"
 
 int main( void ){
 
