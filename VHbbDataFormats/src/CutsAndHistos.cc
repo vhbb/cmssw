@@ -9,173 +9,205 @@
 
 //class LeptonSelection : public Cut 
 
-class mcHPt70Cut :  public Cut {
-  std::string name() {return "mcHpT70";};
+class mcHPtCut :  public Cut {
+public:
+  mcHPtCut(Double_t mcHPtCutMin_):
+    mcHPtCutMin(mcHPtCutMin_) {}
+  mcHPtCut(Double_t mcHPtCutMin_, Double_t mcHPtCutMax_):
+    mcHPtCutMin(mcHPtCutMin_),
+    mcHPtCutMax(mcHPtCutMax_) {}
+  std::string name() {
+    oss_mcHPtCutMin << mcHPtCutMin;
+    if(!mcHPtCutMax)
+      return "mcHpT"+oss_mcHPtCutMin.str();
+    else{
+      oss_mcHPtCutMax << mcHPtCutMax;
+      return "mcHpT"+oss_mcHPtCutMin.str()+"To"+oss_mcHPtCutMax.str();
+    }
+  }
   bool pass(VHbbProxy &iProxy) {
-    return iProxy.getVHbbEvent()->mcH.fourMomentum.Pt() > 70;
+    if(!mcHPtCutMax)
+      return ( iProxy.getVHbbEvent()->mcH.fourMomentum.Pt() > mcHPtCutMin );
+    else
+      return ( iProxy.getVHbbEvent()->mcH.fourMomentum.Pt() > mcHPtCutMin 
+	       && iProxy.getVHbbEvent()->mcH.fourMomentum.Pt() < mcHPtCutMax );
   } 
+private:
+  Double_t mcHPtCutMin;
+  Double_t mcHPtCutMax;
+  std::ostringstream oss_mcHPtCutMin;
+  std::ostringstream oss_mcHPtCutMax;
 };
 
-class mcHPt100Cut :  public Cut {
-  std::string name() {return "mcHpT100";};
+
+class mcWPtCut :  public Cut {
+public:
+  mcWPtCut(Double_t mcWPtCutMin_):
+    mcWPtCutMin(mcWPtCutMin_) {}
+  mcWPtCut(Double_t mcWPtCutMin_, Double_t mcWPtCutMax_):
+    mcWPtCutMin(mcWPtCutMin_),
+    mcWPtCutMax(mcWPtCutMax_) {}
+  std::string name() {
+    oss_mcWPtCutMin << mcWPtCutMin;
+    if(!mcWPtCutMax)
+      return "mcWpT"+oss_mcWPtCutMin.str();
+    else{
+      oss_mcWPtCutMax << mcWPtCutMax;
+      return "mcWpT"+oss_mcWPtCutMin.str()+"To"+oss_mcWPtCutMax.str();
+    }
+  }
   bool pass(VHbbProxy &iProxy) {
-    return iProxy.getVHbbEvent()->mcH.fourMomentum.Pt() > 100;
+    if(!mcWPtCutMax)
+      return ( iProxy.getVHbbEvent()->mcW.fourMomentum.Pt() > mcWPtCutMin );
+    else
+      return ( iProxy.getVHbbEvent()->mcW.fourMomentum.Pt() > mcWPtCutMin 
+	       && iProxy.getVHbbEvent()->mcW.fourMomentum.Pt() < mcWPtCutMax );
   } 
+private:
+  Double_t mcWPtCutMin;
+  Double_t mcWPtCutMax;
+  std::ostringstream oss_mcWPtCutMin;
+  std::ostringstream oss_mcWPtCutMax;
 };
 
-class mcHPt150Cut :  public Cut {
-  std::string name() {return "mcHpT150";};
+
+
+class mcZPtCut :  public Cut {
+public:
+  mcZPtCut(Double_t mcZPtCutMin_):
+    mcZPtCutMin(mcZPtCutMin_) {}
+  mcZPtCut(Double_t mcZPtCutMin_, Double_t mcZPtCutMax_):
+    mcZPtCutMin(mcZPtCutMin_),
+    mcZPtCutMax(mcZPtCutMax_) {}
+  std::string name() {
+    oss_mcZPtCutMin << mcZPtCutMin;
+    if(!mcZPtCutMax)
+      return "mcZpT"+oss_mcZPtCutMin.str();
+    else{
+      oss_mcZPtCutMax << mcZPtCutMax;
+      return "mcZpT"+oss_mcZPtCutMin.str()+"To"+oss_mcZPtCutMax.str();
+    }
+  }
   bool pass(VHbbProxy &iProxy) {
-    return iProxy.getVHbbEvent()->mcH.fourMomentum.Pt() > 150;
+    if(!mcZPtCutMax)
+      return ( iProxy.getVHbbEvent()->mcZ.fourMomentum.Pt() > mcZPtCutMin );
+    else
+      return ( iProxy.getVHbbEvent()->mcZ.fourMomentum.Pt() > mcZPtCutMin 
+	       && iProxy.getVHbbEvent()->mcZ.fourMomentum.Pt() < mcZPtCutMax );
   } 
+private:
+  Double_t mcZPtCutMin;
+  Double_t mcZPtCutMax;
+  std::ostringstream oss_mcZPtCutMin;
+  std::ostringstream oss_mcZPtCutMax;
 };
 
-class mcWPt50To150Cut:  public Cut {
-  std::string name() {return "mcWpT50To150";};
-  bool pass(VHbbProxy &iProxy) {
-    const VHbbEvent* iEvent = iProxy.getVHbbEvent();
-    return ( iEvent->mcW.fourMomentum.Pt() > 50 
-	     && iEvent->mcW.fourMomentum.Pt() < 150 );
-  } 
-};
-
-class mcZPt50To150Cut:  public Cut {
-  std::string name() {return "mcZpT50To150";};
-  bool pass(VHbbProxy &iProxy) {
-    const VHbbEvent* iEvent = iProxy.getVHbbEvent();
-    return ( iEvent->mcZ.fourMomentum.Pt() > 50 
-	     && iEvent->mcZ.fourMomentum.Pt() < 150 );
-  } 
-};
 
 class SimpleJet1PtCut: public Cut {
 public:
-  SimpleJet1PtCut(Double_t simpleJet1PtCut_):
-    simpleJet1PtCut(simpleJet1PtCut_){}
-  std::ostringstream  oss_simpleJet1PtCut;
+  SimpleJet1PtCut(Double_t simpleJet1PtCutMin_):
+    simpleJet1PtCutMin(simpleJet1PtCutMin_) {}
+  SimpleJet1PtCut(Double_t simpleJet1PtCutMin_, Double_t simpleJet1PtCutMax_):
+    simpleJet1PtCutMin(simpleJet1PtCutMin_),
+    simpleJet1PtCutMax(simpleJet1PtCutMax_) {}
   std::string name() {
-    oss_simpleJet1PtCut << simpleJet1PtCut;
-    return "SimpleJet1PtCut"+oss_simpleJet1PtCut.str();
+    oss_simpleJet1PtCutMin << simpleJet1PtCutMin;
+    if(!simpleJet1PtCutMax){
+      return "SimpleJet1PtCut"+oss_simpleJet1PtCutMin.str();
+    }
+    else{
+      oss_simpleJet1PtCutMax << simpleJet1PtCutMax;
+      return "SimpleJet1PtCut"+oss_simpleJet1PtCutMin.str()+"To"+oss_simpleJet1PtCutMax.str();
+    }
   }
   bool pass(VHbbProxy &iProxy) {
     if(iProxy.getVHbbCandidate()->size() < 1)
       return false;
     else 
-      return ((iProxy.getVHbbCandidate()->at(0)).H.jets.at(0).fourMomentum.Pt() > simpleJet1PtCut);
+      if(!simpleJet1PtCutMin)
+	return ((iProxy.getVHbbCandidate()->at(0)).H.jets.at(0).fourMomentum.Pt() > simpleJet1PtCutMin);
+      else
+	return ((iProxy.getVHbbCandidate()->at(0)).H.jets.at(0).fourMomentum.Pt() > simpleJet1PtCutMin
+		&& (iProxy.getVHbbCandidate()->at(0)).H.jets.at(0).fourMomentum.Pt() < simpleJet1PtCutMax);
   } 
 private:
-  Double_t simpleJet1PtCut;
+  Double_t simpleJet1PtCutMin;
+  Double_t simpleJet1PtCutMax;
+  std::ostringstream  oss_simpleJet1PtCutMin;
+  std::ostringstream  oss_simpleJet1PtCutMax;
 };
 
 class VPtCut: public Cut {
 public:
-  VPtCut(Double_t VptCut_):
-    VptCut(VptCut_){}
-  std::ostringstream  V_pt;
+  VPtCut(Double_t VptCutMin_):
+    VptCutMin(VptCutMin_) {}
+  VPtCut(Double_t VptCutMin_, Double_t VptCutMax_):
+    VptCutMin(VptCutMin_),
+    VptCutMax(VptCutMax_) {}
   std::string name() {
-    V_pt << VptCut;
-    return "VpT"+V_pt.str();
+    oss_VptMin << VptCutMin;
+    if(! VptCutMax ){
+      return "VpT"+oss_VptMin.str();
+    }
+    else{
+      oss_VptMax << VptCutMax;
+      return "VpT"+oss_VptMin.str()+"To"+oss_VptMax.str();
+    }
   }
   bool pass(VHbbProxy &iProxy) {
     if(iProxy.getVHbbCandidate()->size() < 1)
       return false;
     else 
-      return ((iProxy.getVHbbCandidate()->at(0)).V.fourMomentum.Pt() > VptCut);
+      if(VptCutMax != 1e10)
+	return ((iProxy.getVHbbCandidate()->at(0)).V.fourMomentum.Pt() > VptCutMin 
+		&& (iProxy.getVHbbCandidate()->at(0)).V.fourMomentum.Pt() < VptCutMax);
+      else
+	return ((iProxy.getVHbbCandidate()->at(0)).V.fourMomentum.Pt() > VptCutMin );
+		
   } 
 private:
-  Double_t VptCut;
+  Double_t VptCutMin;
+  Double_t VptCutMax;
+  std::ostringstream oss_VptMin;
+  std::ostringstream oss_VptMax;
 };
 
-class HPt120Cut: public Cut {
+
+class HPtCut: public Cut {
 public:
-  HPt120Cut(): HptCut(120){}
-  std::ostringstream H_pt;
+  HPtCut(Double_t hPtCutMin_):
+    hPtCutMin(hPtCutMin_) {}
+  HPtCut(Double_t hPtCutMin_, Double_t hPtCutMax_):
+    hPtCutMin(hPtCutMin_),
+    hPtCutMax(hPtCutMax_) {}
+
   std::string name() {
-    H_pt << HptCut;
-    return "HpT"+H_pt.str();
+    oss_HPtCutMin << hPtCutMin;
+    if(!hPtCutMax){
+      return "HpT"+oss_HPtCutMin.str();
+    }
+    else{
+      oss_HPtCutMax << hPtCutMax;
+      return "HpT"+oss_HPtCutMin.str()+"To"+oss_HPtCutMax.str();
+    }
   }
   bool pass(VHbbProxy &iProxy) {
     if(iProxy.getVHbbCandidate()->size() < 1)
       return false;
     else 
-      return ((iProxy.getVHbbCandidate()->at(0)).H.fourMomentum.Pt() > HptCut);
+      if(!hPtCutMax)
+	return ((iProxy.getVHbbCandidate()->at(0)).H.fourMomentum.Pt() > hPtCutMin);
+      else 
+	return ((iProxy.getVHbbCandidate()->at(0)).H.fourMomentum.Pt() > hPtCutMin
+		&& (iProxy.getVHbbCandidate()->at(0)).H.fourMomentum.Pt() < hPtCutMax);
   }
 private:
-  Double_t HptCut;
+  Double_t hPtCutMin;
+  Double_t hPtCutMax;
+  std::ostringstream oss_HPtCutMin;
+  std::ostringstream oss_HPtCutMax;
 };
 
-class HPt130Cut: public Cut {
-public:
-  HPt130Cut(): HptCut(130){}
-  std::ostringstream H_pt;
-  std::string name() {
-    H_pt << HptCut;
-    return "HpT"+H_pt.str();
-  }
-  bool pass(VHbbProxy &iProxy) {
-    if(iProxy.getVHbbCandidate()->size() < 1)
-      return false;
-    else 
-      return ((iProxy.getVHbbCandidate()->at(0)).H.fourMomentum.Pt() > HptCut);
-  }
-private:
-  Double_t HptCut;
-};
-
-class HPt140Cut: public Cut {
-public:
-  HPt140Cut(): HptCut(140){}
-  std::ostringstream H_pt;
-  std::string name() {
-    H_pt << HptCut;
-    return "HpT"+H_pt.str();
-  }
-  bool pass(VHbbProxy &iProxy) {
-    if(iProxy.getVHbbCandidate()->size() < 1)
-      return false;
-    else 
-      return ((iProxy.getVHbbCandidate()->at(0)).H.fourMomentum.Pt() > HptCut);
-  }
-private:
-  Double_t HptCut;
-};
-
-class HPt145Cut: public Cut {
-public:
-  HPt145Cut(): HptCut(145){}
-  std::ostringstream H_pt;
-  std::string name() {
-    H_pt << HptCut;
-    return "HpT"+H_pt.str();
-  }
-  bool pass(VHbbProxy &iProxy) {
-    if(iProxy.getVHbbCandidate()->size() < 1)
-      return false;
-    else 
-      return ((iProxy.getVHbbCandidate()->at(0)).H.fourMomentum.Pt() > HptCut);
-  }
-private:
-  Double_t HptCut;
-};
-
-class HPt150Cut: public Cut {
-public:
-  HPt150Cut(): HptCut(150){}
-  std::ostringstream H_pt;
-  std::string name() {
-    H_pt << HptCut;
-    return "HpT"+H_pt.str();
-  }
-  bool pass(VHbbProxy &iProxy) {
-    if(iProxy.getVHbbCandidate()->size() < 1)
-      return false;
-    else 
-      return ((iProxy.getVHbbCandidate()->at(0)).H.fourMomentum.Pt() > HptCut);
-  }
-private:
-  Double_t HptCut;
-
-};
 
 class SignalRegion: public Cut {
   std::string name() {return "SignalRegion";};
