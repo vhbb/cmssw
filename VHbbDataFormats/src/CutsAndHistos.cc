@@ -328,7 +328,8 @@ public:
   virtual void fill(VHbbProxy &iProxy,float w) {
 
     const VHbbEvent *iEvent = iProxy.getVHbbEvent();
-
+   if(iEvent)
+   {
     //from MC    
     McH_simHMass->Fill(iEvent->mcH.fourMomentum.M(), w); 
     McH_simHPt->Fill(iEvent->mcH.fourMomentum.Pt(), w); 
@@ -336,7 +337,7 @@ public:
     McH_simZPt->Fill(iEvent->mcZ.fourMomentum.Pt(), w); 
     McH_simWMass->Fill(iEvent->mcW.fourMomentum.M(), w); 
     McH_simWPt->Fill(iEvent->mcW.fourMomentum.Pt(), w); 
-
+   }
   }
 
 
@@ -664,14 +665,14 @@ public:
   virtual void fill(VHbbProxy &iProxy,float w) {
 
     const VHbbEvent *iEvent = iProxy.getVHbbEvent();
-    const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+if(iEvent)
+{    const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
 
     //Candidates
     if(iCand->size() > 0){
       VHbbCandidate::CandidateType iCandType = iCand->at(0).candidateType;
       VHbbCandidate::HiggsCandidate H = iCand->at(0).H;
       VHbbCandidate::VectorCandidate V = iCand->at(0).V;
-
       std::vector<VHbbEvent::HardJet> iHardJets = iEvent->hardJets;
       VHbbEvent::HardJet iHardJet = iHardJets.at(0);
 
@@ -698,7 +699,7 @@ public:
 // 	HardJetH_WPt->Fill(V.fourMomentum.Pt(), w); 
 // 	HardJetH_WH_dPhi->Fill(V.fourMomentum.DeltaPhi(H.fourMomentum.Phi()), w); 
 //       }
- 
+ }
     }
   }
   
