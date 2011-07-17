@@ -13,7 +13,8 @@ process.source = cms.Source("PoolSource",
 process.out = cms.OutputModule(
     'PoolOutputModule',
     fileName       = cms.untracked.string('Cand.root'),
-    outputCommands = cms.untracked.vstring('drop *','keep *_HbbAnalyzerNew_*_*', 'keep *_hbbCandidates_*_*'),
+#    outputCommands = cms.untracked.vstring('drop *','keep *_HbbAnalyzerNew_*_*', 'keep *_hbbCandidates_*_*'),
+    outputCommands = cms.untracked.vstring('drop *','keep *_*_*_Candidates'),
     dropMetaData = cms.untracked.string('ALL'),
     splitLevel = cms.untracked.int32(0)
     )
