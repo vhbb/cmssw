@@ -104,11 +104,28 @@ class VHbbCandidateTools {
   VHbbCandidate getHWmunCandidate(const VHbbCandidate & in, bool & ok){
     ok = false;
     VHbbCandidate temp=in;
+    // require a muon and no electrons
     if (temp.V.muons.size()!=1) return in ;
     if (temp.V.electrons.size()!=0) return in ;
     //
-    // not clear to me, where is MET? it is not used????
-    //
+    /*pT(W) > 150 GeV (pt(W) computed using lepton px,y and PF MET x and y components)
+      pT(H) > 150 GeV
+      best btag, CSV > 0.90
+      second-best btag, CSV > 0.50
+      Dphi(W,H) > 2.95
+      no additional isolated leptons (pT > 15 GeV)
+      
+      same lepton definition as in the physics objects section 
+      
+      No additional ak5PFjets (pT > 30 GeV; |eta| < 2.4)
+      MET>35. for the electron BDT analysis
+      |cos(theta * )| (TBO)
+      color flow pull angle (TBO)
+      We don't cut on the transverse mass (for boosted objects cutting on the transverse mass introduces an inefficiency due to the angle between the MET and the lepton being close to 0.) 
+    */
+    
+
+    ok=true;
     return in;
   }
 
@@ -118,13 +135,63 @@ class VHbbCandidateTools {
     if (temp.V.electrons.size()!=1) return in ;
     if (temp.V.muons.size()!=0) return in ;
     //
-    // not clear to me, where is MET? it is not used????
-    //
+    /*pT(W) > 150 GeV (pt(W) computed using lepton px,y and PF MET x and y components)
+      pT(H) > 150 GeV
+      best btag, CSV > 0.90
+      second-best btag, CSV > 0.50
+      Dphi(W,H) > 2.95
+      no additional isolated leptons (pT > 15 GeV)
+      
+      same lepton definition as in the physics objects section 
+      
+      No additional ak5PFjets (pT > 30 GeV; |eta| < 2.4)
+      MET>35. for the electron BDT analysis
+      |cos(theta * )| (TBO)
+      color flow pull angle (TBO)
+      We don't cut on the transverse mass (for boosted objects cutting on the transverse mass introduces an inefficiency due to the angle between the MET and the lepton being close to 0.) 
+    */
+    
+    ok=true;
+
+
     return in;
   }
 
  public: 
   bool verbose_;
+  
+ public:
+  float getDeltaTheta( const VHbbEvent::SimpleJet & j1, const VHbbEvent::SimpleJet & j2 ) const {
+ double deltaTheta = 1e10;
+ TLorentzVector pi(0,0,0,0);
+ TLorentzVector v_j1 = j1.chargedTracksFourMomentum;
+ TLorentzVector v_j2 = j2.chargedTracksFourMomentum;
+ 
+ if( v_j2.Mag() == 0 
+     || v_j1.Mag() == 0 )
+   return deltaTheta = 1e10;
+ 
+ //use j1 to calculate the pull vector
+ TVector2 t = j1.tVector;
+ 
+ if( t.Mod() == 0 )
+   return deltaTheta = 1e10;
+ 
+ Double_t dphi =  v_j2.Phi()- v_j1.Phi();
+ if ( dphi > M_PI ) {
+   dphi -= 2.0*M_PI;
+ } else if ( dphi <= -M_PI ) {
+   dphi += 2.0*M_PI;
+ }
+ Double_t deltaeta = v_j2.Rapidity() - v_j1.Rapidity();
+ TVector2 BBdir( deltaeta, dphi );
+ 
+ deltaTheta = t.DeltaPhi(BBdir);
+ 
+ return deltaTheta;
+ 
+}
+
 
 };
 

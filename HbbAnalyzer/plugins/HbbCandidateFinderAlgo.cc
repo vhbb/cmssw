@@ -16,39 +16,6 @@ struct CompareBTag {
   }
 };
 
-float HbbCandidateFinderAlgo::getDeltaTheta( const VHbbEvent::SimpleJet & j1, const VHbbEvent::SimpleJet & j2 ) const{
-
- double deltaTheta = 1e10;
- TLorentzVector pi(0,0,0,0);
- TLorentzVector v_j1 = j1.chargedTracksFourMomentum;
- TLorentzVector v_j2 = j2.chargedTracksFourMomentum;
- 
- if( v_j2.Mag() == 0 
-     || v_j1.Mag() == 0 )
-   return deltaTheta = 1e10;
- 
- //use j1 to calculate the pull vector
- TVector2 t = j1.tVector;
- 
- if( t.Mod() == 0 )
-   return deltaTheta = 1e10;
- 
- Double_t dphi =  v_j2.Phi()- v_j1.Phi();
- if ( dphi > M_PI ) {
-   dphi -= 2.0*M_PI;
- } else if ( dphi <= -M_PI ) {
-   dphi += 2.0*M_PI;
- }
- Double_t deltaeta = v_j2.Rapidity() - v_j1.Rapidity();
- TVector2 BBdir( deltaeta, dphi );
- 
- deltaTheta = t.DeltaPhi(BBdir);
- 
- return deltaTheta;
- 
-}
-
-
 
 
 
@@ -56,6 +23,8 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   //
   // first find the jets
   //
+
+  VHbbCandidateTools selector(verbose_);
 
   VHbbEvent::SimpleJet j1,j2;
   std::vector<VHbbEvent::SimpleJet> addJets;
@@ -91,7 +60,7 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   temp.H.jets.push_back(j1);
   temp.H.jets.push_back(j2);
   temp.H.fourMomentum = (j1).fourMomentum+(j2).fourMomentum;
-  temp.H.deltaTheta = getDeltaTheta(j1,j2);
+  temp.H.deltaTheta = selector.getDeltaTheta(j1,j2);
   //  temp.H.deltaTheta = getDeltaTheta()
   temp.additionalJets = addJets;
   temp.V.mets = met;
@@ -101,7 +70,6 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   //
   // now see which kind of andidate this can be
   // 
-  VHbbCandidateTools selector(verbose_);
 
   VHbbCandidate result;
   bool ok = false;
