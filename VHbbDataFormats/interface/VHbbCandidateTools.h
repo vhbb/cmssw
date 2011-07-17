@@ -107,6 +107,7 @@ class VHbbCandidateTools {
     // require a muon and no electrons
     if (temp.V.muons.size()!=1) return in ;
     if (temp.V.electrons.size()!=0) return in ;
+    if (temp.V.mets.size()<1) return in ;
     //
     /*pT(W) > 150 GeV (pt(W) computed using lepton px,y and PF MET x and y components)
       pT(H) > 150 GeV
@@ -124,9 +125,10 @@ class VHbbCandidateTools {
       We don't cut on the transverse mass (for boosted objects cutting on the transverse mass introduces an inefficiency due to the angle between the MET and the lepton being close to 0.) 
     */
     
+    temp.V.fourMomentum = temp.V.muons[0].fourMomentum+temp.V.mets[0].fourMomentum;
 
     ok=true;
-    return in;
+    return temp;
   }
 
   VHbbCandidate getHWenCandidate(const VHbbCandidate & in, bool & ok){
@@ -134,6 +136,7 @@ class VHbbCandidateTools {
     VHbbCandidate temp=in;
     if (temp.V.electrons.size()!=1) return in ;
     if (temp.V.muons.size()!=0) return in ;
+    if (temp.V.mets.size()<1) return in ;
     //
     /*pT(W) > 150 GeV (pt(W) computed using lepton px,y and PF MET x and y components)
       pT(H) > 150 GeV
@@ -153,8 +156,8 @@ class VHbbCandidateTools {
     
     ok=true;
 
-
-    return in;
+    temp.V.fourMomentum = temp.V.electrons[0].fourMomentum+temp.V.mets[0].fourMomentum;
+    return temp;
   }
 
  public: 
