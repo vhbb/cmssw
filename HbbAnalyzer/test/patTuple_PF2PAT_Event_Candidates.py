@@ -38,7 +38,13 @@ else :
 process.out1 = cms.OutputModule(
     'PoolOutputModule',
     fileName       = cms.untracked.string('PAT.edm.root'),
-    outputCommands = cms.untracked.vstring('drop *','keep *_HbbAnalyzerNew_*_*', 'keep *_hbbCandidates_*_*'),
+    outputCommands = cms.untracked.vstring(
+	'drop *',
+					   'keep *_HbbAnalyzerNew_*_*',
+					   'keep *_hbbCandidates_*_*',
+					   'keep PileupSummaryInfo_*_*_*',
+					   'keep edmTriggerResults_*_*_*',
+					   ),
     dropMetaData = cms.untracked.string('ALL'),
     splitLevel = cms.untracked.int32(0)
     )
