@@ -13,12 +13,13 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.9 2011/06/30 08:56:27 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.10 2011/07/08 07:33:44 tboccali Exp $
 //
 //
 
 #include "VHbbAnalysis/HbbAnalyzer/interface/HbbAnalyzerNew.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEventAuxInfo.h"
 
 #include "DataFormats/GeometryVector/interface/VectorUtil.h"
 
@@ -47,6 +48,7 @@ HbbAnalyzerNew::HbbAnalyzerNew(const edm::ParameterSet& iConfig):
   // put the setwhatproduced etc etc
  
   produces<VHbbEvent>();
+  produces<VHbbEventAuxInfo>();
 
  
 }
@@ -71,7 +73,8 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   using namespace reco;
   
   
-  std::auto_ptr<VHbbEvent> hbbInfo( new VHbbEvent() );
+  std::auto_ptr<VHbbEvent> hbbInfo( new VHbbEvent() );  
+  std::auto_ptr<VHbbEventAuxInfo> auxInfo( new VHbbEventAuxInfo() );
   
   //
   // ??
@@ -94,8 +97,8 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     TString trigName=triggerNames_.triggerName(itrig);
     bool accept = hltresults->accept(itrig);
 
-    if (accept){(hbbInfo->triggerInfo.flag)[itrig] = 1;}
-    else { (hbbInfo->triggerInfo.flag)[itrig] = 0;}
+    if (accept){(auxInfo->triggerInfo.flag)[itrig] = 1;}
+    else { (auxInfo->triggerInfo.flag)[itrig] = 0;}
 
     //    std::cout << "%HLTInfo --  Number of HLT Triggers: " << ntrigs << std::endl;
     //    std::cout << "%HLTInfo --  HLTTrigger(" << itrig << "): " << trigName << " = " << accept << std::endl;
@@ -206,69 +209,69 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   int itrig26=-99;
   if(goodIsoMu17v6!=0) itrig26 = triggerNames_.triggerIndex("HLT_IsoMu17_v6");
    
-  if (itrig1!=-99 && hltresults->accept(itrig1))  hbbInfo->triggerInfo.triggerMu9=1; else hbbInfo->triggerInfo.triggerMu9=0;
-  if (itrig2!=-99 && hltresults->accept(itrig2))  hbbInfo->triggerInfo.triggerIsoMu9=1; else hbbInfo->triggerInfo.triggerIsoMu9=0;
-  if (itrig3!=-99 && hltresults->accept(itrig3))  hbbInfo->triggerInfo.triggerIsoMu13_3=1; else hbbInfo->triggerInfo.triggerIsoMu13_3=0;
-  if (itrig4!=-99 && hltresults->accept(itrig4))  hbbInfo->triggerInfo.triggerMu11=1; else hbbInfo->triggerInfo.triggerMu11=0;
-  if (itrig5!=-99 && hltresults->accept(itrig5))  hbbInfo->triggerInfo.triggerDoubleMu3=1; else hbbInfo->triggerInfo.triggerDoubleMu3=0; 
-  if (itrig6!=-99 && hltresults->accept(itrig6))  hbbInfo->triggerInfo.triggerDoubleMu3_2=1; else hbbInfo->triggerInfo.triggerDoubleMu3_2=0;
-  if (itrig7!=-99 && hltresults->accept(itrig7))  hbbInfo->triggerInfo.triggerMu15=1; else hbbInfo->triggerInfo.triggerMu15=0;
-  if (itrig8!=-99 && hltresults->accept(itrig8))  hbbInfo->triggerInfo.triggerMu15_1=1; else hbbInfo->triggerInfo.triggerMu15_1=0;  
+  if (itrig1!=-99 && hltresults->accept(itrig1))  auxInfo->triggerInfo.triggerMu9=1; else auxInfo->triggerInfo.triggerMu9=0;
+  if (itrig2!=-99 && hltresults->accept(itrig2))  auxInfo->triggerInfo.triggerIsoMu9=1; else auxInfo->triggerInfo.triggerIsoMu9=0;
+  if (itrig3!=-99 && hltresults->accept(itrig3))  auxInfo->triggerInfo.triggerIsoMu13_3=1; else auxInfo->triggerInfo.triggerIsoMu13_3=0;
+  if (itrig4!=-99 && hltresults->accept(itrig4))  auxInfo->triggerInfo.triggerMu11=1; else auxInfo->triggerInfo.triggerMu11=0;
+  if (itrig5!=-99 && hltresults->accept(itrig5))  auxInfo->triggerInfo.triggerDoubleMu3=1; else auxInfo->triggerInfo.triggerDoubleMu3=0; 
+  if (itrig6!=-99 && hltresults->accept(itrig6))  auxInfo->triggerInfo.triggerDoubleMu3_2=1; else auxInfo->triggerInfo.triggerDoubleMu3_2=0;
+  if (itrig7!=-99 && hltresults->accept(itrig7))  auxInfo->triggerInfo.triggerMu15=1; else auxInfo->triggerInfo.triggerMu15=0;
+  if (itrig8!=-99 && hltresults->accept(itrig8))  auxInfo->triggerInfo.triggerMu15_1=1; else auxInfo->triggerInfo.triggerMu15_1=0;  
    
-  if (itrig9!=-99 && hltresults->accept(itrig9))  hbbInfo->triggerInfo.triggerDoubleElec10=1; else hbbInfo->triggerInfo.triggerDoubleElec10=0;  
-  if (itrig10!=-99 && hltresults->accept(itrig10))  hbbInfo->triggerInfo.triggerDoubleElec15_1=1; else hbbInfo->triggerInfo.triggerDoubleElec15_1=0;  
-  if (itrig11!=-99 && hltresults->accept(itrig11))  hbbInfo->triggerInfo.triggerDoubleElec17_1=1; else hbbInfo->triggerInfo.triggerDoubleElec17_1=0;  
-  if (itrig12!=-99 && hltresults->accept(itrig12))  hbbInfo->triggerInfo.triggerMet100_1=1; else hbbInfo->triggerInfo.triggerMet100_1=0;
+  if (itrig9!=-99 && hltresults->accept(itrig9))  auxInfo->triggerInfo.triggerDoubleElec10=1; else auxInfo->triggerInfo.triggerDoubleElec10=0;  
+  if (itrig10!=-99 && hltresults->accept(itrig10))  auxInfo->triggerInfo.triggerDoubleElec15_1=1; else auxInfo->triggerInfo.triggerDoubleElec15_1=0;  
+  if (itrig11!=-99 && hltresults->accept(itrig11))  auxInfo->triggerInfo.triggerDoubleElec17_1=1; else auxInfo->triggerInfo.triggerDoubleElec17_1=0;  
+  if (itrig12!=-99 && hltresults->accept(itrig12))  auxInfo->triggerInfo.triggerMet100_1=1; else auxInfo->triggerInfo.triggerMet100_1=0;
    
-  if (itrig13!=-99 && hltresults->accept(itrig13))  hbbInfo->triggerInfo.triggerSingleEle1=1; else hbbInfo->triggerInfo.triggerSingleEle1=0;
-  if (itrig14!=-99 && hltresults->accept(itrig14))  hbbInfo->triggerInfo.triggerSingleEle2=1; else hbbInfo->triggerInfo.triggerSingleEle2=0;
-  if (itrig15!=-99 && hltresults->accept(itrig15))  hbbInfo->triggerInfo.triggerSingleEle3=1; else hbbInfo->triggerInfo.triggerSingleEle3=0;
-  if (itrig16!=-99 && hltresults->accept(itrig16))  hbbInfo->triggerInfo.triggerSingleEle4=1; else hbbInfo->triggerInfo.triggerSingleEle4=0;
+  if (itrig13!=-99 && hltresults->accept(itrig13))  auxInfo->triggerInfo.triggerSingleEle1=1; else auxInfo->triggerInfo.triggerSingleEle1=0;
+  if (itrig14!=-99 && hltresults->accept(itrig14))  auxInfo->triggerInfo.triggerSingleEle2=1; else auxInfo->triggerInfo.triggerSingleEle2=0;
+  if (itrig15!=-99 && hltresults->accept(itrig15))  auxInfo->triggerInfo.triggerSingleEle3=1; else auxInfo->triggerInfo.triggerSingleEle3=0;
+  if (itrig16!=-99 && hltresults->accept(itrig16))  auxInfo->triggerInfo.triggerSingleEle4=1; else auxInfo->triggerInfo.triggerSingleEle4=0;
    
-  if (itrig17!=-99 && hltresults->accept(itrig17))  hbbInfo->triggerInfo.triggerBtagMu1=1; else hbbInfo->triggerInfo.triggerBtagMu1=0;   
-  if (itrig18!=-99 && hltresults->accept(itrig18))  hbbInfo->triggerInfo.triggerBtagMu2=1; else hbbInfo->triggerInfo.triggerBtagMu2=0;
-  if (itrig19!=-99 && hltresults->accept(itrig19))  hbbInfo->triggerInfo.triggerBtagMu0=1; else hbbInfo->triggerInfo.triggerBtagMu0=0;
-  if (itrig20!=-99 && hltresults->accept(itrig20))  hbbInfo->triggerInfo.triggerBtagMu11=1; else hbbInfo->triggerInfo.triggerBtagMu11=0;
-  if (itrig21!=-99 && hltresults->accept(itrig21))  hbbInfo->triggerInfo.triggerBtagMuJet1=1; else hbbInfo->triggerInfo.triggerBtagMuJet1=0;
-  if (itrig22!=-99 && hltresults->accept(itrig22))  hbbInfo->triggerInfo.triggerBtagMuJet2=1; else hbbInfo->triggerInfo.triggerBtagMuJet2=0;
-  if (itrig23!=-99 && hltresults->accept(itrig23))  hbbInfo->triggerInfo.triggerBtagMuJet3=1; else hbbInfo->triggerInfo.triggerBtagMuJet3=0;
-  if (itrig231!=-99 && hltresults->accept(itrig231))  hbbInfo->triggerInfo.triggerBtagMuJet4=1; else hbbInfo->triggerInfo.triggerBtagMuJet4=0;
+  if (itrig17!=-99 && hltresults->accept(itrig17))  auxInfo->triggerInfo.triggerBtagMu1=1; else auxInfo->triggerInfo.triggerBtagMu1=0;   
+  if (itrig18!=-99 && hltresults->accept(itrig18))  auxInfo->triggerInfo.triggerBtagMu2=1; else auxInfo->triggerInfo.triggerBtagMu2=0;
+  if (itrig19!=-99 && hltresults->accept(itrig19))  auxInfo->triggerInfo.triggerBtagMu0=1; else auxInfo->triggerInfo.triggerBtagMu0=0;
+  if (itrig20!=-99 && hltresults->accept(itrig20))  auxInfo->triggerInfo.triggerBtagMu11=1; else auxInfo->triggerInfo.triggerBtagMu11=0;
+  if (itrig21!=-99 && hltresults->accept(itrig21))  auxInfo->triggerInfo.triggerBtagMuJet1=1; else auxInfo->triggerInfo.triggerBtagMuJet1=0;
+  if (itrig22!=-99 && hltresults->accept(itrig22))  auxInfo->triggerInfo.triggerBtagMuJet2=1; else auxInfo->triggerInfo.triggerBtagMuJet2=0;
+  if (itrig23!=-99 && hltresults->accept(itrig23))  auxInfo->triggerInfo.triggerBtagMuJet3=1; else auxInfo->triggerInfo.triggerBtagMuJet3=0;
+  if (itrig231!=-99 && hltresults->accept(itrig231))  auxInfo->triggerInfo.triggerBtagMuJet4=1; else auxInfo->triggerInfo.triggerBtagMuJet4=0;
    
-  if (itrig24!=-99 && hltresults->accept(itrig24))  hbbInfo->triggerInfo.triggerIsoMu15=1; else hbbInfo->triggerInfo.triggerIsoMu15=0;
-  if (itrig25!=-99 && hltresults->accept(itrig25))  hbbInfo->triggerInfo.triggerIsoMu17v5=1; else hbbInfo->triggerInfo.triggerIsoMu17v5=0;
-  if (itrig26!=-99 && hltresults->accept(itrig26))  hbbInfo->triggerInfo.triggerIsoMu17v6=1; else hbbInfo->triggerInfo.triggerIsoMu17v6=0;
+  if (itrig24!=-99 && hltresults->accept(itrig24))  auxInfo->triggerInfo.triggerIsoMu15=1; else auxInfo->triggerInfo.triggerIsoMu15=0;
+  if (itrig25!=-99 && hltresults->accept(itrig25))  auxInfo->triggerInfo.triggerIsoMu17v5=1; else auxInfo->triggerInfo.triggerIsoMu17v5=0;
+  if (itrig26!=-99 && hltresults->accept(itrig26))  auxInfo->triggerInfo.triggerIsoMu17v6=1; else auxInfo->triggerInfo.triggerIsoMu17v6=0;
    
-  if (itrig1==-99)  hbbInfo->triggerInfo.triggerMu9=-99; 
-  if (itrig2==-99)  hbbInfo->triggerInfo.triggerIsoMu9=-99; 
-  if (itrig3==-99)  hbbInfo->triggerInfo.triggerIsoMu13_3=-99; 
-  if (itrig4==-99)  hbbInfo->triggerInfo.triggerMu11=-99; 
-  if (itrig5==-99)  hbbInfo->triggerInfo.triggerDoubleMu3=-99;
-  if (itrig6==-99)  hbbInfo->triggerInfo.triggerDoubleMu3_2=-99; 
-  if (itrig7==-99)  hbbInfo->triggerInfo.triggerMu15=-99;
-  if (itrig8==-99)  hbbInfo->triggerInfo.triggerMu15_1=-99; 
+  if (itrig1==-99)  auxInfo->triggerInfo.triggerMu9=-99; 
+  if (itrig2==-99)  auxInfo->triggerInfo.triggerIsoMu9=-99; 
+  if (itrig3==-99)  auxInfo->triggerInfo.triggerIsoMu13_3=-99; 
+  if (itrig4==-99)  auxInfo->triggerInfo.triggerMu11=-99; 
+  if (itrig5==-99)  auxInfo->triggerInfo.triggerDoubleMu3=-99;
+  if (itrig6==-99)  auxInfo->triggerInfo.triggerDoubleMu3_2=-99; 
+  if (itrig7==-99)  auxInfo->triggerInfo.triggerMu15=-99;
+  if (itrig8==-99)  auxInfo->triggerInfo.triggerMu15_1=-99; 
 
-  if (itrig9==-99)  hbbInfo->triggerInfo.triggerDoubleElec10=-99; 
-  if (itrig10==-99)  hbbInfo->triggerInfo.triggerDoubleElec15_1=-99; 
-  if (itrig11==-99)  hbbInfo->triggerInfo.triggerDoubleElec17_1=-99; 
-  if (itrig12==-99) hbbInfo->triggerInfo.triggerMet100_1=-99;
+  if (itrig9==-99)  auxInfo->triggerInfo.triggerDoubleElec10=-99; 
+  if (itrig10==-99)  auxInfo->triggerInfo.triggerDoubleElec15_1=-99; 
+  if (itrig11==-99)  auxInfo->triggerInfo.triggerDoubleElec17_1=-99; 
+  if (itrig12==-99) auxInfo->triggerInfo.triggerMet100_1=-99;
 
-  if (itrig13==-99) hbbInfo->triggerInfo.triggerSingleEle1=-99;
-  if (itrig14==-99) hbbInfo->triggerInfo.triggerSingleEle2=-99;
-  if (itrig15==-99) hbbInfo->triggerInfo.triggerSingleEle3=-99;
-  if (itrig16==-99) hbbInfo->triggerInfo.triggerSingleEle4=-99;
+  if (itrig13==-99) auxInfo->triggerInfo.triggerSingleEle1=-99;
+  if (itrig14==-99) auxInfo->triggerInfo.triggerSingleEle2=-99;
+  if (itrig15==-99) auxInfo->triggerInfo.triggerSingleEle3=-99;
+  if (itrig16==-99) auxInfo->triggerInfo.triggerSingleEle4=-99;
 
-  if(itrig17==-99)  hbbInfo->triggerInfo.triggerBtagMu1=-99;   
-  if(itrig18==-99)  hbbInfo->triggerInfo.triggerBtagMu2=-99;
-  if(itrig19==-99)  hbbInfo->triggerInfo.triggerBtagMu0=-99;
-  if(itrig20==-99)  hbbInfo->triggerInfo.triggerBtagMu11=-99;
-  if(itrig21==-99)  hbbInfo->triggerInfo.triggerBtagMuJet1=-99;
-  if(itrig22==-99)  hbbInfo->triggerInfo.triggerBtagMuJet2=-99;
-  if(itrig23==-99)  hbbInfo->triggerInfo.triggerBtagMuJet3=-99;
-  if(itrig231==-99)  hbbInfo->triggerInfo.triggerBtagMuJet4=-99;
+  if(itrig17==-99)  auxInfo->triggerInfo.triggerBtagMu1=-99;   
+  if(itrig18==-99)  auxInfo->triggerInfo.triggerBtagMu2=-99;
+  if(itrig19==-99)  auxInfo->triggerInfo.triggerBtagMu0=-99;
+  if(itrig20==-99)  auxInfo->triggerInfo.triggerBtagMu11=-99;
+  if(itrig21==-99)  auxInfo->triggerInfo.triggerBtagMuJet1=-99;
+  if(itrig22==-99)  auxInfo->triggerInfo.triggerBtagMuJet2=-99;
+  if(itrig23==-99)  auxInfo->triggerInfo.triggerBtagMuJet3=-99;
+  if(itrig231==-99)  auxInfo->triggerInfo.triggerBtagMuJet4=-99;
 
-  if(itrig24==-99)  hbbInfo->triggerInfo.triggerIsoMu15=-99;
-  if(itrig25==-99)  hbbInfo->triggerInfo.triggerIsoMu17v5=-99;
-  if(itrig26==-99)  hbbInfo->triggerInfo.triggerIsoMu17v6=-99;
+  if(itrig24==-99)  auxInfo->triggerInfo.triggerIsoMu15=-99;
+  if(itrig25==-99)  auxInfo->triggerInfo.triggerIsoMu17v5=-99;
+  if(itrig26==-99)  auxInfo->triggerInfo.triggerIsoMu17v6=-99;
 
   //  MinDRMu=-99.,MCBestMuId=-99,MCBestMuMomId=-99,MCBestMuGMomId=-99;
   //  for(int i=0;i<50;i++) {DeltaRMu[i]=-99;}
@@ -303,13 +306,13 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   const Vertex &RecVtx = (*recVtxs)[VtxIn];
   const Vertex &RecVtxFirst = (*recVtxs)[0];
   
-  hbbInfo->pvInfo.firstPVInPT2 = TVector3(RecVtxFirst.x(), RecVtxFirst.y(), RecVtxFirst.z());
-  hbbInfo->pvInfo.firstPVInProb = TVector3(RecVtx.x(), RecVtx.y(), RecVtx.z());
+  auxInfo->pvInfo.firstPVInPT2 = TVector3(RecVtxFirst.x(), RecVtxFirst.y(), RecVtxFirst.z());
+  auxInfo->pvInfo.firstPVInProb = TVector3(RecVtx.x(), RecVtx.y(), RecVtx.z());
 
     
   edm::Handle<double> rhoHandle;
   iEvent.getByLabel(edm::InputTag("kt6PFJets", "rho"),rhoHandle); // configure srcRho = cms.InputTag('kt6PFJets")
-  hbbInfo->puInfo.rho = *rhoHandle;
+  auxInfo->puInfo.rho = *rhoHandle;
   
   //// real start
   
