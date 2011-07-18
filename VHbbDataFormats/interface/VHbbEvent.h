@@ -213,8 +213,6 @@ class VHbbEvent{
   
   PUInfo puInfo;
   
-  
-  
   METInfo calomet;
   METInfo tcmet;
   METInfo pfmet;

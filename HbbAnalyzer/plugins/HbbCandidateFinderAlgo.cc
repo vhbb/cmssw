@@ -61,6 +61,10 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   temp.H.jets.push_back(j2);
   temp.H.fourMomentum = (j1).fourMomentum+(j2).fourMomentum;
   temp.H.deltaTheta = selector.getDeltaTheta(j1,j2);
+  TVector3 higgsBoost;
+  higgsBoost = (temp.H.fourMomentum).BoostVector();
+  temp.H.helicities.push_back(selector.getHelicity(j1,higgsBoost));
+  temp.H.helicities.push_back(selector.getHelicity(j2,higgsBoost));
   //  temp.H.deltaTheta = getDeltaTheta()
   temp.additionalJets = addJets;
   temp.V.mets = met;

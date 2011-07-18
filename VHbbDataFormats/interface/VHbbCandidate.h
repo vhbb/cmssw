@@ -30,6 +30,7 @@ class VHbbCandidate {
    TLorentzVector fourMomentum;
     std::vector<VHbbEvent::SimpleJet> jets;
     float deltaTheta;
+    std::vector <float> helicities;
   public:
     VHbbEvent::SimpleJet& firstJet(){return jets[0];}
     VHbbEvent::SimpleJet& secondJet(){return jets[1];}

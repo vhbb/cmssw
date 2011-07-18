@@ -195,6 +195,14 @@ class VHbbCandidateTools {
  
 }
 
+  float getHelicity(const VHbbEvent::SimpleJet& j, TVector3 boost) const {
+    double hel = 1e10;
+    TLorentzVector jet = j.fourMomentum;
+    jet.Boost( -boost );
+    hel = TMath::Cos( jet.Vect().Angle( boost ) );
+    return hel;
+  }
+
 
 };
 
