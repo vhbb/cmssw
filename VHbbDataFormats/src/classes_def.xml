@@ -1,12 +1,15 @@
 <lcgdict>
-  <class name="VHbbEvent"/>
+
+      <class name="VHbbEvent"/>
+      <class name="VHbbEventAuxInfo"/>
   <class name="edm::Wrapper<VHbbEvent>"/>
+  <class name="edm::Wrapper<VHbbEventAuxInfo>"/>
 
 <class name="VHbbEvent::METInfo"/>
-<class name="VHbbEvent::PUInfo"/>
+<class name="VHbbEventAuxInfo::PUInfo"/>
 <class name="VHbbEvent::ParticleMCInfo"/>
-<class name="VHbbEvent::PrimaryVertexInfo"/>
-<class name="VHbbEvent::TriggerInfo"/>
+<class name="VHbbEventAuxInfo::PrimaryVertexInfo"/>
+<class name="VHbbEventAuxInfo::TriggerInfo"/>
 <class name="VHbbEvent::DiElectronInfo"/>
 
 <class name="VHbbEvent::DiMuonInfo"/>
