@@ -85,6 +85,8 @@ class SignalRegion: public Cut {
 
 private:
 
+  Double_t pt_b1;
+  Double_t pt_b2;
   Double_t btag_csv_min;
   Double_t btag_csv_max;
   Double_t Higgs_pt;
@@ -94,7 +96,6 @@ private:
   unsigned int nOfAdditionalLeptons;
   Double_t pullAngle;
   Double_t helicityAngle;
-
 };
 
 
@@ -171,14 +172,14 @@ class ControlRegion_Vusdg: public Cut {
       std::cerr << "No vector boson reconstructed for this control region." << std::endl;
 
     CompareBTag bTagComparator;
-    additionalJetsBtag = iProxy.getVHbbEvent().additionalJets;
+    additionalJetsBtag = iProxy.getVHbbCandidate()->at(0).additionalJets;
     std::sort( additionalJetsBtag.begin(), additionalJetsBtag.end(), bTagComparator );
     
     Bool_t go = false;
     if( H.fourMomentum.Pt() > Higgs_pt 
 	&& H.jets.at(0).Pt() > pt_b1 
 	&& H.jets.at(1).Pt() > pt_b2 
-	&& H.additionalJetsBtag.at(0).Pt() > pt_b3
+	&& additionalJetsBtag.at(0).Pt() > pt_b3
 	&& V.fourMomentum.Pt() > V_pt 
 	&& TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > VH_deltaPhi  
 	&& ( H.jets.at(0).csv > btag_csv_min && H.jets.at(1).csv > btag_csv_min )
@@ -194,6 +195,9 @@ class ControlRegion_Vusdg: public Cut {
 
 private:
 
+  Double_t pt_b1;
+  Double_t pt_b2;
+  Double_t pt_b3;
   Double_t CSVL;
   Double_t CSVM;  
   Double_t CSVT;
@@ -298,6 +302,9 @@ class ControlRegion_Top: public Cut {
 
 private:
 
+  Double_t pt_b1;
+  Double_t pt_b2;
+  Double_t pt_b3;
   Double_t btag_csv_min;
   Double_t btag_csv_max;
   Double_t Higgs_pt;
@@ -398,6 +405,9 @@ class ControlRegion_Vbb: public Cut {
 
 private:
 
+  Double_t pt_b1;
+  Double_t pt_b2;
+  Double_t pt_b3;
   Double_t btag_csv_min;
   Double_t btag_csv_max;
   Double_t Higgs_pt;
