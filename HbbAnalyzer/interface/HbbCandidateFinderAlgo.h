@@ -11,7 +11,6 @@ class HbbCandidateFinderAlgo {
 
 
   void run (const VHbbEvent*, std::vector<VHbbCandidate>  &);
-  float getDeltaTheta( const VHbbEvent::SimpleJet & j1, const VHbbEvent::SimpleJet & j2 ) const ;
 
   
  protected:

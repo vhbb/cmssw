@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 
 import os 
 
-isMC = False
+isMC = True 
 
 # define the process
 process = cms.Process("VH")

@@ -165,36 +165,36 @@ class VHbbCandidateTools {
   
  public:
   float getDeltaTheta( const VHbbEvent::SimpleJet & j1, const VHbbEvent::SimpleJet & j2 ) const {
- double deltaTheta = 1e10;
- TLorentzVector pi(0,0,0,0);
- TLorentzVector v_j1 = j1.chargedTracksFourMomentum;
- TLorentzVector v_j2 = j2.chargedTracksFourMomentum;
- 
- if( v_j2.Mag() == 0 
-     || v_j1.Mag() == 0 )
-   return deltaTheta = 1e10;
- 
- //use j1 to calculate the pull vector
- TVector2 t = j1.tVector;
- 
- if( t.Mod() == 0 )
-   return deltaTheta = 1e10;
- 
- Double_t dphi =  v_j2.Phi()- v_j1.Phi();
- if ( dphi > M_PI ) {
-   dphi -= 2.0*M_PI;
- } else if ( dphi <= -M_PI ) {
-   dphi += 2.0*M_PI;
- }
- Double_t deltaeta = v_j2.Rapidity() - v_j1.Rapidity();
- TVector2 BBdir( deltaeta, dphi );
- 
- deltaTheta = t.DeltaPhi(BBdir);
- 
- return deltaTheta;
- 
-}
-
+    double deltaTheta = 1e10;
+    TLorentzVector pi(0,0,0,0);
+    TLorentzVector v_j1 = j1.chargedTracksFourMomentum;
+    TLorentzVector v_j2 = j2.chargedTracksFourMomentum;
+    
+    if( v_j2.Mag() == 0 
+	|| v_j1.Mag() == 0 )
+      return deltaTheta = 1e10;
+    
+    //use j1 to calculate the pull vector
+    TVector2 t = j1.tVector;
+    
+    if( t.Mod() == 0 )
+      return deltaTheta = 1e10;
+    
+    Double_t dphi =  v_j2.Phi()- v_j1.Phi();
+    if ( dphi > M_PI ) {
+      dphi -= 2.0*M_PI;
+    } else if ( dphi <= -M_PI ) {
+      dphi += 2.0*M_PI;
+    }
+    Double_t deltaeta = v_j2.Rapidity() - v_j1.Rapidity();
+    TVector2 BBdir( deltaeta, dphi );
+    
+    deltaTheta = t.DeltaPhi(BBdir);
+    
+    return deltaTheta;
+    
+  }
+  
   float getHelicity(const VHbbEvent::SimpleJet& j, TVector3 boost) const {
     double hel = 1e10;
     TLorentzVector jet = j.fourMomentum;

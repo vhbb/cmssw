@@ -60,17 +60,16 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   temp.H.jets.push_back(j1);
   temp.H.jets.push_back(j2);
   temp.H.fourMomentum = (j1).fourMomentum+(j2).fourMomentum;
-  temp.H.deltaTheta = selector.getDeltaTheta(j1,j2);
   TVector3 higgsBoost;
   higgsBoost = (temp.H.fourMomentum).BoostVector();
   temp.H.helicities.push_back(selector.getHelicity(j1,higgsBoost));
   temp.H.helicities.push_back(selector.getHelicity(j2,higgsBoost));
-  //  temp.H.deltaTheta = getDeltaTheta()
+  temp.H.deltaTheta = selector.getDeltaTheta(j1,j2);
   temp.additionalJets = addJets;
   temp.V.mets = met;
   temp.V.muons = mu;
   temp.V.electrons = ele;
-
+  
   //
   // now see which kind of andidate this can be
   // 
@@ -152,7 +151,7 @@ bool HbbCandidateFinderAlgo::findDiJets (const std::vector<VHbbEvent::SimpleJet>
  }
  
  CompareBTag  bTagComparator;
-
+ CompareJetPt ptComparator;
  
  if (verbose_){
    std::cout <<" CandidateFinder: Intermediate Jets = "<<tempJets.size()<<std::endl;
@@ -163,9 +162,15 @@ bool HbbCandidateFinderAlgo::findDiJets (const std::vector<VHbbEvent::SimpleJet>
  
  std::sort(tempJets.begin(), tempJets.end(), bTagComparator);
  
- j1 = tempJets[0];
- j2 = tempJets[1];
- //
+if (tempJets[0].fourMomentum.Pt()>(tempJets[1].fourMomentum.Pt())){
+   j1 = tempJets[0];
+   j2 = tempJets[1];
+ }else{
+   j2 = tempJets[0];
+   j1 = tempJets[1]; 
+ }
+
+//
  // additional jets
  //
  if (tempJets.size()>2){
@@ -173,7 +178,6 @@ bool HbbCandidateFinderAlgo::findDiJets (const std::vector<VHbbEvent::SimpleJet>
      addJets.push_back(tempJets[i]);
    }
  }
-  CompareJetPt ptComparator;
 
  if (verbose_){
    std::cout <<" CandidateFinder: Output Jets = "<<2<<" Additional = "<<addJets.size()<<std::endl;
