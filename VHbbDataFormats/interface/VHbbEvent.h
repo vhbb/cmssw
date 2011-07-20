@@ -28,6 +28,7 @@ class VHbbEvent{
       ssvhe(-99), csv(-99), csvmva(-99), ntracks(-99), charge(-99),
       bestMCid(-99), bestMCmomid(-99){}
   public:
+    double Pt() {return fourMomentum.Pt();}
     int flavour;
     float tche,tchp, jpb,jp , ssvhe, csv, csvmva;
     int ntracks;
