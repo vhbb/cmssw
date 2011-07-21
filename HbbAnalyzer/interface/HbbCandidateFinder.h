@@ -68,6 +68,7 @@ protected:
   edm::InputTag vhbbevent_;
  HbbCandidateFinderAlgo *algo_;
  bool verbose_;
+ bool useHighestHiggs;
   
 };
 

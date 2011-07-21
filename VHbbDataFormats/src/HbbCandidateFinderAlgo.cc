@@ -28,7 +28,12 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
 
   VHbbEvent::SimpleJet j1,j2;
   std::vector<VHbbEvent::SimpleJet> addJets;
-  bool foundJets = findDiJets(event->simpleJets2,j1,j2,addJets) ;
+  bool foundJets;
+  if (useHighestPtHiggs_ == false){
+    foundJets = findDiJets(event->simpleJets2,j1,j2,addJets) ;
+  }else{
+    foundJets= findDiJetsHighestPt(event->simpleJets2,j1,j2,addJets) ;
+  }
 
   if (verbose_){
     std::cout <<" Found Dijets: "<<foundJets<< " Additional: "<<addJets.size()<< std::endl;
@@ -189,6 +194,61 @@ if (tempJets[0].fourMomentum.Pt()>(tempJets[1].fourMomentum.Pt())){
 
 
 }
+
+
+bool HbbCandidateFinderAlgo::findDiJetsHighestPt (const std::vector<VHbbEvent::SimpleJet>& jets, VHbbEvent::SimpleJet& j1, VHbbEvent::SimpleJet& j2,std::vector<VHbbEvent::SimpleJet>& addJets){
+  
+ std::vector<VHbbEvent::SimpleJet> tempJets;
+
+ if (verbose_){
+   std::cout <<" CandidateFinder: Input Jets = "<<jets.size()<<std::endl;
+ }
+
+ for (unsigned int i=0 ; i< jets.size(); ++i){
+   if (jets[i].fourMomentum.Pt()> jetPtThreshold)
+     tempJets.push_back(jets[i]);
+ }
+
+ if (tempJets.size()<2) return false;
+
+ //loop over the dijets and save the one with highest Pt
+
+ CompareJetPt ptComparator;
+ std::sort(tempJets.begin(), tempJets.end(), ptComparator);
+ //
+ // so if i<j, pt(i)>pt(j)
+ //
+ 
+ float highestPt = -1000;
+ unsigned  int highesti,highestj;
+ for (unsigned int i =0; i< tempJets.size()-1; ++i){
+   for (unsigned int j =i+1; j< tempJets.size(); ++j){
+     float pt = (tempJets[i].fourMomentum+tempJets[j].fourMomentum).Pt();
+     if (pt> highestPt){
+       highestPt = pt;
+       highesti=i;
+       highestj=j;
+     }
+   }
+ }
+ j1 = tempJets[highesti]; 
+ j2 = tempJets[highestj]; 
+
+ for (unsigned int i=0; i<tempJets.size(); ++i){
+   if (i!= highesti && i!= highestj)
+     addJets.push_back(tempJets[i]);
+ }
+
+ if (verbose_){
+   std::cout <<" CandidateFinder: Output Jets = "<<2<<" Additional = "<<addJets.size()<<std::endl;
+ }
+
+return true;
+
+
+}
+
+
 
 void HbbCandidateFinderAlgo::findMuons(const std::vector<VHbbEvent::MuonInfo>& muons, std::vector<VHbbEvent::MuonInfo>& out){
   /* Use:

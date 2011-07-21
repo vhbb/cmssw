@@ -1,7 +1,8 @@
 #include "VHbbAnalysis/HbbAnalyzer/interface/HbbCandidateFinder.h"
 
-HbbCandidateFinder::HbbCandidateFinder(const edm::ParameterSet& iConfig): verbose_(iConfig.getParameter<bool>("verbose") ){
-  algo_ = new HbbCandidateFinderAlgo(iConfig.getParameter<bool>("verbose"), iConfig.getParameter<double>("jetPtThreshold"));
+HbbCandidateFinder::HbbCandidateFinder(const edm::ParameterSet& iConfig): verbose_(iConfig.getParameter<bool>("verbose") ) {
+  algo_ = new HbbCandidateFinderAlgo(iConfig.getParameter<bool>("verbose"), iConfig.getParameter<double>("jetPtThreshold"),
+				     iConfig.getParameter<bool>("useHighestPtHiggs")			     );
   produces<std::vector<VHbbCandidate > >();
 }
 

@@ -7,7 +7,7 @@
 class HbbCandidateFinderAlgo {
  public:
 
-  explicit HbbCandidateFinderAlgo(bool verbose, float jetPt): verbose_(verbose), jetPtThreshold(jetPt){}
+  explicit HbbCandidateFinderAlgo(bool verbose, float jetPt, bool useH): verbose_(verbose), jetPtThreshold(jetPt),useHighestPtHiggs_(useH) {}
 
 
   void run (const VHbbEvent*, std::vector<VHbbCandidate>  &);
@@ -16,7 +16,8 @@ class HbbCandidateFinderAlgo {
  protected:
   
  
-  bool  findDiJets (const std::vector<VHbbEvent::SimpleJet>& , VHbbEvent::SimpleJet& , VHbbEvent::SimpleJet& ,std::vector<VHbbEvent::SimpleJet>& );
+  bool  findDiJets (const std::vector<VHbbEvent::SimpleJet>& , VHbbEvent::SimpleJet& , VHbbEvent::SimpleJet& ,std::vector<VHbbEvent::SimpleJet>&);
+  bool  findDiJetsHighestPt (const std::vector<VHbbEvent::SimpleJet>& , VHbbEvent::SimpleJet& , VHbbEvent::SimpleJet& ,std::vector<VHbbEvent::SimpleJet>&);
   
   void findMuons (const std::vector<VHbbEvent::MuonInfo>& muons, std::vector<VHbbEvent::MuonInfo>& out);
   void findElectrons(const std::vector<VHbbEvent::ElectronInfo>& electrons, std::vector<VHbbEvent::ElectronInfo>& out);
@@ -24,8 +25,8 @@ class HbbCandidateFinderAlgo {
   
  private:
   bool verbose_;
-  float jetPtThreshold;
-  
+ float jetPtThreshold;
+ bool useHighestPtHiggs_;
 
 
 };
