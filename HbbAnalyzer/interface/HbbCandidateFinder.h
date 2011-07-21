@@ -28,7 +28,7 @@ using namespace std;
 #include <TString.h>
 
 
-#include "VHbbAnalysis/HbbAnalyzer/interface/HbbCandidateFinderAlgo.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/HbbCandidateFinderAlgo.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidate.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
 

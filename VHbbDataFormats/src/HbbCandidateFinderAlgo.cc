@@ -1,4 +1,4 @@
-#include "VHbbAnalysis/HbbAnalyzer/interface/HbbCandidateFinderAlgo.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/HbbCandidateFinderAlgo.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidateTools.h"
 
 #include <iostream>
