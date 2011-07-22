@@ -27,10 +27,10 @@ public:
   }
   bool pass(VHbbProxy &iProxy) {
     if(!mcHPtCutMax)
-      return ( iProxy.getVHbbEvent()->mcH.fourMomentum.Pt() > mcHPtCutMin );
+      return ( iProxy.getVHbbEventAuxInfo()->mcH.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcH)[0]).fourMomentum.Pt() > mcHPtCutMin );
     else
-      return ( iProxy.getVHbbEvent()->mcH.fourMomentum.Pt() > mcHPtCutMin 
-	       && iProxy.getVHbbEvent()->mcH.fourMomentum.Pt() < mcHPtCutMax );
+      return ( iProxy.getVHbbEventAuxInfo()->mcH.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcH)[0]).fourMomentum.Pt() > mcHPtCutMin 
+	       && iProxy.getVHbbEventAuxInfo()->mcH.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcH)[0]).fourMomentum.Pt() < mcHPtCutMax );
   } 
 private:
   Double_t mcHPtCutMin;
@@ -58,10 +58,10 @@ public:
   }
   bool pass(VHbbProxy &iProxy) {
     if(!mcWPtCutMax)
-      return ( iProxy.getVHbbEvent()->mcW.fourMomentum.Pt() > mcWPtCutMin );
+      return ( iProxy.getVHbbEventAuxInfo()->mcW.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcW)[0]).fourMomentum.Pt() > mcWPtCutMin );
     else
-      return ( iProxy.getVHbbEvent()->mcW.fourMomentum.Pt() > mcWPtCutMin 
-	       && iProxy.getVHbbEvent()->mcW.fourMomentum.Pt() < mcWPtCutMax );
+      return ( iProxy.getVHbbEventAuxInfo()->mcW.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcW)[0]).fourMomentum.Pt() > mcWPtCutMin 
+	       && iProxy.getVHbbEventAuxInfo()->mcW.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcW)[0]).fourMomentum.Pt() < mcWPtCutMax );
   } 
 private:
   Double_t mcWPtCutMin;
@@ -90,10 +90,10 @@ public:
   }
   bool pass(VHbbProxy &iProxy) {
     if(!mcZPtCutMax)
-      return ( iProxy.getVHbbEvent()->mcZ.fourMomentum.Pt() > mcZPtCutMin );
+      return ( iProxy.getVHbbEventAuxInfo()->mcZ.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcZ)[0]).fourMomentum.Pt() > mcZPtCutMin );
     else
-      return ( iProxy.getVHbbEvent()->mcZ.fourMomentum.Pt() > mcZPtCutMin 
-	       && iProxy.getVHbbEvent()->mcZ.fourMomentum.Pt() < mcZPtCutMax );
+      return ( iProxy.getVHbbEventAuxInfo()->mcZ.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcZ)[0]).fourMomentum.Pt() > mcZPtCutMin 
+	       && iProxy.getVHbbEventAuxInfo()->mcZ.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcZ)[0]).fourMomentum.Pt() < mcZPtCutMax );
   } 
 private:
   Double_t mcZPtCutMin;
@@ -327,16 +327,22 @@ public:
   
   virtual void fill(VHbbProxy &iProxy,float w) {
 
-    const VHbbEvent *iEvent = iProxy.getVHbbEvent();
-   if(iEvent)
-   {
+    //    const VHbbEvent *iEvent = iProxy.getVHbbEvent();  
+    const VHbbEventAuxInfo *iAuxInfo = iProxy.getVHbbEventAuxInfo();
+   if(iAuxInfo) {
     //from MC    
-    McH_simHMass->Fill(iEvent->mcH.fourMomentum.M(), w); 
-    McH_simHPt->Fill(iEvent->mcH.fourMomentum.Pt(), w); 
-    McH_simZMass->Fill(iEvent->mcZ.fourMomentum.M(), w); 
-    McH_simZPt->Fill(iEvent->mcZ.fourMomentum.Pt(), w); 
-    McH_simWMass->Fill(iEvent->mcW.fourMomentum.M(), w); 
-    McH_simWPt->Fill(iEvent->mcW.fourMomentum.Pt(), w); 
+     if (iAuxInfo->mcH.size() )
+       McH_simHMass->Fill(iAuxInfo->mcH[0].fourMomentum.M(), w); 
+     if (iAuxInfo->mcH.size() )
+    McH_simHPt->Fill(iAuxInfo->mcH[0].fourMomentum.Pt(), w); 
+     if (iAuxInfo->mcZ.size() )
+    McH_simZMass->Fill(iAuxInfo->mcZ[0].fourMomentum.M(), w); 
+     if (iAuxInfo->mcZ.size() )
+    McH_simZPt->Fill(iAuxInfo->mcZ[0].fourMomentum.Pt(), w); 
+     if (iAuxInfo->mcW.size() )
+    McH_simWMass->Fill(iAuxInfo->mcW[0].fourMomentum.M(), w); 
+     if (iAuxInfo->mcW.size() )
+    McH_simWPt->Fill(iAuxInfo->mcW[0].fourMomentum.Pt(), w); 
    }
   }
 

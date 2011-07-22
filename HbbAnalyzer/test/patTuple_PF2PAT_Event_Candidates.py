@@ -71,7 +71,16 @@ from PhysicsTools.PatAlgos.tools.coreTools import *
 
 if isMC == False :
 	removeMCMatching(process, ['All'])
-
+        RunOnData()
+        process.makePatMuons.remove(process.muonMatch)
+        process.makePatTaus.remove(process.tauMatch)
+        process.makePatTaus.remove(process.tauGenJets)
+        process.makePatTaus.remove(process.tauGenJetsSelectorAllHadrons)
+        process.makePatTaus.remove(process.tauGenJetMatch)
+        process.makePatPhotons.remove(process.photonMatch)
+        process.makePatJets.remove(process.patJetPartonMatch)
+        process.makePatJets.remove(process.patJetGenJetMatch)
+        process.makePatJets.remove(process.patJetFlavourId)
 # add the trigger information to the configuration
 from PhysicsTools.PatAlgos.tools.trigTools import *
 #####switchOnTrigger( process )

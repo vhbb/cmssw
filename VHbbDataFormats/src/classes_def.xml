@@ -7,7 +7,8 @@
 
 <class name="VHbbEvent::METInfo"/>
 <class name="VHbbEventAuxInfo::PUInfo"/>
-<class name="VHbbEvent::ParticleMCInfo"/>
+<class name="VHbbEventAuxInfo::ParticleMCInfo"/>
+<class name="std::vector<VHbbEventAuxInfo::ParticleMCInfo>"/>
 <class name="VHbbEventAuxInfo::PrimaryVertexInfo"/>
 <class name="VHbbEventAuxInfo::TriggerInfo"/>
 <class name="VHbbEvent::DiElectronInfo"/>

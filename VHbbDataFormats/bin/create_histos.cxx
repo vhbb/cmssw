@@ -105,7 +105,7 @@ int main( int argc, char ** argv ){
     const std::vector<VHbbCandidate> iCand = *vhbbCandHandle.product();
 
 //    VHbbProxy iProxy(&iEvent, &iCand);
-    VHbbProxy iProxy(0, &iCand);
+    VHbbProxy iProxy(0,0, &iCand);
 
     const std::vector<VHbbCandidate> *pcand = iProxy.getVHbbCandidate();
 

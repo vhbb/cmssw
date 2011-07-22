@@ -8,19 +8,6 @@
 class VHbbEvent{
  public:
 
-  class ParticleMCInfo {
-  public:
-    ParticleMCInfo(): status(-99), momid(-99), gmomid(-99), charge(-1){}
-  public:
-    int status;
-    int momid;
-    int gmomid;
-    int charge;
-    TLorentzVector fourMomentum;
-    //    int ndau;
-    std::vector<int> dauid;
-    std::vector<TLorentzVector> dauFourMomentum;    
-  };
 
   class SimpleJet {
     public:
@@ -124,19 +111,12 @@ class VHbbEvent{
 
 
  public:
-  ParticleMCInfo mcH;
-  ParticleMCInfo mcW;
-  ParticleMCInfo mcZ;
   std::vector<SimpleJet> simpleJets;
   std::vector<SimpleJet> simpleJets2; //???
   std::vector<SimpleJet> subJets; //???
   std::vector<HardJet> hardJets;
   
-  ParticleMCInfo mcBbar;
-  ParticleMCInfo mcB;
-  ParticleMCInfo mcC;    
-    
-  METInfo calomet;
+ METInfo calomet;
   METInfo tcmet;
   METInfo pfmet;
   

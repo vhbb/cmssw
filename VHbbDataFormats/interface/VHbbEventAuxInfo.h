@@ -85,13 +85,34 @@ class VHbbEventAuxInfo{
   };
 
 
+  class ParticleMCInfo {
+  public:
+    ParticleMCInfo(): status(-99), momid(-99), gmomid(-99), charge(-1){}
+  public:
+    int status;
+    int momid;
+    int gmomid;
+    int charge;
+    TLorentzVector fourMomentum;
+    //    int ndau;
+    std::vector<int> dauid;
+    std::vector<TLorentzVector> dauFourMomentum;    
+  };
+
+
  public:
   PUInfo puInfo;
   
   TriggerInfo triggerInfo;
   
   PrimaryVertexInfo pvInfo;
+  std::vector<ParticleMCInfo> mcH;
+  std::vector<ParticleMCInfo> mcW;
+  std::vector<ParticleMCInfo> mcZ;
   
+  std::vector<ParticleMCInfo> mcBbar;
+  std::vector<ParticleMCInfo> mcB;
+  std::vector<ParticleMCInfo> mcC;       
 
 };
 #endif

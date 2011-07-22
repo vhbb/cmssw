@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.10 2011/07/08 07:33:44 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.11 2011/07/18 13:14:05 tboccali Exp $
 //
 //
 
@@ -325,16 +325,17 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   if(runOnMC_){
     
     int Hin=-99,Win=-99,Zin=-99,bin=-99,bbarin=-99;
-    
     iEvent.getByLabel("genParticles", genParticles);
     
     for(size_t i = 0; i < genParticles->size(); ++ i) {
+      int Hin=-99,Win=-99,Zin=-99,bin=-99,bbarin=-99;
+      
       const GenParticle & p = (*genParticles)[i];
       int id = p.pdgId();
       int st = p.status();  
-	
+      
       if(id==25){
-	  
+	
 	/*          int wh=0;
 		    int nMoth = p.numberOfMothers();
 		    for(size_t jj = 0; jj < nMoth; ++ jj) {
@@ -345,110 +346,119 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 		    if(abs(Wmomdau->pdgId())==24) wh++;
 		    }
 		    }
-		      
+		    
 		    if(wh==0) continue;
 	*/
+	VHbbEventAuxInfo::ParticleMCInfo htemp;
 	Hin=i; 
-	hbbInfo->mcH.status=st;
-	hbbInfo->mcH.charge=p.charge();
-	if(p.mother(0)!=0) hbbInfo->mcH.momid=p.mother(0)->pdgId();
-	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) hbbInfo->mcH.gmomid=p.mother(0)->mother(0)->pdgId(); 
-	hbbInfo->mcH.fourMomentum = GENPTOLOR(p);
+	htemp.status=st;
+	htemp.charge=p.charge();
+	if(p.mother(0)!=0) htemp.momid=p.mother(0)->pdgId();
+	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) htemp.gmomid=p.mother(0)->mother(0)->pdgId(); 
+	htemp.fourMomentum = GENPTOLOR(p);
 	  
 	int ndau = p.numberOfDaughters();
 	for(int j = 0; j < ndau; ++ j) {
 	  const Candidate * Hdau = p.daughter( j );
-	  hbbInfo->mcH.dauid.push_back(Hdau->pdgId());
-	  hbbInfo->mcH.dauFourMomentum.push_back(GENPTOLORP(Hdau));
+	  htemp.dauid.push_back(Hdau->pdgId());
+	  htemp.dauFourMomentum.push_back(GENPTOLORP(Hdau));
 	}
+	(auxInfo->mcH).push_back(htemp);
       }
 	
 	
       if(abs(id)==24){
 	  
 	Win=i;
-	hbbInfo->mcW.status=st;
-	hbbInfo->mcW.charge=p.charge();
-	if(p.mother(0)!=0) hbbInfo->mcW.momid=p.mother(0)->pdgId();
-	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) hbbInfo->mcW.gmomid=p.mother(0)->mother(0)->pdgId();
-	hbbInfo->mcW.fourMomentum=GENPTOLOR(p);
+	VHbbEventAuxInfo::ParticleMCInfo wtemp;
+	wtemp.status=st;
+	wtemp.charge=p.charge();
+	if(p.mother(0)!=0) wtemp.momid=p.mother(0)->pdgId();
+	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) wtemp.gmomid=p.mother(0)->mother(0)->pdgId();
+	wtemp.fourMomentum=GENPTOLOR(p);
 
 	int ndau = p.numberOfDaughters();
 	for(int j = 0; j < ndau; ++ j) {
 	  const Candidate * Wdau = p.daughter( j );
-	  hbbInfo->mcW.dauid.push_back(Wdau->pdgId());
-	  hbbInfo->mcW.dauFourMomentum.push_back(GENPTOLORP(Wdau));
+	  wtemp.dauid.push_back(Wdau->pdgId());
+	  wtemp.dauFourMomentum.push_back(GENPTOLORP(Wdau));
 	}
+	auxInfo->mcW.push_back(wtemp);
       }
 	
       if(abs(id)==23){
 
 	Zin=i;
-	hbbInfo->mcZ.status=st;
-	hbbInfo->mcZ.charge=p.charge();
-	if(p.mother(0)!=0) hbbInfo->mcZ.momid=p.mother(0)->pdgId();
-	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) hbbInfo->mcZ.gmomid=p.mother(0)->mother(0)->pdgId();
-	hbbInfo->mcZ.fourMomentum=GENPTOLOR(p);
+	VHbbEventAuxInfo::ParticleMCInfo ztemp;
+	ztemp.status=st;
+	ztemp.charge=p.charge();
+	if(p.mother(0)!=0) ztemp.momid=p.mother(0)->pdgId();
+	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) ztemp.gmomid=p.mother(0)->mother(0)->pdgId();
+	ztemp.fourMomentum=GENPTOLOR(p);
 
 	int ndau = p.numberOfDaughters();
 	for(int j = 0; j < ndau; ++ j) {
 	  const Candidate * Zdau = p.daughter( j );
-	  hbbInfo->mcZ.dauid.push_back(Zdau->pdgId());
-	  hbbInfo->mcZ.dauFourMomentum.push_back(GENPTOLOR(p));
+	  ztemp.dauid.push_back(Zdau->pdgId());
+	  ztemp.dauFourMomentum.push_back(GENPTOLOR(p));
 	}
+	auxInfo->mcZ.push_back(ztemp);
       }
       //
       // binfo
       //
-
+      
       
       if(id==5){
 	bin=i; 
-	hbbInfo->mcB.status=st;
-	hbbInfo->mcB.charge=p.charge();
-	if(p.mother(0)!=0) hbbInfo->mcB.momid=p.mother(0)->pdgId();
-	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) hbbInfo->mcB.gmomid=p.mother(0)->mother(0)->pdgId(); 
+	VHbbEventAuxInfo::ParticleMCInfo btemp;
+	btemp.status=st;
+	btemp.charge=p.charge();
+	if(p.mother(0)!=0) btemp.momid=p.mother(0)->pdgId();
+	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) btemp.gmomid=p.mother(0)->mother(0)->pdgId(); 
+	auxInfo->mcB.push_back(btemp);
       }
       
       if(id==-5){
 	bbarin=i; 
-	hbbInfo->mcBbar.status=st;
-	hbbInfo->mcBbar.charge=p.charge();
-	if(p.mother(0)!=0) hbbInfo->mcBbar.momid=p.mother(0)->pdgId();
-	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) hbbInfo->mcBbar.gmomid=p.mother(0)->mother(0)->pdgId(); 
-      }
+	VHbbEventAuxInfo::ParticleMCInfo bbtemp;
+	
+	bbtemp.status=st;
+	bbtemp.charge=p.charge();
+	if(p.mother(0)!=0) bbtemp.momid=p.mother(0)->pdgId();
+	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) bbtemp.gmomid=p.mother(0)->mother(0)->pdgId(); 
+	auxInfo->mcBbar.push_back(bbtemp);
+     }
       
       if(abs(id)==4){
-	hbbInfo->mcC.status=st;
-	hbbInfo->mcC.charge=p.charge();
-	if(p.mother(0)!=0) hbbInfo->mcC.momid=p.mother(0)->pdgId();
-	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) hbbInfo->mcC.gmomid=p.mother(0)->mother(0)->pdgId();
+	VHbbEventAuxInfo::ParticleMCInfo ctemp;
+	ctemp.status=st;
+	ctemp.charge=p.charge();
+	if(p.mother(0)!=0) ctemp.momid=p.mother(0)->pdgId();
+	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) ctemp.gmomid=p.mother(0)->mother(0)->pdgId();
+	auxInfo->mcC.push_back(ctemp);	
       }
-
-
-    }
-
-
-    if(bin!=-99 && bbarin!=-99){
+    
+      if(bin!=-99 && bbarin!=-99){
       const Candidate & bGen = (*genParticles)[bin];
       const Candidate & bbarGen = (*genParticles)[bbarin]; 
-      hbbInfo->mcB.fourMomentum=GENPTOLOR(bGen);
-      hbbInfo->mcBbar.fourMomentum=GENPTOLOR(bbarGen);
+      ((auxInfo->mcB).back()).fourMomentum=GENPTOLOR(bGen);
+     ((auxInfo->mcBbar).back()).fourMomentum=GENPTOLOR(bbarGen);
       
       int nHDaubdau = bGen.numberOfDaughters();
       for(int j = 0; j < nHDaubdau; ++ j) {
 	const Candidate * Bdau = bGen.daughter( j );
-	hbbInfo->mcB.dauid.push_back(Bdau->pdgId());
-	hbbInfo->mcB.dauFourMomentum.push_back(GENPTOLORP(Bdau));
+	((auxInfo->mcB).back()).dauid.push_back(Bdau->pdgId());
+	((auxInfo->mcB).back()).dauFourMomentum.push_back(GENPTOLORP(Bdau));
       }
       int nHDaubbardau = bbarGen.numberOfDaughters();
       for(int j = 0; j < nHDaubbardau; ++ j) {
 	const Candidate * Bbardau = bbarGen.daughter( j );
-	hbbInfo->mcBbar.dauid.push_back(Bbardau->pdgId());
-	hbbInfo->mcBbar.dauFourMomentum.push_back(GENPTOLORP(Bbardau));
+	((auxInfo->mcBbar).back()).dauid.push_back(Bbardau->pdgId());
+	((auxInfo->mcBbar).back()).dauFourMomentum.push_back(GENPTOLORP(Bbardau));
       }
-
-  
+      
+    }
 
     }
 

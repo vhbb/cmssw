@@ -47,15 +47,22 @@ public:
   virtual void fill(VHbbProxy &iProxy,float w) {
 
     const VHbbEvent *iEvent = iProxy.getVHbbEvent();
-   if(iEvent)
+    const VHbbEventAuxInfo *iAuxInfo = iProxy.getVHbbEventAuxInfo();
+   if(iAuxInfo)
    {
     //from MC    
-    McH_simHMass->Fill(iEvent->mcH.fourMomentum.M(), w); 
-    McH_simHPt->Fill(iEvent->mcH.fourMomentum.Pt(), w); 
-    McH_simZMass->Fill(iEvent->mcZ.fourMomentum.M(), w); 
-    McH_simZPt->Fill(iEvent->mcZ.fourMomentum.Pt(), w); 
-    McH_simWMass->Fill(iEvent->mcW.fourMomentum.M(), w); 
-    McH_simWPt->Fill(iEvent->mcW.fourMomentum.Pt(), w); 
+     if (iAuxInfo->mcH.size()!=0)
+       McH_simHMass->Fill(iAuxInfo->mcH[0].fourMomentum.M(), w); 
+     if (iAuxInfo->mcH.size()!=0)
+       McH_simHPt->Fill(iAuxInfo->mcH[0].fourMomentum.Pt(), w); 
+     if (iAuxInfo->mcZ.size()!=0)
+     McH_simZMass->Fill(iAuxInfo->mcZ[0].fourMomentum.M(), w); 
+     if (iAuxInfo->mcZ.size()!=0)
+     McH_simZPt->Fill(iAuxInfo->mcZ[0].fourMomentum.Pt(), w); 
+     if (iAuxInfo->mcW.size()!=0)
+     McH_simWMass->Fill(iAuxInfo->mcW[0].fourMomentum.M(), w); 
+     if (iAuxInfo->mcW.size()!=0)
+     McH_simWPt->Fill(iAuxInfo->mcW[0].fourMomentum.Pt(), w); 
    }
   }
 
