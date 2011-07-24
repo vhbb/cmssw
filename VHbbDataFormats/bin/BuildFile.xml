@@ -12,4 +12,5 @@
 <use   name="PhysicsTools/SelectorUtils"/>
 <environment>
    <bin   file="create_histos.cxx"></bin>
+   <bin   file="make_histos.cxx"></bin>
 </environment>

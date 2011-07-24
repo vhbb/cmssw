@@ -8,6 +8,10 @@
 #include "TKey.h"
 
 
+#define CSVM 0.679
+#define CSVL 0.244
+#define CSVT 0.898
+
 struct CompareJetPt {
   bool operator()( const VHbbEvent::SimpleJet& j1, const  VHbbEvent::SimpleJet& j2 ) const {
     return j1.fourMomentum.Pt() > j2.fourMomentum.Pt();
@@ -19,6 +23,283 @@ struct CompareBTag {
     return j1.csv > j2.csv;
   }
 };
+
+
+// New implementations of the control region
+// The signal regions must be implemented incrementally since cutflow is needed
+
+class VlightRegionHWmun: public Cut {
+  std::string name() {return "VlightRegionHWmun";};
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
+  VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
+  
+  return (  iCand->at(0).candidateType == VHbbCandidate::Wmun
+        && H.jets.size() >= 2 
+        && H.jets.at(0).Pt() > 30
+        && H.jets.at(1).Pt() > 30
+        && H.fourMomentum.Pt() > 150
+        && V.fourMomentum.Pt() > 150
+        && ( H.jets.at(0).csv < CSVM)
+        && ( H.jets.at(1).csv < CSVM)
+        && iCand->at(0).additionalJets.size() < 2
+        && V.mets[0].metSig > 2
+	&& TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > 2.5  
+        );
+  }
+};
+
+
+class VlightRegionHWen: public Cut {
+  std::string name() {return "VlightRegionHWen";};
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
+  VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
+  
+  return (  iCand->at(0).candidateType == VHbbCandidate::Wen
+        && H.jets.size() >= 2 
+        && H.jets.at(0).Pt() > 30
+        && H.jets.at(1).Pt() > 30
+        && H.fourMomentum.Pt() > 150
+        && V.fourMomentum.Pt() > 150
+        && ( H.jets.at(0).csv < CSVM)
+        && ( H.jets.at(1).csv < CSVM)
+        && iCand->at(0).additionalJets.size() < 5
+        && V.mets[0].metSig > 2
+	&& TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > 2.5  
+        );
+  }
+};
+
+class VlightRegionHZmumu: public Cut {
+  std::string name() {return "VlightRegionHZmumu";};
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
+  VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
+
+  return (  iCand->at(0).candidateType == VHbbCandidate::Zmumu
+        && H.jets.size() >= 2 
+        && H.jets.at(0).Pt() > 20
+        && H.jets.at(1).Pt() > 20
+        && H.fourMomentum.Pt() > 100
+        && V.fourMomentum.Pt() > 100
+        && ( H.jets.at(0).csv < CSVL)
+        && ( H.jets.at(1).csv < CSVL)
+        && iCand->at(0).additionalJets.size() < 2
+        );
+  }
+};
+
+class VlightRegionHZee: public Cut {
+  std::string name() {return "VlightRegionHZee";};
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
+  VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
+
+  return (  iCand->at(0).candidateType == VHbbCandidate::Zee
+        && H.jets.size() >= 2 
+        && H.jets.at(0).Pt() > 20
+        && H.jets.at(1).Pt() > 20
+        && H.fourMomentum.Pt() > 100
+        && V.fourMomentum.Pt() > 100
+        && ( H.jets.at(0).csv < CSVL)
+        && ( H.jets.at(1).csv < CSVL)
+        && iCand->at(0).additionalJets.size() < 2
+        );
+  }
+};
+
+
+
+class TTbarRegionHWmun: public Cut {
+  std::string name() {return "TTbarRegionHWmun";};
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
+  VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
+  
+  return (  iCand->at(0).candidateType == VHbbCandidate::Wmun
+        && H.jets.size() >= 2
+        && H.jets.at(0).Pt() > 30
+        && H.jets.at(1).Pt() > 30
+        && H.fourMomentum.Pt() > 100
+        && V.fourMomentum.Pt() > 100
+        && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
+        && iCand->at(0).additionalJets.size() > 1
+        );
+  }
+};
+
+class TTbarRegionHWen: public Cut {
+  std::string name() {return "TTbarRegionHWen";};
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
+  VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
+  
+  return (  iCand->at(0).candidateType == VHbbCandidate::Wen
+        && H.jets.size() >= 2
+        && H.jets.at(0).Pt() > 30
+        && H.jets.at(1).Pt() > 30
+        && H.fourMomentum.Pt() > 75
+        && V.fourMomentum.Pt() > 75
+        && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
+        && TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > 2.5
+	&& iCand->at(0).additionalJets.size() > 0
+        && iCand->at(0).additionalJets.at(0).fourMomentum.Pt() > 35
+        && V.mets[0].metSig > 2
+        &&  ( TMath::Abs( Geom::deltaPhi( V.mets[0].fourMomentum.Phi(), H.jets.at(0).fourMomentum.Phi())) > 1.5
+            || TMath::Abs( Geom::deltaPhi(V.mets[0].fourMomentum.Phi(), H.jets.at(1).fourMomentum.Phi())) > 1.5  )
+        );
+  }
+};
+
+
+class TTbarRegionHZmumu: public Cut {
+  std::string name() {return "TTbarRegionHZmumu";};
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
+  VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
+
+  return (  iCand->at(0).candidateType == VHbbCandidate::Zmumu
+        && H.jets.size() >= 2
+        && H.jets.at(0).Pt() > 20
+        && H.jets.at(1).Pt() > 20
+        && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
+        && iCand->at(0).additionalJets.size() > 1
+        && V.fourMomentum.M() > 120
+	);
+  }
+};
+
+
+class TTbarRegionHZee: public Cut {
+  std::string name() {return "TTbarRegionHZee";};
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
+  VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
+
+  return (  iCand->at(0).candidateType == VHbbCandidate::Zee
+        && H.jets.size() >= 2
+        && H.jets.at(0).Pt() > 20
+        && H.jets.at(1).Pt() > 20
+        && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
+        && iCand->at(0).additionalJets.size() > 1
+	);
+  }
+};
+
+
+class VbbRegionHWmun: public Cut {
+  std::string name() {return "VbbRegionHWmun";};
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
+  VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
+
+  return (  iCand->at(0).candidateType == VHbbCandidate::Wmun
+        && H.jets.size() >= 2
+        && H.jets.at(0).Pt() > 30
+        && H.jets.at(1).Pt() > 30
+        && H.fourMomentum.Pt() < 150
+        && V.fourMomentum.Pt() < 150 
+        && V.fourMomentum.M() > 50
+        && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
+        && TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > 2.5
+        && iCand->at(0).additionalJets.size() ==0
+        && V.mets[0].metSig > 1
+        );
+  }
+};
+
+class VbbRegionHWen: public Cut {
+  std::string name() {return "VbbRegionHWen";};
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
+  VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
+
+  return (  iCand->at(0).candidateType == VHbbCandidate::Wen
+        && H.jets.size() >= 2
+        && H.jets.at(0).Pt() > 30
+        && H.jets.at(1).Pt() > 30
+        && H.fourMomentum.Pt() < 150
+        && V.fourMomentum.Pt() < 150 
+        && V.fourMomentum.M() > 50
+        && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
+        && TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > 2.4
+        && iCand->at(0).additionalJets.size() < 2
+        && V.mets[0].metSig > 2
+        );
+  }
+};
+
+class VbbRegionHZmumu: public Cut {
+  std::string name() {return "VbbRegionHZmumu";};
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
+  VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
+
+  return (  iCand->at(0).candidateType == VHbbCandidate::Zmumu
+        && H.jets.size() >= 2
+        && H.jets.at(0).Pt() > 20
+        && H.jets.at(1).Pt() > 20
+        &&  ( V.fourMomentum.M() < 100 ||  V.fourMomentum.M() > 140)
+        && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
+        && ( H.jets.at(0).csv > 0.5 && H.jets.at(1).csv > 0.5)
+        && TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > 2.9
+        && iCand->at(0).additionalJets.size() < 2
+        && ( V.mets.size() ==0 || V.mets.at(0).fourMomentum.Pt() < 30)
+        );
+  }
+};
+
+class VbbRegionHZee: public Cut {
+  std::string name() {return "VbbRegionHZee";};
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
+  VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
+
+  return (  iCand->at(0).candidateType == VHbbCandidate::Zee
+        && H.jets.size() >= 2
+        && H.jets.at(0).Pt() > 20
+        && H.jets.at(1).Pt() > 20
+        && ( V.fourMomentum.M() < 95 ||  V.fourMomentum.M() > 145)
+        && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
+        && ( H.jets.at(0).csv > 0.5 && H.jets.at(1).csv > 0.5)
+//        && TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > 2.9
+        && iCand->at(0).additionalJets.size() < 2
+  //      && V.mets[0].fourMomentum.Pt() < 30
+        );
+  }
+};
+
+
+
+
+
+
+
 
 
 
@@ -69,7 +350,7 @@ class SignalRegion: public Cut {
       std::cerr << "No vector boson reconstructed. No histos will be filled." << std::endl;
     
     Bool_t go = false;
-    if( H.fourMomentum.Pt() > Higgs_pt 
+    if( H.jets.size() >= 2 && H.fourMomentum.Pt() > Higgs_pt 
 	&& V.fourMomentum.Pt() > V_pt 
 	&& TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > VH_deltaPhi  
 	&& ( H.jets.at(0).csv > btag_csv_min && H.jets.at(1).csv > btag_csv_min )
@@ -99,325 +380,5 @@ private:
 };
 
 
-class ControlRegion_Vusdg: public Cut {
-  std::string name() {return "ControlRegion_Vusdg";};
-  
-  Bool_t pass(VHbbProxy &iProxy){
-    
-    const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
-
-    if(iCand->size() < 1)
-      return false;
-
-    VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
-    VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
-
-    CSVL = 0.244;
-    CSVM = 0.679;
-    CSVT = 0.898;
-
-    if(iCand->at(0).candidateType == VHbbCandidate::Zmumu){
-      pt_b1 = 20;
-      pt_b2 = 20;
-      btag_csv_min = CSVL;
-      btag_csv_max = CSVL;
-      Higgs_pt = 150;
-      V_pt = 150;
-      VH_deltaPhi = 2.70;
-      nOfAdditionalJets = 2;
-      pullAngle = 1.57;
-      helicityAngle = 0.8;
-    }
-    else if( iCand->at(0).candidateType == VHbbCandidate::Zee){ 
-      pt_b1 = 20;
-      pt_b2 = 20;
-      btag_csv_min = CSVL;
-      btag_csv_max = CSVL;
-      Higgs_pt = 150;
-      V_pt = 150;
-      VH_deltaPhi = 2.70;
-      nOfAdditionalJets = 2;
-      pullAngle = 1.57;
-      helicityAngle = 0.8;
-    }
-    else if(iCand->at(0).candidateType == VHbbCandidate::Wmun){
-      pt_b1 = 30;
-      pt_b2 = 30;
-      pt_b3 = 30;
-      Higgs_pt = 150;
-      btag_csv_min = CSVM;
-      btag_csv_max = CSVT;
-      btag_csv_additional = CSVL;
-      V_pt = 150;
-      VH_deltaPhi = 2.95;
-      nOfAdditionalJets = 2;
-      pullAngle = 1.57;
-      helicityAngle = 0.8;
-    }
-    else if(iCand->at(0).candidateType == VHbbCandidate::Wen){
-      pt_b1 = 30;
-      pt_b2 = 30;
-      pt_b3 = 30;
-      btag_csv_min = CSVM;
-      btag_csv_max = CSVT;
-      btag_csv_additional = CSVL;
-      Higgs_pt = 150;
-      V_pt = 150;
-      VH_deltaPhi = 2.95;
-      nOfAdditionalJets = 2;
-      pullAngle = 1.57;
-      helicityAngle = 0.8;
-    }
-    else
-      std::cerr << "No vector boson reconstructed for this control region." << std::endl;
-
-    CompareBTag bTagComparator;
-    additionalJetsBtag = iProxy.getVHbbCandidate()->at(0).additionalJets;
-    std::sort( additionalJetsBtag.begin(), additionalJetsBtag.end(), bTagComparator );
-    
-    Bool_t go = false;
-    if( H.fourMomentum.Pt() > Higgs_pt 
-	&& H.jets.at(0).Pt() > pt_b1 
-	&& H.jets.at(1).Pt() > pt_b2 
-	&& additionalJetsBtag.at(0).Pt() > pt_b3
-	&& V.fourMomentum.Pt() > V_pt 
-	&& TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > VH_deltaPhi  
-	&& ( H.jets.at(0).csv > btag_csv_min && H.jets.at(1).csv > btag_csv_min )
-	&& ( H.jets.at(0).csv > btag_csv_max || H.jets.at(1).csv > btag_csv_max )
-	&& iCand->at(0).additionalJets.size() < nOfAdditionalJets 
-	&& TMath::Abs(H.deltaTheta) < pullAngle 
-	//	&& TMath::Abs(H.helicityAngle) < helicityAngle 
-	)
-      go = true;
-     return go;
-
-  }
-
-private:
-
-  Double_t pt_b1;
-  Double_t pt_b2;
-  Double_t pt_b3;
-  Double_t CSVL;
-  Double_t CSVM;  
-  Double_t CSVT;
-  Double_t btag_csv_additional;
-  Double_t btag_csv_min;
-  Double_t btag_csv_max;
-  Double_t Higgs_pt;
-  Double_t V_pt;
-  Double_t VH_deltaPhi;
-  unsigned int nOfAdditionalJets;
-  unsigned int nOfAdditionalLeptons;
-  Double_t pullAngle;
-  Double_t helicityAngle;
-  std::vector<VHbbEvent::SimpleJet> additionalJetsBtag;
-
-};
-
-
-class ControlRegion_Top: public Cut {
-  std::string name() {return "ControlRegion_Top";};
-  
-  Bool_t pass(VHbbProxy &iProxy){
-    
-    const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
-
-    if(iCand->size() < 1)
-      return false;
-
-    VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
-    VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
-
-    if(iCand->at(0).candidateType == VHbbCandidate::Zmumu){
-      pt_b1 = 20;
-      pt_b2 = 20;
-      btag_csv_min = 0.5;
-      btag_csv_max = 0.9;
-      Higgs_pt = 150;
-      V_pt = 150;
-      VH_deltaPhi = 2.70;
-      nOfAdditionalJets = 2;
-      pullAngle = 1.57;
-      helicityAngle = 0.8;
-    }
-    else if( iCand->at(0).candidateType == VHbbCandidate::Zee){ 
-      pt_b1 = 20;
-      pt_b2 = 20;
-      btag_csv_min = 0.5;
-      btag_csv_max = 0.9;
-      Higgs_pt = 150;
-      V_pt = 150;
-      VH_deltaPhi = 2.70;
-      nOfAdditionalJets = 2;
-      pullAngle = 1.57;
-      helicityAngle = 0.8;
-    }
-    else if(iCand->at(0).candidateType == VHbbCandidate::Wmun){
-      pt_b1 = 30;
-      pt_b2 = 30;
-      pt_b3 = 30;
-      btag_csv_min = 0.5;
-      btag_csv_max = 0.9;
-      Higgs_pt = 150;
-      V_pt = 150;
-      VH_deltaPhi = 2.95;
-      nOfAdditionalJets = 2;
-      pullAngle = 1.57;
-      helicityAngle = 0.8;
-    }
-    else if(iCand->at(0).candidateType == VHbbCandidate::Wen){
-      pt_b1 = 30;
-      pt_b2 = 30;
-      pt_b3 = 30;
-      btag_csv_min = 0.5;
-      btag_csv_max = 0.9;
-      Higgs_pt = 150;
-      V_pt = 150;
-      VH_deltaPhi = 2.95;
-      nOfAdditionalJets = 2;
-      pullAngle = 1.57;
-      helicityAngle = 0.8;
-    }
-    else
-      std::cerr << "No vector boson reconstructed for this control region." << std::endl;
-    
-    Bool_t go = false;
-    if( H.fourMomentum.Pt() > Higgs_pt 
-	&& H.jets.at(0).Pt() > pt_b1 
-	&& H.jets.at(1).Pt() > pt_b2 
-	//	&& H.additionalJets.at(0).Pt() > pt_b3
-	&& V.fourMomentum.Pt() > V_pt 
-	&& TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > VH_deltaPhi  
-	&& ( H.jets.at(0).csv > btag_csv_min && H.jets.at(1).csv > btag_csv_min )
-	&& ( H.jets.at(0).csv > btag_csv_max || H.jets.at(1).csv > btag_csv_max )
-	&& iCand->at(0).additionalJets.size() < nOfAdditionalJets 
-	&& TMath::Abs(H.deltaTheta) < pullAngle 
-	//	&& TMath::Abs(H.helicityAngle) < helicityAngle 
-	)
-      go = true;
-     return go;
-
-  }
-
-private:
-
-  Double_t pt_b1;
-  Double_t pt_b2;
-  Double_t pt_b3;
-  Double_t btag_csv_min;
-  Double_t btag_csv_max;
-  Double_t Higgs_pt;
-  Double_t V_pt;
-  Double_t VH_deltaPhi;
-  unsigned int nOfAdditionalJets;
-  unsigned int nOfAdditionalLeptons;
-  Double_t pullAngle;
-  Double_t helicityAngle;
-
-};
-
-
-
-class ControlRegion_Vbb: public Cut {
-  std::string name() {return "ControlRegion_Vbb";};
-  
-  Bool_t pass(VHbbProxy &iProxy){
-    
-    const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
-
-    if(iCand->size() < 1)
-      return false;
-
-    VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
-    VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
-
-    if(iCand->at(0).candidateType == VHbbCandidate::Zmumu){
-      pt_b1 = 20;
-      pt_b2 = 20;
-      btag_csv_min = 0.5;
-      btag_csv_max = 0.9;
-      Higgs_pt = 150;
-      V_pt = 150;
-      VH_deltaPhi = 2.70;
-      nOfAdditionalJets = 2;
-      pullAngle = 1.57;
-      helicityAngle = 0.8;
-    }
-    else if( iCand->at(0).candidateType == VHbbCandidate::Zee){ 
-      pt_b1 = 20;
-      pt_b2 = 20;
-      btag_csv_min = 0.5;
-      btag_csv_max = 0.9;
-      Higgs_pt = 150;
-      V_pt = 150;
-      VH_deltaPhi = 2.70;
-      nOfAdditionalJets = 2;
-      pullAngle = 1.57;
-      helicityAngle = 0.8;
-    }
-    else if(iCand->at(0).candidateType == VHbbCandidate::Wmun){
-      pt_b1 = 30;
-      pt_b2 = 30;
-      pt_b3 = 30;
-      btag_csv_min = 0.5;
-      btag_csv_max = 0.9;
-      Higgs_pt = 150;
-      V_pt = 150;
-      VH_deltaPhi = 2.95;
-      nOfAdditionalJets = 2;
-      pullAngle = 1.57;
-      helicityAngle = 0.8;
-    }
-    else if(iCand->at(0).candidateType == VHbbCandidate::Wen){
-      pt_b1 = 30;
-      pt_b2 = 30;
-      pt_b3 = 30;
-      btag_csv_min = 0.5;
-      btag_csv_max = 0.9;
-      Higgs_pt = 150;
-      V_pt = 150;
-      VH_deltaPhi = 2.95;
-      nOfAdditionalJets = 2;
-      pullAngle = 1.57;
-      helicityAngle = 0.8;
-    }
-    else
-      std::cerr << "No vector boson reconstructed for this control region." << std::endl;
-    
-    Bool_t go = false;
-    if( H.fourMomentum.Pt() > Higgs_pt 
-	&& H.jets.at(0).Pt() > pt_b1 
-	&& H.jets.at(1).Pt() > pt_b2 
-	//	&& H.additionalJets.at(0).Pt() > pt_b3
-	&& V.fourMomentum.Pt() > V_pt 
-	&& TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > VH_deltaPhi  
-	&& ( H.jets.at(0).csv > btag_csv_min && H.jets.at(1).csv > btag_csv_min )
-	&& ( H.jets.at(0).csv > btag_csv_max || H.jets.at(1).csv > btag_csv_max )
-	&& iCand->at(0).additionalJets.size() < nOfAdditionalJets 
-	&& TMath::Abs(H.deltaTheta) < pullAngle 
-	//	&& TMath::Abs(H.helicityAngle) < helicityAngle 
-	)
-      go = true;
-     return go;
-
-  }
-
-private:
-
-  Double_t pt_b1;
-  Double_t pt_b2;
-  Double_t pt_b3;
-  Double_t btag_csv_min;
-  Double_t btag_csv_max;
-  Double_t Higgs_pt;
-  Double_t V_pt;
-  Double_t VH_deltaPhi;
-  unsigned int nOfAdditionalJets;
-  unsigned int nOfAdditionalLeptons;
-  Double_t pullAngle;
-  Double_t helicityAngle;
-
-};
 
 
