@@ -443,7 +443,8 @@ process.patElectrons.electronIDSources = cms.PSet(
 process.hbbCandidates = cms.EDProducer("HbbCandidateFinder",
 				       VHbbEventLabel = cms.InputTag(""),
 				       verbose = cms.bool(True) ,
-				       jetPtThreshold = cms.double(30.)
+				       jetPtThreshold = cms.double(30.),
+				       useHighestPtHiggs=cms.bool(False)
 				      )
 
 
