@@ -209,7 +209,7 @@ private:
 };
 
 
-class SignalRegion: public Cut {
+class SignalRegionOld: public Cut {
   std::string name() {return "SignalRegion";};
   
   Bool_t pass(VHbbProxy &iProxy){
