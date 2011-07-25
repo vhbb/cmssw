@@ -100,7 +100,7 @@ for(size_t a=0;a < allHistos.size(); a++)
     const VHbbEvent iEvent = *vhbbHandle.product();
 */
 
-    VHbbProxy iProxy(0, &iCand);
+    VHbbProxy iProxy(0,0, &iCand);
 
     const std::vector<VHbbCandidate> *pcand = iProxy.getVHbbCandidate();
 

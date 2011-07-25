@@ -109,13 +109,13 @@ int main( int argc, char ** argv ){
 
     const std::vector<VHbbCandidate> *pcand = iProxy.getVHbbCandidate();
 
-//    std::cout << "pt MC higgs from proxy = " << iProxy.getVHbbEvent()->mcH.fourMomentum.Pt() << std::endl;
-//    std::cout << "pt higgs = " << iEvent.mcH.fourMomentum.Pt() << std::endl;
+//    std::cout << "pt MC higgs from proxy = " << iProxy.getVHbbEvent()->mcH.p4.Pt() << std::endl;
+//    std::cout << "pt higgs = " << iEvent.mcH.p4.Pt() << std::endl;
     if(iCand.size()>0){
     std::cout << " --- Processing event " << event << " --- " << std::endl;
-      std::cout << "pt Candidate higgs from proxy = " << pcand->at(0).H.fourMomentum.Pt() << std::endl;
-      std::cout << "pt Candidate higgs from proxy = " << iProxy.getVHbbCandidate()->at(0).H.fourMomentum.Pt() << std::endl;
-      std::cout << "pt Candidate higgs = " << iCand.at(0).H.fourMomentum.Pt() << std::endl;
+      std::cout << "pt Candidate higgs from proxy = " << pcand->at(0).H.p4.Pt() << std::endl;
+      std::cout << "pt Candidate higgs from proxy = " << iProxy.getVHbbCandidate()->at(0).H.p4.Pt() << std::endl;
+      std::cout << "pt Candidate higgs = " << iCand.at(0).H.p4.Pt() << std::endl;
     }
 
 //    noBoost.process(iProxy, 1);

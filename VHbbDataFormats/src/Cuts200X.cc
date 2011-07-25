@@ -295,14 +295,6 @@ class VbbRegionHZee: public Cut {
 };
 
 
-
-
-
-
-
-
-
-
 class SignalRegion: public Cut {
   std::string name() {return "SignalRegion";};
   
