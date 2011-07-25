@@ -28,9 +28,9 @@ class VHbbCandidateTools {
     VHbbCandidate temp=in;
     if (temp.V.muons.size()!=2) return in ;
     if (temp.V.electrons.size()!=0) return in ;
-    temp.V.fourMomentum = temp.V.muons[0].fourMomentum+temp.V.muons[1].fourMomentum;
+    temp.V.p4 = temp.V.muons[0].p4+temp.V.muons[1].p4;
    
-    if (temp.V.muons[0].fourMomentum.Pt()<20 || temp.V.muons[1].fourMomentum.Pt()<20 ) return in;
+    if (temp.V.muons[0].p4.Pt()<20 || temp.V.muons[1].p4.Pt()<20 ) return in;
     
     //    if (temp.V.Pt()<150 ) return in;
     //    if (temp.H.Pt()<150) return in;
@@ -53,20 +53,20 @@ class VHbbCandidateTools {
     if (temp.V.electrons.size()!=2) return in ;
     if (temp.V.muons.size()!=0) return in ;
 
-    temp.V.fourMomentum = temp.V.electrons[0].fourMomentum+temp.V.electrons[1].fourMomentum;
+    temp.V.p4 = temp.V.electrons[0].p4+temp.V.electrons[1].p4;
    
     //
     // i need to ask VBTF and pt NEEDS ADJUSTING!!!!!
     //
-    if (temp.V.electrons[0].fourMomentum.Pt()<20 ||temp.V.electrons[1].fourMomentum.Pt()<20  ) return in;
+    if (temp.V.electrons[0].p4.Pt()<20 ||temp.V.electrons[1].p4.Pt()<20  ) return in;
     if (temp.V.electrons[0].id95r < -100000 ||temp.V.electrons[1].id95r < -100000) return in;
 
-    //    if (temp.V.fourMomentum.Pt()<150 ) return in;
-    //    if (temp.H.fourMomentum.Pt()<150) return in;
+    //    if (temp.V.p4.Pt()<150 ) return in;
+    //    if (temp.H.p4.Pt()<150) return in;
     //    if (temp.H.firstJet().csv< 0.9) return in;
     //    if (temp.H.secondJet().csv<0.5) return in;
-    //    if (deltaPhi(temp.V.fourMomentum.Phi(),temp.H.fourMomentum.Phi())<2.7) return in;
-    //    if (temp.V.fourMomentum.M()<75 || temp.V.fourMomentum.M()>105) return in; 
+    //    if (deltaPhi(temp.V.p4.Phi(),temp.H.p4.Phi())<2.7) return in;
+    //    if (temp.V.p4.M()<75 || temp.V.p4.M()>105) return in; 
     //    if (temp.additionalJets.size()>0) return in;
     //    if (std::Abs(deltaTheta) ????
     ok = true;
@@ -83,16 +83,16 @@ class VHbbCandidateTools {
     if (temp.V.muons.size()!=0) return in ;
     if (temp.V.electrons.size()!=0) return in ;
     
-    temp.V.fourMomentum = temp.V.mets[0].fourMomentum;
+    temp.V.p4 = temp.V.mets[0].p4;
     if (verbose_) {
       std::cout <<" debug met "<< temp.V.mets[0].metSig << " " <<  temp.V.mets[0].sumEt<< std::endl;
     }   
     if (temp.V.mets[0].metSig<5) return in;
     if (temp.V.mets[0].sumEt<50) return in;
-    //    if (temp.H.fourMomentum.Pt()<150)return in;
+    //    if (temp.H.p4.Pt()<150)return in;
     //    if (temp.H.firstJet().csv< 0.9) return in;
     //    if (temp.H.secondJet().csv<0.5) return in;
-    //    if (deltaPhi(temp.V.fourMomentum.Phi(),temp.H.fourMomentum.Phi())<2.95) return in;
+    //    if (deltaPhi(temp.V.p4.Phi(),temp.H.p4.Phi())<2.95) return in;
     //    if (temp.V.electrons.size()>0 || temp.V.muons.size()>0 ) return in;
     //    if (temp.additionalJets.size()>0) return in;
     //    if (std::Abs(deltaTheta) ????
@@ -125,7 +125,7 @@ class VHbbCandidateTools {
       We don't cut on the transverse mass (for boosted objects cutting on the transverse mass introduces an inefficiency due to the angle between the MET and the lepton being close to 0.) 
     */
     
-    temp.V.fourMomentum = temp.V.muons[0].fourMomentum+temp.V.mets[0].fourMomentum;
+    temp.V.p4 = temp.V.muons[0].p4+temp.V.mets[0].p4;
 
     ok=true;
     return temp;
@@ -156,7 +156,7 @@ class VHbbCandidateTools {
     
     ok=true;
 
-    temp.V.fourMomentum = temp.V.electrons[0].fourMomentum+temp.V.mets[0].fourMomentum;
+    temp.V.p4 = temp.V.electrons[0].p4+temp.V.mets[0].p4;
     return temp;
   }
 
@@ -197,7 +197,7 @@ class VHbbCandidateTools {
   
   float getHelicity(const VHbbEvent::SimpleJet& j, TVector3 boost) const {
     double hel = 1e10;
-    TLorentzVector jet = j.fourMomentum;
+    TLorentzVector jet = j.p4;
     jet.Boost( -boost );
     hel = TMath::Cos( jet.Vect().Angle( boost ) );
     return hel;

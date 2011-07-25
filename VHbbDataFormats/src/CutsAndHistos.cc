@@ -27,10 +27,10 @@ public:
   }
   bool pass(VHbbProxy &iProxy) {
     if(!mcHPtCutMax)
-      return ( iProxy.getVHbbEventAuxInfo()->mcH.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcH)[0]).fourMomentum.Pt() > mcHPtCutMin );
+      return ( iProxy.getVHbbEventAuxInfo()->mcH.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcH)[0]).p4.Pt() > mcHPtCutMin );
     else
-      return ( iProxy.getVHbbEventAuxInfo()->mcH.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcH)[0]).fourMomentum.Pt() > mcHPtCutMin 
-	       && iProxy.getVHbbEventAuxInfo()->mcH.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcH)[0]).fourMomentum.Pt() < mcHPtCutMax );
+      return ( iProxy.getVHbbEventAuxInfo()->mcH.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcH)[0]).p4.Pt() > mcHPtCutMin 
+	       && iProxy.getVHbbEventAuxInfo()->mcH.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcH)[0]).p4.Pt() < mcHPtCutMax );
   } 
 private:
   Double_t mcHPtCutMin;
@@ -58,10 +58,10 @@ public:
   }
   bool pass(VHbbProxy &iProxy) {
     if(!mcWPtCutMax)
-      return ( iProxy.getVHbbEventAuxInfo()->mcW.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcW)[0]).fourMomentum.Pt() > mcWPtCutMin );
+      return ( iProxy.getVHbbEventAuxInfo()->mcW.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcW)[0]).p4.Pt() > mcWPtCutMin );
     else
-      return ( iProxy.getVHbbEventAuxInfo()->mcW.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcW)[0]).fourMomentum.Pt() > mcWPtCutMin 
-	       && iProxy.getVHbbEventAuxInfo()->mcW.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcW)[0]).fourMomentum.Pt() < mcWPtCutMax );
+      return ( iProxy.getVHbbEventAuxInfo()->mcW.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcW)[0]).p4.Pt() > mcWPtCutMin 
+	       && iProxy.getVHbbEventAuxInfo()->mcW.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcW)[0]).p4.Pt() < mcWPtCutMax );
   } 
 private:
   Double_t mcWPtCutMin;
@@ -90,10 +90,10 @@ public:
   }
   bool pass(VHbbProxy &iProxy) {
     if(!mcZPtCutMax)
-      return ( iProxy.getVHbbEventAuxInfo()->mcZ.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcZ)[0]).fourMomentum.Pt() > mcZPtCutMin );
+      return ( iProxy.getVHbbEventAuxInfo()->mcZ.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcZ)[0]).p4.Pt() > mcZPtCutMin );
     else
-      return ( iProxy.getVHbbEventAuxInfo()->mcZ.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcZ)[0]).fourMomentum.Pt() > mcZPtCutMin 
-	       && iProxy.getVHbbEventAuxInfo()->mcZ.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcZ)[0]).fourMomentum.Pt() < mcZPtCutMax );
+      return ( iProxy.getVHbbEventAuxInfo()->mcZ.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcZ)[0]).p4.Pt() > mcZPtCutMin 
+	       && iProxy.getVHbbEventAuxInfo()->mcZ.size() !=0 && ((iProxy.getVHbbEventAuxInfo()->mcZ)[0]).p4.Pt() < mcZPtCutMax );
   } 
 private:
   Double_t mcZPtCutMin;
@@ -125,10 +125,10 @@ public:
       return false;
     else 
       if(!simpleJet1PtCutMin)
-	return ((iProxy.getVHbbCandidate()->at(0)).H.jets.at(0).fourMomentum.Pt() > simpleJet1PtCutMin);
+	return ((iProxy.getVHbbCandidate()->at(0)).H.jets.at(0).p4.Pt() > simpleJet1PtCutMin);
       else
-	return ((iProxy.getVHbbCandidate()->at(0)).H.jets.at(0).fourMomentum.Pt() > simpleJet1PtCutMin
-		&& (iProxy.getVHbbCandidate()->at(0)).H.jets.at(0).fourMomentum.Pt() < simpleJet1PtCutMax);
+	return ((iProxy.getVHbbCandidate()->at(0)).H.jets.at(0).p4.Pt() > simpleJet1PtCutMin
+		&& (iProxy.getVHbbCandidate()->at(0)).H.jets.at(0).p4.Pt() < simpleJet1PtCutMax);
   } 
 private:
   Double_t simpleJet1PtCutMin;
@@ -159,10 +159,10 @@ public:
       return false;
     else 
       if(VptCutMax != 1e10)
-	return ((iProxy.getVHbbCandidate()->at(0)).V.fourMomentum.Pt() > VptCutMin 
-		&& (iProxy.getVHbbCandidate()->at(0)).V.fourMomentum.Pt() < VptCutMax);
+	return ((iProxy.getVHbbCandidate()->at(0)).V.p4.Pt() > VptCutMin 
+		&& (iProxy.getVHbbCandidate()->at(0)).V.p4.Pt() < VptCutMax);
       else
-	return ((iProxy.getVHbbCandidate()->at(0)).V.fourMomentum.Pt() > VptCutMin );
+	return ((iProxy.getVHbbCandidate()->at(0)).V.p4.Pt() > VptCutMin );
 		
   } 
 private:
@@ -196,10 +196,10 @@ public:
       return false;
     else 
       if(!hPtCutMax)
-	return ((iProxy.getVHbbCandidate()->at(0)).H.fourMomentum.Pt() > hPtCutMin);
+	return ((iProxy.getVHbbCandidate()->at(0)).H.p4.Pt() > hPtCutMin);
       else 
-	return ((iProxy.getVHbbCandidate()->at(0)).H.fourMomentum.Pt() > hPtCutMin
-		&& (iProxy.getVHbbCandidate()->at(0)).H.fourMomentum.Pt() < hPtCutMax);
+	return ((iProxy.getVHbbCandidate()->at(0)).H.p4.Pt() > hPtCutMin
+		&& (iProxy.getVHbbCandidate()->at(0)).H.p4.Pt() < hPtCutMax);
   }
 private:
   Double_t hPtCutMin;
@@ -256,9 +256,9 @@ class SignalRegion: public Cut {
       std::cerr << "No vector boson reconstructed. No histos will be filled." << std::endl;
     
     Bool_t go = false;
-    if( H.fourMomentum.Pt() > Higgs_pt 
-	&& V.fourMomentum.Pt() > V_pt 
-	&& TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > VH_deltaPhi  
+    if( H.p4.Pt() > Higgs_pt 
+	&& V.p4.Pt() > V_pt 
+	&& TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > VH_deltaPhi  
 	&& ( H.jets.at(0).csv > btag_csv_min && H.jets.at(1).csv > btag_csv_min )
 	&& ( H.jets.at(0).csv > btag_csv_max || H.jets.at(1).csv > btag_csv_max )
 	&& iCand->at(0).additionalJets.size() < nOfAdditionalJets 
@@ -332,17 +332,17 @@ public:
    if(iAuxInfo) {
     //from MC    
      if (iAuxInfo->mcH.size() )
-       McH_simHMass->Fill(iAuxInfo->mcH[0].fourMomentum.M(), w); 
+       McH_simHMass->Fill(iAuxInfo->mcH[0].p4.M(), w); 
      if (iAuxInfo->mcH.size() )
-    McH_simHPt->Fill(iAuxInfo->mcH[0].fourMomentum.Pt(), w); 
+    McH_simHPt->Fill(iAuxInfo->mcH[0].p4.Pt(), w); 
      if (iAuxInfo->mcZ.size() )
-    McH_simZMass->Fill(iAuxInfo->mcZ[0].fourMomentum.M(), w); 
+    McH_simZMass->Fill(iAuxInfo->mcZ[0].p4.M(), w); 
      if (iAuxInfo->mcZ.size() )
-    McH_simZPt->Fill(iAuxInfo->mcZ[0].fourMomentum.Pt(), w); 
+    McH_simZPt->Fill(iAuxInfo->mcZ[0].p4.Pt(), w); 
      if (iAuxInfo->mcW.size() )
-    McH_simWMass->Fill(iAuxInfo->mcW[0].fourMomentum.M(), w); 
+    McH_simWMass->Fill(iAuxInfo->mcW[0].p4.M(), w); 
      if (iAuxInfo->mcW.size() )
-    McH_simWPt->Fill(iAuxInfo->mcW[0].fourMomentum.Pt(), w); 
+    McH_simWPt->Fill(iAuxInfo->mcW[0].p4.Pt(), w); 
    }
   }
 
@@ -534,27 +534,27 @@ public:
       VHbbCandidate::HiggsCandidate H = iCand->at(0).H;
       VHbbCandidate::VectorCandidate V = iCand->at(0).V;
       
-      StH_simpleJet1_pt->Fill(H.jets.at(0).fourMomentum.Pt(), w);
-      StH_simpleJet2_pt->Fill(H.jets.at(1).fourMomentum.Pt(), w);
+      StH_simpleJet1_pt->Fill(H.jets.at(0).p4.Pt(), w);
+      StH_simpleJet2_pt->Fill(H.jets.at(1).p4.Pt(), w);
       StH_simpleJet1_bTag->Fill(H.jets.at(0).csv, w);
       StH_simpleJet2_bTag->Fill(H.jets.at(1).csv, w);
-      StH_simpleJets_dR->Fill(H.jets.at(0).fourMomentum.DeltaR(H.jets.at(1).fourMomentum), w);
-      StH_simpleJets_dPhi->Fill(H.jets.at(0).fourMomentum.DeltaPhi(H.jets.at(1).fourMomentum), w);
-      StH_simpleJets_dEta->Fill(TMath::Abs(H.jets.at(0).fourMomentum.Eta()-H.jets.at(1).fourMomentum.Eta()), w);
+      StH_simpleJets_dR->Fill(H.jets.at(0).p4.DeltaR(H.jets.at(1).p4), w);
+      StH_simpleJets_dPhi->Fill(H.jets.at(0).p4.DeltaPhi(H.jets.at(1).p4), w);
+      StH_simpleJets_dEta->Fill(TMath::Abs(H.jets.at(0).p4.Eta()-H.jets.at(1).p4.Eta()), w);
 
-      StH_HMass->Fill(H.fourMomentum.M(), w); 
-      StH_HPt->Fill(H.fourMomentum.Pt(), w); 
+      StH_HMass->Fill(H.p4.M(), w); 
+      StH_HPt->Fill(H.p4.Pt(), w); 
      //    StH_HHel->Fill(H.hel(), w); 
       StH_HPullAngle->Fill(H.deltaTheta, w); 
       if( iCandType == VHbbCandidate::Zmumu || iCandType == VHbbCandidate::Zee || iCandType == VHbbCandidate::Znn ){
-	StH_ZMass->Fill(V.fourMomentum.M(), w); 
-	StH_ZPt->Fill(V.fourMomentum.Pt(), w);
-	StH_ZH_dPhi->Fill(V.fourMomentum.DeltaPhi(H.fourMomentum.Phi()), w); 
+	StH_ZMass->Fill(V.p4.M(), w); 
+	StH_ZPt->Fill(V.p4.Pt(), w);
+	StH_ZH_dPhi->Fill(V.p4.DeltaPhi(H.p4.Phi()), w); 
       } 
       else if(iCandType == VHbbCandidate::Wen || iCandType == VHbbCandidate::Wmun){
-	StH_WMass->Fill(V.fourMomentum.M(), w); 
-	StH_WPt->Fill(V.fourMomentum.Pt(), w); 
-	StH_WH_dPhi->Fill(V.fourMomentum.DeltaPhi(H.fourMomentum.Phi()), w); 
+	StH_WMass->Fill(V.p4.M(), w); 
+	StH_WPt->Fill(V.p4.Pt(), w); 
+	StH_WH_dPhi->Fill(V.p4.DeltaPhi(H.p4.Phi()), w); 
       }
  
     }
@@ -692,18 +692,18 @@ if(iEvent)
       HardJetH_subJets_dEta->Fill(TMath::Abs(iHardJet.subFourMomentum.at(0).Eta()-iHardJet.subFourMomentum.at(1).Eta()), w);
 
       //Here there should be the higgs candidate from HardJet
-//       HardJetH_HMass->Fill(H.fourMomentum.M(), w); 
-//       HardJetH_HPt->Fill(H.fourMomentum.Pt(), w); 
+//       HardJetH_HMass->Fill(H.p4.M(), w); 
+//       HardJetH_HPt->Fill(H.p4.Pt(), w); 
 //      //    HardJetH_HHel->Fill(H.hel(), w); 
 //       if( iCandType == VHbbCandidate::Zmumu || iCandType == VHbbCandidate::Zee || iCandType == VHbbCandidate::Znn ){
-// 	HardJetH_ZMass->Fill(V.fourMomentum.M(), w); 
-// 	HardJetH_ZPt->Fill(V.fourMomentum.Pt(), w);
-// 	HardJetH_ZH_dPhi->Fill(V.fourMomentum.DeltaPhi(H.fourMomentum.Phi()), w); 
+// 	HardJetH_ZMass->Fill(V.p4.M(), w); 
+// 	HardJetH_ZPt->Fill(V.p4.Pt(), w);
+// 	HardJetH_ZH_dPhi->Fill(V.p4.DeltaPhi(H.p4.Phi()), w); 
 //       } 
 //       else if(iCandType == VHbbCandidate::Wen || iCandType == VHbbCandidate::Wmun){
-// 	HardJetH_WMass->Fill(V.fourMomentum.M(), w); 
-// 	HardJetH_WPt->Fill(V.fourMomentum.Pt(), w); 
-// 	HardJetH_WH_dPhi->Fill(V.fourMomentum.DeltaPhi(H.fourMomentum.Phi()), w); 
+// 	HardJetH_WMass->Fill(V.p4.M(), w); 
+// 	HardJetH_WPt->Fill(V.p4.Pt(), w); 
+// 	HardJetH_WH_dPhi->Fill(V.p4.DeltaPhi(H.p4.Phi()), w); 
 //       }
  }
     }

@@ -52,17 +52,17 @@ public:
    {
     //from MC    
      if (iAuxInfo->mcH.size()!=0)
-       McH_simHMass->Fill(iAuxInfo->mcH[0].fourMomentum.M(), w); 
+       McH_simHMass->Fill(iAuxInfo->mcH[0].p4.M(), w); 
      if (iAuxInfo->mcH.size()!=0)
-       McH_simHPt->Fill(iAuxInfo->mcH[0].fourMomentum.Pt(), w); 
+       McH_simHPt->Fill(iAuxInfo->mcH[0].p4.Pt(), w); 
      if (iAuxInfo->mcZ.size()!=0)
-     McH_simZMass->Fill(iAuxInfo->mcZ[0].fourMomentum.M(), w); 
+     McH_simZMass->Fill(iAuxInfo->mcZ[0].p4.M(), w); 
      if (iAuxInfo->mcZ.size()!=0)
-     McH_simZPt->Fill(iAuxInfo->mcZ[0].fourMomentum.Pt(), w); 
+     McH_simZPt->Fill(iAuxInfo->mcZ[0].p4.Pt(), w); 
      if (iAuxInfo->mcW.size()!=0)
-     McH_simWMass->Fill(iAuxInfo->mcW[0].fourMomentum.M(), w); 
+     McH_simWMass->Fill(iAuxInfo->mcW[0].p4.M(), w); 
      if (iAuxInfo->mcW.size()!=0)
-     McH_simWPt->Fill(iAuxInfo->mcW[0].fourMomentum.Pt(), w); 
+     McH_simWPt->Fill(iAuxInfo->mcW[0].p4.Pt(), w); 
    }
   }
 
@@ -254,27 +254,27 @@ public:
       VHbbCandidate::HiggsCandidate H = iCand->at(0).H;
       VHbbCandidate::VectorCandidate V = iCand->at(0).V;
       
-      StH_simpleJet1_pt->Fill(H.jets.at(0).fourMomentum.Pt(), w);
-      StH_simpleJet2_pt->Fill(H.jets.at(1).fourMomentum.Pt(), w);
+      StH_simpleJet1_pt->Fill(H.jets.at(0).p4.Pt(), w);
+      StH_simpleJet2_pt->Fill(H.jets.at(1).p4.Pt(), w);
       StH_simpleJet1_bTag->Fill(H.jets.at(0).csv, w);
       StH_simpleJet2_bTag->Fill(H.jets.at(1).csv, w);
-      StH_simpleJets_dR->Fill(H.jets.at(0).fourMomentum.DeltaR(H.jets.at(1).fourMomentum), w);
-      StH_simpleJets_dPhi->Fill(H.jets.at(0).fourMomentum.DeltaPhi(H.jets.at(1).fourMomentum), w);
-      StH_simpleJets_dEta->Fill(TMath::Abs(H.jets.at(0).fourMomentum.Eta()-H.jets.at(1).fourMomentum.Eta()), w);
+      StH_simpleJets_dR->Fill(H.jets.at(0).p4.DeltaR(H.jets.at(1).p4), w);
+      StH_simpleJets_dPhi->Fill(H.jets.at(0).p4.DeltaPhi(H.jets.at(1).p4), w);
+      StH_simpleJets_dEta->Fill(TMath::Abs(H.jets.at(0).p4.Eta()-H.jets.at(1).p4.Eta()), w);
 
-      StH_HMass->Fill(H.fourMomentum.M(), w); 
-      StH_HPt->Fill(H.fourMomentum.Pt(), w); 
+      StH_HMass->Fill(H.p4.M(), w); 
+      StH_HPt->Fill(H.p4.Pt(), w); 
      //    StH_HHel->Fill(H.hel(), w); 
       StH_HPullAngle->Fill(H.deltaTheta, w); 
       if( iCandType == VHbbCandidate::Zmumu || iCandType == VHbbCandidate::Zee || iCandType == VHbbCandidate::Znn ){
-	StH_ZMass->Fill(V.fourMomentum.M(), w); 
-	StH_ZPt->Fill(V.fourMomentum.Pt(), w);
-	StH_ZH_dPhi->Fill(V.fourMomentum.DeltaPhi(H.fourMomentum.Phi()), w); 
+	StH_ZMass->Fill(V.p4.M(), w); 
+	StH_ZPt->Fill(V.p4.Pt(), w);
+	StH_ZH_dPhi->Fill(V.p4.DeltaPhi(H.p4.Phi()), w); 
       } 
       else if(iCandType == VHbbCandidate::Wen || iCandType == VHbbCandidate::Wmun){
-	StH_WMass->Fill(V.fourMomentum.M(), w); 
-	StH_WPt->Fill(V.fourMomentum.Pt(), w); 
-	StH_WH_dPhi->Fill(V.fourMomentum.DeltaPhi(H.fourMomentum.Phi()), w); 
+	StH_WMass->Fill(V.p4.M(), w); 
+	StH_WPt->Fill(V.p4.Pt(), w); 
+	StH_WH_dPhi->Fill(V.p4.DeltaPhi(H.p4.Phi()), w); 
       }
  
     }
@@ -412,18 +412,18 @@ if(iEvent)
       HardJetH_subJets_dEta->Fill(TMath::Abs(iHardJet.subFourMomentum.at(0).Eta()-iHardJet.subFourMomentum.at(1).Eta()), w);
 
       //Here there should be the higgs candidate from HardJet
-//       HardJetH_HMass->Fill(H.fourMomentum.M(), w); 
-//       HardJetH_HPt->Fill(H.fourMomentum.Pt(), w); 
+//       HardJetH_HMass->Fill(H.p4.M(), w); 
+//       HardJetH_HPt->Fill(H.p4.Pt(), w); 
 //      //    HardJetH_HHel->Fill(H.hel(), w); 
 //       if( iCandType == VHbbCandidate::Zmumu || iCandType == VHbbCandidate::Zee || iCandType == VHbbCandidate::Znn ){
-// 	HardJetH_ZMass->Fill(V.fourMomentum.M(), w); 
-// 	HardJetH_ZPt->Fill(V.fourMomentum.Pt(), w);
-// 	HardJetH_ZH_dPhi->Fill(V.fourMomentum.DeltaPhi(H.fourMomentum.Phi()), w); 
+// 	HardJetH_ZMass->Fill(V.p4.M(), w); 
+// 	HardJetH_ZPt->Fill(V.p4.Pt(), w);
+// 	HardJetH_ZH_dPhi->Fill(V.p4.DeltaPhi(H.p4.Phi()), w); 
 //       } 
 //       else if(iCandType == VHbbCandidate::Wen || iCandType == VHbbCandidate::Wmun){
-// 	HardJetH_WMass->Fill(V.fourMomentum.M(), w); 
-// 	HardJetH_WPt->Fill(V.fourMomentum.Pt(), w); 
-// 	HardJetH_WH_dPhi->Fill(V.fourMomentum.DeltaPhi(H.fourMomentum.Phi()), w); 
+// 	HardJetH_WMass->Fill(V.p4.M(), w); 
+// 	HardJetH_WPt->Fill(V.p4.Pt(), w); 
+// 	HardJetH_WH_dPhi->Fill(V.p4.DeltaPhi(H.p4.Phi()), w); 
 //       }
  }
     }

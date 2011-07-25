@@ -14,7 +14,7 @@
 
 struct CompareJetPt {
   bool operator()( const VHbbEvent::SimpleJet& j1, const  VHbbEvent::SimpleJet& j2 ) const {
-    return j1.fourMomentum.Pt() > j2.fourMomentum.Pt();
+    return j1.p4.Pt() > j2.p4.Pt();
   }
 };
 
@@ -40,13 +40,13 @@ class VlightRegionHWmun: public Cut {
         && H.jets.size() >= 2 
         && H.jets.at(0).Pt() > 30
         && H.jets.at(1).Pt() > 30
-        && H.fourMomentum.Pt() > 150
-        && V.fourMomentum.Pt() > 150
+        && H.p4.Pt() > 150
+        && V.p4.Pt() > 150
         && ( H.jets.at(0).csv < CSVM)
         && ( H.jets.at(1).csv < CSVM)
         && iCand->at(0).additionalJets.size() < 2
         && V.mets[0].metSig > 2
-	&& TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > 2.5  
+	&& TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5  
         );
   }
 };
@@ -64,13 +64,13 @@ class VlightRegionHWen: public Cut {
         && H.jets.size() >= 2 
         && H.jets.at(0).Pt() > 30
         && H.jets.at(1).Pt() > 30
-        && H.fourMomentum.Pt() > 150
-        && V.fourMomentum.Pt() > 150
+        && H.p4.Pt() > 150
+        && V.p4.Pt() > 150
         && ( H.jets.at(0).csv < CSVM)
         && ( H.jets.at(1).csv < CSVM)
         && iCand->at(0).additionalJets.size() < 5
         && V.mets[0].metSig > 2
-	&& TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > 2.5  
+	&& TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5  
         );
   }
 };
@@ -87,8 +87,8 @@ class VlightRegionHZmumu: public Cut {
         && H.jets.size() >= 2 
         && H.jets.at(0).Pt() > 20
         && H.jets.at(1).Pt() > 20
-        && H.fourMomentum.Pt() > 100
-        && V.fourMomentum.Pt() > 100
+        && H.p4.Pt() > 100
+        && V.p4.Pt() > 100
         && ( H.jets.at(0).csv < CSVL)
         && ( H.jets.at(1).csv < CSVL)
         && iCand->at(0).additionalJets.size() < 2
@@ -108,8 +108,8 @@ class VlightRegionHZee: public Cut {
         && H.jets.size() >= 2 
         && H.jets.at(0).Pt() > 20
         && H.jets.at(1).Pt() > 20
-        && H.fourMomentum.Pt() > 100
-        && V.fourMomentum.Pt() > 100
+        && H.p4.Pt() > 100
+        && V.p4.Pt() > 100
         && ( H.jets.at(0).csv < CSVL)
         && ( H.jets.at(1).csv < CSVL)
         && iCand->at(0).additionalJets.size() < 2
@@ -131,8 +131,8 @@ class TTbarRegionHWmun: public Cut {
         && H.jets.size() >= 2
         && H.jets.at(0).Pt() > 30
         && H.jets.at(1).Pt() > 30
-        && H.fourMomentum.Pt() > 100
-        && V.fourMomentum.Pt() > 100
+        && H.p4.Pt() > 100
+        && V.p4.Pt() > 100
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
         && iCand->at(0).additionalJets.size() > 1
         );
@@ -151,15 +151,15 @@ class TTbarRegionHWen: public Cut {
         && H.jets.size() >= 2
         && H.jets.at(0).Pt() > 30
         && H.jets.at(1).Pt() > 30
-        && H.fourMomentum.Pt() > 75
-        && V.fourMomentum.Pt() > 75
+        && H.p4.Pt() > 75
+        && V.p4.Pt() > 75
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
-        && TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > 2.5
+        && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5
 	&& iCand->at(0).additionalJets.size() > 0
-        && iCand->at(0).additionalJets.at(0).fourMomentum.Pt() > 35
+        && iCand->at(0).additionalJets.at(0).p4.Pt() > 35
         && V.mets[0].metSig > 2
-        &&  ( TMath::Abs( Geom::deltaPhi( V.mets[0].fourMomentum.Phi(), H.jets.at(0).fourMomentum.Phi())) > 1.5
-            || TMath::Abs( Geom::deltaPhi(V.mets[0].fourMomentum.Phi(), H.jets.at(1).fourMomentum.Phi())) > 1.5  )
+        &&  ( TMath::Abs( Geom::deltaPhi( V.mets[0].p4.Phi(), H.jets.at(0).p4.Phi())) > 1.5
+            || TMath::Abs( Geom::deltaPhi(V.mets[0].p4.Phi(), H.jets.at(1).p4.Phi())) > 1.5  )
         );
   }
 };
@@ -179,7 +179,7 @@ class TTbarRegionHZmumu: public Cut {
         && H.jets.at(1).Pt() > 20
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
         && iCand->at(0).additionalJets.size() > 1
-        && V.fourMomentum.M() > 120
+        && V.p4.M() > 120
 	);
   }
 };
@@ -216,11 +216,11 @@ class VbbRegionHWmun: public Cut {
         && H.jets.size() >= 2
         && H.jets.at(0).Pt() > 30
         && H.jets.at(1).Pt() > 30
-        && H.fourMomentum.Pt() < 150
-        && V.fourMomentum.Pt() < 150 
-        && V.fourMomentum.M() > 50
+        && H.p4.Pt() < 150
+        && V.p4.Pt() < 150 
+        && V.p4.M() > 50
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
-        && TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > 2.5
+        && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5
         && iCand->at(0).additionalJets.size() ==0
         && V.mets[0].metSig > 1
         );
@@ -239,11 +239,11 @@ class VbbRegionHWen: public Cut {
         && H.jets.size() >= 2
         && H.jets.at(0).Pt() > 30
         && H.jets.at(1).Pt() > 30
-        && H.fourMomentum.Pt() < 150
-        && V.fourMomentum.Pt() < 150 
-        && V.fourMomentum.M() > 50
+        && H.p4.Pt() < 150
+        && V.p4.Pt() < 150 
+        && V.p4.M() > 50
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
-        && TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > 2.4
+        && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.4
         && iCand->at(0).additionalJets.size() < 2
         && V.mets[0].metSig > 2
         );
@@ -262,12 +262,12 @@ class VbbRegionHZmumu: public Cut {
         && H.jets.size() >= 2
         && H.jets.at(0).Pt() > 20
         && H.jets.at(1).Pt() > 20
-        &&  ( V.fourMomentum.M() < 100 ||  V.fourMomentum.M() > 140)
+        &&  ( V.p4.M() < 100 ||  V.p4.M() > 140)
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
         && ( H.jets.at(0).csv > 0.5 && H.jets.at(1).csv > 0.5)
-        && TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > 2.9
+        && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.9
         && iCand->at(0).additionalJets.size() < 2
-        && ( V.mets.size() ==0 || V.mets.at(0).fourMomentum.Pt() < 30)
+        && ( V.mets.size() ==0 || V.mets.at(0).p4.Pt() < 30)
         );
   }
 };
@@ -284,12 +284,12 @@ class VbbRegionHZee: public Cut {
         && H.jets.size() >= 2
         && H.jets.at(0).Pt() > 20
         && H.jets.at(1).Pt() > 20
-        && ( V.fourMomentum.M() < 95 ||  V.fourMomentum.M() > 145)
+        && ( V.p4.M() < 95 ||  V.p4.M() > 145)
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
         && ( H.jets.at(0).csv > 0.5 && H.jets.at(1).csv > 0.5)
-//        && TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > 2.9
+//        && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.9
         && iCand->at(0).additionalJets.size() < 2
-  //      && V.mets[0].fourMomentum.Pt() < 30
+  //      && V.mets[0].p4.Pt() < 30
         );
   }
 };
@@ -350,9 +350,9 @@ class SignalRegion: public Cut {
       std::cerr << "No vector boson reconstructed. No histos will be filled." << std::endl;
     
     Bool_t go = false;
-    if( H.jets.size() >= 2 && H.fourMomentum.Pt() > Higgs_pt 
-	&& V.fourMomentum.Pt() > V_pt 
-	&& TMath::Abs( Geom::deltaPhi(H.fourMomentum.Phi(), V.fourMomentum.Phi()) ) > VH_deltaPhi  
+    if( H.jets.size() >= 2 && H.p4.Pt() > Higgs_pt 
+	&& V.p4.Pt() > V_pt 
+	&& TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > VH_deltaPhi  
 	&& ( H.jets.at(0).csv > btag_csv_min && H.jets.at(1).csv > btag_csv_min )
 	&& ( H.jets.at(0).csv > btag_csv_max || H.jets.at(1).csv > btag_csv_max )
 	&& iCand->at(0).additionalJets.size() < nOfAdditionalJets 

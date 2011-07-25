@@ -15,12 +15,12 @@ class VHbbEvent{
       ssvhe(-99), csv(-99), csvmva(-99), ntracks(-99), charge(-99),
       bestMCid(-99), bestMCmomid(-99){}
   public:
-    double Pt() {return fourMomentum.Pt();}
+    double Pt() {return p4.Pt();}
     int flavour;
     float tche,tchp, jpb,jp , ssvhe, csv, csvmva;
     int ntracks;
     float charge;
-    TLorentzVector fourMomentum;
+    TLorentzVector p4;
     TLorentzVector chargedTracksFourMomentum;
 
     int bestMCid, bestMCmomid;
@@ -34,7 +34,7 @@ class VHbbEvent{
     HardJet(): constituents(-99){}
   public:
     int constituents;
-    TLorentzVector fourMomentum;
+    TLorentzVector p4;
     std::vector<TLorentzVector> subFourMomentum;
     std::vector<float> etaSub, phiSub;
   };
@@ -45,7 +45,7 @@ class VHbbEvent{
     METInfo(): sumEt(-99), metSig(-99), eLong(-99){}
   public:
     float sumEt, metSig, eLong;
-    TLorentzVector fourMomentum;
+    TLorentzVector p4;
   };
 
   class MuonInfo {
@@ -55,7 +55,7 @@ class VHbbEvent{
       cat(-99), nHits(-99), nPixelHits(-99), globNHits(-99),validMuStations(-99),
       mcId(-99), mcMomId(-99), mcgMomId(-99){}
   public:
-    TLorentzVector fourMomentum;
+    TLorentzVector p4;
     int charge;
     float tIso, eIso, hIso, acop, ipDb, ipErrDb, zPVPt,zPVProb, chi2, globChi2;
     int cat, nHits, nPixelHits, globNHits, validMuStations;
@@ -70,7 +70,7 @@ class VHbbEvent{
       acop(-99), id95(-99),id85(-99),id70(-99),id95r(-99), 
       id70r(-99), id85r(-99),mcId(-99), mcMomId(-99), mcgMomId (-99){}
   public:
-    TLorentzVector fourMomentum;
+    TLorentzVector p4;
     float scEta, scPhi;
     int charge;
     float tIso, eIso, hIso, acop;
@@ -86,7 +86,7 @@ class VHbbEvent{
     idbyTaNCfrHalfPercent(-99), idbyTaNCfrQuarterPercent(-99), 
       idbyTaNCfrTenthPercent(-99), idbyTaNC(-99), mcId(-99), mcMomId(-99), mcgMomId(-99) {}
   public:
-    TLorentzVector fourMomentum;
+    TLorentzVector p4;
     int charge;
     float tIso, eIso, hIso, acop;
     float  idbyIso,idbyTrackIso,idbyTaNCfrOnePercent,idbyTaNCfrHalfPercent, idbyTaNCfrQuarterPercent, idbyTaNCfrTenthPercent, idbyTaNC;
@@ -97,14 +97,14 @@ class VHbbEvent{
 
   class DiMuonInfo  {
   public:
-    TLorentzVector fourMomentum;
+    TLorentzVector p4;
     MuonInfo daughter1, daughter2;
   };
 
 
   class DiElectronInfo {
   public:
-    TLorentzVector fourMomentum;
+    TLorentzVector p4;
     ElectronInfo daughter1, daughter2;
   };
 

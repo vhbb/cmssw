@@ -93,7 +93,7 @@ class VHbbEventAuxInfo{
     int momid;
     int gmomid;
     int charge;
-    TLorentzVector fourMomentum;
+    TLorentzVector p4;
     //    int ndau;
     std::vector<int> dauid;
     std::vector<TLorentzVector> dauFourMomentum;    

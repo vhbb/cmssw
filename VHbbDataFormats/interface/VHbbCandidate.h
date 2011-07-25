@@ -17,7 +17,7 @@ class VHbbCandidate {
   public:
 
 
-    TLorentzVector fourMomentum;
+    TLorentzVector p4;
     std::vector<VHbbEvent::MuonInfo> muons;
     std::vector<VHbbEvent::ElectronInfo> electrons;
     std::vector<VHbbEvent::TauInfo> taus;
@@ -27,7 +27,7 @@ class VHbbCandidate {
   
   class HiggsCandidate {
   public:
-   TLorentzVector fourMomentum;
+   TLorentzVector p4;
     std::vector<VHbbEvent::SimpleJet> jets;
     float deltaTheta;
     std::vector <float> helicities;
@@ -40,7 +40,7 @@ class VHbbCandidate {
   void setCandidateType (CandidateType c){candidateType = c;}
   
  public:
-  TLorentzVector fourMomentum(){return V.fourMomentum+H.fourMomentum;}
+  TLorentzVector p4(){return V.p4+H.p4;}
   CandidateType candidateType;
   HiggsCandidate H;
   VectorCandidate V;

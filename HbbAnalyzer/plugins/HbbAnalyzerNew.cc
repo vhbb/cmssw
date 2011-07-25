@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.11 2011/07/18 13:14:05 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.12 2011/07/22 14:45:44 tboccali Exp $
 //
 //
 
@@ -355,7 +355,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	htemp.charge=p.charge();
 	if(p.mother(0)!=0) htemp.momid=p.mother(0)->pdgId();
 	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) htemp.gmomid=p.mother(0)->mother(0)->pdgId(); 
-	htemp.fourMomentum = GENPTOLOR(p);
+	htemp.p4 = GENPTOLOR(p);
 	  
 	int ndau = p.numberOfDaughters();
 	for(int j = 0; j < ndau; ++ j) {
@@ -375,7 +375,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	wtemp.charge=p.charge();
 	if(p.mother(0)!=0) wtemp.momid=p.mother(0)->pdgId();
 	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) wtemp.gmomid=p.mother(0)->mother(0)->pdgId();
-	wtemp.fourMomentum=GENPTOLOR(p);
+	wtemp.p4=GENPTOLOR(p);
 
 	int ndau = p.numberOfDaughters();
 	for(int j = 0; j < ndau; ++ j) {
@@ -394,7 +394,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	ztemp.charge=p.charge();
 	if(p.mother(0)!=0) ztemp.momid=p.mother(0)->pdgId();
 	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) ztemp.gmomid=p.mother(0)->mother(0)->pdgId();
-	ztemp.fourMomentum=GENPTOLOR(p);
+	ztemp.p4=GENPTOLOR(p);
 
 	int ndau = p.numberOfDaughters();
 	for(int j = 0; j < ndau; ++ j) {
@@ -442,8 +442,8 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
       if(bin!=-99 && bbarin!=-99){
       const Candidate & bGen = (*genParticles)[bin];
       const Candidate & bbarGen = (*genParticles)[bbarin]; 
-      ((auxInfo->mcB).back()).fourMomentum=GENPTOLOR(bGen);
-     ((auxInfo->mcBbar).back()).fourMomentum=GENPTOLOR(bbarGen);
+      ((auxInfo->mcB).back()).p4=GENPTOLOR(bGen);
+     ((auxInfo->mcBbar).back()).p4=GENPTOLOR(bbarGen);
       
       int nHDaubdau = bGen.numberOfDaughters();
       for(int j = 0; j < nHDaubdau; ++ j) {
@@ -539,7 +539,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     sj.csvmva=jet_iter->bDiscriminator("combinedSecondaryVertexMVABJetTags");
     sj.charge=jet_iter->jetCharge();
     sj.ntracks=jet_iter->associatedTracks().size();
-    sj.fourMomentum=GENPTOLORP(jet_iter);
+    sj.p4=GENPTOLORP(jet_iter);
     sj.chargedTracksFourMomentum=(getChargedTracksMomentum(&*(jet_iter)));
     
     //
@@ -581,7 +581,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     sj.csvmva=jet_iter->bDiscriminator("combinedSecondaryVertexMVABJetTags");
     sj.charge=jet_iter->jetCharge();
     sj.ntracks=jet_iter->associatedTracks().size();
-    sj.fourMomentum=GENPTOLORP(jet_iter);
+    sj.p4=GENPTOLORP(jet_iter);
     sj.chargedTracksFourMomentum=(getChargedTracksMomentum(&*(jet_iter)));
     sj.tVector = getTvect(&(*jet_iter));
 
@@ -635,7 +635,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     //    if(printJet) {std::cout << "NsubJets: " << constituents.size() << "\n";} 
     VHbbEvent::HardJet hj;
     hj.constituents=constituents.size();
-    hj.fourMomentum =GENPTOLORP(jet_iter);
+    hj.p4 =GENPTOLORP(jet_iter);
 
     for (unsigned int iJC(0); iJC<constituents.size(); ++iJC ){
       Jet::Constituent icandJet = constituents[iJC];
@@ -681,8 +681,8 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     sj.csvmva=subjet_iter->bDiscriminator("combinedSecondaryVertexMVABJetTags");
     sj.charge=subjet_iter->jetCharge();
     sj.ntracks=subjet_iter->associatedTracks().size();
-    sj.fourMomentum=GENPTOLORP(subjet_iter);
-    sj.fourMomentum=(getChargedTracksMomentum(&*(subjet_iter)));
+    sj.p4=GENPTOLORP(subjet_iter);
+    sj.p4=(getChargedTracksMomentum(&*(subjet_iter)));
     hbbInfo->subJets.push_back(sj);
 
   }
@@ -699,7 +699,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     hbbInfo->tcmet.sumEt=(metsTC[0]).sumEt();
     hbbInfo->tcmet.metSig=(metsTC[0]).mEtSig();
     hbbInfo->tcmet.eLong=(metsTC[0]).e_longitudinal();
-    hbbInfo->tcmet.fourMomentum=GENPTOLOR((metsTC[0]));
+    hbbInfo->tcmet.p4=GENPTOLOR((metsTC[0]));
     if (verbose_)     std::cout <<" METTC "<<     hbbInfo->tcmet.metSig <<" " <<     hbbInfo->tcmet.sumEt<<std::endl;
   }
   
@@ -707,7 +707,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     hbbInfo->calomet.sumEt=(mets[0]).sumEt();
     hbbInfo->calomet.metSig=(mets[0]).mEtSig();
     hbbInfo->calomet.eLong=(mets[0]).e_longitudinal();
-    hbbInfo->calomet.fourMomentum=GENPTOLOR((mets[0]));
+    hbbInfo->calomet.p4=GENPTOLOR((mets[0]));
     if (verbose_)     std::cout <<" METTC "<<     hbbInfo->calomet.metSig <<" " <<     hbbInfo->calomet.sumEt<<std::endl;
   }
 
@@ -720,7 +720,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     hbbInfo->pfmet.sumEt=(metsPF[0]).sumEt();
     hbbInfo->pfmet.metSig=(metsPF[0]).mEtSig();
     hbbInfo->pfmet.eLong=(metsPF[0]).e_longitudinal();
-    hbbInfo->pfmet.fourMomentum=GENPTOLOR((metsPF[0]));
+    hbbInfo->pfmet.p4=GENPTOLOR((metsPF[0]));
     if (verbose_)     std::cout <<" METTC "<<     hbbInfo->pfmet.metSig <<" " <<     hbbInfo->pfmet.sumEt<<std::endl;
   }
 
@@ -733,12 +733,12 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   for(edm::View<pat::Muon>::const_iterator mu = muons.begin(); mu!=muons.end(); ++mu){
     VHbbEvent::MuonInfo mf;
-    mf.fourMomentum =GENPTOLORP( mu);
+    mf.p4 =GENPTOLORP( mu);
     mf.charge=mu->charge();
     mf.tIso=mu->trackIso();
     mf.eIso=mu->ecalIso();
     mf.hIso=mu->hcalIso();
-    Geom::Phi<double> deltaphi(mu->phi()-atan2(mf.fourMomentum.Px(), mf.fourMomentum.Py()));
+    Geom::Phi<double> deltaphi(mu->phi()-atan2(mf.p4.Px(), mf.p4.Py()));
     double acop = deltaphi.value();
     mf.acop=acop;
 
@@ -793,7 +793,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   std::cout << " INPUT electrons "<<electrons.size()<<std::endl;
   for(edm::View<pat::Electron>::const_iterator elec = electrons.begin(); elec!=electrons.end(); ++elec){
     VHbbEvent::ElectronInfo ef;
-    ef.fourMomentum=GENPTOLORP(elec);
+    ef.p4=GENPTOLORP(elec);
     ef.scEta =elec->superCluster()->eta();
     ef.scPhi =elec->superCluster()->phi();
     //    if(ElecEta[eleccont]!=0) ElecEt[eleccont]=elec->superCluster()->energy()/cosh(elec->superCluster()->eta());
@@ -801,7 +801,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     ef.tIso=elec->trackIso();
     ef.eIso=elec->ecalIso();
     ef.hIso=elec->hcalIso();
-    Geom::Phi<double> deltaphi(elec->superCluster()->phi()-atan2(hbbInfo->calomet.fourMomentum.Py(),hbbInfo->calomet.fourMomentum.Px()));
+    Geom::Phi<double> deltaphi(elec->superCluster()->phi()-atan2(hbbInfo->calomet.p4.Py(),hbbInfo->calomet.p4.Px()));
     ef.acop = deltaphi.value();
     //
     // fill eleids
@@ -828,12 +828,12 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   std::cout << " INPUT taus "<<taus.size()<<std::endl;
   for(edm::View<pat::Tau>::const_iterator tau = taus.begin(); tau!=taus.end(); ++tau){
     VHbbEvent::TauInfo tf;
-    tf.fourMomentum=GENPTOLORP(tau);
+    tf.p4=GENPTOLORP(tau);
     tf.charge=tau->charge();
     tf.tIso=tau->trackIso();
     tf.eIso=tau->ecalIso();
     tf.hIso=tau->hcalIso();
-    Geom::Phi<double> deltaphi(tau->phi()-atan2(hbbInfo->calomet.fourMomentum.Py(),hbbInfo->calomet.fourMomentum.Px()));
+    Geom::Phi<double> deltaphi(tau->phi()-atan2(hbbInfo->calomet.p4.Py(),hbbInfo->calomet.p4.Px()));
     double acop = deltaphi.value();
     tf.acop=acop;
     tf.idbyIso=tau->tauID("byIsolation");
@@ -852,15 +852,15 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   for( size_t i = 0; i < dimuons->size(); i++ ) {
     VHbbEvent::DiMuonInfo df;
     const Candidate & dimuonCand = (*dimuons)[ i ];
-    df.fourMomentum= GENPTOLOR(dimuonCand);
+    df.p4= GENPTOLOR(dimuonCand);
     const Candidate * lep0 = dimuonCand.daughter( 0 );
     const Candidate * lep1 = dimuonCand.daughter( 1 );
     // needed to access specific methods of pat::Muon
     const pat::Muon & muonDau0 = dynamic_cast<const pat::Muon &>(*lep0->masterClone());
     const pat::Muon & muonDau1 = dynamic_cast<const pat::Muon &>(*lep1->masterClone());
     
-    df.daughter1.fourMomentum=GENPTOLOR(muonDau0);
-    df.daughter2.fourMomentum=GENPTOLOR(muonDau1);
+    df.daughter1.p4=GENPTOLOR(muonDau0);
+    df.daughter2.p4=GENPTOLOR(muonDau1);
     
     df.daughter1.tIso= muonDau0.trackIso();
     df.daughter2.tIso= muonDau1.trackIso();
@@ -934,7 +934,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     VHbbEvent::DiElectronInfo df;
     const Candidate & dielecCand = (*dielectrons)[ i ];
 
-    df.fourMomentum=GENPTOLOR(dielecCand);
+    df.p4=GENPTOLOR(dielecCand);
 
     // accessing the daughters of the dimuon candidate
     const Candidate * lep0 = dielecCand.daughter( 0 );
@@ -943,8 +943,8 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     const pat::Electron & elecDau0 = dynamic_cast<const pat::Electron &>(*lep0->masterClone());
     const pat::Electron & elecDau1 = dynamic_cast<const pat::Electron &>(*lep1->masterClone());
 
-    df.daughter1.fourMomentum = GENPTOLOR(elecDau0);
-    df.daughter2.fourMomentum = GENPTOLOR(elecDau1);
+    df.daughter1.p4 = GENPTOLOR(elecDau0);
+    df.daughter2.p4= GENPTOLOR(elecDau1);
 
     df.daughter1.tIso = elecDau0.trackIso();
     df.daughter2.tIso = elecDau1.trackIso();

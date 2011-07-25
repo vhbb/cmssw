@@ -6,7 +6,7 @@
 
 struct CompareJetPt {
   bool operator()( const VHbbEvent::SimpleJet& j1, const  VHbbEvent::SimpleJet& j2 ) const {
-    return j1.fourMomentum.Pt() > j2.fourMomentum.Pt();
+    return j1.p4.Pt() > j2.p4.Pt();
   }
 };
 
@@ -64,9 +64,9 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   VHbbCandidate temp;
   temp.H.jets.push_back(j1);
   temp.H.jets.push_back(j2);
-  temp.H.fourMomentum = (j1).fourMomentum+(j2).fourMomentum;
+  temp.H.p4 = (j1).p4+(j2).p4;
   TVector3 higgsBoost;
-  higgsBoost = (temp.H.fourMomentum).BoostVector();
+  higgsBoost = (temp.H.p4).BoostVector();
   temp.H.helicities.push_back(selector.getHelicity(j1,higgsBoost));
   temp.H.helicities.push_back(selector.getHelicity(j2,higgsBoost));
   temp.H.deltaTheta = selector.getDeltaTheta(j1,j2);
@@ -152,7 +152,7 @@ bool HbbCandidateFinderAlgo::findDiJets (const std::vector<VHbbEvent::SimpleJet>
  }
 
  for (unsigned int i=0 ; i< jets.size(); ++i){
-   if (jets[i].fourMomentum.Pt()> jetPtThreshold)
+   if (jets[i].p4.Pt()> jetPtThreshold)
      tempJets.push_back(jets[i]);
  }
  
@@ -168,7 +168,7 @@ bool HbbCandidateFinderAlgo::findDiJets (const std::vector<VHbbEvent::SimpleJet>
  
  std::sort(tempJets.begin(), tempJets.end(), bTagComparator);
  
-if (tempJets[0].fourMomentum.Pt()>(tempJets[1].fourMomentum.Pt())){
+if (tempJets[0].p4.Pt()>(tempJets[1].p4.Pt())){
    j1 = tempJets[0];
    j2 = tempJets[1];
  }else{
@@ -206,7 +206,7 @@ bool HbbCandidateFinderAlgo::findDiJetsHighestPt (const std::vector<VHbbEvent::S
  }
 
  for (unsigned int i=0 ; i< jets.size(); ++i){
-   if (jets[i].fourMomentum.Pt()> jetPtThreshold)
+   if (jets[i].p4.Pt()> jetPtThreshold)
      tempJets.push_back(jets[i]);
  }
 
@@ -224,7 +224,7 @@ bool HbbCandidateFinderAlgo::findDiJetsHighestPt (const std::vector<VHbbEvent::S
  unsigned  int highesti,highestj;
  for (unsigned int i =0; i< tempJets.size()-1; ++i){
    for (unsigned int j =i+1; j< tempJets.size(); ++j){
-     float pt = (tempJets[i].fourMomentum+tempJets[j].fourMomentum).Pt();
+     float pt = (tempJets[i].p4+tempJets[j].p4).Pt();
      if (pt> highestPt){
        highestPt = pt;
        highesti=i;
@@ -277,9 +277,9 @@ For both W -> mu nu and Z -> mu mu, we adopt the standard VBTF muon selection de
 	(*it).cat ==1 && 
 	(*it).validMuStations >=2 &&
 	(*it).ipDb<.2 &&
-	((*it).hIso+(*it).eIso+(*it).tIso)/(*it).fourMomentum.Pt()<.15 &&
-	(*it).fourMomentum.Eta()<2.4 &&
-	(*it).fourMomentum.Pt()>15) {
+	((*it).hIso+(*it).eIso+(*it).tIso)/(*it).p4.Pt()<.15 &&
+	(*it).p4.Eta()<2.4 &&
+	(*it).p4.Pt()>15) {
       out.push_back(*it);
     }
   }
@@ -314,9 +314,9 @@ We adopt the standard cut-based selection from VBTF described in detail here.
     if (
 	// fake
 	//	(*it).id95>  &&
-	fabs((*it).fourMomentum.Eta()) < 2.5 &&
-	!( 	fabs((*it).fourMomentum.Eta()) < 1.57 &&	fabs((*it).fourMomentum.Eta()) > 1.44) &&
-	(*it).fourMomentum.Pt()>15 //  I use the minimum ok for both Z and W
+	fabs((*it).p4.Eta()) < 2.5 &&
+	!( 	fabs((*it).p4.Eta()) < 1.57 &&	fabs((*it).p4.Eta()) > 1.44) &&
+	(*it).p4.Pt()>15 //  I use the minimum ok for both Z and W
 	){
       out.push_back(*it);
     }  
