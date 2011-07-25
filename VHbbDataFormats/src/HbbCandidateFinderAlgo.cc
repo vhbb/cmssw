@@ -133,8 +133,9 @@ void HbbCandidateFinderAlgo::findMET(const VHbbEvent::METInfo & met, std::vector
   //
 
   //  just preselection: met significance > 2 
-
-    if (met.metSig >2 ) out.push_back(met);
+  // removed on request by A. Rizzi - no filter at all
+  //    if (met.metSig >2 ) out.push_back(met);
+  out.push_back(met);
     if (verbose_){
       std::cout <<" CandidateFinder: Input MET = "<<met.metSig<<" Output MET = "<<out.size()<<std::endl;
     }
