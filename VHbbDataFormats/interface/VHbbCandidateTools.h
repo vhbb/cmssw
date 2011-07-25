@@ -5,6 +5,19 @@
 
 #include <iostream>
 
+struct CompareJetPtMuons {
+  bool operator()( const VHbbEvent::MuonInfo& j1, const  VHbbEvent::MuonInfo& j2 ) const {
+    return j1.p4.Pt() > j2.p4.Pt();
+  }
+};
+struct CompareJetPtElectrons {
+  bool operator()( const VHbbEvent::ElectronInfo& j1, const  VHbbEvent::ElectronInfo& j2 ) const {
+    return j1.p4.Pt() > j2.p4.Pt();
+  }
+};
+
+
+
 class VHbbCandidateTools {
  public:
 
@@ -26,11 +39,37 @@ class VHbbCandidateTools {
     }
     ok = false;
     VHbbCandidate temp=in;
-    if (temp.V.muons.size()!=2) return in ;
-    if (temp.V.electrons.size()!=0) return in ;
-    temp.V.p4 = temp.V.muons[0].p4+temp.V.muons[1].p4;
-   
-    if (temp.V.muons[0].p4.Pt()<20 || temp.V.muons[1].p4.Pt()<20 ) return in;
+
+    //
+    // change: allow for additional leptons; by definition 
+    //
+    if (temp.V.muons.size()<2) return in ;
+    //    if (temp.V.electrons.size()!=0) return in ;
+    std::vector<VHbbEvent::MuonInfo> muons_ = temp.V.muons;
+    CompareJetPtMuons ptComparator;
+    std::sort(muons_.begin(), muons_.end(), ptComparator);
+    if (muons_[0].p4.Pt()<20 || muons_[1].p4.Pt()<20 ) return in;
+    temp.V.p4 = muons_[0].p4+muons_[1].p4;
+    std::vector<VHbbEvent::MuonInfo> muons2_;
+    for (std::vector<VHbbEvent::MuonInfo>::const_iterator it = muons_.begin(); it!= muons_.end(); ++it){
+      if (it->p4.Pt()>20) muons2_.push_back(*it);
+    }
+    temp.V.muons = muons2_;
+  
+    // the same for electrons
+    std::vector<VHbbEvent::ElectronInfo> electrons_ = temp.V.electrons;
+    CompareJetPtElectrons ptComparator2;
+    std::sort(electrons_.begin(), electrons_.end(), ptComparator2);
+    std::vector<VHbbEvent::ElectronInfo> electrons2_;
+    for (std::vector<VHbbEvent::ElectronInfo>::const_iterator it = electrons_.begin(); it!= electrons_.end(); ++it){
+      if (it->p4.Pt()>20) electrons2_.push_back(*it);
+    }
+    temp.V.electrons = electrons2_;
+    
+   //
+    // consider all 
+    //
+    
     
     //    if (temp.V.Pt()<150 ) return in;
     //    if (temp.H.Pt()<150) return in;
@@ -45,31 +84,38 @@ class VHbbCandidateTools {
   }  
   VHbbCandidate getHZeeCandidate(const VHbbCandidate & in, bool & ok){
     if (verbose_){
-      std::cout <<" getHZeeCandidate input mu "<<in.V.muons.size()<<" e "<<in.V.electrons.size()<<std::endl;
+      std::cout <<" getHZeeCandidate input mu "<<in.V.electrons.size()<<" e "<<in.V.muons.size()<<std::endl;
     }
-
     ok = false;
     VHbbCandidate temp=in;
-    if (temp.V.electrons.size()!=2) return in ;
-    if (temp.V.muons.size()!=0) return in ;
 
-    temp.V.p4 = temp.V.electrons[0].p4+temp.V.electrons[1].p4;
-   
     //
-    // i need to ask VBTF and pt NEEDS ADJUSTING!!!!!
+    // change: allow for additional leptons; by definition 
     //
-    if (temp.V.electrons[0].p4.Pt()<20 ||temp.V.electrons[1].p4.Pt()<20  ) return in;
-    if (temp.V.electrons[0].id95r < -100000 ||temp.V.electrons[1].id95r < -100000) return in;
-
-    //    if (temp.V.p4.Pt()<150 ) return in;
-    //    if (temp.H.p4.Pt()<150) return in;
-    //    if (temp.H.firstJet().csv< 0.9) return in;
-    //    if (temp.H.secondJet().csv<0.5) return in;
-    //    if (deltaPhi(temp.V.p4.Phi(),temp.H.p4.Phi())<2.7) return in;
-    //    if (temp.V.p4.M()<75 || temp.V.p4.M()>105) return in; 
-    //    if (temp.additionalJets.size()>0) return in;
-    //    if (std::Abs(deltaTheta) ????
-    ok = true;
+    if (temp.V.electrons.size()<2) return in ;
+    //    if (temp.V.electrons.size()!=0) return in ;
+    std::vector<VHbbEvent::ElectronInfo> electrons_ = temp.V.electrons;
+    CompareJetPtElectrons ptComparator;
+    std::sort(electrons_.begin(), electrons_.end(), ptComparator);
+    if (electrons_[0].p4.Pt()<20 || electrons_[1].p4.Pt()<20 ) return in;
+    temp.V.p4 = electrons_[0].p4+electrons_[1].p4;
+    std::vector<VHbbEvent::ElectronInfo> electrons2_;
+    for (std::vector<VHbbEvent::ElectronInfo>::const_iterator it = electrons_.begin(); it!= electrons_.end(); ++it){
+      if (it->p4.Pt()>20) electrons2_.push_back(*it);
+    }
+    temp.V.electrons = electrons2_;
+  
+    // the same for muonss
+    std::vector<VHbbEvent::MuonInfo> muons_ = temp.V.muons;
+    CompareJetPtMuons ptComparator2;
+    std::sort(muons_.begin(), muons_.end(), ptComparator2);
+    std::vector<VHbbEvent::MuonInfo> muons2_;
+    for (std::vector<VHbbEvent::MuonInfo>::const_iterator it = muons_.begin(); it!= muons_.end(); ++it){
+      if (it->p4.Pt()>20) muons2_.push_back(*it);
+    }
+    temp.V.muons = muons2_;
+    
+   ok = true;
     return temp;
   }  
   VHbbCandidate getHZnnCandidate(const VHbbCandidate & in, bool & ok){

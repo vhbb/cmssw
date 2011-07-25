@@ -18,6 +18,72 @@
 #include <iostream>
 #include <fstream>
 #include "VHbbAnalysis/VHbbDataFormats/src/Cuts200X.cc"
+#include "DataFormats/Math/interface/deltaR.h"
+/*
+std::vector<float> runBDTWe(VHbbProxy* proxy){
+  //
+  // idea is to use out of the proxy just the candidates
+  const std::vector<VHbbCandidate> *pcand = proxy.getVHbbCandidate();
+  // check whether the candidate is indeed a We
+  if (pcand->candidateType !=VHbbCandidate::Wen){
+    std::cout <<" ERROR - Using Wen BDT on a candidate which is not a Wen"<<std::endl;
+    abort();
+  }
+  //
+  static TMVA::Reader *readerElec =0;
+  static float var1,var2,var3,var4,var5,var6,var7,var8,var9,var10,var11,var12,var13,var14;
+  if (readerElec ==0 ){
+    readerElec = new TMVA::Reader( "!Color:!Silent" );
+
+    readerElec->BookMVA("BDT method","/tigress-hsm/dlopes/root528/root/tmva/test/weightsTestJune16Elec/TMVA_test2_BDT.weights.xml");
+    readerElec->BookMVA("MLPBNN method","/tigress-hsm/dlopes/root528/root/tmva/test/weightsTestJune16Elec/TMVA_test2_MLPBNN.weights.xml");
+    readerElec->BookMVA("BDTG method","/tigress-hsm/dlopes/root528/root/tmva/test/weightsTestJune16Elec/TMVA_test2_BDTG.weights.xml");
+    
+    readerElec->AddVariable( "bbMass_dij", &var1 );
+    readerElec->AddVariable( "bbPt_dij", &var2 );
+    readerElec->AddVariable( "btag1_dij", &var3 );
+    readerElec->AddVariable( "btag2_dij", &var4 );
+    readerElec->AddVariable( "NAddJet1_dij", &var5 );
+    readerElec->AddVariable( "DeltaRbb_dij", &var6 );
+    readerElec->AddVariable( "hely1_dij", &var7 );
+    readerElec->AddVariable( "DeltaPhiWElec_dij", &var8 );
+    readerElec->AddVariable( "ptWElec_dij", &var9 );
+    readerElec->AddVariable(  "abs(DeltaThetaFlow_dij)", &var10 );
+    readerElec->AddSpectator( "ElecFlag_dij", &var11 );
+    readerElec->AddSpectator( "NleptonsMu_dij", &var12 );
+    readerElec->AddSpectator( "NleptonsElec_dij", &var13 );
+    readerElec->AddSpectator( "MET_dij", &var14 );
+  }
+  //
+  // fill variables, please correct
+  //  
+
+  var1 = pcand->H.p4.Mass();
+  var2 = pcand->H.p4.Pt();
+  var3 = pcand->H.jets[0].csv;
+  var4 = pcand->H.jets[1].csv;
+  var5 = pcand->additionalJets.size();
+  var6 = deltaR(pcand->H.jets[0].Eta(),pcand->H.jets[0].Phi(),pcand->H.jets[1].Eta(),pcand->H.jets[1].Phi());
+  var7 = pcand->H.helicities[0];
+  var8 = Geom::deltaPhi(pcand->H.jets[1].p4.Phi(),V.p4.Phi()) ;
+  var9 = TMath::Sqrt((pcand->V.mets[0].p4.Px()+pcand->V.electrons[0].p4.Px())**2
+		     +(pcand->V.mets[0].p4.Py()+pcand->V.electrons[0].p4.Py())**2);
+  var12 = 0; // no add lepton allowed
+  var13 = 0; // no add lepton allowed
+  var14 = pcand->V.mets[0].p4.Pt();
+ double mvaoutputBDT = -1;
+  double mvaoutputMLPBNN =-1;
+  double mvaoutputBDTG = -1;
+  
+  std::vector<float> results;
+  results.push_back(mvaoutputBDT);
+  results.push_back(mvaoutputMLPBNN);
+  result.push_back(mvaoutputBDTG);
+  return results;
+}
+*/
+
+
 int main( int argc, char ** argv ){
 int event_all=0;
 float btag_csv_min = 0.69;
