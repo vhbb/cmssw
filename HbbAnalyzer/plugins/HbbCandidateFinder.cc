@@ -38,5 +38,6 @@ void HbbCandidateFinder::produce( edm::Event& iEvent, const edm::EventSetup& iEv
 }
 
 
+
 //define this as a plug-in
 DEFINE_FWK_MODULE(HbbCandidateFinder);
