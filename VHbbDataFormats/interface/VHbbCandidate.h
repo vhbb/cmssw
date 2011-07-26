@@ -16,7 +16,6 @@ class VHbbCandidate {
   class VectorCandidate {
   public:
 
-
     TLorentzVector p4;
     std::vector<VHbbEvent::MuonInfo> muons;
     std::vector<VHbbEvent::ElectronInfo> electrons;
