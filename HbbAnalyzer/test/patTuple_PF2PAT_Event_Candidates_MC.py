@@ -484,6 +484,7 @@ process.p = cms.Path(
 		     process.hbbCandidates
                      )
 
+process.options = cms.untracked.PSet( Rethrow = cms.untracked.vstring('ProductNotFound') )
 
 process.e = cms.EndPath(process.out1)
 
