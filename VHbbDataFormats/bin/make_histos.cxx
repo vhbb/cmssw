@@ -65,7 +65,7 @@ std::vector<float> runBDTWe(VHbbProxy* proxy){
   var5 = pcand->additionalJets.size();
   var6 = deltaR(pcand->H.jets[0].Eta(),pcand->H.jets[0].Phi(),pcand->H.jets[1].Eta(),pcand->H.jets[1].Phi());
   var7 = pcand->H.helicities[0];
-  var8 = Geom::deltaPhi(pcand->H.jets[1].p4.Phi(),V.p4.Phi()) ;
+  var8 = Geom::deltaPhi(pcand->H.p4.Phi(),V.p4.Phi()) ;
   var9 = TMath::Sqrt((pcand->V.mets[0].p4.Px()+pcand->V.electrons[0].p4.Px())**2
 		     +(pcand->V.mets[0].p4.Py()+pcand->V.electrons[0].p4.Py())**2);
   var10 = TMath::Abs( pcand->deltaTheta);
