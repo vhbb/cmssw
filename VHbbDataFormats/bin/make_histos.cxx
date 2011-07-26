@@ -68,10 +68,12 @@ std::vector<float> runBDTWe(VHbbProxy* proxy){
   var8 = Geom::deltaPhi(pcand->H.jets[1].p4.Phi(),V.p4.Phi()) ;
   var9 = TMath::Sqrt((pcand->V.mets[0].p4.Px()+pcand->V.electrons[0].p4.Px())**2
 		     +(pcand->V.mets[0].p4.Py()+pcand->V.electrons[0].p4.Py())**2);
+  var10 = TMath::Abs( pcand->deltaTheta);
+  var11 = pcand->V.electrons[0].id95; //not clear!!
   var12 = 0; // no add lepton allowed
   var13 = 0; // no add lepton allowed
   var14 = pcand->V.mets[0].p4.Pt();
- double mvaoutputBDT = -1;
+  double mvaoutputBDT = -1;
   double mvaoutputMLPBNN =-1;
   double mvaoutputBDTG = -1;
   
