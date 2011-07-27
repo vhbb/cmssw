@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.12 2011/07/22 14:45:44 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.13 2011/07/25 08:55:40 tboccali Exp $
 //
 //
 
@@ -989,6 +989,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
 
   iEvent.put(hbbInfo);
+  iEvent.put(auxInfo);
 
 
 }
