@@ -87,12 +87,12 @@ class VHbbEventAuxInfo{
 
   class ParticleMCInfo {
   public:
-    ParticleMCInfo(): status(-99), momid(-99), gmomid(-99), charge(-1){}
+    ParticleMCInfo(): status(-99), momid(-99), gmomid(-99), charge(-99){}
   public:
     int status;
     int momid;
     int gmomid;
-    int charge;
+    float charge;
     TLorentzVector p4;
     //    int ndau;
     std::vector<int> dauid;
