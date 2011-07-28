@@ -16,14 +16,20 @@ process.out = cms.OutputModule(
 #    outputCommands = cms.untracked.vstring('drop *','keep *_HbbAnalyzerNew_*_*', 'keep *_hbbCandidates_*_*'),
     outputCommands = cms.untracked.vstring('drop *','keep *_*_*_Candidates'),
     dropMetaData = cms.untracked.string('ALL'),
-    splitLevel = cms.untracked.int32(0)
+    splitLevel = cms.untracked.int32(0),
+        SelectEvents = cms.untracked.PSet(
+        SelectEvents = cms.vstring('candidates')
     )
+)
 
 
 process.hbbCandidates = cms.EDProducer("HbbCandidateFinder",
 				       VHbbEventLabel = cms.InputTag(""),
 				       verbose = cms.bool(False) ,
-				       jetPtThreshold = cms.double(30.)
+				       jetPtThreshold = cms.double(30.),
+                                       useHighestPtHiggs=cms.bool(False),
+             			       actAsAFilter = cms.bool(False)
+
 				      )
 
 
@@ -38,5 +44,7 @@ process.p = cms.Path(	     process.hbbCandidates                     )
 
 
 process.e = cms.EndPath(process.out)
+
+
 
 #
