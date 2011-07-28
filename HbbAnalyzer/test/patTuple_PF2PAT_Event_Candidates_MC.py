@@ -46,8 +46,12 @@ process.out1 = cms.OutputModule(
 					   'keep edmTriggerResults_*_*_*',
 					   ),
     dropMetaData = cms.untracked.string('ALL'),
-    splitLevel = cms.untracked.int32(0)
+    splitLevel = cms.untracked.int32(0),
+    SelectEvents = cms.untracked.PSet(
+        SelectEvents = cms.vstring('candidates')
     )
+    
+)
 
 
 process.out = cms.OutputModule(
@@ -437,6 +441,7 @@ process.patElectrons.electronIDSources = cms.PSet(
     eidRobustHighEnergy = cms.InputTag("eidRobustHighEnergy"),
     eidRobustLoose = cms.InputTag("eidRobustLoose")
     )
+
 
 
 
