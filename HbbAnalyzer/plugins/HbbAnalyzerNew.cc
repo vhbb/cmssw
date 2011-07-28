@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.13 2011/07/25 08:55:40 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.14 2011/07/27 14:54:34 tboccali Exp $
 //
 //
 
@@ -294,6 +294,8 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   Handle<reco::VertexCollection> recVtxs;
   iEvent.getByLabel("offlinePrimaryVertices", recVtxs);
   
+  auxInfo->pvInfo.nVertices = recVtxs->size();
+
   for(size_t i = 0; i < recVtxs->size(); ++ i) {
     const Vertex &vtx = (*recVtxs)[i];
     double RecVtxProb=TMath::Prob(vtx.chi2(),vtx.ndof());
@@ -311,8 +313,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     
   edm::Handle<double> rhoHandle;
-  iEvent.getByLabel(edm::InputTag("kt6PFJets", "rho"),rhoHandle); // configure srcRho = cms.InputTag('kt6PFJets")
-  auxInfo->puInfo.rho = *rhoHandle;
+  iEvent.getByLabel(edm::InputTag("kt6PFJets", "rho"),rhoHandle);   auxInfo->puInfo.rho = *rhoHandle;
   
   //// real start
   

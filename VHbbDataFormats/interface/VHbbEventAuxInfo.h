@@ -74,7 +74,9 @@ class VHbbEventAuxInfo{
 
   class PrimaryVertexInfo {
   public:
+    PrimaryVertexInfo() : nVertices (-99){}
     TVector3 firstPVInPT2,firstPVInProb;
+    int nVertices;
   };
 
   class PUInfo{
