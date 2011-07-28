@@ -441,11 +441,12 @@ process.patElectrons.electronIDSources = cms.PSet(
 
 
 
-process.hbbCandidates = cms.EDProducer("HbbCandidateFinder",
+process.hbbCandidates = cms.EDFilter("HbbCandidateFinder",
 				       VHbbEventLabel = cms.InputTag(""),
 				       verbose = cms.bool(True) ,
 				       jetPtThreshold = cms.double(30.),
-				       useHighestPtHiggs=cms.bool(False)
+				       useHighestPtHiggs=cms.bool(False),
+              			       actAsAFilter = cms.bool(False)
 				      )
 
 
@@ -481,12 +482,18 @@ process.p = cms.Path(
                      process.dimuons*
                      process.dielectrons*
                      process.goodPatJetsAK5PF*
-                     process.HbbAnalyzerNew*
-		     process.hbbCandidates
+                     process.HbbAnalyzerNew
                      )
+
+
+process.candidates = cms.Path(process.hbbCandidates)
+
 
 process.options = cms.untracked.PSet( Rethrow = cms.untracked.vstring('ProductNotFound') )
 
 process.e = cms.EndPath(process.out1)
+
+
+process.schedule = cms.Schedule(process.p, process.candidates, process.e)
 
 #

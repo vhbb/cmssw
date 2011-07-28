@@ -5,7 +5,7 @@ using namespace std;
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/EDFilter.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -38,12 +38,12 @@ using namespace std;
 
 
 
-class HbbCandidateFinder : public edm::EDProducer {
+class HbbCandidateFinder : public edm::EDFilter {
   
  public:
   explicit HbbCandidateFinder(const edm::ParameterSet&);
   ~HbbCandidateFinder();
-  void produce( edm::Event&, const edm::EventSetup& );
+  bool filter( edm::Event&, const edm::EventSetup& );
 
   float getDeltaTheta( const VHbbEvent::SimpleJet & j1, const VHbbEvent::SimpleJet & j2 ) const ;
 
@@ -69,6 +69,7 @@ protected:
  HbbCandidateFinderAlgo *algo_;
  bool verbose_;
  bool useHighestHiggs;
+ bool applyFilter;
   
 };
 

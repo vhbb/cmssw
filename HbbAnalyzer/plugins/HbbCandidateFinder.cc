@@ -3,6 +3,7 @@
 HbbCandidateFinder::HbbCandidateFinder(const edm::ParameterSet& iConfig): verbose_(iConfig.getParameter<bool>("verbose") ) {
   algo_ = new HbbCandidateFinderAlgo(iConfig.getParameter<bool>("verbose"), iConfig.getParameter<double>("jetPtThreshold"),
 				     iConfig.getParameter<bool>("useHighestPtHiggs")			     );
+  applyFilter = iConfig.getParameter<bool>("actAsAFilter");
   produces<std::vector<VHbbCandidate > >();
 }
 
@@ -11,7 +12,7 @@ HbbCandidateFinder::~HbbCandidateFinder(){delete algo_;}
 void HbbCandidateFinder::beginJob(){}
 void HbbCandidateFinder::endJob(){}
 
-void HbbCandidateFinder::produce( edm::Event& iEvent, const edm::EventSetup& iEventSetup){
+bool HbbCandidateFinder::filter( edm::Event& iEvent, const edm::EventSetup& iEventSetup){
   
   std::auto_ptr<std::vector<VHbbCandidate> >  vHbbCandidates( new std::vector<VHbbCandidate>  );
 
@@ -34,7 +35,10 @@ void HbbCandidateFinder::produce( edm::Event& iEvent, const edm::EventSetup& iEv
     std::cout <<" Pushing VHbb candidates: "<<vHbbCandidates->size()<<std::endl;
   
   iEvent.put(vHbbCandidates);  
-  
+
+  if (applyFilter == false) return true;
+  if (vHbbCandidates->size() == 0) return false;
+  return true;
 }
 
 
