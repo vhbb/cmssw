@@ -465,7 +465,26 @@ private:
   Double_t max_btag_count;
   
 };
-  
+ 
+class CountHisto : public Histos {
+   virtual void book(TFile &f, std::string suffix) { 
+      
+    TDirectory *subDir;
+    if( ! f.GetDirectory(suffix.c_str()) )
+      subDir = f.mkdir(suffix.c_str());
+    else 
+      subDir = f.GetDirectory(suffix.c_str());
+    subDir->cd();
+     count = new TH1F(("Count"+suffix).c_str(),("Count ("+suffix+")").c_str(), 1,0,2 );
+
+   }
+   virtual void fill(VHbbProxy &iProxy,float w) {
+    count->Fill(1,w);
+   }
+
+   TH1F * count;
+};
+ 
 class StandardHistos : public Histos {
     
 public:

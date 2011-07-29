@@ -3,7 +3,7 @@
 
 struct Options
 {
- Options():rebin(50), legendx1(0.7),legendy1(0.65),legendx2(0.88),legendy2(0.90),min(0.001),max(100), yaxis("Events") {}
+ Options():rebin(50), legendx1(0.7),legendy1(0.65),legendx2(0.88),legendy2(0.90),min(0.01),max(1000), yaxis("Events") {}
  int rebin;
  float legendx1;
  float legendy1;

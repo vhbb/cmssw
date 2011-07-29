@@ -46,7 +46,8 @@ class VlightRegionHWmun: public Cut {
         && ( H.jets.at(1).csv < CSVM)
         && iCand->at(0).additionalJets.size() < 2
         && V.mets[0].metSig > 2
-	&& TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5  
+	&& TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5 
+        && iProxy.trigger()->accept("HLT_IsoMu17_v.*") 
         );
   }
 };
@@ -71,6 +72,7 @@ class VlightRegionHWen: public Cut {
         && iCand->at(0).additionalJets.size() < 5
         && V.mets[0].metSig > 2
 	&& TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5  
+        && iProxy.trigger()->accept("HLT_Ele\\(\\(27\\)\\|\\(32\\)\\)_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v.")
         );
   }
 };
@@ -92,6 +94,7 @@ class VlightRegionHZmumu: public Cut {
         && ( H.jets.at(0).csv < CSVL)
         && ( H.jets.at(1).csv < CSVL)
         && iCand->at(0).additionalJets.size() < 2
+        && iProxy.trigger()->accept("HLT_IsoMu17_v.*")
         );
   }
 };
@@ -113,6 +116,7 @@ class VlightRegionHZee: public Cut {
         && ( H.jets.at(0).csv < CSVL)
         && ( H.jets.at(1).csv < CSVL)
         && iCand->at(0).additionalJets.size() < 2
+        && iProxy.trigger()->accept("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v.*")       
         );
   }
 };
@@ -135,6 +139,7 @@ class TTbarRegionHWmun: public Cut {
         && V.p4.Pt() > 100
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
         && iCand->at(0).additionalJets.size() > 1
+        && iProxy.trigger()->accept("HLT_IsoMu17_v.*")
         );
   }
 };
@@ -160,6 +165,9 @@ class TTbarRegionHWen: public Cut {
         && V.mets[0].metSig > 2
         &&  ( TMath::Abs( Geom::deltaPhi( V.mets[0].p4.Phi(), H.jets.at(0).p4.Phi())) > 1.5
             || TMath::Abs( Geom::deltaPhi(V.mets[0].p4.Phi(), H.jets.at(1).p4.Phi())) > 1.5  )
+        && iProxy.trigger()->accept("HLT_Ele\\(\\(27\\)\\|\\(32\\)\\)_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v.")
+
+
         );
   }
 };
@@ -180,6 +188,7 @@ class TTbarRegionHZmumu: public Cut {
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
         && iCand->at(0).additionalJets.size() > 1
         && V.p4.M() > 120
+        && iProxy.trigger()->accept("HLT_IsoMu17_v.*")
 	);
   }
 };
@@ -199,6 +208,8 @@ class TTbarRegionHZee: public Cut {
         && H.jets.at(1).Pt() > 20
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
         && iCand->at(0).additionalJets.size() > 1
+        && iProxy.trigger()->accept("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v.*")
+
 	);
   }
 };
@@ -223,6 +234,7 @@ class VbbRegionHWmun: public Cut {
         && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5
         && iCand->at(0).additionalJets.size() ==0
         && V.mets[0].metSig > 1
+        && iProxy.trigger()->accept("HLT_IsoMu17_v.*")
         );
   }
 };
@@ -246,6 +258,8 @@ class VbbRegionHWen: public Cut {
         && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.4
         && iCand->at(0).additionalJets.size() < 2
         && V.mets[0].metSig > 2
+        && iProxy.trigger()->accept("HLT_Ele\\(\\(27\\)\\|\\(32\\)\\)_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v.*")
+
         );
   }
 };
@@ -268,6 +282,7 @@ class VbbRegionHZmumu: public Cut {
         && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.9
         && iCand->at(0).additionalJets.size() < 2
         && ( V.mets.size() ==0 || V.mets.at(0).p4.Pt() < 30)
+        && iProxy.trigger()->accept("HLT_IsoMu17_v.*")
         );
   }
 };
@@ -290,6 +305,8 @@ class VbbRegionHZee: public Cut {
 //        && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.9
         && iCand->at(0).additionalJets.size() < 2
   //      && V.mets[0].p4.Pt() < 30
+        && iProxy.trigger()->accept("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v.*")
+
         );
   }
 };

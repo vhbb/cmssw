@@ -23,6 +23,12 @@ class Cut {
    virtual bool operator()(VHbbProxy &iProxy) {return pass(iProxy); }
 };
 
+class NoCut : public Cut {
+ public:
+   virtual bool pass(VHbbProxy &)  { return true;}
+   virtual std::string name() {return "NoCut"; }
+};
+
 /// One parameter cut class
 class PCut : public Cut
 {
