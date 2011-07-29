@@ -12,6 +12,7 @@
 #include <vector>
 //#include "VHbbAnalysis/HbbAnalyzer/interface/HbbAnalyzerNew.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/TriggerReader.h"
 //#include "VHbbAnalysis/HbbAnalyzer/interface/HbbCandidateFinder.h"
 #include "VHbbAnalysis/VHbbDataFormats/src/classes.h"
 #include "VHbbAnalysis/VHbbDataFormats/src/CutsAndHistos.cc"
@@ -89,6 +90,9 @@ std::vector<float> runBDTWe(VHbbProxy* proxy){
 int main( int argc, char ** argv ){
 bool splitBCLIGHT=true;
 int event_all=0;
+int event_all_b=0;
+int event_all_c=0;
+int event_all_l=0;
 float btag_csv_min = 0.69;
 float btag_csv_max = 0.25;
 int s=0;
@@ -211,7 +215,8 @@ for(size_t a=0;a < allHistosB.size(); a++)
    in>> line;
    inputFiles_.push_back(line);
   }
-   
+  TriggerReader trigger;
+ 
   //Loop on all files
   for(unsigned int iFile=0; iFile<inputFiles_.size(); ++iFile){
   std::cout << iFile << std::endl;
@@ -243,8 +248,8 @@ for(size_t a=0;a < allHistosB.size(); a++)
     vhbbHandle.getByLabel(ev,"HbbAnalyzerNew");
     const VHbbEvent iEvent = *vhbbHandle.product();
 */
-
-    VHbbProxy iProxy(0,0, &iCand);
+    trigger.setEvent(&ev);
+    VHbbProxy iProxy(0,0, &iCand,&trigger);
 
     const std::vector<VHbbCandidate> *pcand = iProxy.getVHbbCandidate();
     norm.process(iProxy,1);
@@ -253,6 +258,7 @@ for(size_t a=0;a < allHistosB.size(); a++)
     {
      if(aux.mcBbar.size() > 0 || aux.mcB.size() > 0) 
      {
+      event_all_b++;
         normB.process(iProxy,1);
    	if(iCand.size()>0)
 	    for(size_t a=0;a < allHistosB.size(); a++)         allHistosB[a]->process(iProxy, 1);
@@ -260,12 +266,14 @@ for(size_t a=0;a < allHistosB.size(); a++)
      }
      else if(aux.mcC.size() > 0) 
      {
+        event_all_c++;
         normC.process(iProxy,1);
         if(iCand.size()>0)
 	   for(size_t a=0;a < allHistosC.size(); a++)         allHistosC[a]->process(iProxy, 1);
 
      } else
      {
+        event_all_l++;
         normL.process(iProxy,1);
    	if(iCand.size()>0)
        	   for(size_t a=0;a < allHistosL.size(); a++)         allHistosL[a]->process(iProxy, 1);
@@ -300,7 +308,7 @@ for(size_t a=0;a < allHistosB.size(); a++)
  
 
      }
- std::cout << event_all << std::endl;
+ std::cout << "TOT: " << event_all << " b: " << event_all_b << " c: "<<  event_all_c <<" l: " << event_all_l <<  std::endl;
   return 0;
 
 }
