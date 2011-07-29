@@ -12,6 +12,8 @@ class HbbCandidateFinderAlgo {
 
   void run (const VHbbEvent*, std::vector<VHbbCandidate>  &);
 
+ VHbbCandidate changeHiggs(bool useHighestPtHiggs , const VHbbCandidate & old);
+
   
  protected:
   

@@ -16,6 +16,40 @@ struct CompareBTag {
   }
 };
 
+VHbbCandidate HbbCandidateFinderAlgo::changeHiggs(bool useHighestPtHiggs , const VHbbCandidate & old)
+{
+  VHbbCandidateTools selector(verbose_);
+
+  VHbbCandidate temp(old);
+  VHbbEvent::SimpleJet j1,j2;
+  std::vector<VHbbEvent::SimpleJet> addJets;
+  std::vector<VHbbEvent::SimpleJet> jets;
+
+  for(size_t i=0; i < old.H.jets.size();i++) jets.push_back(old.H.jets[i]);
+  for(size_t i=0; i < old.additionalJets.size();i++) jets.push_back(old.additionalJets[i]);
+
+  bool foundJets;
+
+  if (useHighestPtHiggs == false){
+    foundJets = findDiJets(jets,j1,j2,addJets) ;
+  }else{
+    foundJets= findDiJetsHighestPt(jets,j1,j2,addJets) ;
+  }
+
+  temp.H.jets.clear();
+  temp.H.jets.push_back(j1);
+  temp.H.jets.push_back(j2);
+  temp.H.p4 = (j1).p4+(j2).p4;
+  TVector3 higgsBoost;
+  higgsBoost = (temp.H.p4).BoostVector();
+  temp.H.helicities.clear();
+  temp.H.helicities.push_back(selector.getHelicity(j1,higgsBoost));
+  temp.H.helicities.push_back(selector.getHelicity(j2,higgsBoost));
+  temp.H.deltaTheta = selector.getDeltaTheta(j1,j2);
+  temp.additionalJets = addJets;
+  return temp;
+
+}
 
 
 
