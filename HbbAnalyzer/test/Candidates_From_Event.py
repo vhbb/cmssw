@@ -7,14 +7,14 @@ import os
 # define the process
 process = cms.Process("Candidates")
 process.source = cms.Source("PoolSource",
- fileNames = cms.untracked.vstring('file:/gpfs/gpfsddn/cms/user/boccali/hbb/ttjets/VHbbPAT.edm_5_0_eqA.root') ) 
+ fileNames = cms.untracked.vstring('file:PAT.edm_194_0_mAx.root') ) 
 
 
 process.out = cms.OutputModule(
     'PoolOutputModule',
     fileName       = cms.untracked.string('Cand.root'),
 #    outputCommands = cms.untracked.vstring('drop *','keep *_HbbAnalyzerNew_*_*', 'keep *_hbbCandidates_*_*'),
-    outputCommands = cms.untracked.vstring('drop *','keep *_*_*_Candidates'),
+    outputCommands = cms.untracked.vstring('keep *','drop VHbbEvent_*_*_*'),
     dropMetaData = cms.untracked.string('ALL'),
     splitLevel = cms.untracked.int32(0),
         SelectEvents = cms.untracked.PSet(
@@ -23,13 +23,12 @@ process.out = cms.OutputModule(
 )
 
 
-process.hbbCandidates = cms.EDProducer("HbbCandidateFinder",
+process.hbbHighPtCandidates = cms.EDProducer("HbbCandidateFinder",
 				       VHbbEventLabel = cms.InputTag(""),
 				       verbose = cms.bool(False) ,
+				       useHighestPtHiggs = cms.bool(True)
 				       jetPtThreshold = cms.double(30.),
-                                       useHighestPtHiggs=cms.bool(False),
              			       actAsAFilter = cms.bool(False)
-
 				      )
 
 
@@ -40,7 +39,7 @@ process.hbbCandidates = cms.EDProducer("HbbCandidateFinder",
 
 
 # define path 'p'
-process.p = cms.Path(	     process.hbbCandidates                     )
+process.p = cms.Path(	     process.hbbHighPtCandidates                     )
 
 
 process.e = cms.EndPath(process.out)
