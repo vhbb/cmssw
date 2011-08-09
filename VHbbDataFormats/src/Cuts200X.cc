@@ -88,6 +88,7 @@ class VlightRegionHZmumu: public Cut {
   VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
 
   return (  iCand->at(0).candidateType == VHbbCandidate::Zmumu
+        && V.muons[0].p4.Pt() > 20
         && H.jets.size() >= 2 
         && H.jets.at(0).Pt() > 20
         && H.jets.at(1).Pt() > 20
@@ -144,8 +145,8 @@ class TTbarRegionHWmun: public Cut {
         && H.jets.at(1).Pt() > 30
         && H.p4.Pt() > 100
         && V.p4.Pt() > 100
-        && V.Mt(VHbbCandidate::Wmun) > 40
-        && V.Mt(VHbbCandidate::Wmun) < 120
+      //  && V.Mt(VHbbCandidate::Wmun) > 40
+      //  && V.Mt(VHbbCandidate::Wmun) < 120
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
         && iCand->at(0).additionalJets.size() > 1
         && iProxy.trigger()->accept("HLT_IsoMu17_v.*")
@@ -191,12 +192,13 @@ class TTbarRegionHZmumu: public Cut {
   VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
 
   return (  iCand->at(0).candidateType == VHbbCandidate::Zmumu
+        && V.muons[0].p4.Pt() > 20
         && H.jets.size() >= 2
         && H.jets.at(0).Pt() > 20
         && H.jets.at(1).Pt() > 20
-//        && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
+        && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
         && ( V.mets.size() >0 && V.mets.at(0).p4.Pt() > 50)
-  //      && iCand->at(0).additionalJets.size() > 1
+        && iCand->at(0).additionalJets.size() > 1
         && V.p4.M() > 120
         && iProxy.trigger()->accept("HLT_IsoMu17_v.*")
 	);
@@ -246,7 +248,7 @@ class VbbRegionHWmun: public Cut {
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
         && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5
         && iCand->at(0).additionalJets.size() ==0
-        && V.mets[0].metSig > 1
+        && V.mets[0].metSig > 2.5
         && iProxy.trigger()->accept("HLT_IsoMu17_v.*")
         );
   }
@@ -286,12 +288,13 @@ class VbbRegionHZmumu: public Cut {
   VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
 
   return (  iCand->at(0).candidateType == VHbbCandidate::Zmumu
+        && V.muons[0].p4.Pt() > 20
         && H.jets.size() >= 2
         && H.jets.at(0).Pt() > 20
         && H.jets.at(1).Pt() > 20
         &&  ( H.p4.M() < 100 ||  H.p4.M() > 140)
-        && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
-        && ( H.jets.at(0).csv > 0.5 && H.jets.at(1).csv > 0.5)
+//	        && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
+        && ( H.jets.at(0).csv > CSVT && H.jets.at(1).csv > CSVT)
         && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.9
         && iCand->at(0).additionalJets.size() < 2
         && ( V.mets.size() ==0 || V.mets.at(0).p4.Pt() < 30)
