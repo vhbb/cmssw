@@ -48,6 +48,13 @@ class PCut : public Cut
  
 };
 
+/*class HPtCut : public PCut
+{
+ public:
+  bool pass(VHbbProxy &p) {return 0; } //p.C.H.Pt() > m_cut;}
+  virtual std::string name()  {return "HPt_Gt_"+cutValueString(); } 
+};*/
+
 class CutSet : public Cut {
  public:
  void add(Cut *c) {cuts.push_back(c);}  

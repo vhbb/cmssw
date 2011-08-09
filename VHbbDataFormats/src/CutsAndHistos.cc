@@ -536,7 +536,7 @@ public:
     StH_ZPt = new TH1F(("ZPt"+suffix).c_str(),(" Z Pt ("+suffix+")").c_str(), bin_pt, min_pt, max_pt );
     StH_ZH_dPhi = new TH1F(("ZH_dPhi"+suffix).c_str(),(" ZH delta Phi ("+suffix+")").c_str(), bin_deltaPhi, min_deltaPhi, max_deltaPhi );
 
-    StH_WMass = new TH1F(("WMass"+suffix).c_str(),(" W Mass ("+suffix+")").c_str(), bin_mass, min_mass, max_mass );
+    StH_WMass = new TH1F(("WMass"+suffix).c_str(),(" W Transverse Mass ("+suffix+")").c_str(), bin_mass, min_mass, max_mass );
     StH_WPt = new TH1F(("WPt"+suffix).c_str(),(" W Pt ("+suffix+")").c_str(), bin_pt, min_pt, max_pt );
     StH_WH_dPhi = new TH1F(("WH_dPhi"+suffix).c_str(),(" WH delta Phi ("+suffix+")").c_str(), bin_deltaPhi, min_deltaPhi, max_deltaPhi );
 
@@ -571,7 +571,7 @@ public:
 	StH_ZH_dPhi->Fill(V.p4.DeltaPhi(H.p4.Phi()), w); 
       } 
       else if(iCandType == VHbbCandidate::Wen || iCandType == VHbbCandidate::Wmun){
-	StH_WMass->Fill(V.p4.M(), w); 
+	StH_WMass->Fill(V.Mt(iCandType), w); 
 	StH_WPt->Fill(V.p4.Pt(), w); 
 	StH_WH_dPhi->Fill(V.p4.DeltaPhi(H.p4.Phi()), w); 
       }

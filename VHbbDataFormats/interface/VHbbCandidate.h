@@ -15,7 +15,23 @@ class VHbbCandidate {
 
   class VectorCandidate {
   public:
-
+    double Mt(CandidateType candidateType) {
+    if(candidateType==Wen)
+      {
+       float ptl=electrons[0].p4.Pt();
+       float met=mets[0].p4.Pt();
+       float et=ptl+met;
+       return sqrt(et*et - p4.Pt()*p4.Pt()  );
+      }
+    if(candidateType==Wmun)
+      {
+       float ptl=muons[0].p4.Pt();
+       float met=mets[0].p4.Pt();
+       float et=ptl+met;
+       return sqrt(et*et - p4.Pt()*p4.Pt()  );
+      }
+    return 0;
+   }
     TLorentzVector p4;
     std::vector<VHbbEvent::MuonInfo> muons;
     std::vector<VHbbEvent::ElectronInfo> electrons;

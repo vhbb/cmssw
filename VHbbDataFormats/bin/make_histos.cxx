@@ -15,10 +15,14 @@
 #include "VHbbAnalysis/VHbbDataFormats/interface/TriggerReader.h"
 //#include "VHbbAnalysis/HbbAnalyzer/interface/HbbCandidateFinder.h"
 #include "VHbbAnalysis/VHbbDataFormats/src/classes.h"
+//#include "VHbbAnalysis/VHbbDataFormats/interface/CutsAndHistos.h"
+//#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbProxy.h"
+//#include "VHbbAnalysis/VHbbDataFormats/src/Histos.cc"
 #include "VHbbAnalysis/VHbbDataFormats/src/CutsAndHistos.cc"
 #include <iostream>
 #include <fstream>
 #include "VHbbAnalysis/VHbbDataFormats/src/Cuts200X.cc"
+//#include "VHbbAnalysis/VHbbDataFormats/interface/HbbCandidateFinderAlgo.h"
 #include "DataFormats/Math/interface/deltaR.h"
 /*
 std::vector<float> runBDTWe(VHbbProxy* proxy){
@@ -88,6 +92,7 @@ std::vector<float> runBDTWe(VHbbProxy* proxy){
 
 
 int main( int argc, char ** argv ){
+    std::cout << "hello" << std::endl;
 bool splitBCLIGHT=true;
 int event_all=0;
 int event_all_b=0;
@@ -103,6 +108,8 @@ int c=0;
   gSystem->Load("libDataFormatsFWLite");
   AutoLibraryLoader::enable();
 
+
+//  HbbCandidateFinderAlgo higgsalgo(false,20,true);
 
   std::string name(argv[2]);
 
@@ -209,12 +216,15 @@ for(size_t a=0;a < allHistosB.size(); a++)
   std::string fl(argv[1]);
   std::vector<std::string> inputFiles_;
   std::ifstream in(fl.c_str());
+    std::cout << "read file" << std::endl;
   while(!in.eof())
   {
    std::string line;
    in>> line;
    inputFiles_.push_back(line);
+   std::cout << line << std::endl;
   }
+    std::cout << "here" << std::endl;
   TriggerReader trigger;
  
   //Loop on all files
@@ -234,7 +244,9 @@ for(size_t a=0;a < allHistosB.size(); a++)
 
 
     fwlite::Handle< std::vector<VHbbCandidate> > vhbbCandHandle; 
-    vhbbCandHandle.getByLabel(ev,"hbbCandidates");
+//    vhbbCandHandle.getByLabel(ev,"hbbBestCSVPt20Candidates");
+
+    vhbbCandHandle.getByLabel(ev,"hbbHighestPtHiggsPt30Candidates");
     const std::vector<VHbbCandidate> & iCand = *vhbbCandHandle.product();
 
 
@@ -250,6 +262,17 @@ for(size_t a=0;a < allHistosB.size(); a++)
 */
     trigger.setEvent(&ev);
     VHbbProxy iProxy(0,0, &iCand,&trigger);
+
+/*    std::cout << "hello" << std::endl;
+    std::vector<VHbbCandidate> candPt;
+    for(size_t ci=0;ci< iCand.size() ; ci++)
+    {
+    std::cout << "h" << std::endl;
+    candPt.push_back(higgsalgo.changeHiggs(true,iCand[ci]));
+    }
+    VHbbProxy iProxy(0,0, &candPt,&trigger);
+
+*/
 
     const std::vector<VHbbCandidate> *pcand = iProxy.getVHbbCandidate();
     norm.process(iProxy,1);
