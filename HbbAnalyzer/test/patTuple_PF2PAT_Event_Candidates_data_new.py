@@ -20,7 +20,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 # source
 # on lxbuild151
@@ -49,7 +49,7 @@ process.out1 = cms.OutputModule(
     dropMetaData = cms.untracked.string('ALL'),
     splitLevel = cms.untracked.int32(0),
         SelectEvents = cms.untracked.PSet(
-        SelectEvents = cms.vstring('candidates')
+        SelectEvents = cms.vstring('p')
     )
 
     )
@@ -500,7 +500,8 @@ if isMC == False :
                      process.dimuons*
                      process.dielectrons*
 #                     process.leptonTrigMatch*
-                     process.HbbAnalyzerNew
+                     process.HbbAnalyzerNew*
+process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
                      )
 else :
         process.p = cms.Path(
@@ -523,11 +524,12 @@ else :
                      process.dimuons*
                      process.dielectrons*
 #                     process.leptonTrigMatch*
-                     process.HbbAnalyzerNew
+                     process.HbbAnalyzerNew*
+process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
                      )
 
 
-process.candidates = cms.Path(process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates)
+#process.candidates = cms.Path(process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates)
 
 
 process.options = cms.untracked.PSet( Rethrow = cms.untracked.vstring('ProductNotFound') )
@@ -535,6 +537,6 @@ process.options = cms.untracked.PSet( Rethrow = cms.untracked.vstring('ProductNo
 process.e = cms.EndPath(process.out1)
 
 
-process.schedule = cms.Schedule(process.p, process.candidates, process.e)
+process.schedule = cms.Schedule(process.p,  process.e)
 
 #
