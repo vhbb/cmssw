@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.15 2011/07/28 11:57:05 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.16 2011/08/10 08:17:27 arizzi Exp $
 //
 //
 
@@ -973,7 +973,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     df.daughter2.hIso = elecDau1.hcalIso();
     
     // ids
-    df.daughter1.id95 = elecDau0.electronID("simpleEleId95cIso");
+    /*df.daughter1.id95 = elecDau0.electronID("simpleEleId95cIso");
     df.daughter1.id85 = elecDau0.electronID  ("simpleEleId85cIso");
     df.daughter1.id70 = elecDau0.electronID  ("simpleEleId70cIso");
     df.daughter1.id95r = elecDau0.electronID ("simpleEleId95relIso");
@@ -987,7 +987,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     df.daughter2.id95r = elecDau1.electronID ("simpleEleId95relIso");
     df.daughter2.id85r = elecDau1.electronID ("simpleEleId85relIso");
     df.daughter2.id70r = elecDau1.electronID ("simpleEleId70relIso");
-
+*/
     hbbInfo->diElectronInfo.push_back(df);
     
   }
