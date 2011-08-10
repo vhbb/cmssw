@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.14 2011/07/27 14:54:34 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.15 2011/07/28 11:57:05 tboccali Exp $
 //
 //
 
@@ -739,6 +739,9 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     mf.tIso=mu->trackIso();
     mf.eIso=mu->ecalIso();
     mf.hIso=mu->hcalIso();
+    mf.pfChaIso=mu->chargedHadronIso();
+    mf.pfPhoIso=mu->photonIso();
+    mf.pfNeuIso=mu->neutralHadronIso(); 
     Geom::Phi<double> deltaphi(mu->phi()-atan2(mf.p4.Px(), mf.p4.Py()));
     double acop = deltaphi.value();
     mf.acop=acop;
@@ -802,17 +805,30 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     ef.tIso=elec->trackIso();
     ef.eIso=elec->ecalIso();
     ef.hIso=elec->hcalIso();
+    ef.pfChaIso=elec->chargedHadronIso();
+    ef.pfPhoIso=elec->photonIso();
+    ef.pfNeuIso=elec->neutralHadronIso();
+
     Geom::Phi<double> deltaphi(elec->superCluster()->phi()-atan2(hbbInfo->calomet.p4.Py(),hbbInfo->calomet.p4.Px()));
     ef.acop = deltaphi.value();
     //
     // fill eleids
     //    
-    ef.id95 = elec->electronID("simpleEleId95cIso");
+/*    ef.id95 = elec->electronID("simpleEleId95cIso");
     ef.id85 = elec->electronID("simpleEleId85cIso");
     ef.id70 = elec->electronID("simpleEleId70cIso");
     ef.id95r = elec->electronID("simpleEleId95relIso");
     ef.id70r = elec->electronID("simpleEleId70relIso");
     ef.id85r = elec->electronID("simpleEleId85relIso");
+*/
+    ef.id95 =elec->electronID("eidVBTFCom95");
+    ef.id95r=elec->electronID("eidVBTFRel95");
+    ef.id85 =elec->electronID("eidVBTFCom85");
+    ef.id85r=elec->electronID("eidVBTFRel85");
+    ef.id80 =elec->electronID("eidVBTFCom80");
+    ef.id80r=elec->electronID("eidVBTFRel80");
+    ef.id70 =elec->electronID("eidVBTFCom70");
+    ef.id70r=elec->electronID("eidVBTFRel70");
 
     if(runOnMC_){
       const GenParticle* elecMc = elec->genLepton();
