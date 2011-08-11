@@ -4,8 +4,13 @@
 #include "VHbbAnalysis/VHbbDataFormats/interface/CutsAndHistos.h"
 #include <TH1F.h>
 #include "DataFormats/GeometryVector/interface/VectorUtil.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include <sstream>
 #include "TKey.h"
+#include "TMVA/Reader.h"
+#include "TMVA/Config.h"
+#include "TMVA/Tools.h"
+#include "TMVA/MethodCuts.h"
 
 class MCHistos : public Histos {
   
@@ -186,6 +191,27 @@ private:
   
 };
   
+
+class CountHisto : public Histos {
+   virtual void book(TFile &f, std::string suffix) { 
+      
+    TDirectory *subDir;
+    if( ! f.GetDirectory(suffix.c_str()) )
+      subDir = f.mkdir(suffix.c_str());
+    else 
+      subDir = f.GetDirectory(suffix.c_str());
+    subDir->cd();
+     count = new TH1F(("Count"+suffix).c_str(),("Count ("+suffix+")").c_str(), 1,0,2 );
+
+   }
+   virtual void fill(VHbbProxy &iProxy,float w) {
+    count->Fill(1,w);
+   }
+
+   TH1F * count;
+};
+
+
 class StandardHistos : public Histos {
     
 public:
@@ -237,7 +263,7 @@ public:
     StH_ZPt = new TH1F(("ZPt"+suffix).c_str(),(" Z Pt ("+suffix+")").c_str(), bin_pt, min_pt, max_pt );
     StH_ZH_dPhi = new TH1F(("ZH_dPhi"+suffix).c_str(),(" ZH delta Phi ("+suffix+")").c_str(), bin_deltaPhi, min_deltaPhi, max_deltaPhi );
 
-    StH_WMass = new TH1F(("WMass"+suffix).c_str(),(" W Transverse Mass ("+suffix+")").c_str(), bin_mass, min_mass, max_mass );
+    StH_WMass = new TH1F(("WMass"+suffix).c_str(),(" W Mass ("+suffix+")").c_str(), bin_mass, min_mass, max_mass );
     StH_WPt = new TH1F(("WPt"+suffix).c_str(),(" W Pt ("+suffix+")").c_str(), bin_pt, min_pt, max_pt );
     StH_WH_dPhi = new TH1F(("WH_dPhi"+suffix).c_str(),(" WH delta Phi ("+suffix+")").c_str(), bin_deltaPhi, min_deltaPhi, max_deltaPhi );
 
@@ -266,13 +292,14 @@ public:
       StH_HPt->Fill(H.p4.Pt(), w); 
      //    StH_HHel->Fill(H.hel(), w); 
       StH_HPullAngle->Fill(H.deltaTheta, w); 
+
       if( iCandType == VHbbCandidate::Zmumu || iCandType == VHbbCandidate::Zee || iCandType == VHbbCandidate::Znn ){
 	StH_ZMass->Fill(V.p4.M(), w); 
 	StH_ZPt->Fill(V.p4.Pt(), w);
 	StH_ZH_dPhi->Fill(V.p4.DeltaPhi(H.p4.Phi()), w); 
       } 
       else if(iCandType == VHbbCandidate::Wen || iCandType == VHbbCandidate::Wmun){
-	StH_WMass->Fill(V.Mt(iCandType), w); 
+	StH_WMass->Fill(V.p4.M(), w); 
 	StH_WPt->Fill(V.p4.Pt(), w); 
 	StH_WH_dPhi->Fill(V.p4.DeltaPhi(H.p4.Phi()), w); 
       }
@@ -330,23 +357,144 @@ private:
   Double_t max_hel;
 
 };
-class CountHisto : public Histos {
-   virtual void book(TFile &f, std::string suffix) {
+
+
+class MVAHistos : public Histos {
+
+public:
+  MVAHistos( const std::string &channel_):
+    channel(channel_) {}
+
+  virtual void book(TFile &f, std::string suffix) {
+
+    //    std::clog << "Start booking" << std::endl;
 
     TDirectory *subDir;
     if( ! f.GetDirectory(suffix.c_str()) )
       subDir = f.mkdir(suffix.c_str());
-    else
+    else 
       subDir = f.GetDirectory(suffix.c_str());
     subDir->cd();
-     count = new TH1F(("Count"+suffix).c_str(),("Count ("+suffix+")").c_str(), 1,0,2 );
 
-   }
-   virtual void fill(VHbbProxy &iProxy,float w) {
-    count->Fill(1,w);
-   }
+    bin_BDT = 100;
+    min_BDT = -0.8;
+    max_BDT = 0.8;
+    
+    MVAH_BDT = new TH1F(("BDT"+suffix).c_str(),(" BDT output ("+suffix+")").c_str(), bin_BDT, min_BDT, max_BDT );
 
-   TH1F * count;
+  }
+  
+  virtual void fill(VHbbProxy &iProxy,float w) {
+
+    //    std::clog << "Start filling" << std::endl;
+
+    const VHbbEvent *iEvent = iProxy.getVHbbEvent();
+    const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+
+    TMVA::Reader * reader = new TMVA::Reader();
+    
+    float bbMass,bbPt,btag1,btag2,NaddJet,DeltaRbb,helicity,DeltaPhiVH,bPt1,bPt2,VMass,VPt,pullAngle,DeltaEtabb,deltaPhipfMETjet1,deltaPhipfMETjet2,pfMET,pfMETsig;
+    
+    if(channel == "Zmm"){
+      reader->AddVariable( "bbMass",            &bbMass    );
+      reader->AddVariable( "VMass",             &VMass     );
+      reader->AddVariable( "bbPt",              &bbPt      );
+      reader->AddVariable( "VPt",               &VPt       );
+      reader->AddVariable( "btag1",             &btag1     );
+      reader->AddVariable( "btag2",             &btag2     );
+      reader->AddVariable( "DeltaPhiVH",        &DeltaPhiVH);
+      reader->AddVariable( "DeltaEtabb",        &DeltaEtabb);      
+    }
+    else if(channel == "Zee"){      
+      reader->AddVariable( "bbMass",            &bbMass    );
+      reader->AddVariable( "VMass",             &VMass     );
+      reader->AddVariable( "bbPt",              &bbPt      );
+      reader->AddVariable( "VPt",               &VPt       );
+      reader->AddVariable( "btag1",             &btag1     );
+      reader->AddVariable( "btag2",             &btag2     );
+      reader->AddVariable( "DeltaPhiVH",        &DeltaPhiVH);
+      reader->AddVariable( "DeltaEtabb",        &DeltaEtabb);      
+    }
+    else if(channel == "Znn"){      
+      reader->AddVariable( "bbMass",            &bbMass    );
+      reader->AddVariable( "bbPt",              &bbPt      );
+      reader->AddVariable( "pfMET",             &pfMET     );
+      reader->AddVariable( "btag1",             &btag1     );
+      reader->AddVariable( "btag2",             &btag2     );
+      reader->AddVariable( "DeltaPhiVH",        &DeltaPhiVH);      
+    } 
+    else if(channel == "We"){
+      reader->AddVariable( "bbMass",            &bbMass    );
+      reader->AddVariable( "bbPt",              &bbPt      );
+      reader->AddVariable( "VPt",               &VPt       );
+      reader->AddVariable( "btag1",             &btag1     );
+      reader->AddVariable( "btag2",             &btag2     );
+      reader->AddVariable( "DeltaPhiVH",        &DeltaPhiVH);
+      reader->AddVariable( "DeltaEtabb",        &DeltaEtabb);      
+    }
+    else if(channel == "Wm"){           
+      reader->AddVariable( "bbMass",            &bbMass    );
+      reader->AddVariable( "bbPt",              &bbPt      );
+      reader->AddVariable( "VPt",               &VPt       );
+      reader->AddVariable( "btag1",             &btag1     );
+      reader->AddVariable( "btag2",             &btag2     );
+      reader->AddVariable( "DeltaPhiVH",        &DeltaPhiVH);
+      reader->AddVariable( "DeltaEtabb",        &DeltaEtabb);
+    }
+    
+    // --- Book the MVA methods
+
+    std::vector<std::string> methods;
+    methods.push_back("BDT");
+    TString dir    = "weights/";
+    TString prefix = "TMVAClassification";
+    //    std::clog << "Booking MVA method..." << std::endl;
+    for (size_t it = 0; it < methods.size(); ++it) {
+      TString methodName = methods.at(it)+ " method";
+      TString weightfile = dir + prefix + "_" + methods.at(it) + "." + channel + TString("_weight.xml");
+      reader->BookMVA( methodName, weightfile ); 
+    }
+    
+    //Candidates
+    if(iCand->size() > 0 and iCand->at(0).H.jets.size() > 1){
+      VHbbCandidate::CandidateType iCandType = iCand->at(0).candidateType;
+      VHbbCandidate::HiggsCandidate H = iCand->at(0).H;
+      VHbbCandidate::VectorCandidate V = iCand->at(0).V;
+
+      bbMass = iCand->at(0).H.p4.M();
+      bbPt = iCand->at(0).H.p4.Pt();
+      btag1 = iCand->at(0).H.jets[0].csv;
+      btag2 = iCand->at(0).H.jets[1].csv;
+      NaddJet = iCand->at(0).additionalJets.size();
+      DeltaRbb = deltaR(iCand->at(0).H.jets[0].p4.Eta(),iCand->at(0).H.jets[0].p4.Phi(),iCand->at(0).H.jets[1].p4.Eta(),iCand->at(0).H.jets[1].p4.Phi());
+      helicity = iCand->at(0).H.helicities[0];
+      DeltaPhiVH = Geom::deltaPhi(iCand->at(0).H.p4.Phi(),iCand->at(0).V.p4.Phi()) ;
+      bPt1 = iCand->at(0).H.jets[0].p4.Pt();
+      bPt2 = iCand->at(0).H.jets[1].p4.Pt();
+      VMass = iCand->at(0).V.p4.M(); 
+      VPt = iCand->at(0).V.p4.Pt();
+      pullAngle = iCand->at(0).H.deltaTheta;
+      DeltaEtabb = TMath::Abs( iCand->at(0).H.jets[0].p4.Eta() - iCand->at(0).H.jets[1].p4.Eta() );
+      deltaPhipfMETjet1 = Geom::deltaPhi( iCand->at(0).V.mets.at(0).p4.Phi(), iCand->at(0).H.jets[0].p4.Phi() );
+      deltaPhipfMETjet2 = Geom::deltaPhi( iCand->at(0).V.mets.at(0).p4.Phi(), iCand->at(0).H.jets[1].p4.Phi() );
+      pfMET = iCand->at(0).V.mets.at(0).p4.Pt();
+      pfMETsig = iCand->at(0).V.mets.at(0).metSig;
+
+      
+      MVAH_BDT->Fill( reader->EvaluateMVA( "BDT method" ) );
+      
+    }
+  }
+  
+  TH1F * MVAH_BDT;
+ 
+private:
+
+  const std::string &channel;
+  Int_t bin_BDT;
+  Double_t min_BDT;
+  Double_t max_BDT;
+
 };
 
 
