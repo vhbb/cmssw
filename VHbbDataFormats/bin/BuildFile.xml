@@ -1,4 +1,5 @@
 <use   name="root"/>
+<use   name="roottmva"/>
 <use   name="boost"/>
 <use   name="fastjet"/>
 <use   name="rootcintex"/>
@@ -11,5 +12,7 @@
 <use   name="PhysicsTools/Utilities"/>
 <use   name="PhysicsTools/SelectorUtils"/>
 <environment>
-  <bin   file="make_histos.cxx"></bin>
+  <bin  file="make_histos.cxx"></bin>
+  <bin  file="TMVAClassification.cxx"></bin>
+  <bin  file="make_tree.cxx"></bin>
 </environment>
