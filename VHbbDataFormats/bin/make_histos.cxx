@@ -129,30 +129,38 @@ int c=0;
   CutsAndHistos normB(new NoCut,new CountHisto);
   CutsAndHistos normC(new NoCut,new CountHisto);
   CutsAndHistos normL(new NoCut,new CountHisto);
-  std::vector<CutsAndHistos *> allHistos;
-  allHistos.push_back(new CutsAndHistos(new SignalRegion,histosForSignalRegions));
-  allHistos.push_back(new CutsAndHistos(new VlightRegionHZee,new StandardHistos));
-  allHistos.push_back(new CutsAndHistos(new VlightRegionHZmumu,new StandardHistos));
-  allHistos.push_back(new CutsAndHistos(new VlightRegionHWen,new StandardHistos));
-  allHistos.push_back(new CutsAndHistos(new VlightRegionHWmun,new StandardHistos));
-  allHistos.push_back(new CutsAndHistos(new VbbRegionHZee,new StandardHistos));
-  allHistos.push_back(new CutsAndHistos(new VbbRegionHZmumu,new StandardHistos));
-  allHistos.push_back(new CutsAndHistos(new VbbRegionHWen,new StandardHistos));
-  allHistos.push_back(new CutsAndHistos(new VbbRegionHWmun,new StandardHistos));
-  allHistos.push_back(new CutsAndHistos(new TTbarRegionHZee,new StandardHistos));
-  allHistos.push_back(new CutsAndHistos(new TTbarRegionHZmumu,new StandardHistos));
-  allHistos.push_back(new CutsAndHistos(new TTbarRegionHWen,new StandardHistos));
-  allHistos.push_back(new CutsAndHistos(new TTbarRegionHWmun,new StandardHistos));
+  std::vector<CutsAndHistos *> allHistosW;
+  std::vector<CutsAndHistos *> allHistosZ;
+//  allHistos.push_back(new CutsAndHistos(new SignalRegion,histosForSignalRegions));
+  allHistosZ.push_back(new CutsAndHistos(new VlightRegionHZee,new StandardHistos));
+  allHistosZ.push_back(new CutsAndHistos(new VlightRegionHZmumu,new StandardHistos));
+  allHistosW.push_back(new CutsAndHistos(new VlightRegionHWen,new StandardHistos));
+  allHistosW.push_back(new CutsAndHistos(new VlightRegionHWmun,new StandardHistos));
+  allHistosZ.push_back(new CutsAndHistos(new VbbRegionHZee,new StandardHistos));
+  allHistosZ.push_back(new CutsAndHistos(new VbbRegionHZmumu,new StandardHistos));
+  allHistosW.push_back(new CutsAndHistos(new VbbRegionHWen,new StandardHistos));
+  allHistosW.push_back(new CutsAndHistos(new VbbRegionHWmun,new StandardHistos));
+  allHistosZ.push_back(new CutsAndHistos(new TTbarRegionHZee,new StandardHistos));
+  allHistosZ.push_back(new CutsAndHistos(new TTbarRegionHZmumu,new StandardHistos));
+  allHistosW.push_back(new CutsAndHistos(new TTbarRegionHWen,new StandardHistos));
+  allHistosW.push_back(new CutsAndHistos(new TTbarRegionHWmun,new StandardHistos));
 
 norm.book(*fout);
-for(size_t a=0;a < allHistos.size(); a++)
+for(size_t a=0;a < allHistosW.size(); a++)
 {
- allHistos[a]->book(*fout);
+ allHistosW[a]->book(*fout);
+}
+for(size_t a=0;a < allHistosZ.size(); a++)
+{
+ allHistosZ[a]->book(*fout);
 }
 
-std::vector<CutsAndHistos *> allHistosB;
-std::vector<CutsAndHistos *> allHistosC;
-std::vector<CutsAndHistos *> allHistosL;
+std::vector<CutsAndHistos *> allHistosBW;
+std::vector<CutsAndHistos *> allHistosCW;
+std::vector<CutsAndHistos *> allHistosLW;
+std::vector<CutsAndHistos *> allHistosBZ;
+std::vector<CutsAndHistos *> allHistosCZ;
+std::vector<CutsAndHistos *> allHistosLZ;
 TFile *foutB,*foutC,*foutL;
 if(splitBCLIGHT)
 {
@@ -162,55 +170,59 @@ foutL = new TFile((name+"_histosL.root").c_str(),"RECREATE");
 normB.book(*foutB);
 normC.book(*foutC);
 normL.book(*foutL);
-  allHistosB.push_back(new CutsAndHistos(new SignalRegion,histosForSignalRegions));
-  allHistosB.push_back(new CutsAndHistos(new VlightRegionHZee,new StandardHistos));
-  allHistosB.push_back(new CutsAndHistos(new VlightRegionHZmumu,new StandardHistos));
-  allHistosB.push_back(new CutsAndHistos(new VlightRegionHWen,new StandardHistos));
-  allHistosB.push_back(new CutsAndHistos(new VlightRegionHWmun,new StandardHistos));
-  allHistosB.push_back(new CutsAndHistos(new VbbRegionHZee,new StandardHistos));
-  allHistosB.push_back(new CutsAndHistos(new VbbRegionHZmumu,new StandardHistos));
-  allHistosB.push_back(new CutsAndHistos(new VbbRegionHWen,new StandardHistos));
-  allHistosB.push_back(new CutsAndHistos(new VbbRegionHWmun,new StandardHistos));
-  allHistosB.push_back(new CutsAndHistos(new TTbarRegionHZee,new StandardHistos));
-  allHistosB.push_back(new CutsAndHistos(new TTbarRegionHZmumu,new StandardHistos));
-  allHistosB.push_back(new CutsAndHistos(new TTbarRegionHWen,new StandardHistos));
-  allHistosB.push_back(new CutsAndHistos(new TTbarRegionHWmun,new StandardHistos));
+//  allHistosBW.push_back(new CutsAndHistos(new SignalRegion,histosForSignalRegions));
+  allHistosBZ.push_back(new CutsAndHistos(new VlightRegionHZee,new StandardHistos));
+  allHistosBZ.push_back(new CutsAndHistos(new VlightRegionHZmumu,new StandardHistos));
+  allHistosBW.push_back(new CutsAndHistos(new VlightRegionHWen,new StandardHistos));
+  allHistosBW.push_back(new CutsAndHistos(new VlightRegionHWmun,new StandardHistos));
+  allHistosBZ.push_back(new CutsAndHistos(new VbbRegionHZee,new StandardHistos));
+  allHistosBZ.push_back(new CutsAndHistos(new VbbRegionHZmumu,new StandardHistos));
+  allHistosBW.push_back(new CutsAndHistos(new VbbRegionHWen,new StandardHistos));
+  allHistosBW.push_back(new CutsAndHistos(new VbbRegionHWmun,new StandardHistos));
+  allHistosBZ.push_back(new CutsAndHistos(new TTbarRegionHZee,new StandardHistos));
+  allHistosBZ.push_back(new CutsAndHistos(new TTbarRegionHZmumu,new StandardHistos));
+  allHistosBW.push_back(new CutsAndHistos(new TTbarRegionHWen,new StandardHistos));
+  allHistosBW.push_back(new CutsAndHistos(new TTbarRegionHWmun,new StandardHistos));
 
-  allHistosC.push_back(new CutsAndHistos(new SignalRegion,histosForSignalRegions));
-  allHistosC.push_back(new CutsAndHistos(new VlightRegionHZee,new StandardHistos));
-  allHistosC.push_back(new CutsAndHistos(new VlightRegionHZmumu,new StandardHistos));
-  allHistosC.push_back(new CutsAndHistos(new VlightRegionHWen,new StandardHistos));
-  allHistosC.push_back(new CutsAndHistos(new VlightRegionHWmun,new StandardHistos));
-  allHistosC.push_back(new CutsAndHistos(new VbbRegionHZee,new StandardHistos));
-  allHistosC.push_back(new CutsAndHistos(new VbbRegionHZmumu,new StandardHistos));
-  allHistosC.push_back(new CutsAndHistos(new VbbRegionHWen,new StandardHistos));
-  allHistosC.push_back(new CutsAndHistos(new VbbRegionHWmun,new StandardHistos));
-  allHistosC.push_back(new CutsAndHistos(new TTbarRegionHZee,new StandardHistos));
-  allHistosC.push_back(new CutsAndHistos(new TTbarRegionHZmumu,new StandardHistos));
-  allHistosC.push_back(new CutsAndHistos(new TTbarRegionHWen,new StandardHistos));
-  allHistosC.push_back(new CutsAndHistos(new TTbarRegionHWmun,new StandardHistos));
+  allHistosCZ.push_back(new CutsAndHistos(new VlightRegionHZee,new StandardHistos));
+  allHistosCZ.push_back(new CutsAndHistos(new VlightRegionHZmumu,new StandardHistos));
+  allHistosCW.push_back(new CutsAndHistos(new VlightRegionHWen,new StandardHistos));
+  allHistosCW.push_back(new CutsAndHistos(new VlightRegionHWmun,new StandardHistos));
+  allHistosCZ.push_back(new CutsAndHistos(new VbbRegionHZee,new StandardHistos));
+  allHistosCZ.push_back(new CutsAndHistos(new VbbRegionHZmumu,new StandardHistos));
+  allHistosCW.push_back(new CutsAndHistos(new VbbRegionHWen,new StandardHistos));
+  allHistosCW.push_back(new CutsAndHistos(new VbbRegionHWmun,new StandardHistos));
+  allHistosCZ.push_back(new CutsAndHistos(new TTbarRegionHZee,new StandardHistos));
+  allHistosCZ.push_back(new CutsAndHistos(new TTbarRegionHZmumu,new StandardHistos));
+  allHistosCW.push_back(new CutsAndHistos(new TTbarRegionHWen,new StandardHistos));
+  allHistosCW.push_back(new CutsAndHistos(new TTbarRegionHWmun,new StandardHistos));
 
-  allHistosL.push_back(new CutsAndHistos(new SignalRegion,histosForSignalRegions));
-  allHistosL.push_back(new CutsAndHistos(new VlightRegionHZee,new StandardHistos));
-  allHistosL.push_back(new CutsAndHistos(new VlightRegionHZmumu,new StandardHistos));
-  allHistosL.push_back(new CutsAndHistos(new VlightRegionHWen,new StandardHistos));
-  allHistosL.push_back(new CutsAndHistos(new VlightRegionHWmun,new StandardHistos));
-  allHistosL.push_back(new CutsAndHistos(new VbbRegionHZee,new StandardHistos));
-  allHistosL.push_back(new CutsAndHistos(new VbbRegionHZmumu,new StandardHistos));
-  allHistosL.push_back(new CutsAndHistos(new VbbRegionHWen,new StandardHistos));
-  allHistosL.push_back(new CutsAndHistos(new VbbRegionHWmun,new StandardHistos));
-  allHistosL.push_back(new CutsAndHistos(new TTbarRegionHZee,new StandardHistos));
-  allHistosL.push_back(new CutsAndHistos(new TTbarRegionHZmumu,new StandardHistos));
-  allHistosL.push_back(new CutsAndHistos(new TTbarRegionHWen,new StandardHistos));
-  allHistosL.push_back(new CutsAndHistos(new TTbarRegionHWmun,new StandardHistos));
+  allHistosLZ.push_back(new CutsAndHistos(new VlightRegionHZee,new StandardHistos));
+  allHistosLZ.push_back(new CutsAndHistos(new VlightRegionHZmumu,new StandardHistos));
+  allHistosLW.push_back(new CutsAndHistos(new VlightRegionHWen,new StandardHistos));
+  allHistosLW.push_back(new CutsAndHistos(new VlightRegionHWmun,new StandardHistos));
+  allHistosLZ.push_back(new CutsAndHistos(new VbbRegionHZee,new StandardHistos));
+  allHistosLZ.push_back(new CutsAndHistos(new VbbRegionHZmumu,new StandardHistos));
+  allHistosLW.push_back(new CutsAndHistos(new VbbRegionHWen,new StandardHistos));
+  allHistosLW.push_back(new CutsAndHistos(new VbbRegionHWmun,new StandardHistos));
+  allHistosLZ.push_back(new CutsAndHistos(new TTbarRegionHZee,new StandardHistos));
+  allHistosLZ.push_back(new CutsAndHistos(new TTbarRegionHZmumu,new StandardHistos));
+  allHistosLW.push_back(new CutsAndHistos(new TTbarRegionHWen,new StandardHistos));
+  allHistosLW.push_back(new CutsAndHistos(new TTbarRegionHWmun,new StandardHistos));
 
-for(size_t a=0;a < allHistosB.size(); a++)
+for(size_t a=0;a < allHistosBW.size(); a++)
 { 
- allHistosB[a]->book(*foutB);
- allHistosC[a]->book(*foutC);
- allHistosL[a]->book(*foutL);
+ allHistosBW[a]->book(*foutB);
+ allHistosCW[a]->book(*foutC);
+ allHistosLW[a]->book(*foutL);
 } 
 
+for(size_t a=0;a < allHistosBZ.size(); a++)
+{ 
+ allHistosBZ[a]->book(*foutB);
+ allHistosCZ[a]->book(*foutC);
+ allHistosLZ[a]->book(*foutL);
+} 
 
 }
   std::string fl(argv[1]);
@@ -243,9 +255,11 @@ for(size_t a=0;a < allHistosB.size(); a++)
     event_all++;
 
 
-    fwlite::Handle< std::vector<VHbbCandidate> > vhbbCandHandle; 
-//    vhbbCandHandle.getByLabel(ev,"hbbBestCSVPt20Candidates");
-
+    fwlite::Handle< std::vector<VHbbCandidate> > vhbbCandHandleZ; 
+    vhbbCandHandleZ.getByLabel(ev,"hbbBestCSVPt20Candidates");
+    const std::vector<VHbbCandidate> & iCandZ = *vhbbCandHandleZ.product();
+ 
+   fwlite::Handle< std::vector<VHbbCandidate> > vhbbCandHandle; 
     vhbbCandHandle.getByLabel(ev,"hbbHighestPtHiggsPt30Candidates");
     const std::vector<VHbbCandidate> & iCand = *vhbbCandHandle.product();
 
@@ -262,6 +276,7 @@ for(size_t a=0;a < allHistosB.size(); a++)
 */
     trigger.setEvent(&ev);
     VHbbProxy iProxy(0,0, &iCand,&trigger);
+    VHbbProxy iProxyZ(0,0, &iCandZ,&trigger);
 
 /*    std::cout << "hello" << std::endl;
     std::vector<VHbbCandidate> candPt;
@@ -284,7 +299,9 @@ for(size_t a=0;a < allHistosB.size(); a++)
       event_all_b++;
         normB.process(iProxy,1);
    	if(iCand.size()>0)
-	    for(size_t a=0;a < allHistosB.size(); a++)         allHistosB[a]->process(iProxy, 1);
+	    for(size_t a=0;a < allHistosBW.size(); a++)         allHistosBW[a]->process(iProxy, 1);
+   	if(iCandZ.size()>0)
+	    for(size_t a=0;a < allHistosBZ.size(); a++)         allHistosBZ[a]->process(iProxyZ, 1);
 
      }
      else if(aux.mcC.size() > 0) 
@@ -292,23 +309,36 @@ for(size_t a=0;a < allHistosB.size(); a++)
         event_all_c++;
         normC.process(iProxy,1);
         if(iCand.size()>0)
-	   for(size_t a=0;a < allHistosC.size(); a++)         allHistosC[a]->process(iProxy, 1);
+            for(size_t a=0;a < allHistosCW.size(); a++)         allHistosCW[a]->process(iProxy, 1);
+        if(iCandZ.size()>0)
+            for(size_t a=0;a < allHistosCZ.size(); a++)         allHistosCZ[a]->process(iProxyZ, 1);
 
      } else
      {
         event_all_l++;
         normL.process(iProxy,1);
    	if(iCand.size()>0)
-       	   for(size_t a=0;a < allHistosL.size(); a++)         allHistosL[a]->process(iProxy, 1);
+       	   for(size_t a=0;a < allHistosLW.size(); a++)         allHistosLW[a]->process(iProxy, 1);
+   	if(iCandZ.size()>0)
+       	   for(size_t a=0;a < allHistosLZ.size(); a++)         allHistosLZ[a]->process(iProxyZ, 1);
 
      }
     }
 
+
     if(iCand.size()>0)
     {
-	for(size_t a=0;a < allHistos.size(); a++)
+	for(size_t a=0;a < allHistosW.size(); a++)
 	{
-	 allHistos[a]->process(iProxy, 1);
+	 allHistosW[a]->process(iProxy, 1);
+	}
+    } 
+
+    if(iCandZ.size()>0)
+    {
+	for(size_t a=0;a < allHistosZ.size(); a++)
+	{
+	 allHistosZ[a]->process(iProxyZ, 1);
 	}
     } 
   }
