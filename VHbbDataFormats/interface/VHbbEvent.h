@@ -61,6 +61,7 @@ class VHbbEvent{
     int cat, nHits, nPixelHits, globNHits, validMuStations;
     TLorentzVector mcFourMomentum;
     int mcId, mcMomId, mcgMomId;
+    std::vector< int > hltMatchedBits;
   };
 
   class ElectronInfo {
@@ -78,6 +79,7 @@ class VHbbEvent{
     float  id95,id85,id80,id70,id95r, id85r,id80r, id70r;
     TLorentzVector mcFourMomentum;
     int mcId, mcMomId, mcgMomId;
+    std::vector< int > hltMatchedBits;
   };
 
   class TauInfo{

@@ -20,11 +20,12 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 # source
 # on lxbuild151
-process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("file:FC40E39B-499A-E011-8311-003048F117EA.root"))
+process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("file:///shome/bortigno/CMSSW_4_2_7_patch1/src/VHbbAnalysis/HbbAnalyzer/test/8E77FB08-7986-E011-B116-001D09F295A1.root"))
+#dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat//store/data/Run2011A/SingleMu/AOD/PromptReco-v1/000/160/940/BE26C0AD-0C55-E011-9EAB-001D09F2514F.root"))
 #process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("file:/build1/tboccali/7C74874C-CA8E-E011-9782-001D09F25401.root"))
 #process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("/store/relval/CMSSW_4_2_3/RelValTTbar/GEN-SIM-RECO/MC_42_V12-v2/0066/3026A5BD-D97B-E011-A9D7-001A92811736.root"))
 
@@ -353,9 +354,11 @@ process.goodPatJetsAK5PF = cms.EDFilter("PFJetIDSelectionFunctorFilter",
 process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     runOnMC = cms.bool(isMC),
     hltResultsTag = cms.InputTag("TriggerResults::HLT"),
-    electronTag = cms.InputTag("selectedPatElectrons"),
+    electronTag = cms.InputTag("selectedElectronsMatched"),
+#    electronTag = cms.InputTag("selectedPatElectrons"),
     tauTag = cms.InputTag("patTaus"),
-    muonTag = cms.InputTag("selectedPatMuons"),
+#   muonTag = cms.InputTag("selectedPatMuons"),
+    muonTag = cms.InputTag("selectedMuonsMatched"),
     jetTag = cms.InputTag("selectedPatJetsCAPF"),
     subjetTag = cms.InputTag("selectedPatJetssubCAPF"),
     simplejet1Tag = cms.InputTag("selectedPatJets"),
@@ -424,7 +427,7 @@ defaultTriggerMatch = cms.EDProducer(
   "PATTriggerMatcherDRDPtLessByR"                                               # match by DeltaR only, best match by DeltaR
 , src     = cms.InputTag( "selectedPatMuons" )
 , matched = cms.InputTag( "patTrigger" )                                        # default producer label as defined in PhysicsTools/PatAlgos/python/triggerLayer1/triggerProducer_cfi.py
-, matchedCuts = cms.string( 'path( "HLT_DoubleMu6_v*" )' )
+, matchedCuts = cms.string( 'path( "*Mu*" )' )
 , maxDPtRel = cms.double( 0.5 )
 , maxDeltaR = cms.double( 0.3 )
 , resolveAmbiguities    = cms.bool( True )                                      # only one match per trigger object
@@ -433,7 +436,8 @@ defaultTriggerMatch = cms.EDProducer(
 
 process.selectedMuonsTriggerMatch = defaultTriggerMatch.clone(
         src         = cms.InputTag( "selectedPatMuons" )
-        , matchedCuts = cms.string('path("HLT_IsoMu17_v*")|| path("HLT_Mu15_v*")')
+        , matchedCuts = cms.string('path("*Mu*")')
+#	        , matchedCuts = cms.string('path("HLT_IsoMu17_v*")|| path("HLT_Mu15_v*")')
 )
 # trigger object embedders for the same collections
 process.selectedMuonsMatched = cms.EDProducer( "PATTriggerMatchMuonEmbedder",
@@ -441,13 +445,24 @@ process.selectedMuonsMatched = cms.EDProducer( "PATTriggerMatchMuonEmbedder",
         matches = cms.VInputTag( cms.InputTag('selectedMuonsTriggerMatch') )
     )
 
+process.selectedElectronsTriggerMatch = defaultTriggerMatch.clone(
+        src         = cms.InputTag( "selectedPatElectrons" )
+        , matchedCuts = cms.string('path("*Ele*")')
+#	        , matchedCuts = cms.string('path("HLT_IsoMu17_v*")|| path("HLT_Mu15_v*")')
+)
+# trigger object embedders for the same collections
+process.selectedElectronsMatched = cms.EDProducer( "PATTriggerMatchElectronEmbedder",
+        src     = cms.InputTag(  "selectedPatElectrons" ),
+        matches = cms.VInputTag( cms.InputTag('selectedElectronssTriggerMatch') )
+    )
+
 
 process.leptonTrigMatch = cms.Sequence (
-#      process.selectedElectronsTriggerMatch
-#      *process.selectedElectronsMatched
-      process.selectedMuonsTriggerMatch
-      *process.selectedMuonsMatched
-   )
+	process.selectedElectronsTriggerMatch
+	*process.selectedElectronsMatched
+	*process.selectedMuonsTriggerMatch
+	*process.selectedMuonsMatched
+	)
 
 
 process.hbbBestCSVPt20Candidates = cms.EDFilter("HbbCandidateFinder",
@@ -499,7 +514,7 @@ if isMC == False :
                      process.patPF2PATSequence* # added with usePF2PAT
                      process.dimuons*
                      process.dielectrons*
-#                     process.leptonTrigMatch*
+                     process.leptonTrigMatch*
                      process.HbbAnalyzerNew*
 process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
                      )

@@ -13,13 +13,17 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.16 2011/08/10 08:17:27 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.17 2011/08/10 13:35:43 arizzi Exp $
 //
 //
 
 #include "VHbbAnalysis/HbbAnalyzer/interface/HbbAnalyzerNew.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEventAuxInfo.h"
+
+#include "DataFormats/PatCandidates/interface/PATObject.h"
+#include "DataFormats/PatCandidates/interface/TriggerObject.h"
+#include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 
 #include "DataFormats/GeometryVector/interface/VectorUtil.h"
 
@@ -772,7 +776,26 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
       mf.globChi2=-99;
       mf.globNHits=-99;
     }
+
+    //Muon trigger matching
+    for (int itrig = 0; itrig != ntrigs; ++itrig){
+      std::string trigName=triggerNames_.triggerName(itrig);
+      if( (mu->triggerObjectMatchesByPath(trigName).size() != 0) ){
+	mf.hltMatchedBits.push_back(itrig);
+	if(verbose_){
+	  std::clog << "Trigger Matching box" << std::endl;
+	  std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+	  std::clog << "Matching parameters are defined in the cfg" << std::endl;
+	  std::clog << "Trigger bit = " << itrig << std::endl;
+	  std::clog << "Trigger name = " << trigName << std::endl;
+	  std::clog << "Trigger object matched collection size = " << mu->triggerObjectMatchesByPath(trigName).size() << std::endl;
+	  std::clog << "Pat Muon pt = " << mf.p4.Pt() << " HLT object matched = " << mu->triggerObjectMatch(0)->p4().Pt() << std::endl;
+	  std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+	}
+      }
+    }
     //
+
     // add stamuon 
 
     //    if (mu->isStandAloneMuon()) {
@@ -829,6 +852,24 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     ef.id80r=elec->electronID("eidVBTFRel80");
     ef.id70 =elec->electronID("eidVBTFCom70");
     ef.id70r=elec->electronID("eidVBTFRel70");
+
+    //Muon trigger matching
+    for (int itrig = 0; itrig != ntrigs; ++itrig){
+      std::string trigName=triggerNames_.triggerName(itrig);
+      if( (elec->triggerObjectMatchesByPath(trigName).size() != 0) ){
+	ef.hltMatchedBits.push_back(itrig);
+	if(verbose_){
+	  std::clog << "Trigger Matching box" << std::endl;
+	  std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+	  std::clog << "Matching parameters are defined in the cfg" << std::endl;
+	  std::clog << "Trigger bit = " << itrig << std::endl;
+	  std::clog << "Trigger name = " << trigName << std::endl;
+	  std::clog << "Trigger object matched collection size = " << elec->triggerObjectMatchesByPath(trigName).size() << std::endl;
+	  std::clog << "Pat Electron pt = " << ef.p4.Pt() << " HLT object matched = " << elec->triggerObjectMatch(0)->p4().Pt() << std::endl;
+	  std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+	}
+      }
+    }
 
     if(runOnMC_){
       const GenParticle* elecMc = elec->genLepton();
