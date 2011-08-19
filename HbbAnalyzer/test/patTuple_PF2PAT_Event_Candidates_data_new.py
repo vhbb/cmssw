@@ -20,7 +20,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
 
 # source
 # on lxbuild151
@@ -289,6 +289,13 @@ for jetcoll in (process.selectedPatJetsCACalo, process.selectedPatJetsCAPF):
 	jetcoll.addBTagInfo = cms.bool(True)
 	jetcoll.addTagInfos = cms.bool(True)
 	jetcoll.addDiscriminators = cms.bool(False)
+
+
+#BTAGGING SF FROM DATABASE
+#How to from :https://twiki.cern.ch/twiki/bin/view/CMS/BtagPerformanceDBV2#Usage_Examples
+process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
+process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
+
 
 ##process.selectedPatJetsCACalo.tagInfoSources = cms.VInputTag( cms.InputTag('CATopCaloJetTagInfos') )
 ##process.selectedPatJetsCAPF.tagInfoSources = cms.VInputTag( cms.InputTag('CATopPFJetTagInfos') )

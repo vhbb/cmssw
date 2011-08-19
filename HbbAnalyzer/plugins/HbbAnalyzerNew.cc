@@ -21,9 +21,13 @@ Implementation:
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEventAuxInfo.h"
 
+#include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/PatCandidates/interface/PATObject.h"
 #include "DataFormats/PatCandidates/interface/TriggerObject.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
+#include "RecoBTag/Records/interface/BTagPerformanceRecord.h"
+#include "CondFormats/PhysicsToolsObjects/interface/BinningPointByMap.h"
+#include "RecoBTag/PerformanceDB/interface/BtagPerformance.h"
 
 #include "DataFormats/GeometryVector/interface/VectorUtil.h"
 
@@ -528,6 +532,20 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   edm::Handle<CandidateView> dielectrons;
   iEvent.getByLabel(dielecLabel_,dielectrons);
 
+  //BTAGGING SCALE FACTOR FROM DATABASE
+  //Combined Secondary Vertex Loose
+  edm::ESHandle<BtagPerformance> bTagSF_CSVL_;
+  iSetup.get<BTagPerformanceRecord>().get("BTAGCSVL",bTagSF_CSVL_);
+  const BtagPerformance & bTagSF_CSVL = *(bTagSF_CSVL_.product());
+  //Combined Secondary Vertex Medium
+  edm::ESHandle<BtagPerformance> bTagSF_CSVM_;
+  iSetup.get<BTagPerformanceRecord>().get("BTAGCSVM",bTagSF_CSVM_);
+  const BtagPerformance & bTagSF_CSVM = *(bTagSF_CSVM_.product());
+  //Combined Secondary Vertex Tight
+  edm::ESHandle<BtagPerformance> bTagSF_CSVT_;
+  iSetup.get<BTagPerformanceRecord>().get("BTAGCSVT",bTagSF_CSVT_);
+  const BtagPerformance & bTagSF_CSVT = *(bTagSF_CSVT_.product());
+
 
   for(edm::View<pat::Jet>::const_iterator jet_iter = simplejets1.begin(); jet_iter!=simplejets1.end(); ++jet_iter){
     //     if(jet_iter->pt()>50)
@@ -546,7 +564,12 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     sj.ntracks=jet_iter->associatedTracks().size();
     sj.p4=GENPTOLORP(jet_iter);
     sj.chargedTracksFourMomentum=(getChargedTracksMomentum(&*(jet_iter)));
-    
+    sj.SF_CSVL=1;
+    sj.SF_CSVM=1;
+    sj.SF_CSVT=1;
+    sj.SF_CSVLerr=0;
+    sj.SF_CSVMerr=0;
+    sj.SF_CSVTerr=0;
     //
     // add tVector
     //
@@ -556,6 +579,49 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     if(runOnMC_){
       double minb1DR=9999.; 
+      //scale factor
+      BinningPointByMap measurePoint;
+      //for a USDG
+      if( TMath::Abs(sj.flavour < 4) ){
+	measurePoint.insert( BinningVariables::JetEt, sj.p4.Et() );
+	measurePoint.insert( BinningVariables::JetAbsEta, fabs(sj.p4.Eta()) );
+	if( bTagSF_CSVL.isResultOk(PerformanceResult::BTAGLEFFCORR , measurePoint) ){
+	  sj.SF_CSVL = bTagSF_CSVL.getResult(PerformanceResult::BTAGLEFFCORR , measurePoint);
+	  sj.SF_CSVLerr = bTagSF_CSVL.getResult(PerformanceResult::BTAGLERRCORR , measurePoint);
+	}
+	if( bTagSF_CSVM.isResultOk(PerformanceResult::BTAGLEFFCORR , measurePoint) ){
+	  sj.SF_CSVM = bTagSF_CSVM.getResult(PerformanceResult::BTAGLEFFCORR , measurePoint);
+	  sj.SF_CSVMerr = bTagSF_CSVM.getResult(PerformanceResult::BTAGLERRCORR , measurePoint);
+	}
+	if( bTagSF_CSVT.isResultOk(PerformanceResult::BTAGLEFFCORR , measurePoint) ){
+	  sj.SF_CSVT = bTagSF_CSVT.getResult(PerformanceResult::BTAGLEFFCORR , measurePoint);
+	  sj.SF_CSVTerr = bTagSF_CSVT.getResult(PerformanceResult::BTAGLERRCORR , measurePoint);
+	}
+	else
+	  std::cerr << "No SF found in the database for this jet" << std::endl;
+      }
+      //for CB jets
+      //scale factor 1 for CB jets over 240GeV/c
+      else if( TMath::Abs(sj.flavour > 3) 
+	       and sj.p4.Pt() < 240 ){
+	measurePoint.insert( BinningVariables::JetEt, sj.p4.Et() );
+	measurePoint.insert( BinningVariables::JetAbsEta, fabs(sj.p4.Eta()) );
+	if( bTagSF_CSVL.isResultOk(PerformanceResult::BTAGBEFFCORR , measurePoint) ){
+	  sj.SF_CSVL = bTagSF_CSVL.getResult(PerformanceResult::BTAGBEFFCORR , measurePoint);
+	  sj.SF_CSVLerr = bTagSF_CSVL.getResult(PerformanceResult::BTAGBERRCORR , measurePoint);	  
+	}
+	if( bTagSF_CSVM.isResultOk(PerformanceResult::BTAGBEFFCORR , measurePoint) ){
+	  sj.SF_CSVM = bTagSF_CSVM.getResult(PerformanceResult::BTAGBEFFCORR , measurePoint);
+	  sj.SF_CSVMerr = bTagSF_CSVM.getResult(PerformanceResult::BTAGBERRCORR , measurePoint);	  
+	}
+	if( bTagSF_CSVT.isResultOk(PerformanceResult::BTAGBEFFCORR , measurePoint) ){
+	   sj.SF_CSVT = bTagSF_CSVT.getResult(PerformanceResult::BTAGBEFFCORR , measurePoint);
+	   sj.SF_CSVTerr = bTagSF_CSVT.getResult(PerformanceResult::BTAGBERRCORR , measurePoint);	  
+	}
+	else
+	  std::cerr << "No SF found in the database for this jet" << std::endl;
+      }
+
       for(size_t i = 0; i < genParticles->size(); ++ i) {
 	const GenParticle & p = (*genParticles)[i];
 	int id = p.pdgId();
