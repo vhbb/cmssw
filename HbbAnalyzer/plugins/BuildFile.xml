@@ -5,8 +5,16 @@
 <use   name="FWCore/ServiceRegistry"/>
 <use   name="DataFormats/Candidate"/>
 <use   name="DataFormats/PatCandidates"/>
+<use   name="PhysicsTools/CondLiteIO"/>
 <use   name="PhysicsTools/UtilAlgos"/>
 <use   name="DataFormats/BeamSpot"/>
+<use   name="RecoBTag/PerformanceDB"/>
+<use   name="RecoBTag/Records"/>
+<use   name="CondCore/PluginSystem"/>
+<use   name="CondCore/DBCommon"/>
+<use   name="CondCore/DBOutputService"/>
+<use   name="CondFormats/DataRecord"/>
+<use   name="CondFormats/PhysicsToolsObjects"/>
 <use   name="VHbbAnalysis/VHbbDataFormats"/>
 <use   name="root"/>
 <use name="fastjet"/>
