@@ -26,6 +26,13 @@ class VHbbEvent{
     int bestMCid, bestMCmomid;
     // new
     TVector2 tVector;
+    float SF_CSVL;
+    float SF_CSVM;
+    float SF_CSVT; 
+    float SF_CSVLerr;
+    float SF_CSVMerr;
+    float SF_CSVTerr; 
+    
   };
 
 
