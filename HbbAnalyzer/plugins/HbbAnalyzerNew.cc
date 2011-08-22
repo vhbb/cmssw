@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.17 2011/08/10 13:35:43 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.19 2011/08/19 13:26:29 bortigno Exp $
 //
 //
 
@@ -582,7 +582,38 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
       //scale factor
       BinningPointByMap measurePoint;
       //for a USDG
-      if( TMath::Abs(sj.flavour < 4) ){
+      //for CB jets
+      //scale factor 1 for CB jets over 240GeV/c
+      if( TMath::Abs(sj.flavour) == 4 or TMath::Abs(sj.flavour) == 5 ){
+	measurePoint.insert( BinningVariables::JetEt, sj.p4.Et() );
+	measurePoint.insert( BinningVariables::JetAbsEta, fabs(sj.p4.Eta()) );
+	if( bTagSF_CSVL.isResultOk(PerformanceResult::BTAGBEFFCORR , measurePoint) ){
+	  sj.SF_CSVL = bTagSF_CSVL.getResult(PerformanceResult::BTAGBEFFCORR , measurePoint);
+	  sj.SF_CSVLerr = bTagSF_CSVL.getResult(PerformanceResult::BTAGBERRCORR , measurePoint);	  
+	  if(verbose_){
+	    std::clog << "C/B Jet Pt > 240!" << std::endl; 
+	    std::clog << "C/B Scale Factor = " << sj.SF_CSVL << std::endl; 
+	    std::clog << "C/B Jet Pt > 240!" << sj.SF_CSVLerr << std::endl; 
+	  }
+	}
+	if( bTagSF_CSVM.isResultOk(PerformanceResult::BTAGBEFFCORR , measurePoint) ){
+	  sj.SF_CSVM = bTagSF_CSVM.getResult(PerformanceResult::BTAGBEFFCORR , measurePoint);
+	  sj.SF_CSVMerr = bTagSF_CSVM.getResult(PerformanceResult::BTAGBERRCORR , measurePoint);	  
+	}
+	if( bTagSF_CSVT.isResultOk(PerformanceResult::BTAGBEFFCORR , measurePoint) ){
+	  sj.SF_CSVT = bTagSF_CSVT.getResult(PerformanceResult::BTAGBEFFCORR , measurePoint);
+	  sj.SF_CSVTerr = bTagSF_CSVT.getResult(PerformanceResult::BTAGBERRCORR , measurePoint);	  
+	}
+	else{
+	  std::cerr << "No SF found in the database for this jet" << std::endl;
+	  if(verbose_){
+	    std::clog << "No SF found: Jet flavour = " << sj.flavour << std::endl;
+	    std::clog << "No SF found: Jet Et = " << sj.p4.Et() << std::endl;
+	    std::clog << "No SF found: Jet eta = " << sj.p4.Eta() << std::endl;
+	  }
+	}
+      }
+      else {
 	measurePoint.insert( BinningVariables::JetEt, sj.p4.Et() );
 	measurePoint.insert( BinningVariables::JetAbsEta, fabs(sj.p4.Eta()) );
 	if( bTagSF_CSVL.isResultOk(PerformanceResult::BTAGLEFFCORR , measurePoint) ){
@@ -597,41 +628,37 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  sj.SF_CSVT = bTagSF_CSVT.getResult(PerformanceResult::BTAGLEFFCORR , measurePoint);
 	  sj.SF_CSVTerr = bTagSF_CSVT.getResult(PerformanceResult::BTAGLERRCORR , measurePoint);
 	}
-	else
+	else{
 	  std::cerr << "No SF found in the database for this jet" << std::endl;
-      }
-      //for CB jets
-      //scale factor 1 for CB jets over 240GeV/c
-      else if( TMath::Abs(sj.flavour > 3) 
-	       and sj.p4.Pt() < 240 ){
-	measurePoint.insert( BinningVariables::JetEt, sj.p4.Et() );
-	measurePoint.insert( BinningVariables::JetAbsEta, fabs(sj.p4.Eta()) );
-	if( bTagSF_CSVL.isResultOk(PerformanceResult::BTAGBEFFCORR , measurePoint) ){
-	  sj.SF_CSVL = bTagSF_CSVL.getResult(PerformanceResult::BTAGBEFFCORR , measurePoint);
-	  sj.SF_CSVLerr = bTagSF_CSVL.getResult(PerformanceResult::BTAGBERRCORR , measurePoint);	  
+	  if(verbose_){
+	    std::clog << "No SF found: Jet flavour = " << sj.flavour << std::endl;
+	    std::clog << "No SF found: Jet Et = " << sj.p4.Et() << std::endl;
+	    std::clog << "No SF found: Jet eta = " << sj.p4.Eta() << std::endl;
+	  }
 	}
-	if( bTagSF_CSVM.isResultOk(PerformanceResult::BTAGBEFFCORR , measurePoint) ){
-	  sj.SF_CSVM = bTagSF_CSVM.getResult(PerformanceResult::BTAGBEFFCORR , measurePoint);
-	  sj.SF_CSVMerr = bTagSF_CSVM.getResult(PerformanceResult::BTAGBERRCORR , measurePoint);	  
-	}
-	if( bTagSF_CSVT.isResultOk(PerformanceResult::BTAGBEFFCORR , measurePoint) ){
-	   sj.SF_CSVT = bTagSF_CSVT.getResult(PerformanceResult::BTAGBEFFCORR , measurePoint);
-	   sj.SF_CSVTerr = bTagSF_CSVT.getResult(PerformanceResult::BTAGBERRCORR , measurePoint);	  
-	}
-	else
-	  std::cerr << "No SF found in the database for this jet" << std::endl;
       }
 
       for(size_t i = 0; i < genParticles->size(); ++ i) {
 	const GenParticle & p = (*genParticles)[i];
 	int id = p.pdgId();
 	if(abs(id)<=6 || id==21 || id==23 || abs(id)==24){
+	  TLorentzVector bestMCp4_,bestMCp4mom_;
 	  double bb1DR=TMath::Sqrt((p.eta()-p4Jet.eta())*(p.eta()-p4Jet.eta())+
 				   (p.phi()-p4Jet.phi())*(p.phi()-p4Jet.phi()));
-	  if(bb1DR<minb1DR) {minb1DR=bb1DR; sj.bestMCid=id; if(p.mother()!=0) sj.bestMCmomid=p.mother()->pdgId();}
+	  if(bb1DR<minb1DR){
+	    minb1DR=bb1DR; 
+	    sj.bestMCid=id;
+	    bestMCp4_.SetPtEtaPhiE(p.pt(),p.eta(),p.phi(),p.energy());
+	    sj.bestMCp4= bestMCp4_;
+	    if(p.mother()!=0){
+	      sj.bestMCmomid=p.mother()->pdgId();
+	      bestMCp4mom_.SetPtEtaPhiE(p.mother()->pt(),p.mother()->eta(),p.mother()->phi(),p.mother()->energy());
+	      sj.bestMCp4mom=bestMCp4mom_;
+	    }
+	  }
 	}
       }
-    } //isMC    
+    } //isMC
     hbbInfo->simpleJets.push_back(sj);
     
   }
