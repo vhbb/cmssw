@@ -43,7 +43,6 @@ class PCut : public Cut
      return s.str();
   } 
 
- private:
  float m_cut;
  
 };
@@ -51,14 +50,14 @@ class PCut : public Cut
 class CutSet : public Cut {
  public:
  void add(Cut *c) {cuts.push_back(c);}  
- bool pass(VHbbProxy &iProxy, int limitCuts=99999) {
+ bool pass(VHbbProxy &iProxy,unsigned int limitCuts=99999) {
   bool result=true;
   for(size_t i=0; i< cuts.size() && i < limitCuts; i++) 
     if( ! (cuts.at(i)->pass(iProxy)) ) 
       result=false;
   return result;
  } 
- std::string name(int limitCuts = 99999) {
+ std::string name(unsigned int limitCuts = 99999) {
    std::stringstream s;
    for(size_t i=0; i< cuts.size() && i < limitCuts; i++) {
      s << "_" << cuts.at(i)->name();
