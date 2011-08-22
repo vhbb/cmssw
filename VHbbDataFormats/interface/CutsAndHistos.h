@@ -48,26 +48,19 @@ class PCut : public Cut
  
 };
 
-/*class HPtCut : public PCut
-{
- public:
-  bool pass(VHbbProxy &p) {return 0; } //p.C.H.Pt() > m_cut;}
-  virtual std::string name()  {return "HPt_Gt_"+cutValueString(); } 
-};*/
-
 class CutSet : public Cut {
  public:
  void add(Cut *c) {cuts.push_back(c);}  
- bool pass(VHbbProxy &iProxy) {
+ bool pass(VHbbProxy &iProxy, int limitCuts=99999) {
   bool result=true;
-  for(size_t i=0; i< cuts.size(); i++) 
+  for(size_t i=0; i< cuts.size() && i < limitCuts; i++) 
     if( ! (cuts.at(i)->pass(iProxy)) ) 
       result=false;
   return result;
  } 
- std::string name() {
+ std::string name(int limitCuts = 99999) {
    std::stringstream s;
-   for(size_t i=0; i< cuts.size(); i++) {
+   for(size_t i=0; i< cuts.size() && i < limitCuts; i++) {
      s << "_" << cuts.at(i)->name();
    }
  return s.str();
@@ -80,6 +73,7 @@ private:
 
 
 ///CutSet of PCut, with scanning functions
+// to be implemented still
 class PCutSet : public Cut {
  public:
  void add(PCut *c) {cuts.push_back(c);}

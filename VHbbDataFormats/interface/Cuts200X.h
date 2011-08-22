@@ -334,81 +334,104 @@ class VbbRegionHZee: public Cut {
 };
 
 
-class SignalRegion: public Cut {
-  std::string name() {return "SignalRegion";};
+class SignalPreSelectionWen : public Cut {
+  std::string name() {return "SignalPreSelWen";};
+
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  return (  iCand->at(0).candidateType == VHbbCandidate::Wen)
+  }
+};
+
+class SignalPreSelectionWen : public Cut {
+  std::string name() {return "SignalPreSelWmun";};
   
   Bool_t pass(VHbbProxy &iProxy){
-    
-    const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
-
-    if(iCand->size() < 1)
-      return false;
-
-    VHbbCandidate::VectorCandidate V = iProxy.getVHbbCandidate()->at(0).V;
-    VHbbCandidate::HiggsCandidate H = iProxy.getVHbbCandidate()->at(0).H;
-
-    if(iCand->at(0).candidateType == VHbbCandidate::Zmumu || iCand->at(0).candidateType == VHbbCandidate::Zee){ 
-      btag_csv_min = 0.5;
-      btag_csv_max = 0.9;
-      Higgs_pt = 150;
-      V_pt = 150;
-      VH_deltaPhi = 2.70;
-      nOfAdditionalJets = 2;
-      pullAngle = 1.57;
-      helicityAngle = 0.8;
-    }
-    else if(iCand->at(0).candidateType == VHbbCandidate::Wmun || iCand->at(0).candidateType == VHbbCandidate::Wen){
-      btag_csv_min = 0.5;
-      btag_csv_max = 0.9;
-      Higgs_pt = 150;
-      V_pt = 150;
-      VH_deltaPhi = 2.95;
-      nOfAdditionalJets = 2;
-      pullAngle = 1.57;
-      helicityAngle = 0.8;
-    }
-    else if(iCand->at(0).candidateType == VHbbCandidate::Znn){
-      btag_csv_min = 0.5;
-      btag_csv_max = 0.9;
-      Higgs_pt = 150;
-      V_pt = 150;
-      VH_deltaPhi = 2.95;
-      nOfAdditionalJets = 2;
-      pullAngle = 1.57;
-      helicityAngle = 0.8;
-    }
-    else
-      std::cerr << "No vector boson reconstructed. No histos will be filled." << std::endl;
-    
-    Bool_t go = false;
-    if( H.jets.size() >= 2 && H.p4.Pt() > Higgs_pt 
-	&& V.p4.Pt() > V_pt 
-	&& TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > VH_deltaPhi  
-	&& ( H.jets.at(0).csv > btag_csv_min && H.jets.at(1).csv > btag_csv_min )
-	&& ( H.jets.at(0).csv > btag_csv_max || H.jets.at(1).csv > btag_csv_max )
-	&& iCand->at(0).additionalJets.size() < nOfAdditionalJets 
-	&& TMath::Abs(H.deltaTheta) < pullAngle 
-	//	&& TMath::Abs(H.helicityAngle) < helicityAngle 
-	)
-      go = true;
-     return go;
-
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  return (  iCand->at(0).candidateType == VHbbCandidate::Wmun)
   }
-
-private:
-
-  Double_t pt_b1;
-  Double_t pt_b2;
-  Double_t btag_csv_min;
-  Double_t btag_csv_max;
-  Double_t Higgs_pt;
-  Double_t V_pt;
-  Double_t VH_deltaPhi;
-  unsigned int nOfAdditionalJets;
-  unsigned int nOfAdditionalLeptons;
-  Double_t pullAngle;
-  Double_t helicityAngle;
 };
+
+class SignalPreSelectionWen : public Cut {
+  std::string name() {return "SignalPreSelZee";};
+  
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  return (  iCand->at(0).candidateType == VHbbCandidate::Zee)
+  }
+};
+
+class SignalPreSelectionWen : public Cut {
+  std::string name() {return "SignalPreSelZmumu";};
+  
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  return (  iCand->at(0).candidateType == VHbbCandidate::Zmumu)
+  }
+};
+
+class SignalPreSelectionWen : public Cut {
+  std::string name() {return "SignalPreSelZnn";};
+  
+  Bool_t pass(VHbbProxy &iProxy){
+  const std::vector<VHbbCandidate> *iCand = iProxy.getVHbbCandidate();
+  if(iCand->size() < 1) return false;
+  return (  iCand->at(0).candidateType == VHbbCandidate::Znn)
+  }
+};
+
+class HPtCut : public PCut
+{
+ public:
+  HPtCut(double ptMin):PCut(ptMin){}
+  bool pass(VHbbProxy &p) {
+  if(iCand->size() < 1) return false;
+  return (  iCand->at(0).H.p4.pT() > m_cut)
+  }
+  virtual std::string name()  {return "Higgs_Pt_Gt_"+cutValueString(); } 
+};
+
+class VPtCut : public PCut
+{
+ public:
+  VPtCut(double ptMin):PCut(ptMin){}
+  bool pass(VHbbProxy &p) {
+  if(iCand->size() < 1) return false;
+  return (  iCand->at(0).V.p4.pT() > m_cut)
+  }
+  virtual std::string name()  {return "Vector_Pt_Gt_"+cutValueString(); }
+};
+
+
+class DoubleBTagCut : public PCut
+public:
+  DoubleBTagCut(double csvMin):PCut(csvMin){}
+  bool pass(VHbbProxy &p) {
+  if(iCand->size() < 1) return false;
+  VHbbCandidate::HiggsCandidate & H = iProxy.getVHbbCandidate()->at(0).H;
+  return (  
+        H.jets.size() >= 2
+        && ( H.jets.at(0).csv > m_cut && H.jets.at(1).csv > m_cut)
+      )
+  } 
+  virtual std::string name()  {return "DoubleCSV_"+cutValueString(); }
+};
+
+//class SingleBTagCut : public PCut
+//class VHDeltaPhiCut : public PCut
+//class AdditionalJetsCut : public PCut
+//class AdditionalLeptonsCut : public PCut
+//class METCut : public PCut
+//class METSignificanceCut : public PCut
+//class JetMETDEltaPhiCut : public PCut
+//class DiJetMassCut : public PCut
+
+
+
 
 
 
