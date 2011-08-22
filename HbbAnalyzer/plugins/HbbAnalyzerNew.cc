@@ -866,9 +866,10 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     mf.ipDb=mu->dB();
     mf.ipErrDb=mu->edB();
+    mf.cat=0;
     if(mu->isGlobalMuon()) mf.cat|=1;
     if(mu->isTrackerMuon()) mf.cat|=2;
-    else mf.cat|=4;
+    if(mu->isStandAloneMuon()) mf.cat|=4;
     TrackRef trkMu1Ref = mu->get<TrackRef>();
     if(trkMu1Ref.isNonnull()){
       const Track* MuTrk1 = mu->get<TrackRef>().get();
@@ -1049,13 +1050,14 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     df.daughter1.ipErrDb=muonDau0.edB();
     df.daughter2.ipErrDb=muonDau1.edB();
 
-
-    if(muonDau0.isGlobalMuon()) df.daughter1.cat =1;
-    else if(muonDau0.isTrackerMuon()) df.daughter1.cat=2;
-    else df.daughter1.cat=3;
-    if(muonDau1.isGlobalMuon()) df.daughter2.cat =1;
-    else if(muonDau1.isTrackerMuon()) df.daughter2.cat=2;
-    else df.daughter2.cat=3;
+    df.daughter1.cat=0;
+    if(muonDau0.isGlobalMuon()) df.daughter1.cat|=1;
+    if(muonDau0.isTrackerMuon()) df.daughter1.cat|=2;
+    if(muonDau0.isStandAloneMuon()) df.daughter1.cat|=4;
+    df.daughter2.cat=0;
+    if(muonDau1.isGlobalMuon()) df.daughter2.cat|=1;
+    if(muonDau1.isTrackerMuon()) df.daughter2.cat|=2;
+    if(muonDau1.isStandAloneMuon()) df.daughter2.cat|=4;
 
     TrackRef trkMu1Ref = muonDau0.get<TrackRef>();
     TrackRef trkMu2Ref = muonDau1.get<TrackRef>();
