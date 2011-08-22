@@ -23,9 +23,12 @@ class VHbbEvent{
     TLorentzVector p4;
     TLorentzVector chargedTracksFourMomentum;
 
+    //MC parton matching
+    TLorentzVector bestMCp4, bestMCp4mom;
     int bestMCid, bestMCmomid;
     // new
     TVector2 tVector;
+    //Scale factor
     float SF_CSVL;
     float SF_CSVM;
     float SF_CSVT; 
