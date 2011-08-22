@@ -546,6 +546,18 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   iSetup.get<BTagPerformanceRecord>().get("BTAGCSVT",bTagSF_CSVT_);
   const BtagPerformance & bTagSF_CSVT = *(bTagSF_CSVT_.product());
 
+  edm::ESHandle<BtagPerformance> mistagSF_CSVL_;
+  iSetup.get<BTagPerformanceRecord>().get("MISTAGCSVL",mistagSF_CSVL_);
+  const BtagPerformance & mistagSF_CSVL = *(mistagSF_CSVL_.product());
+  //Combined Secondary Vertex Medium
+  edm::ESHandle<BtagPerformance> mistagSF_CSVM_;
+  iSetup.get<BTagPerformanceRecord>().get("MISTAGCSVM",mistagSF_CSVM_);
+  const BtagPerformance & mistagSF_CSVM = *(mistagSF_CSVM_.product());
+  //Combined Secondary Vertex Tight
+  edm::ESHandle<BtagPerformance> mistagSF_CSVT_;
+  iSetup.get<BTagPerformanceRecord>().get("MISTAGCSVT",mistagSF_CSVT_);
+  const BtagPerformance & mistagSF_CSVT = *(mistagSF_CSVT_.product());
+
 
   for(edm::View<pat::Jet>::const_iterator jet_iter = simplejets1.begin(); jet_iter!=simplejets1.end(); ++jet_iter){
     //     if(jet_iter->pt()>50)
@@ -591,9 +603,11 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  sj.SF_CSVL = bTagSF_CSVL.getResult(PerformanceResult::BTAGBEFFCORR , measurePoint);
 	  sj.SF_CSVLerr = bTagSF_CSVL.getResult(PerformanceResult::BTAGBERRCORR , measurePoint);	  
 	  if(verbose_){
-	    std::clog << "C/B Jet Pt > 240!" << std::endl; 
+	    std::clog << "C/B Jet flavour = " << sj.flavour << std::endl;
+	    std::clog << "C/B Jet Et = " << sj.p4.Et() << std::endl;
+	    std::clog << "C/B Jet eta = " << sj.p4.Eta() << std::endl;	    
 	    std::clog << "C/B Scale Factor = " << sj.SF_CSVL << std::endl; 
-	    std::clog << "C/B Jet Pt > 240!" << sj.SF_CSVLerr << std::endl; 
+	    std::clog << "C/B Scale Factor error = " << sj.SF_CSVLerr << std::endl; 
 	  }
 	}
 	if( bTagSF_CSVM.isResultOk(PerformanceResult::BTAGBEFFCORR , measurePoint) ){
@@ -616,17 +630,24 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
       else {
 	measurePoint.insert( BinningVariables::JetEt, sj.p4.Et() );
 	measurePoint.insert( BinningVariables::JetAbsEta, fabs(sj.p4.Eta()) );
-	if( bTagSF_CSVL.isResultOk(PerformanceResult::BTAGLEFFCORR , measurePoint) ){
-	  sj.SF_CSVL = bTagSF_CSVL.getResult(PerformanceResult::BTAGLEFFCORR , measurePoint);
-	  sj.SF_CSVLerr = bTagSF_CSVL.getResult(PerformanceResult::BTAGLERRCORR , measurePoint);
+	if( mistagSF_CSVL.isResultOk(PerformanceResult::BTAGLEFFCORR , measurePoint) ){
+	  sj.SF_CSVL = mistagSF_CSVL.getResult(PerformanceResult::BTAGLEFFCORR , measurePoint);
+	  sj.SF_CSVLerr = mistagSF_CSVL.getResult(PerformanceResult::BTAGLERRCORR , measurePoint);
+	  if(verbose_){
+	    std::clog << "Light Jet flavour = " << sj.flavour << std::endl;
+	    std::clog << "Light Jet Et = " << sj.p4.Et() << std::endl;
+	    std::clog << "Light Jet eta = " << sj.p4.Eta() << std::endl;	    
+	    std::clog << "Light Scale Factor = " << sj.SF_CSVL << std::endl; 
+	    std::clog << "Light Scale Factor error = " << sj.SF_CSVLerr << std::endl; 
+	  }
 	}
-	if( bTagSF_CSVM.isResultOk(PerformanceResult::BTAGLEFFCORR , measurePoint) ){
-	  sj.SF_CSVM = bTagSF_CSVM.getResult(PerformanceResult::BTAGLEFFCORR , measurePoint);
-	  sj.SF_CSVMerr = bTagSF_CSVM.getResult(PerformanceResult::BTAGLERRCORR , measurePoint);
+	if( mistagSF_CSVM.isResultOk(PerformanceResult::BTAGLEFFCORR , measurePoint) ){
+	  sj.SF_CSVM = mistagSF_CSVM.getResult(PerformanceResult::BTAGLEFFCORR , measurePoint);
+	  sj.SF_CSVMerr = mistagSF_CSVM.getResult(PerformanceResult::BTAGLERRCORR , measurePoint);
 	}
-	if( bTagSF_CSVT.isResultOk(PerformanceResult::BTAGLEFFCORR , measurePoint) ){
-	  sj.SF_CSVT = bTagSF_CSVT.getResult(PerformanceResult::BTAGLEFFCORR , measurePoint);
-	  sj.SF_CSVTerr = bTagSF_CSVT.getResult(PerformanceResult::BTAGLERRCORR , measurePoint);
+	if( mistagSF_CSVT.isResultOk(PerformanceResult::BTAGLEFFCORR , measurePoint) ){
+	  sj.SF_CSVT = mistagSF_CSVT.getResult(PerformanceResult::BTAGLEFFCORR , measurePoint);
+	  sj.SF_CSVTerr = mistagSF_CSVT.getResult(PerformanceResult::BTAGLERRCORR , measurePoint);
 	}
 	else{
 	  std::cerr << "No SF found in the database for this jet" << std::endl;
