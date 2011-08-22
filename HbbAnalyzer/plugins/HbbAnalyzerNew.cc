@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.19 2011/08/19 13:26:29 bortigno Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.21 2011/08/22 10:29:52 bortigno Exp $
 //
 //
 
@@ -866,9 +866,9 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     mf.ipDb=mu->dB();
     mf.ipErrDb=mu->edB();
-    if(mu->isGlobalMuon()) mf.cat=1;
-    else if(mu->isTrackerMuon()) mf.cat=2;
-    else mf.cat=3;
+    if(mu->isGlobalMuon()) mf.cat|=1;
+    if(mu->isTrackerMuon()) mf.cat|=2;
+    else mf.cat|=4;
     TrackRef trkMu1Ref = mu->get<TrackRef>();
     if(trkMu1Ref.isNonnull()){
       const Track* MuTrk1 = mu->get<TrackRef>().get();
