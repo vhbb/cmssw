@@ -46,6 +46,36 @@ using namespace std;
 #include "TLorentzVector.h"
 
 #include "DataFormats/METReco/interface/PFMET.h"
+
+//from .cc
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEventAuxInfo.h"
+
+#include "DataFormats/GeometryVector/interface/VectorUtil.h"
+
+#include "FWCore/Framework/interface/ESHandle.h"
+#include "DataFormats/PatCandidates/interface/PATObject.h"
+#include "DataFormats/PatCandidates/interface/TriggerObject.h"
+#include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
+#include "RecoBTag/Records/interface/BTagPerformanceRecord.h"
+#include "CondFormats/PhysicsToolsObjects/interface/BinningPointByMap.h"
+#include "RecoBTag/PerformanceDB/interface/BtagPerformance.h"
+
+
+struct BTV_SF{
+  
+
+  const BtagPerformance * BTAGSF_CSVL;
+  const BtagPerformance * BTAGSF_CSVM;
+  const BtagPerformance * BTAGSF_CSVT;
+  
+  const BtagPerformance * MISTAGSF_CSVL;
+  const BtagPerformance * MISTAGSF_CSVM;
+  const BtagPerformance * MISTAGSF_CSVT;
+  
+};
+
+
 //
 // class decleration
 //
@@ -68,6 +98,7 @@ class HbbAnalyzerNew : public edm::EDProducer {
   virtual void produce( edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
   virtual void fillMuBlock(edm::View<pat::Muon>::const_iterator mu, int muInfo[15]);
+  virtual void fillScaleFactors(VHbbEvent::SimpleJet, BTV_SF);
   
   // ----------member data ---------------------------
   
@@ -94,7 +125,10 @@ class HbbAnalyzerNew : public edm::EDProducer {
 
   bool verbose_;
   
+  BTV_SF iBTV;
+  
 };
+
 
 //
 // constants, enums and typedefs
