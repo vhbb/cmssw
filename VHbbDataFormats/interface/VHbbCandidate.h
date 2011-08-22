@@ -9,7 +9,13 @@
 
 class VHbbCandidate {
  public:
-  enum CandidateType{Zmumu, Zee, Wen, Wmun, Znn, UNKNOWN};
+   //Zmumu = 0 
+   //Zee = 1 
+   //Wmun = 2
+   //Wen = 3
+   //Znn = 4
+
+  enum CandidateType{Zmumu, Zee, Wmun, Wen, Znn, UNKNOWN};
 
     VHbbCandidate(){candidateType=UNKNOWN;}
 
