@@ -14,14 +14,14 @@
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/TriggerReader.h"
 //#include "VHbbAnalysis/HbbAnalyzer/interface/HbbCandidateFinder.h"
-#include "VHbbAnalysis/VHbbDataFormats/src/classes.h"
+//#include "VHbbAnalysis/VHbbDataFormats/src/classes.h"
 //#include "VHbbAnalysis/VHbbDataFormats/interface/CutsAndHistos.h"
 //#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbProxy.h"
 //#include "VHbbAnalysis/VHbbDataFormats/src/Histos.cc"
-#include "VHbbAnalysis/VHbbDataFormats/src/CutsAndHistos.cc"
+#include "VHbbAnalysis/VHbbDataFormats/interface/Histos.h"
 #include <iostream>
 #include <fstream>
-#include "VHbbAnalysis/VHbbDataFormats/src/Cuts200X.cc"
+#include "VHbbAnalysis/VHbbDataFormats/interface/Cuts200X.h"
 //#include "VHbbAnalysis/VHbbDataFormats/interface/HbbCandidateFinderAlgo.h"
 #include "DataFormats/Math/interface/deltaR.h"
 /*

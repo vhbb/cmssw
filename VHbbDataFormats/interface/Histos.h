@@ -1,3 +1,6 @@
+#ifndef HISTOS_H
+#define HISTOS_H
+
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidate.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbProxy.h"
@@ -645,3 +648,6 @@ private:
   Double_t max_hel;
 
 };
+
+
+#endif
