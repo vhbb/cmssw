@@ -308,8 +308,10 @@ For both W -> mu nu and Z -> mu mu, we adopt the standard VBTF muon selection de
 	(*it).nPixelHits>= 1 &&
 	(*it).globNHits >= 1 &&
 	(*it).nHits >= 10 &&
-	//global and tracker
-	(*it).cat == 3 && 
+	//tracker
+	((*it).cat & 0x1) && 
+	//global
+	((*it).cat & 0x2) && 
 	(*it).validMuStations >=2 &&
 	(*it).ipDb<.2 &&
 	//	((*it).hIso+(*it).eIso+(*it).tIso)/(*it).p4.Pt()<.15 &&
