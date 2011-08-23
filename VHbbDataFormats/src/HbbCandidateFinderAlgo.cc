@@ -351,7 +351,7 @@ We adopt the standard cut-based selection from VBTF described in detail here.
   for (std::vector<VHbbEvent::ElectronInfo>::const_iterator it = electrons.begin(); it!= electrons.end(); ++it){
     if (
 	// fake
-	((*it).id95r - 7) < 0.1  &&
+	(fabs((*it).id95r - 7)) < 0.1  &&
 	fabs((*it).p4.Eta()) < 2.5 &&
 	!( fabs((*it).p4.Eta()) < 1.57 && fabs((*it).p4.Eta()) > 1.44) &&
 	(*it).p4.Pt()>20 //  I use the minimum ok for both Z and W
