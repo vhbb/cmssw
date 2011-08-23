@@ -50,16 +50,16 @@ class PCut : public Cut
 class CutSet : public Cut {
  public:
  void add(Cut *c) {cuts.push_back(c);}  
- bool pass(VHbbProxy &iProxy,unsigned int limitCuts=99999) {
+ bool pass(VHbbProxy &iProxy) {
   bool result=true;
-  for(size_t i=0; i< cuts.size() && i < limitCuts; i++) 
+  for(size_t i=0; i< cuts.size() ; i++) 
     if( ! (cuts.at(i)->pass(iProxy)) ) 
       result=false;
   return result;
  } 
- std::string name(unsigned int limitCuts = 99999) {
+ std::string name() {
    std::stringstream s;
-   for(size_t i=0; i< cuts.size() && i < limitCuts; i++) {
+   for(size_t i=0; i< cuts.size() ; i++) {
      s << "_" << cuts.at(i)->name();
    }
  return s.str();

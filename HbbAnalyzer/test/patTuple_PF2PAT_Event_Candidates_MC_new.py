@@ -23,7 +23,8 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
 
 # source
-process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat//store/mc/Summer11/BdToMuMu_2MuPtFilter_7TeV-pythia6-evtgen//GEN-SIM-RECO//PU_S4_START42_V11-v1///0000//92DE42C9-CD8C-E011-A421-001F296B758E.root"))
+# on lxbuild151
+process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("file:../../../../../../CMSSW_4_2_8_patch1/src/VHbbAnalysis/HbbAnalyzer/test/E2245F7E-81AD-E011-9FE1-90E6BA0D09CA.root"))
 #dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat//store/data/Run2011A/SingleMu/AOD/PromptReco-v1/000/160/940/BE26C0AD-0C55-E011-9EAB-001D09F2514F.root"))
 #process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("file:/build1/tboccali/7C74874C-CA8E-E011-9782-001D09F25401.root"))
 #process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("/store/relval/CMSSW_4_2_3/RelValTTbar/GEN-SIM-RECO/MC_42_V12-v2/0066/3026A5BD-D97B-E011-A9D7-001A92811736.root"))

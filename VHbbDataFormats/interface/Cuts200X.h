@@ -39,15 +39,14 @@ class VlightRegionHWmun: public Cut {
   VHbbCandidate::HiggsCandidate H = p.getVHbbCandidate()->at(0).H;
   
   return (  iCand->at(0).candidateType == VHbbCandidate::Wmun
-        && V.muons[0].p4.Pt() > 20
         && H.jets.size() >= 2 
         && H.jets.at(0).Pt() > 30
         && H.jets.at(1).Pt() > 30
         && H.p4.Pt() > 150
         && V.p4.Pt() > 150
-        && V.Mt(VHbbCandidate::Wmun) < 160
-        && ( H.jets.at(0).csv < CSVM)
-        && ( H.jets.at(1).csv < CSVM)
+ //       && V.Mt(VHbbCandidate::Wmun) < 160
+//        && ( H.jets.at(0).csv < CSVM)
+//        && ( H.jets.at(1).csv < CSVM)
         && iCand->at(0).additionalJets.size() < 2
         && V.mets[0].metSig > 2.5
 //	&& TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5 
@@ -66,16 +65,17 @@ class VlightRegionHWen: public Cut {
   VHbbCandidate::HiggsCandidate H = p.getVHbbCandidate()->at(0).H;
   
   return (  iCand->at(0).candidateType == VHbbCandidate::Wen
+        && V.electrons[0].p4.Pt() > 30
         && H.jets.size() >= 2 
         && H.jets.at(0).Pt() > 30
         && H.jets.at(1).Pt() > 30
         && H.p4.Pt() > 150
         && V.p4.Pt() > 150
-        && ( H.jets.at(0).csv < CSVM)
-        && ( H.jets.at(1).csv < CSVM)
-        && iCand->at(0).additionalJets.size() < 5
-        && V.mets[0].metSig > 2
-	&& TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5  
+//        && ( H.jets.at(0).csv < CSVM)
+//        && ( H.jets.at(1).csv < CSVM)
+        && iCand->at(0).additionalJets.size() < 2
+        && V.mets[0].metSig > 2.5
+//	&& TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5  
         && p.trigger()->accept("HLT_Ele\\(\\(27\\)\\|\\(32\\)\\)_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v.")
         );
   }
@@ -90,14 +90,13 @@ class VlightRegionHZmumu: public Cut {
   VHbbCandidate::HiggsCandidate H = p.getVHbbCandidate()->at(0).H;
 
   return (  iCand->at(0).candidateType == VHbbCandidate::Zmumu
-        && V.muons[0].p4.Pt() > 20
         && H.jets.size() >= 2 
         && H.jets.at(0).Pt() > 20
         && H.jets.at(1).Pt() > 20
-//        && H.p4.Pt() > 100
+        && H.p4.Pt() > 100
         && V.p4.Pt() > 100
-        && ( H.jets.at(0).csv < CSVL)
-        && ( H.jets.at(1).csv < CSVL)
+//        && ( H.jets.at(0).csv < CSVL)
+ //       && ( H.jets.at(1).csv < CSVL)
         && iCand->at(0).additionalJets.size() < 2
         && p.trigger()->accept("HLT_IsoMu17_v.*")
         && V.p4.M() > 75
@@ -118,10 +117,10 @@ class VlightRegionHZee: public Cut {
         && H.jets.size() >= 2 
         && H.jets.at(0).Pt() > 20
         && H.jets.at(1).Pt() > 20
-  //      && H.p4.Pt() > 100
+        && H.p4.Pt() > 100
         && V.p4.Pt() > 100
-        && ( H.jets.at(0).csv < CSVL)
-        && ( H.jets.at(1).csv < CSVL)
+  //      && ( H.jets.at(0).csv < CSVL)
+  //      && ( H.jets.at(1).csv < CSVL)
         && iCand->at(0).additionalJets.size() < 2
         && p.trigger()->accept("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v.*")       
         && V.p4.M() > 75
@@ -141,7 +140,7 @@ class TTbarRegionHWmun: public Cut {
   VHbbCandidate::HiggsCandidate H = p.getVHbbCandidate()->at(0).H;
   
   return (  iCand->at(0).candidateType == VHbbCandidate::Wmun
-        && V.muons[0].p4.Pt() > 20
+   //     && V.muons[0].p4.Pt() > 20
         && H.jets.size() >= 2
         && H.jets.at(0).Pt() > 30
         && H.jets.at(1).Pt() > 30
@@ -165,18 +164,19 @@ class TTbarRegionHWen: public Cut {
   VHbbCandidate::HiggsCandidate H = p.getVHbbCandidate()->at(0).H;
   
   return (  iCand->at(0).candidateType == VHbbCandidate::Wen
+        && V.electrons[0].p4.Pt() > 30
         && H.jets.size() >= 2
         && H.jets.at(0).Pt() > 30
         && H.jets.at(1).Pt() > 30
-        && H.p4.Pt() > 75
-        && V.p4.Pt() > 75
+        && H.p4.Pt() > 100
+        && V.p4.Pt() > 100
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
-        && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5
-	&& iCand->at(0).additionalJets.size() > 0
-        && iCand->at(0).additionalJets.at(0).p4.Pt() > 35
-        && V.mets[0].metSig > 2
-        &&  ( TMath::Abs( Geom::deltaPhi( V.mets[0].p4.Phi(), H.jets.at(0).p4.Phi())) > 1.5
-            || TMath::Abs( Geom::deltaPhi(V.mets[0].p4.Phi(), H.jets.at(1).p4.Phi())) > 1.5  )
+	&& iCand->at(0).additionalJets.size() > 1
+//        && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5
+//        && iCand->at(0).additionalJets.at(0).p4.Pt() > 35
+//        && V.mets[0].metSig > 2
+ //       &&  ( TMath::Abs( Geom::deltaPhi( V.mets[0].p4.Phi(), H.jets.at(0).p4.Phi())) > 1.5
+ //           || TMath::Abs( Geom::deltaPhi(V.mets[0].p4.Phi(), H.jets.at(1).p4.Phi())) > 1.5  )
         && p.trigger()->accept("HLT_Ele\\(\\(27\\)\\|\\(32\\)\\)_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v.")
 
 
@@ -194,13 +194,13 @@ class TTbarRegionHZmumu: public Cut {
   VHbbCandidate::HiggsCandidate H = p.getVHbbCandidate()->at(0).H;
 
   return (  iCand->at(0).candidateType == VHbbCandidate::Zmumu
-        && V.muons[0].p4.Pt() > 20
+     //   && V.muons[0].p4.Pt() > 20
         && H.jets.size() >= 2
         && H.jets.at(0).Pt() > 20
         && H.jets.at(1).Pt() > 20
-        && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
+   //     && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
         && ( V.mets.size() >0 && V.mets.at(0).p4.Pt() > 50)
-        && iCand->at(0).additionalJets.size() > 1
+   //     && iCand->at(0).additionalJets.size() > 1
         && V.p4.M() > 120
         && p.trigger()->accept("HLT_IsoMu17_v.*")
 	);
@@ -222,7 +222,8 @@ class TTbarRegionHZee: public Cut {
         && H.jets.at(1).Pt() > 20
       //  && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
         && ( V.mets.size() >0 && V.mets.at(0).p4.Pt() > 50)
-    //    && iCand->at(0).additionalJets.size() > 1
+        && V.p4.M() > 120
+   //    && iCand->at(0).additionalJets.size() > 1
         && p.trigger()->accept("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v.*")
 
 	);
@@ -239,7 +240,7 @@ class VbbRegionHWmun: public Cut {
   VHbbCandidate::HiggsCandidate H = p.getVHbbCandidate()->at(0).H;
 
   return (  iCand->at(0).candidateType == VHbbCandidate::Wmun
-        && V.muons[0].p4.Pt() > 20
+   //     && V.muons[0].p4.Pt() > 20
         && H.jets.size() >= 2
         && H.jets.at(0).Pt() > 30
         && H.jets.at(1).Pt() > 30
@@ -248,7 +249,7 @@ class VbbRegionHWmun: public Cut {
         && V.Mt(VHbbCandidate::Wmun) < 120
         && V.Mt(VHbbCandidate::Wmun) > 40
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
-        && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5
+     //   && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.5
         && iCand->at(0).additionalJets.size() ==0
         && V.mets[0].metSig > 2.5
         && p.trigger()->accept("HLT_IsoMu17_v.*")
@@ -265,16 +266,18 @@ class VbbRegionHWen: public Cut {
   VHbbCandidate::HiggsCandidate H = p.getVHbbCandidate()->at(0).H;
 
   return (  iCand->at(0).candidateType == VHbbCandidate::Wen
+        && V.electrons[0].p4.Pt() > 30
         && H.jets.size() >= 2
         && H.jets.at(0).Pt() > 30
         && H.jets.at(1).Pt() > 30
         && H.p4.Pt() < 150
         && V.p4.Pt() < 150 
-        && V.p4.M() > 50
+        && V.Mt(VHbbCandidate::Wmun) < 120
+        && V.Mt(VHbbCandidate::Wmun) > 40
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
-        && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.4
-        && iCand->at(0).additionalJets.size() < 2
-        && V.mets[0].metSig > 2
+       // && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.4
+        && iCand->at(0).additionalJets.size() == 0
+        && V.mets[0].metSig > 2.5
         && p.trigger()->accept("HLT_Ele\\(\\(27\\)\\|\\(32\\)\\)_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v.*")
 
         );
@@ -290,16 +293,15 @@ class VbbRegionHZmumu: public Cut {
   VHbbCandidate::HiggsCandidate H = p.getVHbbCandidate()->at(0).H;
 
   return (  iCand->at(0).candidateType == VHbbCandidate::Zmumu
-        && V.muons[0].p4.Pt() > 20
         && H.jets.size() >= 2
         && H.jets.at(0).Pt() > 20
         && H.jets.at(1).Pt() > 20
-        &&  ( H.p4.M() < 100 ||  H.p4.M() > 140)
+        &&  ( H.p4.M() < 90 ||  H.p4.M() > 145)
 //	        && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
         && ( H.jets.at(0).csv > CSVT && H.jets.at(1).csv > CSVT)
         && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.9
         && iCand->at(0).additionalJets.size() < 2
-        && ( V.mets.size() ==0 || V.mets.at(0).p4.Pt() < 30)
+//        && ( V.mets.size() ==0 || V.mets.at(0).p4.Pt() < 30)
         && p.trigger()->accept("HLT_IsoMu17_v.*")
         && V.p4.M() > 75 
 	&& V.p4.M() < 105
@@ -320,10 +322,9 @@ class VbbRegionHZee: public Cut {
         && H.jets.size() >= 2
         && H.jets.at(0).Pt() > 20
         && H.jets.at(1).Pt() > 20
-        && ( H.p4.M() < 95 ||  H.p4.M() > 145)
-        && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
-        && ( H.jets.at(0).csv > 0.5 && H.jets.at(1).csv > 0.5)
-//        && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.9
+        && ( H.p4.M() < 90 ||  H.p4.M() > 145)
+        && ( H.jets.at(0).csv > CSVT &&  H.jets.at(1).csv > CSVT)
+        && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.9
         && iCand->at(0).additionalJets.size() < 2
   //      && V.mets[0].p4.Pt() < 30
         && p.trigger()->accept("HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v.*")
@@ -427,6 +428,7 @@ public:
 
 class SingleBTagCut : public PCut
 {
+public:
   SingleBTagCut(double csvMin):PCut(csvMin){}
   bool pass(VHbbProxy &p) {
   const std::vector<VHbbCandidate> *iCand = p.getVHbbCandidate();
@@ -443,6 +445,7 @@ class SingleBTagCut : public PCut
 
 class VHDeltaPhiCut : public PCut
 {
+public:
   VHDeltaPhiCut(double deltaPhiMin):PCut(deltaPhiMin){}
   bool pass(VHbbProxy &p) {
   const std::vector<VHbbCandidate> *iCand = p.getVHbbCandidate();
@@ -459,6 +462,7 @@ class VHDeltaPhiCut : public PCut
 
 class AdditionalJetsCut : public PCut
 {
+public:
  /// Filtering "< n"
   AdditionalJetsCut(int n):PCut(n) {}
   bool pass(VHbbProxy &p) {
@@ -471,6 +475,7 @@ class AdditionalJetsCut : public PCut
 
 class AdditionalLeptonsCut : public PCut
 {
+public:
  /// Filtering "< n"
   AdditionalLeptonsCut(int n):PCut(n) {}
   bool pass(VHbbProxy &p) {
@@ -550,5 +555,9 @@ class DiJetMassMaxCut : public PCut
   virtual std::string name()  {return "Higgs_M_Lt_"+cutValueString(); }
 };
 
+CutSet buildSignalSelectionZee(float mass);
+CutSet buildSignalSelectionZmumu(float mass);
+CutSet buildSignalSelectionWen(float mass);
+CutSet buildSignalSelectionWmun(float mass);
 
 #endif
