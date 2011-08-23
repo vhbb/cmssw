@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.23 2011/08/22 14:05:52 bortigno Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.24 2011/08/22 18:04:12 bortigno Exp $
 //
 //
 
@@ -85,7 +85,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   const edm::TriggerNames & triggerNames_ = iEvent.triggerNames(*hltresults);
    
   int ntrigs = hltresults->size();
-  if (ntrigs==0){std::cout << "%HLTInfo -- No trigger name given in TriggerResults of the input " << std::endl;}
+  if (ntrigs==0){std::cerr << "%HLTInfo -- No trigger name given in TriggerResults of the input " << std::endl;}
 
   for (int itrig = 0; itrig != ntrigs; ++itrig){
 
@@ -99,9 +99,9 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     //    std::cout << "%HLTInfo --  HLTTrigger(" << itrig << "): " << trigName << " = " << accept << std::endl;
   }
 
-  //
-  // big bloat
-  //
+//   //
+//   // big bloat
+//   //
 
 
   int goodDoubleMu3=0,goodDoubleMu3_2=0,  
@@ -795,7 +795,8 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     std::cout << "METs: calomet "<<mets.size()<<" tcmet "<<metsTC.size()<<" pfmet "<<metsPF.size()<<std::endl;  
   }
 
-  std::cout << " INPUT MUONS "<<muons.size()<<std::endl;
+  if(verbose_)
+    std::cout << " INPUT MUONS "<<muons.size()<<std::endl;
 
   for(edm::View<pat::Muon>::const_iterator mu = muons.begin(); mu!=muons.end(); ++mu){
     VHbbEvent::MuonInfo mf;
@@ -879,7 +880,8 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     hbbInfo->muInfo.push_back(mf);
   }
 
-  std::cout << " INPUT electrons "<<electrons.size()<<std::endl;
+  if(verbose_)
+    std::cout << " INPUT electrons "<<electrons.size()<<std::endl;
   for(edm::View<pat::Electron>::const_iterator elec = electrons.begin(); elec!=electrons.end(); ++elec){
     VHbbEvent::ElectronInfo ef;
     ef.p4=GENPTOLORP(elec);
@@ -915,7 +917,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     ef.id70 =elec->electronID("eidVBTFCom70");
     ef.id70r=elec->electronID("eidVBTFRel70");
 
-    //Muon trigger matching
+    //Electron trigger matching
     for (int itrig = 0; itrig != ntrigs; ++itrig){
       std::string trigName=triggerNames_.triggerName(itrig);
       if( (elec->triggerObjectMatchesByPath(trigName).size() != 0) ){
@@ -944,8 +946,8 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     hbbInfo->eleInfo.push_back(ef);
   }
 
-
-  std::cout << " INPUT taus "<<taus.size()<<std::endl;
+  if(verbose_)
+    std::cout << " INPUT taus "<<taus.size()<<std::endl;
   for(edm::View<pat::Tau>::const_iterator tau = taus.begin(); tau!=taus.end(); ++tau){
     VHbbEvent::TauInfo tf;
     tf.p4=GENPTOLORP(tau);
@@ -1254,8 +1256,8 @@ void HbbAnalyzerNew::fillScaleFactors(VHbbEvent::SimpleJet sj, BTV_SF iSF){
       sj.SF_CSVTerr = iSF.BTAGSF_CSVT->getResult(PerformanceResult::BTAGBERRCORR , measurePoint);	  
     }
     else{
-      std::cerr << "No SF found in the database for this jet" << std::endl;
       if(verbose_){
+	std::cerr << "No SF found in the database for this jet" << std::endl;
 	std::clog << "No SF found: Jet flavour = " << sj.flavour << std::endl;
 	std::clog << "No SF found: Jet Et = " << sj.p4.Et() << std::endl;
 	std::clog << "No SF found: Jet eta = " << sj.p4.Eta() << std::endl;
@@ -1285,8 +1287,8 @@ void HbbAnalyzerNew::fillScaleFactors(VHbbEvent::SimpleJet sj, BTV_SF iSF){
       sj.SF_CSVTerr = iSF.MISTAGSF_CSVT->getResult(PerformanceResult::BTAGLERRCORR , measurePoint);
     }
     else{
-      std::cerr << "No SF found in the database for this jet" << std::endl;
       if(verbose_){
+	std::cerr << "No SF found in the database for this jet" << std::endl;
 	std::clog << "No SF found: Jet flavour = " << sj.flavour << std::endl;
 	std::clog << "No SF found: Jet Et = " << sj.p4.Et() << std::endl;
 	std::clog << "No SF found: Jet eta = " << sj.p4.Eta() << std::endl;
