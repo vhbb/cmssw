@@ -10,9 +10,6 @@ isMC = True
 process = cms.Process("VH")
 process.load("RecoLocalCalo.EcalRecAlgos.EcalSeverityLevelESProducer_cfi")
 
-process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True),
-SkipEvent = cms.untracked.vstring('ProductNotFound') )
-
 ## import skeleton process
 #from PhysicsTools.PatAlgos.patTemplate_cfg import *
 from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
@@ -20,15 +17,15 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 # source
-# on lxbuild151
-process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("file:../../../../../../CMSSW_4_2_8_patch1/src/VHbbAnalysis/HbbAnalyzer/test/E2245F7E-81AD-E011-9FE1-90E6BA0D09CA.root"))
-#dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat//store/data/Run2011A/SingleMu/AOD/PromptReco-v1/000/160/940/BE26C0AD-0C55-E011-9EAB-001D09F2514F.root"))
-#process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("file:/build1/tboccali/7C74874C-CA8E-E011-9782-001D09F25401.root"))
-#process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("/store/relval/CMSSW_4_2_3/RelValTTbar/GEN-SIM-RECO/MC_42_V12-v2/0066/3026A5BD-D97B-E011-A9D7-001A92811736.root"))
-
+process.source = cms.Source("PoolSource",
+			    fileNames=cms.untracked.vstring(
+	"file:///shome/bortigno/CMSSW_4_2_7_patch1/src/VHbbAnalysis/HbbAnalyzer/test/ZH_ZToLL_C81E17BC-5BAD-E011-BEF0-90E6BA442F38.root"
+#	"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat//store/mc/Summer11/BdToMuMu_2MuPtFilter_7TeV-pythia6-evtgen//GEN-SIM-RECO//PU_S4_START42_V11-v1///0000//92DE42C9-CD8C-E011-A421-001F296B758E.root"
+	)
+			    )
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -248,7 +245,7 @@ else :
                  doJTA=True,doBTagging=True,jetCorrLabel=('AK5PFchs',  inputJetCorrLabel),
                  doType1MET=False, genJetCollection=cms.InputTag("ak5GenJets"),doL1Cleaning = False,doL1Counters=False,
                  doJetID = False)
-
+	
 addJetCollection(process,cms.InputTag("ak7PFJets"),"AK7","PF",
                  doJTA=True,doBTagging=True,jetCorrLabel=('AK7PF',  inputJetCorrLabel),
                  doType1MET=False,doL1Cleaning = False,doL1Counters=False,
@@ -278,7 +275,7 @@ addPfMET(process, 'PF')
 #            )
 
 for jetcoll in (process.selectedPatJetsCACalo, process.selectedPatJetsCAPF):
-	jetcoll.embedGenJetMatch = cms.bool(False)
+	jetcoll.embedGenJetMatch = cms.bool(True)
 	#getJetMCFlavour uses jetFlavourAssociation*, see below
 	jetcoll.getJetMCFlavour = cms.bool(True)
 	#those two use jetPartonMatch*, see below
@@ -377,7 +374,7 @@ process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     dimuTag = cms.InputTag("dimuons"),
     dielecTag = cms.InputTag("dielectrons"),
 
-    verbose = cms.untracked.bool(True)
+    verbose = cms.untracked.bool(False)
 )
 
 process.dimuons = cms.EDProducer("CandViewShallowCloneCombiner",
@@ -460,7 +457,7 @@ process.selectedElectronsTriggerMatch = defaultTriggerMatch.clone(
 # trigger object embedders for the same collections
 process.selectedElectronsMatched = cms.EDProducer( "PATTriggerMatchElectronEmbedder",
         src     = cms.InputTag(  "selectedPatElectrons" ),
-        matches = cms.VInputTag( cms.InputTag('selectedElectronssTriggerMatch') )
+        matches = cms.VInputTag( cms.InputTag('selectedElectronsTriggerMatch') )
     )
 
 
@@ -490,7 +487,7 @@ process.hbbHighestPtHiggsPt30Candidates = cms.EDFilter("HbbCandidateFinder",
 
 process.hbbCandidates = cms.EDFilter("HbbCandidateFinder",
 				       VHbbEventLabel = cms.InputTag(""),
-				       verbose = cms.bool(True) ,
+				       verbose = cms.bool(False) ,
 				       jetPtThreshold = cms.double(30.),
 				       useHighestPtHiggs=cms.bool(False),
               			       actAsAFilter = cms.bool(False)
@@ -554,8 +551,10 @@ process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSV
 #process.candidates = cms.Path(process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates)
 
 
-process.options = cms.untracked.PSet( Rethrow = cms.untracked.vstring('ProductNotFound') )
-
+process.options = cms.untracked.PSet(
+	wantSummary = cms.untracked.bool(True),
+	Rethrow = cms.untracked.vstring('ProductNotFound')
+	)
 process.e = cms.EndPath(process.out1)
 
 

@@ -10,8 +10,6 @@ isMC = False
 process = cms.Process("VH")
 process.load("RecoLocalCalo.EcalRecAlgos.EcalSeverityLevelESProducer_cfi")
 
-process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True),
-SkipEvent = cms.untracked.vstring('ProductNotFound') )
 
 ## import skeleton process
 #from PhysicsTools.PatAlgos.patTemplate_cfg import *
@@ -460,7 +458,7 @@ process.selectedElectronsTriggerMatch = defaultTriggerMatch.clone(
 # trigger object embedders for the same collections
 process.selectedElectronsMatched = cms.EDProducer( "PATTriggerMatchElectronEmbedder",
         src     = cms.InputTag(  "selectedPatElectrons" ),
-        matches = cms.VInputTag( cms.InputTag('selectedElectronssTriggerMatch') )
+        matches = cms.VInputTag( cms.InputTag('selectedElectronsTriggerMatch') )
     )
 
 
@@ -545,7 +543,7 @@ else :
                      process.patPF2PATSequence* # added with usePF2PAT
                      process.dimuons*
                      process.dielectrons*
-#                     process.leptonTrigMatch*
+                     process.leptonTrigMatch*
                      process.HbbAnalyzerNew*
 process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
                      )
@@ -554,7 +552,9 @@ process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSV
 #process.candidates = cms.Path(process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates)
 
 
-process.options = cms.untracked.PSet( Rethrow = cms.untracked.vstring('ProductNotFound') )
+process.options = cms.untracked.PSet(
+	WantSummary = cms.untracked.bool(True),
+	Rethrow = cms.untracked.vstring('ProductNotFound') )
 
 process.e = cms.EndPath(process.out1)
 
