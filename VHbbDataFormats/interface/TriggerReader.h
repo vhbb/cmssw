@@ -13,12 +13,13 @@
 
 class TriggerReader {
  public:
-    TriggerReader() : cacheRun(0) {}
+    TriggerReader(bool passAllEvents=false) : cacheRun(0), passAll(passAllEvents) {}
     
     void setEvent( fwlite::Event * e) {  ev=e;}
   
     bool accept(const std::string & triggername)
     {
+     if(passAll) return true;
      fwlite::Handle<edm::TriggerResults> hTriggerResults;
      hTriggerResults.getByLabel(*ev,"TriggerResults","","HLT");
 
@@ -77,6 +78,7 @@ private:
   std::map<std::string,size_t> nameMap;
   unsigned int cacheRun;
   fwlite::Event * ev;
+  bool passAll;
 
 };
 

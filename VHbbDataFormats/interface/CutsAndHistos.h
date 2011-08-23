@@ -14,6 +14,7 @@ class Histos {
 public:
    virtual void book(TFile &f, std::string suffix) = 0;
    virtual void fill(VHbbProxy &, float w) = 0;
+//   virtual Histos * clone() =0;
 };
 
 class Cut {
