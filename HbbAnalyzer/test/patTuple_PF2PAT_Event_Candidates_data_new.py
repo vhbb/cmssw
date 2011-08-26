@@ -21,12 +21,9 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
 
 # source
-# on lxbuild151
-process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("file:///shome/bortigno/CMSSW_4_2_7_patch1/src/VHbbAnalysis/HbbAnalyzer/test/8E77FB08-7986-E011-B116-001D09F295A1.root"))
-#dcap://t3se01.psi.ch:22125/pnfs/psi.ch/cms/trivcat//store/data/Run2011A/SingleMu/AOD/PromptReco-v1/000/160/940/BE26C0AD-0C55-E011-9EAB-001D09F2514F.root"))
-#process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("file:/build1/tboccali/7C74874C-CA8E-E011-9782-001D09F25401.root"))
-#process.source = cms.Source("PoolSource",fileNames=cms.untracked.vstring("/store/relval/CMSSW_4_2_3/RelValTTbar/GEN-SIM-RECO/MC_42_V12-v2/0066/3026A5BD-D97B-E011-A9D7-001A92811736.root"))
-
+process.source = cms.Source("PoolSource",
+			    fileNames=cms.untracked.vstring(
+	"file:/gpfs/gpfsddn/cms/user/arizzi/Hbb/CMSSW_4_2_7_patch2/src/VHbbAnalysis/HbbAnalyzer/test/048D33D0-EE80-E011-94E2-0030487CD716.root"))
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -41,7 +38,7 @@ process.out1 = cms.OutputModule(
     outputCommands = cms.untracked.vstring(
 	'drop *',
 					   'keep *_HbbAnalyzerNew_*_*',
-					   'keep *_hbbCandidates_*_*',
+					   'keep VHbbCandidates_*_*_*',
 					   'keep PileupSummaryInfo_*_*_*',
 					   'keep edmTriggerResults_*_*_*',
 					   ),
@@ -102,14 +99,7 @@ from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerEventContent
 
 process.load('CommonTools.ParticleFlow.PF2PAT_cff')
 from PhysicsTools.PatAlgos.tools.pfTools import *
-if isMC == False :
-        usePF2PAT(process,runPF2PAT=False,jetAlgo='AK5',runOnMC=False,postfix='')
-else :
-        usePF2PAT(process,runPF2PAT=False,jetAlgo='AK5',runOnMC=True,postfix='')
-
-process.pfPileUp.Enable = True
-process.pfIsolatedElectrons.combinedIsolationCut = 0.35
-process.pfIsolatedMuons.combinedIsolationCut     = 0.35
+usePF2PAT(process,runPF2PAT=True,jetAlgo='AK5',runOnMC=isMC,postfix='')
 
 # Get a list of good primary vertices, in 42x, these are DAF vertices
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
@@ -120,6 +110,8 @@ process.goodOfflinePrimaryVertices = cms.EDFilter(
     )
 
 process.pfPileUp.Enable = True
+process.pfIsolatedElectrons.combinedIsolationCut = 0.35
+process.pfIsolatedMuons.combinedIsolationCut     = 0.35
 process.pfPileUp.checkClosestZVertex = cms.bool(False)
 process.pfPileUp.Vertices = cms.InputTag('goodOfflinePrimaryVertices')
 process.pfJets.doAreaFastjet = True
@@ -159,7 +151,6 @@ process.load("RecoJets.Configuration.GenJetParticles_cff")
 from RecoJets.JetProducers.ca4GenJets_cfi import ca4GenJets
 process.ca4GenJets = ca4GenJets
 process.load("VHbbAnalysis.HbbAnalyzer.caTopJets_cff")
-##process.load("TopQuarkAnalysis.TopPairBSM.CATopJetTagger_cfi")
 
 process.ca8GenJets = ca4GenJets.clone( rParam = cms.double(0.8) )
 
@@ -246,7 +237,7 @@ else :
                  doJTA=True,doBTagging=True,jetCorrLabel=('AK5PFchs',  inputJetCorrLabel),
                  doType1MET=False, genJetCollection=cms.InputTag("ak5GenJets"),doL1Cleaning = False,doL1Counters=False,
                  doJetID = False)
-
+	
 addJetCollection(process,cms.InputTag("ak7PFJets"),"AK7","PF",
                  doJTA=True,doBTagging=True,jetCorrLabel=('AK7PF',  inputJetCorrLabel),
                  doType1MET=False,doL1Cleaning = False,doL1Counters=False,
@@ -295,9 +286,6 @@ process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
 process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
 
 
-##process.selectedPatJetsCACalo.tagInfoSources = cms.VInputTag( cms.InputTag('CATopCaloJetTagInfos') )
-##process.selectedPatJetsCAPF.tagInfoSources = cms.VInputTag( cms.InputTag('CATopPFJetTagInfos') )
-
 # jet flavor stuff
 #process.jetPartons.withTop = cms.bool(True)
 #process.jetPartonAssociation.coneSizeToAssociate = cms.double(1.2)
@@ -340,15 +328,8 @@ else:
 
 
 
-# pythia output
-#process.printList = cms.EDAnalyzer( "ParticleListDrawer",
-#                                src = cms.InputTag( "genParticles" ),
-#                                maxEventsToPrint = cms.untracked.int32( 1 )
-#)
-
-
 # prune gen particles
-
+## AR: is it used???
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 
 
@@ -488,7 +469,7 @@ process.hbbHighestPtHiggsPt30Candidates = cms.EDFilter("HbbCandidateFinder",
 
 process.hbbCandidates = cms.EDFilter("HbbCandidateFinder",
 				       VHbbEventLabel = cms.InputTag(""),
-				       verbose = cms.bool(True) ,
+				       verbose = cms.bool(False) ,
 				       jetPtThreshold = cms.double(30.),
 				       useHighestPtHiggs=cms.bool(False),
               			       actAsAFilter = cms.bool(False)
@@ -516,7 +497,7 @@ if isMC == False :
                      process.CAsubJetsProducer*
                      process.eidSequence*
                      process.patDefaultSequence*
-                     process.patPF2PATSequence* # added with usePF2PAT
+#                     process.patPF2PATSequence* # added with usePF2PAT
                      process.dimuons*
                      process.dielectrons*
                      process.leptonTrigMatch*
@@ -540,7 +521,7 @@ else :
                      process.CAsubJetsProducer*
                      process.eidSequence*
                      process.patDefaultSequence*
-                     process.patPF2PATSequence* # added with usePF2PAT
+#                     process.patPF2PATSequence* # added with usePF2PAT
                      process.dimuons*
                      process.dielectrons*
                      process.leptonTrigMatch*
@@ -552,10 +533,12 @@ process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSV
 #process.candidates = cms.Path(process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates)
 
 
-process.options = cms.untracked.PSet(
-	WantSummary = cms.untracked.bool(True),
-	Rethrow = cms.untracked.vstring('ProductNotFound') )
+#process.options = cms.untracked.PSet( Rethrow = cms.untracked.vstring('ProductNotFound') )
 
+process.options = cms.untracked.PSet(
+	wantSummary = cms.untracked.bool(True),
+	Rethrow = cms.untracked.vstring('ProductNotFound')
+	)
 process.e = cms.EndPath(process.out1)
 
 
