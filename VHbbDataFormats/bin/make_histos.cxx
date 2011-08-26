@@ -92,6 +92,7 @@ std::vector<float> runBDTWe(VHbbProxy* proxy){
 
 void prepareAllZHistos(std::vector<CutsAndHistos *> & allHistosZ,TFile *fout  )
 {
+ std::cout << "Book Z" << std::endl;
   allHistosZ.push_back(new CutsAndHistos(new VlightRegionHZee,new StandardHistos));
   allHistosZ.push_back(new CutsAndHistos(new VlightRegionHZmumu,new StandardHistos));
   allHistosZ.push_back(new CutsAndHistos(new VbbRegionHZee,new StandardHistos));
@@ -108,6 +109,7 @@ void prepareAllZHistos(std::vector<CutsAndHistos *> & allHistosZ,TFile *fout  )
 
 void prepareAllWHistos(std::vector<CutsAndHistos *> & allHistosW, TFile *fout )
 {
+ std::cout << "Book W" << std::endl;
   allHistosW.push_back(new CutsAndHistos(new VlightRegionHWen,new StandardHistos));
   allHistosW.push_back(new CutsAndHistos(new VlightRegionHWmun,new StandardHistos));
   allHistosW.push_back(new CutsAndHistos(new VbbRegionHWen,new StandardHistos));
@@ -157,10 +159,10 @@ bool data=true;
   //ddTFile &f =* TFile::Open("/scratch/arizzi/VHbbPAT.edm_9_0_tPZ.root");
  TFile *fout = new TFile((name+"_histos.root").c_str(),"RECREATE");
 
-  std::vector<Histos *> histosForSignalRegions;
+/*  std::vector<Histos *> histosForSignalRegions;
   histosForSignalRegions.push_back(new StandardHistos);
   histosForSignalRegions.push_back(new MCHistos);
-
+*/
 
   CutsAndHistos norm(new NoCut,new CountHisto);
   std::vector<CutsAndHistos *> allHistosW;
@@ -169,14 +171,6 @@ bool data=true;
   prepareAllZHistos(allHistosZ,fout);
 
 norm.book(*fout);
-for(size_t a=0;a < allHistosW.size(); a++)
-{
- allHistosW[a]->book(*fout);
-}
-for(size_t a=0;a < allHistosZ.size(); a++)
-{
- allHistosZ[a]->book(*fout);
-}
 
 std::vector<CutsAndHistos *> allHistosBW;
 std::vector<CutsAndHistos *> allHistosCW;
@@ -190,6 +184,7 @@ CutsAndHistos normL(new NoCut,new CountHisto);
 TFile *foutB,*foutC,*foutL;
 if(splitBCLIGHT)
 {
+  std::cout << "Enabling split" << std::endl;
   foutB = new TFile((name+"_histosB.root").c_str(),"RECREATE");
   foutC = new TFile((name+"_histosC.root").c_str(),"RECREATE");
   foutL = new TFile((name+"_histosL.root").c_str(),"RECREATE");
