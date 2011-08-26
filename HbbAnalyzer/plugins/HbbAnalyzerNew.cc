@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.24 2011/08/22 18:04:12 bortigno Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.25 2011/08/23 14:43:03 bortigno Exp $
 //
 //
 
@@ -843,7 +843,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     //Muon trigger matching
     for (int itrig = 0; itrig != ntrigs; ++itrig){
       std::string trigName=triggerNames_.triggerName(itrig);
-      if( (mu->triggerObjectMatchesByPath(trigName).size() != 0) ){
+      if( (mu->triggerObjectMatchesByPath(trigName,false,false).size() != 0) ){
 	mf.hltMatchedBits.push_back(itrig);
 	if(verbose_){
 	  std::clog << "Trigger Matching box" << std::endl;
@@ -851,7 +851,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  std::clog << "Matching parameters are defined in the cfg" << std::endl;
 	  std::clog << "Trigger bit = " << itrig << std::endl;
 	  std::clog << "Trigger name = " << trigName << std::endl;
-	  std::clog << "Trigger object matched collection size = " << mu->triggerObjectMatchesByPath(trigName).size() << std::endl;
+	  std::clog << "Trigger object matched collection size = " << mu->triggerObjectMatchesByPath(trigName,false,false).size() << std::endl;
 	  std::clog << "Pat Muon pt = " << mf.p4.Pt() << " HLT object matched = " << mu->triggerObjectMatch(0)->p4().Pt() << std::endl;
 	  std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
 	}
