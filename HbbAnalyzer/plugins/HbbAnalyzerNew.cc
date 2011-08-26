@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.25 2011/08/23 14:43:03 bortigno Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.26 2011/08/26 08:32:55 arizzi Exp $
 //
 //
 
@@ -545,12 +545,13 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   iSetup.get<BTagPerformanceRecord>().get("MISTAGCSVT",mistagSF_CSVT_);
   const BtagPerformance & mistagSF_CSVT = *(mistagSF_CSVT_.product());
 
-  iBTV.BTAGSF_CSVL = (bTagSF_CSVL_.product());
-  iBTV.BTAGSF_CSVM = (bTagSF_CSVM_.product());
-  iBTV.BTAGSF_CSVT = (bTagSF_CSVT_.product());
-  iBTV.MISTAGSF_CSVL = (mistagSF_CSVL_.product());
-  iBTV.MISTAGSF_CSVM = (mistagSF_CSVM_.product());
-  iBTV.MISTAGSF_CSVT = (mistagSF_CSVT_.product());
+BTagSFContainer btagSFs;
+  btagSFs.BTAGSF_CSVL = (bTagSF_CSVL_.product());
+  btagSFs.BTAGSF_CSVM = (bTagSF_CSVM_.product());
+  btagSFs.BTAGSF_CSVT = (bTagSF_CSVT_.product());
+  btagSFs.MISTAGSF_CSVL = (mistagSF_CSVL_.product());
+  btagSFs.MISTAGSF_CSVM = (mistagSF_CSVM_.product());
+  btagSFs.MISTAGSF_CSVT = (mistagSF_CSVT_.product());
 
   for(edm::View<pat::Jet>::const_iterator jet_iter = simplejets1.begin(); jet_iter!=simplejets1.end(); ++jet_iter){
     //     if(jet_iter->pt()>50)
@@ -584,7 +585,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     if(runOnMC_){
 
-      fillScaleFactors(sj, iBTV);
+      fillScaleFactors(sj, btagSFs);
 
       //PAT genJet matching
       //genJet
@@ -644,7 +645,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
     if(runOnMC_){
 
       //BTV scale factors
-      fillScaleFactors(sj, iBTV);
+      fillScaleFactors(sj, btagSFs);
 
       //PAT genJet matching
       //genJet
@@ -1226,7 +1227,7 @@ TLorentzVector HbbAnalyzerNew::getChargedTracksMomentum(const pat::Jet* patJet )
 
 
 //Btagging scale factors
-void HbbAnalyzerNew::fillScaleFactors(VHbbEvent::SimpleJet sj, BTV_SF iSF){
+void HbbAnalyzerNew::fillScaleFactors(VHbbEvent::SimpleJet sj, BTagSFContainer iSF){
 
 
   BinningPointByMap measurePoint;
