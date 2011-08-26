@@ -272,8 +272,8 @@ class VbbRegionHWen: public Cut {
         && H.jets.at(1).Pt() > 30
         && H.p4.Pt() < 150
         && V.p4.Pt() < 150 
-        && V.Mt(VHbbCandidate::Wmun) < 120
-        && V.Mt(VHbbCandidate::Wmun) > 40
+        && V.Mt(VHbbCandidate::Wen) < 120
+        && V.Mt(VHbbCandidate::Wen) > 40
         && ( H.jets.at(0).csv > CSVT ||  H.jets.at(1).csv > CSVT)
        // && TMath::Abs( Geom::deltaPhi(H.p4.Phi(), V.p4.Phi()) ) > 2.4
         && iCand->at(0).additionalJets.size() == 0

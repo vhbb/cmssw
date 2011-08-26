@@ -302,7 +302,8 @@ public:
 	StH_ZH_dPhi->Fill(V.p4.DeltaPhi(H.p4.Phi()), w); 
       } 
       else if(iCandType == VHbbCandidate::Wen || iCandType == VHbbCandidate::Wmun){
-	StH_WMass->Fill(V.p4.M(), w); 
+        StH_WMass->Fill(V.Mt(iCandType), w);
+	//StH_WMass->Fill(V.p4.M(), w); 
 	StH_WPt->Fill(V.p4.Pt(), w); 
 	StH_WH_dPhi->Fill(V.p4.DeltaPhi(H.p4.Phi()), w); 
       }
