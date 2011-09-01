@@ -21,7 +21,7 @@ class VHbbCandidate {
 
   class VectorCandidate {
   public:
-    double Mt(CandidateType candidateType) {
+    double Mt(CandidateType candidateType) const {
     if(candidateType==Wen)
       {
        float ptl=electrons[0].p4.Pt();
@@ -59,7 +59,25 @@ class VHbbCandidate {
   
 
   void setCandidateType (CandidateType c){candidateType = c;}
+
+
+  double deltaPhi() const {
+   return V.p4.DeltaPhi(H.p4);
+  }
+
+  double Mt() const {
+   return V.Mt(candidateType);
+  }
   
+ int additionalLeptons() const {
+   int expectedLeptons = 0;
+   if(  candidateType == Wmun ||  candidateType == Wen) expectedLeptons =1;
+   if(  candidateType == Zmumu ||  candidateType == Zee) expectedLeptons =2;
+
+   return ( V.muons.size() + V.electrons.size() - expectedLeptons);
+
+ } 
+
  public:
   TLorentzVector p4(){return V.p4+H.p4;}
   CandidateType candidateType;

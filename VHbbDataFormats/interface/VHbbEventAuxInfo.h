@@ -101,7 +101,11 @@ class VHbbEventAuxInfo{
     std::vector<TLorentzVector> dauFourMomentum;    
   };
 
-
+ double genBBDeltaR()
+ {
+   return mcB[0].p4.DeltaR(mcBbar[0].p4);
+ }
+ 
  public:
   PUInfo puInfo;
   
