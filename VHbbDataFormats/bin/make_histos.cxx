@@ -124,7 +124,6 @@ void prepareAllWHistos(std::vector<CutsAndHistos *> & allHistosW, TFile *fout )
 }
 
 int main( int argc, char ** argv ){
-    std::cout << "hello" << std::endl;
 int event_all=0;
 int event_all_b=0;
 int event_all_c=0;
@@ -143,6 +142,12 @@ int c=0;
   std::string name(argv[2]);
   
   std::string procType(argv[3]);
+
+if(argc < 4)
+ {
+  std::cout << "Usage:\n   make_histos inputFileList outputPrefix [mc|mcSpli|data]" << std::endl;
+  exit(1);
+ }
 
 bool splitBCLIGHT=true;
 bool data=true;
