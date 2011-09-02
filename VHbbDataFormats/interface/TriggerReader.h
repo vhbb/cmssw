@@ -13,7 +13,7 @@
 
 class TriggerReader {
  public:
-    TriggerReader(bool passAllEvents=false) : cacheRun(0), passAll(passAllEvents) {}
+    TriggerReader(bool passAllEvents=false) : passAll(passAllEvents) {}
     
     void setEvent( fwlite::Event * e) {  ev=e;}
   
@@ -34,9 +34,10 @@ class TriggerReader {
 
 
      std::map<std::string,size_t>::iterator nit;
-     if(ev->getRun().run()  != cacheRun || nameMap.find(triggername) == nameMap.end())
+     if(ev->getRun().run()  != cacheRun[triggername] || nameMap.find(triggername) == nameMap.end())
      {
-      cacheRun=ev->getRun().run();
+      std::cout << "new run" << ev->getRun().run() << std::endl;
+      cacheRun[triggername]=ev->getRun().run();
       edm::TriggerNames const&  triggerNames = ev->triggerNames(*hTriggerResults);
       std::string oldiname="whatever";
       nit=nameMap.find(triggername);
@@ -66,17 +67,19 @@ class TriggerReader {
     {
      std::cout << "ERROR: trigger name not found" << std::endl;
      edm::TriggerNames const&  triggerNames = ev->triggerNames(*hTriggerResults);
-     for (unsigned i = 0; i < triggerNames.size(); ++i)  std::cout << triggerNames.triggerName(i) << " is bit  " << i << "looking for: "<< triggername <<  std::endl;
-
+    // for (unsigned i = 0; i < triggerNames.size(); ++i)  std::cout << triggerNames.triggerName(i) << " is bit  " << i << "looking for: "<< triggername <<  std::endl;
+     nameMap[triggername]=100000000; // meaning not found in this run 
        
      return false; 
     }
+   if(nit->second==100000000) return false;
    return hTriggerResults->accept(nit->second);
 }
 
 private:
   std::map<std::string,size_t> nameMap;
-  unsigned int cacheRun;
+  std::map<std::string,size_t> cacheRun;
+//  unsigned int cacheRun;
   fwlite::Event * ev;
   bool passAll;
 
