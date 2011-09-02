@@ -3,6 +3,9 @@
 #include "DataFormats/FWLite/interface/Handle.h"
 #include "FWCore/FWLite/interface/AutoLibraryLoader.h"
 #include "PhysicsTools/FWLite/interface/CommandLineParser.h"
+#include "DataFormats/GeometryVector/interface/VectorUtil.h"
+#include "DataFormats/Math/interface/deltaR.h"
+
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
@@ -11,11 +14,13 @@
 #include <TCanvas.h>
 #include <vector>
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEventAuxInfo.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidate.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/TriggerReader.h"
-#include "VHbbAnalysis/VHbbDataFormats/interface/Histos.h"
+//#include "VHbbAnalysis/VHbbDataFormats/interface/Histos.h"
 #include <iostream>
 #include <fstream>
-#include "VHbbAnalysis/VHbbDataFormats/interface/Cuts200X.h"
+//#include "VHbbAnalysis/VHbbDataFormats/interface/Cuts200X.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
 
@@ -82,7 +87,7 @@ int main( int argc, char ** argv ){
       //      std::clog << "Entering event "<< event << std::endl;
       fwlite::Handle< std::vector<VHbbCandidate> > vhbbCandHandle; 
       vhbbCandHandle.getByLabel(ev,"hbbCandidates");
-      const std::vector<VHbbCandidate> & iCand = *vhbbCandHandle.product();
+      const std::vector<VHbbCandidate> & icand = *vhbbCandHandle.product();
       
       fwlite::Handle< VHbbEventAuxInfo > vhbbAuxHandle; 
       vhbbAuxHandle.getByLabel(ev,"HbbAnalyzerNew");
@@ -93,35 +98,33 @@ int main( int argc, char ** argv ){
 	  const VHbbEvent iEvent = *vhbbHandle.product();
       */
       trigger.setEvent(&ev);
-      VHbbProxy iProxy(0,0, &iCand,&trigger);
       
       //      std::clog << "Filling tree "<< std::endl;
       
 
-      const std::vector<VHbbCandidate> *pcand = iProxy.getVHbbCandidate();
       //////////////
       // TMVA ADD //
       //////////////
-      if(pcand->size() > 0 and pcand->at(0).H.jets.size() > 1){
+      if(icand.size() > 0 and icand.at(0).H.jets.size() > 1){
 	//variables for tmva
-	bbMass = pcand->at(0).H.p4.M();
-	bbPt = pcand->at(0).H.p4.Pt();
-	btag1 = pcand->at(0).H.jets[0].csv;
-	btag2 = pcand->at(0).H.jets[1].csv;
-	NaddJet = pcand->at(0).additionalJets.size();
-	DeltaRbb = deltaR(pcand->at(0).H.jets[0].p4.Eta(),pcand->at(0).H.jets[0].p4.Phi(),pcand->at(0).H.jets[1].p4.Eta(),pcand->at(0).H.jets[1].p4.Phi());
-	helicity = pcand->at(0).H.helicities[0];
-	DeltaPhiVH = Geom::deltaPhi(pcand->at(0).H.p4.Phi(),pcand->at(0).V.p4.Phi()) ;
-	bPt1 = pcand->at(0).H.jets[0].p4.Pt();
-	bPt2 = pcand->at(0).H.jets[1].p4.Pt();
-	VMass = pcand->at(0).V.p4.M();
-	VPt = pcand->at(0).V.p4.Pt();
-	pullAngle = pcand->at(0).H.deltaTheta;
-	DeltaEtabb = TMath::Abs( pcand->at(0).H.jets[0].p4.Eta() - pcand->at(0).H.jets[1].p4.Eta() );
-	deltaPhipfMETjet1 = Geom::deltaPhi( pcand->at(0).V.mets.at(0).p4.Phi(), pcand->at(0).H.jets[0].p4.Phi() );
-	deltaPhipfMETjet2 = Geom::deltaPhi( pcand->at(0).V.mets.at(0).p4.Phi(), pcand->at(0).H.jets[1].p4.Phi() );
-	pfMET = pcand->at(0).V.mets.at(0).p4.Pt();
-	pfMETsig = pcand->at(0).V.mets.at(0).metSig;
+	bbMass = icand.at(0).H.p4.M();
+	bbPt = icand.at(0).H.p4.Pt();
+	btag1 = icand.at(0).H.jets[0].csv;
+	btag2 = icand.at(0).H.jets[1].csv;
+	NaddJet = icand.at(0).additionalJets.size();
+	DeltaRbb = deltaR(icand.at(0).H.jets[0].p4.Eta(),icand.at(0).H.jets[0].p4.Phi(),icand.at(0).H.jets[1].p4.Eta(),icand.at(0).H.jets[1].p4.Phi());
+	helicity = icand.at(0).H.helicities[0];
+	DeltaPhiVH = Geom::deltaPhi(icand.at(0).H.p4.Phi(),icand.at(0).V.p4.Phi()) ;
+	bPt1 = icand.at(0).H.jets[0].p4.Pt();
+	bPt2 = icand.at(0).H.jets[1].p4.Pt();
+	VMass = icand.at(0).V.p4.M();
+	VPt = icand.at(0).V.p4.Pt();
+	pullAngle = icand.at(0).H.deltaTheta;
+	DeltaEtabb = TMath::Abs( icand.at(0).H.jets[0].p4.Eta() - icand.at(0).H.jets[1].p4.Eta() );
+	deltaPhipfMETjet1 = Geom::deltaPhi( icand.at(0).V.mets.at(0).p4.Phi(), icand.at(0).H.jets[0].p4.Phi() );
+	deltaPhipfMETjet2 = Geom::deltaPhi( icand.at(0).V.mets.at(0).p4.Phi(), icand.at(0).H.jets[1].p4.Phi() );
+	pfMET = icand.at(0).V.mets.at(0).p4.Pt();
+	pfMETsig = icand.at(0).V.mets.at(0).metSig;
 	
 	//fill the tree for tmva    
 	tree->Fill();
