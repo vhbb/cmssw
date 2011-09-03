@@ -28,14 +28,16 @@ class TriggerReader {
      int reti;
 
 
-     reti = regcomp(&regex, triggername.c_str(), 0);
-//     reti = regcomp(&regex, "HLT_Ele32_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v.*", 0);
-     if( reti ){ std::cerr << "Could not compile regex" << std::endl;}
 
 
      std::map<std::string,size_t>::iterator nit;
      if(ev->getRun().run()  != cacheRun[triggername] || nameMap.find(triggername) == nameMap.end())
      {
+
+     reti = regcomp(&regex, triggername.c_str(), 0);
+//     reti = regcomp(&regex, "HLT_Ele32_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v.*", 0);
+     if( reti ){ std::cerr << "Could not compile regex" << std::endl;}
+
       std::cout << "new run" << ev->getRun().run() << std::endl;
       cacheRun[triggername]=ev->getRun().run();
       edm::TriggerNames const&  triggerNames = ev->triggerNames(*hTriggerResults);
@@ -61,8 +63,8 @@ class TriggerReader {
          }
        
       }
-   } 
    regfree(&regex);
+   } 
     nit=nameMap.find(triggername);
    if(nit==nameMap.end()) 
     {
