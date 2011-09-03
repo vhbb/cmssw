@@ -62,6 +62,7 @@ class TriggerReader {
        
       }
    } 
+   regfree(&regex);
     nit=nameMap.find(triggername);
    if(nit==nameMap.end()) 
     {
