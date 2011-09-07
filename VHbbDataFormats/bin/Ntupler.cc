@@ -303,8 +303,45 @@ int main(int argc, char* argv[])
   _outTree->Branch("V"		,  &V	            ,  "mass/F:pt/F:eta:phi/F");
   _outTree->Branch("nhJets"		,  &nhJets	            ,  "nhJets/I");
   _outTree->Branch("naJets"		,  &naJets	            ,  "naJets/I");
-  _outTree->Branch("hJets"		,  &hJets	    ,  "pt[nhJets]/F:eta[nhJets]/F:phi[nhJets]/F:csv[nhJets]/F:cosTheta[nhJets]/F:numTracksSV[nhJets]/I:chf[nhJets]/F:nhf[nhJets]:cef[nhJets]:nef[nhJets]:nch[nhJets]:nconstituents[nhJets]:flavour[nhJets]:genPt[nhJets]:genEta[nhJets]:genPhi[nhJets]:JECUnc[nhJets]/F");
-  _outTree->Branch("aJets"		,  &aJets	    ,  "pt[naJets]/F:eta[naJets]/F:phi[naJets]/F:csv[naJets]/F:cosTheta[naJets]/F:numTracksSV[naJets]/I:chf[naJets]/F:nhf[naJets]:cef[naJets]:nef[naJets]:nch[naJets]:nconstituents[naJets]:flavour[naJets]:genPt[naJets]:genEta[naJets]:genPhi[naJets]:JECUnc[naJets]/F");
+//  _outTree->Branch("hJet_"		,  &hJets	    ,  "pt[nhJets]/F:eta[nhJets]/F:phi[nhJets]/F:csv[nhJets]/F:cosTheta[nhJets]/F:numTracksSV[nhJets]/I:chf[nhJets]/F:nhf[nhJets]:cef[nhJets]:nef[nhJets]:nch[nhJets]:nconstituents[nhJets]:flavour[nhJets]:genPt[nhJets]:genEta[nhJets]:genPhi[nhJets]:JECUnc[nhJets]/F");
+//  _outTree->Branch("aJet_"		,  &aJets	    ,  "pt[naJets]/F:eta[naJets]/F:phi[naJets]/F:csv[naJets]/F:cosTheta[naJets]/F:numTracksSV[naJets]/I:chf[naJets]/F:nhf[naJets]:cef[naJets]:nef[naJets]:nch[naJets]:nconstituents[naJets]:flavour[naJets]:genPt[naJets]:genEta[naJets]:genPhi[naJets]:JECUnc[naJets]/F");
+
+  _outTree->Branch("hJet_pt",hJets.pt ,"pt[nhJets]/F");
+  _outTree->Branch("hJet_eta",hJets.eta ,"eta[nhJets]/F");
+  _outTree->Branch("hJet_phi",hJets.phi ,"phi[nhJets]/F");
+  _outTree->Branch("hJet_csv",hJets.csv ,"csv[nhJets]/F");
+  _outTree->Branch("hJet_cosTheta",hJets.cosTheta ,"cosTheta[nhJets]/F");
+  _outTree->Branch("hJet_numTracksSV",hJets.numTracksSV ,"numTracksSV[nhJets]/I");
+  _outTree->Branch("hJet_chf",hJets.chf ,"chf[nhJets]/F");
+  _outTree->Branch("hJet_nhf",hJets.nhf ,"nhf[nhJets]/F");
+  _outTree->Branch("hJet_cef",hJets.cef ,"cef[nhJets]/F");
+  _outTree->Branch("hJet_nef",hJets.nef ,"nef[nhJets]/F");
+  _outTree->Branch("hJet_nch",hJets.nch ,"nch[nhJets]/F");
+  _outTree->Branch("hJet_nconstituents",hJets.nconstituents ,"nconstituents[nhJets]");
+  _outTree->Branch("hJet_flavour",hJets.flavour ,"flavour[nhJets]/F");
+  _outTree->Branch("hJet_genPt",hJets.genPt ,"genPt[nhJets]/F");
+  _outTree->Branch("hJet_genEta",hJets.genEta ,"genEta[nhJets]/F");
+  _outTree->Branch("hJet_genPhi",hJets.genPhi ,"genPhi[nhJets]/F");
+  _outTree->Branch("hJet_JECUnc",hJets.JECUnc ,"JECUnc[nhJets]/F");
+
+  _outTree->Branch("aJet_pt",aJets.pt ,"pt[naJets]/F");
+  _outTree->Branch("aJet_eta",aJets.eta ,"eta[naJets]/F");
+  _outTree->Branch("aJet_phi",aJets.phi ,"phi[naJets]/F");
+  _outTree->Branch("aJet_csv",aJets.csv ,"csv[naJets]/F");
+  _outTree->Branch("aJet_cosTheta",aJets.cosTheta ,"cosTheta[naJets]/F");
+  _outTree->Branch("aJet_numTracksSV",aJets.numTracksSV ,"numTracksSV[naJets]/I");
+  _outTree->Branch("aJet_chf",aJets.chf ,"chf[naJets]/F");
+  _outTree->Branch("aJet_nhf",aJets.nhf ,"nhf[naJets]/F");
+  _outTree->Branch("aJet_cef",aJets.cef ,"cef[naJets]/F");
+  _outTree->Branch("aJet_nef",aJets.nef ,"nef[naJets]/F");
+  _outTree->Branch("aJet_nch",aJets.nch ,"nch[naJets]/F");
+  _outTree->Branch("aJet_nconstituents",aJets.nconstituents ,"nconstituents[naJets]");
+  _outTree->Branch("aJet_flavour",aJets.flavour ,"flavour[naJets]/F");
+  _outTree->Branch("aJet_genPt",aJets.genPt ,"genPt[naJets]/F");
+  _outTree->Branch("aJet_genEta",aJets.genEta ,"genEta[naJets]/F");
+  _outTree->Branch("aJet_genPhi",aJets.genPhi ,"genPhi[naJets]/F");
+  _outTree->Branch("aJet_JECUnc",aJets.JECUnc ,"JECUnc[naJets]/F");
+
 
   _outTree->Branch("addJet3Pt", &addJet3Pt  ,  "addJet3Pt/F");
   _outTree->Branch("jjdr" 	,  &jjdr            ,  "jjdr/F"         );         	
@@ -330,7 +367,20 @@ int main(int argc, char* argv[])
   _outTree->Branch("VMt"  	,  &VMt      ,   "VMt/F"    );             	
 
   _outTree->Branch("nlep"	,  &nlep    ,   "nlep/I");
-  _outTree->Branch("leptons"	,  &leptons    ,   "mass[nlep]/F:pt[nlep]/F:eta[nlep]:phi[nlep]/F:aodCombRelIso[nlep]/F:pfCombRelIso[nlep]/F:photonIso[nlep]/F:neutralHadIso[nlep]/F:chargedHadIso[nlep]/F:particleIso[nlep]/F:dxy[nlep]/F:dz[nlep]/F:type[nlep]/I");
+//_outTree->Branch("leptons"	,  &leptons    ,   "mass[nlep]/F:pt[nlep]/F:eta[nlep]:phi[nlep]/F:aodCombRelIso[nlep]/F:pfCombRelIso[nlep]/F:photonIso[nlep]/F:neutralHadIso[nlep]/F:chargedHadIso[nlep]/F:particleIso[nlep]/F:dxy[nlep]/F:dz[nlep]/F:type[nlep]/I");
+  _outTree->Branch("lepton_mass",leptons.mass ,"mass[nlep]/F");
+  _outTree->Branch("lepton_pt",leptons.pt ,"pt[nlep]/F");
+  _outTree->Branch("lepton_eta",leptons.eta ,"eta[nlep]");
+  _outTree->Branch("lepton_phi",leptons.phi ,"phi[nlep]/F");
+  _outTree->Branch("lepton_aodCombRelIso",leptons.aodCombRelIso ,"aodCombRelIso[nlep]/F");
+  _outTree->Branch("lepton_pfCombRelIso",leptons.pfCombRelIso ,"pfCombRelIso[nlep]/F");
+  _outTree->Branch("lepton_photonIso",leptons.photonIso ,"photonIso[nlep]/F");
+  _outTree->Branch("lepton_neutralHadIso",leptons.neutralHadIso ,"neutralHadIso[nlep]/F");
+  _outTree->Branch("lepton_chargedHadIso",leptons.chargedHadIso ,"chargedHadIso[nlep]/F");
+  _outTree->Branch("lepton_particleIso",leptons.particleIso ,"particleIso[nlep]/F");
+  _outTree->Branch("lepton_dxy",leptons.dxy ,"dxy[nlep]/F");
+  _outTree->Branch("lepton_dz",leptons.dz ,"dz[nlep]/F");
+  _outTree->Branch("lepton_type",leptons.type ,"type[nlep]/I");
 
 //_outTree->Branch("lepton1"		,  &lepton1    ,   "mass/F:pt/F:eta:phi/F:aodCombRelIso/F:pfCombRelIso/F:photonIso/F:neutralHadIso/F:chargedHadIso/F:particleIso/F:dxy/F:dz/F:type/I");
 //_outTree->Branch("lepton2"		,  &lepton2    ,   "mass/F:pt/F:eta:phi/F:aodCombRelIso/F:pfCombRelIso/F:photonIso/F:neutralHadIso/F:chargedHadIso/F:particleIso/F:dxy/F:dz/F:type/I");
