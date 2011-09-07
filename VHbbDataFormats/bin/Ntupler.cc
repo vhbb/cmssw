@@ -20,6 +20,8 @@
 #include "DataFormats/FWLite/interface/Run.h"
 #include "DataFormats/Luminosity/interface/LumiSummary.h"
 
+#include "VHbbAnalysis/VHbbDataFormats/interface/HbbCandidateFinderAlgo.h" 
+#include "VHbbAnalysis/VHbbDataFormats/src/HbbCandidateFinderAlgo.cc"
 
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEventAuxInfo.h"
@@ -31,6 +33,10 @@
 
 #define MAXJ 30
 #define MAXL 10
+
+
+TTree * tscaleHLTmu = 0;
+TTree * tscaleIDmu = 0;
 
 float ScaleCSV(float CSV)
 {
@@ -44,20 +50,22 @@ float ScaleIsoHLT(float pt1, float eta1)
 {
 float ptMin,ptMax,etaMin,etaMax,scale,error;
 float s1 = 0;
-
-TFile *scaleFile = new TFile ("IsoToHLT42.root","read");
-TTree *tscale = (TTree*) scaleFile->Get("tree");
+if(tscaleHLTmu ==0) 
+{
+  TFile *scaleFile = new TFile ("IsoToHLT42.root","read");
+  tscaleHLTmu = (TTree*) scaleFile->Get("tree");
+}
 int count = 0;
-tscale->SetBranchAddress("ptMin",&ptMin);
-tscale->SetBranchAddress("ptMax",&ptMax);
-tscale->SetBranchAddress("etaMin",&etaMin);
-tscale->SetBranchAddress("etaMax",&etaMax);
-tscale->SetBranchAddress("scale",&scale);
-tscale->SetBranchAddress("error",&error);
+tscaleHLTmu->SetBranchAddress("ptMin",&ptMin);
+tscaleHLTmu->SetBranchAddress("ptMax",&ptMax);
+tscaleHLTmu->SetBranchAddress("etaMin",&etaMin);
+tscaleHLTmu->SetBranchAddress("etaMax",&etaMax);
+tscaleHLTmu->SetBranchAddress("scale",&scale);
+tscaleHLTmu->SetBranchAddress("error",&error);
 
-for(int jentry = 0; jentry < tscale->GetEntries(); jentry++)
+for(int jentry = 0; jentry < tscaleHLTmu->GetEntries(); jentry++)
   {
-   tscale->GetEntry(jentry);
+   tscaleHLTmu->GetEntry(jentry);
    if((pt1 > ptMin) && (pt1 < ptMax) && (eta1 > etaMin) && (eta1 < etaMax))
     {
     s1 = scale;
@@ -67,12 +75,12 @@ for(int jentry = 0; jentry < tscale->GetEntries(); jentry++)
 
 if(count == 0 || s1 == 0) 
 {
- scaleFile->Close();
+//caleFile->Close();
  return 1;
 }
 
 
-scaleFile->Close();
+//aleFile->Close();
 return (s1);
 }
 
@@ -83,21 +91,22 @@ float ScaleID(float pt1, float eta1)
 
 float ptMin,ptMax,etaMin,etaMax,scale,error;
 float s1 = 0;
-
-TFile *scaleFile = new TFile ("ScaleEffs42.root","read");
-TTree *tscale = (TTree*) scaleFile->Get("tree");
+if(tscaleIDmu==0)
+{ TFile *scaleFile = new TFile ("ScaleEffs42.root","read");
+  tscaleIDmu = (TTree*) scaleFile->Get("tree");
+}
 int count = 0;
-tscale->SetBranchAddress("ptMin",&ptMin);
-tscale->SetBranchAddress("ptMax",&ptMax);
-tscale->SetBranchAddress("etaMin",&etaMin);
-tscale->SetBranchAddress("etaMax",&etaMax);
-tscale->SetBranchAddress("scale",&scale);
-tscale->SetBranchAddress("error",&error);
+tscaleIDmu->SetBranchAddress("ptMin",&ptMin);
+tscaleIDmu->SetBranchAddress("ptMax",&ptMax);
+tscaleIDmu->SetBranchAddress("etaMin",&etaMin);
+tscaleIDmu->SetBranchAddress("etaMax",&etaMax);
+tscaleIDmu->SetBranchAddress("scale",&scale);
+tscaleIDmu->SetBranchAddress("error",&error);
 
-for(int jentry = 0; jentry < tscale->GetEntries(); jentry++)
+for(int jentry = 0; jentry < tscaleIDmu->GetEntries(); jentry++)
   {
 
-   tscale->GetEntry(jentry);
+   tscaleIDmu->GetEntry(jentry);
    if((pt1 > ptMin) && (pt1 < ptMax) && (eta1 > etaMin) && (eta1 < etaMax))
     {
     s1 = scale;
@@ -107,11 +116,11 @@ for(int jentry = 0; jentry < tscale->GetEntries(); jentry++)
 
 if(count == 0 || s1 == 0) 
 {
- scaleFile->Close();
+//caleFile->Close();
  return 1;
 }
 
-scaleFile->Close();
+//aleFile->Close();
 return (s1);
 
 }
@@ -146,8 +155,16 @@ struct  _LeptonInfo
       photonIso[j]=i.pfPhoIso;
       neutralHadIso[j]=i.pfNeuIso;
       chargedHadIso[j]=i.pfChaIso;
+      setID(i,j);
 //FIXME: whats this?      particleIso;
     }
+     template <class Input> void setID(const Input & i, int j)
+     {
+      id[j]=-99;
+     }      
+ 
+      
+     
 
     float mass[MAXL];  //MT in case of W
     float pt[MAXL];
@@ -162,8 +179,13 @@ struct  _LeptonInfo
     float dxy[MAXL];
     float dz[MAXL];
     int type[MAXL];
+    float id[MAXL];
   };
   
+ template <> void _LeptonInfo::setID<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j){
+     id[j]=i.id80r;
+  }
+
   typedef struct 
   {
     float et; 
@@ -274,6 +296,9 @@ int main(int argc, char* argv[])
     return 0;
   }
 
+  std::vector<VHbbCandidate> * candZlocal = new std::vector<VHbbCandidate>;
+  std::vector<VHbbCandidate> * candWlocal = new std::vector<VHbbCandidate>;
+
   // get the python configuration
   PythonProcessDesc builder(argv[1]);
   const edm::ParameterSet& in  = builder.processDesc()->getProcessPSet()->getParameter<edm::ParameterSet>("fwliteInput" );
@@ -287,6 +312,12 @@ int main(int argc, char* argv[])
   
   
   std::vector<std::string> triggers( ana.getParameter<std::vector<std::string> >("triggers") );
+  bool fromCandidate = ana.getParameter<bool>("readFromCandidates");
+  HbbCandidateFinderAlgo * algoZ = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdZ"),
+                                     ana.getParameter<bool>("useHighestPtHiggsZ")                         );
+  HbbCandidateFinderAlgo * algoW = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdW"),
+                                     ana.getParameter<bool>("useHighestPtHiggsW")                         );
+
 
   std::vector<std::string> inputFiles_( in.getParameter<std::vector<std::string> >("fileNames") );
 //  std::string inputFile( in.getParameter<std::string> ("fileName") );
@@ -383,8 +414,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("lepton_dxy",leptons.dxy ,"dxy[nlep]/F");
   _outTree->Branch("lepton_dz",leptons.dz ,"dz[nlep]/F");
   _outTree->Branch("lepton_type",leptons.type ,"type[nlep]/I");
-
-//FIXME: add something about ELE id ?
+  _outTree->Branch("lepton_id",leptons.id ,"id[nlep]/F");
 
   _outTree->Branch("MET"		,  &MET	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("MHT"		,  &MHT	         ,   "mht/F:ht:sig/F:phi/F");
@@ -398,6 +428,7 @@ int main(int argc, char* argv[])
 
    /*
       FIXME - top event reco
+      FIXME - btag SF
     */
 
     int ievt=0;  
@@ -427,14 +458,35 @@ int main(int argc, char* argv[])
  	   PUweight = 1.0; // FIXME: LumiWeights_.weight3BX( avg /3.);  (NEED EDM FIX)
  	  }
 
+ 
+ const std::vector<VHbbCandidate> * candZ ;
+ const std::vector<VHbbCandidate> * candW ;
+
+ if(fromCandidate)
+  {
 	fwlite::Handle< std::vector<VHbbCandidate> > vhbbCandHandleZ;
     	vhbbCandHandleZ.getByLabel(ev,"hbbBestCSVPt20Candidates");
-    	const std::vector<VHbbCandidate> * candZ = vhbbCandHandleZ.product();
+    	candZ = vhbbCandHandleZ.product();
 
    	fwlite::Handle< std::vector<VHbbCandidate> > vhbbCandHandle;
     	vhbbCandHandle.getByLabel(ev,"hbbHighestPtHiggsPt30Candidates");
-    	const std::vector<VHbbCandidate> * candW = vhbbCandHandle.product();
+    	candW = vhbbCandHandle.product();
+   }
+ else
+   {
+      candZlocal->clear();
+      candWlocal->clear();
+      fwlite::Handle< VHbbEvent > vhbbHandle; 
+      vhbbHandle.getByLabel(ev,"HbbAnalyzerNew");
+      const VHbbEvent iEvent = *vhbbHandle.product();
+      algoZ->run(vhbbHandle.product(),*candZlocal);
+      algoW->run(vhbbHandle.product(),*candWlocal);
+      candZ= candZlocal; 
+      candW= candWlocal; 
+
+
  
+    }
 
         const std::vector<VHbbCandidate> * cand = candZ;
 
@@ -447,9 +499,6 @@ int main(int argc, char* argv[])
           vhbbHandle.getByLabel(ev,"HbbAnalyzerNew");
           const VHbbEvent iEvent = *vhbbHandle.product();
       */
-      trigger.setEvent(&ev);
-      for(size_t j=0;j < triggers.size();j++)
-        triggerFlags[j]=trigger.accept(triggers[j]);
 
       //      std::clog << "Filling tree "<< std::endl;
       
@@ -465,6 +514,9 @@ int main(int argc, char* argv[])
             continue;
           }
           const VHbbCandidate & vhCand =  cand->at(0);
+          trigger.setEvent(&ev);
+          for(size_t j=0;j < triggers.size();j++)
+          triggerFlags[j]=trigger.accept(triggers[j]);
      
           eventFlav=0;
           if(aux.mcBbar.size() > 0 || aux.mcB.size() > 0) eventFlav=5;
@@ -567,6 +619,7 @@ int main(int argc, char* argv[])
 
 
 	  _outTree->Fill();
+
 	}// closed event loop
 
       std::cout << "closing the file: " << inputFiles_[iFile] << std::endl;

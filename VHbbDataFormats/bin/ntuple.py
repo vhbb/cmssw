@@ -23,7 +23,8 @@ process.fwliteInput = cms.PSet(
 "dcap://cmsdcache/pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_23_0_PdH.root",
 "dcap://cmsdcache/pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_24_0_gFX.root",
 "dcap://cmsdcache/pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_25_0_Jta.root",
-"dcap://cmsdcache/pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_26_0_pL3.root",
+"file:PAT.edm_26_0_pL3.root",
+#"dcap://cmsdcache/pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_26_0_pL3.root",
 "dcap://cmsdcache/pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_27_0_2RN.root",
 "dcap://cmsdcache/pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_28_0_ILe.root",
 "dcap://cmsdcache/pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_30_0_lyu.root",
@@ -101,6 +102,12 @@ process.Analyzer = cms.PSet(
 	"HLT_DiCentralJet20_MET80_v.*", #11
    ),
     isMC =     cms.bool(False),
+    verbose = cms.bool(False),
+    readFromCandidates = cms.bool(True),
+    jetPtThresholdZ = cms.double(20),
+    jetPtThresholdW = cms.double(30),
+    useHighestPtHiggsW = cms.bool(True),
+    useHighestPtHiggsZ = cms.bool(False),
 
     )
 
