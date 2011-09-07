@@ -47,13 +47,14 @@ process.fwliteInput = cms.PSet(
 "dcap://cmsdcache/pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_9_1_juk.root"
 
 ),
-
+    PUmcfileName = cms.string(""),
+    PUdatafileName = cms.string(""),
     maxEvents   = cms.int32(-1),                             ## optional
     outputEvery = cms.uint32(0),                            ## optional
     )
 
 
-channel =  "DoubleMu"
+channel =  "TTbar"
 import os
 dirnameOld = "/pnfs/pi.infn.it/data/cms/store/user/bortigno/DoubleMu/HBB_EDMNtupleV3_ProcV1_may/07fb60889166b64f474d8d0aa162db69/"
 

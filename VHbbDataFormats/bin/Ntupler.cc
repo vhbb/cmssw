@@ -42,8 +42,6 @@ else  return  0.94;
 
 float ScaleIsoHLT(float pt1, float eta1)
 {
-//FIXME: get the files for HLT
-return 1;
 float ptMin,ptMax,etaMin,etaMax,scale,error;
 float s1 = 0;
 
@@ -82,8 +80,6 @@ return (s1);
 
 float ScaleID(float pt1, float eta1)
 {
-//FIXME: get the files for ID
-return 1;
 
 float ptMin,ptMax,etaMin,etaMax,scale,error;
 float s1 = 0;
@@ -200,15 +196,20 @@ struct  _LeptonInfo
      eta[i]=j.p4.Eta();
      phi[i]=j.p4.Phi();
      csv[i]=j.csv;
-     //FIXME: cosTheta=tVector;
-     //FIXME:     numTracksSV
-     //FIXME:    chf;    float nhf;    float cef;    float nef;    float nch; nconstituents;
+     //FIXME:     numTracksSV  (NEED EDM FIX)
+     //FIXME:    chf;    float nhf;    float cef;    float nef;    float nch; nconstituents;  (NEED EDM FIX)
+
      flavour[i]=j.flavour;
-     //FIXME: genPt parton or genjet?
-/*     genPt=j.bestMCp4.Pt();
-     genEta=j.bestMCp4.Eta();
-     genPhi=j.bestMCp4.Phi();*/
-     //FIXME JECUnc
+     //FIXME: genPt parton or genjet?  (NEED EDM FIX)
+
+     if(j.bestMCp4.Pt() > 0)
+     {
+      genPt[i]=j.bestMCp4.Pt();
+      genEta[i]=j.bestMCp4.Eta();
+      genPhi[i]=j.bestMCp4.Phi();
+     }
+     //FIXME JECUnc  (NEED EDM FIX)
+
     }
    void reset()
    {
@@ -252,7 +253,7 @@ int main(int argc, char* argv[])
   int nlep=0; 
   
  float jjdr,jjdPhi,HVdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig,addJet3Pt, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
-   int nofLeptons15,nofLeptons20, Vtype,numJets,numBJets;
+   int nofLeptons15,nofLeptons20, Vtype,numJets,numBJets,eventFlav;
 //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
    bool triggerFlags[500];
   // ----------------------------------------------------------------------
@@ -291,11 +292,13 @@ int main(int argc, char* argv[])
 //  std::string inputFile( in.getParameter<std::string> ("fileName") );
 
   
-  std::string PUmcfileName_;//FIXME ( in.getParameter<std::string> ("PUmcfileName") );
-  std::string PUdatafileName_;//FIXME ( in.getParameter<std::string> ("PUdatafileName") );
+  std::string PUmcfileName_ = in.getParameter<std::string> ("PUmcfileName") ;
+  std::string PUdatafileName_ = in.getParameter<std::string> ("PUdatafileName") ;
   bool isMC_( ana.getParameter<bool>("isMC") );  
   TriggerReader trigger(isMC_);
  
+   TFile *_outPUFile	= new TFile((outputFile_+"_PU").c_str(), "recreate");	
+   TH1F * pu = new TH1F("pileup","",-0.5,24.5,25);
    TFile *_outFile	= new TFile(outputFile_.c_str(), "recreate");	
   _outTree = new TTree("tree", "myTree");
   
@@ -303,8 +306,6 @@ int main(int argc, char* argv[])
   _outTree->Branch("V"		,  &V	            ,  "mass/F:pt/F:eta:phi/F");
   _outTree->Branch("nhJets"		,  &nhJets	            ,  "nhJets/I");
   _outTree->Branch("naJets"		,  &naJets	            ,  "naJets/I");
-//  _outTree->Branch("hJet_"		,  &hJets	    ,  "pt[nhJets]/F:eta[nhJets]/F:phi[nhJets]/F:csv[nhJets]/F:cosTheta[nhJets]/F:numTracksSV[nhJets]/I:chf[nhJets]/F:nhf[nhJets]:cef[nhJets]:nef[nhJets]:nch[nhJets]:nconstituents[nhJets]:flavour[nhJets]:genPt[nhJets]:genEta[nhJets]:genPhi[nhJets]:JECUnc[nhJets]/F");
-//  _outTree->Branch("aJet_"		,  &aJets	    ,  "pt[naJets]/F:eta[naJets]/F:phi[naJets]/F:csv[naJets]/F:cosTheta[naJets]/F:numTracksSV[naJets]/I:chf[naJets]/F:nhf[naJets]:cef[naJets]:nef[naJets]:nch[naJets]:nconstituents[naJets]:flavour[naJets]:genPt[naJets]:genEta[naJets]:genPhi[naJets]:JECUnc[naJets]/F");
 
   _outTree->Branch("hJet_pt",hJets.pt ,"pt[nhJets]/F");
   _outTree->Branch("hJet_eta",hJets.eta ,"eta[nhJets]/F");
@@ -358,6 +359,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("weightTrig"        , &weightTrig          ,  "weightTrig/F");
   _outTree->Branch("deltaPullAngleAK7", &deltaPullAngleAK7  ,  "deltaPullAngleAK7/F");
   _outTree->Branch("PUweight",       &PUweight  ,  "PUweight/F");
+  _outTree->Branch("eventFlav",       &eventFlav  ,  "eventFlav/I");
  
 
    
@@ -367,7 +369,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("VMt"  	,  &VMt      ,   "VMt/F"    );             	
 
   _outTree->Branch("nlep"	,  &nlep    ,   "nlep/I");
-//_outTree->Branch("leptons"	,  &leptons    ,   "mass[nlep]/F:pt[nlep]/F:eta[nlep]:phi[nlep]/F:aodCombRelIso[nlep]/F:pfCombRelIso[nlep]/F:photonIso[nlep]/F:neutralHadIso[nlep]/F:chargedHadIso[nlep]/F:particleIso[nlep]/F:dxy[nlep]/F:dz[nlep]/F:type[nlep]/I");
+
   _outTree->Branch("lepton_mass",leptons.mass ,"mass[nlep]/F");
   _outTree->Branch("lepton_pt",leptons.pt ,"pt[nlep]/F");
   _outTree->Branch("lepton_eta",leptons.eta ,"eta[nlep]");
@@ -382,31 +384,20 @@ int main(int argc, char* argv[])
   _outTree->Branch("lepton_dz",leptons.dz ,"dz[nlep]/F");
   _outTree->Branch("lepton_type",leptons.type ,"type[nlep]/I");
 
-//_outTree->Branch("lepton1"		,  &lepton1    ,   "mass/F:pt/F:eta:phi/F:aodCombRelIso/F:pfCombRelIso/F:photonIso/F:neutralHadIso/F:chargedHadIso/F:particleIso/F:dxy/F:dz/F:type/I");
-//_outTree->Branch("lepton2"		,  &lepton2    ,   "mass/F:pt/F:eta:phi/F:aodCombRelIso/F:pfCombRelIso/F:photonIso/F:neutralHadIso/F:chargedHadIso/F:particleIso/F:dxy/F:dz/F:type/I");
+//FIXME: add something about ELE id ?
 
-//FIXME: add something about ELE id
   _outTree->Branch("MET"		,  &MET	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("MHT"		,  &MHT	         ,   "mht/F:ht:sig/F:phi/F");
   _outTree->Branch("minDeltaPhijetMET"		,  &minDeltaPhijetMET	         ,   "minDeltaPhijetMET/F");
   _outTree->Branch("jetPt_minDeltaPhijetMET"		,  &jetPt_minDeltaPhijetMET	         ,   "jetPt_minDeltaPhijetMET/F");
 
-
-
-/*for(size_t j=0;j<triggers.size();j++)
-   {
-    _outTree->Branch(triggers[j].c_str(), &triggerFlags+j, (triggers[j]+"/b".c_str())); 
-   }
-*/
    std::stringstream s;
    s << "triggerFlags[" << triggers.size() << "]/b";
    _outTree->Branch("triggerFlags", triggerFlags, s.str().c_str()); 
  
 
-   /* FIXME:        - trigger bits
+   /*
       FIXME - top event reco
-      FIXME - electrons id ?
-      FIXME - add B/C/Light classification
     */
 
     int ievt=0;  
@@ -420,33 +411,32 @@ int main(int argc, char* argv[])
 
   // loop the events
       
-      // ----------------------------------------------------------------------
-      // Second Part: 
-      //
-      //  * loop the events in the input file 
-      //  * receive the collections of interest via fwlite::Handle
-      //  * fill the histograms
-      //  * after the loop close the input file
-      // ----------------------------------------------------------------------
       fwlite::Event ev(inFile);
       for(ev.toBegin(); !ev.atEnd(); ++ev, ++ievt)
         {
 
  	  if(isMC_){
  	  // PU weights
+          
  	  edm::LumiReWeighting   LumiWeights_ = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
  	  double avg=0;
-//FIXME
+//FIXME:  PU (NEED EDM FIX)
 // 	   if( PUintimeSizes.isValid() && PUouttime1minusSizes.isValid() && PUouttime1plusSizes.isValid()){
 // 	     avg = (double)( *PUintimeSizes );
 // 	   }
- 	   PUweight = 1.0; // FIXME: LumiWeights_.weight3BX( avg /3.);
+ 	   PUweight = 1.0; // FIXME: LumiWeights_.weight3BX( avg /3.);  (NEED EDM FIX)
  	  }
+
+	fwlite::Handle< std::vector<VHbbCandidate> > vhbbCandHandleZ;
+    	vhbbCandHandleZ.getByLabel(ev,"hbbBestCSVPt20Candidates");
+    	const std::vector<VHbbCandidate> * candZ = vhbbCandHandleZ.product();
+
+   	fwlite::Handle< std::vector<VHbbCandidate> > vhbbCandHandle;
+    	vhbbCandHandle.getByLabel(ev,"hbbHighestPtHiggsPt30Candidates");
+    	const std::vector<VHbbCandidate> * candW = vhbbCandHandle.product();
  
 
-      fwlite::Handle< std::vector<VHbbCandidate> > vhbbCandHandle; 
-      vhbbCandHandle.getByLabel(ev,"hbbBestCSVPt20Candidates");
-      const std::vector<VHbbCandidate> & cand = *vhbbCandHandle.product();
+        const std::vector<VHbbCandidate> * cand = candZ;
 
 
       fwlite::Handle< VHbbEventAuxInfo > vhbbAuxHandle; 
@@ -463,8 +453,24 @@ int main(int argc, char* argv[])
 
       //      std::clog << "Filling tree "<< std::endl;
       
-     if(cand.size() == 0 or cand.at(0).H.jets.size() < 2) continue;
-          const VHbbCandidate & vhCand =  cand.at(0);
+     if(cand->size() == 0 or cand->at(0).H.jets.size() < 2) continue;
+          if(cand->size() > 1 ) 
+          {
+           std::cout << "MULTIPLE CANDIDATES: " << cand->size() << std::endl;
+          }
+          if(cand->at(0).candidateType == VHbbCandidate::Wmun || cand->at(0).candidateType == VHbbCandidate::Wen ) cand=candW;
+          if(cand->size() == 0) 
+          {
+//            std::cout << "W event loss due to tigther cuts" << std::endl;
+            continue;
+          }
+          const VHbbCandidate & vhCand =  cand->at(0);
+     
+          eventFlav=0;
+          if(aux.mcBbar.size() > 0 || aux.mcB.size() > 0) eventFlav=5;
+          else if(aux.mcC.size() > 0) eventFlav=4;
+       
+
           H.mass = vhCand.H.p4.M();
           H.pt = vhCand.H.p4.Pt();
           H.eta = vhCand.H.p4.Eta();
@@ -499,18 +505,19 @@ int main(int argc, char* argv[])
           }
   
 //FIXME: should we add?          DeltaEtabb = TMath::Abs( vhCand.H.jets[0].p4.Eta() - vhCand.H.jets[1].p4.Eta() );
-//FIXME: should we add?          helicity = vhCand.H.helicities[0];
+          hJets.cosTheta[0]=  vhCand.H.helicities[0];
+          hJets.cosTheta[1]=  vhCand.H.helicities[1];
 
           MET.et = vhCand.V.mets.at(0).p4.Pt();
           MET.phi = vhCand.V.mets.at(0).p4.Phi();
           MET.sumet = vhCand.V.mets.at(0).sumEt;
           MET.sig = vhCand.V.mets.at(0).metSig;
-//FIXME  add MHT     _outTree->Branch("MHT"            ,  &MHT          ,   "mht/F:ht:sig/F:phi/F");
+//FIXME  add MHT     _outTree->Branch("MHT"            ,  &MHT          ,   "mht/F:ht:sig/F:phi/F");  (NEED EDM FIX)
           Vtype = vhCand.candidateType;
           leptons.reset();
-          
+          weightTrig = 0.; 
           if(Vtype == VHbbCandidate::Zmumu ){
-            leptons.set(vhCand.V.muons[0],0,12); //FIXME set the type
+            leptons.set(vhCand.V.muons[0],0,12); 
             leptons.set(vhCand.V.muons[1],1,12);
                   float cweightID = ScaleID(leptons.pt[0],leptons.eta[0]) * ScaleID(leptons.pt[1],leptons.eta[1]) ;
                   float weightTrig1 = ScaleIsoHLT(leptons.pt[0],leptons.eta[0]);
@@ -523,9 +530,10 @@ int main(int argc, char* argv[])
 	          leptons.set(vhCand.V.electrons[0],0,11);
             	  leptons.set(vhCand.V.electrons[1],1,11);
                   nlep=2;
+                  //FIXME: trigger weights for electrons
            }
           if(Vtype == VHbbCandidate::Wmun ){
-            leptons.set(vhCand.V.muons[0],0,12); //FIXME set the type
+            leptons.set(vhCand.V.muons[0],0,12); 
                   float cweightID = ScaleID(leptons.pt[0],leptons.eta[0]);
                   float weightTrig1 = ScaleIsoHLT(leptons.pt[0],leptons.eta[0]);
                   float cweightTrig = weightTrig1;
@@ -536,6 +544,11 @@ int main(int argc, char* argv[])
             	  leptons.set(vhCand.V.electrons[0],0,11);
 		  nlep=1;
            }
+          if( Vtype == VHbbCandidate::Znn ){
+                  nlep=0;
+                  //FIXME: trigger weights for Znn
+
+          }
 //FIXME  _outTree->Branch("nofLeptons15"   ,  &nofLeptons15      ,  "nofLeptons15/I"    );
           nofLeptons20= vhCand.additionalLeptons();
 // if(aux.mcC.size() >=2)
@@ -543,11 +556,12 @@ int main(int argc, char* argv[])
 // if(aux.mcB.size() >=1)
 // std::cout << "B Must not be zero and it is ... " << aux.mcB[0].p4.Pt() << std::endl;
 
-// FIXME         gendrcc=aux.genCCDeltaR();
-// FIXME    gendrbb=aux.genBBDeltaR();
+// FIXME         gendrcc=aux.genCCDeltaR();  (NEED EDM FIX)
+
+// FIXME    gendrbb=aux.genBBDeltaR();  (NEED EDM FIX)
           genZpt=aux.mcZ.size() > 0 ? aux.mcZ[0].p4.Pt():-99;
           genWpt=aux.mcW.size() > 0 ? aux.mcW[0].p4.Pt():-99;
-//FIXME:  _outTree->Branch("weightTrig"        , &weightTrig          ,  "weightTrig/F");
+
 //FIXME:  _outTree->Branch("deltaPullAngleAK7", &deltaPullAngleAK7  ,  "deltaPullAngleAK7/F");
 
 
