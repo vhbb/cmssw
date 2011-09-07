@@ -101,9 +101,17 @@ class VHbbEventAuxInfo{
     std::vector<TLorentzVector> dauFourMomentum;    
   };
 
- double genBBDeltaR()
+ double genBBDeltaR() const
  {
+   if(mcB.size() > 0 && mcBbar.size() > 0)
    return mcB[0].p4.DeltaR(mcBbar[0].p4);
+   else return -99;
+ }
+ double genCCDeltaR() const
+ {
+   if(mcC.size() >=2)
+   return mcC[0].p4.DeltaR(mcC[1].p4);
+   else return -99;
  }
  
  public:
