@@ -154,10 +154,10 @@ bool jsonContainsEvent (const std::vector< edm::LuminosityBlockRange > &jsonVec,
     float pt;
     float eta;
     float phi;
-  } _TrackInfo;
+  } TrackInfo;
   
 
-struct  _LeptonInfo
+struct  LeptonInfo
   {
     void reset()
     {
@@ -203,7 +203,7 @@ struct  _LeptonInfo
     float id[MAXL];
   };
   
- template <> void _LeptonInfo::setID<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j){
+ template <> void LeptonInfo::setID<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j){
      id[j]=i.id80r;
   }
 
@@ -213,7 +213,7 @@ struct  _LeptonInfo
     float sumet;   
     float sig;
     float phi;
-  } _METInfo;
+  } METInfo;
   
   typedef struct 
   {
@@ -221,14 +221,14 @@ struct  _LeptonInfo
     float ht;  
     float sig;
     float phi;
-  } _MHTInfo;
+  } MHTInfo;
   
   typedef struct 
   {
     float mass;
     float pt;
     float wMass;
-  } _TopInfo;
+  } TopInfo;
 
   typedef struct 
   {
@@ -236,7 +236,7 @@ struct  _LeptonInfo
     int lumi;
     int event;
     int json;
-  } _EventInfo;
+  } EventInfo;
   
   typedef struct 
   {
@@ -285,24 +285,25 @@ struct  _LeptonInfo
     float genPhi[MAXJ];
     float JECUnc[MAXJ];
 
-  } _JetInfo;
+  } JetInfo;
   
 int main(int argc, char* argv[]) 
 {
   gROOT->Reset();
 
   TTree *_outTree;
-  _METInfo MET;
-  _MHTInfo MHT;
-  _TopInfo top;
-  _EventInfo EVENT;
-//  _JetInfo jet1,jet2, addJet1, addJet2;
-  _JetInfo hJets, aJets;
+  METInfo MET;
+  MHTInfo MHT;
+  TopInfo top;
+  EventInfo EVENT;
+//  JetInfo jet1,jet2, addJet1, addJet2;
+  // lepton1,lepton2;
+  JetInfo hJets, aJets;
+  LeptonInfo vLeptons, aLeptons;
   int naJets=0, nhJets=0;
-  _TrackInfo H;
-  _TrackInfo V;
-  _LeptonInfo leptons; // lepton1,lepton2;
-  int nlep=0; 
+  TrackInfo H;
+  TrackInfo V;
+  int nvlep=0,nalep=0; 
   
  float jjdr,jjdPhi,jjdEta,HVdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig,addJet3Pt, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
    int nofLeptons15,nofLeptons20, Vtype,numJets,numBJets,eventFlav;
@@ -439,23 +440,39 @@ int main(int argc, char* argv[])
   _outTree->Branch("HVdPhi"     ,  &HVdPhi   ,   "HVdPhi/F" );                
   _outTree->Branch("VMt"  	,  &VMt      ,   "VMt/F"    );             	
 
-  _outTree->Branch("nlep"	,  &nlep    ,   "nlep/I");
+  _outTree->Branch("nvlep"	,  &nvlep    ,   "nvlep/I");
+  _outTree->Branch("nalep"	,  &nalep    ,   "nalep/I");
 
-  _outTree->Branch("lepton_mass",leptons.mass ,"mass[nlep]/F");
-  _outTree->Branch("lepton_pt",leptons.pt ,"pt[nlep]/F");
-  _outTree->Branch("lepton_eta",leptons.eta ,"eta[nlep]");
-  _outTree->Branch("lepton_phi",leptons.phi ,"phi[nlep]/F");
-  _outTree->Branch("lepton_aodCombRelIso",leptons.aodCombRelIso ,"aodCombRelIso[nlep]/F");
-  _outTree->Branch("lepton_pfCombRelIso",leptons.pfCombRelIso ,"pfCombRelIso[nlep]/F");
-  _outTree->Branch("lepton_photonIso",leptons.photonIso ,"photonIso[nlep]/F");
-  _outTree->Branch("lepton_neutralHadIso",leptons.neutralHadIso ,"neutralHadIso[nlep]/F");
-  _outTree->Branch("lepton_chargedHadIso",leptons.chargedHadIso ,"chargedHadIso[nlep]/F");
-  _outTree->Branch("lepton_particleIso",leptons.particleIso ,"particleIso[nlep]/F");
-  _outTree->Branch("lepton_dxy",leptons.dxy ,"dxy[nlep]/F");
-  _outTree->Branch("lepton_dz",leptons.dz ,"dz[nlep]/F");
-  _outTree->Branch("lepton_type",leptons.type ,"type[nlep]/I");
-  _outTree->Branch("lepton_id",leptons.id ,"id[nlep]/F");
-  
+  _outTree->Branch("vLepton_mass",vLeptons.mass ,"mass[nvlep]/F");
+  _outTree->Branch("vLepton_pt",vLeptons.pt ,"pt[nvlep]/F");
+  _outTree->Branch("vLepton_eta",vLeptons.eta ,"eta[nvlep]");
+  _outTree->Branch("vLepton_phi",vLeptons.phi ,"phi[nvlep]/F");
+  _outTree->Branch("vLepton_aodCombRelIso",vLeptons.aodCombRelIso ,"aodCombRelIso[nvlep]/F");
+  _outTree->Branch("vLepton_pfCombRelIso",vLeptons.pfCombRelIso ,"pfCombRelIso[nvlep]/F");
+  _outTree->Branch("vLepton_photonIso",vLeptons.photonIso ,"photonIso[nvlep]/F");
+  _outTree->Branch("vLepton_neutralHadIso",vLeptons.neutralHadIso ,"neutralHadIso[nvlep]/F");
+  _outTree->Branch("vLepton_chargedHadIso",vLeptons.chargedHadIso ,"chargedHadIso[nvlep]/F");
+  _outTree->Branch("vLepton_particleIso",vLeptons.particleIso ,"particleIso[nvlep]/F");
+  _outTree->Branch("vLepton_dxy",vLeptons.dxy ,"dxy[nvlep]/F");
+  _outTree->Branch("vLepton_dz",vLeptons.dz ,"dz[nvlep]/F");
+  _outTree->Branch("vLepton_type",vLeptons.type ,"type[nvlep]/I");
+  _outTree->Branch("vLepton_id",vLeptons.id ,"id[nvlep]/F");
+ 
+  _outTree->Branch("aLepton_mass",aLeptons.mass ,"mass[nalep]/F");
+  _outTree->Branch("aLepton_pt",aLeptons.pt ,"pt[nalep]/F");
+  _outTree->Branch("aLepton_eta",aLeptons.eta ,"eta[nalep]");
+  _outTree->Branch("aLepton_phi",aLeptons.phi ,"phi[nalep]/F");
+  _outTree->Branch("aLepton_aodCombRelIso",aLeptons.aodCombRelIso ,"aodCombRelIso[nalep]/F");
+  _outTree->Branch("aLepton_pfCombRelIso",aLeptons.pfCombRelIso ,"pfCombRelIso[nalep]/F");
+  _outTree->Branch("aLepton_photonIso",aLeptons.photonIso ,"photonIso[nalep]/F");
+  _outTree->Branch("aLepton_neutralHadIso",aLeptons.neutralHadIso ,"neutralHadIso[nalep]/F");
+  _outTree->Branch("aLepton_chargedHadIso",aLeptons.chargedHadIso ,"chargedHadIso[nalep]/F");
+  _outTree->Branch("aLepton_particleIso",aLeptons.particleIso ,"particleIso[nalep]/F");
+  _outTree->Branch("aLepton_dxy",aLeptons.dxy ,"dxy[nalep]/F");
+  _outTree->Branch("aLepton_dz",aLeptons.dz ,"dz[nalep]/F");
+  _outTree->Branch("aLepton_type",aLeptons.type ,"type[nalep]/I");
+  _outTree->Branch("aLepton_id",aLeptons.id ,"id[nalep]/F");
+ 
   _outTree->Branch("top"		,  &top	         ,   "mass/F:pt/F:wMass/F");
 
   _outTree->Branch("MET"		,  &MET	         ,   "et/F:sumet:sig/F:phi/F");
@@ -491,8 +508,8 @@ int main(int argc, char* argv[])
  	  if(isMC_){
  	  // PU weights
           
- 	  edm::LumiReWeighting   LumiWeights_ = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
- 	  double avg=0;
+// 	  edm::LumiReWeighting   LumiWeights_ = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
+// 	  double avg=0;
 //FIXME:  PU (NEED EDM FIX)
 // 	   if( PUintimeSizes.isValid() && PUouttime1minusSizes.isValid() && PUouttime1plusSizes.isValid()){
 // 	     avg = (double)( *PUintimeSizes );
@@ -620,46 +637,56 @@ int main(int argc, char* argv[])
           MET.sig = vhCand.V.mets.at(0).metSig;
 //FIXME  add MHT     _outTree->Branch("MHT"            ,  &MHT          ,   "mht/F:ht:sig/F:phi/F");  (NEED EDM FIX)
           Vtype = vhCand.candidateType;
-          leptons.reset();
+          vLeptons.reset();
           weightTrig = 0.; 
 	  TLorentzVector leptonForTop;
+          size_t firstAddMu=0;
+          size_t firstAddEle=0;
           if(Vtype == VHbbCandidate::Zmumu ){
-                  leptons.set(vhCand.V.muons[0],0,12); 
-                  leptons.set(vhCand.V.muons[1],1,12);
-                  float cweightID = ScaleID(leptons.pt[0],leptons.eta[0]) * ScaleID(leptons.pt[1],leptons.eta[1]) ;
-                  float weightTrig1 = ScaleIsoHLT(leptons.pt[0],leptons.eta[0]);
-                  float weightTrig2 = ScaleIsoHLT(leptons.pt[1],leptons.eta[1]);
+                  vLeptons.set(vhCand.V.muons[0],0,12); 
+                  vLeptons.set(vhCand.V.muons[1],1,12);
+                  float cweightID = ScaleID(vLeptons.pt[0],vLeptons.eta[0]) * ScaleID(vLeptons.pt[1],vLeptons.eta[1]) ;
+                  float weightTrig1 = ScaleIsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
+                  float weightTrig2 = ScaleIsoHLT(vLeptons.pt[1],vLeptons.eta[1]);
                   float cweightTrig = weightTrig1 + weightTrig2 - weightTrig1*weightTrig2;
                   weightTrig = cweightID * cweightTrig;
-                  nlep=2;
+                  nvlep=2;
+                  firstAddMu=2;
           }
           if( Vtype == VHbbCandidate::Zee ){
-	          leptons.set(vhCand.V.electrons[0],0,11);
-            	  leptons.set(vhCand.V.electrons[1],1,11);
-                  nlep=2;
+	          vLeptons.set(vhCand.V.electrons[0],0,11);
+            	  vLeptons.set(vhCand.V.electrons[1],1,11);
+                  nvlep=2;
+		  firstAddEle=2;
                   //FIXME: trigger weights for electrons
            }
           if(Vtype == VHbbCandidate::Wmun ){
                   leptonForTop=vhCand.V.muons[0].p4;
-                  leptons.set(vhCand.V.muons[0],0,12); 
-                  float cweightID = ScaleID(leptons.pt[0],leptons.eta[0]);
-                  float weightTrig1 = ScaleIsoHLT(leptons.pt[0],leptons.eta[0]);
+                  vLeptons.set(vhCand.V.muons[0],0,12); 
+                  float cweightID = ScaleID(vLeptons.pt[0],vLeptons.eta[0]);
+                  float weightTrig1 = ScaleIsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
                   float cweightTrig = weightTrig1;
                   weightTrig = cweightID * cweightTrig;
-                  nlep=1;
+                  nvlep=1;
+		  firstAddMu=1;
           }
           if( Vtype == VHbbCandidate::Wen ){
                   leptonForTop=vhCand.V.electrons[0].p4;
-            	  leptons.set(vhCand.V.electrons[0],0,11);
-		  nlep=1;
+            	  vLeptons.set(vhCand.V.electrons[0],0,11);
+		  nvlep=1;
+		  firstAddEle=1;
            }
           if( Vtype == VHbbCandidate::Znn ){
-                  nlep=0;
+                  nvlep=0;
                   //FIXME: trigger weights for Znn
 
           }
+          
+          aLeptons.reset();
+          nalep=0;
+          for(size_t j=firstAddMu;j< vhCand.V.muons.size();j++) aLeptons.set(vhCand.V.electrons[j],nalep++,12);
+          for(size_t j=firstAddEle;j< vhCand.V.electrons.size();j++) aLeptons.set(vhCand.V.electrons[j],nalep++,12);
 
-      
 
           double maxBtag=-99999;
           TLorentzVector bJet;
