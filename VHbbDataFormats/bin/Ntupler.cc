@@ -641,8 +641,8 @@ int main(int argc, char* argv[])
           size_t firstAddMu=0;
           size_t firstAddEle=0;
           if(Vtype == VHbbCandidate::Zmumu ){
-                  vLeptons.set(vhCand.V.muons[0],0,12); 
-                  vLeptons.set(vhCand.V.muons[1],1,12);
+                  vLeptons.set(vhCand.V.muons[0],0,13; 
+                  vLeptons.set(vhCand.V.muons[1],1,13;
                   float cweightID = ScaleID(vLeptons.pt[0],vLeptons.eta[0]) * ScaleID(vLeptons.pt[1],vLeptons.eta[1]) ;
                   float weightTrig1 = ScaleIsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
                   float weightTrig2 = ScaleIsoHLT(vLeptons.pt[1],vLeptons.eta[1]);
@@ -660,7 +660,7 @@ int main(int argc, char* argv[])
            }
           if(Vtype == VHbbCandidate::Wmun ){
                   leptonForTop=vhCand.V.muons[0].p4;
-                  vLeptons.set(vhCand.V.muons[0],0,12); 
+                  vLeptons.set(vhCand.V.muons[0],0,13; 
                   float cweightID = ScaleID(vLeptons.pt[0],vLeptons.eta[0]);
                   float weightTrig1 = ScaleIsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
                   float cweightTrig = weightTrig1;
@@ -682,7 +682,7 @@ int main(int argc, char* argv[])
           
           aLeptons.reset();
           nalep=0;
-          for(size_t j=firstAddMu;j< vhCand.V.muons.size();j++) aLeptons.set(vhCand.V.muons[j],nalep++,12);
+          for(size_t j=firstAddMu;j< vhCand.V.muons.size();j++) aLeptons.set(vhCand.V.muons[j],nalep++,13;
           for(size_t j=firstAddEle;j< vhCand.V.electrons.size();j++) aLeptons.set(vhCand.V.electrons[j],nalep++,11);
 
 
