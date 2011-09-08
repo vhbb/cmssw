@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
   _LeptonInfo leptons; // lepton1,lepton2;
   int nlep=0; 
   
- float jjdr,jjdPhi,HVdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig,addJet3Pt, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
+ float jjdr,jjdPhi,jjdEta,HVdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig,addJet3Pt, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
    int nofLeptons15,nofLeptons20, Vtype,numJets,numBJets,eventFlav;
 //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
    bool triggerFlags[500];
@@ -320,6 +320,7 @@ int main(int argc, char* argv[])
   
   
   std::vector<std::string> triggers( ana.getParameter<std::vector<std::string> >("triggers") );
+  double btagThr =  ana.getParameter<double>("bJetCountThreshold" );
   bool fromCandidate = ana.getParameter<bool>("readFromCandidates");
   HbbCandidateFinderAlgo * algoZ = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdZ"),
                                      ana.getParameter<bool>("useHighestPtHiggsZ")                         );
@@ -336,8 +337,8 @@ int main(int argc, char* argv[])
   bool isMC_( ana.getParameter<bool>("isMC") );  
   TriggerReader trigger(isMC_);
  
-   TFile *_outPUFile	= new TFile((outputFile_+"_PU").c_str(), "recreate");	
-   TH1F * pu = new TH1F("pileup","",-0.5,24.5,25);
+//   TFile *_outPUFile	= new TFile((outputFile_+"_PU").c_str(), "recreate");	
+//   TH1F * pu = new TH1F("pileup","",-0.5,24.5,25);
    TFile *_outFile	= new TFile(outputFile_.c_str(), "recreate");	
   _outTree = new TTree("tree", "myTree");
   
@@ -386,6 +387,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("addJet3Pt", &addJet3Pt  ,  "addJet3Pt/F");
   _outTree->Branch("jjdr" 	,  &jjdr            ,  "jjdr/F"         );         	
   _outTree->Branch("jjdPhi"  	,  &jjdPhi          ,  "jjdPhi/F"       );            	
+  _outTree->Branch("jjdEta"  	,  &jjdEta          ,  "jjdEta/F"       );            	
   _outTree->Branch("numJets"      ,  &numJets         ,  "numJets/I"       );                
   _outTree->Branch("numBJets"      ,  &numBJets         ,  "numBJets/I"       );                
   _outTree->Branch("nofLeptons15"   ,  &nofLeptons15      ,  "nofLeptons15/I"    );                
@@ -550,11 +552,18 @@ int main(int argc, char* argv[])
           hJets.set(vhCand.H.jets[1],1);
           aJets.reset();
           naJets=vhCand.additionalJets.size();
-          for( int j=0; j < naJets && j < MAXJ; j++ ) aJets.set(vhCand.additionalJets[j],j);
+          numBJets=0;
+          if(vhCand.H.jets[0].csv> btagThr) numBJets++;
+          if(vhCand.H.jets[1].csv> btagThr) numBJets++;
+          for( int j=0; j < naJets && j < MAXJ; j++ ) 
+          {
+              aJets.set(vhCand.additionalJets[j],j);
+              if(vhCand.additionalJets[j].csv> btagThr) numBJets++;
+          }   
           numJets = vhCand.additionalJets.size()+2;
-//FIXME:  _outTree->Branch("numBJets"      ,  &numBJets         ,  "numBJets/I"       );
           jjdr = deltaR(vhCand.H.jets[0].p4.Eta(),vhCand.H.jets[0].p4.Phi(),vhCand.H.jets[1].p4.Eta(),vhCand.H.jets[1].p4.Phi());
           jjdPhi = deltaPhi(vhCand.H.jets[0].p4.Phi(),vhCand.H.jets[1].p4.Phi());
+          jjdEta= TMath::Abs( vhCand.H.jets[0].p4.Eta() - vhCand.H.jets[1].p4.Eta() );
           HVdPhi = deltaPhi(vhCand.H.p4.Phi(),vhCand.V.p4.Phi()) ;
           deltaPullAngle = vhCand.H.deltaTheta;
           float deltaPhipfMETjet1 = deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[0].p4.Phi() );
@@ -570,7 +579,6 @@ int main(int argc, char* argv[])
              jetPt_minDeltaPhijetMET=vhCand.H.jets[1].p4.Pt(); 
           }
   
-//FIXME: should we add?          DeltaEtabb = TMath::Abs( vhCand.H.jets[0].p4.Eta() - vhCand.H.jets[1].p4.Eta() );
           hJets.cosTheta[0]=  vhCand.H.helicities[0];
           hJets.cosTheta[1]=  vhCand.H.helicities[1];
 
