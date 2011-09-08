@@ -27,6 +27,7 @@
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEventAuxInfo.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidate.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/TriggerReader.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/TopMassReco.h"
 
 #include <sstream>
 #include <string>
@@ -201,6 +202,13 @@ struct  _LeptonInfo
     float sig;
     float phi;
   } _MHTInfo;
+  
+  typedef struct 
+  {
+    float mass;
+    float pt;
+    float wMass;
+  } _TopInfo;
 
   struct 
   {
@@ -209,7 +217,6 @@ struct  _LeptonInfo
     int event;
   } _EventInfo;
   
-
   typedef struct 
   {
     void set(const VHbbEvent::SimpleJet & j, int i) 
@@ -266,6 +273,7 @@ int main(int argc, char* argv[])
   TTree *_outTree;
   _METInfo MET;
   _MHTInfo MHT;
+  _TopInfo TOP;
 //  _JetInfo jet1,jet2, addJet1, addJet2;
   _JetInfo hJets, aJets;
   int naJets=0, nhJets=0;
@@ -415,6 +423,8 @@ int main(int argc, char* argv[])
   _outTree->Branch("lepton_dz",leptons.dz ,"dz[nlep]/F");
   _outTree->Branch("lepton_type",leptons.type ,"type[nlep]/I");
   _outTree->Branch("lepton_id",leptons.id ,"id[nlep]/F");
+  
+  _outTree->Branch("TOP"		,  &TOP	         ,   "mass/F:pt/F:wMass/F");
 
   _outTree->Branch("MET"		,  &MET	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("MHT"		,  &MHT	         ,   "mht/F:ht:sig/F:phi/F");
@@ -425,9 +435,7 @@ int main(int argc, char* argv[])
    s << "triggerFlags[" << triggers.size() << "]/b";
    _outTree->Branch("triggerFlags", triggerFlags, s.str().c_str()); 
  
-
    /*
-      FIXME - top event reco
       FIXME - btag SF
     */
 
@@ -521,7 +529,13 @@ int main(int argc, char* argv[])
           eventFlav=0;
           if(aux.mcBbar.size() > 0 || aux.mcB.size() > 0) eventFlav=5;
           else if(aux.mcC.size() > 0) eventFlav=4;
-       
+          
+          
+          topHypo topQuark = topMassReco()(vhCand);
+
+          TOP.mass = topQuark.p4.M();
+          TOP.pt = topQuark.p4.Pt();
+          TOP.wMass = topQuark.p4W.M();
 
           H.mass = vhCand.H.p4.M();
           H.pt = vhCand.H.p4.Pt();
