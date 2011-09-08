@@ -15,4 +15,5 @@
   <bin  file="make_histos.cxx"></bin>
   <bin  file="TMVAClassification.cxx"></bin>
   <bin  file="make_tree.cxx"></bin>
+  <bin  file="Ntupler.cc"></bin>
 </environment>
