@@ -684,7 +684,7 @@ int main(int argc, char* argv[])
           
           aLeptons.reset();
           nalep=0;
-          for(size_t j=firstAddMu;j< vhCand.V.muons.size();j++) aLeptons.set(vhCand.V.electrons[j],nalep++,12);
+          for(size_t j=firstAddMu;j< vhCand.V.muons.size();j++) aLeptons.set(vhCand.V.muons[j],nalep++,12);
           for(size_t j=firstAddEle;j< vhCand.V.electrons.size();j++) aLeptons.set(vhCand.V.electrons[j],nalep++,12);
 
 
