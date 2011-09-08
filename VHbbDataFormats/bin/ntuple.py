@@ -119,6 +119,8 @@ process.Analyzer = cms.PSet(
     bJetCountThreshold = cms.double(0.898),
     useHighestPtHiggsW = cms.bool(True),
     useHighestPtHiggsZ = cms.bool(False),
+    idMuFileName = cms.string("ScaleEffs42.root"),
+    hltMuFileName = cms.string("IsoToHLT42.root"),
 
     )
 

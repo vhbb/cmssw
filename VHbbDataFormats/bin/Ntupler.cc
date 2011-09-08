@@ -51,11 +51,6 @@ float ScaleIsoHLT(float pt1, float eta1)
 {
 float ptMin,ptMax,etaMin,etaMax,scale,error;
 float s1 = 0;
-if(tscaleHLTmu ==0) 
-{
-  TFile *scaleFile = new TFile ("IsoToHLT42.root","read");
-  tscaleHLTmu = (TTree*) scaleFile->Get("tree");
-}
 int count = 0;
 tscaleHLTmu->SetBranchAddress("ptMin",&ptMin);
 tscaleHLTmu->SetBranchAddress("ptMax",&ptMax);
@@ -92,10 +87,6 @@ float ScaleID(float pt1, float eta1)
 
 float ptMin,ptMax,etaMin,etaMax,scale,error;
 float s1 = 0;
-if(tscaleIDmu==0)
-{ TFile *scaleFile = new TFile ("ScaleEffs42.root","read");
-  tscaleIDmu = (TTree*) scaleFile->Get("tree");
-}
 int count = 0;
 tscaleIDmu->SetBranchAddress("ptMin",&ptMin);
 tscaleIDmu->SetBranchAddress("ptMax",&ptMax);
@@ -358,6 +349,12 @@ int main(int argc, char* argv[])
   HbbCandidateFinderAlgo * algoW = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdW"),
                                      ana.getParameter<bool>("useHighestPtHiggsW")                         );
 
+  TFile *hltMuFile = new TFile (ana.getParameter<std::string> ("hltMuFileName").c_str(),"read");
+  tscaleHLTmu = (TTree*) hltMuFile->Get("tree");
+//  hltMuFile->Close();
+  TFile *idMuFile = new TFile (ana.getParameter<std::string> ("idMuFileName").c_str(),"read"); //"ScaleEffs42.root","read");
+  tscaleIDmu = (TTree*) idMuFile->Get("tree");
+//  idMuFile->Close();
 
   std::vector<std::string> inputFiles_( in.getParameter<std::vector<std::string> >("fileNames") );
 //  std::string inputFile( in.getParameter<std::string> ("fileName") );
@@ -488,6 +485,7 @@ int main(int argc, char* argv[])
  
    /*
       FIXME - btag SF
+      FIXME - HBHE filter (NEED EDM)
     */
 
     int ievt=0;  
@@ -685,7 +683,7 @@ int main(int argc, char* argv[])
           aLeptons.reset();
           nalep=0;
           for(size_t j=firstAddMu;j< vhCand.V.muons.size();j++) aLeptons.set(vhCand.V.muons[j],nalep++,12);
-          for(size_t j=firstAddEle;j< vhCand.V.electrons.size();j++) aLeptons.set(vhCand.V.electrons[j],nalep++,12);
+          for(size_t j=firstAddEle;j< vhCand.V.electrons.size();j++) aLeptons.set(vhCand.V.electrons[j],nalep++,11);
 
 
           double maxBtag=-99999;
