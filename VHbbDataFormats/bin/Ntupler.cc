@@ -612,6 +612,7 @@ int main(int argc, char* argv[])
           jjdPhi = deltaPhi(vhCand.H.jets[0].p4.Phi(),vhCand.H.jets[1].p4.Phi());
           jjdEta= TMath::Abs( vhCand.H.jets[0].p4.Eta() - vhCand.H.jets[1].p4.Eta() );
           HVdPhi = deltaPhi(vhCand.H.p4.Phi(),vhCand.V.p4.Phi()) ;
+          VMt = vhCand.Mt() ;
           deltaPullAngle = vhCand.H.deltaTheta;
           float deltaPhipfMETjet1 = deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[0].p4.Phi() );
           float deltaPhipfMETjet2 = deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[1].p4.Phi() );
