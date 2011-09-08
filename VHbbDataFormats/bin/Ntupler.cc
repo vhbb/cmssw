@@ -294,7 +294,7 @@ int main(int argc, char* argv[])
   TTree *_outTree;
   _METInfo MET;
   _MHTInfo MHT;
-  _TopInfo TOP;
+  _TopInfo top;
   _EventInfo EVENT;
 //  _JetInfo jet1,jet2, addJet1, addJet2;
   _JetInfo hJets, aJets;
@@ -456,7 +456,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("lepton_type",leptons.type ,"type[nlep]/I");
   _outTree->Branch("lepton_id",leptons.id ,"id[nlep]/F");
   
-  _outTree->Branch("TOP"		,  &TOP	         ,   "mass/F:pt/F:wMass/F");
+  _outTree->Branch("top"		,  &top	         ,   "mass/F:pt/F:wMass/F");
 
   _outTree->Branch("MET"		,  &MET	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("MHT"		,  &MHT	         ,   "mht/F:ht:sig/F:phi/F");
@@ -569,13 +569,7 @@ int main(int argc, char* argv[])
           eventFlav=0;
           if(aux.mcBbar.size() > 0 || aux.mcB.size() > 0) eventFlav=5;
           else if(aux.mcC.size() > 0) eventFlav=4;
-          
-          
-          topHypo topQuark = topMassReco()(vhCand);
-
-          TOP.mass = topQuark.p4.M();
-          TOP.pt = topQuark.p4.Pt();
-          TOP.wMass = topQuark.p4W.M();
+         
 
           H.mass = vhCand.H.p4.M();
           H.pt = vhCand.H.p4.Pt();
@@ -628,9 +622,10 @@ int main(int argc, char* argv[])
           Vtype = vhCand.candidateType;
           leptons.reset();
           weightTrig = 0.; 
+	  TLorentzVector leptonForTop;
           if(Vtype == VHbbCandidate::Zmumu ){
-            leptons.set(vhCand.V.muons[0],0,12); 
-            leptons.set(vhCand.V.muons[1],1,12);
+                  leptons.set(vhCand.V.muons[0],0,12); 
+                  leptons.set(vhCand.V.muons[1],1,12);
                   float cweightID = ScaleID(leptons.pt[0],leptons.eta[0]) * ScaleID(leptons.pt[1],leptons.eta[1]) ;
                   float weightTrig1 = ScaleIsoHLT(leptons.pt[0],leptons.eta[0]);
                   float weightTrig2 = ScaleIsoHLT(leptons.pt[1],leptons.eta[1]);
@@ -645,7 +640,8 @@ int main(int argc, char* argv[])
                   //FIXME: trigger weights for electrons
            }
           if(Vtype == VHbbCandidate::Wmun ){
-            leptons.set(vhCand.V.muons[0],0,12); 
+                  leptonForTop=vhCand.V.muons[0].p4;
+                  leptons.set(vhCand.V.muons[0],0,12); 
                   float cweightID = ScaleID(leptons.pt[0],leptons.eta[0]);
                   float weightTrig1 = ScaleIsoHLT(leptons.pt[0],leptons.eta[0]);
                   float cweightTrig = weightTrig1;
@@ -653,6 +649,7 @@ int main(int argc, char* argv[])
                   nlep=1;
           }
           if( Vtype == VHbbCandidate::Wen ){
+                  leptonForTop=vhCand.V.electrons[0].p4;
             	  leptons.set(vhCand.V.electrons[0],0,11);
 		  nlep=1;
            }
@@ -661,6 +658,31 @@ int main(int argc, char* argv[])
                   //FIXME: trigger weights for Znn
 
           }
+
+      
+
+          double maxBtag=-99999;
+          TLorentzVector bJet;
+          for(unsigned int j=0; j < vhCand.H.jets.size(); j++ ){
+                if (vhCand.H.jets[j].csv > maxBtag) { bJet=vhCand.H.jets[j].p4 ; maxBtag =vhCand.H.jets[j].csv; }
+          }
+          for(unsigned int j=0; j < vhCand.additionalJets.size(); j++ ){
+                if (vhCand.additionalJets[j].csv > maxBtag) { bJet=vhCand.additionalJets[j].p4 ; maxBtag =vhCand.additionalJets[j].csv; }
+          }
+          if(maxBtag > -99999)
+          { 
+           TopHypo topQuark = TopMassReco::topMass(leptonForTop,bJet,vhCand.V.mets.at(0).p4);
+           top.mass = topQuark.p4.M();
+           top.pt = topQuark.p4.Pt();
+           top.wMass = topQuark.p4W.M();
+          } else {
+              top.mass = -99;
+              top.pt = -99;
+              top.wMass = -99;
+          }
+  
+
+       
 //FIXME  _outTree->Branch("nofLeptons15"   ,  &nofLeptons15      ,  "nofLeptons15/I"    );
           nofLeptons20= vhCand.additionalLeptons();
 // if(aux.mcC.size() >=2)
