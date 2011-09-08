@@ -1,3 +1,5 @@
+import FWCore.PythonUtilities.LumiList as LumiList
+import FWCore.ParameterSet.Types as CfgTypes
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("FWLitePlots")
@@ -52,7 +54,15 @@ process.fwliteInput = cms.PSet(
     PUdatafileName = cms.string(""),
     maxEvents   = cms.int32(-1),                             ## optional
     outputEvery = cms.uint32(0),                            ## optional
+    lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange()),
     )
+
+# get JSON file 
+JSONfile = 'Input.json'
+lumiList = LumiList.LumiList (filename = JSONfile).getCMSSWString().split(',')
+
+#Uncomment to run with JSON
+#process.fwliteInput.lumisToProcess.extend(lumiList)
 
 
 channel =  "TTbar"
@@ -106,6 +116,7 @@ process.Analyzer = cms.PSet(
     readFromCandidates = cms.bool(True),
     jetPtThresholdZ = cms.double(20),
     jetPtThresholdW = cms.double(30),
+    bJetCountThreshold = cms.double(0.898),
     useHighestPtHiggsW = cms.bool(True),
     useHighestPtHiggsZ = cms.bool(False),
 

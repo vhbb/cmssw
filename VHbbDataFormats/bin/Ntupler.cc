@@ -126,6 +126,26 @@ return (s1);
 
 }
 
+bool jsonContainsEvent (const std::vector< edm::LuminosityBlockRange > &jsonVec,
+                        const edm::EventBase &event)
+{
+   // if the jsonVec is empty, then no JSON file was provided so all
+   // events should pass
+   if (jsonVec.empty())
+   {
+      return true;
+   }
+   bool (* funcPtr) (edm::LuminosityBlockRange const &,
+                     edm::LuminosityBlockID const &) = &edm::contains;
+   edm::LuminosityBlockID lumiID (event.id().run(), 
+                                  event.id().luminosityBlock());
+   std::vector< edm::LuminosityBlockRange >::const_iterator iter = 
+      std::find_if (jsonVec.begin(), jsonVec.end(),
+                    boost::bind(funcPtr, _1, lumiID) );
+   return jsonVec.end() != iter;
+
+}
+
 
 
   typedef struct 
@@ -210,11 +230,12 @@ struct  _LeptonInfo
     float wMass;
   } _TopInfo;
 
-  struct 
+  typedef struct 
   {
     int run;
     int lumi;
     int event;
+    int json;
   } _EventInfo;
   
   typedef struct 
@@ -274,6 +295,7 @@ int main(int argc, char* argv[])
   _METInfo MET;
   _MHTInfo MHT;
   _TopInfo TOP;
+  _EventInfo EVENT;
 //  _JetInfo jet1,jet2, addJet1, addJet2;
   _JetInfo hJets, aJets;
   int naJets=0, nhJets=0;
@@ -312,6 +334,14 @@ int main(int argc, char* argv[])
   const edm::ParameterSet& in  = builder.processDesc()->getProcessPSet()->getParameter<edm::ParameterSet>("fwliteInput" );
   const edm::ParameterSet& out = builder.processDesc()->getProcessPSet()->getParameter<edm::ParameterSet>("fwliteOutput");
   const edm::ParameterSet& ana = builder.processDesc()->getProcessPSet()->getParameter<edm::ParameterSet>("Analyzer");
+  std::vector<edm::LuminosityBlockRange> jsonVector;
+  if ( in.exists("lumisToProcess") ) 
+  {
+       std::vector<edm::LuminosityBlockRange> const & lumisTemp =
+         in.getUntrackedParameter<std::vector<edm::LuminosityBlockRange> > ("lumisToProcess");
+      jsonVector.resize( lumisTemp.size() );
+      copy( lumisTemp.begin(), lumisTemp.end(), jsonVector.begin() );
+  }
   
   // now get each parameter
   int maxEvents_( in.getParameter<int>("maxEvents") );
@@ -436,6 +466,8 @@ int main(int argc, char* argv[])
    std::stringstream s;
    s << "triggerFlags[" << triggers.size() << "]/b";
    _outTree->Branch("triggerFlags", triggerFlags, s.str().c_str()); 
+  
+   _outTree->Branch("EVENT"		,  &EVENT	         ,   "run/I:lumi/I:event/I:json/I");
  
    /*
       FIXME - btag SF
@@ -467,6 +499,12 @@ int main(int argc, char* argv[])
 // 	   }
  	   PUweight = 1.0; // FIXME: LumiWeights_.weight3BX( avg /3.);  (NEED EDM FIX)
  	  }
+      
+      //Write event info 
+      EVENT.run = ev.id().run();
+      EVENT.lumi = ev.id().luminosityBlock();
+      EVENT.event = ev.id().event();
+      EVENT.json = jsonContainsEvent (jsonVector, ev);
 
  
  const std::vector<VHbbCandidate> * candZ ;
