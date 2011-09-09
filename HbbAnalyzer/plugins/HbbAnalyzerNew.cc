@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.29 2011/09/09 11:00:04 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.30 2011/09/09 12:03:29 tboccali Exp $
 //
 //
 
@@ -98,10 +98,10 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   edm::ESHandle<JetCorrectorParametersCollection> JetCorParColl;
   iSetup.get<JetCorrectionsRecord>().get("AK5PF",JetCorParColl); 
   JetCorrectionUncertainty *jecUnc=0;
-  if (!runOnMC_){
+  //  if (!runOnMC_){
   JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
   jecUnc = new JetCorrectionUncertainty(JetCorPar);
-  }
+  //  }
   
   std::auto_ptr<VHbbEvent> hbbInfo( new VHbbEvent() );  
   std::auto_ptr<VHbbEventAuxInfo> auxInfo( new VHbbEventAuxInfo() );
@@ -395,53 +395,9 @@ BTagSFContainer btagSFs;
     //       njetscounter++;
     VHbbEvent::SimpleJet sj;
     fillSimpleJet(sj,jet_iter);
-    if(!runOnMC_)    setJecUnc(sj,jecUnc);
-    /*    sj.flavour = jet_iter->partonFlavour();
+    //    if(!runOnMC_) 
 
-    sj.tche=jet_iter->bDiscriminator("trackCountingHighEffBJetTags");
-    sj.tchp=jet_iter->bDiscriminator("trackCountingHighPurBJetTags");
-    sj.jp=jet_iter->bDiscriminator("jetProbabilityBJetTags");
-    sj.jpb=jet_iter->bDiscriminator("jetBProbabilityBJetTags");
-    sj.ssvhe=jet_iter->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
-    sj.csv=jet_iter->bDiscriminator("combinedSecondaryVertexBJetTags");
-    sj.csvmva=jet_iter->bDiscriminator("combinedSecondaryVertexMVABJetTags");
-    sj.charge=jet_iter->jetCharge();
-    sj.ntracks=jet_iter->associatedTracks().size();
-    sj.p4=GENPTOLORP(jet_iter);
-    sj.chargedTracksFourMomentum=(getChargedTracksMomentum(&*(jet_iter)));
-    sj.SF_CSVL=1;
-    sj.SF_CSVM=1;
-    sj.SF_CSVT=1;
-    sj.SF_CSVLerr=0;
-    sj.SF_CSVMerr=0;
-    sj.SF_CSVTerr=0;
-
-    
-
-    sj.chargedHadronEFraction = jet_iter-> chargedHadronEnergyFraction();
-
-
-    //
-    // addtaginfo for csv
-    //
-
-    if (jet_iter->hasTagInfo("SimpleSecondaryVertex")) {
-
-      const reco::SecondaryVertexTagInfo * tf = jet_iter->tagInfoSecondaryVertex();
-      sj.vtxMass = tf->secondaryVertex(0).p4().mass();
-      sj.vtxNTracks = tf->secondaryVertex(0).nTracks();
-      Measurement1D m = tf->flightDistance(0);
-      sj.vtx3dL = m.value();
-      sj.vtx3deL = m.error();
-    }
-
-
-    //
-    // add tVector
-    //
-    sj.tVector = getTvect(&(*jet_iter));
-
-    */
+   setJecUnc(sj,jecUnc);
 
     Particle::LorentzVector p4Jet = jet_iter->p4();
 
@@ -478,55 +434,11 @@ BTagSFContainer btagSFs;
     //       njetscounter++;
     VHbbEvent::SimpleJet sj;
     fillSimpleJet(sj,jet_iter);
-    if(!runOnMC_)    setJecUnc(sj,jecUnc);
-    /*    sj.flavour = jet_iter->partonFlavour();
-
-    sj.tche=jet_iter->bDiscriminator("trackCountingHighEffBJetTags");
-    sj.tchp=jet_iter->bDiscriminator("trackCountingHighPurBJetTags");
-    sj.jp=jet_iter->bDiscriminator("jetProbabilityBJetTags");
-    sj.jpb=jet_iter->bDiscriminator("jetBProbabilityBJetTags");
-    sj.ssvhe=jet_iter->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
-    sj.csv=jet_iter->bDiscriminator("combinedSecondaryVertexBJetTags");
-    sj.csvmva=jet_iter->bDiscriminator("combinedSecondaryVertexMVABJetTags");
-    sj.charge=jet_iter->jetCharge();
-    sj.ntracks=jet_iter->associatedTracks().size();
-    sj.p4=GENPTOLORP(jet_iter);
-    sj.chargedTracksFourMomentum=(getChargedTracksMomentum(&*(jet_iter)));
-    sj.SF_CSVL=1;
-    sj.SF_CSVM=1;
-    sj.SF_CSVT=1;
-    sj.SF_CSVLerr=0;
-    sj.SF_CSVMerr=0;
-    sj.SF_CSVTerr=0;
-
-    
-
-    sj.chargedHadronEFraction = jet_iter-> chargedHadronEnergyFraction();
+    //    if(!runOnMC_)  
+  setJecUnc(sj,jecUnc);
 
 
-    //
-    // addtaginfo for csv
-    //
-
-    if (jet_iter->hasTagInfo("SimpleSecondaryVertex")) {
-
-      const reco::SecondaryVertexTagInfo * tf = jet_iter->tagInfoSecondaryVertex();
-      sj.vtxMass = tf->secondaryVertex(0).p4().mass();
-      sj.vtxNTracks = tf->secondaryVertex(0).nTracks();
-      Measurement1D m = tf->flightDistance(0);
-      sj.vtx3dL = m.value();
-      sj.vtx3deL = m.error();
-    }
-
-
-    //
-    // add tVector
-    //
-    sj.tVector = getTvect(&(*jet_iter));
-
-    */
-
-    Particle::LorentzVector p4Jet = jet_iter->p4();
+   Particle::LorentzVector p4Jet = jet_iter->p4();
 
     if(runOnMC_){
 
@@ -561,53 +473,9 @@ BTagSFContainer btagSFs;
     //       njetscounter++;
     VHbbEvent::SimpleJet sj;
     fillSimpleJet(sj,jet_iter);
-    if(!runOnMC_)    setJecUnc(sj,jecUnc);
-    /*    sj.flavour = jet_iter->partonFlavour();
+    //    if(!runOnMC_)  
+    setJecUnc(sj,jecUnc);
 
-    sj.tche=jet_iter->bDiscriminator("trackCountingHighEffBJetTags");
-    sj.tchp=jet_iter->bDiscriminator("trackCountingHighPurBJetTags");
-    sj.jp=jet_iter->bDiscriminator("jetProbabilityBJetTags");
-    sj.jpb=jet_iter->bDiscriminator("jetBProbabilityBJetTags");
-    sj.ssvhe=jet_iter->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
-    sj.csv=jet_iter->bDiscriminator("combinedSecondaryVertexBJetTags");
-    sj.csvmva=jet_iter->bDiscriminator("combinedSecondaryVertexMVABJetTags");
-    sj.charge=jet_iter->jetCharge();
-    sj.ntracks=jet_iter->associatedTracks().size();
-    sj.p4=GENPTOLORP(jet_iter);
-    sj.chargedTracksFourMomentum=(getChargedTracksMomentum(&*(jet_iter)));
-    sj.SF_CSVL=1;
-    sj.SF_CSVM=1;
-    sj.SF_CSVT=1;
-    sj.SF_CSVLerr=0;
-    sj.SF_CSVMerr=0;
-    sj.SF_CSVTerr=0;
-
-    
-
-    sj.chargedHadronEFraction = jet_iter-> chargedHadronEnergyFraction();
-
-
-    //
-    // addtaginfo for csv
-    //
-
-    if (jet_iter->hasTagInfo("SimpleSecondaryVertex")) {
-
-      const reco::SecondaryVertexTagInfo * tf = jet_iter->tagInfoSecondaryVertex();
-      sj.vtxMass = tf->secondaryVertex(0).p4().mass();
-      sj.vtxNTracks = tf->secondaryVertex(0).nTracks();
-      Measurement1D m = tf->flightDistance(0);
-      sj.vtx3dL = m.value();
-      sj.vtx3deL = m.error();
-    }
-
-
-    //
-    // add tVector
-    //
-    sj.tVector = getTvect(&(*jet_iter));
-
-    */
 
     Particle::LorentzVector p4Jet = jet_iter->p4();
 
@@ -644,7 +512,8 @@ BTagSFContainer btagSFs;
     
     VHbbEvent::SimpleJet sj;
     fillSimpleJet(sj,jet_iter);    
-  if(!runOnMC_)   setJecUnc(sj,jecUnc);
+    //  if(!runOnMC_)  
+ setJecUnc(sj,jecUnc);
     /*    sj.flavour = jet_iter->partonFlavour();
     
     
@@ -785,7 +654,8 @@ BTagSFContainer btagSFs;
 
     VHbbEvent::SimpleJet sj;
     fillSimpleJet(sj,subjet_iter);
-  if(!runOnMC_)    setJecUnc(sj,jecUnc);
+    //  if(!runOnMC_)  
+    setJecUnc(sj,jecUnc);
     /*    sj.flavour = subjet_iter->partonFlavour();
     sj.tVector = getTvect(&(*subjet_iter));
     sj.tche=subjet_iter->bDiscriminator("trackCountingHighEffBJetTags");
@@ -1440,8 +1310,7 @@ void HbbAnalyzerNew ::fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Je
     //    if (jet_iter->hasTagInfo("SimpleSecondaryVertex")) {
 
     const reco::SecondaryVertexTagInfo * tf = jet_iter->tagInfoSecondaryVertex();
-    std::cout<<" ECCO TF "<<tf<<std::endl;
-    if (tf){
+   if (tf){
       std::cout <<" PIPPO!!!!"<<std::endl;
       std::cout <<" PIPPO!!!!ddd "<<tf->nVertices()<<std::endl;
       sj.vtxMass = tf->secondaryVertex(0).p4().mass();

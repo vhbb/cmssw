@@ -33,7 +33,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 if isMC == False :
 	process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
 else :
-	process.GlobalTag.globaltag = cms.string('START42_V12::All')
+	process.GlobalTag.globaltag = cms.string('START42_V13::All')
 
 process.out1 = cms.OutputModule(
     'PoolOutputModule',
