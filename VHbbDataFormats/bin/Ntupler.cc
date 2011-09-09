@@ -637,7 +637,7 @@ int main(int argc, char* argv[])
 //FIXME  add MHT     _outTree->Branch("MHT"            ,  &MHT          ,   "mht/F:ht:sig/F:phi/F");  (NEED EDM FIX)
           Vtype = vhCand.candidateType;
           vLeptons.reset();
-          weightTrig = 0.; 
+          weightTrig = 1.; // better to default to 1 
 	  TLorentzVector leptonForTop;
           size_t firstAddMu=0;
           size_t firstAddEle=0;
