@@ -99,6 +99,7 @@ from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerEventContent
 
 ## want pfNoElectron
 
+#process.patJets.addTagInfos  = True
 
 process.load('CommonTools.ParticleFlow.PF2PAT_cff')
 from PhysicsTools.PatAlgos.tools.pfTools import *
@@ -339,6 +340,7 @@ process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 from PhysicsTools.SelectorUtils.pfJetIDSelector_cfi import pfJetIDSelector 
 process.goodPatJetsAK5PF = cms.EDFilter("PFJetIDSelectionFunctorFilter",
                            filterParams = pfJetIDSelector.clone(), src = cms.InputTag("selectedPatJetsAK5PF") )
+
 
 process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     runOnMC = cms.bool(isMC),
