@@ -13,14 +13,39 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.26 2011/08/26 08:32:55 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.27 2011/08/26 10:29:59 arizzi Exp $
 //
 //
+
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+#include "JetMETCorrections/Objects/interface/JetCorrector.h"
+#include "JetMETCorrections/Objects/interface/JetCorrectionsRecord.h" 
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
 
 #include "VHbbAnalysis/HbbAnalyzer/interface/HbbAnalyzerNew.h"
 
 #define GENPTOLOR(a) TLorentzVector((a).px(), (a).py(), (a).pz(), (a).energy())
 #define GENPTOLORP(a) TLorentzVector((a)->px(), (a)->py(), (a)->pz(), (a)->energy())
+
+
+struct CompareJetPtMuons {
+  bool operator()( const VHbbEvent::MuonInfo& j1, const  VHbbEvent::MuonInfo& j2 ) const {
+    return j1.p4.Pt() > j2.p4.Pt();
+  }
+};
+struct CompareJetPtElectrons {
+  bool operator()( const VHbbEvent::ElectronInfo& j1, const  VHbbEvent::ElectronInfo& j2 ) const {
+    return j1.p4.Pt() > j2.p4.Pt();
+  }
+};
+struct CompareJetPtTaus {
+  bool operator()( const VHbbEvent::TauInfo& j1, const  VHbbEvent::TauInfo& j2 ) const {
+    return j1.p4.Pt() > j2.p4.Pt();
+  }
+};
+
+
 
 HbbAnalyzerNew::HbbAnalyzerNew(const edm::ParameterSet& iConfig):
   eleLabel_(iConfig.getParameter<edm::InputTag>("electronTag")),
@@ -67,6 +92,16 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   using namespace edm;
   using namespace reco;
   
+  // JEC Uncertainty
+
+ 
+  edm::ESHandle<JetCorrectorParametersCollection> JetCorParColl;
+  iSetup.get<JetCorrectionsRecord>().get("AK5PF",JetCorParColl); 
+  JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
+  JetCorrectionUncertainty *jecUnc = new JetCorrectionUncertainty(JetCorPar);
+
+
+
   
   std::auto_ptr<VHbbEvent> hbbInfo( new VHbbEvent() );  
   std::auto_ptr<VHbbEventAuxInfo> auxInfo( new VHbbEventAuxInfo() );
@@ -74,6 +109,8 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   //
   // ??
    
+  // trigger
+
   // trigger
   edm::Handle<edm::TriggerResults>  hltresults;
   //iEvent.getByLabel("TriggerResults", hltresults);
@@ -83,195 +120,9 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   iEvent.getByLabel(hltResults_, hltresults);
    
   const edm::TriggerNames & triggerNames_ = iEvent.triggerNames(*hltresults);
-   
+
   int ntrigs = hltresults->size();
   if (ntrigs==0){std::cerr << "%HLTInfo -- No trigger name given in TriggerResults of the input " << std::endl;}
-
-  for (int itrig = 0; itrig != ntrigs; ++itrig){
-
-    TString trigName=triggerNames_.triggerName(itrig);
-    bool accept = hltresults->accept(itrig);
-
-    if (accept){(auxInfo->triggerInfo.flag)[itrig] = 1;}
-    else { (auxInfo->triggerInfo.flag)[itrig] = 0;}
-
-    //    std::cout << "%HLTInfo --  Number of HLT Triggers: " << ntrigs << std::endl;
-    //    std::cout << "%HLTInfo --  HLTTrigger(" << itrig << "): " << trigName << " = " << accept << std::endl;
-  }
-
-//   //
-//   // big bloat
-//   //
-
-
-  int goodDoubleMu3=0,goodDoubleMu3_2=0,  
-    goodMu9=0, goodIsoMu9=0, goodMu11=0, goodIsoMu13_3=0, goodMu15=0, goodMu15_1=0; 
-  int goodDoubleElec10=0,goodDoubleElec15_1=0,goodDoubleElec17_1=0;
-  int goodMet100=0;
-  int goodSingleEle1=0,goodSingleEle2=0,goodSingleEle3=0,goodSingleEle4=0;
-  int goodBtagMu1=0,goodBtagMu2=0,goodBtagMu0=0,goodBtagMu11=0;  
-  int goodBtagMuJet1=0, goodBtagMuJet2=0, goodBtagMuJet3=0, goodBtagMuJet4=0; 
-  int goodIsoMu15=0,goodIsoMu17v5=0,goodIsoMu17v6=0;
-
-  for (int itrig = 0; itrig != ntrigs; ++itrig){
-    TString trigName=triggerNames_.triggerName(itrig);
-    if(strcmp(trigName,"HLT_Mu9")==0) goodMu9++;
-    if(strcmp(trigName,"HLT_IsoMu9")==0) goodIsoMu9++;
-    if(strcmp(trigName,"HLT_IsoMu13_v3")==0) goodIsoMu13_3++;
-    if(strcmp(trigName,"HLT_Mu11")==0) goodMu11++;
-    if(strcmp(trigName,"HLT_DoubleMu3")==0) goodDoubleMu3++;
-    if(strcmp(trigName,"HLT_DoubleMu3_v2")==0) goodDoubleMu3_2++;
-    if(strcmp(trigName,"HLT_Mu15")==0) goodMu15++;
-    if(strcmp(trigName,"HLT_Mu15_v1")==0) goodMu15_1++;
-
-    if(strcmp(trigName,"HLT_DoubleEle10_SW_L1R")==0) goodDoubleElec10++;
-    if(strcmp(trigName,"HLT_DoubleEle15_SW_L1R_v1")==0) goodDoubleElec15_1++;
-    if(strcmp(trigName,"HLT_DoubleEle17_SW_L1R_v1")==0) goodDoubleElec17_1++;
-    if(strcmp(trigName,"HLT_MET100_v1")==0) goodMet100++;
-    if(strcmp(trigName,"HLT_Ele15_SW_L1R")==0) goodSingleEle1++;
-    if(strcmp(trigName,"HLT_Ele17_SW_TightEleId_L1R")==0) goodSingleEle2++;
-    if(strcmp(trigName,"HLT_Ele17_SW_TighterEleIdIsol_L1R_v2")==0) goodSingleEle3++;
-    if(strcmp(trigName,"HLT_Ele17_SW_TighterEleIdIsol_L1R_v3")==0) goodSingleEle4++;
-    if(strcmp(trigName,"HLT_BTagMu_DiJet20U_v1")==0) goodBtagMu1++;
-    if(strcmp(trigName,"HLT_BTagMu_DiJet30U_Mu5_v3")==0) goodBtagMu2++;
-    if(strcmp(trigName,"HLT_BTagMu_Jet20U")==0) goodBtagMu0++;
-    if(strcmp(trigName,"HLT_BTagMu_DiJet20U_Mu5_v1")==0) goodBtagMu11++;
-    if(strcmp(trigName,"HLT_Mu17_CentralJet30_BTagIP_v2")==0) goodBtagMuJet1++;
-    if(strcmp(trigName,"HLT_Mu17_CentralJet30_v2")==0) goodBtagMuJet2++;
-    if(strcmp(trigName,"HLT_HT200_Mu5_PFMHT35_v2")==0) goodBtagMuJet3++;
-    if(strcmp(trigName,"HLT_Mu12_CentralJet30_BTagIP_v2")==0) goodBtagMuJet4++;  
-
-    if(strcmp(trigName,"HLT_IsoMu15_v5")==0) goodIsoMu15++; 
-    if(strcmp(trigName,"HLT_IsoMu17_v5")==0) goodIsoMu17v5++;  
-    if(strcmp(trigName,"HLT_IsoMu17_v6")==0) goodIsoMu17v6++;  
-  }
-  int itrig1=-99;
-  if(goodMu9!=0) itrig1 = triggerNames_.triggerIndex("HLT_Mu9");
-  int itrig2=-99;
-  if(goodIsoMu9!=0) itrig2 = triggerNames_.triggerIndex("HLT_IsoMu9");
-  int itrig3=-99;
-  if(goodIsoMu13_3!=0) itrig3 = triggerNames_.triggerIndex("HLT_IsoMu13_v3"); 
-  int itrig4=-99;
-  if(goodMu11!=0) itrig4 = triggerNames_.triggerIndex("HLT_Mu11"); 
-  int itrig5=-99;  
-  if(goodDoubleMu3!=0) itrig5 = triggerNames_.triggerIndex("HLT_DoubleMu3"); 
-  int itrig6=-99;
-  if(goodDoubleMu3_2!=0) itrig6 = triggerNames_.triggerIndex("HLT_DoubleMu3_v2");
-  int itrig7=-99;
-  if(goodMu15!=0) itrig7 = triggerNames_.triggerIndex("HLT_Mu15");
-  int itrig8=-99;
-  if(goodMu15_1!=0) itrig8 = triggerNames_.triggerIndex("HLT_Mu15_v1"); 
-
-  int itrig9=-99;
-  if(goodDoubleElec10!=0) itrig9 = triggerNames_.triggerIndex("HLT_DoubleEle10_SW_L1R"); 
-  int itrig10=-99;
-  if(goodDoubleElec15_1!=0) itrig10 = triggerNames_.triggerIndex("HLT_DoubleEle15_SW_L1R_v1"); 
-  int itrig11=-99;
-  if(goodDoubleElec17_1!=0) itrig11 = triggerNames_.triggerIndex("HLT_DoubleEle17_SW_L1R_v1"); 
-  int itrig12=-99;
-  if(goodMet100!=0) itrig12 = triggerNames_.triggerIndex("HLT_MET100_v1"); 
-
-  int itrig13=-99;
-  if(goodSingleEle1!=0) itrig13 = triggerNames_.triggerIndex("HLT_Ele15_SW_L1R");
-  int itrig14=-99;
-  if(goodSingleEle2!=0) itrig14 = triggerNames_.triggerIndex("HLT_Ele17_SW_TightEleId_L1R");
-  int itrig15=-99;
-  if(goodSingleEle3!=0) itrig15 = triggerNames_.triggerIndex("HLT_Ele17_SW_TighterEleIdIsol_L1R_v2");
-  int itrig16=-99;
-  if(goodSingleEle4!=0) itrig16 = triggerNames_.triggerIndex("HLT_Ele17_SW_TighterEleIdIsol_L1R_v3");
-
-  int itrig17=-99; 
-  if(goodBtagMu1!=0) itrig17 = triggerNames_.triggerIndex("HLT_BTagMu_DiJet20U_v1");      
-  int itrig18=-99;
-  if(goodBtagMu2!=0) itrig18 = triggerNames_.triggerIndex("HLT_BTagMu_DiJet30U_Mu5_v3");    
-  int itrig19=-99;
-  if(goodBtagMu0!=0) itrig19 = triggerNames_.triggerIndex("HLT_BTagMu_Jet20U");
-  int itrig20=-99;
-  if(goodBtagMu11!=0) itrig20 = triggerNames_.triggerIndex("HLT_BTagMu_DiJet20U_Mu5_v1");
-  int itrig21=-99;
-  if(goodBtagMuJet1!=0) itrig21 = triggerNames_.triggerIndex("HLT_Mu17_CentralJet30_BTagIP_v2");
-  int itrig22=-99;
-  if(goodBtagMuJet2!=0) itrig22 = triggerNames_.triggerIndex("HLT_Mu17_CentralJet30_v2"); 
-  int itrig23=-99;
-  if(goodBtagMuJet3!=0) itrig23 = triggerNames_.triggerIndex("HLT_HT200_Mu5_PFMHT35_v2");
-  int itrig231=-99;
-  if(goodBtagMuJet4!=0) itrig231 = triggerNames_.triggerIndex("HLT_Mu12_CentralJet30_BTagIP_v2");  
-
-  int itrig24=-99;
-  if(goodIsoMu15!=0) itrig24 = triggerNames_.triggerIndex("HLT_IsoMu15_v5"); 
-  int itrig25=-99;
-  if(goodIsoMu17v5!=0) itrig25 = triggerNames_.triggerIndex("HLT_IsoMu17_v5");
-  int itrig26=-99;
-  if(goodIsoMu17v6!=0) itrig26 = triggerNames_.triggerIndex("HLT_IsoMu17_v6");
-   
-  if (itrig1!=-99 && hltresults->accept(itrig1))  auxInfo->triggerInfo.triggerMu9=1; else auxInfo->triggerInfo.triggerMu9=0;
-  if (itrig2!=-99 && hltresults->accept(itrig2))  auxInfo->triggerInfo.triggerIsoMu9=1; else auxInfo->triggerInfo.triggerIsoMu9=0;
-  if (itrig3!=-99 && hltresults->accept(itrig3))  auxInfo->triggerInfo.triggerIsoMu13_3=1; else auxInfo->triggerInfo.triggerIsoMu13_3=0;
-  if (itrig4!=-99 && hltresults->accept(itrig4))  auxInfo->triggerInfo.triggerMu11=1; else auxInfo->triggerInfo.triggerMu11=0;
-  if (itrig5!=-99 && hltresults->accept(itrig5))  auxInfo->triggerInfo.triggerDoubleMu3=1; else auxInfo->triggerInfo.triggerDoubleMu3=0; 
-  if (itrig6!=-99 && hltresults->accept(itrig6))  auxInfo->triggerInfo.triggerDoubleMu3_2=1; else auxInfo->triggerInfo.triggerDoubleMu3_2=0;
-  if (itrig7!=-99 && hltresults->accept(itrig7))  auxInfo->triggerInfo.triggerMu15=1; else auxInfo->triggerInfo.triggerMu15=0;
-  if (itrig8!=-99 && hltresults->accept(itrig8))  auxInfo->triggerInfo.triggerMu15_1=1; else auxInfo->triggerInfo.triggerMu15_1=0;  
-   
-  if (itrig9!=-99 && hltresults->accept(itrig9))  auxInfo->triggerInfo.triggerDoubleElec10=1; else auxInfo->triggerInfo.triggerDoubleElec10=0;  
-  if (itrig10!=-99 && hltresults->accept(itrig10))  auxInfo->triggerInfo.triggerDoubleElec15_1=1; else auxInfo->triggerInfo.triggerDoubleElec15_1=0;  
-  if (itrig11!=-99 && hltresults->accept(itrig11))  auxInfo->triggerInfo.triggerDoubleElec17_1=1; else auxInfo->triggerInfo.triggerDoubleElec17_1=0;  
-  if (itrig12!=-99 && hltresults->accept(itrig12))  auxInfo->triggerInfo.triggerMet100_1=1; else auxInfo->triggerInfo.triggerMet100_1=0;
-   
-  if (itrig13!=-99 && hltresults->accept(itrig13))  auxInfo->triggerInfo.triggerSingleEle1=1; else auxInfo->triggerInfo.triggerSingleEle1=0;
-  if (itrig14!=-99 && hltresults->accept(itrig14))  auxInfo->triggerInfo.triggerSingleEle2=1; else auxInfo->triggerInfo.triggerSingleEle2=0;
-  if (itrig15!=-99 && hltresults->accept(itrig15))  auxInfo->triggerInfo.triggerSingleEle3=1; else auxInfo->triggerInfo.triggerSingleEle3=0;
-  if (itrig16!=-99 && hltresults->accept(itrig16))  auxInfo->triggerInfo.triggerSingleEle4=1; else auxInfo->triggerInfo.triggerSingleEle4=0;
-   
-  if (itrig17!=-99 && hltresults->accept(itrig17))  auxInfo->triggerInfo.triggerBtagMu1=1; else auxInfo->triggerInfo.triggerBtagMu1=0;   
-  if (itrig18!=-99 && hltresults->accept(itrig18))  auxInfo->triggerInfo.triggerBtagMu2=1; else auxInfo->triggerInfo.triggerBtagMu2=0;
-  if (itrig19!=-99 && hltresults->accept(itrig19))  auxInfo->triggerInfo.triggerBtagMu0=1; else auxInfo->triggerInfo.triggerBtagMu0=0;
-  if (itrig20!=-99 && hltresults->accept(itrig20))  auxInfo->triggerInfo.triggerBtagMu11=1; else auxInfo->triggerInfo.triggerBtagMu11=0;
-  if (itrig21!=-99 && hltresults->accept(itrig21))  auxInfo->triggerInfo.triggerBtagMuJet1=1; else auxInfo->triggerInfo.triggerBtagMuJet1=0;
-  if (itrig22!=-99 && hltresults->accept(itrig22))  auxInfo->triggerInfo.triggerBtagMuJet2=1; else auxInfo->triggerInfo.triggerBtagMuJet2=0;
-  if (itrig23!=-99 && hltresults->accept(itrig23))  auxInfo->triggerInfo.triggerBtagMuJet3=1; else auxInfo->triggerInfo.triggerBtagMuJet3=0;
-  if (itrig231!=-99 && hltresults->accept(itrig231))  auxInfo->triggerInfo.triggerBtagMuJet4=1; else auxInfo->triggerInfo.triggerBtagMuJet4=0;
-   
-  if (itrig24!=-99 && hltresults->accept(itrig24))  auxInfo->triggerInfo.triggerIsoMu15=1; else auxInfo->triggerInfo.triggerIsoMu15=0;
-  if (itrig25!=-99 && hltresults->accept(itrig25))  auxInfo->triggerInfo.triggerIsoMu17v5=1; else auxInfo->triggerInfo.triggerIsoMu17v5=0;
-  if (itrig26!=-99 && hltresults->accept(itrig26))  auxInfo->triggerInfo.triggerIsoMu17v6=1; else auxInfo->triggerInfo.triggerIsoMu17v6=0;
-   
-  if (itrig1==-99)  auxInfo->triggerInfo.triggerMu9=-99; 
-  if (itrig2==-99)  auxInfo->triggerInfo.triggerIsoMu9=-99; 
-  if (itrig3==-99)  auxInfo->triggerInfo.triggerIsoMu13_3=-99; 
-  if (itrig4==-99)  auxInfo->triggerInfo.triggerMu11=-99; 
-  if (itrig5==-99)  auxInfo->triggerInfo.triggerDoubleMu3=-99;
-  if (itrig6==-99)  auxInfo->triggerInfo.triggerDoubleMu3_2=-99; 
-  if (itrig7==-99)  auxInfo->triggerInfo.triggerMu15=-99;
-  if (itrig8==-99)  auxInfo->triggerInfo.triggerMu15_1=-99; 
-
-  if (itrig9==-99)  auxInfo->triggerInfo.triggerDoubleElec10=-99; 
-  if (itrig10==-99)  auxInfo->triggerInfo.triggerDoubleElec15_1=-99; 
-  if (itrig11==-99)  auxInfo->triggerInfo.triggerDoubleElec17_1=-99; 
-  if (itrig12==-99) auxInfo->triggerInfo.triggerMet100_1=-99;
-
-  if (itrig13==-99) auxInfo->triggerInfo.triggerSingleEle1=-99;
-  if (itrig14==-99) auxInfo->triggerInfo.triggerSingleEle2=-99;
-  if (itrig15==-99) auxInfo->triggerInfo.triggerSingleEle3=-99;
-  if (itrig16==-99) auxInfo->triggerInfo.triggerSingleEle4=-99;
-
-  if(itrig17==-99)  auxInfo->triggerInfo.triggerBtagMu1=-99;   
-  if(itrig18==-99)  auxInfo->triggerInfo.triggerBtagMu2=-99;
-  if(itrig19==-99)  auxInfo->triggerInfo.triggerBtagMu0=-99;
-  if(itrig20==-99)  auxInfo->triggerInfo.triggerBtagMu11=-99;
-  if(itrig21==-99)  auxInfo->triggerInfo.triggerBtagMuJet1=-99;
-  if(itrig22==-99)  auxInfo->triggerInfo.triggerBtagMuJet2=-99;
-  if(itrig23==-99)  auxInfo->triggerInfo.triggerBtagMuJet3=-99;
-  if(itrig231==-99)  auxInfo->triggerInfo.triggerBtagMuJet4=-99;
-
-  if(itrig24==-99)  auxInfo->triggerInfo.triggerIsoMu15=-99;
-  if(itrig25==-99)  auxInfo->triggerInfo.triggerIsoMu17v5=-99;
-  if(itrig26==-99)  auxInfo->triggerInfo.triggerIsoMu17v6=-99;
-
-  //  MinDRMu=-99.,MCBestMuId=-99,MCBestMuMomId=-99,MCBestMuGMomId=-99;
-  //  for(int i=0;i<50;i++) {DeltaRMu[i]=-99;}
-
-
 
   BeamSpot vertexBeamSpot;
   edm::Handle<reco::BeamSpot> recoBeamSpotHandle;
@@ -320,39 +171,23 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   
   if(runOnMC_){
     
-    int Hin=-99,Win=-99,Zin=-99,bin=-99,bbarin=-99;
-    iEvent.getByLabel("genParticles", genParticles);
+   iEvent.getByLabel("genParticles", genParticles);
     
     for(size_t i = 0; i < genParticles->size(); ++ i) {
-      int Hin=-99,Win=-99,Zin=-99,bin=-99,bbarin=-99;
-      
+     
       const GenParticle & p = (*genParticles)[i];
       int id = p.pdgId();
       int st = p.status();  
       
       if(id==25){
 	
-	/*          int wh=0;
-		    int nMoth = p.numberOfMothers();
-		    for(size_t jj = 0; jj < nMoth; ++ jj) {
-		    const Candidate * mom = p.mother( jj );
-		    int nmomdau= mom->numberOfDaughters();
-		    for(size_t j = 0; j < nmomdau; ++ j) {
-		    const Candidate * Wmomdau = mom->daughter( j );
-		    if(abs(Wmomdau->pdgId())==24) wh++;
-		    }
-		    }
-		    
-		    if(wh==0) continue;
-	*/
 	VHbbEventAuxInfo::ParticleMCInfo htemp;
-	Hin=i; 
 	htemp.status=st;
 	htemp.charge=p.charge();
 	if(p.mother(0)!=0) htemp.momid=p.mother(0)->pdgId();
 	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) htemp.gmomid=p.mother(0)->mother(0)->pdgId(); 
 	htemp.p4 = GENPTOLOR(p);
-	  
+	
 	int ndau = p.numberOfDaughters();
 	for(int j = 0; j < ndau; ++ j) {
 	  const Candidate * Hdau = p.daughter( j );
@@ -361,18 +196,17 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	}
 	(auxInfo->mcH).push_back(htemp);
       }
-	
-	
+      
+      
       if(abs(id)==24){
-	  
-	Win=i;
+	
 	VHbbEventAuxInfo::ParticleMCInfo wtemp;
 	wtemp.status=st;
 	wtemp.charge=p.charge();
 	if(p.mother(0)!=0) wtemp.momid=p.mother(0)->pdgId();
 	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) wtemp.gmomid=p.mother(0)->mother(0)->pdgId();
 	wtemp.p4=GENPTOLOR(p);
-
+	
 	int ndau = p.numberOfDaughters();
 	for(int j = 0; j < ndau; ++ j) {
 	  const Candidate * Wdau = p.daughter( j );
@@ -384,7 +218,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	
       if(abs(id)==23){
 
-	Zin=i;
+
 	VHbbEventAuxInfo::ParticleMCInfo ztemp;
 	ztemp.status=st;
 	ztemp.charge=p.charge();
@@ -406,23 +240,41 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
       
       
       if(id==5){
-	bin=i; 
+
 	VHbbEventAuxInfo::ParticleMCInfo btemp;
 	btemp.status=st;
 	btemp.charge=p.charge();
 	if(p.mother(0)!=0) btemp.momid=p.mother(0)->pdgId();
 	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) btemp.gmomid=p.mother(0)->mother(0)->pdgId(); 
+
+	btemp.p4=GENPTOLOR(p);
+	
+	int nHDaubdau = p.numberOfDaughters();
+	for(int j = 0; j < nHDaubdau; ++ j) {
+	  const Candidate * Bdau = p.daughter( j );
+	  btemp.dauid.push_back(Bdau->pdgId());
+	}
 	auxInfo->mcB.push_back(btemp);
       }
       
       if(id==-5){
-	bbarin=i; 
+
 	VHbbEventAuxInfo::ParticleMCInfo bbtemp;
 	
 	bbtemp.status=st;
 	bbtemp.charge=p.charge();
 	if(p.mother(0)!=0) bbtemp.momid=p.mother(0)->pdgId();
 	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) bbtemp.gmomid=p.mother(0)->mother(0)->pdgId(); 
+
+	bbtemp.p4=GENPTOLOR(p);
+	
+	int nHDaubdau = p.numberOfDaughters();
+	for(int j = 0; j < nHDaubdau; ++ j) {
+	  const Candidate * Bdau = p.daughter( j );
+	  bbtemp.dauid.push_back(Bdau->pdgId());
+	}
+
+
 	auxInfo->mcBbar.push_back(bbtemp);
      }
       
@@ -432,32 +284,20 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	ctemp.charge=p.charge();
 	if(p.mother(0)!=0) ctemp.momid=p.mother(0)->pdgId();
 	if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) ctemp.gmomid=p.mother(0)->mother(0)->pdgId();
+
+	ctemp.p4=GENPTOLOR(p);
+	
+	int nHDaubdau = p.numberOfDaughters();
+	for(int j = 0; j < nHDaubdau; ++ j) {
+	  const Candidate * Bdau = p.daughter( j );
+	  ctemp.dauid.push_back(Bdau->pdgId());
+	}
+
 	auxInfo->mcC.push_back(ctemp);	
+
       }
-    
-      if(bin!=-99 && bbarin!=-99){
-      const Candidate & bGen = (*genParticles)[bin];
-      const Candidate & bbarGen = (*genParticles)[bbarin]; 
-      ((auxInfo->mcB).back()).p4=GENPTOLOR(bGen);
-     ((auxInfo->mcBbar).back()).p4=GENPTOLOR(bbarGen);
-      
-      int nHDaubdau = bGen.numberOfDaughters();
-      for(int j = 0; j < nHDaubdau; ++ j) {
-	const Candidate * Bdau = bGen.daughter( j );
-	((auxInfo->mcB).back()).dauid.push_back(Bdau->pdgId());
-	((auxInfo->mcB).back()).dauFourMomentum.push_back(GENPTOLORP(Bdau));
-      }
-      int nHDaubbardau = bbarGen.numberOfDaughters();
-      for(int j = 0; j < nHDaubbardau; ++ j) {
-	const Candidate * Bbardau = bbarGen.daughter( j );
-	((auxInfo->mcBbar).back()).dauid.push_back(Bbardau->pdgId());
-	((auxInfo->mcBbar).back()).dauFourMomentum.push_back(GENPTOLORP(Bbardau));
-      }
-      
-    }
 
     }
-
 
   }   // isMC
 
@@ -501,9 +341,6 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   iEvent.getByLabel(eleLabel_,electronHandle);
   edm::View<pat::Electron> electrons = *electronHandle;
 
-  edm::Handle<edm::View<pat::MET> > metHandle;
-  iEvent.getByLabel(metLabel_,metHandle);
-  edm::View<pat::MET> mets = *metHandle;
 
   //   edm::Handle<edm::View<pat::Photon> > phoHandle;
   //   iEvent.getByLabel(phoLabel_,phoHandle);
@@ -557,7 +394,9 @@ BTagSFContainer btagSFs;
     //     if(jet_iter->pt()>50)
     //       njetscounter++;
     VHbbEvent::SimpleJet sj;
-    sj.flavour = jet_iter->partonFlavour();
+    fillSimpleJet(sj,jet_iter);
+    setJecUnc(sj,jecUnc);
+    /*    sj.flavour = jet_iter->partonFlavour();
 
     sj.tche=jet_iter->bDiscriminator("trackCountingHighEffBJetTags");
     sj.tchp=jet_iter->bDiscriminator("trackCountingHighPurBJetTags");
@@ -576,10 +415,33 @@ BTagSFContainer btagSFs;
     sj.SF_CSVLerr=0;
     sj.SF_CSVMerr=0;
     sj.SF_CSVTerr=0;
+
+    
+
+    sj.chargedHadronEFraction = jet_iter-> chargedHadronEnergyFraction();
+
+
+    //
+    // addtaginfo for csv
+    //
+
+    if (jet_iter->hasTagInfo("SimpleSecondaryVertex")) {
+
+      const reco::SecondaryVertexTagInfo * tf = jet_iter->tagInfoSecondaryVertex();
+      sj.vtxMass = tf->secondaryVertex(0).p4().mass();
+      sj.vtxNTracks = tf->secondaryVertex(0).nTracks();
+      Measurement1D m = tf->flightDistance(0);
+      sj.vtx3dL = m.value();
+      sj.vtx3deL = m.error();
+    }
+
+
     //
     // add tVector
     //
     sj.tVector = getTvect(&(*jet_iter));
+
+    */
 
     Particle::LorentzVector p4Jet = jet_iter->p4();
 
@@ -597,10 +459,11 @@ BTagSFContainer btagSFs;
       TLorentzVector gJp4;
       if(gJ){
 	gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
+	sj. bestMCp4mom = gJp4;
 	if(verbose_){
 	  std::clog << "genJet matched Pt = " << gJp4.Pt() << std::endl;
 	  std::clog << "genJet matched eta = " << gJp4.Eta() << std::endl;
-	  std::clog << "genJet matched deltaR = " << gJp4.DeltaR(sj.p4) << std::endl;
+	  std::clog << "genJet matched deltaR = " <<gJp4.DeltaR(sj.p4) << std::endl;
 	  std::clog << "genJet matched mother id = " << sj.bestMCmomid << std::endl;
 	}
       }
@@ -614,7 +477,9 @@ BTagSFContainer btagSFs;
   for(edm::View<pat::Jet>::const_iterator jet_iter = simplejets2.begin(); jet_iter!=simplejets2.end(); ++jet_iter){
     
     VHbbEvent::SimpleJet sj;
-    sj.flavour = jet_iter->partonFlavour();
+    fillSimpleJet(sj,jet_iter);    
+    setJecUnc(sj,jecUnc);
+    /*    sj.flavour = jet_iter->partonFlavour();
     
     
     sj.tche=jet_iter->bDiscriminator("trackCountingHighEffBJetTags");
@@ -634,11 +499,27 @@ BTagSFContainer btagSFs;
     sj.SF_CSVLerr=0;
     sj.SF_CSVMerr=0;
     sj.SF_CSVTerr=0;
+
+    //
+    // addtaginfo for csv
+    //
+
+    if (jet_iter->hasTagInfo("SimpleSecondaryVertex")) {
+
+      const reco::SecondaryVertexTagInfo * tf = jet_iter->tagInfoSecondaryVertex();
+      sj.vtxMass = tf->secondaryVertex(0).p4().mass();
+      sj.vtxNTracks = tf->secondaryVertex(0).nTracks();
+      Measurement1D m = tf->flightDistance(0);
+      sj.vtx3dL = m.value();
+      sj.vtx3deL = m.error();
+    }
+
+
     //
     // add tVector
     //
     sj.tVector = getTvect(&(*jet_iter));
-
+    */
     Particle::LorentzVector p4Jet = jet_iter->p4();
 
 
@@ -657,6 +538,7 @@ BTagSFContainer btagSFs;
       TLorentzVector gJp4;
       if(gJ){
 	gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
+	sj. bestMCp4mom = gJp4;
 	if(verbose_){
 	  std::clog << "genJet matched Pt = " << gJp4.Pt() << std::endl;
 	  std::clog << "genJet matched eta = " << gJp4.Eta() << std::endl;
@@ -703,7 +585,7 @@ BTagSFContainer btagSFs;
     VHbbEvent::HardJet hj;
     hj.constituents=constituents.size();
     hj.p4 =GENPTOLORP(jet_iter);
-
+    
     for (unsigned int iJC(0); iJC<constituents.size(); ++iJC ){
       Jet::Constituent icandJet = constituents[iJC];
 
@@ -736,8 +618,9 @@ BTagSFContainer btagSFs;
 			    << "," << subjet_iter->bDiscriminator("combinedSecondaryVertexBJetTags") << "\n";}
 
     VHbbEvent::SimpleJet sj;
-
-    sj.flavour = subjet_iter->partonFlavour();
+    fillSimpleJet(sj,subjet_iter);
+    setJecUnc(sj,jecUnc);
+    /*    sj.flavour = subjet_iter->partonFlavour();
     sj.tVector = getTvect(&(*subjet_iter));
     sj.tche=subjet_iter->bDiscriminator("trackCountingHighEffBJetTags");
     sj.tchp=subjet_iter->bDiscriminator("trackCountingHighPurBJetTags");
@@ -750,6 +633,21 @@ BTagSFContainer btagSFs;
     sj.ntracks=subjet_iter->associatedTracks().size();
     sj.p4=GENPTOLORP(subjet_iter);
     sj.p4=(getChargedTracksMomentum(&*(subjet_iter)));
+
+    //
+    // addtaginfo for csv
+    //
+
+    if (subjet_iter->hasTagInfo("SimpleSecondaryVertex")) {
+
+      const reco::SecondaryVertexTagInfo * tf = subjet_iter->tagInfoSecondaryVertex();
+      sj.vtxMass = tf->secondaryVertex(0).p4().mass();
+      sj.vtxNTracks = tf->secondaryVertex(0).nTracks();
+      Measurement1D m = tf->flightDistance(0);
+      sj.vtx3dL = m.value();
+      sj.vtx3deL = m.error();
+    }
+    */
     hbbInfo->subJets.push_back(sj);
 
   }
@@ -770,30 +668,45 @@ BTagSFContainer btagSFs;
     if (verbose_)     std::cout <<" METTC "<<     hbbInfo->tcmet.metSig <<" " <<     hbbInfo->tcmet.sumEt<<std::endl;
   }
   
+ 
+  edm::Handle<edm::View<pat::MET> > mHTHandle;
+  iEvent.getByLabel("patMETsHT",mHTHandle);
+  edm::View<pat::MET> metsHT = *mHTHandle;
+  if(metsHT.size()){
+    hbbInfo->mht.sumEt=(metsHT[0]).sumEt();
+    hbbInfo->mht.metSig=(metsHT[0]).mEtSig();
+    hbbInfo->mht.eLong=(metsHT[0]).e_longitudinal();
+    hbbInfo->mht.p4=GENPTOLOR((metsHT[0]));
+    if (verbose_)     std::cout <<" METHT "<<     hbbInfo->mht.metSig <<" " <<     hbbInfo->mht.sumEt<<std::endl;
+  }
+  
+  edm::Handle<edm::View<pat::MET> > metHandle;
+  iEvent.getByLabel(metLabel_,metHandle);
+  edm::View<pat::MET> mets = *metHandle;
+  
   if(mets.size()){
     hbbInfo->calomet.sumEt=(mets[0]).sumEt();
     hbbInfo->calomet.metSig=(mets[0]).mEtSig();
     hbbInfo->calomet.eLong=(mets[0]).e_longitudinal();
     hbbInfo->calomet.p4=GENPTOLOR((mets[0]));
-    if (verbose_)     std::cout <<" METTC "<<     hbbInfo->calomet.metSig <<" " <<     hbbInfo->calomet.sumEt<<std::endl;
+    if (verbose_)     std::cout <<" METCALO "<<     hbbInfo->calomet.metSig <<" " <<     hbbInfo->calomet.sumEt<<std::endl;
   }
-
   
   edm::Handle<edm::View<pat::MET> > metPFHandle;
   iEvent.getByLabel("patMETsPF",metPFHandle);
   edm::View<pat::MET> metsPF = *metPFHandle;
-
+  
   if(metsPF.size()){
     hbbInfo->pfmet.sumEt=(metsPF[0]).sumEt();
     hbbInfo->pfmet.metSig=(metsPF[0]).mEtSig();
     hbbInfo->pfmet.eLong=(metsPF[0]).e_longitudinal();
     hbbInfo->pfmet.p4=GENPTOLOR((metsPF[0]));
-    if (verbose_)     std::cout <<" METTC "<<     hbbInfo->pfmet.metSig <<" " <<     hbbInfo->pfmet.sumEt<<std::endl;
+    if (verbose_)     std::cout <<" METPF "<<     hbbInfo->pfmet.metSig <<" " <<     hbbInfo->pfmet.sumEt<<std::endl;
   }
-
-
+  
+  
   if(verbose_){
-    std::cout << "METs: calomet "<<mets.size()<<" tcmet "<<metsTC.size()<<" pfmet "<<metsPF.size()<<std::endl;  
+    std::cout << "METs: calomet "<<mets.size()<<" tcmet"<<metsTC.size()<<" pfmet "<<metsPF.size()<<" MHT" <<metsHT.size()<<std::endl;  
   }
 
   if(verbose_)
@@ -881,7 +794,7 @@ BTagSFContainer btagSFs;
     hbbInfo->muInfo.push_back(mf);
   }
 
-  if(verbose_)
+ if(verbose_)
     std::cout << " INPUT electrons "<<electrons.size()<<std::endl;
   for(edm::View<pat::Electron>::const_iterator elec = electrons.begin(); elec!=electrons.end(); ++elec){
     VHbbEvent::ElectronInfo ef;
@@ -968,6 +881,14 @@ BTagSFContainer btagSFs;
     tf.idbyTaNC=tau->tauID("byTaNC");
     hbbInfo->tauInfo.push_back(tf);
   }
+
+  CompareJetPtMuons ptComparatorMu;
+  CompareJetPtElectrons ptComparatorE;
+  CompareJetPtTaus ptComparatorTau;
+
+  std::sort(hbbInfo->muInfo.begin(), hbbInfo->muInfo.end(), ptComparatorMu);
+  std::sort(hbbInfo->eleInfo.begin(), hbbInfo->eleInfo.end(), ptComparatorE);
+  std::sort(hbbInfo->tauInfo.begin(), hbbInfo->tauInfo.end(), ptComparatorTau);
 
 
   // dimuons and dielectrons
@@ -1298,6 +1219,71 @@ void HbbAnalyzerNew::fillScaleFactors(VHbbEvent::SimpleJet sj, BTagSFContainer i
   }
     
 }
+
+void HbbAnalyzerNew::setJecUnc(VHbbEvent::SimpleJet& sj,JetCorrectionUncertainty* jecunc){
+  double eta = sj.p4.Eta();
+  double pt = sj.p4.Pt();
+  
+  jecunc->setJetEta(eta);
+  jecunc->setJetPt(pt); // here you must use the CORRECTED jet pt
+  double unc = jecunc->getUncertainty(true);
+  sj.jecunc= unc;
+}
+
+
+void HbbAnalyzerNew ::fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Jet>::const_iterator jet_iter){
+      sj.flavour = jet_iter->partonFlavour();
+
+    sj.tche=jet_iter->bDiscriminator("trackCountingHighEffBJetTags");
+    sj.tchp=jet_iter->bDiscriminator("trackCountingHighPurBJetTags");
+    sj.jp=jet_iter->bDiscriminator("jetProbabilityBJetTags");
+    sj.jpb=jet_iter->bDiscriminator("jetBProbabilityBJetTags");
+    sj.ssvhe=jet_iter->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
+    sj.csv=jet_iter->bDiscriminator("combinedSecondaryVertexBJetTags");
+    sj.csvmva=jet_iter->bDiscriminator("combinedSecondaryVertexMVABJetTags");
+    sj.charge=jet_iter->jetCharge();
+    sj.ntracks=jet_iter->associatedTracks().size();
+    sj.p4=GENPTOLORP(jet_iter);
+    sj.chargedTracksFourMomentum=(getChargedTracksMomentum(&*(jet_iter)));
+    sj.SF_CSVL=1;
+    sj.SF_CSVM=1;
+    sj.SF_CSVT=1;
+    sj.SF_CSVLerr=0;
+    sj.SF_CSVMerr=0;
+    sj.SF_CSVTerr=0;
+
+    
+
+    sj.chargedHadronEFraction = jet_iter-> chargedHadronEnergyFraction();
+    sj.neutralHadronEFraction = jet_iter-> neutralHadronEnergyFraction ();
+    sj.chargedEmEFraction = jet_iter-> chargedEmEnergyFraction ();
+    sj.neutralEmEFraction = jet_iter-> neutralEmEnergyFraction ();
+    sj. nConstituents = jet_iter->getPFConstituents().size();
+
+    //
+    // addtaginfo for csv
+    //
+
+    //    if (jet_iter->hasTagInfo("SimpleSecondaryVertex")) {
+
+    const reco::SecondaryVertexTagInfo * tf = jet_iter->tagInfoSecondaryVertex();
+    if (tf){
+      sj.vtxMass = tf->secondaryVertex(0).p4().mass();
+      sj.vtxNTracks = tf->secondaryVertex(0).nTracks();
+      std::vector<reco::TrackBaseRef >::const_iterator tit =  tf->secondaryVertex(0).tracks_begin();
+      for (; tit<  tf->secondaryVertex(0).tracks_end(); ++tit){
+	sj.vtxTrackIds.push_back(tit->key());
+      }
+      Measurement1D m = tf->flightDistance(0);
+      sj.vtx3dL = m.value();
+      sj.vtx3deL = m.error();
+    }
+   //
+    // add tVector
+    //
+    sj.tVector = getTvect(&(*jet_iter));
+}
+
 
 //define this as a plug-in
 DEFINE_FWK_MODULE(HbbAnalyzerNew);

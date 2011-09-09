@@ -12,19 +12,42 @@ class VHbbEvent{
   class SimpleJet {
     public:
     SimpleJet(): flavour(-99), tche(-99), tchp(-99), jpb(-99), jp(-99), 
-      ssvhe(-99), csv(-99), csvmva(-99), ntracks(-99), charge(-99),
+      ssvhe(-99), csv(-99), csvmva(-99),
+      vtxMass(-99), vtx3dL(-99), vtx3deL(-99), vtxNTracks(-99), vtxProb(-99),
+      ntracks(-99), charge(-99),jecunc(-99),
+      chargedHadronEFraction(-99), neutralHadronEFraction(-99), chargedEmEFraction(-99), neutralEmEFraction(-99),nConstituents(-99),
       bestMCid(-99), bestMCmomid(-99){}
   public:
     double Pt() {return p4.Pt();}
     int flavour;
     float tche,tchp, jpb,jp , ssvhe, csv, csvmva;
+    // CSV vertex info
+    float vtxMass, vtx3dL, vtx3deL, vtxNTracks, vtxProb;
+    std::vector<unsigned int> vtxTrackIds;
     int ntracks;
     float charge;
     TLorentzVector p4;
     TLorentzVector chargedTracksFourMomentum;
 
+    // jec uncertainty
+
+    float jecunc;
+    // energy fractions as in 
+    /*    //chargedHadronEnergyFraction (relative to uncorrected jet energy)
+	  float chargedHadronEnergyFraction() const {return chargedHadronEnergy()/((jecSetsAvailable() ? jecFactor(0) : 1.)*energy());}
+	  /// neutralHadronEnergyFraction (relative to uncorrected jet energy)
+	  float neutralHadronEnergyFraction() const {return neutralHadronEnergy()/((jecSetsAvailable() ? jecFactor(0) : 1.)*energy());}
+	  /// chargedEmEnergyFraction (relative to uncorrected jet energy)
+	  float chargedEmEnergyFraction()     const {return chargedEmEnergy()/((jecSetsAvailable() ? jecFactor(0) : 1.)*energy());}
+	  /// neutralEmEnergyFraction (relative to uncorrected jet energy)
+	  float neutralEmEnergyFraction()     const {return neutralEmEnergy()/((jecSetsAvailable() ? jecFactor(0) : 1.)*energy());}
+    */
+
+    float chargedHadronEFraction, neutralHadronEFraction, chargedEmEFraction, neutralEmEFraction;
+    int nConstituents;
+
     //MC parton matching
-    TLorentzVector bestMCp4, bestMCp4mom;
+    TLorentzVector bestMCp4,bestMCp4mom;
     int bestMCid, bestMCmomid;
     // new
     TVector2 tVector;
@@ -132,7 +155,8 @@ class VHbbEvent{
  METInfo calomet;
   METInfo tcmet;
   METInfo pfmet;
-  
+  METInfo mht;
+
   std::vector<MuonInfo> muInfo;
   std::vector<ElectronInfo> eleInfo;
   std::vector<TauInfo> tauInfo;

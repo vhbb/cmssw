@@ -64,7 +64,7 @@ using namespace std;
 
 // class decleration
 //
-
+class JetCorrectionUncertainty;
 
 
 class HbbAnalyzerNew : public edm::EDProducer {
@@ -118,9 +118,10 @@ class HbbAnalyzerNew : public edm::EDProducer {
   TMatrixD *pointerPhi;
 
   bool verbose_;
+ protected:
+  void fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Jet>::const_iterator iter);
+  void setJecUnc(VHbbEvent::SimpleJet& sj,JetCorrectionUncertainty* jecunc);
 
-  
-  
 };
 
 

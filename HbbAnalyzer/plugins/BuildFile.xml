@@ -15,7 +15,9 @@
 <use   name="CondCore/DBOutputService"/>
 <use   name="CondFormats/DataRecord"/>
 <use   name="CondFormats/PhysicsToolsObjects"/>
+<use   name="CondFormats/JetMETObjects"/>
 <use   name="VHbbAnalysis/VHbbDataFormats"/>
+<use   name="JetMETCorrections/Objects"/>
 <use   name="root"/>
 <use name="fastjet"/>
 <library   file="*.cc" name="VHbbAnalysisHbbAnalyzerPlugins">

@@ -57,8 +57,8 @@ protected:
  // voif findVectorCandidate()
 
 
- void findMuons (const std::vector<VHbbEvent::MuonInfo>& muons, std::vector<VHbbEvent::MuonInfo>& out);
- void findElectrons(const std::vector<VHbbEvent::ElectronInfo>& electrons, std::vector<VHbbEvent::ElectronInfo>& out);
+ void findMuons (const std::vector<VHbbEvent::MuonInfo>& muons, std::vector<VHbbEvent::MuonInfo>& out, std::vector<unsigned int>&);
+ void findElectrons(const std::vector<VHbbEvent::ElectronInfo>& electrons, std::vector<VHbbEvent::ElectronInfo>& out, std::vector<unsigned int>&);
  void findMET(const VHbbEvent::METInfo& met, std::vector<VHbbEvent::METInfo>& out);
 
  private:

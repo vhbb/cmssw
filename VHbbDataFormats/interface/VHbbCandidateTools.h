@@ -32,44 +32,70 @@ class VHbbCandidateTools {
     }
     return dphi;
   }
-
-
-
-
-  VHbbCandidate getHZmumuCandidate(const VHbbCandidate & in, bool & ok){
+  
+  
+  
+  
+  VHbbCandidate getHZmumuCandidate(const VHbbCandidate & in, bool & ok, std::vector<unsigned int>& pos){
     if (verbose_){
       std::cout <<" getHZmumuCandidate input mu "<<in.V.muons.size()<<" e "<<in.V.electrons.size()<<std::endl;
     }
     ok = false;
     VHbbCandidate temp=in;
-
+    
     //
     // change: allow for additional leptons; by definition 
     //
     if (temp.V.muons.size()<2) return in ;
     //    if (temp.V.electrons.size()!=0) return in ;
     std::vector<VHbbEvent::MuonInfo> muons_ = temp.V.muons;
-    CompareJetPtMuons ptComparator;
-    std::sort(muons_.begin(), muons_.end(), ptComparator);
+
+    // beware: assumes already sorted!!!!
+
+    //    CompareJetPtMuons ptComparator;
+    //    std::sort(muons_.begin(), muons_.end(), ptComparator);
     if (muons_[0].p4.Pt()<20 || muons_[1].p4.Pt()<20 ) return in;
-    temp.V.p4 = muons_[0].p4+muons_[1].p4;
+    
+    //
+    // now I need to ask also for the charge
+    //
+    int selectMu2=1;
+    
+    if (muons_[0].charge* muons_[selectMu2].charge > 0){
+      if (muons_.size() ==2) return in;
+      //
+      // i need to find a proper pair
+      //
+      
+      for (unsigned int it=2; it< muons_.size(); ++it){
+	if (  muons_[it].charge * muons_[0].charge < 0) {
+	  selectMu2 = it;
+	  break;
+	}
+	if (selectMu2 == 1) return in;
+      }  
+    }
+    temp.V.p4 = muons_[0].p4+muons_[selectMu2].p4;
     std::vector<VHbbEvent::MuonInfo> muons2_;
     for (std::vector<VHbbEvent::MuonInfo>::const_iterator it = muons_.begin(); it!= muons_.end(); ++it){
       if (it->p4.Pt()>20) muons2_.push_back(*it);
     }
     temp.V.muons = muons2_;
-  
+    
     // the same for electrons
     std::vector<VHbbEvent::ElectronInfo> electrons_ = temp.V.electrons;
-    CompareJetPtElectrons ptComparator2;
-    std::sort(electrons_.begin(), electrons_.end(), ptComparator2);
+
+    // beware; assumes already sorted
+
+    //    CompareJetPtElectrons ptComparator2;
+    //    std::sort(electrons_.begin(), electrons_.end(), ptComparator2);
     std::vector<VHbbEvent::ElectronInfo> electrons2_;
     for (std::vector<VHbbEvent::ElectronInfo>::const_iterator it = electrons_.begin(); it!= electrons_.end(); ++it){
       if (it->p4.Pt()>20) electrons2_.push_back(*it);
     }
     temp.V.electrons = electrons2_;
     
-   //
+    //
     // consider all 
     //
     
@@ -82,26 +108,51 @@ class VHbbCandidateTools {
     //    if (temp.V.FourMomentum.Mass()<75 || temp.V.FourMomentum.Mass()>105) return in; 
     //    if (temp.additionalJets.size()>0) return in;
     //    if (std::Abs(deltaTheta) ????
-    ok = true;
+
+    temp.V.firstLepton = pos[0];
+    temp.V.secondLepton = pos[selectMu2];
+   ok = true;
     return temp;
   }  
-  VHbbCandidate getHZeeCandidate(const VHbbCandidate & in, bool & ok){
+  VHbbCandidate getHZeeCandidate(const VHbbCandidate & in, bool & ok, std::vector<unsigned int>& pos){
     if (verbose_){
       std::cout <<" getHZeeCandidate input mu "<<in.V.electrons.size()<<" e "<<in.V.muons.size()<<std::endl;
     }
     ok = false;
     VHbbCandidate temp=in;
-
+    
     //
     // change: allow for additional leptons; by definition 
     //
     if (temp.V.electrons.size()<2) return in ;
     //    if (temp.V.electrons.size()!=0) return in ;
     std::vector<VHbbEvent::ElectronInfo> electrons_ = temp.V.electrons;
-    CompareJetPtElectrons ptComparator;
-    std::sort(electrons_.begin(), electrons_.end(), ptComparator);
+
+    // beware assumes already sorted
+
+    //    CompareJetPtElectrons ptComparator;
+    //    std::sort(electrons_.begin(), electrons_.end(), ptComparator);
     if (electrons_[0].p4.Pt()<20 || electrons_[1].p4.Pt()<20 ) return in;
-    temp.V.p4 = electrons_[0].p4+electrons_[1].p4;
+    //
+    // now I need to ask also for the charge
+    //
+    int selectE2=1;
+    
+    if (electrons_[0].charge* electrons_[selectE2].charge > 0){
+      if (electrons_.size() ==2) return in;
+      //
+      // i need to find a proper pair
+      //
+      
+      for (unsigned int it=2; it< electrons_.size(); ++it){
+	if (  electrons_[it].charge * electrons_[0].charge < 0) {
+	  selectE2 = it;
+	  break;
+	}
+	if (selectE2 == 1) return in;
+      }  
+    }
+   temp.V.p4 = electrons_[0].p4+electrons_[selectE2].p4;
     std::vector<VHbbEvent::ElectronInfo> electrons2_;
     for (std::vector<VHbbEvent::ElectronInfo>::const_iterator it = electrons_.begin(); it!= electrons_.end(); ++it){
       if (it->p4.Pt()>20) electrons2_.push_back(*it);
@@ -110,13 +161,20 @@ class VHbbCandidateTools {
   
     // the same for muonss
     std::vector<VHbbEvent::MuonInfo> muons_ = temp.V.muons;
-    CompareJetPtMuons ptComparator2;
-    std::sort(muons_.begin(), muons_.end(), ptComparator2);
+
+    // beware assumes already sorted
+
+    //    CompareJetPtMuons ptComparator2;
+    //    std::sort(muons_.begin(), muons_.end(), ptComparator2);
     std::vector<VHbbEvent::MuonInfo> muons2_;
     for (std::vector<VHbbEvent::MuonInfo>::const_iterator it = muons_.begin(); it!= muons_.end(); ++it){
       if (it->p4.Pt()>20) muons2_.push_back(*it);
     }
     temp.V.muons = muons2_;
+
+    temp.V.firstLepton = pos[0];
+    temp.V.secondLepton = pos[selectE2];
+
     
    ok = true;
     return temp;
@@ -150,7 +208,7 @@ class VHbbCandidateTools {
     return temp;
   }
 
-  VHbbCandidate getHWmunCandidate(const VHbbCandidate & in, bool & ok){
+  VHbbCandidate getHWmunCandidate(const VHbbCandidate & in, bool & ok , std::vector<unsigned int>& pos){
     ok = false;
     VHbbCandidate temp=in;
     // require a muon and no electrons
@@ -175,12 +233,13 @@ class VHbbCandidateTools {
     */
     
     temp.V.p4 = temp.V.muons[0].p4+temp.V.mets[0].p4;
+    temp.V.firstLepton=pos[0];
 
     ok=true;
     return temp;
   }
 
-  VHbbCandidate getHWenCandidate(const VHbbCandidate & in, bool & ok){
+  VHbbCandidate getHWenCandidate(const VHbbCandidate & in, bool & ok, std::vector<unsigned int>& pos){
     ok = false;
     VHbbCandidate temp=in;
     if (temp.V.electrons.size()!=1) return in ;
@@ -204,7 +263,7 @@ class VHbbCandidateTools {
     */
     
     ok=true;
-
+    temp.V.firstLepton=pos[0];
     temp.V.p4 = temp.V.electrons[0].p4+temp.V.mets[0].p4;
     return temp;
   }
@@ -213,7 +272,7 @@ class VHbbCandidateTools {
   bool verbose_;
   
  public:
-  float getDeltaTheta( const VHbbEvent::SimpleJet & j1, const VHbbEvent::SimpleJet & j2 ) const {
+  static float getDeltaTheta( const VHbbEvent::SimpleJet & j1, const VHbbEvent::SimpleJet & j2 ) {
     double deltaTheta = 1e10;
     TLorentzVector pi(0,0,0,0);
     TLorentzVector v_j1 = j1.chargedTracksFourMomentum;

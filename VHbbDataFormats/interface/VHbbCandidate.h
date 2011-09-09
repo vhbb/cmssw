@@ -21,6 +21,7 @@ class VHbbCandidate {
 
   class VectorCandidate {
   public:
+  VectorCandidate() : firstLepton(-99),secondLepton(-99) {}
     double Mt(CandidateType candidateType) const {
     if(candidateType==Wen)
       {
@@ -43,6 +44,8 @@ class VHbbCandidate {
     std::vector<VHbbEvent::ElectronInfo> electrons;
     std::vector<VHbbEvent::TauInfo> taus;
     std::vector<VHbbEvent::METInfo> mets;
+    
+    unsigned int firstLepton,secondLepton;
     
   };
   
