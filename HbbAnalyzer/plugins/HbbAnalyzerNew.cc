@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.27 2011/08/26 10:29:59 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.28 2011/09/09 08:05:27 tboccali Exp $
 //
 //
 
@@ -94,13 +94,14 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   
   // JEC Uncertainty
 
- 
-  edm::ESHandle<JetCorrectorParametersCollection> JetCorParColl;
+  //  JetCorrectionUncertainty *jecUnc=0;
+  edm::ESHandle<g> JetCorParColl;
   iSetup.get<JetCorrectionsRecord>().get("AK5PF",JetCorParColl); 
+  std::cout <<" PIPPO " << JetCorParColl.isValid()<<" " <<std::endl;
   JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
+  std::cout <<" Pluto " << &JetCorPar<<std::endl;
   JetCorrectionUncertainty *jecUnc = new JetCorrectionUncertainty(JetCorPar);
-
-
+  
 
   
   std::auto_ptr<VHbbEvent> hbbInfo( new VHbbEvent() );  
@@ -395,7 +396,7 @@ BTagSFContainer btagSFs;
     //       njetscounter++;
     VHbbEvent::SimpleJet sj;
     fillSimpleJet(sj,jet_iter);
-    setJecUnc(sj,jecUnc);
+    if(runOnMC_)    setJecUnc(sj,jecUnc);
     /*    sj.flavour = jet_iter->partonFlavour();
 
     sj.tche=jet_iter->bDiscriminator("trackCountingHighEffBJetTags");
@@ -478,7 +479,7 @@ BTagSFContainer btagSFs;
     
     VHbbEvent::SimpleJet sj;
     fillSimpleJet(sj,jet_iter);    
-    setJecUnc(sj,jecUnc);
+  if(runOnMC_)   setJecUnc(sj,jecUnc);
     /*    sj.flavour = jet_iter->partonFlavour();
     
     
@@ -619,7 +620,7 @@ BTagSFContainer btagSFs;
 
     VHbbEvent::SimpleJet sj;
     fillSimpleJet(sj,subjet_iter);
-    setJecUnc(sj,jecUnc);
+  if(runOnMC_)    setJecUnc(sj,jecUnc);
     /*    sj.flavour = subjet_iter->partonFlavour();
     sj.tVector = getTvect(&(*subjet_iter));
     sj.tche=subjet_iter->bDiscriminator("trackCountingHighEffBJetTags");
@@ -669,9 +670,9 @@ BTagSFContainer btagSFs;
   }
   
  
-  edm::Handle<edm::View<pat::MET> > mHTHandle;
+  edm::Handle<edm::View<reco::MET> > mHTHandle;
   iEvent.getByLabel("patMETsHT",mHTHandle);
-  edm::View<pat::MET> metsHT = *mHTHandle;
+  edm::View<reco::MET> metsHT = *mHTHandle;
   if(metsHT.size()){
     hbbInfo->mht.sumEt=(metsHT[0]).sumEt();
     hbbInfo->mht.metSig=(metsHT[0]).mEtSig();
@@ -1221,6 +1222,11 @@ void HbbAnalyzerNew::fillScaleFactors(VHbbEvent::SimpleJet sj, BTagSFContainer i
 }
 
 void HbbAnalyzerNew::setJecUnc(VHbbEvent::SimpleJet& sj,JetCorrectionUncertainty* jecunc){
+  //
+  // test 
+  //
+
+  return;
   double eta = sj.p4.Eta();
   double pt = sj.p4.Pt();
   
@@ -1253,13 +1259,15 @@ void HbbAnalyzerNew ::fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Je
     sj.SF_CSVTerr=0;
 
     
+    if (jet_iter->isPFJet() == true) {
 
-    sj.chargedHadronEFraction = jet_iter-> chargedHadronEnergyFraction();
-    sj.neutralHadronEFraction = jet_iter-> neutralHadronEnergyFraction ();
-    sj.chargedEmEFraction = jet_iter-> chargedEmEnergyFraction ();
-    sj.neutralEmEFraction = jet_iter-> neutralEmEnergyFraction ();
-    sj. nConstituents = jet_iter->getPFConstituents().size();
-
+      sj.chargedHadronEFraction = jet_iter-> chargedHadronEnergyFraction();
+      sj.neutralHadronEFraction = jet_iter-> neutralHadronEnergyFraction ();
+      sj.chargedEmEFraction = jet_iter-> chargedEmEnergyFraction ();
+      sj.neutralEmEFraction = jet_iter-> neutralEmEnergyFraction ();
+      sj. nConstituents = jet_iter->getPFConstituents().size();
+      
+    }
     //
     // addtaginfo for csv
     //

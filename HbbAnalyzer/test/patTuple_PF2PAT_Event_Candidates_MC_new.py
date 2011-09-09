@@ -23,7 +23,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
 # source
 process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
-	"file:file:../../../../../../CMSSW_4_2_8_patch1/src/VHbbAnalysis/HbbAnalyzer/test/E2245F7E-81AD-E011-9FE1-90E6BA0D09CA.root"
+		"/store/mc/CMSSW_4_2_3/RelValProdTTbar/GEN-SIM-RECO/MC_42_V12_JobRobot-v1/0000/B89A0B07-818C-E011-953E-0030487CD7E0.root"
 #	"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat//store/mc/Summer11/BdToMuMu_2MuPtFilter_7TeV-pythia6-evtgen//GEN-SIM-RECO//PU_S4_START42_V11-v1///0000//92DE42C9-CD8C-E011-A421-001F296B758E.root"
 	)
 			    )
@@ -270,7 +270,7 @@ addPfMET(process, 'PF')
 #            )
 
 for jetcoll in (process.selectedPatJetsCACalo, process.selectedPatJetsCAPF):
-	jetcoll.embedGenJetMatch = cms.bool(True)
+	jetcoll.embedGenJetMatch = cms.bool(isMC)
 	#getJetMCFlavour uses jetFlavourAssociation*, see below
 	jetcoll.getJetMCFlavour = cms.bool(True)
 	#those two use jetPartonMatch*, see below
@@ -479,6 +479,15 @@ process.hbbCandidates = cms.EDFilter("HbbCandidateFinder",
 				      )
 
 
+process.patMETsHT = cms.EDProducer("MHTProducer",
+  JetCollection = cms.InputTag("patJets"),
+  MinJetPt      = cms.double(30),
+  MaxJetEta     = cms.double(5)
+)
+
+
+process.dump = cms.EDAnalyzer("EventContentAnalyzer")
+
 # drop the meta data for dropped data
 #process.out.dropMetaData = cms.string("DROPPED")
 
@@ -501,6 +510,7 @@ if isMC == False :
                      process.eidSequence*
                      process.patDefaultSequence*
 #                     process.patPF2PATSequence* # added with usePF2PAT
+		     process.patMETsHT*
                      process.dimuons*
                      process.dielectrons*
                      process.leptonTrigMatch*
@@ -525,6 +535,8 @@ else :
                      process.eidSequence*
                      process.patDefaultSequence*
 #                     process.patPF2PATSequence* # added with usePF2PAT
+		     process.patMETsHT*
+#		     process.dump*
                      process.dimuons*
                      process.dielectrons*
                      process.leptonTrigMatch*
