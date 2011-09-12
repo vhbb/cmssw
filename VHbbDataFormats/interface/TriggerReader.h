@@ -15,13 +15,16 @@ class TriggerReader {
  public:
     TriggerReader(bool passAllEvents=false) : passAll(passAllEvents) {}
     
-    void setEvent( fwlite::Event * e) {  ev=e;}
+    void setEvent( fwlite::Event * e) {  ev=e;
+     if(!passAll) { 
+     hTriggerResults.getByLabel(*ev,"TriggerResults","","HLT");
+     run = ev->eventAuxiliary().id().run();
+     }
+    }
   
     bool accept(const std::string & triggername)
     {
      if(passAll) return true;
-     fwlite::Handle<edm::TriggerResults> hTriggerResults;
-     hTriggerResults.getByLabel(*ev,"TriggerResults","","HLT");
 
      
      regex_t regex;
@@ -31,15 +34,16 @@ class TriggerReader {
 
 
      std::map<std::string,size_t>::iterator nit;
-     if(ev->getRun().run()  != cacheRun[triggername] || nameMap.find(triggername) == nameMap.end())
+     if(run  != cacheRun[triggername] || nameMap.find(triggername) == nameMap.end())
      {
 
      reti = regcomp(&regex, triggername.c_str(), 0);
 //     reti = regcomp(&regex, "HLT_Ele32_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v.*", 0);
      if( reti ){ std::cerr << "Could not compile regex" << std::endl;}
 
-      std::cout << "new run" << ev->getRun().run() << std::endl;
-      cacheRun[triggername]=ev->getRun().run();
+      std::cout << "new run" << run << std::endl;
+//      cacheRun[triggername]=ev->getRun().run();
+      cacheRun[triggername]=run;
       edm::TriggerNames const&  triggerNames = ev->triggerNames(*hTriggerResults);
       std::string oldiname="whatever";
       nit=nameMap.find(triggername);
@@ -69,7 +73,7 @@ class TriggerReader {
    if(nit==nameMap.end()) 
     {
      std::cout << "ERROR: trigger name not found" << std::endl;
-     edm::TriggerNames const&  triggerNames = ev->triggerNames(*hTriggerResults);
+//     edm::TriggerNames const&  triggerNames = ev->triggerNames(*hTriggerResults);
     // for (unsigned i = 0; i < triggerNames.size(); ++i)  std::cout << triggerNames.triggerName(i) << " is bit  " << i << "looking for: "<< triggername <<  std::endl;
      nameMap[triggername]=100000000; // meaning not found in this run 
        
@@ -80,11 +84,13 @@ class TriggerReader {
 }
 
 private:
+  fwlite::Handle<edm::TriggerResults> hTriggerResults;
   std::map<std::string,size_t> nameMap;
   std::map<std::string,size_t> cacheRun;
 //  unsigned int cacheRun;
   fwlite::Event * ev;
   bool passAll;
+  unsigned int run;
 
 };
 

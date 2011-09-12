@@ -1,14 +1,11 @@
 #ifndef BTAGWEIGHT_H
 #define BTAGWEIGHT_H
-#include <math.h>
 #include <iostream>
+#include <fstream>
+#include <math.h>
 #include <vector>
 using namespace std; 
 
-class BTagPerSampleEfficiency
-{
-
-};
 
 class BTagWeight 
 {
@@ -20,12 +17,12 @@ class BTagWeight
      int tag;
    };
 
-   BTagWeight(int nTaggers) : taggers(nTaggers) {}
+   BTagWeight(unsigned int nTaggers) : taggers(nTaggers) {}
    
 // virtual bool filter(vector<int> tags);
    template <class Filter> float weight(vector<vector<JetInfo> > jets);
  private:
-   int taggers;
+   unsigned int taggers;
 
 };
 
@@ -62,29 +59,28 @@ class BTag1Tight2CustomFilter
 
 template <class Filter> float BTagWeight::weight(vector<vector<JetInfo> >jets)
 {
- int njets=jets.size();
- std::vector<int> comb(jets.size());
- for(int i=0;i < jets.size(); i++) comb[i]=0;
- int idx=0;
- int max=taggers+1; //force sorted tagging //1 << taggers;
+ unsigned int njets=jets.size();
+ std::vector<unsigned int> comb(jets.size());
+ for(size_t i=0;i < jets.size(); i++) comb[i]=0;
+ unsigned int idx=0;
+ unsigned int max=taggers+1; //force sorted tagging //1 << taggers;
  float pMC=0;
  float pData=0;
  if(jets.size()==0) return 0.;
  while(comb[jets.size()-1] < max)
  {
-// std::cout << std::endl << "New comb" << std::endl;
-// for(int i=0;i < jets.size(); i++) {std::cout << comb[i] << " ";}
-
-////// std::cout << std::endl;
-
+/* std::cout << std::endl << "New comb" << std::endl;
+ for(size_t i=0;i < jets.size(); i++) {std::cout << comb[i] << " ";}
+ std::cout << std::endl;
+*/
    std::vector<int> tags;
-   for(int j=0;j<taggers;j++) tags.push_back(0);
+   for(size_t j=0;j<taggers;j++) tags.push_back(0);
 
    float mc=1.;
    float data=1.;
    for(size_t j=0;j<njets;j++) // loop on jets
     {
-   // std::cout << std::endl << "Jet" << j ;
+  //  std::cout << std::endl << "Jet" << j ;
 
      // if none tagged, take the 1-eff SF for the loosest:
      float tagMc = 1.-jets[j][0].eff;
@@ -118,16 +114,58 @@ template <class Filter> float BTagWeight::weight(vector<vector<JetInfo> >jets)
   //  std::cout << mc << " " << data << " " << data/mc << " " << pData/pMC << endl;
     pMC+=mc;
     pData+=data;
-//n    std::cout << std::endl<< "mc, data,ratioThis,ratioTot " <<  mc << " " << data << " " << data/mc << " " << pData/pMC << endl;
+   // std::cout << std::endl<< "mc, data,ratioThis,ratioTot " <<  mc << " " << data << " " << data/mc << " " << pData/pMC << endl;
    }
   }
   while (comb[idx] == max -1  && idx+1 < jets.size()) idx++; // find first jets for which we did not already test all configs 
 // next combination
   comb[idx]++;  // test a new config for that jet
-  for(int i=0;i<idx;i++) { comb[i]=0; idx=0; } // reset the tested configs for all previous jets
+  for(size_t i=0;i<idx;i++) { comb[i]=0; idx=0; } // reset the tested configs for all previous jets
  }
   if(pMC==0) return 0; 
   return pData/pMC;
 }
+
+
+
+class BTagSampleEfficiency
+{
+public:
+ struct MeanEfficiencies {
+    float CSVL;
+    float CSVC;
+    float CSVM;
+    float CSVT;
+    void read(std::ifstream & f)
+    {
+      f >> CSVL >> CSVC >> CSVM >> CSVT;
+    }
+ };
+ BTagSampleEfficiency(const char * filename) 
+ {
+    std::ifstream ff(filename);
+    bEff.read(ff);
+    cEff.read(ff);
+    lEff.read(ff);
+
+ }
+ 
+ vector<BTagWeight::JetInfo> jetInfo(const VHbbEvent::SimpleJet & jet)
+ {
+   std::vector<BTagWeight::JetInfo> jInfo;
+   MeanEfficiencies * m=0;
+   if(abs(jet.flavour)==5) m= &bEff;
+   else if(abs(jet.flavour)==4) m= &lEff;
+   else m= &lEff;
+   jInfo.push_back(BTagWeight::JetInfo(m->CSVC,(jet.SF_CSVL+jet.SF_CSVM)/2.)); // consider Custom as average of M and L
+   jInfo.push_back(BTagWeight::JetInfo(m->CSVT,jet.SF_CSVT)); 
+   return jInfo;
+ } 
+
+private:
+  MeanEfficiencies bEff;
+  MeanEfficiencies cEff;
+  MeanEfficiencies lEff;
+};
 
 #endif
