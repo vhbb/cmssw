@@ -15,9 +15,10 @@ class TriggerReader {
  public:
     TriggerReader(bool passAllEvents=false) : passAll(passAllEvents) {}
     
-    void setEvent( fwlite::Event * e) {  ev=e;
+    void setEvent( fwlite::Event * e,const char * process ="HLT") {
+     ev=e;
      if(!passAll) { 
-     hTriggerResults.getByLabel(*ev,"TriggerResults","","HLT");
+     hTriggerResults.getByLabel(*ev,"TriggerResults","",process);
      run = ev->eventAuxiliary().id().run();
      }
     }

@@ -94,7 +94,6 @@ struct  LeptonInfo
       neutralHadIso[j]=i.pfNeuIso;
       chargedHadIso[j]=i.pfChaIso;
       setID(i,j);
-//FIXME: whats this?      particleIso;
     }
      template <class Input> void setID(const Input & i, int j)
      {
@@ -167,8 +166,6 @@ struct  LeptonInfo
      //FIXME:    chf;    float nhf;    float cef;    float nef;    float nch; nconstituents;  (NEED EDM FIX)
 
      flavour[i]=j.flavour;
-     //FIXME: genPt parton or genjet?  (NEED EDM FIX)
-
      if(j.bestMCp4.Pt() > 0)
      {
       genPt[i]=j.bestMCp4.Pt();
@@ -225,7 +222,7 @@ int main(int argc, char* argv[])
  float jjdr,jjdPhi,jjdEta,HVdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig,addJet3Pt, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
    int nofLeptons15,nofLeptons20, Vtype,numJets,numBJets,eventFlav;
 //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
-   bool triggerFlags[500];
+   bool triggerFlags[500],hbhe;
   float btag1T2CSF=1.,btag2TSF=1.,btag1TSF=1.;
   // ----------------------------------------------------------------------
   // First Part: 
@@ -289,6 +286,7 @@ int main(int argc, char* argv[])
   std::string PUdatafileName_ = in.getParameter<std::string> ("PUdatafileName") ;
   bool isMC_( ana.getParameter<bool>("isMC") );  
   TriggerReader trigger(isMC_);
+  TriggerReader patFilters(false);
  
 //   TFile *_outPUFile	= new TFile((outputFile_+"_PU").c_str(), "recreate");	
 //   TH1F * pu = new TH1F("pileup","",-0.5,24.5,25);
@@ -410,13 +408,10 @@ int main(int argc, char* argv[])
   
  
    _outTree->Branch("EVENT"		,  &EVENT	         ,   "run/I:lumi/I:event/I:json/I");
+   _outTree->Branch("hbhe"		,  &hbhe	         ,   "hbhe/b");
    _outTree->Branch("btag1TSF"		,  &btag1TSF	         ,   "btag1TSF/F");
    _outTree->Branch("btag2TSF"		,  &btag2TSF	         ,   "btag2TSF/F");
    _outTree->Branch("btag1T2CSF"	,  &btag1T2CSF	         ,   "btag1T2CSF/F");
-   /*
-      FIXME - btag SF
-      FIXME - HBHE filter (NEED EDM)
-    */
 
     int ievt=0;  
     int totalcount=0;
@@ -510,6 +505,9 @@ int main(int argc, char* argv[])
             continue;
           }
           const VHbbCandidate & vhCand =  cand->at(0);
+          patFilters.setEvent(&ev,"VH");
+          hbhe = patFilters.accept("hbhe");
+
           trigger.setEvent(&ev);
           for(size_t j=0;j < triggers.size();j++)
           triggerFlags[j]=trigger.accept(triggers[j]);
