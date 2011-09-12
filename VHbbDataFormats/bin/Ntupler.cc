@@ -226,6 +226,7 @@ int main(int argc, char* argv[])
    int nofLeptons15,nofLeptons20, Vtype,numJets,numBJets,eventFlav;
 //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
    bool triggerFlags[500];
+  float btag1T2CSF=1.,btag2TSF=1.,btag1TSF=1.;
   // ----------------------------------------------------------------------
   // First Part: 
   //
@@ -270,12 +271,15 @@ int main(int argc, char* argv[])
   std::vector<std::string> triggers( ana.getParameter<std::vector<std::string> >("triggers") );
   double btagThr =  ana.getParameter<double>("bJetCountThreshold" );
   bool fromCandidate = ana.getParameter<bool>("readFromCandidates");
-  HbbCandidateFinderAlgo * algoZ = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdZ"),
-                                     ana.getParameter<bool>("useHighestPtHiggsZ")                         );
-  HbbCandidateFinderAlgo * algoW = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdW"),
-                                     ana.getParameter<bool>("useHighestPtHiggsW")                         );
+
+  bool useHighestPtHiggsZ = ana.getParameter<bool>("useHighestPtHiggsZ");
+  bool useHighestPtHiggsW = ana.getParameter<bool>("useHighestPtHiggsW");
+  HbbCandidateFinderAlgo * algoZ = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdZ"),useHighestPtHiggsZ );
+  HbbCandidateFinderAlgo * algoW = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdW"),useHighestPtHiggsW);
 
   TriggerWeight triggerWeight(ana);
+  BTagWeight btag(2); // 2 operating points "Custom" = 0.5 and "Tight = 0.898"
+  BTagSampleEfficiency btagEff( ana.getParameter<std::string>("btagEffFileName" ).c_str() ); 
 
   std::vector<std::string> inputFiles_( in.getParameter<std::vector<std::string> >("fileNames") );
 //  std::string inputFile( in.getParameter<std::string> ("fileName") );
@@ -404,8 +408,11 @@ int main(int argc, char* argv[])
    s << "triggerFlags[" << triggers.size() << "]/b";
    _outTree->Branch("triggerFlags", triggerFlags, s.str().c_str()); 
   
-   _outTree->Branch("EVENT"		,  &EVENT	         ,   "run/I:lumi/I:event/I:json/I");
  
+   _outTree->Branch("EVENT"		,  &EVENT	         ,   "run/I:lumi/I:event/I:json/I");
+   _outTree->Branch("btag1TSF"		,  &btag1TSF	         ,   "btag1TSF/F");
+   _outTree->Branch("btag2TSF"		,  &btag2TSF	         ,   "btag2TSF/F");
+   _outTree->Branch("btag1T2CSF"	,  &btag1T2CSF	         ,   "btag1T2CSF/F");
    /*
       FIXME - btag SF
       FIXME - HBHE filter (NEED EDM)
@@ -489,13 +496,14 @@ int main(int argc, char* argv[])
       */
 
       //      std::clog << "Filling tree "<< std::endl;
-      
+     bool isW=false;
+ 
      if(cand->size() == 0 or cand->at(0).H.jets.size() < 2) continue;
           if(cand->size() > 1 ) 
           {
            std::cout << "MULTIPLE CANDIDATES: " << cand->size() << std::endl;
           }
-          if(cand->at(0).candidateType == VHbbCandidate::Wmun || cand->at(0).candidateType == VHbbCandidate::Wen ) cand=candW;
+          if(cand->at(0).candidateType == VHbbCandidate::Wmun || cand->at(0).candidateType == VHbbCandidate::Wen ) { cand=candW; isW=true; }
           if(cand->size() == 0) 
           {
 //            std::cout << "W event loss due to tigther cuts" << std::endl;
@@ -601,9 +609,12 @@ int main(int argc, char* argv[])
           for(size_t j=firstAddEle;j< vhCand.V.electrons.size();j++) aLeptons.set(vhCand.V.electrons[j],nalep++,11);
 
 
+          //Loop on jets
+          
           double maxBtag=-99999;
           minDeltaPhijetMET = 999;
           TLorentzVector bJet;
+          std::vector<std::vector<BTagWeight::JetInfo> > btagJetInfos;
           for(unsigned int j=0; j < vhCand.H.jets.size(); j++ ){
                 if (vhCand.H.jets[j].csv > maxBtag) { bJet=vhCand.H.jets[j].p4 ; maxBtag =vhCand.H.jets[j].csv; }
                 if (deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[j].p4.Phi()) < minDeltaPhijetMET) 
@@ -611,7 +622,7 @@ int main(int argc, char* argv[])
                   minDeltaPhijetMET=deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[j].p4.Phi()); 
                   jetPt_minDeltaPhijetMET=vhCand.H.jets[j].p4.Pt();
                  }
-
+                btagJetInfos.push_back(btagEff.jetInfo(vhCand.H.jets[j]));
           }
           for(unsigned int j=0; j < vhCand.additionalJets.size(); j++ ){
                 if (vhCand.additionalJets[j].csv > maxBtag) { bJet=vhCand.additionalJets[j].p4 ; maxBtag =vhCand.additionalJets[j].csv; }
@@ -620,9 +631,19 @@ int main(int argc, char* argv[])
                   minDeltaPhijetMET=deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.additionalJets[j].p4.Phi());
                   jetPt_minDeltaPhijetMET=vhCand.additionalJets[j].p4.Pt();
                  }
+                if( ( isW && ! useHighestPtHiggsW ) ||  ( ! isW && ! useHighestPtHiggsZ )  )  // btag SF computed using only H-jets if best-H made with dijetPt rather than best CSV
+                 {
+                   btagJetInfos.push_back(btagEff.jetInfo(vhCand.additionalJets[j]));
+                 }
          }
-
- 
+         if(isMC_)
+         {
+          //std::cout << "BTAGSF " <<  btagJetInfos.size() << " " << btag.weight<BTag1Tight2CustomFilter>(btagJetInfos) << std::endl;
+          btag1T2CSF = btag.weight<BTag1Tight2CustomFilter>(btagJetInfos);
+          btag2TSF = btag.weight<BTag1Tight2CustomFilter>(btagJetInfos);
+          btag1TSF = btag.weight<BTag1Tight2CustomFilter>(btagJetInfos);;
+         }
+            
           if(maxBtag > -99999)
           { 
            TopHypo topQuark = TopMassReco::topMass(leptonForTop,bJet,vhCand.V.mets.at(0).p4);
@@ -651,6 +672,7 @@ int main(int argc, char* argv[])
           genWpt=aux.mcW.size() > 0 ? aux.mcW[0].p4.Pt():-99;
 
 //FIXME:  _outTree->Branch("deltaPullAngleAK7", &deltaPullAngleAK7  ,  "deltaPullAngleAK7/F");
+
 
 
 
