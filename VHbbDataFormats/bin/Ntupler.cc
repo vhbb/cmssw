@@ -29,93 +29,19 @@
 #include "VHbbAnalysis/VHbbDataFormats/interface/TriggerReader.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/TopMassReco.h"
 
+
+//Move class definition to Ntupler.h ?
+//#include "VHbbAnalysis/VHbbDataFormats/interface/Ntupler.h"
+
+#include "VHbbAnalysis/VHbbDataFormats/interface/BTagWeight.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/TriggerWeight.h"
+
 #include <sstream>
 #include <string>
 
 #define MAXJ 30
 #define MAXL 10
 
-
-TTree * tscaleHLTmu = 0;
-TTree * tscaleIDmu = 0;
-
-float ScaleCSV(float CSV)
-{
-if(CSV < 0.68) return 1.0;
-if(CSV < 0.9) return  0.96;
-else  return  0.94;
-}
-
-
-float ScaleIsoHLT(float pt1, float eta1)
-{
-float ptMin,ptMax,etaMin,etaMax,scale,error;
-float s1 = 0;
-int count = 0;
-tscaleHLTmu->SetBranchAddress("ptMin",&ptMin);
-tscaleHLTmu->SetBranchAddress("ptMax",&ptMax);
-tscaleHLTmu->SetBranchAddress("etaMin",&etaMin);
-tscaleHLTmu->SetBranchAddress("etaMax",&etaMax);
-tscaleHLTmu->SetBranchAddress("scale",&scale);
-tscaleHLTmu->SetBranchAddress("error",&error);
-
-for(int jentry = 0; jentry < tscaleHLTmu->GetEntries(); jentry++)
-  {
-   tscaleHLTmu->GetEntry(jentry);
-   if((pt1 > ptMin) && (pt1 < ptMax) && (eta1 > etaMin) && (eta1 < etaMax))
-    {
-    s1 = scale;
-    count++;   
-    }
-  }
-
-if(count == 0 || s1 == 0) 
-{
-//caleFile->Close();
- return 1;
-}
-
-
-//aleFile->Close();
-return (s1);
-}
-
-
-
-float ScaleID(float pt1, float eta1)
-{
-
-float ptMin,ptMax,etaMin,etaMax,scale,error;
-float s1 = 0;
-int count = 0;
-tscaleIDmu->SetBranchAddress("ptMin",&ptMin);
-tscaleIDmu->SetBranchAddress("ptMax",&ptMax);
-tscaleIDmu->SetBranchAddress("etaMin",&etaMin);
-tscaleIDmu->SetBranchAddress("etaMax",&etaMax);
-tscaleIDmu->SetBranchAddress("scale",&scale);
-tscaleIDmu->SetBranchAddress("error",&error);
-
-for(int jentry = 0; jentry < tscaleIDmu->GetEntries(); jentry++)
-  {
-
-   tscaleIDmu->GetEntry(jentry);
-   if((pt1 > ptMin) && (pt1 < ptMax) && (eta1 > etaMin) && (eta1 < etaMax))
-    {
-    s1 = scale;
-    count++;   
-    }
-   }
-
-if(count == 0 || s1 == 0) 
-{
-//caleFile->Close();
- return 1;
-}
-
-//aleFile->Close();
-return (s1);
-
-}
 
 bool jsonContainsEvent (const std::vector< edm::LuminosityBlockRange > &jsonVec,
                         const edm::EventBase &event)
@@ -349,12 +275,7 @@ int main(int argc, char* argv[])
   HbbCandidateFinderAlgo * algoW = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdW"),
                                      ana.getParameter<bool>("useHighestPtHiggsW")                         );
 
-  TFile *hltMuFile = new TFile (ana.getParameter<std::string> ("hltMuFileName").c_str(),"read");
-  tscaleHLTmu = (TTree*) hltMuFile->Get("tree");
-//  hltMuFile->Close();
-  TFile *idMuFile = new TFile (ana.getParameter<std::string> ("idMuFileName").c_str(),"read"); //"ScaleEffs42.root","read");
-  tscaleIDmu = (TTree*) idMuFile->Get("tree");
-//  idMuFile->Close();
+  TriggerWeight triggerWeight(ana);
 
   std::vector<std::string> inputFiles_( in.getParameter<std::vector<std::string> >("fileNames") );
 //  std::string inputFile( in.getParameter<std::string> ("fileName") );
@@ -368,6 +289,8 @@ int main(int argc, char* argv[])
 //   TFile *_outPUFile	= new TFile((outputFile_+"_PU").c_str(), "recreate");	
 //   TH1F * pu = new TH1F("pileup","",-0.5,24.5,25);
    TFile *_outFile	= new TFile(outputFile_.c_str(), "recreate");	
+   TH1F *  count = new TH1F("Count","Count", 1,0,2 );
+   TH1F *  countWithPU = new TH1F("CountWithPU","CountWithPU", 1,0,2 );
   _outTree = new TTree("tree", "myTree");
   
   _outTree->Branch("H"		,  &H	            ,  "mass/F:pt/F:eta:phi/F");
@@ -502,6 +425,7 @@ int main(int argc, char* argv[])
       fwlite::Event ev(inFile);
       for(ev.toBegin(); !ev.atEnd(); ++ev, ++ievt)
         {
+          count->Fill(1.);
 
  	  if(isMC_){
  	  // PU weights
@@ -514,6 +438,7 @@ int main(int argc, char* argv[])
 // 	   }
  	   PUweight = 1.0; // FIXME: LumiWeights_.weight3BX( avg /3.);  (NEED EDM FIX)
  	  }
+      countWithPU->Fill(PUweight);
       
       //Write event info 
       EVENT.run = ev.id().run();
@@ -614,18 +539,7 @@ int main(int argc, char* argv[])
           HVdPhi = deltaPhi(vhCand.H.p4.Phi(),vhCand.V.p4.Phi()) ;
           VMt = vhCand.Mt() ;
           deltaPullAngle = vhCand.H.deltaTheta;
-          float deltaPhipfMETjet1 = deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[0].p4.Phi() );
-          float deltaPhipfMETjet2 = deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[1].p4.Phi() );
-          if(deltaPhipfMETjet1 <= deltaPhipfMETjet2) 
-          {
-	     minDeltaPhijetMET=deltaPhipfMETjet1;
-             jetPt_minDeltaPhijetMET=vhCand.H.jets[0].p4.Pt(); 
-          }
-	  else
-          {
-	     minDeltaPhijetMET=deltaPhipfMETjet2;
-             jetPt_minDeltaPhijetMET=vhCand.H.jets[1].p4.Pt(); 
-          }
+
   
           hJets.cosTheta[0]=  vhCand.H.helicities[0];
           hJets.cosTheta[1]=  vhCand.H.helicities[1];
@@ -644,9 +558,9 @@ int main(int argc, char* argv[])
           if(Vtype == VHbbCandidate::Zmumu ){
                   vLeptons.set(vhCand.V.muons[0],0,13); 
                   vLeptons.set(vhCand.V.muons[1],1,13);
-                  float cweightID = ScaleID(vLeptons.pt[0],vLeptons.eta[0]) * ScaleID(vLeptons.pt[1],vLeptons.eta[1]) ;
-                  float weightTrig1 = ScaleIsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
-                  float weightTrig2 = ScaleIsoHLT(vLeptons.pt[1],vLeptons.eta[1]);
+                  float cweightID = triggerWeight.scaleMuID(vLeptons.pt[0],vLeptons.eta[0]) * triggerWeight.scaleMuID(vLeptons.pt[1],vLeptons.eta[1]) ;
+                  float weightTrig1 = triggerWeight.scaleMuIsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
+                  float weightTrig2 = triggerWeight.scaleMuIsoHLT(vLeptons.pt[1],vLeptons.eta[1]);
                   float cweightTrig = weightTrig1 + weightTrig2 - weightTrig1*weightTrig2;
                   weightTrig = cweightID * cweightTrig;
                   nvlep=2;
@@ -662,8 +576,8 @@ int main(int argc, char* argv[])
           if(Vtype == VHbbCandidate::Wmun ){
                   leptonForTop=vhCand.V.muons[0].p4;
                   vLeptons.set(vhCand.V.muons[0],0,13); 
-                  float cweightID = ScaleID(vLeptons.pt[0],vLeptons.eta[0]);
-                  float weightTrig1 = ScaleIsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
+                  float cweightID = triggerWeight.scaleMuID(vLeptons.pt[0],vLeptons.eta[0]);
+                  float weightTrig1 = triggerWeight.scaleMuIsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
                   float cweightTrig = weightTrig1;
                   weightTrig = cweightID * cweightTrig;
                   nvlep=1;
@@ -688,13 +602,27 @@ int main(int argc, char* argv[])
 
 
           double maxBtag=-99999;
+          minDeltaPhijetMET = 999;
           TLorentzVector bJet;
           for(unsigned int j=0; j < vhCand.H.jets.size(); j++ ){
                 if (vhCand.H.jets[j].csv > maxBtag) { bJet=vhCand.H.jets[j].p4 ; maxBtag =vhCand.H.jets[j].csv; }
+                if (deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[j].p4.Phi()) < minDeltaPhijetMET) 
+                 {
+                  minDeltaPhijetMET=deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[j].p4.Phi()); 
+                  jetPt_minDeltaPhijetMET=vhCand.H.jets[j].p4.Pt();
+                 }
+
           }
           for(unsigned int j=0; j < vhCand.additionalJets.size(); j++ ){
                 if (vhCand.additionalJets[j].csv > maxBtag) { bJet=vhCand.additionalJets[j].p4 ; maxBtag =vhCand.additionalJets[j].csv; }
-          }
+                if (deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.additionalJets[j].p4.Phi()) < minDeltaPhijetMET) 
+                 {
+                  minDeltaPhijetMET=deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.additionalJets[j].p4.Phi());
+                  jetPt_minDeltaPhijetMET=vhCand.additionalJets[j].p4.Pt();
+                 }
+         }
+
+ 
           if(maxBtag > -99999)
           { 
            TopHypo topQuark = TopMassReco::topMass(leptonForTop,bJet,vhCand.V.mets.at(0).p4);
