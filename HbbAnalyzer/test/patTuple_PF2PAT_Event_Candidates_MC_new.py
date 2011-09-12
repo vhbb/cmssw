@@ -99,7 +99,11 @@ from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerEventContent
 
 ## want pfNoElectron
 
-#process.patJets.addTagInfos  = True
+process.patJets.addTagInfos  = True
+#process.selectedPatJets.addTagInfos  = True
+###process.selectedPatJetsAK5PF.addTagInfos  = True
+#process.selectedPatJetsAK7Calo.addTagInfos  = True
+#process.selectedPatJetsAK7PF.addTagInfos  = True
 
 process.load('CommonTools.ParticleFlow.PF2PAT_cff')
 from PhysicsTools.PatAlgos.tools.pfTools import *

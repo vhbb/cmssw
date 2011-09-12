@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.30 2011/09/09 12:03:29 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.31 2011/09/09 12:34:45 tboccali Exp $
 //
 //
 
@@ -698,7 +698,7 @@ BTagSFContainer btagSFs;
   edm::View<pat::MET> metsTC = *metTCHandle;
   if(metsTC.size()){
     hbbInfo->tcmet.sumEt=(metsTC[0]).sumEt();
-    hbbInfo->tcmet.metSig=(metsTC[0]).mEtSig();
+    hbbInfo->tcmet.metSig=(metsTC[0]).significance();
     hbbInfo->tcmet.eLong=(metsTC[0]).e_longitudinal();
     hbbInfo->tcmet.p4=GENPTOLOR((metsTC[0]));
     if (verbose_)     std::cout <<" METTC "<<     hbbInfo->tcmet.metSig <<" " <<     hbbInfo->tcmet.sumEt<<std::endl;
@@ -710,7 +710,7 @@ BTagSFContainer btagSFs;
   edm::View<reco::MET> metsHT = *mHTHandle;
   if(metsHT.size()){
     hbbInfo->mht.sumEt=(metsHT[0]).sumEt();
-    hbbInfo->mht.metSig=(metsHT[0]).mEtSig();
+    hbbInfo->mht.metSig=(metsHT[0]).significance();
     hbbInfo->mht.eLong=(metsHT[0]).e_longitudinal();
     hbbInfo->mht.p4=GENPTOLOR((metsHT[0]));
     if (verbose_)     std::cout <<" METHT "<<     hbbInfo->mht.metSig <<" " <<     hbbInfo->mht.sumEt<<std::endl;
@@ -722,7 +722,7 @@ BTagSFContainer btagSFs;
   
   if(mets.size()){
     hbbInfo->calomet.sumEt=(mets[0]).sumEt();
-    hbbInfo->calomet.metSig=(mets[0]).mEtSig();
+    hbbInfo->calomet.metSig=(mets[0]).significance();
     hbbInfo->calomet.eLong=(mets[0]).e_longitudinal();
     hbbInfo->calomet.p4=GENPTOLOR((mets[0]));
     if (verbose_)     std::cout <<" METCALO "<<     hbbInfo->calomet.metSig <<" " <<     hbbInfo->calomet.sumEt<<std::endl;
@@ -734,7 +734,7 @@ BTagSFContainer btagSFs;
   
   if(metsPF.size()){
     hbbInfo->pfmet.sumEt=(metsPF[0]).sumEt();
-    hbbInfo->pfmet.metSig=(metsPF[0]).mEtSig();
+    hbbInfo->pfmet.metSig=(metsPF[0]).significance();
     hbbInfo->pfmet.eLong=(metsPF[0]).e_longitudinal();
     hbbInfo->pfmet.p4=GENPTOLOR((metsPF[0]));
     if (verbose_)     std::cout <<" METPF "<<     hbbInfo->pfmet.metSig <<" " <<     hbbInfo->pfmet.sumEt<<std::endl;
@@ -1311,20 +1311,17 @@ void HbbAnalyzerNew ::fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Je
 
     const reco::SecondaryVertexTagInfo * tf = jet_iter->tagInfoSecondaryVertex();
    if (tf){
-      std::cout <<" PIPPO!!!!"<<std::endl;
-      std::cout <<" PIPPO!!!!ddd "<<tf->nVertices()<<std::endl;
-      sj.vtxMass = tf->secondaryVertex(0).p4().mass();
-      std::cout <<" PIPPO2!!!!"<<std::endl;
-      sj.vtxNTracks = tf->secondaryVertex(0).nTracks();
-      std::cout <<" PIPPO3!!!!"<<std::endl;
-      std::vector<reco::TrackBaseRef >::const_iterator tit =  tf->secondaryVertex(0).tracks_begin();
-      std::cout <<" PIPPO4!!!!"<<std::endl;
-      for (; tit<  tf->secondaryVertex(0).tracks_end(); ++tit){
-	sj.vtxTrackIds.push_back(tit->key());
-      }
-      Measurement1D m = tf->flightDistance(0);
-      sj.vtx3dL = m.value();
-      sj.vtx3deL = m.error();
+     if (tf->nVertices() >0){
+	sj.vtxMass = tf->secondaryVertex(0).p4().mass();
+	sj.vtxNTracks = tf->secondaryVertex(0).nTracks();
+	std::vector<reco::TrackBaseRef >::const_iterator tit =  tf->secondaryVertex(0).tracks_begin();
+	for (; tit<  tf->secondaryVertex(0).tracks_end(); ++tit){
+	  sj.vtxTrackIds.push_back(tit->key());
+	}
+	Measurement1D m = tf->flightDistance(0);
+	sj.vtx3dL = m.value();
+	sj.vtx3deL = m.error();
+     }
     }
    //
     // add tVector
