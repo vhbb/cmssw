@@ -3,7 +3,9 @@
 
 #include "FWCore/ParameterSet/interface/ProcessDesc.h"
 #include "FWCore/PythonParameterSet/interface/PythonProcessDesc.h"
+#include "TriggerZnunuCurve.h"
 #include <TH1F.h>
+#include <TF1.h>
 #include <TFile.h>
 #include <TTree.h>
 #include <iostream>
@@ -23,14 +25,13 @@ public:
       std::cout << "ERROR: cannot load Muon Trigger efficiencies" << std::endl;
     } 
 
-
   }
    
  
   float scaleMuIsoHLT(float pt1, float eta1)
   {
-
-    if(! tscaleHLTmu) return 1;
+    // changed to !tscaleHLTmu
+    if(!tscaleHLTmu) return 1;
     float ptMin,ptMax,etaMin,etaMax,scale,error;
     float s1 = 0;
     int count = 0;
@@ -66,8 +67,8 @@ public:
   
   float scaleMuID(float pt1, float eta1)
   {
-    
-    if(! tscaleIDmu) return 1;
+    // changed to !tscale...
+    if(!tscaleIDmu) return 1;
 
     float ptMin,ptMax,etaMin,etaMax,scale,error;
     float s1 = 0;
@@ -101,9 +102,25 @@ public:
     
   }
 
+double  scaleMetHLT( double met){
+
+    float s1 = 1;
+    TF1 * f = new TF1 ("f",TriggerZnunuCurve::trigMet, 0,99999, 0, "triggerZnunuCurve"  );
+    
+    s1 = f->Eval(met);
+    
+    return (s1);
+    
+  }
+  
+
+
+
+
 private:
   TTree * tscaleHLTmu;
   TTree * tscaleIDmu;
+  
 };
 
 #endif
