@@ -21,7 +21,7 @@ class VHbbCandidate {
 
   class VectorCandidate {
   public:
-  VectorCandidate() : firstLepton(-99),secondLepton(-99) {}
+  VectorCandidate() : firstLepton(99999),secondLepton(99999) {}
     double Mt(CandidateType candidateType) const {
     if(candidateType==Wen)
       {
