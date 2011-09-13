@@ -11,9 +11,6 @@ process.fwliteInput = cms.PSet(
 "root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_11_0_syf.root",
 "root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_12_0_98x.root",
 "root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_1_2_fZC.root",
-),
- fasadasdileNames   = cms.vstring(
-
 "root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_13_0_d07.root",
 "root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_14_0_gTV.root",
 "root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_15_0_k8w.root",
@@ -116,7 +113,7 @@ process.Analyzer = cms.PSet(
    ),
     isMC =     cms.bool(True),
     verbose = cms.bool(False),
-    readFromCandidates = cms.bool(True),
+    readFromCandidates = cms.bool(False),
     jetPtThresholdZ = cms.double(20),
     jetPtThresholdW = cms.double(30),
     bJetCountThreshold = cms.double(0.898),

@@ -30,7 +30,7 @@ public:
   float scaleMuIsoHLT(float pt1, float eta1)
   {
 
-    if(tscaleHLTmu) return 1;
+    if(! tscaleHLTmu) return 1;
     float ptMin,ptMax,etaMin,etaMax,scale,error;
     float s1 = 0;
     int count = 0;
@@ -67,7 +67,7 @@ public:
   float scaleMuID(float pt1, float eta1)
   {
     
-    if(tscaleIDmu) return 1;
+    if(! tscaleIDmu) return 1;
 
     float ptMin,ptMax,etaMin,etaMax,scale,error;
     float s1 = 0;

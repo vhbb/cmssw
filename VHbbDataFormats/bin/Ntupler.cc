@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
   TrackInfo V;
   int nvlep=0,nalep=0; 
   
- float jjdr,jjdPhi,jjdEta,HVdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig,addJet3Pt, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
+ float jjdr,jjdPhi,jjdEta,HVdPhi,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
    int nofLeptons15,nofLeptons20, Vtype,numJets,numBJets,eventFlav;
 //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
    bool triggerFlags[500],hbhe;
@@ -337,7 +337,6 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_JECUnc",aJets.JECUnc ,"JECUnc[naJets]/F");
 
 
-  _outTree->Branch("addJet3Pt", &addJet3Pt  ,  "addJet3Pt/F");
   _outTree->Branch("jjdr" 	,  &jjdr            ,  "jjdr/F"         );         	
   _outTree->Branch("jjdPhi"  	,  &jjdPhi          ,  "jjdPhi/F"       );            	
   _outTree->Branch("jjdEta"  	,  &jjdEta          ,  "jjdEta/F"       );            	
@@ -360,6 +359,7 @@ int main(int argc, char* argv[])
     
   _outTree->Branch("Vtype"     ,  &Vtype   ,   "Vtype/I" );                
   _outTree->Branch("HVdPhi"     ,  &HVdPhi   ,   "HVdPhi/F" );                
+  _outTree->Branch("HMETdPhi"     ,  &HMETdPhi   ,   "HMETdPhi/F" );                
   _outTree->Branch("VMt"  	,  &VMt      ,   "VMt/F"    );             	
 
   _outTree->Branch("nvlep"	,  &nvlep    ,   "nvlep/I");
@@ -542,7 +542,8 @@ int main(int argc, char* argv[])
           jjdr = deltaR(vhCand.H.jets[0].p4.Eta(),vhCand.H.jets[0].p4.Phi(),vhCand.H.jets[1].p4.Eta(),vhCand.H.jets[1].p4.Phi());
           jjdPhi = deltaPhi(vhCand.H.jets[0].p4.Phi(),vhCand.H.jets[1].p4.Phi());
           jjdEta= TMath::Abs( vhCand.H.jets[0].p4.Eta() - vhCand.H.jets[1].p4.Eta() );
-          HVdPhi = deltaPhi(vhCand.H.p4.Phi(),vhCand.V.p4.Phi()) ;
+          HVdPhi = fabs( deltaPhi(vhCand.H.p4.Phi(),vhCand.V.p4.Phi()) ) ;
+          HMETdPhi = fabs( deltaPhi(vhCand.H.p4.Phi(),vhCand.mets.at(0).p4.Phi()) ) ;
           VMt = vhCand.Mt() ;
           deltaPullAngle = vhCand.H.deltaTheta;
 
