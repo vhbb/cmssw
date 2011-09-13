@@ -46,11 +46,11 @@ process.out1 = cms.OutputModule(
 	'drop *',
 	'keep *_HbbAnalyzerNew_*_*',
 	'keep VHbbCandidates_*_*_*',
-	'keep PileupSummaryInfo_*_*_*',
+	'keep PileupSummaryInfos_*_*_*',
 	'keep edmTriggerResults_*_*_*',
 	),
     dropMetaData = cms.untracked.string('ALL'),
-    splitLevel = cms.untracked.int32(0),
+    splitLevel = cms.untracked.int32(99),
         SelectEvents = cms.untracked.PSet(
         SelectEvents = cms.vstring('p')
     )

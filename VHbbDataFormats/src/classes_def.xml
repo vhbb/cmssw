@@ -32,6 +32,7 @@
 <class name="std::vector<VHbbEvent::SimpleJet>"/>
 <class name="std::vector<VHbbEvent::TauInfo>"/>
 <class name="std::vector<TLorentzVector>"/>
+<class name="std::map <int, unsigned int>"/>
 
 <class name="VHbbCandidate"/>
 <class name="std::vector<VHbbCandidate>"/>

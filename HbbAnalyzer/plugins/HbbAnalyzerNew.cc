@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.31 2011/09/09 12:34:45 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.32 2011/09/12 14:23:42 tboccali Exp $
 //
 //
 
@@ -24,6 +24,7 @@ Implementation:
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 
 #include "VHbbAnalysis/HbbAnalyzer/interface/HbbAnalyzerNew.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
 #define GENPTOLOR(a) TLorentzVector((a).px(), (a).py(), (a).pz(), (a).energy())
 #define GENPTOLORP(a) TLorentzVector((a)->px(), (a)->py(), (a)->pz(), (a)->energy())
@@ -159,8 +160,25 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
     
   edm::Handle<double> rhoHandle;
-  iEvent.getByLabel(edm::InputTag("kt6PFJets", "rho"),rhoHandle);   auxInfo->puInfo.rho = *rhoHandle;
+  iEvent.getByLabel(edm::InputTag("kt6PFJets", "rho"),rhoHandle);   
+  auxInfo->puInfo.rho = *rhoHandle;
   
+  edm::Handle<std::vector< PileupSummaryInfo> > puHandle;
+
+  if (runOnMC_){
+    iEvent.getByType(puHandle);
+    if (puHandle.isValid()){
+      
+      std::vector< PileupSummaryInfo> pu = (*puHandle); 
+      for (std::vector<PileupSummaryInfo>::const_iterator it= pu.begin(); it!=pu.end(); ++it){
+	 int bx = (*it).getBunchCrossing();
+	unsigned int num = (*it).getPU_NumInteractions();
+	//	std::cout <<" PU PUSHING "<<bx<<" " <<num<<std::endl;
+	auxInfo->puInfo.pus[bx]  =num;
+      }
+    }
+  }
+
   //// real start
   
   
@@ -1184,7 +1202,7 @@ TLorentzVector HbbAnalyzerNew::getChargedTracksMomentum(const pat::Jet* patJet )
 
 
 //Btagging scale factors
-void HbbAnalyzerNew::fillScaleFactors(VHbbEvent::SimpleJet sj, BTagSFContainer iSF){
+void HbbAnalyzerNew::fillScaleFactors(VHbbEvent::SimpleJet& sj, BTagSFContainer iSF){
 
 
   BinningPointByMap measurePoint;

@@ -92,7 +92,7 @@ class HbbAnalyzerNew : public edm::EDProducer {
   virtual void produce( edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
   virtual void fillMuBlock(edm::View<pat::Muon>::const_iterator mu, int muInfo[15]);
-  virtual void fillScaleFactors(VHbbEvent::SimpleJet, BTagSFContainer);
+  virtual void fillScaleFactors(VHbbEvent::SimpleJet&, BTagSFContainer);
   
   // ----------member data ---------------------------
   

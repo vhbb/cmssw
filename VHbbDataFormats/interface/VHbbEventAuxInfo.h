@@ -4,7 +4,7 @@
 #include <TLorentzVector.h>
 #include <TVector2.h>
 #include <vector>
-
+#include<map>
 class VHbbEventAuxInfo{
  public:
 
@@ -21,6 +21,7 @@ class VHbbEventAuxInfo{
     PUInfo(): rho(-99) {}
   public:
     float rho;
+    std::map<int,unsigned int>  pus;
   };
 
 

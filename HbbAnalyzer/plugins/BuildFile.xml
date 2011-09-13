@@ -5,6 +5,7 @@
 <use   name="FWCore/ServiceRegistry"/>
 <use   name="DataFormats/Candidate"/>
 <use   name="DataFormats/PatCandidates"/>
+<use   name="SimDataFormats/PileupSummaryInfo"/>
 <use   name="PhysicsTools/CondLiteIO"/>
 <use   name="PhysicsTools/UtilAlgos"/>
 <use   name="DataFormats/BeamSpot"/>
