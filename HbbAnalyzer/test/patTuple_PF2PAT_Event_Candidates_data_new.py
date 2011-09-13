@@ -18,32 +18,39 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 # source
 process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
-	"file:/gpfs/gpfsddn/cms/user/arizzi/Hbb/CMSSW_4_2_7_patch2/src/VHbbAnalysis/HbbAnalyzer/test/048D33D0-EE80-E011-94E2-0030487CD716.root"))
+		'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/02E676EE-BDAD-E011-B9ED-E0CB4EA0A929.root',
+		'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/32CECED6-BFAD-E011-B08D-00261834B5A4.root',
+		'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/3EE916B3-C4AD-E011-9159-90E6BA0D09B0.root',
+		'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/42622800-C1AD-E011-AD65-485B39800BF2.root',
+#		"/store/mc/CMSSW_4_2_3/RelValProdTTbar/GEN-SIM-RECO/MC_42_V12_JobRobot-v1/0000/B89A0B07-818C-E011-953E-0030487CD7E0.root"
+#	"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat//store/mc/Summer11/BdToMuMu_2MuPtFilter_7TeV-pythia6-evtgen//GEN-SIM-RECO//PU_S4_START42_V11-v1///0000//92DE42C9-CD8C-E011-A421-001F296B758E.root"
+	)
+			    )
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 if isMC == False :
 	process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
 else :
-	process.GlobalTag.globaltag = cms.string('START42_V12::All')
+	process.GlobalTag.globaltag = cms.string('START42_V13::All')
 
 process.out1 = cms.OutputModule(
     'PoolOutputModule',
-    fileName       = cms.untracked.string('PAT.edm.root'),
+    fileName       = cms.untracked.string('/tmp/tboccali/PAT.edm.root'),
     outputCommands = cms.untracked.vstring(
 	'drop *',
-					   'keep *_HbbAnalyzerNew_*_*',
-					   'keep VHbbCandidates_*_*_*',
-					   'keep PileupSummaryInfo_*_*_*',
-					   'keep edmTriggerResults_*_*_*',
-					   ),
+	'keep *_HbbAnalyzerNew_*_*',
+	'keep VHbbCandidates_*_*_*',
+#	'keep PileupSummaryInfos_*_*_*',
+	'keep edmTriggerResults_*_*_*',
+	),
     dropMetaData = cms.untracked.string('ALL'),
-    splitLevel = cms.untracked.int32(0),
+    splitLevel = cms.untracked.int32(99),
         SelectEvents = cms.untracked.PSet(
         SelectEvents = cms.vstring('p')
     )
@@ -96,6 +103,11 @@ from PhysicsTools.PatAlgos.patEventContent_cff import patTriggerEventContent
 
 ## want pfNoElectron
 
+process.patJets.addTagInfos  = True
+#process.selectedPatJets.addTagInfos  = True
+###process.selectedPatJetsAK5PF.addTagInfos  = True
+#process.selectedPatJetsAK7Calo.addTagInfos  = True
+#process.selectedPatJetsAK7PF.addTagInfos  = True
 
 process.load('CommonTools.ParticleFlow.PF2PAT_cff')
 from PhysicsTools.PatAlgos.tools.pfTools import *
@@ -267,7 +279,7 @@ addPfMET(process, 'PF')
 #            )
 
 for jetcoll in (process.selectedPatJetsCACalo, process.selectedPatJetsCAPF):
-	jetcoll.embedGenJetMatch = cms.bool(False)
+	jetcoll.embedGenJetMatch = cms.bool(isMC)
 	#getJetMCFlavour uses jetFlavourAssociation*, see below
 	jetcoll.getJetMCFlavour = cms.bool(True)
 	#those two use jetPartonMatch*, see below
@@ -336,6 +348,7 @@ process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 from PhysicsTools.SelectorUtils.pfJetIDSelector_cfi import pfJetIDSelector 
 process.goodPatJetsAK5PF = cms.EDFilter("PFJetIDSelectionFunctorFilter",
                            filterParams = pfJetIDSelector.clone(), src = cms.InputTag("selectedPatJetsAK5PF") )
+
 
 process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     runOnMC = cms.bool(isMC),
@@ -422,7 +435,7 @@ defaultTriggerMatch = cms.EDProducer(
 
 process.selectedMuonsTriggerMatch = defaultTriggerMatch.clone(
         src         = cms.InputTag( "selectedPatMuons" )
-        , matchedCuts = cms.string('path("*Mu*")')
+        , matchedCuts = cms.string('path("*Mu*",0,0)')
 #	        , matchedCuts = cms.string('path("HLT_IsoMu17_v*")|| path("HLT_Mu15_v*")')
 )
 # trigger object embedders for the same collections
@@ -433,7 +446,7 @@ process.selectedMuonsMatched = cms.EDProducer( "PATTriggerMatchMuonEmbedder",
 
 process.selectedElectronsTriggerMatch = defaultTriggerMatch.clone(
         src         = cms.InputTag( "selectedPatElectrons" )
-        , matchedCuts = cms.string('path("*Ele*")')
+        , matchedCuts = cms.string('path("*Ele*",0,0)')
 #	        , matchedCuts = cms.string('path("HLT_IsoMu17_v*")|| path("HLT_Mu15_v*")')
 )
 # trigger object embedders for the same collections
@@ -476,6 +489,15 @@ process.hbbCandidates = cms.EDFilter("HbbCandidateFinder",
 				      )
 
 
+process.patMETsHT = cms.EDProducer("MHTProducer",
+  JetCollection = cms.InputTag("patJets"),
+  MinJetPt      = cms.double(30),
+  MaxJetEta     = cms.double(5)
+)
+
+
+process.dump = cms.EDAnalyzer("EventContentAnalyzer")
+
 # drop the meta data for dropped data
 #process.out.dropMetaData = cms.string("DROPPED")
 
@@ -484,8 +506,7 @@ process.hbbCandidates = cms.EDFilter("HbbCandidateFinder",
 
 if isMC == False :
         process.p = cms.Path(
-                     process.HBHENoiseFilter*
-                     process.goodOfflinePrimaryVertices*
+                    process.goodOfflinePrimaryVertices*
                      process.PF2PAT*
                      process.ak5CaloJets*
                      process.ak7CaloJets*
@@ -498,6 +519,7 @@ if isMC == False :
                      process.eidSequence*
                      process.patDefaultSequence*
 #                     process.patPF2PATSequence* # added with usePF2PAT
+		     process.patMETsHT*
                      process.dimuons*
                      process.dielectrons*
                      process.leptonTrigMatch*
@@ -506,8 +528,7 @@ process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSV
                      )
 else :
         process.p = cms.Path(
-                     process.HBHENoiseFilter*
-                     process.goodOfflinePrimaryVertices*
+                    process.goodOfflinePrimaryVertices*
                      process.genParticlesForJets*
                      process.ak5GenJets*
                      process.PF2PAT*
@@ -522,12 +543,17 @@ else :
                      process.eidSequence*
                      process.patDefaultSequence*
 #                     process.patPF2PATSequence* # added with usePF2PAT
+		     process.patMETsHT*
+#		     process.dump*
                      process.dimuons*
                      process.dielectrons*
                      process.leptonTrigMatch*
                      process.HbbAnalyzerNew*
 process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
                      )
+
+process.hbhepath = cms.Path(process.HBHENoiseFilter)
+
 
 
 #process.candidates = cms.Path(process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates)
@@ -542,6 +568,6 @@ process.options = cms.untracked.PSet(
 process.e = cms.EndPath(process.out1)
 
 
-process.schedule = cms.Schedule(process.p,  process.e)
+process.schedule = cms.Schedule(process.p, process.hbhepath, process.e)
 
 #
