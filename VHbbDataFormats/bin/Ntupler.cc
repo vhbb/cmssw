@@ -492,6 +492,7 @@ int main(int argc, char* argv[])
 
       //      std::clog << "Filling tree "<< std::endl;
      bool isW=false;
+
  
      if(cand->size() == 0 or cand->at(0).H.jets.size() < 2) continue;
           if(cand->size() > 1 ) 
@@ -604,9 +605,25 @@ int main(int argc, char* argv[])
           
           aLeptons.reset();
           nalep=0;
-          for(size_t j=firstAddMu;j< vhCand.V.muons.size();j++) aLeptons.set(vhCand.V.muons[j],nalep++,13);
-          for(size_t j=firstAddEle;j< vhCand.V.electrons.size();j++) aLeptons.set(vhCand.V.electrons[j],nalep++,11);
+	  if(fromCandidate)
+          {
+            for(size_t j=firstAddMu;j< vhCand.V.muons.size();j++) aLeptons.set(vhCand.V.muons[j],nalep++,13);
+            for(size_t j=firstAddEle;j< vhCand.V.electrons.size();j++) aLeptons.set(vhCand.V.electrons[j],nalep++,11);
+          }
+          else
+          {
+             for(size_t j=0;j< iEvent->muInfo.size();j++)
+             { 
+                if((j!= vhCand.V.firstLepton && j!= vhCand.V.secondLepton) || ((Vtype != VHbbCandidate::Wmun ) && (Vtype != VHbbCandidate::Zmumu )) )
+                 aLeptons.set(iEvent->muInfo[j],nalep++,13);
+             }
+             for(size_t j=0;j< iEvent->eleInfo.size();j++)
+             { 
+                if((j!= vhCand.V.firstLepton && j!= vhCand.V.secondLepton) || ((Vtype != VHbbCandidate::Wen ) && (Vtype != VHbbCandidate::Zee )))
+                 aLeptons.set(iEvent->eleInfo[j],nalep++,11);
+             }
 
+          }
 
           //Loop on jets
           
