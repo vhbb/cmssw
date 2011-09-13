@@ -187,8 +187,10 @@ class VHbbCandidateTools {
     ok = false;
     VHbbCandidate temp=in;
     if (temp.V.mets.size()!=1) return in;
-    if (temp.V.muons.size()!=0) return in ;
-    if (temp.V.electrons.size()!=0) return in ;
+//always build a NuNu candidate, exclusion come from if/else series on the caller side
+// this allow to still build candidates for mu+e  and same sign dilept
+//    if (temp.V.muons.size()!=0) return in ;
+//    if (temp.V.electrons.size()!=0) return in ;
     
     temp.V.p4 = temp.V.mets[0].p4;
     if (verbose_) {
