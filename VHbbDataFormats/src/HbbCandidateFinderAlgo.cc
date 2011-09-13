@@ -1,5 +1,6 @@
 #include "VHbbAnalysis/VHbbDataFormats/interface/HbbCandidateFinderAlgo.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidateTools.h"
+#include <algorithm>
 
 #include <iostream>
 #include<cstdlib>
@@ -179,110 +180,118 @@ void HbbCandidateFinderAlgo::findMET(const VHbbEvent::METInfo & met, std::vector
 }
 
 
-bool HbbCandidateFinderAlgo::findDiJets (const std::vector<VHbbEvent::SimpleJet>& jets, VHbbEvent::SimpleJet& j1, VHbbEvent::SimpleJet& j2,std::vector<VHbbEvent::SimpleJet>& addJets){
+bool HbbCandidateFinderAlgo::findDiJets (const std::vector<VHbbEvent::SimpleJet>& jetsin, VHbbEvent::SimpleJet& j1, VHbbEvent::SimpleJet& j2,std::vector<VHbbEvent::SimpleJet>& addJets){
   
- std::vector<VHbbEvent::SimpleJet> tempJets;
 
- if (verbose_){
-   std::cout <<" CandidateFinder: Input Jets = "<<jets.size()<<std::endl;
+
+if (verbose_){
+   std::cout <<" CandidateFinder: Input Jets = "<<jetsin.size()<<std::endl;
  }
 
- for (unsigned int i=0 ; i< jets.size(); ++i){
-   if (jets[i].p4.Pt()> jetPtThreshold)
-     tempJets.push_back(jets[i]);
- }
- 
+
  CompareBTag  bTagComparator;
  CompareJetPt ptComparator;
  
- if (verbose_){
-   std::cout <<" CandidateFinder: Intermediate Jets = "<<tempJets.size()<<std::endl;
- }
 
 
- if (tempJets.size()<2) return false;
+ if (jetsin.size()<2) return false;
+
+ std::vector<VHbbEvent::SimpleJet> jets = jetsin;
  
- std::sort(tempJets.begin(), tempJets.end(), bTagComparator);
- 
-if (tempJets[0].p4.Pt()>(tempJets[1].p4.Pt())){
-   j1 = tempJets[0];
-   j2 = tempJets[1];
- }else{
-   j2 = tempJets[0];
-   j1 = tempJets[1]; 
- }
+ std::sort(jets.begin(), jets.end(), bTagComparator);
 
-//
+ //
+ // now I need at least 2 with pt > threshold
+ //
+ unsigned int index1=999999, index2=999999;
+ for (unsigned int i =0; i< jets.size()-1; ++i){
+   if (jets[i].p4.Pt()> jetPtThreshold){
+     if (index1 == 999999) {
+       index1=i;
+     }else if (index2 == 999999){
+       index2=i;
+       break;
+     }
+   }
+}
+ if (index1==999999 || index2== 999999) return false;
+
+if (jets[index1].p4.Pt()<(jets[index2].p4.Pt())){
+  std::swap (index1,index2);
+ }
+ j1 = jets[index1];
+ j2 = jets[index2];
+ 
+ //
  // additional jets
  //
- if (tempJets.size()>2){
-   for (unsigned int i=2 ; i< tempJets.size(); ++i){
-     addJets.push_back(tempJets[i]);
+ if (jets.size()>2){
+   for (unsigned int i=0 ; i< jets.size(); ++i){
+     if (i != index1 && i != index2 )
+       addJets.push_back(jets[i]);
    }
  }
-
+ 
  if (verbose_){
    std::cout <<" CandidateFinder: Output Jets = "<<2<<" Additional = "<<addJets.size()<<std::endl;
  }
-
-
-  std::sort(addJets.begin(), addJets.end(), ptComparator);
+ 
+ 
+ std::sort(addJets.begin(), addJets.end(), ptComparator);
  return true;
+ 
+ 
+
 
 
 }
 
 
-bool HbbCandidateFinderAlgo::findDiJetsHighestPt (const std::vector<VHbbEvent::SimpleJet>& jets, VHbbEvent::SimpleJet& j1, VHbbEvent::SimpleJet& j2,std::vector<VHbbEvent::SimpleJet>& addJets){
+bool HbbCandidateFinderAlgo::findDiJetsHighestPt (const std::vector<VHbbEvent::SimpleJet>& jetsin, VHbbEvent::SimpleJet& j1, VHbbEvent::SimpleJet& j2,std::vector<VHbbEvent::SimpleJet>& addJets){
   
- std::vector<VHbbEvent::SimpleJet> tempJets;
 
- if (verbose_){
-   std::cout <<" CandidateFinder: Input Jets = "<<jets.size()<<std::endl;
- }
+  if (verbose_){
+    std::cout <<" CandidateFinder: Input Jets = "<<jetsin.size()<<std::endl;
+  }
+  if (jetsin.size()<2) return false;
+  
 
- for (unsigned int i=0 ; i< jets.size(); ++i){
-   if (jets[i].p4.Pt()> jetPtThreshold)
-     tempJets.push_back(jets[i]);
- }
-
- if (tempJets.size()<2) return false;
-
- //loop over the dijets and save the one with highest Pt
-
- CompareJetPt ptComparator;
- std::sort(tempJets.begin(), tempJets.end(), ptComparator);
- //
- // so if i<j, pt(i)>pt(j)
- //
- 
- float highestPt = -1000;
- unsigned  int highesti,highestj;
- for (unsigned int i =0; i< tempJets.size()-1; ++i){
-   for (unsigned int j =i+1; j< tempJets.size(); ++j){
-     float pt = (tempJets[i].p4+tempJets[j].p4).Pt();
-     if (pt> highestPt){
-       highestPt = pt;
-       highesti=i;
-       highestj=j;
-     }
-   }
- }
- j1 = tempJets[highesti]; 
- j2 = tempJets[highestj]; 
-
- for (unsigned int i=0; i<tempJets.size(); ++i){
-   if (i!= highesti && i!= highestj)
-     addJets.push_back(tempJets[i]);
- }
-
- if (verbose_){
-   std::cout <<" CandidateFinder: Output Jets = "<<2<<" Additional = "<<addJets.size()<<std::endl;
- }
-
-return true;
-
-
+  std::vector<VHbbEvent::SimpleJet> jets = jetsin;
+  //loop over the dijets and save the one with highest Pt
+  
+  CompareJetPt ptComparator;
+  std::sort(jets.begin(), jets.end(), ptComparator);
+  //
+  // so if i<j, pt(i)>pt(j)
+  //
+  
+  float highestPt = -1000;
+  unsigned  int highesti=999999,highestj=999999;
+  for (unsigned int i =0; i< jets.size()-1; ++i){
+    for (unsigned int j =i+1; j< jets.size(); ++j){
+      float pt = (jets[i].p4+jets[j].p4).Pt();
+      if (pt>highestPt && jets[j].p4.Pt()> jetPtThreshold && jets[i].p4.Pt()> jetPtThreshold){
+	highestPt = pt;
+	highesti=i;
+	highestj=j;
+      }
+    }
+  }
+  
+  if (highesti == 999999 || highestj == 999999) return false;
+  j1 = jets[highesti]; 
+  j2 = jets[highestj]; 
+  
+  for (unsigned int i=0; i<jets.size(); ++i){
+    if (i!= highesti && i!= highestj)
+      addJets.push_back(jets[i]);
+  }
+  
+  if (verbose_){
+    std::cout <<" CandidateFinder: Output Jets = "<<2<<" Additional = "<<addJets.size()<<std::endl;
+  }
+  std::sort(addJets.begin(), addJets.end(), ptComparator);
+  return true;
 }
 
 

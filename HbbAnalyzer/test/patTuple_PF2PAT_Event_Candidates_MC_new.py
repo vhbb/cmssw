@@ -18,12 +18,16 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 # source
 process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
-		"/store/mc/CMSSW_4_2_3/RelValProdTTbar/GEN-SIM-RECO/MC_42_V12_JobRobot-v1/0000/B89A0B07-818C-E011-953E-0030487CD7E0.root"
+		'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/02E676EE-BDAD-E011-B9ED-E0CB4EA0A929.root',
+		'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/32CECED6-BFAD-E011-B08D-00261834B5A4.root',
+		'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/3EE916B3-C4AD-E011-9159-90E6BA0D09B0.root',
+		'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/42622800-C1AD-E011-AD65-485B39800BF2.root',
+#		"/store/mc/CMSSW_4_2_3/RelValProdTTbar/GEN-SIM-RECO/MC_42_V12_JobRobot-v1/0000/B89A0B07-818C-E011-953E-0030487CD7E0.root"
 #	"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat//store/mc/Summer11/BdToMuMu_2MuPtFilter_7TeV-pythia6-evtgen//GEN-SIM-RECO//PU_S4_START42_V11-v1///0000//92DE42C9-CD8C-E011-A421-001F296B758E.root"
 	)
 			    )
@@ -37,14 +41,14 @@ else :
 
 process.out1 = cms.OutputModule(
     'PoolOutputModule',
-    fileName       = cms.untracked.string('PAT.edm.root'),
+    fileName       = cms.untracked.string('/tmp/tboccali/PAT.edm.root'),
     outputCommands = cms.untracked.vstring(
 	'drop *',
-					   'keep *_HbbAnalyzerNew_*_*',
-					   'keep VHbbCandidates_*_*_*',
-					   'keep PileupSummaryInfo_*_*_*',
-					   'keep edmTriggerResults_*_*_*',
-					   ),
+	'keep *_HbbAnalyzerNew_*_*',
+	'keep VHbbCandidates_*_*_*',
+	'keep PileupSummaryInfo_*_*_*',
+	'keep edmTriggerResults_*_*_*',
+	),
     dropMetaData = cms.untracked.string('ALL'),
     splitLevel = cms.untracked.int32(0),
         SelectEvents = cms.untracked.PSet(
@@ -502,8 +506,7 @@ process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
 if isMC == False :
         process.p = cms.Path(
-                     process.HBHENoiseFilter*
-                     process.goodOfflinePrimaryVertices*
+                    process.goodOfflinePrimaryVertices*
                      process.PF2PAT*
                      process.ak5CaloJets*
                      process.ak7CaloJets*
@@ -525,8 +528,7 @@ process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSV
                      )
 else :
         process.p = cms.Path(
-                     process.HBHENoiseFilter*
-                     process.goodOfflinePrimaryVertices*
+                    process.goodOfflinePrimaryVertices*
                      process.genParticlesForJets*
                      process.ak5GenJets*
                      process.PF2PAT*
@@ -550,6 +552,9 @@ else :
 process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
                      )
 
+process.hbhepath = cms.Path(process.HBHENoiseFilter)
+
+
 
 #process.candidates = cms.Path(process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates)
 
@@ -563,6 +568,6 @@ process.options = cms.untracked.PSet(
 process.e = cms.EndPath(process.out1)
 
 
-process.schedule = cms.Schedule(process.p,  process.e)
+process.schedule = cms.Schedule(process.p, process.hbhepath, process.e)
 
 #

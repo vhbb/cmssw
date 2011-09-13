@@ -149,6 +149,8 @@ class VHbbEvent{
  public:
   std::vector<SimpleJet> simpleJets;
   std::vector<SimpleJet> simpleJets2; //???
+  std::vector<SimpleJet> simpleJets3;
+  std::vector<SimpleJet> simpleJets4; //???
   std::vector<SimpleJet> subJets; //???
   std::vector<HardJet> hardJets;
   
