@@ -13,9 +13,14 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.32 2011/09/12 14:23:42 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.33 2011/09/13 10:10:06 tboccali Exp $
 //
 //
+
+
+//uncomment to save also jet collections 1 and 4
+//#define ENABLE_SIMPLEJETS1
+//#define ENABLE_SIMPLEJETS4
 
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
@@ -25,6 +30,8 @@ Implementation:
 
 #include "VHbbAnalysis/HbbAnalyzer/interface/HbbAnalyzerNew.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 #define GENPTOLOR(a) TLorentzVector((a).px(), (a).py(), (a).pz(), (a).energy())
 #define GENPTOLORP(a) TLorentzVector((a)->px(), (a)->py(), (a)->pz(), (a)->energy())
@@ -92,7 +99,8 @@ void
 HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   using namespace edm;
   using namespace reco;
-  
+ 
+ 
   // JEC Uncertainty
 
   //  JetCorrectionUncertainty *jecUnc=0;
@@ -106,7 +114,15 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   
   std::auto_ptr<VHbbEvent> hbbInfo( new VHbbEvent() );  
   std::auto_ptr<VHbbEventAuxInfo> auxInfo( new VHbbEventAuxInfo() );
-  
+ 
+
+  if (!runOnMC_){
+  Handle<GenEventInfoProduct> evt_info;
+  iEvent.getByType(evt_info);
+  auxInfo->weightMCProd = evt_info->weight(); 
+  }
+  else
+ { auxInfo->weightMCProd =1.;}
   //
   // ??
    
@@ -408,6 +424,7 @@ BTagSFContainer btagSFs;
   btagSFs.MISTAGSF_CSVM = (mistagSF_CSVM_.product());
   btagSFs.MISTAGSF_CSVT = (mistagSF_CSVT_.product());
 
+#ifdef ENABLE_SIMPLEJETS1
   for(edm::View<pat::Jet>::const_iterator jet_iter = simplejets1.begin(); jet_iter!=simplejets1.end(); ++jet_iter){
     //     if(jet_iter->pt()>50)
     //       njetscounter++;
@@ -446,6 +463,7 @@ BTagSFContainer btagSFs;
     hbbInfo->simpleJets.push_back(sj);
     
   }
+#endif //ENABLE_SIMPLEJETS1
 
   for(edm::View<pat::Jet>::const_iterator jet_iter = simplejets3.begin(); jet_iter!=simplejets3.end(); ++jet_iter){
     //     if(jet_iter->pt()>50)
@@ -486,6 +504,7 @@ BTagSFContainer btagSFs;
     
   }
 
+#ifdef ENABLE_SIMPLEJETS4
   for(edm::View<pat::Jet>::const_iterator jet_iter = simplejets4.begin(); jet_iter!=simplejets4.end(); ++jet_iter){
     //     if(jet_iter->pt()>50)
     //       njetscounter++;
@@ -524,7 +543,8 @@ BTagSFContainer btagSFs;
     hbbInfo->simpleJets4.push_back(sj);
     
   }
- 
+#endif //ENABLE SIMPLEJETS4
+
   
   for(edm::View<pat::Jet>::const_iterator jet_iter = simplejets2.begin(); jet_iter!=simplejets2.end(); ++jet_iter){
     
@@ -945,134 +965,8 @@ BTagSFContainer btagSFs;
   std::sort(hbbInfo->tauInfo.begin(), hbbInfo->tauInfo.end(), ptComparatorTau);
 
 
-  // dimuons and dielectrons
-
-  for( size_t i = 0; i < dimuons->size(); i++ ) {
-    VHbbEvent::DiMuonInfo df;
-    const Candidate & dimuonCand = (*dimuons)[ i ];
-    df.p4= GENPTOLOR(dimuonCand);
-    const Candidate * lep0 = dimuonCand.daughter( 0 );
-    const Candidate * lep1 = dimuonCand.daughter( 1 );
-    // needed to access specific methods of pat::Muon
-    const pat::Muon & muonDau0 = dynamic_cast<const pat::Muon &>(*lep0->masterClone());
-    const pat::Muon & muonDau1 = dynamic_cast<const pat::Muon &>(*lep1->masterClone());
     
-    df.daughter1.p4=GENPTOLOR(muonDau0);
-    df.daughter2.p4=GENPTOLOR(muonDau1);
-    
-    df.daughter1.tIso= muonDau0.trackIso();
-    df.daughter2.tIso= muonDau1.trackIso();
-
-    df.daughter1.eIso= muonDau0.ecalIso();
-    df.daughter2.eIso= muonDau1.ecalIso();
-
-    df.daughter1.hIso= muonDau0.hcalIso();
-    df.daughter2.hIso= muonDau1.hcalIso();
-
-    df.daughter1.ipDb=muonDau0.dB();
-    df.daughter2.ipDb=muonDau1.dB();
-
-    df.daughter1.ipErrDb=muonDau0.edB();
-    df.daughter2.ipErrDb=muonDau1.edB();
-
-    df.daughter1.cat=0;
-    if(muonDau0.isGlobalMuon()) df.daughter1.cat|=1;
-    if(muonDau0.isTrackerMuon()) df.daughter1.cat|=2;
-    if(muonDau0.isStandAloneMuon()) df.daughter1.cat|=4;
-    df.daughter2.cat=0;
-    if(muonDau1.isGlobalMuon()) df.daughter2.cat|=1;
-    if(muonDau1.isTrackerMuon()) df.daughter2.cat|=2;
-    if(muonDau1.isStandAloneMuon()) df.daughter2.cat|=4;
-
-    TrackRef trkMu1Ref = muonDau0.get<TrackRef>();
-    TrackRef trkMu2Ref = muonDau1.get<TrackRef>();
-
-    if(trkMu1Ref.isNonnull() && trkMu2Ref.isNonnull()){
-      const Track* MuTrk1 = muonDau0.get<TrackRef>().get();
-      const Track* MuTrk2 = muonDau1.get<TrackRef>().get();
-      df.daughter1.zPVPt=MuTrk1->dz(RecVtxFirst.position());
-      df.daughter1.zPVProb=MuTrk1->dz(RecVtx.position());
-      df.daughter2.zPVPt=MuTrk2->dz(RecVtxFirst.position());
-      df.daughter2.zPVProb=MuTrk2->dz(RecVtx.position());
-
-      df.daughter1.nHits = MuTrk1->numberOfValidHits();
-      df.daughter2.nHits = MuTrk2->numberOfValidHits();
-
-      df.daughter1.chi2 = MuTrk1->normalizedChi2();
-      df.daughter2.chi2 = MuTrk2->normalizedChi2();
-
-      TrackRef iTrack1 = muonDau0.innerTrack();
-      const reco::HitPattern& p1 = iTrack1->hitPattern();
-      TrackRef iTrack2 = muonDau1.innerTrack();
-      const reco::HitPattern& p2 = iTrack2->hitPattern();
-
-      df.daughter1.nPixelHits = p1.pixelLayersWithMeasurement();
-      df.daughter2.nPixelHits = p2.pixelLayersWithMeasurement();
-
-      if(muonDau0.isGlobalMuon()){
-	TrackRef gTrack = muonDau0.globalTrack();
-	const reco::HitPattern& q = gTrack->hitPattern();
-	df.daughter1.globNHits=q.numberOfValidMuonHits();
-	df.daughter1.globChi2=gTrack.get()->normalizedChi2();
-        df.daughter1.validMuStations = q. muonStationsWithValidHits();
-      }
-      if(muonDau1.isGlobalMuon()){
-	TrackRef gTrack = muonDau1.globalTrack();
-	const reco::HitPattern& q = gTrack->hitPattern();
-	df.daughter2.globNHits=q.numberOfValidMuonHits();
-	df.daughter2.globChi2=gTrack.get()->normalizedChi2();
-        df.daughter2.validMuStations = q. muonStationsWithValidHits();
-      }
   
-    }
-      
-    hbbInfo->diMuonInfo.push_back(df);
-  }
-
-  for( size_t i = 0; i < dielectrons->size(); i++ ) {
-    VHbbEvent::DiElectronInfo df;
-    const Candidate & dielecCand = (*dielectrons)[ i ];
-
-    df.p4=GENPTOLOR(dielecCand);
-
-    // accessing the daughters of the dimuon candidate
-    const Candidate * lep0 = dielecCand.daughter( 0 );
-    const Candidate * lep1 = dielecCand.daughter( 1 );
-    // needed to access specific methods of pat::Muon
-    const pat::Electron & elecDau0 = dynamic_cast<const pat::Electron &>(*lep0->masterClone());
-    const pat::Electron & elecDau1 = dynamic_cast<const pat::Electron &>(*lep1->masterClone());
-
-    df.daughter1.p4 = GENPTOLOR(elecDau0);
-    df.daughter2.p4= GENPTOLOR(elecDau1);
-
-    df.daughter1.tIso = elecDau0.trackIso();
-    df.daughter2.tIso = elecDau1.trackIso();
-
-    df.daughter1.eIso = elecDau0.ecalIso();
-    df.daughter2.eIso = elecDau1.ecalIso();
-
-    df.daughter1.hIso = elecDau0.hcalIso();
-    df.daughter2.hIso = elecDau1.hcalIso();
-    
-    // ids
-    /*df.daughter1.id95 = elecDau0.electronID("simpleEleId95cIso");
-    df.daughter1.id85 = elecDau0.electronID  ("simpleEleId85cIso");
-    df.daughter1.id70 = elecDau0.electronID  ("simpleEleId70cIso");
-    df.daughter1.id95r = elecDau0.electronID ("simpleEleId95relIso");
-    df.daughter1.id85r = elecDau0.electronID ("simpleEleId85relIso");
-    df.daughter1.id70r = elecDau0.electronID ("simpleEleId70relIso");
-
-
-    df.daughter2.id95 = elecDau1.electronID("simpleEleId95cIso");
-    df.daughter2.id85 = elecDau1.electronID  ("simpleEleId85cIso");
-    df.daughter2.id70 = elecDau1.electronID  ("simpleEleId70cIso");
-    df.daughter2.id95r = elecDau1.electronID ("simpleEleId95relIso");
-    df.daughter2.id85r = elecDau1.electronID ("simpleEleId85relIso");
-    df.daughter2.id70r = elecDau1.electronID ("simpleEleId70relIso");
-*/
-    hbbInfo->diElectronInfo.push_back(df);
-    
-  }
    if (verbose_){
      std::cout <<" Pushing hbbInfo "<<std::endl;
      std::cout <<" SimpleJets1 = "<<hbbInfo->simpleJets.size()<<std::endl<<
