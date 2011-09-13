@@ -54,7 +54,7 @@ class VHbbEventAuxInfo{
  
  public:
   PUInfo puInfo;
-  
+  float weightMCProd;  
  PrimaryVertexInfo pvInfo;
   std::vector<ParticleMCInfo> mcH;
   std::vector<ParticleMCInfo> mcW;
