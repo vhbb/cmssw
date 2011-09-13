@@ -204,7 +204,7 @@ if (verbose_){
  // now I need at least 2 with pt > threshold
  //
  unsigned int index1=999999, index2=999999;
- for (unsigned int i =0; i< jets.size()-1; ++i){
+ for (unsigned int i =0; i< jets.size(); ++i){
    if (jets[i].p4.Pt()> jetPtThreshold){
      if (index1 == 999999) {
        index1=i;
