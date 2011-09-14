@@ -125,43 +125,42 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   if (verbose_){
     std::cout <<" START SELECTION "<<std::endl;
   }
-  
+  //
+  //
+  // change must allow a candidate to be both Zee and Zmumu
+
+  // Zmumu
   result = selector.getHZmumuCandidate(temp,ok,muPos);
   if ( ok == true ){
     result.setCandidateType(VHbbCandidate::Zmumu);
     candidates.push_back(result);
-  }else{
-    //      HZee
-    result = selector. getHZeeCandidate(temp,ok,elePos);
-    if ( ok == true ){
-      result.setCandidateType(VHbbCandidate::Zee);
-      candidates.push_back(result);
-      return;
-    }else{
-      //HWmunu
-      result = selector. getHWmunCandidate(temp,ok,muPos);
-      if ( ok == true ){
-	result.setCandidateType(VHbbCandidate::Wmun);
-	candidates.push_back(result);
-	return;
-      }else{
-	// HWenu
-	result = selector. getHWenCandidate(temp,ok,elePos);
-	if ( ok == true ){
-	  result.setCandidateType(VHbbCandidate::Wen);
-	  candidates.push_back(result);
-	  return;
-	}else{
-	  // HZnn
-	  result = selector. getHZnnCandidate(temp,ok);
-	  if ( ok == true ){
-	    result.setCandidateType(VHbbCandidate::Znn);
-	    candidates.push_back(result);
-	    return;
-	  }
-	}
-      }
-    }
+  }
+  //      HZee
+  result = selector. getHZeeCandidate(temp,ok,elePos);
+  if ( ok == true ){
+    result.setCandidateType(VHbbCandidate::Zee);
+    candidates.push_back(result);
+  }
+  //HWmunu
+  result = selector. getHWmunCandidate(temp,ok,muPos);
+  if ( ok == true ){
+    result.setCandidateType(VHbbCandidate::Wmun);
+    candidates.push_back(result);
+  }
+  // HWenu
+  result = selector. getHWenCandidate(temp,ok,elePos);
+  if ( ok == true ){
+    result.setCandidateType(VHbbCandidate::Wen);
+    candidates.push_back(result);
+  }
+
+  if (candidates.size()!=0 ) return;
+
+  // HZnn - look at it only if nothing found up to now
+  result = selector. getHZnnCandidate(temp,ok);
+  if ( ok == true ){
+    result.setCandidateType(VHbbCandidate::Znn);
+    candidates.push_back(result);
   }
   return;
 }
