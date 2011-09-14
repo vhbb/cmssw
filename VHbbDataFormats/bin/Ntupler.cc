@@ -659,8 +659,8 @@ int main(int argc, char* argv[])
          {
           //std::cout << "BTAGSF " <<  btagJetInfos.size() << " " << btag.weight<BTag1Tight2CustomFilter>(btagJetInfos) << std::endl;
           btag1T2CSF = btag.weight<BTag1Tight2CustomFilter>(btagJetInfos);
-          btag2TSF = btag.weight<BTag1Tight2CustomFilter>(btagJetInfos);
-          btag1TSF = btag.weight<BTag1Tight2CustomFilter>(btagJetInfos);;
+          btag2TSF = btag.weight<BTag2TightFilter>(btagJetInfos);
+          btag1TSF = btag.weight<BTag1TightFilter>(btagJetInfos);;
          }
             
           if(maxBtag > -99999)
