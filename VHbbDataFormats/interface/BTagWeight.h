@@ -109,6 +109,7 @@ template <class Filter> float BTagWeight::weight(vector<vector<JetInfo> >jets)
     mc*=tagMc;       
     data*=tagData;       
    
+  }
    if(Filter::filter(tags))
    {
   //  std::cout << mc << " " << data << " " << data/mc << " " << pData/pMC << endl;
@@ -116,11 +117,11 @@ template <class Filter> float BTagWeight::weight(vector<vector<JetInfo> >jets)
     pData+=data;
    // std::cout << std::endl<< "mc, data,ratioThis,ratioTot " <<  mc << " " << data << " " << data/mc << " " << pData/pMC << endl;
    }
-  }
   while (comb[idx] == max -1  && idx+1 < jets.size()) idx++; // find first jets for which we did not already test all configs 
 // next combination
   comb[idx]++;  // test a new config for that jet
-  for(size_t i=0;i<idx;i++) { comb[i]=0; idx=0; } // reset the tested configs for all previous jets
+  for(size_t i=0;i<idx;i++) { comb[i]=0;  } // reset the tested configs for all previous jets
+  idx=0;
  }
   if(pMC==0) return 0; 
   return pData/pMC;
