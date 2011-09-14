@@ -523,8 +523,8 @@ if isMC == False :
                      process.dimuons*
                      process.dielectrons*
                      process.leptonTrigMatch*
-                     process.HbbAnalyzerNew*
-process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
+                     process.HbbAnalyzerNew
+#process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
                      )
 else :
         process.p = cms.Path(
@@ -548,8 +548,8 @@ else :
                      process.dimuons*
                      process.dielectrons*
                      process.leptonTrigMatch*
-                     process.HbbAnalyzerNew*
-process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
+                     process.HbbAnalyzerNew
+#process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
                      )
 
 process.hbhepath = cms.Path(process.HBHENoiseFilter)
