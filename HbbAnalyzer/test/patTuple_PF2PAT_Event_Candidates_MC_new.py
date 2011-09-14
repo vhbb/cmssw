@@ -41,7 +41,7 @@ else :
 
 process.out1 = cms.OutputModule(
     'PoolOutputModule',
-    fileName       = cms.untracked.string('/tmp/tboccali/PAT.edm.root'),
+    fileName       = cms.untracked.string('PAT.edm.root'),
     outputCommands = cms.untracked.vstring(
 	'drop *',
 	'keep *_HbbAnalyzerNew_*_*',
