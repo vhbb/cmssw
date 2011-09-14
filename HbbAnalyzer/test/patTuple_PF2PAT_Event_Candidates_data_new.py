@@ -23,7 +23,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 # source
 process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
-		'root://cmsdcache7.pi.infn.it:7070//store/data/Run2011A/SingleMu/AOD/PromptReco-v2/000/163/374/8ABA0558-C470-E011-B566-003048D2C108.root',
+		'root://cmsdcache7.pi.infn.it:7070//store/data/Run2011A/MuOnia/AOD/PromptReco-v6/000/172/620/DEF8F56B-42C0-E011-9A13-001D09F24E39.root',
 #		"/store/mc/CMSSW_4_2_3/RelValProdTTbar/GEN-SIM-RECO/MC_42_V12_JobRobot-v1/0000/B89A0B07-818C-E011-953E-0030487CD7E0.root"
 #	"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat//store/mc/Summer11/BdToMuMu_2MuPtFilter_7TeV-pythia6-evtgen//GEN-SIM-RECO//PU_S4_START42_V11-v1///0000//92DE42C9-CD8C-E011-A421-001F296B758E.root"
 	)

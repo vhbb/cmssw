@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.33 2011/09/13 10:10:06 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.34 2011/09/13 15:21:40 arizzi Exp $
 //
 //
 
@@ -116,16 +116,16 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   std::auto_ptr<VHbbEventAuxInfo> auxInfo( new VHbbEventAuxInfo() );
  
 
-  if (!runOnMC_){
-  Handle<GenEventInfoProduct> evt_info;
-  iEvent.getByType(evt_info);
-  auxInfo->weightMCProd = evt_info->weight(); 
+  if (runOnMC_){
+    Handle<GenEventInfoProduct> evt_info;
+    iEvent.getByType(evt_info);
+    auxInfo->weightMCProd = evt_info->weight(); 
   }
   else
- { auxInfo->weightMCProd =1.;}
+    { auxInfo->weightMCProd =1.;}
   //
   // ??
-   
+  
   // trigger
 
   // trigger
