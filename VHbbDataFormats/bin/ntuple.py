@@ -121,6 +121,12 @@ process.Analyzer = cms.PSet(
     useHighestPtHiggsZ = cms.bool(False),
     idMuFileName = cms.string("ScaleEffs42.root"),
     hltMuFileName = cms.string("IsoToHLT42.root"),
+    hltEle1FileName = cms.string("TriggerEfficiency_Electrons_May10.root"),
+    hltEle2FileName = cms.string("TriggerEfficiency_Electrons_PromptV4.root"),
+    idEleFileName = cms.string("ScaleFactor_PFElectrons_DataMontecarlo.root"),
+    hltJetEle1FileName = cms.string("TriggerEfficiency_JetNo30_Jet25.root"),
+    hltJetEle2FileName = cms.string("TriggerEfficiency_Jet30.root"),
+
     btagEffFileName = cms.string("btag_generic.txt")
     )
 

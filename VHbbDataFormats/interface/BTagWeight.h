@@ -69,10 +69,10 @@ template <class Filter> float BTagWeight::weight(vector<vector<JetInfo> >jets)
  if(jets.size()==0) return 0.;
  while(comb[jets.size()-1] < max)
  {
-/* std::cout << std::endl << "New comb" << std::endl;
- for(size_t i=0;i < jets.size(); i++) {std::cout << comb[i] << " ";}
- std::cout << std::endl;
-*/
+// std::cout << std::endl << "New comb" << std::endl;
+// for(size_t i=0;i < jets.size(); i++) {std::cout << comb[i] << " ";}
+// std::cout << std::endl;
+
    std::vector<int> tags;
    for(size_t j=0;j<taggers;j++) tags.push_back(0);
 

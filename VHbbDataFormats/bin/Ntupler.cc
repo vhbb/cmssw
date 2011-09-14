@@ -219,7 +219,7 @@ int main(int argc, char* argv[])
   TrackInfo V;
   int nvlep=0,nalep=0; 
   
- float jjdr,jjdPhi,jjdEta,HVdPhi,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
+ float jjdr,jjdPhi,jjdEta,HVdPhi,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMET, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
    int nofLeptons15,nofLeptons20, Vtype,numJets,numBJets,eventFlav;
 //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
    bool triggerFlags[500],hbhe;
@@ -350,6 +350,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("genZpt"    , &genZpt      ,  "genZpt/F");
   _outTree->Branch("genWpt"    , &genWpt      ,  "genWpt/F");
   _outTree->Branch("weightTrig"        , &weightTrig          ,  "weightTrig/F");
+  _outTree->Branch("weightTrigMET"        , &weightTrigMET          ,  "weightTrigMET/F");
   _outTree->Branch("deltaPullAngleAK7", &deltaPullAngleAK7  ,  "deltaPullAngleAK7/F");
   _outTree->Branch("PUweight",       &PUweight  ,  "PUweight/F");
   _outTree->Branch("eventFlav",       &eventFlav  ,  "eventFlav/I");
@@ -599,8 +600,9 @@ int main(int argc, char* argv[])
            }
           if( Vtype == VHbbCandidate::Znn ){
                   nvlep=0;
-                  //FIXME: trigger weights for Znn
-
+                 float weightTrig1 = triggerWeight.scaleMetHLT(vhCand.V.mets.at(0).p4.Pt());
+                 weightTrig = weightTrig1;
+                 weightTrigMET = weightTrig1;  
           }
           
           aLeptons.reset();
@@ -649,6 +651,7 @@ int main(int argc, char* argv[])
                  }
                 if( ( isW && ! useHighestPtHiggsW ) ||  ( ! isW && ! useHighestPtHiggsZ )  )  // btag SF computed using only H-jets if best-H made with dijetPt rather than best CSV
                  {
+                   if(vhCand.additionalJets[j].p4.Pt() > 20)
                    btagJetInfos.push_back(btagEff.jetInfo(vhCand.additionalJets[j]));
                  }
          }
