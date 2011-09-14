@@ -18,12 +18,12 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 # source
 process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
-		'root://cmsdcache7.pi.infn.it:7070//store/data/Run2011A/MuOnia/AOD/PromptReco-v6/000/172/620/DEF8F56B-42C0-E011-9A13-001D09F24E39.root',
+               'root://cmsdcache7.pi.infn.it:7070//store/data/Run2011A/MuOnia/AOD/PromptReco-v6/000/172/620/DEF8F56B-42C0-E011-9A13-001D09F24E39.root',
 #		"/store/mc/CMSSW_4_2_3/RelValProdTTbar/GEN-SIM-RECO/MC_42_V12_JobRobot-v1/0000/B89A0B07-818C-E011-953E-0030487CD7E0.root"
 #	"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat//store/mc/Summer11/BdToMuMu_2MuPtFilter_7TeV-pythia6-evtgen//GEN-SIM-RECO//PU_S4_START42_V11-v1///0000//92DE42C9-CD8C-E011-A421-001F296B758E.root"
 	)
@@ -45,6 +45,8 @@ process.out1 = cms.OutputModule(
 	'keep VHbbCandidates_*_*_*',
 #	'keep PileupSummaryInfos_*_*_*',
 	'keep edmTriggerResults_*_*_*',
+        'keep *_bcandidates_*_*',
+        'keep *_selectedVertices_*_*',
 	),
     dropMetaData = cms.untracked.string('ALL'),
     splitLevel = cms.untracked.int32(99),
@@ -497,9 +499,32 @@ process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
 # drop the meta data for dropped data
 #process.out.dropMetaData = cms.string("DROPPED")
+process.load('RecoVertex/AdaptiveVertexFinder/inclusiveVertexing_cff')
+process.inclusiveMergedVertices = process.vertexMerger.clone()
+process.inclusiveMergedVertices.secondaryVertices = cms.InputTag("inclusiveVertices")
+process.inclusiveMergedVertices.maxFraction = 0.2
+process.inclusiveMergedVertices.minSignificance = cms.double(10.)
+
+process.load("RecoBTag/SecondaryVertex/bVertexFilter_cfi")
+process.selectedVertices = process.bVertexFilter.clone()
+process.selectedVertices.secondaryVertices = cms.InputTag("inclusiveMergedVertices")
+process.selectedVertices.minVertices = 0
+process.selectedVertices.vertexFilter.multiplicityMin = 3
+
+process.inclusiveVertexFinder.clusterScale = 1.
+process.inclusiveVertexFinder.clusterMinAngleCosine = 0.5
+
 
 #process.out.fileName = '/tigress-hsm/dlopes/PatEDM.root'
-
+process.bcandidates = cms.EDProducer('BCandidateProducer',
+                                     src = cms.InputTag('selectedVertices','',''),
+                                     primaryVertices =
+                                     cms.InputTag('offlinePrimaryVerticesWithBS','',''),
+                                     minDRUnique = cms.untracked.double(0.4),
+                                     minvecSumIMifsmallDRUnique = cms.untracked.double(5.5),
+                                     minCosPAtomerge = cms.untracked.double(0.99),
+                                     maxPtreltomerge = cms.untracked.double(7777.0)
+                                     )
 
 if isMC == False :
         process.p = cms.Path(
@@ -520,7 +545,11 @@ if isMC == False :
                      process.dimuons*
                      process.dielectrons*
                      process.leptonTrigMatch*
+                     process.inclusiveVertexing*
+                     process.inclusiveMergedVertices*process.selectedVertices*
+                     process.bcandidates*
                      process.HbbAnalyzerNew
+
 #process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
                      )
 else :
@@ -545,12 +574,14 @@ else :
                      process.dimuons*
                      process.dielectrons*
                      process.leptonTrigMatch*
+                     process.inclusiveVertexing*
+                     process.inclusiveMergedVertices*process.selectedVertices*
+                     process.bcandidates*
                      process.HbbAnalyzerNew
 #process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
                      )
 
 process.hbhepath = cms.Path(process.HBHENoiseFilter)
-
 
 
 #process.candidates = cms.Path(process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates)

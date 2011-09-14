@@ -18,7 +18,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 # source
 process.source = cms.Source("PoolSource",
