@@ -59,7 +59,7 @@ process.out1 = cms.OutputModule(
 
 process.out = cms.OutputModule(
     'PoolOutputModule',
-    fileName       = cms.untracked.string('fanculo.edm.root'),
+    fileName       = cms.untracked.string('fake.edm.root'),
     outputCommands = cms.untracked.vstring('drop *','keep *_HbbAnalyzerNew_*_*')
     )
 
