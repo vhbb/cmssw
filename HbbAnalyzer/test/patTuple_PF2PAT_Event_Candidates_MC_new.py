@@ -23,15 +23,19 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 # source
 process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
-		'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/02E676EE-BDAD-E011-B9ED-E0CB4EA0A929.root',
-		'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/32CECED6-BFAD-E011-B08D-00261834B5A4.root',
-		'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/3EE916B3-C4AD-E011-9159-90E6BA0D09B0.root',
-		'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/42622800-C1AD-E011-AD65-485B39800BF2.root',
+'file:/gpfs/gpfsddn/cms/user/arizzi/Hbb/submit/CMSSW_4_2_8_patch1/src/VHbbAnalysis/VHbbDataFormats/bin/submissions/testbortigno/24233412-65AD-E011-B930-E0CB4E553667.root'
+
+#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/02E676EE-BDAD-E011-B9ED-E0CB4EA0A929.root',
+#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/32CECED6-BFAD-E011-B08D-00261834B5A4.root',
+#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/3EE916B3-C4AD-E011-9159-90E6BA0D09B0.root',
+#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/42622800-C1AD-E011-AD65-485B39800BF2.root',
 #		"/store/mc/CMSSW_4_2_3/RelValProdTTbar/GEN-SIM-RECO/MC_42_V12_JobRobot-v1/0000/B89A0B07-818C-E011-953E-0030487CD7E0.root"
 #	"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat//store/mc/Summer11/BdToMuMu_2MuPtFilter_7TeV-pythia6-evtgen//GEN-SIM-RECO//PU_S4_START42_V11-v1///0000//92DE42C9-CD8C-E011-A421-001F296B758E.root"
-	)
+	),
+eventsToProcess = cms.untracked.VEventRange(
+"1:131781",
 			    )
-
+)
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 if isMC == False :
@@ -62,7 +66,7 @@ process.out1 = cms.OutputModule(
 
 process.out = cms.OutputModule(
     'PoolOutputModule',
-    fileName       = cms.untracked.string('fanculo.edm.root'),
+    fileName       = cms.untracked.string('fake.edm.root'),
     outputCommands = cms.untracked.vstring('drop *','keep *_HbbAnalyzerNew_*_*')
     )
 
@@ -368,22 +372,8 @@ process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     simplejet4Tag = cms.InputTag("selectedPatJetsAK7PF"),
     photonTag = cms.InputTag("selectedPatPhotons"),
     metTag = cms.InputTag("patMETs"),
-    dimuTag = cms.InputTag("dimuons"),
-    dielecTag = cms.InputTag("dielectrons"),
 
     verbose = cms.untracked.bool(False)
-)
-
-process.dimuons = cms.EDProducer("CandViewShallowCloneCombiner",
-    checkCharge = cms.bool(False),
-    cut = cms.string('mass > 40 && mass < 200'),
-    decay = cms.string('selectedPatMuons@+ selectedPatMuons@-')
-)
-
-process.dielectrons = cms.EDProducer("CandViewShallowCloneCombiner",
-    checkCharge = cms.bool(False),
-    cut = cms.string('mass > 40 && mass < 200'),
-    decay = cms.string('selectedPatElectrons@+ selectedPatElectrons@-')
 )
 
 #process.Tracer = cms.Service("Tracer")
@@ -484,7 +474,7 @@ process.hbbHighestPtHiggsPt30Candidates = cms.EDFilter("HbbCandidateFinder",
 
 process.hbbCandidates = cms.EDFilter("HbbCandidateFinder",
 				       VHbbEventLabel = cms.InputTag(""),
-				       verbose = cms.bool(False) ,
+				       verbose = cms.bool(True) ,
 				       jetPtThreshold = cms.double(30.),
 				       useHighestPtHiggs=cms.bool(False),
               			       actAsAFilter = cms.bool(False)
@@ -545,8 +535,6 @@ if isMC == False :
                      process.patDefaultSequence*
 #                     process.patPF2PATSequence* # added with usePF2PAT
 		     process.patMETsHT*
-                     process.dimuons*
-                     process.dielectrons*
                      process.leptonTrigMatch*
                      process.inclusiveVertexing*
                      process.inclusiveMergedVertices*process.selectedVertices*
@@ -574,8 +562,6 @@ else :
 #                     process.patPF2PATSequence* # added with usePF2PAT
 		     process.patMETsHT*
 #		     process.dump*
-                     process.dimuons*
-                     process.dielectrons*
                      process.leptonTrigMatch*
                      process.inclusiveVertexing*
                      process.inclusiveMergedVertices*process.selectedVertices*

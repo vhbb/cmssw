@@ -107,8 +107,6 @@ class HbbAnalyzerNew : public edm::EDProducer {
   edm::InputTag tauLabel_;
   edm::InputTag metLabel_;
   edm::InputTag phoLabel_;
-  edm::InputTag dimuLabel_;
-  edm::InputTag dielecLabel_;
   edm::InputTag hltResults_;
 
   bool runOnMC_;

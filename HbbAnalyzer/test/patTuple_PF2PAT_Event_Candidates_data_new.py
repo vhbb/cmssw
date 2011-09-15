@@ -365,22 +365,8 @@ process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     simplejet4Tag = cms.InputTag("selectedPatJetsAK7PF"),
     photonTag = cms.InputTag("selectedPatPhotons"),
     metTag = cms.InputTag("patMETs"),
-    dimuTag = cms.InputTag("dimuons"),
-    dielecTag = cms.InputTag("dielectrons"),
 
     verbose = cms.untracked.bool(False)
-)
-
-process.dimuons = cms.EDProducer("CandViewShallowCloneCombiner",
-    checkCharge = cms.bool(False),
-    cut = cms.string('mass > 40 && mass < 200'),
-    decay = cms.string('selectedPatMuons@+ selectedPatMuons@-')
-)
-
-process.dielectrons = cms.EDProducer("CandViewShallowCloneCombiner",
-    checkCharge = cms.bool(False),
-    cut = cms.string('mass > 40 && mass < 200'),
-    decay = cms.string('selectedPatElectrons@+ selectedPatElectrons@-')
 )
 
 #process.Tracer = cms.Service("Tracer")
@@ -542,8 +528,6 @@ if isMC == False :
                      process.patDefaultSequence*
 #                     process.patPF2PATSequence* # added with usePF2PAT
 		     process.patMETsHT*
-                     process.dimuons*
-                     process.dielectrons*
                      process.leptonTrigMatch*
                      process.inclusiveVertexing*
                      process.inclusiveMergedVertices*process.selectedVertices*
@@ -571,8 +555,6 @@ else :
 #                     process.patPF2PATSequence* # added with usePF2PAT
 		     process.patMETsHT*
 #		     process.dump*
-                     process.dimuons*
-                     process.dielectrons*
                      process.leptonTrigMatch*
                      process.inclusiveVertexing*
                      process.inclusiveMergedVertices*process.selectedVertices*

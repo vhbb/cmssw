@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.34 2011/09/13 15:21:40 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.35 2011/09/14 14:15:04 tboccali Exp $
 //
 //
 
@@ -67,8 +67,6 @@ HbbAnalyzerNew::HbbAnalyzerNew(const edm::ParameterSet& iConfig):
   tauLabel_(iConfig.getParameter<edm::InputTag>("tauTag")),
   metLabel_(iConfig.getParameter<edm::InputTag>("metTag")),
   phoLabel_(iConfig.getParameter<edm::InputTag>("photonTag")),
-  dimuLabel_(iConfig.getParameter<edm::InputTag>("dimuTag")),
-  dielecLabel_(iConfig.getParameter<edm::InputTag>("dielecTag")),
   hltResults_(iConfig.getParameter<edm::InputTag>("hltResultsTag")),
   runOnMC_(iConfig.getParameter<bool>("runOnMC")), verbose_(iConfig.getUntrackedParameter<bool>("verbose")) {
 
@@ -384,37 +382,26 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   iEvent.getByLabel(tauLabel_,tauHandle);
   edm::View<pat::Tau> taus = *tauHandle;
 
-  edm::Handle<CandidateView> dimuons;
-  iEvent.getByLabel(dimuLabel_,dimuons);
-
-  edm::Handle<CandidateView> dielectrons;
-  iEvent.getByLabel(dielecLabel_,dielectrons);
 
   //BTAGGING SCALE FACTOR FROM DATABASE
   //Combined Secondary Vertex Loose
   edm::ESHandle<BtagPerformance> bTagSF_CSVL_;
   iSetup.get<BTagPerformanceRecord>().get("BTAGCSVL",bTagSF_CSVL_);
-  const BtagPerformance & bTagSF_CSVL = *(bTagSF_CSVL_.product());
   //Combined Secondary Vertex Medium
   edm::ESHandle<BtagPerformance> bTagSF_CSVM_;
   iSetup.get<BTagPerformanceRecord>().get("BTAGCSVM",bTagSF_CSVM_);
-  const BtagPerformance & bTagSF_CSVM = *(bTagSF_CSVM_.product());
   //Combined Secondary Vertex Tight
   edm::ESHandle<BtagPerformance> bTagSF_CSVT_;
   iSetup.get<BTagPerformanceRecord>().get("BTAGCSVT",bTagSF_CSVT_);
-  const BtagPerformance & bTagSF_CSVT = *(bTagSF_CSVT_.product());
 
   edm::ESHandle<BtagPerformance> mistagSF_CSVL_;
   iSetup.get<BTagPerformanceRecord>().get("MISTAGCSVL",mistagSF_CSVL_);
-  const BtagPerformance & mistagSF_CSVL = *(mistagSF_CSVL_.product());
   //Combined Secondary Vertex Medium
   edm::ESHandle<BtagPerformance> mistagSF_CSVM_;
   iSetup.get<BTagPerformanceRecord>().get("MISTAGCSVM",mistagSF_CSVM_);
-  const BtagPerformance & mistagSF_CSVM = *(mistagSF_CSVM_.product());
   //Combined Secondary Vertex Tight
   edm::ESHandle<BtagPerformance> mistagSF_CSVT_;
   iSetup.get<BTagPerformanceRecord>().get("MISTAGCSVT",mistagSF_CSVT_);
-  const BtagPerformance & mistagSF_CSVT = *(mistagSF_CSVT_.product());
 
 BTagSFContainer btagSFs;
   btagSFs.BTAGSF_CSVL = (bTagSF_CSVL_.product());
@@ -594,7 +581,6 @@ BTagSFContainer btagSFs;
     sj.tVector = getTvect(&(*jet_iter));
     */
     Particle::LorentzVector p4Jet = jet_iter->p4();
-
 
     if(runOnMC_){
 
