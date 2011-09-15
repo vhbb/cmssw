@@ -489,8 +489,8 @@ process.hbbCandidates = cms.EDFilter("HbbCandidateFinder",
 
 
 process.patMETsHT = cms.EDProducer("MHTProducer",
-  JetCollection = cms.InputTag("patJets"),
-  MinJetPt      = cms.double(30),
+  JetCollection = cms.InputTag("patJetsAK5PF"),
+ MinJetPt      = cms.double(30),
   MaxJetEta     = cms.double(5)
 )
 
