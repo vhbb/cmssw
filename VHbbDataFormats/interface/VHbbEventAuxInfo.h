@@ -18,9 +18,9 @@ class VHbbEventAuxInfo{
 
   class PUInfo{
   public:
-    PUInfo(): rho(-99) {}
+    PUInfo(): rho(-99), rho25(-99) {}
   public:
-    float rho;
+    float rho, rho25;
     std::map<int,unsigned int>  pus;
   };
 

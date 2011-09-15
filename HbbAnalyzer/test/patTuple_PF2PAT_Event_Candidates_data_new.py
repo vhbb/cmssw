@@ -23,12 +23,18 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 # source
 process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
-               'root://cmsdcache7.pi.infn.it:7070//store/data/Run2011A/MuOnia/AOD/PromptReco-v6/000/172/620/DEF8F56B-42C0-E011-9A13-001D09F24E39.root',
+"rfio:/castor/cern.ch/cms/store/data/Run2011B/DoubleMu/AOD/PromptReco-v1/000/176//169/2600718E-36DF-E011-BD47-BCAEC518FF74.root",
+
+#'file:/gpfs/gpfsddn/cms/user/arizzi/Hbb/submit/CMSSW_4_2_8_patch1/src/VHbbAnalysis/VHbbDataFormats/bin/submissions/testbortigno/24233412-65AD-E011-B930-E0CB4E553667.root'
+
+#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/02E676EE-BDAD-E011-B9ED-E0CB4EA0A929.root',
+#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/32CECED6-BFAD-E011-B08D-00261834B5A4.root',
+#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/3EE916B3-C4AD-E011-9159-90E6BA0D09B0.root',
+#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/42622800-C1AD-E011-AD65-485B39800BF2.root',
 #		"/store/mc/CMSSW_4_2_3/RelValProdTTbar/GEN-SIM-RECO/MC_42_V12_JobRobot-v1/0000/B89A0B07-818C-E011-953E-0030487CD7E0.root"
 #	"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat//store/mc/Summer11/BdToMuMu_2MuPtFilter_7TeV-pythia6-evtgen//GEN-SIM-RECO//PU_S4_START42_V11-v1///0000//92DE42C9-CD8C-E011-A421-001F296B758E.root"
-	)
-			    )
-
+	),
+)
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 if isMC == False :
@@ -139,6 +145,16 @@ process.kt6PFJets = kt4PFJets.clone(
     doRhoFastjet = cms.bool(True)
     )
 process.patJetCorrFactors.rho = cms.InputTag("kt6PFJets", "rho")
+
+### to compute rho to subtract to lepton isolation cone, so with particles up to eta 2.5  
+process.kt6PFJets25 = process.kt4PFJets.clone(
+	src = 'pfNoElectron',
+	rParam = 0.6,
+	doRhoFastjet = True,
+	Ghost_EtaMax = 2.5,
+	Rho_EtaMax = 2.5
+	)
+
 
 
 process.load('RecoJets.JetProducers.ak5PFJets_cfi')
@@ -348,6 +364,9 @@ from PhysicsTools.SelectorUtils.pfJetIDSelector_cfi import pfJetIDSelector
 process.goodPatJetsAK5PF = cms.EDFilter("PFJetIDSelectionFunctorFilter",
                            filterParams = pfJetIDSelector.clone(), src = cms.InputTag("selectedPatJetsAK5PF") )
 
+### rerun isolation for muons and electrons
+process.load("VHbbAnalysis.HbbAnalyzer.pfIsoDeltaBeta04_cff")
+
 
 process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     runOnMC = cms.bool(isMC),
@@ -516,9 +535,13 @@ if isMC == False :
         process.p = cms.Path(
                     process.goodOfflinePrimaryVertices*
                      process.PF2PAT*
+		     process.pfCandsForIsolationSequence *
+		     process.muonPFIsolationSequence *
+		     process.electronPFIsolationSequence *
                      process.ak5CaloJets*
                      process.ak7CaloJets*
                      process.kt6PFJets*
+		     process.kt6PFJets25* 
                      process.ak5PFJets*
                      process.ak7PFJets*
                      process.caTopCaloJets*
@@ -542,9 +565,13 @@ else :
                      process.genParticlesForJets*
                      process.ak5GenJets*
                      process.PF2PAT*
+		    process.pfCandsForIsolationSequence *
+		     process.muonPFIsolationSequence *
+		     process.electronPFIsolationSequence *
                      process.ak5CaloJets*
                      process.ak7CaloJets*
                      process.kt6PFJets*
+	      	     process.kt6PFJets25* 
                      process.ak5PFJets*
                      process.ak7PFJets*
                      process.caTopCaloJets*

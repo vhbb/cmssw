@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.35 2011/09/14 14:15:04 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.36 2011/09/15 10:50:35 arizzi Exp $
 //
 //
 
@@ -176,7 +176,11 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   edm::Handle<double> rhoHandle;
   iEvent.getByLabel(edm::InputTag("kt6PFJets", "rho"),rhoHandle);   
   auxInfo->puInfo.rho = *rhoHandle;
-  
+   
+  edm::Handle<double> rho25Handle;
+  iEvent.getByLabel(edm::InputTag("kt6PFJets25", "rho"),rho25Handle);   
+  auxInfo->puInfo.rho25 = *rho25Handle;
+ 
   edm::Handle<std::vector< PileupSummaryInfo> > puHandle;
 
   if (runOnMC_){
@@ -780,6 +784,7 @@ BTagSFContainer btagSFs;
     mf.eIso=mu->ecalIso();
     mf.hIso=mu->hcalIso();
     mf.pfChaIso=mu->chargedHadronIso();
+    mf.pfChaPUIso=mu->userIso(5);
     mf.pfPhoIso=mu->photonIso();
     mf.pfNeuIso=mu->neutralHadronIso(); 
     Geom::Phi<double> deltaphi(mu->phi()-atan2(mf.p4.Px(), mf.p4.Py()));
@@ -867,6 +872,7 @@ BTagSFContainer btagSFs;
     ef.eIso=elec->ecalIso();
     ef.hIso=elec->hcalIso();
     ef.pfChaIso=elec->chargedHadronIso();
+    ef.pfChaPUIso=elec->userIso(5);
     ef.pfPhoIso=elec->photonIso();
     ef.pfNeuIso=elec->neutralHadronIso();
 

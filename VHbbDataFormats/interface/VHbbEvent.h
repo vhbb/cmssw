@@ -83,14 +83,14 @@ class VHbbEvent{
 
   class MuonInfo {
   public:
-    MuonInfo(): charge(-99),tIso(-99), eIso(-99), hIso(-99),pfChaIso(-99), pfPhoIso(-99), pfNeuIso(-99),
+    MuonInfo(): charge(-99),tIso(-99), eIso(-99), hIso(-99),pfChaIso(-99),pfChaPUIso(99), pfPhoIso(-99), pfNeuIso(-99),
       acop(-99), ipDb(-99), ipErrDb(-99), zPVPt(-99),zPVProb(-99), chi2(-99), globChi2(-99),
       cat(-99), nHits(-99), nPixelHits(-99), globNHits(-99),validMuStations(-99),
       mcId(-99), mcMomId(-99), mcgMomId(-99){}
   public:
     TLorentzVector p4;
     int charge;
-    float tIso, eIso, hIso, pfChaIso,pfPhoIso,pfNeuIso,acop, ipDb, ipErrDb, zPVPt,zPVProb, chi2, globChi2;
+    float tIso, eIso, hIso, pfChaIso,pfChaPUIso,  pfPhoIso,pfNeuIso,acop, ipDb, ipErrDb, zPVPt,zPVProb, chi2, globChi2;
     int cat, nHits, nPixelHits, globNHits, validMuStations;
     TLorentzVector mcFourMomentum;
     int mcId, mcMomId, mcgMomId;
@@ -100,7 +100,7 @@ class VHbbEvent{
   class ElectronInfo {
   public:
     ElectronInfo() : scEta(-99), scPhi(-99), charge(-99), 
-    tIso(-99), eIso(-99), hIso(-99),pfChaIso(-99), pfPhoIso(-99), pfNeuIso(-99), acop(-99),
+      tIso(-99), eIso(-99), hIso(-99),pfChaIso(-99),pfChaPUIso(-99), pfPhoIso(-99), pfNeuIso(-99), acop(-99),
       id95(-99),id85(-99),id80(-99),id70(-99),
       id95r(-99),id85r(-99),id80r(-99),id70r(-99),
       mcId(-99), mcMomId(-99), mcgMomId (-99){}
@@ -108,7 +108,7 @@ class VHbbEvent{
     TLorentzVector p4;
     float scEta, scPhi;
     int charge;
-    float tIso, eIso, hIso, pfChaIso,pfPhoIso,pfNeuIso, acop;
+    float tIso, eIso, hIso, pfChaIso,pfChaPUIso, pfPhoIso,pfNeuIso, acop;
     float  id95,id85,id80,id70,id95r, id85r,id80r, id70r;
     TLorentzVector mcFourMomentum;
     int mcId, mcMomId, mcgMomId;

@@ -23,7 +23,9 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 # source
 process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
-'file:/gpfs/gpfsddn/cms/user/arizzi/Hbb/submit/CMSSW_4_2_8_patch1/src/VHbbAnalysis/VHbbDataFormats/bin/submissions/testbortigno/24233412-65AD-E011-B930-E0CB4E553667.root'
+"rfio:/castor/cern.ch/user/d/degrutto/test/DYJetsToLL_PtZ-100.root",
+
+#'file:/gpfs/gpfsddn/cms/user/arizzi/Hbb/submit/CMSSW_4_2_8_patch1/src/VHbbAnalysis/VHbbDataFormats/bin/submissions/testbortigno/24233412-65AD-E011-B930-E0CB4E553667.root'
 
 #	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/02E676EE-BDAD-E011-B9ED-E0CB4EA0A929.root',
 #	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/32CECED6-BFAD-E011-B08D-00261834B5A4.root',
@@ -143,6 +145,16 @@ process.kt6PFJets = kt4PFJets.clone(
     doRhoFastjet = cms.bool(True)
     )
 process.patJetCorrFactors.rho = cms.InputTag("kt6PFJets", "rho")
+
+### to compute rho to subtract to lepton isolation cone, so with particles up to eta 2.5  
+process.kt6PFJets25 = process.kt4PFJets.clone(
+	src = 'pfNoElectron',
+	rParam = 0.6,
+	doRhoFastjet = True,
+	Ghost_EtaMax = 2.5,
+	Rho_EtaMax = 2.5
+	)
+
 
 
 process.load('RecoJets.JetProducers.ak5PFJets_cfi')
@@ -352,6 +364,9 @@ from PhysicsTools.SelectorUtils.pfJetIDSelector_cfi import pfJetIDSelector
 process.goodPatJetsAK5PF = cms.EDFilter("PFJetIDSelectionFunctorFilter",
                            filterParams = pfJetIDSelector.clone(), src = cms.InputTag("selectedPatJetsAK5PF") )
 
+### rerun isolation for muons and electrons
+process.load("VHbbAnalysis.HbbAnalyzer.pfIsoDeltaBeta04_cff")
+
 
 process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     runOnMC = cms.bool(isMC),
@@ -520,9 +535,13 @@ if isMC == False :
         process.p = cms.Path(
                     process.goodOfflinePrimaryVertices*
                      process.PF2PAT*
+		     process.pfCandsForIsolationSequence *
+		     process.muonPFIsolationSequence *
+		     process.electronPFIsolationSequence *
                      process.ak5CaloJets*
                      process.ak7CaloJets*
                      process.kt6PFJets*
+		     process.kt6PFJets25* 
                      process.ak5PFJets*
                      process.ak7PFJets*
                      process.caTopCaloJets*
@@ -546,9 +565,13 @@ else :
                      process.genParticlesForJets*
                      process.ak5GenJets*
                      process.PF2PAT*
+		    process.pfCandsForIsolationSequence *
+		     process.muonPFIsolationSequence *
+		     process.electronPFIsolationSequence *
                      process.ak5CaloJets*
                      process.ak7CaloJets*
                      process.kt6PFJets*
+	      	     process.kt6PFJets25* 
                      process.ak5PFJets*
                      process.ak7PFJets*
                      process.caTopCaloJets*
