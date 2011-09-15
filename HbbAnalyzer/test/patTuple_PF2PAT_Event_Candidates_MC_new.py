@@ -32,9 +32,6 @@ process.source = cms.Source("PoolSource",
 #		"/store/mc/CMSSW_4_2_3/RelValProdTTbar/GEN-SIM-RECO/MC_42_V12_JobRobot-v1/0000/B89A0B07-818C-E011-953E-0030487CD7E0.root"
 #	"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat//store/mc/Summer11/BdToMuMu_2MuPtFilter_7TeV-pythia6-evtgen//GEN-SIM-RECO//PU_S4_START42_V11-v1///0000//92DE42C9-CD8C-E011-A421-001F296B758E.root"
 	),
-eventsToProcess = cms.untracked.VEventRange(
-"1:131781",
-			    )
 )
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -474,7 +471,7 @@ process.hbbHighestPtHiggsPt30Candidates = cms.EDFilter("HbbCandidateFinder",
 
 process.hbbCandidates = cms.EDFilter("HbbCandidateFinder",
 				       VHbbEventLabel = cms.InputTag(""),
-				       verbose = cms.bool(True) ,
+				       verbose = cms.bool(False) ,
 				       jetPtThreshold = cms.double(30.),
 				       useHighestPtHiggs=cms.bool(False),
               			       actAsAFilter = cms.bool(False)
