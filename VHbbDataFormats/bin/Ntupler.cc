@@ -308,8 +308,7 @@ int main(int argc, char* argv[])
   edm::LumiReWeighting   lumiWeights;
   if(isMC_)
    {
-   	  edm::LumiReWeighting   lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
-
+   	   lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
    }
  
 //   TFile *_outPUFile	= new TFile((outputFile_+"_PU").c_str(), "recreate");	
@@ -783,9 +782,9 @@ int main(int argc, char* argv[])
   
 
        
-
-         gendrcc=aux.genCCDeltaR(); 
-         gendrbb=aux.genBBDeltaR(); 
+//FIXME: too much  warnings... figure out why 
+//         gendrcc=aux.genCCDeltaR(); 
+//         gendrbb=aux.genBBDeltaR(); 
          genZpt=aux.mcZ.size() > 0 ? aux.mcZ[0].p4.Pt():-99;
          genWpt=aux.mcW.size() > 0 ? aux.mcW[0].p4.Pt():-99;
 
