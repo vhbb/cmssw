@@ -42,6 +42,13 @@
 #define MAXJ 30
 #define MAXL 10
 
+struct CompareDeltaR {
+ CompareDeltaR(TLorentzVector p4dir_): p4dir(p4dir_) {}
+ bool operator()( const VHbbEvent::SimpleJet& j1, const  VHbbEvent::SimpleJet& j2 ) const {
+  return j1.p4.DeltaR(p4dir) > j2.p4.DeltaR(p4dir);
+ }
+ TLorentzVector p4dir;
+};
 
 bool jsonContainsEvent (const std::vector< edm::LuminosityBlockRange > &jsonVec,
                         const edm::EventBase &event)
@@ -162,8 +169,16 @@ struct  LeptonInfo
      eta[i]=j.p4.Eta();
      phi[i]=j.p4.Phi();
      csv[i]=j.csv;
-     //FIXME:     numTracksSV  (NEED EDM FIX)
-     //FIXME:    chf;    float nhf;    float cef;    float nef;    float nch; nconstituents;  (NEED EDM FIX)
+     numTracksSV[i] = j.vtxMass;
+     vtxMass[i]= j.vtxMass;
+     vtx3dL[i] = j.vtx3dL;
+     vtx3deL[i] = j.vtx3deL;
+     chf[i]=j.chargedHadronEFraction;
+     nhf[i]  =j.neutralHadronEFraction;
+     cef[i]  =j.chargedEmEFraction;
+     nef[i]  =j.neutralEmEFraction;
+     nconstituents[i]  =j.nConstituents;
+     nch[i]=j.ntracks;
 
      flavour[i]=j.flavour;
      if(j.bestMCp4.Pt() > 0)
@@ -172,7 +187,7 @@ struct  LeptonInfo
       genEta[i]=j.bestMCp4.Eta();
       genPhi[i]=j.bestMCp4.Phi();
      }
-     //FIXME JECUnc  (NEED EDM FIX)
+     JECUnc[i]=j.jecunc;
 
     }
    void reset()
@@ -198,7 +213,9 @@ struct  LeptonInfo
     float genEta[MAXJ];
     float genPhi[MAXJ];
     float JECUnc[MAXJ];
-
+    float vtxMass[MAXJ];
+    float vtx3dL [MAXJ];
+    float vtx3deL[MAXJ];
   } JetInfo;
   
 int main(int argc, char* argv[]) 
@@ -220,7 +237,9 @@ int main(int argc, char* argv[])
   int nvlep=0,nalep=0; 
   
  float jjdr,jjdPhi,jjdEta,HVdPhi,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMET, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
-   int nofLeptons15,nofLeptons20, Vtype,numJets,numBJets,eventFlav;
+ float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart;
+
+ int Vtype,numJets,numBJets,eventFlav;
 //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
    bool triggerFlags[500],hbhe;
   float btag1T2CSF=1.,btag2TSF=1.,btag1TSF=1.;
@@ -263,12 +282,9 @@ int main(int argc, char* argv[])
   int maxEvents_( in.getParameter<int>("maxEvents") );
   unsigned int outputEvery_( in.getParameter<unsigned int>("outputEvery") );
   std::string outputFile_( out.getParameter<std::string>("fileName" ) );
-  
-  
   std::vector<std::string> triggers( ana.getParameter<std::vector<std::string> >("triggers") );
   double btagThr =  ana.getParameter<double>("bJetCountThreshold" );
   bool fromCandidate = ana.getParameter<bool>("readFromCandidates");
-
   bool useHighestPtHiggsZ = ana.getParameter<bool>("useHighestPtHiggsZ");
   bool useHighestPtHiggsW = ana.getParameter<bool>("useHighestPtHiggsW");
   HbbCandidateFinderAlgo * algoZ = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdZ"),useHighestPtHiggsZ );
@@ -317,6 +333,9 @@ int main(int argc, char* argv[])
   _outTree->Branch("hJet_genEta",hJets.genEta ,"genEta[nhJets]/F");
   _outTree->Branch("hJet_genPhi",hJets.genPhi ,"genPhi[nhJets]/F");
   _outTree->Branch("hJet_JECUnc",hJets.JECUnc ,"JECUnc[nhJets]/F");
+  _outTree->Branch("hJet_vtxMass",hJets.vtxMass ,"vtxMass[naJets]/F");
+  _outTree->Branch("hJet_vtx3dL",hJets.vtx3dL ,"vtx3dL[naJets]/F");
+  _outTree->Branch("hJet_vtx3deL",hJets.vtx3deL ,"vtx3deL[naJets]/F");
 
   _outTree->Branch("aJet_pt",aJets.pt ,"pt[naJets]/F");
   _outTree->Branch("aJet_eta",aJets.eta ,"eta[naJets]/F");
@@ -335,15 +354,15 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_genEta",aJets.genEta ,"genEta[naJets]/F");
   _outTree->Branch("aJet_genPhi",aJets.genPhi ,"genPhi[naJets]/F");
   _outTree->Branch("aJet_JECUnc",aJets.JECUnc ,"JECUnc[naJets]/F");
-
+  _outTree->Branch("aJet_vtxMass",aJets.vtxMass ,"vtxMass[naJets]/F");
+  _outTree->Branch("aJet_vtx3dL",aJets.vtx3dL ,"vtx3dL[naJets]/F");
+  _outTree->Branch("aJet_vtx3deL",aJets.vtx3deL ,"vtx3deL[naJets]/F");
 
   _outTree->Branch("jjdr" 	,  &jjdr            ,  "jjdr/F"         );         	
   _outTree->Branch("jjdPhi"  	,  &jjdPhi          ,  "jjdPhi/F"       );            	
   _outTree->Branch("jjdEta"  	,  &jjdEta          ,  "jjdEta/F"       );            	
   _outTree->Branch("numJets"      ,  &numJets         ,  "numJets/I"       );                
   _outTree->Branch("numBJets"      ,  &numBJets         ,  "numBJets/I"       );                
-  _outTree->Branch("nofLeptons15"   ,  &nofLeptons15      ,  "nofLeptons15/I"    );                
-  _outTree->Branch("nofLeptons20"   ,  &nofLeptons20      ,  "nofLeptons20/I"    );                
   _outTree->Branch("deltaPullAngle", &deltaPullAngle  ,  "deltaPullAngle/F");
   _outTree->Branch("gendrcc"    , &gendrcc      ,  "gendrcc/F");
   _outTree->Branch("gendrbb"    , &gendrbb      ,  "gendrbb/F");
@@ -351,6 +370,11 @@ int main(int argc, char* argv[])
   _outTree->Branch("genWpt"    , &genWpt      ,  "genWpt/F");
   _outTree->Branch("weightTrig"        , &weightTrig          ,  "weightTrig/F");
   _outTree->Branch("weightTrigMET"        , &weightTrigMET          ,  "weightTrigMET/F");
+  _outTree->Branch("weightEleRecoAndId"        , &weightEleRecoAndId     ,  "weightEleRecoAndId/F");
+  _outTree->Branch("weightEleTrigJetMETPart"        , &weightEleTrigJetMETPart          ,  "weightEleTrigJetMETPart/F");
+  _outTree->Branch("weightEleTrigElePart"        , &weightEleTrigElePart          ,  "weightEleTrigElePart/F");
+
+
   _outTree->Branch("deltaPullAngleAK7", &deltaPullAngleAK7  ,  "deltaPullAngleAK7/F");
   _outTree->Branch("PUweight",       &PUweight  ,  "PUweight/F");
   _outTree->Branch("eventFlav",       &eventFlav  ,  "eventFlav/I");
@@ -557,8 +581,84 @@ int main(int argc, char* argv[])
           MET.phi = vhCand.V.mets.at(0).p4.Phi();
           MET.sumet = vhCand.V.mets.at(0).sumEt;
           MET.sig = vhCand.V.mets.at(0).metSig;
-//FIXME  add MHT     _outTree->Branch("MHT"            ,  &MHT          ,   "mht/F:ht:sig/F:phi/F");  (NEED EDM FIX)
+
+
+        if(!fromCandidate) {
+	  MHT.mht = iEvent->mht.p4.Pt(); 
+	  MHT.phi = iEvent->mht.p4.Phi(); 
+	  MHT.ht = iEvent->mht.sumEt; 
+	  MHT.sig = iEvent->mht.metSig; 
+
+	  }
+
+ 
           Vtype = vhCand.candidateType;
+
+          //Loop on jets
+          double maxBtag=-99999;
+          minDeltaPhijetMET = 999;
+          TLorentzVector bJet;
+          std::vector<std::vector<BTagWeight::JetInfo> > btagJetInfos;
+          std::vector<float> jet30eta;
+          std::vector<float> jet30pt;
+         if(fromCandidate)
+         {
+          //Loop on Higgs Jets
+          for(unsigned int j=0; j < vhCand.H.jets.size(); j++ ){
+                if (vhCand.H.jets[j].csv > maxBtag) { bJet=vhCand.H.jets[j].p4 ; maxBtag =vhCand.H.jets[j].csv; }
+                if (deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[j].p4.Phi()) < minDeltaPhijetMET) 
+                 {
+                  minDeltaPhijetMET=deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[j].p4.Phi()); 
+                  jetPt_minDeltaPhijetMET=vhCand.H.jets[j].p4.Pt();
+                 }
+                btagJetInfos.push_back(btagEff.jetInfo(vhCand.H.jets[j]));
+          }
+          //Loop on Additional Jets
+          for(unsigned int j=0; j < vhCand.additionalJets.size(); j++ ){
+                if (vhCand.additionalJets[j].csv > maxBtag) { bJet=vhCand.additionalJets[j].p4 ; maxBtag =vhCand.additionalJets[j].csv; }
+                if (deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.additionalJets[j].p4.Phi()) < minDeltaPhijetMET) 
+                 {
+                  minDeltaPhijetMET=deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.additionalJets[j].p4.Phi());
+                  jetPt_minDeltaPhijetMET=vhCand.additionalJets[j].p4.Pt();
+                 }
+                if( ( isW && ! useHighestPtHiggsW ) ||  ( ! isW && ! useHighestPtHiggsZ )  )  // btag SF computed using only H-jets if best-H made with dijetPt rather than best CSV
+                 {
+                   if(vhCand.additionalJets[j].p4.Pt() > 20)
+                   btagJetInfos.push_back(btagEff.jetInfo(vhCand.additionalJets[j]));
+                 }
+         }
+        } 
+          else
+        {
+           for(unsigned int j=0; j < iEvent->simpleJets2.size(); j++ ){
+                if (iEvent->simpleJets2[j].csv > maxBtag) { bJet=iEvent->simpleJets2[j].p4 ; maxBtag =iEvent->simpleJets2[j].csv; }
+                if (deltaPhi( vhCand.V.mets.at(0).p4.Phi(), iEvent->simpleJets2[j].p4.Phi()) < minDeltaPhijetMET)
+                 {
+                  minDeltaPhijetMET=deltaPhi( vhCand.V.mets.at(0).p4.Phi(), iEvent->simpleJets2[j].p4.Phi());
+                  jetPt_minDeltaPhijetMET=iEvent->simpleJets2[j].p4.Pt();
+                 }
+           if(iEvent->simpleJets2[j].p4.Pt() > 30)
+           {
+             jet30eta.push_back(iEvent->simpleJets2[j].p4.Eta());
+             jet30pt.push_back(iEvent->simpleJets2[j].p4.Pt());
+           }
+   
+           //For events made with highest CSV, all jets in the event should be taken into account for "tagging" SF (anti tagging is a mess)
+           // because for example a light jet not used for the Higgs can have in reality a higher CSV due to SF > 1 and become a higgs jet
+           if( ( isW && ! useHighestPtHiggsW ) ||  ( ! isW && ! useHighestPtHiggsZ )  ) 
+           { 
+              if(iEvent->simpleJets2[j].p4.Pt() > 20)
+               btagJetInfos.push_back(btagEff.jetInfo(iEvent->simpleJets2[j]));
+           }
+         }
+
+        //if we use the highest pt pair, only the two higgs jet should be used to compute the SF because the other jets are excluded 
+        // by a criteria (pt of the dijet) that is not btag SF dependent 
+        if(!( ( isW && ! useHighestPtHiggsW ) ||  ( ! isW && ! useHighestPtHiggsZ ) )) {
+             for(unsigned int j=0; j < vhCand.H.jets.size(); j++ )   btagJetInfos.push_back(btagEff.jetInfo(vhCand.H.jets[j]));
+          }
+
+        }
           vLeptons.reset();
           weightTrig = 1.; // better to default to 1 
 	  TLorentzVector leptonForTop;
@@ -580,7 +680,16 @@ int main(int argc, char* argv[])
             	  vLeptons.set(vhCand.V.electrons[1],1,11);
                   nvlep=2;
 		  firstAddEle=2;
-                  //FIXME: trigger weights for electrons
+                  std::vector<float> pt,eta;
+                  pt.push_back(vLeptons.pt[0]); eta.push_back(vLeptons.eta[0]);
+                  pt.push_back(vLeptons.pt[1]); eta.push_back(vLeptons.eta[1]);
+                  weightEleRecoAndId=triggerWeight.scaleID95Ele(vLeptons.pt[0],vLeptons.eta[0]) * triggerWeight.scaleRecoEle(vLeptons.pt[0],vLeptons.eta[0]) *
+                                  triggerWeight.scaleID95Ele(vLeptons.pt[1],vLeptons.eta[1]) * triggerWeight.scaleRecoEle(vLeptons.pt[1],vLeptons.eta[1]);
+                  weightEleTrigElePart = triggerWeight.scaleDoubleEle17Ele8(pt,eta); 
+                  weightTrig = weightEleTrigElePart * weightEleRecoAndId;
+ 
+                 
+
            }
           if(Vtype == VHbbCandidate::Wmun ){
                   leptonForTop=vhCand.V.muons[0].p4;
@@ -597,6 +706,16 @@ int main(int argc, char* argv[])
             	  vLeptons.set(vhCand.V.electrons[0],0,11);
 		  nvlep=1;
 		  firstAddEle=1;
+                  float weightMay = triggerWeight.scaleSingleEleMay(vLeptons.pt[0],vLeptons.eta[0]);
+                  float weightV4 = triggerWeight.scaleSingleEleV4(vLeptons.pt[0],vLeptons.eta[0]);
+                  weightEleRecoAndId=triggerWeight.scaleID80Ele(vLeptons.pt[0],vLeptons.eta[0]) * triggerWeight.scaleRecoEle(vLeptons.pt[0],vLeptons.eta[0]);
+                  weightEleTrigJetMETPart=triggerWeight.scaleJet30Jet25(jet30eta,jet30pt)*triggerWeight.scalePFMHTEle(MET.et);
+                  weightEleTrigElePart= weightV4; //this is for debugging only, checking only the V4 part
+
+                  weightMay*=weightEleRecoAndId;
+                  weightV4*=weightEleRecoAndId;
+                  weightV4*=weightEleTrigJetMETPart;
+                  weightTrig = weightMay * 0.187 + weightV4 * (1.-0.187); //FIXME: use proper lumi if we reload 2.fb
            }
           if( Vtype == VHbbCandidate::Znn ){
                   nvlep=0;
@@ -627,40 +746,24 @@ int main(int argc, char* argv[])
 
           }
 
-          //Loop on jets
-          
-          double maxBtag=-99999;
-          minDeltaPhijetMET = 999;
-          TLorentzVector bJet;
-          std::vector<std::vector<BTagWeight::JetInfo> > btagJetInfos;
-          for(unsigned int j=0; j < vhCand.H.jets.size(); j++ ){
-                if (vhCand.H.jets[j].csv > maxBtag) { bJet=vhCand.H.jets[j].p4 ; maxBtag =vhCand.H.jets[j].csv; }
-                if (deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[j].p4.Phi()) < minDeltaPhijetMET) 
-                 {
-                  minDeltaPhijetMET=deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[j].p4.Phi()); 
-                  jetPt_minDeltaPhijetMET=vhCand.H.jets[j].p4.Pt();
-                 }
-                btagJetInfos.push_back(btagEff.jetInfo(vhCand.H.jets[j]));
-          }
-          for(unsigned int j=0; j < vhCand.additionalJets.size(); j++ ){
-                if (vhCand.additionalJets[j].csv > maxBtag) { bJet=vhCand.additionalJets[j].p4 ; maxBtag =vhCand.additionalJets[j].csv; }
-                if (deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.additionalJets[j].p4.Phi()) < minDeltaPhijetMET) 
-                 {
-                  minDeltaPhijetMET=deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.additionalJets[j].p4.Phi());
-                  jetPt_minDeltaPhijetMET=vhCand.additionalJets[j].p4.Pt();
-                 }
-                if( ( isW && ! useHighestPtHiggsW ) ||  ( ! isW && ! useHighestPtHiggsZ )  )  // btag SF computed using only H-jets if best-H made with dijetPt rather than best CSV
-                 {
-                   if(vhCand.additionalJets[j].p4.Pt() > 20)
-                   btagJetInfos.push_back(btagEff.jetInfo(vhCand.additionalJets[j]));
-                 }
-         }
+
          if(isMC_)
          {
           //std::cout << "BTAGSF " <<  btagJetInfos.size() << " " << btag.weight<BTag1Tight2CustomFilter>(btagJetInfos) << std::endl;
+          if ( btagJetInfos.size()< 10) 
+          {
           btag1T2CSF = btag.weight<BTag1Tight2CustomFilter>(btagJetInfos);
           btag2TSF = btag.weight<BTag2TightFilter>(btagJetInfos);
-          btag1TSF = btag.weight<BTag1TightFilter>(btagJetInfos);;
+          btag1TSF = btag.weight<BTag1TightFilter>(btagJetInfos);
+          }
+         else
+          {
+            std::cout << "WARNING:  combinatorics for " << btagJetInfos.size() << " jets is too high (>=10). use SF=1 " << std::endl;
+            //FIXME: revert to random throw  for this cases
+            btag1T2CSF = 1.;
+	    btag2TSF =  1.;
+	    btag1TSF =  1.;
+          }
          }
             
           if(maxBtag > -99999)
@@ -677,21 +780,43 @@ int main(int argc, char* argv[])
   
 
        
-//FIXME  _outTree->Branch("nofLeptons15"   ,  &nofLeptons15      ,  "nofLeptons15/I"    );
-          nofLeptons20= vhCand.additionalLeptons();
 // if(aux.mcC.size() >=2)
 // std::cout << "C Must not be zero and it is ... " << aux.mcC[1].p4.Pt() << std::endl;
 // if(aux.mcB.size() >=1)
 // std::cout << "B Must not be zero and it is ... " << aux.mcB[0].p4.Pt() << std::endl;
 
-// FIXME         gendrcc=aux.genCCDeltaR();  (NEED EDM FIX)
+         gendrcc=aux.genCCDeltaR(); 
+         gendrbb=aux.genBBDeltaR(); 
+         genZpt=aux.mcZ.size() > 0 ? aux.mcZ[0].p4.Pt():-99;
+         genWpt=aux.mcW.size() > 0 ? aux.mcW[0].p4.Pt():-99;
 
-// FIXME    gendrbb=aux.genBBDeltaR();  (NEED EDM FIX)
-          genZpt=aux.mcZ.size() > 0 ? aux.mcZ[0].p4.Pt():-99;
-          genWpt=aux.mcW.size() > 0 ? aux.mcW[0].p4.Pt():-99;
+/*        if(!fromCandidate){
+          std::vector<VHbbEvent::SimpleJet> & ak7 = iEvent.simpleJets3;
+          if(ak7.size() > 1){
+            CompareDeltaR deltaRComparatorJ1(vhCand.H.jets[0].p4);
+            CompareDeltaR deltaRComparatorJ2(vhCand.H.jets[1].p4);
+            std::vector<VHbbEvent::SimpleJet> ak7_matched;
+
+            std::sort( ak7.begin(),ak7.end(),deltaRComparatorJ1 );
+            ak7_matched.push_back(ak7[0]);
+
+            if(ak7[1].p4.DeltaR(vhCand.H.jets[0].p4) > 0.5)
+              ak7.erase(ak7.begin());
+
+            std::sort( ak7.begin(),ak7.end(),deltaRComparatorJ2 );
+            ak7_matched.push_back(ak7[0]);
+
+            CompareJetPt ptComparator;
+            std::sort( ak7_matched.begin(),ak7_matched.end(),ptComparator );
+            if(ak7_matched[0].p4.DeltaR(vhCand.H.jets[0].p4) < 0.5
+               and ak7_matched[1].p4.DeltaR(vhCand.H.jets[1].p4) < 0.5 ){  
+              deltaPullAngleAK7 = VHbbCandidateTools::getDeltaTheta(ak7_matched[0],ak7_matched[1]);
+            }
+          }
+        }
 
 //FIXME:  _outTree->Branch("deltaPullAngleAK7", &deltaPullAngleAK7  ,  "deltaPullAngleAK7/F");
-
+*/
 
 
 

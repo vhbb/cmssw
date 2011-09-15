@@ -7,48 +7,15 @@ process = cms.Process("FWLitePlots")
 #fileNames   = cms.vstring('file:2l2bMetEdmNtuples.root'),         ## mandatory
 process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_10_0_0dz.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_11_0_syf.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_12_0_98x.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_1_2_fZC.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_13_0_d07.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_14_0_gTV.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_15_0_k8w.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_16_0_Gyt.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_17_0_Sbb.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_18_0_08B.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_19_0_FPm.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_20_0_K9m.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_2_0_o7r.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_21_0_KC0.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_22_0_fym.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_23_0_PdH.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_24_0_gFX.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_25_0_Jta.root",
-"file:PAT.edm_26_0_pL3.root",
-#"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_26_0_pL3.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_27_0_2RN.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_28_0_ILe.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_30_0_lyu.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_3_0_JbI.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_31_0_l4y.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_32_0_jyU.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_33_0_CwC.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_34_0_aWH.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_35_0_6hS.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_36_0_3cS.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_37_0_akJ.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_38_0_YeV.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_39_1_Yve.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_40_0_ifl.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_4_0_q1y.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_41_0_hHm.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_5_0_hty.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_6_0_5vG.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_7_0_9A5.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_8_0_f1B.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV3_ProcV1/f0063de7ad3f08dda539b5259b13f60a//PAT.edm_9_1_juk.root"
-
+"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_10_0_15C.root",
+"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_11_0_E20.root",
+"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_12_0_00Q.root",
+"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_1_1_5pD.root",
+"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_24_0_LKk.root",
+"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_2_1_sPg.root",
+"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_41_0_PYm.root",
+"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_6_0_Iqu.root",
+"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_9_0_rgK.root"
 ),
     PUmcfileName = cms.string(""),
     PUdatafileName = cms.string(""),
@@ -58,8 +25,8 @@ process.fwliteInput = cms.PSet(
     )
 
 # get JSON file 
-JSONfile = 'Input.json'
-lumiList = LumiList.LumiList (filename = JSONfile).getCMSSWString().split(',')
+#JSONfile = 'Input.json'
+#lumiList = LumiList.LumiList (filename = JSONfile).getCMSSWString().split(',')
 
 #Uncomment to run with JSON
 #process.fwliteInput.lumisToProcess.extend(lumiList)
@@ -121,11 +88,17 @@ process.Analyzer = cms.PSet(
     useHighestPtHiggsZ = cms.bool(False),
     idMuFileName = cms.string("ScaleEffs42.root"),
     hltMuFileName = cms.string("IsoToHLT42.root"),
-    hltEle1FileName = cms.string("TriggerEfficiency_Electrons_May10.root"),
-    hltEle2FileName = cms.string("TriggerEfficiency_Electrons_PromptV4.root"),
-    idEleFileName = cms.string("ScaleFactor_PFElectrons_DataMontecarlo.root"),
+
+    hltEle1FileName = cms.string("Ele17.root"),
+    hltEle2FileName = cms.string("Ele8NotEle17.root"),
+    idEle80FileName = cms.string("PFElectronToWP80.root"),
+    idEle95FileName = cms.string("PFElectronToWP95.root"),
     hltJetEle1FileName = cms.string("TriggerEfficiency_JetNo30_Jet25.root"),
     hltJetEle2FileName = cms.string("TriggerEfficiency_Jet30.root"),
+    recoEleFileName = cms.string("EleReco.root"),
+    hltSingleEleMayFileName = cms.string("TriggerEfficiency_Electrons_May10.root"),
+    hltSingleEleV4FileName = cms.string("TriggerEfficiency_Electrons_PromptV4.root"),
+    idEleFileName = cms.string("ScaleFactor_PFElectrons_DataMontecarlo.root"),
 
     btagEffFileName = cms.string("btag_generic.txt")
     )

@@ -14,15 +14,20 @@
 class TriggerWeight
 {
 public:  
-  TriggerWeight(const edm::ParameterSet& ana) : tscaleHLTele1(0),tscaleHLTele2(0),tscaleHLTeleJet1(0),tscaleHLTeleJet2(0),tscaleIDele(0), tscaleHLTmu(0), tscaleIDmu(0),combiner2Thr(2)
+  TriggerWeight(const edm::ParameterSet& ana) : combiner2Thr(2)
   {
    tscaleHLTmu=openFile(ana,"hltMuFileName");
    tscaleIDmu=openFile(ana,"idMuFileName");
    tscaleHLTele1=openFile(ana,"hltEle1FileName");
    tscaleHLTele2=openFile(ana,"hltEle2FileName");
-   tscaleIDele=openFile(ana,"idEleFileName");
+   tscaleID80Ele=openFile(ana,"idEle80FileName");
+   tscaleID95Ele=openFile(ana,"idEle95FileName");
    tscaleHLTeleJet1=openFile(ana,"hltJetEle1FileName");
    tscaleHLTeleJet2=openFile(ana,"hltJetEle2FileName");
+   tscaleRecoEle=openFile(ana,"recoEleFileName");
+//   tscalePFMHTele=openFile(ana,"hltPFMHTEleFileName");
+   tscaleSingleEleMay=openFile(ana,"hltSingleEleMayFileName");
+   tscaleSingleEleV4=openFile(ana,"hltSingleEleV4FileName");
 
    if(tscaleHLTmu == 0 || tscaleIDmu == 0) 
     {
@@ -35,7 +40,7 @@ public:
  
   TTree * openFile(const edm::ParameterSet& ana, const char * name)
   {
-   TFile *hltMuFile = new TFile (ana.getParameter<std::string> ("hltMuFileName").c_str(),"read");
+   TFile *hltMuFile = new TFile (ana.getParameter<std::string> (name).c_str(),"read");
    if(hltMuFile)   return (TTree*) hltMuFile->Get("tree");
    else return 0;
   }
@@ -78,36 +83,6 @@ public:
   float scaleMuIsoHLT(float pt1, float eta1)
   {
     return efficiencyFromPtEta(pt1,eta1,tscaleHLTmu).first;
-/*    if(!tscaleHLTmu) return 1;
-    float ptMin,ptMax,etaMin,etaMax,scale,error;
-    float s1 = 0;
-    int count = 0;
-    tscaleHLTmu->SetBranchAddress("ptMin",&ptMin);
-    tscaleHLTmu->SetBranchAddress("ptMax",&ptMax);
-    tscaleHLTmu->SetBranchAddress("etaMin",&etaMin);
-    tscaleHLTmu->SetBranchAddress("etaMax",&etaMax);
-    tscaleHLTmu->SetBranchAddress("scale",&scale);
-    tscaleHLTmu->SetBranchAddress("error",&error);
-    
-    for(int jentry = 0; jentry < tscaleHLTmu->GetEntries(); jentry++)
-      {
-	tscaleHLTmu->GetEntry(jentry);
-	if((pt1 > ptMin) && (pt1 < ptMax) && (eta1 > etaMin) && (eta1 < etaMax))
-	  {
-	    s1 = scale;
-	    count++;   
-	  }
-      }
-    
-    if(count == 0 || s1 == 0) 
-      {
-	//caleFile->Close();
-	return 1;
-      }
-    
-    
-    //aleFile->Close();
-    return (s1);*/
   }
   
   
@@ -115,40 +90,6 @@ public:
   float scaleMuID(float pt1, float eta1)
   {
     return efficiencyFromPtEta(pt1,eta1,tscaleIDmu).first;
-
-    // changed to !tscale...
-    if(!tscaleIDmu) return 1;
-
-    float ptMin,ptMax,etaMin,etaMax,scale,error;
-    float s1 = 0;
-    int count = 0;
-    tscaleIDmu->SetBranchAddress("ptMin",&ptMin);
-    tscaleIDmu->SetBranchAddress("ptMax",&ptMax);
-    tscaleIDmu->SetBranchAddress("etaMin",&etaMin);
-    tscaleIDmu->SetBranchAddress("etaMax",&etaMax);
-    tscaleIDmu->SetBranchAddress("scale",&scale);
-    tscaleIDmu->SetBranchAddress("error",&error);
-    
-    for(int jentry = 0; jentry < tscaleIDmu->GetEntries(); jentry++)
-      {
-	
-	tscaleIDmu->GetEntry(jentry);
-	if((pt1 > ptMin) && (pt1 < ptMax) && (eta1 > etaMin) && (eta1 < etaMax))
-	  {
-	    s1 = scale;
-	    count++;   
-	  }
-      }
-    
-    if(count == 0 || s1 == 0) 
-      {
-	//caleFile->Close();
-	return 1;
-      }
-    
-    //aleFile->Close();
-    return (s1);
-    
   }
 
 double  scaleMetHLT( double met){
@@ -163,13 +104,58 @@ double  scaleMetHLT( double met){
   }
   
 
-double scaleJet30Jet25( std::vector<float> eta, std::vector<float> pt)
+double scaleDoubleEle17Ele8( std::vector<float> pt, std::vector<float> eta )
 {
-return 1;
-//     if(!tscaleEleJet1) return 1;
-//     if(!tscaleEleJet2) return 1;
-     vector<vector<float > > bah;
-     combiner2Thr.weight<Trigger1High2Loose>(bah);
+   std::vector< std::vector<float> > allEleWithEffs;
+for(unsigned int j=0; j< pt.size(); j++)
+ {
+  std::vector<float> thisEleEffs;
+  thisEleEffs.push_back(efficiencyFromPtEta(pt[j],eta[j],tscaleHLTele1).first);
+  thisEleEffs.push_back(efficiencyFromPtEta(pt[j],eta[j],tscaleHLTele2).first);
+  allEleWithEffs.push_back(thisEleEffs);
+ }
+
+  return   combiner2Thr.weight<Trigger1High2Loose>(allEleWithEffs);
+
+}
+
+double scaleSingleEleMay( float pt, float eta){    return efficiencyFromPtEta(pt,eta,tscaleSingleEleMay).first;}
+double scaleSingleEleV4( float pt, float eta){   return efficiencyFromPtEta(pt,eta,tscaleSingleEleV4).first; }
+double scaleID80Ele( float pt, float eta) {      return efficiencyFromPtEta(pt,eta,tscaleID80Ele).first; }
+double scaleID95Ele( float pt, float eta) {      return efficiencyFromPtEta(pt,eta,tscaleID95Ele).first; }
+double scaleRecoEle( float pt, float eta){     return efficiencyFromPtEta(pt,eta,tscaleRecoEle).first; }
+double scalePFMHTEle( float MetPFPt){
+    double weightPFMHTrigger=0.;
+
+    //FIXME: read from file
+    if(MetPFPt>0. && MetPFPt<5.) weightPFMHTrigger=0.3834;
+    if(MetPFPt>5. && MetPFPt<10.) weightPFMHTrigger=0.4493;
+    if(MetPFPt>10. && MetPFPt<15.) weightPFMHTrigger=0.5676;
+    if(MetPFPt>15. && MetPFPt<20.) weightPFMHTrigger=0.6474;
+    if(MetPFPt>20. && MetPFPt<25.) weightPFMHTrigger=0.7695;
+    if(MetPFPt>25. && MetPFPt<30.) weightPFMHTrigger=0.8936;
+    if(MetPFPt>30. && MetPFPt<35.) weightPFMHTrigger=0.9304;
+    if(MetPFPt>35. && MetPFPt<40.) weightPFMHTrigger=0.9620;
+    if(MetPFPt>40. && MetPFPt<45.) weightPFMHTrigger=0.9894;
+    if(MetPFPt>45. && MetPFPt<50.) weightPFMHTrigger=0.9863;
+    if(MetPFPt>50. && MetPFPt<60.) weightPFMHTrigger=0.9978;
+    if(MetPFPt>60.) weightPFMHTrigger=1;
+    return weightPFMHTrigger;
+}
+
+double scaleJet30Jet25( std::vector<float> pt, std::vector<float> eta)
+{
+
+  std::vector< std::vector<float> > allJetsWithEffs;
+for(unsigned int j=0; j< pt.size(); j++)
+ {
+  std::vector<float> thisJetEffs;
+  thisJetEffs.push_back(efficiencyFromPtEta(pt[j],eta[j],tscaleHLTeleJet1).first);
+  thisJetEffs.push_back(efficiencyFromPtEta(pt[j],eta[j],tscaleHLTeleJet2).first);
+  allJetsWithEffs.push_back(thisJetEffs);
+ }
+
+  return   combiner2Thr.weight<Trigger1High2Loose>(allJetsWithEffs);
 }
 
 
@@ -179,7 +165,12 @@ private:
   TTree * tscaleHLTele2;
   TTree * tscaleHLTeleJet1;
   TTree * tscaleHLTeleJet2;
-  TTree * tscaleIDele;
+  TTree * tscaleID80Ele;
+  TTree * tscaleID95Ele;
+  TTree * tscaleRecoEle;
+//  TTree * tscalePFMHTele;
+  TTree * tscaleSingleEleMay;
+  TTree * tscaleSingleEleV4;
 
   TTree * tscaleHLTmu;
   TTree * tscaleIDmu;
