@@ -17,8 +17,9 @@ process.fwliteInput = cms.PSet(
 "root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_6_0_Iqu.root",
 "root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_9_0_rgK.root"
 ),
-    PUmcfileName = cms.string(""),
-    PUdatafileName = cms.string(""),
+
+    PUmcfileName = cms.string("ttbarPU.root"),
+    PUdatafileName = cms.string("PUdist_160404-167151_7TeV_PromptReco_Collisions11.root"),
     maxEvents   = cms.int32(-1),                             ## optional
     outputEvery = cms.uint32(0),                            ## optional
     lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange()),

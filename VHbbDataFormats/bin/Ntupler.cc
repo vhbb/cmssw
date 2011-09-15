@@ -300,9 +300,17 @@ int main(int argc, char* argv[])
   
   std::string PUmcfileName_ = in.getParameter<std::string> ("PUmcfileName") ;
   std::string PUdatafileName_ = in.getParameter<std::string> ("PUdatafileName") ;
+
   bool isMC_( ana.getParameter<bool>("isMC") );  
   TriggerReader trigger(isMC_);
   TriggerReader patFilters(false);
+
+  edm::LumiReWeighting   lumiWeights;
+  if(isMC_)
+   {
+   	  edm::LumiReWeighting   lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
+
+   }
  
 //   TFile *_outPUFile	= new TFile((outputFile_+"_PU").c_str(), "recreate");	
 //   TH1F * pu = new TH1F("pileup","",-0.5,24.5,25);
@@ -454,16 +462,14 @@ int main(int argc, char* argv[])
         {
           count->Fill(1.);
 
+      fwlite::Handle< VHbbEventAuxInfo > vhbbAuxHandle; 
+      vhbbAuxHandle.getByLabel(ev,"HbbAnalyzerNew");
+      const VHbbEventAuxInfo & aux = *vhbbAuxHandle.product();
+      PUweight=1.;
  	  if(isMC_){
  	  // PU weights
-          
-// 	  edm::LumiReWeighting   LumiWeights_ = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
-// 	  double avg=0;
-//FIXME:  PU (NEED EDM FIX)
-// 	   if( PUintimeSizes.isValid() && PUouttime1minusSizes.isValid() && PUouttime1plusSizes.isValid()){
-// 	     avg = (double)( *PUintimeSizes );
-// 	   }
- 	   PUweight = 1.0; // FIXME: LumiWeights_.weight3BX( avg /3.);  (NEED EDM FIX)
+           std::map<int, unsigned int>::const_iterator puit = aux.puInfo.pus.find(0);
+           PUweight =  lumiWeights.weight3BX( puit->second /3. );        
  	  }
       countWithPU->Fill(PUweight);
       
@@ -506,9 +512,6 @@ int main(int argc, char* argv[])
         const std::vector<VHbbCandidate> * cand = candZ;
 
 
-      fwlite::Handle< VHbbEventAuxInfo > vhbbAuxHandle; 
-      vhbbAuxHandle.getByLabel(ev,"HbbAnalyzerNew");
-      const VHbbEventAuxInfo & aux = *vhbbAuxHandle.product();
       
       /*  fwlite::Handle< VHbbEvent > vhbbHandle; 
           vhbbHandle.getByLabel(ev,"HbbAnalyzerNew");
@@ -759,7 +762,7 @@ int main(int argc, char* argv[])
          else
           {
             std::cout << "WARNING:  combinatorics for " << btagJetInfos.size() << " jets is too high (>=10). use SF=1 " << std::endl;
-            //FIXME: revert to random throw  for this cases
+            //TODO: revert to random throw  for this cases
             btag1T2CSF = 1.;
 	    btag2TSF =  1.;
 	    btag1TSF =  1.;
@@ -780,18 +783,16 @@ int main(int argc, char* argv[])
   
 
        
-// if(aux.mcC.size() >=2)
-// std::cout << "C Must not be zero and it is ... " << aux.mcC[1].p4.Pt() << std::endl;
-// if(aux.mcB.size() >=1)
-// std::cout << "B Must not be zero and it is ... " << aux.mcB[0].p4.Pt() << std::endl;
 
          gendrcc=aux.genCCDeltaR(); 
          gendrbb=aux.genBBDeltaR(); 
          genZpt=aux.mcZ.size() > 0 ? aux.mcZ[0].p4.Pt():-99;
          genWpt=aux.mcW.size() > 0 ? aux.mcW[0].p4.Pt():-99;
 
-/*        if(!fromCandidate){
-          std::vector<VHbbEvent::SimpleJet> & ak7 = iEvent.simpleJets3;
+
+       /// Compute pull angle from AK7
+        if(!fromCandidate){
+           std::vector<VHbbEvent::SimpleJet>  ak7 = iEvent->simpleJets3;
           if(ak7.size() > 1){
             CompareDeltaR deltaRComparatorJ1(vhCand.H.jets[0].p4);
             CompareDeltaR deltaRComparatorJ2(vhCand.H.jets[1].p4);
@@ -804,7 +805,10 @@ int main(int argc, char* argv[])
               ak7.erase(ak7.begin());
 
             std::sort( ak7.begin(),ak7.end(),deltaRComparatorJ2 );
-            ak7_matched.push_back(ak7[0]);
+            if( abs(ak7[0].p4.Pt() - ak7_matched[1].p4.Pt()) > 0.1 )
+                ak7_matched.push_back(ak7[0]);
+            else
+               ak7_matched.push_back(ak7[1]);
 
             CompareJetPt ptComparator;
             std::sort( ak7_matched.begin(),ak7_matched.end(),ptComparator );
@@ -815,8 +819,7 @@ int main(int argc, char* argv[])
           }
         }
 
-//FIXME:  _outTree->Branch("deltaPullAngleAK7", &deltaPullAngleAK7  ,  "deltaPullAngleAK7/F");
-*/
+
 
 
 
