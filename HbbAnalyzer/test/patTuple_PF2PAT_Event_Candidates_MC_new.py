@@ -51,7 +51,7 @@ process.out1 = cms.OutputModule(
 	'keep VHbbCandidates_*_*_*',
 #	'keep PileupSummaryInfos_*_*_*',
 	'keep edmTriggerResults_*_*_*',
-        'keep *_bcandidates_*_*',
+        'keep *_hltTriggerSummaryAOD_*_*',
         'keep *_selectedVertices_*_*',
 	),
     dropMetaData = cms.untracked.string('ALL'),
