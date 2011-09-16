@@ -23,7 +23,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 # source
 process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
-"rfio:/castor/cern.ch/cms/store/data/Run2011B/DoubleMu/AOD/PromptReco-v1/000/176//169/2600718E-36DF-E011-BD47-BCAEC518FF74.root",
+"rfio:/castor/cern.ch/user/d/degrutto/test/DYJetsToLL_PtZ-100.root",
 
 #'file:/gpfs/gpfsddn/cms/user/arizzi/Hbb/submit/CMSSW_4_2_8_patch1/src/VHbbAnalysis/VHbbDataFormats/bin/submissions/testbortigno/24233412-65AD-E011-B930-E0CB4E553667.root'
 
@@ -383,7 +383,7 @@ process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     simplejet3Tag = cms.InputTag("selectedPatJetsAK7Calo"),
     simplejet4Tag = cms.InputTag("selectedPatJetsAK7PF"),
     photonTag = cms.InputTag("selectedPatPhotons"),
-    metTag = cms.InputTag("patMETs"),
+    metTag = cms.InputTag("met"), #this input tag is used to fill calo MET 
 
     verbose = cms.untracked.bool(False)
 )
@@ -499,6 +499,8 @@ process.patMETsHT = cms.EDProducer("MHTProducer",
   MaxJetEta     = cms.double(5)
 )
 
+process.pfMETNoPU = process.pfMET.clone()
+process.pfMETNoPU.src=cms.InputTag("pfNoPileUp")
 
 process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
@@ -551,6 +553,7 @@ if isMC == False :
                      process.patDefaultSequence*
 #                     process.patPF2PATSequence* # added with usePF2PAT
 		     process.patMETsHT*
+		     process.pfMETNoPU*
                      process.leptonTrigMatch*
                      process.inclusiveVertexing*
                      process.inclusiveMergedVertices*process.selectedVertices*
@@ -581,6 +584,7 @@ else :
                      process.patDefaultSequence*
 #                     process.patPF2PATSequence* # added with usePF2PAT
 		     process.patMETsHT*
+		     process.pfMETNoPU*
 #		     process.dump*
                      process.leptonTrigMatch*
                      process.inclusiveVertexing*

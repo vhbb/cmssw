@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.36 2011/09/15 10:50:35 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.37 2011/09/15 14:00:01 degrutto Exp $
 //
 //
 
@@ -732,6 +732,16 @@ BTagSFContainer btagSFs;
     if (verbose_)     std::cout <<" METTC "<<     hbbInfo->tcmet.metSig <<" " <<     hbbInfo->tcmet.sumEt<<std::endl;
   }
   
+  edm::Handle<edm::View<reco::MET> > pfMETNoPUHandle;
+  iEvent.getByLabel("pfMETNoPU",pfMETNoPUHandle);
+  edm::View<reco::MET> metspfMETNoPU = *pfMETNoPUHandle;
+  if(metspfMETNoPU.size()){
+    hbbInfo->metNoPU.sumEt=(metspfMETNoPU[0]).sumEt();
+    hbbInfo->metNoPU.metSig=(metspfMETNoPU[0]).significance();
+    hbbInfo->metNoPU.eLong=(metspfMETNoPU[0]).e_longitudinal();
+    hbbInfo->metNoPU.p4=GENPTOLOR((metspfMETNoPU[0]));
+    if (verbose_)     std::cout <<" pfMETNoPU "<<     hbbInfo->metNoPU.metSig <<" " <<     hbbInfo->metNoPU.sumEt<<std::endl;
+  }
  
   edm::Handle<edm::View<reco::MET> > mHTHandle;
   iEvent.getByLabel("patMETsHT",mHTHandle);
@@ -876,7 +886,7 @@ BTagSFContainer btagSFs;
     ef.pfPhoIso=elec->photonIso();
     ef.pfNeuIso=elec->neutralHadronIso();
 
-    Geom::Phi<double> deltaphi(elec->superCluster()->phi()-atan2(hbbInfo->calomet.p4.Py(),hbbInfo->calomet.p4.Px()));
+    Geom::Phi<double> deltaphi(elec->superCluster()->phi()-atan2(hbbInfo->pfmet.p4.Py(),hbbInfo->pfmet.p4.Px()));
     ef.acop = deltaphi.value();
     //
     // fill eleids
@@ -935,7 +945,7 @@ BTagSFContainer btagSFs;
     tf.tIso=tau->trackIso();
     tf.eIso=tau->ecalIso();
     tf.hIso=tau->hcalIso();
-    Geom::Phi<double> deltaphi(tau->phi()-atan2(hbbInfo->calomet.p4.Py(),hbbInfo->calomet.p4.Px()));
+    Geom::Phi<double> deltaphi(tau->phi()-atan2(hbbInfo->pfmet.p4.Py(),hbbInfo->pfmet.p4.Px()));
     double acop = deltaphi.value();
     tf.acop=acop;
     tf.idbyIso=tau->tauID("byIsolation");

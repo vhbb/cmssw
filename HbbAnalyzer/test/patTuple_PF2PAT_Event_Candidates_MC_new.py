@@ -383,7 +383,7 @@ process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     simplejet3Tag = cms.InputTag("selectedPatJetsAK7Calo"),
     simplejet4Tag = cms.InputTag("selectedPatJetsAK7PF"),
     photonTag = cms.InputTag("selectedPatPhotons"),
-    metTag = cms.InputTag("patMETs"),
+    metTag = cms.InputTag("met"), #this input tag is used to fill calo MET 
 
     verbose = cms.untracked.bool(False)
 )
@@ -499,6 +499,8 @@ process.patMETsHT = cms.EDProducer("MHTProducer",
   MaxJetEta     = cms.double(5)
 )
 
+process.pfMETNoPU = process.pfMET.clone()
+process.pfMETNoPU.src=cms.InputTag("pfNoPileUp")
 
 process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
@@ -551,6 +553,7 @@ if isMC == False :
                      process.patDefaultSequence*
 #                     process.patPF2PATSequence* # added with usePF2PAT
 		     process.patMETsHT*
+		     process.pfMETNoPU*
                      process.leptonTrigMatch*
                      process.inclusiveVertexing*
                      process.inclusiveMergedVertices*process.selectedVertices*
@@ -581,6 +584,7 @@ else :
                      process.patDefaultSequence*
 #                     process.patPF2PATSequence* # added with usePF2PAT
 		     process.patMETsHT*
+		     process.pfMETNoPU*
 #		     process.dump*
                      process.leptonTrigMatch*
                      process.inclusiveVertexing*
