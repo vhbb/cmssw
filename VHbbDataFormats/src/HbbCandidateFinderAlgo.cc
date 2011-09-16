@@ -177,6 +177,17 @@ void HbbCandidateFinderAlgo::findMET(const VHbbEvent::METInfo & met, std::vector
     }
     
 }
+bool HbbCandidateFinderAlgo::jetID(const VHbbEvent::SimpleJet & j)
+{
+ 
+    if(j.neutralHadronEFraction > 0.99) return false;
+    if(j.neutralEmEFraction > 0.99) return false;
+    if(j.chargedEmEFraction > 0.99) return false;
+    if(j.chargedHadronEFraction == 0) return false;
+    if(j.ntracks == 0) return false;
+    if(j.nConstituents <= 1) return false;
+return true;
+}
 
 
 bool HbbCandidateFinderAlgo::findDiJets (const std::vector<VHbbEvent::SimpleJet>& jetsin, VHbbEvent::SimpleJet& j1, VHbbEvent::SimpleJet& j2,std::vector<VHbbEvent::SimpleJet>& addJets){
@@ -204,7 +215,7 @@ if (verbose_){
  //
  unsigned int index1=999999, index2=999999;
  for (unsigned int i =0; i< jets.size(); ++i){
-   if (jets[i].p4.Pt()> jetPtThreshold && fabs(jets[i].p4.Eta()) < etaThr){
+   if (jets[i].p4.Pt()> jetPtThreshold && fabs(jets[i].p4.Eta()) < etaThr && jetID(jets[i])){
      if (index1 == 999999) {
        index1=i;
      }else if (index2 == 999999){
@@ -269,7 +280,7 @@ bool HbbCandidateFinderAlgo::findDiJetsHighestPt (const std::vector<VHbbEvent::S
   for (unsigned int i =0; i< jets.size()-1; ++i){
     for (unsigned int j =i+1; j< jets.size(); ++j){
       float pt = (jets[i].p4+jets[j].p4).Pt();
-      if (pt>highestPt && jets[j].p4.Pt()> jetPtThreshold && jets[i].p4.Pt()> jetPtThreshold && fabs(jets[i].p4.Eta()) < etaThr &&  fabs(jets[j].p4.Eta()) < etaThr  ){
+      if (pt>highestPt && jets[j].p4.Pt()> jetPtThreshold && jets[i].p4.Pt()> jetPtThreshold && fabs(jets[i].p4.Eta()) < etaThr &&  fabs(jets[j].p4.Eta()) < etaThr && jetID(jets[i]) && jetID(jets[j]) ){
 	highestPt = pt;
 	highesti=i;
 	highestj=j;
