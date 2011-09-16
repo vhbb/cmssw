@@ -190,7 +190,7 @@ if (verbose_){
 
  CompareBTag  bTagComparator;
  CompareJetPt ptComparator;
- 
+ float etaThr = 2.5;
 
 
  if (jetsin.size()<2) return false;
@@ -204,7 +204,7 @@ if (verbose_){
  //
  unsigned int index1=999999, index2=999999;
  for (unsigned int i =0; i< jets.size(); ++i){
-   if (jets[i].p4.Pt()> jetPtThreshold){
+   if (jets[i].p4.Pt()> jetPtThreshold && fabs(jets[i].p4.Eta()) < etaThr){
      if (index1 == 999999) {
        index1=i;
      }else if (index2 == 999999){
@@ -254,7 +254,7 @@ bool HbbCandidateFinderAlgo::findDiJetsHighestPt (const std::vector<VHbbEvent::S
   }
   if (jetsin.size()<2) return false;
   
-
+  float etaThr = 2.5;
   std::vector<VHbbEvent::SimpleJet> jets = jetsin;
   //loop over the dijets and save the one with highest Pt
   
@@ -269,7 +269,7 @@ bool HbbCandidateFinderAlgo::findDiJetsHighestPt (const std::vector<VHbbEvent::S
   for (unsigned int i =0; i< jets.size()-1; ++i){
     for (unsigned int j =i+1; j< jets.size(); ++j){
       float pt = (jets[i].p4+jets[j].p4).Pt();
-      if (pt>highestPt && jets[j].p4.Pt()> jetPtThreshold && jets[i].p4.Pt()> jetPtThreshold){
+      if (pt>highestPt && jets[j].p4.Pt()> jetPtThreshold && jets[i].p4.Pt()> jetPtThreshold && fabs(jets[i].p4.Eta()) < etaThr &&  fabs(jets[j].p4.Eta()) < etaThr  ){
 	highestPt = pt;
 	highesti=i;
 	highestj=j;
@@ -317,23 +317,22 @@ For both W -> mu nu and Z -> mu mu, we adopt the standard VBTF muon selection de
     if (
 	muons[it]. globChi2<10 &&
 	muons[it].nPixelHits>= 1 &&
-	muons[it].globNHits >= 1 &&
+        muons[it].globNHits != 0 &&
 	muons[it].nHits >= 10 &&
-	//tracker
+        //tracker
 	(muons[it].cat & 0x1) && 
 	//global
 	(muons[it].cat & 0x2) && 
-	muons[it].validMuStations >=2 &&
+//TODO ?	muons[it].validMuStations >=2 &&
 	muons[it].ipDb<.2 &&
 	//	(muons[it].hIso+muons[it].eIso+muons[it].tIso)/muons[it].p4.Pt()<.15 &&
 	(muons[it].pfChaIso+muons[it].pfPhoIso+muons[it].pfNeuIso)/muons[it].p4.Pt()<.15 &&
 	fabs(muons[it].p4.Eta())<2.4 &&
-	muons[it].p4.Pt()>20) {
+	muons[it].p4.Pt()>20 ) {
       out.push_back(muons[it]);
       positions.push_back(it);
-    }
   }
-
+  }
     if (verbose_){
       std::cout <<" CandidateFinder: Input Muons = "<<muons.size()<<" Output Muons = "<<out.size()<<std::endl;
     }
