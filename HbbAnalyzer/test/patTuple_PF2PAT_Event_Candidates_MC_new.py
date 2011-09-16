@@ -23,9 +23,9 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 # source
 process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
-"rfio:/castor/cern.ch/user/d/degrutto/test/DYJetsToLL_PtZ-100.root",
+#"rfio:/castor/cern.ch/user/d/degrutto/test/DYJetsToLL_PtZ-100.root",
 
-#'file:/gpfs/gpfsddn/cms/user/arizzi/Hbb/submit/CMSSW_4_2_8_patch1/src/VHbbAnalysis/VHbbDataFormats/bin/submissions/testbortigno/24233412-65AD-E011-B930-E0CB4E553667.root'
+'file:/gpfs/gpfsddn/cms/user/arizzi/Hbb/submit/CMSSW_4_2_8_patch1/src/VHbbAnalysis/VHbbDataFormats/bin/submissions/testbortigno/24233412-65AD-E011-B930-E0CB4E553667.root'
 
 #	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/02E676EE-BDAD-E011-B9ED-E0CB4EA0A929.root',
 #	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/32CECED6-BFAD-E011-B08D-00261834B5A4.root',
@@ -326,6 +326,7 @@ process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
 # Place appropriate jet cuts (NB: no cut on number of constituents)
 process.selectedPatJets.cut = cms.string('pt > 15. & abs(eta) < 5.0')
 process.selectedPatJetsAK5PF.cut = cms.string('pt > 15. & abs(eta) < 5.0')
+process.selectedPatJetsAK7PF.cut = cms.string('pt > 15. & abs(eta) < 5.0')
 process.selectedPatJetsCACalo.cut = cms.string('pt > 0. & abs(eta) < 5.0')
 process.selectedPatJetsCAPF.cut = cms.string('pt > 0. & abs(eta) < 5.0')
 ##process.selectedLayer1Muons.cut = cms.string('pt > 20. & abs(eta) < 2.5 & muonID("TMLastStationLoose")')
