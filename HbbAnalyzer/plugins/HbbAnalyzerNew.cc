@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.37 2011/09/15 14:00:01 degrutto Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.38 2011/09/16 13:52:49 arizzi Exp $
 //
 //
 
@@ -754,9 +754,9 @@ BTagSFContainer btagSFs;
     if (verbose_)     std::cout <<" METHT "<<     hbbInfo->mht.metSig <<" " <<     hbbInfo->mht.sumEt<<std::endl;
   }
   
-  edm::Handle<edm::View<pat::MET> > metHandle;
+  edm::Handle<edm::View<reco::MET> > metHandle;
   iEvent.getByLabel(metLabel_,metHandle);
-  edm::View<pat::MET> mets = *metHandle;
+  edm::View<reco::MET> mets = *metHandle;
   
   if(mets.size()){
     hbbInfo->calomet.sumEt=(mets[0]).sumEt();
