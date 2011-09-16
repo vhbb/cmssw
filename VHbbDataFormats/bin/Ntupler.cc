@@ -100,11 +100,10 @@ struct  LeptonInfo
       photonIso[j]=i.pfPhoIso;
       neutralHadIso[j]=i.pfNeuIso;
       chargedHadIso[j]=i.pfChaIso;
-      setID(i,j);
+      setSpecific(i,j);
     }
-     template <class Input> void setID(const Input & i, int j)
+     template <class Input> void setSpecific(const Input & i, int j)
      {
-      id[j]=-99;
      }      
  
       
@@ -123,11 +122,17 @@ struct  LeptonInfo
     float dxy[MAXL];
     float dz[MAXL];
     int type[MAXL];
-    float id[MAXL];
+    float id80[MAXL];
+    float id95[MAXL];
   };
   
- template <> void LeptonInfo::setID<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j){
-     id[j]=i.id80r;
+ template <> void LeptonInfo::setSpecific<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j){
+     id80[j]=i.id80r;
+     id95[j]=i.id95r;
+  }
+ template <> void LeptonInfo::setSpecific<VHbbEvent::MuonInfo>(const VHbbEvent::MuonInfo & i, int j){
+     dxy[j]=i.ipDb;
+     dz[j]=i.zPVPt;
   }
 
   typedef struct 
@@ -410,7 +415,8 @@ int main(int argc, char* argv[])
   _outTree->Branch("vLepton_dxy",vLeptons.dxy ,"dxy[nvlep]/F");
   _outTree->Branch("vLepton_dz",vLeptons.dz ,"dz[nvlep]/F");
   _outTree->Branch("vLepton_type",vLeptons.type ,"type[nvlep]/I");
-  _outTree->Branch("vLepton_id",vLeptons.id ,"id[nvlep]/F");
+  _outTree->Branch("vLepton_id80",vLeptons.id80 ,"id80[nvlep]/F");
+  _outTree->Branch("vLepton_id95",vLeptons.id95 ,"id95[nvlep]/F");
  
   _outTree->Branch("aLepton_mass",aLeptons.mass ,"mass[nalep]/F");
   _outTree->Branch("aLepton_pt",aLeptons.pt ,"pt[nalep]/F");
@@ -425,7 +431,8 @@ int main(int argc, char* argv[])
   _outTree->Branch("aLepton_dxy",aLeptons.dxy ,"dxy[nalep]/F");
   _outTree->Branch("aLepton_dz",aLeptons.dz ,"dz[nalep]/F");
   _outTree->Branch("aLepton_type",aLeptons.type ,"type[nalep]/I");
-  _outTree->Branch("aLepton_id",aLeptons.id ,"id[nalep]/F");
+  _outTree->Branch("aLepton_id80",aLeptons.id80 ,"id[nalep]/F");
+  _outTree->Branch("aLepton_id95",aLeptons.id95 ,"id[nalep]/F");
  
   _outTree->Branch("top"		,  &top	         ,   "mass/F:pt/F:wMass/F");
 
@@ -504,7 +511,16 @@ int main(int argc, char* argv[])
       candZ= candZlocal; 
       candW= candWlocal; 
 
+/*     for(size_t m=0;m<iEvent->muInfo.size();m++)
+     { 
 
+       if( fabs(iEvent->muInfo[m].p4.Pt()-28.118684) < 0.0001 ||
+           fabs(iEvent->muInfo[m].p4.Pt()-34.853199) < 0.0001 )  
+          {
+                std::cout << "FOUND " << iEvent->muInfo[m].p4.Pt() <<  " " << EVENT.event << " " << candW->size() << " " << candZ->size() << std::endl;
+          }
+     }
+*/
  
     }
 
