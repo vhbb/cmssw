@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.41 2011/09/19 10:34:54 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.42 2011/09/19 12:49:17 tboccali Exp $
 //
 //
 
@@ -435,13 +435,15 @@ BTagSFContainer btagSFs;
       //genJet
       const reco::GenJet *gJ = jet_iter->genJet();
       //physical parton for mother info ONLY
-      if( (jet_iter->genParton())
-	  and (jet_iter->genParton()->mother()) )
-	sj.bestMCmomid=jet_iter->genParton()->mother()->pdgId();
+      if( (jet_iter->genParton()) ){
+	sj.bestMCid = jet_iter->genParton()->pdgId();
+	if( (jet_iter->genParton()->mother()) )
+	  sj.bestMCmomid=jet_iter->genParton()->mother()->pdgId();
+      }
       TLorentzVector gJp4;
       if(gJ){
 	gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
-	sj.bestMCp4mom = gJp4;
+	sj.bestMCp4 = gJp4;
 	if(verbose_){
 	  std::clog << "genJet matched Pt = " << gJp4.Pt() << std::endl;
 	  std::clog << "genJet matched eta = " << gJp4.Eta() << std::endl;
@@ -475,13 +477,15 @@ BTagSFContainer btagSFs;
       //genJet
       const reco::GenJet *gJ = jet_iter->genJet();
       //physical parton for mother info ONLY
-      if( (jet_iter->genParton())
-	  and (jet_iter->genParton()->mother()) )
-	sj.bestMCmomid=jet_iter->genParton()->mother()->pdgId();
+      if( (jet_iter->genParton()) ){
+	sj.bestMCid = jet_iter->genParton()->pdgId();
+	if( (jet_iter->genParton()->mother()) )
+	  sj.bestMCmomid=jet_iter->genParton()->mother()->pdgId();
+      }
       TLorentzVector gJp4;
       if(gJ){
 	gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
-	sj.bestMCp4mom = gJp4;
+	sj.bestMCp4 = gJp4;
 	if(verbose_){
 	  std::clog << "genJet matched Pt = " << gJp4.Pt() << std::endl;
 	  std::clog << "genJet matched eta = " << gJp4.Eta() << std::endl;
@@ -515,13 +519,15 @@ BTagSFContainer btagSFs;
       //genJet
       const reco::GenJet *gJ = jet_iter->genJet();
       //physical parton for mother info ONLY
-      if( (jet_iter->genParton())
-	  and (jet_iter->genParton()->mother()) )
-	sj.bestMCmomid=jet_iter->genParton()->mother()->pdgId();
+      if( (jet_iter->genParton()) ){
+	sj.bestMCid = jet_iter->genParton()->pdgId();
+	if( (jet_iter->genParton()->mother()) )
+	  sj.bestMCmomid=jet_iter->genParton()->mother()->pdgId();
+      }
       TLorentzVector gJp4;
       if(gJ){
 	gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
-	sj.bestMCp4mom = gJp4;
+	sj.bestMCp4 = gJp4;
 	if(verbose_){
 	  std::clog << "genJet matched Pt = " << gJp4.Pt() << std::endl;
 	  std::clog << "genJet matched eta = " << gJp4.Eta() << std::endl;
@@ -595,13 +601,15 @@ BTagSFContainer btagSFs;
       //genJet
       const reco::GenJet *gJ = jet_iter->genJet();
       //physical parton for mother info ONLY
-      if( (jet_iter->genParton())
-	  and (jet_iter->genParton()->mother()) )
-	sj.bestMCmomid=jet_iter->genParton()->mother()->pdgId();
+      if( (jet_iter->genParton()) ){
+	sj.bestMCid = jet_iter->genParton()->pdgId();
+	if( (jet_iter->genParton()->mother()) )
+	  sj.bestMCmomid=jet_iter->genParton()->mother()->pdgId();
+      }
       TLorentzVector gJp4;
       if(gJ){
 	gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
-	sj.bestMCp4mom = gJp4;
+	sj.bestMCp4 = gJp4;
 	if(verbose_){
 	  std::clog << "genJet matched Pt = " << gJp4.Pt() << std::endl;
 	  std::clog << "genJet matched eta = " << gJp4.Eta() << std::endl;
