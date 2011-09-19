@@ -85,13 +85,13 @@ class VHbbEvent{
   public:
     MuonInfo(): charge(-99),tIso(-99), eIso(-99), hIso(-99),pfChaIso(-99),pfChaPUIso(99), pfPhoIso(-99), pfNeuIso(-99),
       acop(-99), ipDb(-99), ipErrDb(-99), zPVPt(-99),zPVProb(-99), chi2(-99), globChi2(-99),
-      cat(-99), nMatches(-99),nHits(-99), nPixelHits(-99), globNHits(-99),validMuStations(-99),
+      cat(-99), nValidTracker(-99), nValidPixel(-99), nMatches(-99),nHits(-99), nPixelHits(-99), globNHits(-99),validMuStations(-99),
       mcId(-99), mcMomId(-99), mcgMomId(-99){}
   public:
     TLorentzVector p4;
     int charge;
     float tIso, eIso, hIso, pfChaIso,pfChaPUIso,  pfPhoIso,pfNeuIso,acop, ipDb, ipErrDb, zPVPt,zPVProb, chi2, globChi2;
-    int cat, nMatches,nHits, nPixelHits, globNHits, validMuStations;
+    int cat, nValidTracker, nValidPixel, nMatches,nHits, nPixelHits, globNHits, validMuStations;
     TLorentzVector mcFourMomentum;
     int mcId, mcMomId, mcgMomId;
     std::vector< int > hltMatchedBits;

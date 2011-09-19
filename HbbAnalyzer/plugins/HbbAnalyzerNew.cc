@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.45 2011/09/19 14:46:12 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.46 2011/09/19 15:06:49 tboccali Exp $
 //
 //
 
@@ -815,9 +815,6 @@ BTagSFContainer btagSFs;
     mf.acop=acop;
 
     mf.nMatches = mu->numberOfMatches();
-    mf.nValidTracker = mu->hitPattern().numberOfValidTrackerHits(); 
-    mf.nValidPixel = mu->hitPattern().numberOfValidPixelHits(); 
-
 
     mf.ipDb=mu->dB();
     mf.ipErrDb=mu->edB();
@@ -835,7 +832,13 @@ BTagSFContainer btagSFs;
       TrackRef iTrack1 = mu->innerTrack();
       const reco::HitPattern& p1 = iTrack1->hitPattern();
       mf.nPixelHits=p1.pixelLayersWithMeasurement();
-    } 
+
+      mf.nValidTracker = p1.numberOfValidTrackerHits(); 
+      mf.nValidPixel = p1.numberOfValidPixelHits(); 
+
+
+
+   } 
     if(mu->isGlobalMuon()){
       TrackRef gTrack = mu->globalTrack();
       const reco::HitPattern& q = gTrack->hitPattern();
