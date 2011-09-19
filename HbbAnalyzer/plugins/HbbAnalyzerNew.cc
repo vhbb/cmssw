@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.44 2011/09/19 14:08:08 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.45 2011/09/19 14:46:12 tboccali Exp $
 //
 //
 
@@ -815,6 +815,8 @@ BTagSFContainer btagSFs;
     mf.acop=acop;
 
     mf.nMatches = mu->numberOfMatches();
+    mf.nValidTracker = mu->hitPattern().numberOfValidTrackerHits(); 
+    mf.nValidPixel = mu->hitPattern().numberOfValidPixelHits(); 
 
 
     mf.ipDb=mu->dB();
