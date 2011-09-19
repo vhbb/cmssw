@@ -51,10 +51,16 @@ process.out1 = cms.OutputModule(
 	'keep VHbbCandidates_*_*_*',
 #	'keep PileupSummaryInfos_*_*_*',
 	'keep edmTriggerResults_*_*_*',
-        'keep *_hltTriggerSummaryAOD_*_*',
+#        'keep *_hltTriggerSummaryAOD_*_*',
         'keep *_selectedVertices_*_*',
-        'keep *_hltTriggerSummaryAOD_*_*',
-        'keep *_TriggerResults_*_*'
+#        'keep *_hltTriggerSummaryAOD_*_*',
+#        'keep *_TriggerResults_*_*',
+       	"keep *_HLTDiCentralJet20MET80_*_*",
+       	"keep *_HLTDiCentralJet20MET100HBHENoiseFiltered_*_*",
+	"keep *_HLTPFMHT150_*_*",
+	"keep *_HLTQuadJet40_*_*",
+	"keep *_HLTDoubleMu7_*_*",
+
 	),
     dropMetaData = cms.untracked.string('ALL'),
     splitLevel = cms.untracked.int32(99),
@@ -536,6 +542,72 @@ process.bcandidates = cms.EDProducer('BCandidateProducer',
                                      maxPtreltomerge = cms.untracked.double(7777.0)
                                      )
 
+
+#
+# ntuplizer di souvik
+#
+#
+
+process.HLTDiCentralJet20MET80 = cms.EDProducer("HLTInfoDumperGeneral",
+  HLTPath = cms.untracked.string('HLT_DiCentralJet20_MET80_v'),
+  TriggerResults = cms.untracked.InputTag('TriggerResults', '', 'HLT'),
+  TriggerEvent = cms.untracked.InputTag('hltTriggerSummaryAOD', '', 'HLT'),
+  FilterNames = cms.untracked.VInputTag(
+    cms.InputTag('hlt2CenJet20CentralRegional', '', 'HLT'),
+    cms.InputTag('hltMET80', '', 'HLT')
+  )
+)
+
+process.HLTDiCentralJet20MET100HBHENoiseFiltered = cms.EDProducer("HLTInfoDumperGeneral",
+  HLTPath = cms.untracked.string('HLT_DiCentralJet20_MET100_HBHENoiseFiltered_v'),
+  TriggerResults = cms.untracked.InputTag('TriggerResults', '', 'HLT'),
+  TriggerEvent = cms.untracked.InputTag('hltTriggerSummaryAOD', '', 'HLT'),
+  FilterNames = cms.untracked.VInputTag(
+    cms.InputTag('hlt2CenJet20CentralRegional', '', 'HLT'),
+    cms.InputTag('hltMET100', '', 'HLT')
+  )
+)
+
+process.HLTPFMHT150 = cms.EDProducer("HLTInfoDumperGeneral",
+  HLTPath = cms.untracked.string('HLT_PFMHT150_v'),
+  TriggerResults = cms.untracked.InputTag('TriggerResults', '', 'HLT'),
+  TriggerEvent = cms.untracked.InputTag('hltTriggerSummaryAOD', '', 'HLT'),
+  FilterNames = cms.untracked.VInputTag(
+    cms.InputTag('hltMET80', '', 'HLT'),
+    cms.InputTag('hltPFMHT150Filter', '', 'HLT')
+  )
+)
+
+process.HLTQuadJet40 = cms.EDProducer("HLTInfoDumperGeneral",
+  HLTPath = cms.untracked.string('HLT_QuadJet40_v'),
+  TriggerResults = cms.untracked.InputTag('TriggerResults', '', 'HLT'),
+  TriggerEvent = cms.untracked.InputTag('hltTriggerSummaryAOD', '', 'HLT'),
+  FilterNames = cms.untracked.VInputTag(
+    cms.InputTag('hltQuadJet40Central', '', 'HLT')
+  )
+)
+
+process.HLTDoubleMu7 = cms.EDProducer("HLTInfoDumperGeneral",
+  HLTPath = cms.untracked.string('HLT_DoubleMu7_v5'),
+  TriggerResults = cms.untracked.InputTag('TriggerResults', '', 'HLT'),
+  TriggerEvent = cms.untracked.InputTag('hltTriggerSummaryAOD', '', 'HLT'),
+  FilterNames = cms.untracked.VInputTag(
+    cms.InputTag('hltL1DoubleMuon3L1Filtered0', '', 'HLT'),
+    cms.InputTag('hltDiMuon3L2PreFiltered0', '', 'HLT'),
+    cms.InputTag('hltDiMuonL3PreFiltered7', '', 'HLT')
+  )
+)
+
+### Paths ###
+
+process.nTuplizePath=cms.Path(process.HLTDiCentralJet20MET80 +
+                              process.HLTDiCentralJet20MET100HBHENoiseFiltered +
+                              process.HLTPFMHT150 +
+                              process.HLTQuadJet40 +
+                              process.HLTDoubleMu7)
+
+
+
 if isMC == False :
         process.p = cms.Path(
                     process.goodOfflinePrimaryVertices*
@@ -612,6 +684,6 @@ process.options = cms.untracked.PSet(
 process.e = cms.EndPath(process.out1)
 
 
-process.schedule = cms.Schedule(process.p, process.hbhepath, process.e)
+process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.e)
 
 #

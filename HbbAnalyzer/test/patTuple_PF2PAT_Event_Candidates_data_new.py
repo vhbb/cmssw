@@ -25,9 +25,9 @@ process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
 #"rfio:/castor/cern.ch/user/d/degrutto/test/DYJetsToLL_PtZ-100.root",
 
-'file:/gpfs/gpfsddn/cms/user/arizzi/Hbb/submit/CMSSW_4_2_8_patch1/src/VHbbAnalysis/VHbbDataFormats/bin/submissions/testbortigno/24233412-65AD-E011-B930-E0CB4E553667.root'
+#'file:/gpfs/gpfsddn/cms/user/arizzi/Hbb/submit/CMSSW_4_2_8_patch1/src/VHbbAnalysis/VHbbDataFormats/bin/submissions/testbortigno/24233412-65AD-E011-B930-E0CB4E553667.root'
 
-#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/02E676EE-BDAD-E011-B9ED-E0CB4EA0A929.root',
+	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/02E676EE-BDAD-E011-B9ED-E0CB4EA0A929.root',
 #	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/32CECED6-BFAD-E011-B08D-00261834B5A4.root',
 #	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/3EE916B3-C4AD-E011-9159-90E6BA0D09B0.root',
 #	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/42622800-C1AD-E011-AD65-485B39800BF2.root',
@@ -51,10 +51,16 @@ process.out1 = cms.OutputModule(
 	'keep VHbbCandidates_*_*_*',
 #	'keep PileupSummaryInfos_*_*_*',
 	'keep edmTriggerResults_*_*_*',
-        'keep *_hltTriggerSummaryAOD_*_*',
+#        'keep *_hltTriggerSummaryAOD_*_*',
         'keep *_selectedVertices_*_*',
-        'keep *_hltTriggerSummaryAOD_*_*',
-        'keep *_TriggerResults_*_*'
+#        'keep *_hltTriggerSummaryAOD_*_*',
+#        'keep *_TriggerResults_*_*',
+       	"keep *_HLTDiCentralJet20MET80_*_*",
+       	"keep *_HLTDiCentralJet20MET100HBHENoiseFiltered_*_*",
+	"keep *_HLTPFMHT150_*_*",
+	"keep *_HLTQuadJet40_*_*",
+	"keep *_HLTDoubleMu7_*_*",
+
 	),
     dropMetaData = cms.untracked.string('ALL'),
     splitLevel = cms.untracked.int32(99),
@@ -536,6 +542,72 @@ process.bcandidates = cms.EDProducer('BCandidateProducer',
                                      maxPtreltomerge = cms.untracked.double(7777.0)
                                      )
 
+
+#
+# ntuplizer di souvik
+#
+#
+
+process.HLTDiCentralJet20MET80 = cms.EDProducer("HLTInfoDumperGeneral",
+  HLTPath = cms.untracked.string('HLT_DiCentralJet20_MET80_v'),
+  TriggerResults = cms.untracked.InputTag('TriggerResults', '', 'HLT'),
+  TriggerEvent = cms.untracked.InputTag('hltTriggerSummaryAOD', '', 'HLT'),
+  FilterNames = cms.untracked.VInputTag(
+    cms.InputTag('hlt2CenJet20CentralRegional', '', 'HLT'),
+    cms.InputTag('hltMET80', '', 'HLT')
+  )
+)
+
+process.HLTDiCentralJet20MET100HBHENoiseFiltered = cms.EDProducer("HLTInfoDumperGeneral",
+  HLTPath = cms.untracked.string('HLT_DiCentralJet20_MET100_HBHENoiseFiltered_v'),
+  TriggerResults = cms.untracked.InputTag('TriggerResults', '', 'HLT'),
+  TriggerEvent = cms.untracked.InputTag('hltTriggerSummaryAOD', '', 'HLT'),
+  FilterNames = cms.untracked.VInputTag(
+    cms.InputTag('hlt2CenJet20CentralRegional', '', 'HLT'),
+    cms.InputTag('hltMET100', '', 'HLT')
+  )
+)
+
+process.HLTPFMHT150 = cms.EDProducer("HLTInfoDumperGeneral",
+  HLTPath = cms.untracked.string('HLT_PFMHT150_v'),
+  TriggerResults = cms.untracked.InputTag('TriggerResults', '', 'HLT'),
+  TriggerEvent = cms.untracked.InputTag('hltTriggerSummaryAOD', '', 'HLT'),
+  FilterNames = cms.untracked.VInputTag(
+    cms.InputTag('hltMET80', '', 'HLT'),
+    cms.InputTag('hltPFMHT150Filter', '', 'HLT')
+  )
+)
+
+process.HLTQuadJet40 = cms.EDProducer("HLTInfoDumperGeneral",
+  HLTPath = cms.untracked.string('HLT_QuadJet40_v'),
+  TriggerResults = cms.untracked.InputTag('TriggerResults', '', 'HLT'),
+  TriggerEvent = cms.untracked.InputTag('hltTriggerSummaryAOD', '', 'HLT'),
+  FilterNames = cms.untracked.VInputTag(
+    cms.InputTag('hltQuadJet40Central', '', 'HLT')
+  )
+)
+
+process.HLTDoubleMu7 = cms.EDProducer("HLTInfoDumperGeneral",
+  HLTPath = cms.untracked.string('HLT_DoubleMu7_v5'),
+  TriggerResults = cms.untracked.InputTag('TriggerResults', '', 'HLT'),
+  TriggerEvent = cms.untracked.InputTag('hltTriggerSummaryAOD', '', 'HLT'),
+  FilterNames = cms.untracked.VInputTag(
+    cms.InputTag('hltL1DoubleMuon3L1Filtered0', '', 'HLT'),
+    cms.InputTag('hltDiMuon3L2PreFiltered0', '', 'HLT'),
+    cms.InputTag('hltDiMuonL3PreFiltered7', '', 'HLT')
+  )
+)
+
+### Paths ###
+
+process.nTuplizePath=cms.Path(process.HLTDiCentralJet20MET80 +
+                              process.HLTDiCentralJet20MET100HBHENoiseFiltered +
+                              process.HLTPFMHT150 +
+                              process.HLTQuadJet40 +
+                              process.HLTDoubleMu7)
+
+
+
 if isMC == False :
         process.p = cms.Path(
                     process.goodOfflinePrimaryVertices*
@@ -612,6 +684,6 @@ process.options = cms.untracked.PSet(
 process.e = cms.EndPath(process.out1)
 
 
-process.schedule = cms.Schedule(process.p, process.hbhepath, process.e)
+process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.e)
 
 #
