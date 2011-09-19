@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.38 2011/09/16 13:52:49 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.39 2011/09/16 14:04:47 arizzi Exp $
 //
 //
 
@@ -441,7 +441,7 @@ BTagSFContainer btagSFs;
       TLorentzVector gJp4;
       if(gJ){
 	gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
-	sj. bestMCp4mom = gJp4;
+	sj.bestMCp4mom = gJp4;
 	if(verbose_){
 	  std::clog << "genJet matched Pt = " << gJp4.Pt() << std::endl;
 	  std::clog << "genJet matched eta = " << gJp4.Eta() << std::endl;
@@ -481,7 +481,7 @@ BTagSFContainer btagSFs;
       TLorentzVector gJp4;
       if(gJ){
 	gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
-	sj. bestMCp4mom = gJp4;
+	sj.bestMCp4mom = gJp4;
 	if(verbose_){
 	  std::clog << "genJet matched Pt = " << gJp4.Pt() << std::endl;
 	  std::clog << "genJet matched eta = " << gJp4.Eta() << std::endl;
@@ -521,7 +521,7 @@ BTagSFContainer btagSFs;
       TLorentzVector gJp4;
       if(gJ){
 	gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
-	sj. bestMCp4mom = gJp4;
+	sj.bestMCp4mom = gJp4;
 	if(verbose_){
 	  std::clog << "genJet matched Pt = " << gJp4.Pt() << std::endl;
 	  std::clog << "genJet matched eta = " << gJp4.Eta() << std::endl;
@@ -601,7 +601,7 @@ BTagSFContainer btagSFs;
       TLorentzVector gJp4;
       if(gJ){
 	gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
-	sj. bestMCp4mom = gJp4;
+	sj.bestMCp4mom = gJp4;
 	if(verbose_){
 	  std::clog << "genJet matched Pt = " << gJp4.Pt() << std::endl;
 	  std::clog << "genJet matched eta = " << gJp4.Eta() << std::endl;
@@ -823,7 +823,7 @@ BTagSFContainer btagSFs;
       const reco::HitPattern& q = gTrack->hitPattern();
       mf.globChi2=gTrack.get()->normalizedChi2();
       mf.globNHits=q.numberOfValidMuonHits();
-      mf. validMuStations = q. muonStationsWithValidHits();
+      mf.validMuStations = q.muonStationsWithValidHits();
     }else{
       mf.globChi2=-99;
       mf.globNHits=-99;
@@ -1214,7 +1214,7 @@ void HbbAnalyzerNew ::fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Je
       sj.neutralHadronEFraction = jet_iter-> neutralHadronEnergyFraction ();
       sj.chargedEmEFraction = jet_iter-> chargedEmEnergyFraction ();
       sj.neutralEmEFraction = jet_iter-> neutralEmEnergyFraction ();
-      sj. nConstituents = jet_iter->getPFConstituents().size();
+      sj.nConstituents = jet_iter->getPFConstituents().size();
       
     }
     //
