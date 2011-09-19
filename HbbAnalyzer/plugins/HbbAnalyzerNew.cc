@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.40 2011/09/19 10:14:16 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.41 2011/09/19 10:34:54 tboccali Exp $
 //
 //
 
@@ -442,7 +442,6 @@ BTagSFContainer btagSFs;
       if(gJ){
 	gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
 	sj.bestMCp4mom = gJp4;
-	std::cout <<" KKKKK 1 "<< sj.bestMCp4mom.Pt() <<std::endl;
 	if(verbose_){
 	  std::clog << "genJet matched Pt = " << gJp4.Pt() << std::endl;
 	  std::clog << "genJet matched eta = " << gJp4.Eta() << std::endl;
@@ -483,7 +482,6 @@ BTagSFContainer btagSFs;
       if(gJ){
 	gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
 	sj.bestMCp4mom = gJp4;
-	std::cout <<" KKKKK 2 "<< (sj.bestMCp4mom.Pt()) <<std::endl;
 	if(verbose_){
 	  std::clog << "genJet matched Pt = " << gJp4.Pt() << std::endl;
 	  std::clog << "genJet matched eta = " << gJp4.Eta() << std::endl;
@@ -524,7 +522,6 @@ BTagSFContainer btagSFs;
       if(gJ){
 	gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
 	sj.bestMCp4mom = gJp4;
-	std::cout <<" KKKKK 3 "<< sj.bestMCp4mom.Pt() <<std::endl;
 	if(verbose_){
 	  std::clog << "genJet matched Pt = " << gJp4.Pt() << std::endl;
 	  std::clog << "genJet matched eta = " << gJp4.Eta() << std::endl;
@@ -605,7 +602,6 @@ BTagSFContainer btagSFs;
       if(gJ){
 	gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
 	sj.bestMCp4mom = gJp4;
-	std::cout <<" KKKKK 4 "<< sj.bestMCp4mom.Pt() <<std::endl;
 	if(verbose_){
 	  std::clog << "genJet matched Pt = " << gJp4.Pt() << std::endl;
 	  std::clog << "genJet matched eta = " << gJp4.Eta() << std::endl;
