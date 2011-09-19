@@ -389,8 +389,8 @@ process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     subjetTag = cms.InputTag("selectedPatJetssubCAPF"),
     simplejet1Tag = cms.InputTag("selectedPatJets"),
     simplejet2Tag = cms.InputTag("selectedPatJetsAK5PF"),
-    simplejet3Tag = cms.InputTag("selectedPatJetsAK7Calo"),
-    simplejet4Tag = cms.InputTag("selectedPatJetsAK7PF"),
+    simplejet4Tag = cms.InputTag("selectedPatJetsAK7Calo"),
+    simplejet3Tag = cms.InputTag("selectedPatJetsAK7PF"),
     photonTag = cms.InputTag("selectedPatPhotons"),
     metTag = cms.InputTag("met"), #this input tag is used to fill calo MET 
 
