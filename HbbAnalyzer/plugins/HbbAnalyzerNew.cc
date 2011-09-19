@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.42 2011/09/19 12:49:17 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.43 2011/09/19 12:55:29 bortigno Exp $
 //
 //
 
@@ -420,6 +420,7 @@ BTagSFContainer btagSFs;
     //     if(jet_iter->pt()>50)
     //       njetscounter++;
     VHbbEvent::SimpleJet sj;
+    //    std::cout <<" sj1"<<std::endl;
     fillSimpleJet(sj,jet_iter);
     //    if(!runOnMC_) 
 
@@ -462,6 +463,7 @@ BTagSFContainer btagSFs;
     //     if(jet_iter->pt()>50)
     //       njetscounter++;
     VHbbEvent::SimpleJet sj;
+    //    std::cout <<" sj3"<<std::endl;
     fillSimpleJet(sj,jet_iter);
     //    if(!runOnMC_)  
   setJecUnc(sj,jecUnc);
@@ -504,6 +506,7 @@ BTagSFContainer btagSFs;
     //     if(jet_iter->pt()>50)
     //       njetscounter++;
     VHbbEvent::SimpleJet sj;
+    //    std::cout <<" sj4"<<std::endl;
     fillSimpleJet(sj,jet_iter);
     //    if(!runOnMC_)  
     setJecUnc(sj,jecUnc);
@@ -546,6 +549,7 @@ BTagSFContainer btagSFs;
   for(edm::View<pat::Jet>::const_iterator jet_iter = simplejets2.begin(); jet_iter!=simplejets2.end(); ++jet_iter){
     
     VHbbEvent::SimpleJet sj;
+    //    std::cout <<" sj2"<<std::endl;
     fillSimpleJet(sj,jet_iter);    
     //  if(!runOnMC_)  
  setJecUnc(sj,jecUnc);
@@ -689,6 +693,7 @@ BTagSFContainer btagSFs;
 			    << "," << subjet_iter->bDiscriminator("combinedSecondaryVertexBJetTags") << "\n";}
 
     VHbbEvent::SimpleJet sj;
+    //    std::cout <<" sub jet "<<std::endl;
     fillSimpleJet(sj,subjet_iter);
     //  if(!runOnMC_)  
     setJecUnc(sj,jecUnc);
@@ -1203,10 +1208,11 @@ void HbbAnalyzerNew ::fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Je
     sj.jpb=jet_iter->bDiscriminator("jetBProbabilityBJetTags");
     sj.ssvhe=jet_iter->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
     sj.csv=jet_iter->bDiscriminator("combinedSecondaryVertexBJetTags");
-    sj.csvmva=jet_iter->bDiscriminator("combinedSecondaryVertexMVABJetTags");
+   sj.csvmva=jet_iter->bDiscriminator("combinedSecondaryVertexMVABJetTags");
     sj.charge=jet_iter->jetCharge();
     sj.ntracks=jet_iter->associatedTracks().size();
     sj.p4=GENPTOLORP(jet_iter);
+    //    std::cout << " ECCO "<<sj.csv<< " "<< sj.p4.Pt()<<std::endl;
     sj.chargedTracksFourMomentum=(getChargedTracksMomentum(&*(jet_iter)));
     sj.SF_CSVL=1;
     sj.SF_CSVM=1;
