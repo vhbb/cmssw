@@ -18,7 +18,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 # source
 process.source = cms.Source("PoolSource",
@@ -53,6 +53,8 @@ process.out1 = cms.OutputModule(
 	'keep edmTriggerResults_*_*_*',
         'keep *_hltTriggerSummaryAOD_*_*',
         'keep *_selectedVertices_*_*',
+        'keep *_hltTriggerSummaryAOD_*_*',
+        'keep *_TriggerResults_*_*'
 	),
     dropMetaData = cms.untracked.string('ALL'),
     splitLevel = cms.untracked.int32(99),

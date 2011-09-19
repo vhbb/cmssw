@@ -475,7 +475,7 @@ int main(int argc, char* argv[])
  	  if(isMC_){
  	  // PU weights
            std::map<int, unsigned int>::const_iterator puit = aux.puInfo.pus.find(0);
-           PUweight =  lumiWeights.weight3BX( puit->second /3. );        
+           PUweight =  lumiWeights.weight( puit->second /3. );        
  	  }
       countWithPU->Fill(PUweight);
       
