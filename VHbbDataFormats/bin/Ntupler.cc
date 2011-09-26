@@ -285,6 +285,7 @@ int main(int argc, char* argv[])
   
   // now get each parameter
   int maxEvents_( in.getParameter<int>("maxEvents") );
+  int skipEvents_( in.getParameter<int>("skipEvents") );
   unsigned int outputEvery_( in.getParameter<unsigned int>("outputEvery") );
   std::string outputFile_( out.getParameter<std::string>("fileName" ) );
   std::vector<std::string> triggers( ana.getParameter<std::vector<std::string> >("triggers") );
@@ -464,8 +465,12 @@ int main(int argc, char* argv[])
   // loop the events
       
       fwlite::Event ev(inFile);
-      for(ev.toBegin(); !ev.atEnd(); ++ev, ++ievt)
+      for(ev.toBegin(); !ev.atEnd() ; ++ev, ++ievt)
         {
+          if (ievt <= skipEvents_) continue;
+          if (maxEvents_ >= 0){
+              if (ievt > maxEvents_ + skipEvents_) break;
+          };
           count->Fill(1.);
 
       fwlite::Handle< VHbbEventAuxInfo > vhbbAuxHandle; 

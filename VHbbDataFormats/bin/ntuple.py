@@ -21,6 +21,7 @@ process.fwliteInput = cms.PSet(
     PUmcfileName = cms.string("ttbarPU.root"),
     PUdatafileName = cms.string("PUdist_160404-167151_7TeV_PromptReco_Collisions11.root"),
     maxEvents   = cms.int32(-1),                             ## optional
+    skipEvents   = cms.int32(0),                             ## optional
     outputEvery = cms.uint32(0),                            ## optional
     lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange()),
     )
