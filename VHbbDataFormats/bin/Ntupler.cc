@@ -423,7 +423,7 @@ int main(int argc, char* argv[])
   edm::LumiReWeighting   lumiWeights;
   if(isMC_)
     {
-      //   	   lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
+        	   lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
     }
  
   //   TFile *_outPUFile	= new TFile((outputFile_+"_PU").c_str(), "recreate");	
