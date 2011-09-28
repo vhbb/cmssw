@@ -165,6 +165,17 @@ typedef struct
 
 typedef struct 
 {
+  float mass; 
+  float pt;
+  float eta;
+  float phi;
+  float dR;
+  float dPhi;
+  float dEta;
+} HiggsInfo;
+  
+typedef struct 
+{
   float mass;  //MT in case of W
   float pt;
   float eta;
@@ -332,14 +343,13 @@ int main(int argc, char* argv[])
   JetInfo hJets, aJets;
   LeptonInfo vLeptons, aLeptons;
   int naJets=0, nhJets=0;
-  TrackInfo H;
+  HiggsInfo H,SVH; //add here the fatjet higgs
   TrackInfo V;
   int nvlep=0,nalep=0; 
   
-  float jjdr,jjdPhi,jjdEta,HVdPhi,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMET, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
+  float HVdPhi,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMET, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
   float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart;
 
-  float BCands_dr = -99, BCands_dEta= -99, BCands_dPhi = -99, BCands_Hmass = -99, BCands_Hpt = -99, BCands_Heta = -99, BCands_Hphi = -99;
   //FIXME
   //  float SimBs_dr = -99, SimBs_dEta= -99, SimBs_dPhi = -99, SimBs_Hmass = -99, SimBs_Hpt = -99, SimBs_Heta = -99, SimBs_Hphi = -99;
 
@@ -423,7 +433,7 @@ int main(int argc, char* argv[])
   TH1F *  countWithPU = new TH1F("CountWithPU","CountWithPU", 1,0,2 );
   _outTree = new TTree("tree", "myTree");
   
-  _outTree->Branch("H"		,  &H	            ,  "mass/F:pt/F:eta:phi/F");
+  _outTree->Branch("H"		,  &H	            ,  "mass/F:pt/F:eta:phi/F:dR/F:dPhi/F:dEta/F");
   _outTree->Branch("V"		,  &V	            ,  "mass/F:pt/F:eta:phi/F");
   _outTree->Branch("nhJets"		,  &nhJets	            ,  "nhJets/I");
   _outTree->Branch("naJets"		,  &naJets	            ,  "naJets/I");
@@ -470,9 +480,6 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_vtx3dL",aJets.vtx3dL ,"vtx3dL[naJets]/F");
   _outTree->Branch("aJet_vtx3deL",aJets.vtx3deL ,"vtx3deL[naJets]/F");
 
-  _outTree->Branch("jjdr" 	,  &jjdr            ,  "jjdr/F"         );         	
-  _outTree->Branch("jjdPhi"  	,  &jjdPhi          ,  "jjdPhi/F"       );            	
-  _outTree->Branch("jjdEta"  	,  &jjdEta          ,  "jjdEta/F"       );            	
   _outTree->Branch("numJets"      ,  &numJets         ,  "numJets/I"       );                
   _outTree->Branch("numBJets"      ,  &numBJets         ,  "numBJets/I"       );                
   _outTree->Branch("deltaPullAngle", &deltaPullAngle  ,  "deltaPullAngle/F");
@@ -538,24 +545,18 @@ int main(int argc, char* argv[])
 
   //IVF
   _outTree->Branch("nSvs",&nSvs ,"nSvs/I");
-  _outTree->Branch("BCands_massBCand", &IVF.massBcand,"massBcand[nSvs]/F");
-  _outTree->Branch("BCands_massSv", &IVF.massSv,"massSv[nSvs]/F");
-  _outTree->Branch("BCands_pt", &IVF.pt,"pt[nSvs]/F");
-  _outTree->Branch("BCands_eta", &IVF.eta,"eta[nSvs]/F");
-  _outTree->Branch("BCands_phi", &IVF.phi,"phi[nSvs]/F");
-  _outTree->Branch("BCands_dist3D", &IVF.dist3D,"dist3D[nSvs]/F");
-  _outTree->Branch("BCands_dist2D", &IVF.dist2D,"dist2D[nSvs]/F");
-  _outTree->Branch("BCands_distSim2D", &IVF.distSig2D,"distSig2D[nSvs]/F");
-  _outTree->Branch("BCands_distSig3D", &IVF.distSig3D,"distSig3D[nSvs]/F");
-  _outTree->Branch("BCands_dist3D_norm", &IVF.dist3D_norm,"dist3D_norm[nSvs]/F");
+  _outTree->Branch("Sv_massBCand", &IVF.massBcand,"massBcand[nSvs]/F");
+  _outTree->Branch("Sv_massSv", &IVF.massSv,"massSv[nSvs]/F");
+  _outTree->Branch("Sv_pt", &IVF.pt,"pt[nSvs]/F");
+  _outTree->Branch("Sv_eta", &IVF.eta,"eta[nSvs]/F");
+  _outTree->Branch("Sv_phi", &IVF.phi,"phi[nSvs]/F");
+  _outTree->Branch("Sv_dist3D", &IVF.dist3D,"dist3D[nSvs]/F");
+  _outTree->Branch("Sv_dist2D", &IVF.dist2D,"dist2D[nSvs]/F");
+  _outTree->Branch("Sv_distSim2D", &IVF.distSig2D,"distSig2D[nSvs]/F");
+  _outTree->Branch("Sv_distSig3D", &IVF.distSig3D,"distSig3D[nSvs]/F");
+  _outTree->Branch("Sv_dist3D_norm", &IVF.dist3D_norm,"dist3D_norm[nSvs]/F");
   //IVF higgs candidate
-  _outTree->Branch("BCands_dr", &BCands_dr,"BCands_dr/F");
-  _outTree->Branch("BCands_dPhi", &BCands_dPhi,"BCands_dPhi/F");
-  _outTree->Branch("BCands_dEta", &BCands_dEta,"BCands_dEta/F");
-  _outTree->Branch("BCands_Hmass", &BCands_Hmass,"BCands_Hmass/F");
-  _outTree->Branch("BCands_Hpt", &BCands_Hpt,"BCands_Hpt/F");
-  _outTree->Branch("BCands_Heta", &BCands_Heta,"BCands_Heta/F");
-  _outTree->Branch("BCands_Hphi", &BCands_Hphi,"BCands_Hphi/F");
+  _outTree->Branch("SVH"          ,  &SVH               ,  "mass/F:pt/F:eta:phi/F:dR/F:dPhi/F:dEta/F");
 
 
   //FIXME : need to update the EDMNtuple with BHadron infos
@@ -624,7 +625,7 @@ int main(int argc, char* argv[])
 
  	  // PU weights
 	  std::map<int, unsigned int>::const_iterator puit = aux.puInfo.pus.find(0);
-	  PUweight =  1;//lumiWeights.weight( puit->second /3. );        
+	  PUweight =  lumiWeights.weight3BX( puit->second /3. );        
 	}
 	countWithPU->Fill(PUweight);
       
@@ -742,9 +743,9 @@ int main(int argc, char* argv[])
 	    if(vhCand.additionalJets[j].csv> btagThr) numBJets++;
           }   
 	numJets = vhCand.additionalJets.size()+2;
-	jjdr = deltaR(vhCand.H.jets[0].p4.Eta(),vhCand.H.jets[0].p4.Phi(),vhCand.H.jets[1].p4.Eta(),vhCand.H.jets[1].p4.Phi());
-	jjdPhi = deltaPhi(vhCand.H.jets[0].p4.Phi(),vhCand.H.jets[1].p4.Phi());
-	jjdEta= TMath::Abs( vhCand.H.jets[0].p4.Eta() - vhCand.H.jets[1].p4.Eta() );
+	H.dR = deltaR(vhCand.H.jets[0].p4.Eta(),vhCand.H.jets[0].p4.Phi(),vhCand.H.jets[1].p4.Eta(),vhCand.H.jets[1].p4.Phi());
+	H.dPhi = deltaPhi(vhCand.H.jets[0].p4.Phi(),vhCand.H.jets[1].p4.Phi());
+	H.dEta= TMath::Abs( vhCand.H.jets[0].p4.Eta() - vhCand.H.jets[1].p4.Eta() );
 	HVdPhi = fabs( deltaPhi(vhCand.H.p4.Phi(),vhCand.V.p4.Phi()) ) ;
 	HMETdPhi = fabs( deltaPhi(vhCand.H.p4.Phi(),vhCand.V.mets.at(0).p4.Phi()) ) ;
 	VMt = vhCand.Mt() ;
@@ -791,13 +792,13 @@ int main(int argc, char* argv[])
 	  BCands_H1.SetPtEtaPhiM(IVF.pt[0], IVF.eta[0], IVF.phi[0], IVF.massBcand[0]);
 	  BCands_H2.SetPtEtaPhiM(IVF.pt[1], IVF.eta[1], IVF.phi[1], IVF.massBcand[1]);
 	  BCands_H = BCands_H1 + BCands_H2;
-	  BCands_dr = deltaR(IVF.eta[0], IVF.phi[0], IVF.eta[1], IVF.phi[1] );
-	  BCands_dPhi = deltaPhi(IVF.phi[0], IVF.phi[1] );
-	  BCands_dEta = TMath::Abs(IVF.eta[0] - IVF.eta[1] );
-	  BCands_Hmass = BCands_H.M();
-	  BCands_Hpt = BCands_H.Pt();
-	  BCands_Heta = BCands_H.Eta();
-	  BCands_Hphi = BCands_H.Phi();
+	  SVH.dR = deltaR(IVF.eta[0], IVF.phi[0], IVF.eta[1], IVF.phi[1] );
+	  SVH.dPhi = deltaPhi(IVF.phi[0], IVF.phi[1] );
+	  SVH.dEta = TMath::Abs(IVF.eta[0] - IVF.eta[1] );
+	  SVH.mass = BCands_H.M();
+	  SVH.pt = BCands_H.Pt();
+	  SVH.eta = BCands_H.Eta();
+	  SVH.phi = BCands_H.Phi();
 	}
 
 	//FIXME : need to update EDM ntuple with simBhadron info

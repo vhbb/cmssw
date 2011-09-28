@@ -7,15 +7,7 @@ process = cms.Process("FWLitePlots")
 #fileNames   = cms.vstring('file:2l2bMetEdmNtuples.root'),         ## mandatory
 process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_10_0_15C.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_11_0_E20.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_12_0_00Q.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_1_1_5pD.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_24_0_LKk.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_2_1_sPg.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_41_0_PYm.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_6_0_Iqu.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/TTJets_TuneZ2_7TeV-madgraph-tauola/HBB_EDMNtupleV5_ProcV1/0c92a4d557a30ce13154302a2f8f57d5/PAT.edm_9_0_rgK.root"
+"/gpfs/gpfsddn/cms/user/arizzi/Hbb/V9/CMSSW_4_2_8_patch3/src/VHbbAnalysis/HbbAnalyzer/test/PAT.edm.root"
 ),
 
     PUmcfileName = cms.string("ttbarPU.root"),
