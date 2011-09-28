@@ -1014,38 +1014,44 @@ int main(int argc, char* argv[])
 	genWpt=aux.mcW.size() > 0 ? aux.mcW[0].p4.Pt():-99;
 
 
-	/// Compute pull angle from AK7
+        /// Compute pull angle from AK7
         if(!fromCandidate){
-	  std::vector<VHbbEvent::SimpleJet>  ak7 = iEvent->simpleJets3;
-          if(ak7.size() > 1){
+          std::vector<VHbbEvent::SimpleJet> ak7wrt1(iEvent->simpleJets3);
+          std::vector<VHbbEvent::SimpleJet> ak7wrt2(iEvent->simpleJets3);
+          if(ak7wrt1.size() > 1){
             CompareDeltaR deltaRComparatorJ1(vhCand.H.jets[0].p4);
             CompareDeltaR deltaRComparatorJ2(vhCand.H.jets[1].p4);
+            std::sort( ak7wrt1.begin(),ak7wrt1.end(),deltaRComparatorJ1 );
+            std::sort( ak7wrt2.begin(),ak7wrt2.end(),deltaRComparatorJ2 );
             std::vector<VHbbEvent::SimpleJet> ak7_matched;
-
-            std::sort( ak7.begin(),ak7.end(),deltaRComparatorJ1 );
-            ak7_matched.push_back(ak7[0]);
-
-            if(ak7[1].p4.DeltaR(vhCand.H.jets[0].p4) > 0.5)
-              ak7.erase(ak7.begin());
-
-            std::sort( ak7.begin(),ak7.end(),deltaRComparatorJ2 );
-            if( abs(ak7[0].p4.Pt() - ak7_matched[1].p4.Pt()) > 0.1 )
-	      ak7_matched.push_back(ak7[0]);
-            else
-	      ak7_matched.push_back(ak7[1]);
-
+            // if the matched are different save them
+            if(ak7wrt1[0].p4.DeltaR(ak7wrt2[0].p4) > 0.1) {
+              ak7_matched.push_back(ak7wrt1[0]);
+              ak7_matched.push_back(ak7wrt2[0]);
+            }
+            // else look at the second best
+            else{
+              // ak7wrt1 is best
+              if( ak7wrt1[1].p4.DeltaR(vhCand.H.jets[0].p4) < ak7wrt2[1].p4.DeltaR(vhCand.H.jets[1].p4))
+                {
+                  ak7_matched.push_back(ak7wrt1[1]);
+                  ak7_matched.push_back(ak7wrt2[0]);
+                }
+              else
+                {
+                  ak7_matched.push_back(ak7wrt1[0]);
+                  ak7_matched.push_back(ak7wrt2[1]);
+                }
+            }
             CompareJetPt ptComparator;
             std::sort( ak7_matched.begin(),ak7_matched.end(),ptComparator );
             if(ak7_matched[0].p4.DeltaR(vhCand.H.jets[0].p4) < 0.5
-               and ak7_matched[1].p4.DeltaR(vhCand.H.jets[1].p4) < 0.5 ){  
-              deltaPullAngleAK7 = VHbbCandidateTools::getDeltaTheta(ak7_matched[0],ak7_matched[1]);
-            }
+               and ak7_matched[1].p4.DeltaR(vhCand.H.jets[1].p4) < 0.5)
+              {
+                deltaPullAngleAK7 =  VHbbCandidateTools::getDeltaTheta(ak7_matched[0],ak7_matched[1]);
+              }
           }
         }
-
-
-
-
 
 	_outTree->Fill();
 
