@@ -635,10 +635,6 @@ int main(int argc, char* argv[])
 	EVENT.event = ev.id().event();
 	EVENT.json = jsonContainsEvent (jsonVector, ev);
 
-	// secondary vtxs
-	fwlite::Handle<std::vector<reco::Vertex> > SVC;
-	SVC.getByLabel(ev,"selectedVertices");
-	const std::vector<reco::Vertex> svc = *(SVC.product());
 
 	//FIXME : need to update EDM ntuple with BHadron infos
 // 	// simBHadrons
@@ -708,6 +704,12 @@ int main(int argc, char* argv[])
 	    //            std::cout << "W event loss due to tigther cuts" << std::endl;
             continue;
           }
+
+	// secondary vtxs
+	fwlite::Handle<std::vector<reco::Vertex> > SVC;
+	SVC.getByLabel(ev,"selectedVertices");
+	const std::vector<reco::Vertex> svc = *(SVC.product());
+
 	const VHbbCandidate & vhCand =  cand->at(0);
 	patFilters.setEvent(&ev,"VH");
 	hbhe = patFilters.accept("hbhe");
