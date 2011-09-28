@@ -393,8 +393,8 @@ int main(int argc, char* argv[])
   bool fromCandidate = ana.getParameter<bool>("readFromCandidates");
   bool useHighestPtHiggsZ = ana.getParameter<bool>("useHighestPtHiggsZ");
   bool useHighestPtHiggsW = ana.getParameter<bool>("useHighestPtHiggsW");
-  HbbCandidateFinderAlgo * algoZ = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdZ"),useHighestPtHiggsZ, ana.getParameter<bool>("isFatJetAnalysis") );
-  HbbCandidateFinderAlgo * algoW = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdW"),useHighestPtHiggsW, ana.getParameter<bool>("isFatJetAnalysis") );
+  HbbCandidateFinderAlgo * algoZ = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdZ"),useHighestPtHiggsZ);
+  HbbCandidateFinderAlgo * algoW = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdW"),useHighestPtHiggsW );
 
   TriggerWeight triggerWeight(ana);
   BTagWeight btag(2); // 2 operating points "Custom" = 0.5 and "Tight = 0.898"
