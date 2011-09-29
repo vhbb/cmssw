@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.46 2011/09/19 15:06:49 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.47 2011/09/19 15:09:36 tboccali Exp $
 //
 //
 
@@ -909,6 +909,16 @@ BTagSFContainer btagSFs;
 
     Geom::Phi<double> deltaphi(elec->superCluster()->phi()-atan2(hbbInfo->pfmet.p4.Py(),hbbInfo->pfmet.p4.Px()));
     ef.acop = deltaphi.value();
+    //
+    ef.sihih = elec->sigmaIetaIeta();
+    ef.Dphi = elec->deltaPhiSuperClusterTrackAtVtx();
+    ef.Deta = elec->deltaEtaSuperClusterTrackAtVtx();
+    ef.HoE = elec->hadronicOverEm();
+    ef.convDist = elec->convDist();
+    ef.convDcot = elec->convDcot();
+    if(elec->gsfTrack().isNonnull()) ef.innerHits = elec->gsfTrack()->trackerExpectedHitsInner().numberOfHits();   
+    ef.isEB = elec->isEB();
+    ef.isEE = elec->isEE();
     //
     // fill eleids
     //    
