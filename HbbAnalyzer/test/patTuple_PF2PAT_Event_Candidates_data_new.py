@@ -52,7 +52,7 @@ process.out1 = cms.OutputModule(
 #	'keep PileupSummaryInfos_*_*_*',
 	'keep edmTriggerResults_*_*_*',
 #        'keep *_hltTriggerSummaryAOD_*_*',
-        'keep *_selectedVertices_*_*',
+#        'keep *_selectedVertices_*_*',
 #        'keep *_hltTriggerSummaryAOD_*_*',
 #        'keep *_TriggerResults_*_*',
 	'keep *_bcandidates_*_*',
