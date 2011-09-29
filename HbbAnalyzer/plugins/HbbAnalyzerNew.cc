@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.48 2011/09/29 14:09:28 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.49 2011/09/29 14:09:52 tboccali Exp $
 //
 //
 
@@ -906,6 +906,15 @@ BTagSFContainer btagSFs;
     ef.pfChaPUIso=elec->userIso(5);
     ef.pfPhoIso=elec->photonIso();
     ef.pfNeuIso=elec->neutralHadronIso();
+
+    //
+    // ip info
+    //
+
+    ef.ipDb=elec->dB();
+    ef.ipErrDb=elec->edB();
+    
+
 
     Geom::Phi<double> deltaphi(elec->superCluster()->phi()-atan2(hbbInfo->pfmet.p4.Py(),hbbInfo->pfmet.p4.Px()));
     ef.acop = deltaphi.value();

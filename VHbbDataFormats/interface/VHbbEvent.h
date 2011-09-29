@@ -103,6 +103,7 @@ class VHbbEvent{
       tIso(-99), eIso(-99), hIso(-99),pfChaIso(-99),pfChaPUIso(-99), pfPhoIso(-99), pfNeuIso(-99), acop(-99),
       sihih(-99), Dphi(-99), Deta(-99), HoE(-99), convDist(-99), convDcot(-99), innerHits(-99),
       isEB(false),isEE(false),
+      ipDb(-99), ipErrDb(-99),
       id95(-99),id85(-99),id80(-99),id70(-99),
       id95r(-99),id85r(-99),id80r(-99),id70r(-99),
       mcId(-99), mcMomId(-99), mcgMomId (-99){}
@@ -114,6 +115,7 @@ class VHbbEvent{
     float sihih, Dphi, Deta, HoE, convDist, convDcot;
     int innerHits;
     bool isEB,isEE;
+    float       ipDb, ipErrDb;
     float  id95,id85,id80,id70,id95r, id85r,id80r, id70r;
     TLorentzVector mcFourMomentum;
     int mcId, mcMomId, mcgMomId;
