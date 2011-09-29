@@ -27,8 +27,8 @@ process.source = cms.Source("PoolSource",
 
 #'file:/gpfs/gpfsddn/cms/user/arizzi/Hbb/submit/CMSSW_4_2_8_patch1/src/VHbbAnalysis/VHbbDataFormats/bin/submissions/testbortigno/24233412-65AD-E011-B930-E0CB4E553667.root'
 
-	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/02E676EE-BDAD-E011-B9ED-E0CB4EA0A929.root',
-#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/32CECED6-BFAD-E011-B08D-00261834B5A4.root',
+#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/02E676EE-BDAD-E011-B9ED-E0CB4EA0A929.root',
+	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/32CECED6-BFAD-E011-B08D-00261834B5A4.root',
 #	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/3EE916B3-C4AD-E011-9159-90E6BA0D09B0.root',
 #	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/42622800-C1AD-E011-AD65-485B39800BF2.root',
 #		"/store/mc/CMSSW_4_2_3/RelValProdTTbar/GEN-SIM-RECO/MC_42_V12_JobRobot-v1/0000/B89A0B07-818C-E011-953E-0030487CD7E0.root"
@@ -142,7 +142,8 @@ process.pfPileUp.checkClosestZVertex = cms.bool(False)
 process.pfPileUp.Vertices = cms.InputTag('goodOfflinePrimaryVertices')
 process.pfJets.doAreaFastjet = True
 process.pfJets.doRhoFastjet = False
-
+process.pfNoMuon.enable = False
+process.pfNoElectron.enable = False
 
 # Compute the mean pt per unit area (rho) from the
 # PFchs inputs
@@ -343,6 +344,71 @@ process.selectedPatJetsCAPF.cut = cms.string('pt > 0. & abs(eta) < 5.0')
 process.selectedPatMuons.cut = cms.string('isGlobalMuon || (isTrackerMuon && muonID("TrackerMuonArbitrated"))')
 #process.selectedPatElectrons.cut = cms.string('')
 
+process.selectedPatMuonsWithIso = process.selectedPatMuons.clone(
+    src = 'selectedPatMuons',
+     cut =  (
+        "pt > 20 && isGlobalMuon && isTrackerMuon && globalTrack().normalizedChi2 < 10 &&" +
+            "innerTrack().hitPattern().numberOfValidTrackerHits > 10 && "                      +
+            "innerTrack().hitPattern().numberOfValidPixelHits > 0 && "                         +
+            "globalTrack().hitPattern().numberOfValidMuonHits > 0 && "                         +
+            "dB < 0.2 && "                                                                     +
+            " chargedHadronIso + neutralHadronIso + photonIso  < 0.15 * pt && "                                               +
+            "numberOfMatches > 1 && abs(eta) < 2.4"
+        )
+)
+
+process.selectedPatElectronsWithIso = process.selectedPatElectrons.clone(
+    src = 'selectedPatElectrons',
+    cut = (
+   "pt > 15.0 && abs(eta) < 2.5 &&"
+   "(isEE || isEB) && !isEBEEGap &&"
+   "ecalDrivenSeed==1 && (abs(superCluster.eta)<2.5)"
+   " && !(1.4442<abs(superCluster.eta)<1.566)"
+   " && (ecalEnergy*sin(superClusterPosition.theta)>20.0)"
+   " && (gsfTrack.trackerExpectedHitsInner.numberOfHits == 0)"
+    " && ((chargedHadronIso + neutralHadronIso + photonIso < 0.15 * pt)) "
+   " && ((isEB"
+   " && (sigmaIetaIeta<0.01)"
+   " && ( -0.8<deltaPhiSuperClusterTrackAtVtx<0.8 )"
+   " && ( -0.007<deltaEtaSuperClusterTrackAtVtx<0.007 )"
+   ")"
+   " || (isEE"
+   " && (sigmaIetaIeta<0.03)"
+   " && ( -0.7<deltaPhiSuperClusterTrackAtVtx<0.7 )"
+   " && ( -0.01<deltaEtaSuperClusterTrackAtVtx<0.01 )"
+   "))"
+   ))
+
+
+process.cleanPatJetsAK5PF = cms.EDProducer("PATJetCleaner",
+					   src = cms.InputTag("selectedPatJetsAK5PF"),
+					   # preselection = cms.string('pt > 20.0  && ( (neutralEmEnergy/energy < 0.99) &&  (neutralHadronEnergy/energy < 0.99) && numberOfDaughters>1) '),
+					   preselection = cms.string('abs(eta)< 5.0 && pt > 15.0'),
+					   
+					   
+					   checkOverlaps = cms.PSet(
+	muons = cms.PSet(
+	src       = cms.InputTag("selectedPatMuonsWithIso"),
+	algorithm = cms.string("byDeltaR"),
+	preselection        = cms.string(""),
+	deltaR              = cms.double(0.5),
+	checkRecoComponents = cms.bool(False),
+	pairCut             = cms.string(""),
+	requireNoOverlaps   = cms.bool(True),
+	),
+	electrons = cms.PSet(
+	src       = cms.InputTag("selectedPatElectronsWithIso"),
+	algorithm = cms.string("byDeltaR"),
+	preselection        = cms.string(""),
+	deltaR              = cms.double(0.5),
+	checkRecoComponents = cms.bool(False),
+	pairCut             = cms.string(""),
+	requireNoOverlaps   = cms.bool(True),
+	),
+	),
+					   finalCut = cms.string('')
+					   
+					   )
 #obsolete
 algorithm = 'ca'
 
@@ -394,7 +460,7 @@ process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     jetTag = cms.InputTag("selectedPatJetsCAPF"),
     subjetTag = cms.InputTag("selectedPatJetssubCAPF"),
     simplejet1Tag = cms.InputTag("selectedPatJets"),
-    simplejet2Tag = cms.InputTag("selectedPatJetsAK5PF"),
+    simplejet2Tag = cms.InputTag("cleanPatJetsAK5PF"),
     simplejet4Tag = cms.InputTag("selectedPatJetsAK7Calo"),
     simplejet3Tag = cms.InputTag("selectedPatJetsAK7PF"),
     photonTag = cms.InputTag("selectedPatPhotons"),
@@ -632,6 +698,13 @@ if isMC == False :
                      process.CAsubJetsProducer*
                      process.eidSequence*
                      process.patDefaultSequence*
+		    		    #
+		    # add no iso stuff
+		    #
+		    process.selectedPatMuonsWithIso*
+		    process.selectedPatElectronsWithIso*
+		    process.cleanPatJetsAK5PF*
+
 #                     process.patPF2PATSequence* # added with usePF2PAT
 		     process.patMETsHT*
 		     process.pfMETNoPU*
@@ -663,6 +736,12 @@ else :
                      process.CAsubJetsProducer*
                      process.eidSequence*
                      process.patDefaultSequence*
+		    #
+		    # add no iso stuff
+		    #
+		    process.selectedPatMuonsWithIso*
+		    process.selectedPatElectronsWithIso*
+		    process.cleanPatJetsAK5PF*
 #                     process.patPF2PATSequence* # added with usePF2PAT
 		     process.patMETsHT*
 		     process.pfMETNoPU*
