@@ -196,7 +196,7 @@ class VHbbCandidateTools {
     if (verbose_) {
       std::cout <<" debug met "<< temp.V.mets[0].metSig << " " <<  temp.V.mets[0].sumEt<< std::endl;
     }   
-    if (temp.V.mets[0].metSig<5) return in;
+//    if (temp.V.mets[0].metSig<5) return in;
     if (temp.V.mets[0].p4.Pt()<80) return in;
     //    if (temp.H.p4.Pt()<150)return in;
     //    if (temp.H.firstJet().csv< 0.9) return in;
