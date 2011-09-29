@@ -179,7 +179,7 @@ void HbbCandidateFinderAlgo::findMET(const VHbbEvent::METInfo & met, std::vector
 }
 bool HbbCandidateFinderAlgo::jetID(const VHbbEvent::SimpleJet & j)
 {
- 
+return true; 
     if(j.neutralHadronEFraction > 0.99) return false;
     if(j.neutralEmEFraction > 0.99) return false;
     if(j.chargedEmEFraction > 0.99) return false;
@@ -328,16 +328,16 @@ For both W -> mu nu and Z -> mu mu, we adopt the standard VBTF muon selection de
     if (
 	muons[it]. globChi2<10 &&
 	muons[it].nPixelHits>= 1 &&
-        muons[it].globNHits != 0 &&
-	muons[it].nHits >= 10 &&
+        muons[it].globNHits != 0
+	muons[it].nHits > 10 &&
         //tracker
 	(muons[it].cat & 0x1) && 
 	//global
-	(muons[it].cat & 0x2) && 
-//TODO ?	muons[it].validMuStations >=2 &&
+	(muons[it].cat & 0x2) 
+	muons[it].nMatches >=2 &&
 	muons[it].ipDb<.2 &&
 	//	(muons[it].hIso+muons[it].eIso+muons[it].tIso)/muons[it].p4.Pt()<.15 &&
-	(muons[it].pfChaIso+muons[it].pfPhoIso+muons[it].pfNeuIso)/muons[it].p4.Pt()<.15 &&
+	(muons[it].pfChaIso+muons[it].pfPhoIso+muons[it].pfNeuIso)/muons[it].p4.Pt()<.15  &&
 	fabs(muons[it].p4.Eta())<2.4 &&
 	muons[it].p4.Pt()>20 ) {
       out.push_back(muons[it]);
@@ -347,7 +347,6 @@ For both W -> mu nu and Z -> mu mu, we adopt the standard VBTF muon selection de
     if (verbose_){
       std::cout <<" CandidateFinder: Input Muons = "<<muons.size()<<" Output Muons = "<<out.size()<<std::endl;
     }
-
 
 
 }

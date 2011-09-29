@@ -229,8 +229,8 @@ struct  LeptonInfo
 };
   
 template <> void LeptonInfo::setSpecific<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j){
-  id80[j]=i.id80r;
-  id95[j]=i.id95r;
+  id80[j]=i.id80;
+  id95[j]=i.id95;
 }
 template <> void LeptonInfo::setSpecific<VHbbEvent::MuonInfo>(const VHbbEvent::MuonInfo & i, int j){
   dxy[j]=i.ipDb;
@@ -296,7 +296,17 @@ typedef struct
 	genPhi[i]=j.bestMCp4.Phi();
       }
     JECUnc[i]=j.jecunc;
-
+    id[i]=jetId(i);
+  }
+  bool jetId(int i)
+  {
+    if(nhf[i] > 0.99) return false;
+    if(nef[i] > 0.99) return false;
+    if(cef[i] > 0.99) return false;
+    if(cef[i] == 0) return false;
+    if(nch[i]== 0) return false;
+    if(nconstituents[i]  <= 1) return false;
+    return true;
   }
   void reset()
   {
@@ -324,6 +334,7 @@ typedef struct
   float vtxMass[MAXJ];
   float vtx3dL [MAXJ];
   float vtx3deL[MAXJ];
+  bool id[MAXJ];
 } JetInfo;
   
 int main(int argc, char* argv[]) 
@@ -334,7 +345,9 @@ int main(int argc, char* argv[])
   IVFInfo IVF;
   //FIXME
   //  SimBHadronInfo SimBs;
+  float rho,rho25,nPVs;
   METInfo MET;
+  METInfo METnoPU;
   MHTInfo MHT;
   TopInfo top;
   EventInfo EVENT;
@@ -455,9 +468,10 @@ int main(int argc, char* argv[])
   _outTree->Branch("hJet_genEta",hJets.genEta ,"genEta[nhJets]/F");
   _outTree->Branch("hJet_genPhi",hJets.genPhi ,"genPhi[nhJets]/F");
   _outTree->Branch("hJet_JECUnc",hJets.JECUnc ,"JECUnc[nhJets]/F");
-  _outTree->Branch("hJet_vtxMass",hJets.vtxMass ,"vtxMass[naJets]/F");
-  _outTree->Branch("hJet_vtx3dL",hJets.vtx3dL ,"vtx3dL[naJets]/F");
-  _outTree->Branch("hJet_vtx3deL",hJets.vtx3deL ,"vtx3deL[naJets]/F");
+  _outTree->Branch("hJet_vtxMass",hJets.vtxMass ,"vtxMass[nhJets]/F");
+  _outTree->Branch("hJet_vtx3dL",hJets.vtx3dL ,"vtx3dL[nhJets]/F");
+  _outTree->Branch("hJet_vtx3deL",hJets.vtx3deL ,"vtx3deL[nhJets]/F");
+  _outTree->Branch("hJet_id",hJets.id ,"id[nhJets]/b");
 
   _outTree->Branch("aJet_pt",aJets.pt ,"pt[naJets]/F");
   _outTree->Branch("aJet_eta",aJets.eta ,"eta[naJets]/F");
@@ -479,6 +493,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_vtxMass",aJets.vtxMass ,"vtxMass[naJets]/F");
   _outTree->Branch("aJet_vtx3dL",aJets.vtx3dL ,"vtx3dL[naJets]/F");
   _outTree->Branch("aJet_vtx3deL",aJets.vtx3deL ,"vtx3deL[naJets]/F");
+  _outTree->Branch("aJet_id",aJets.id ,"id[naJets]/b");
 
   _outTree->Branch("numJets"      ,  &numJets         ,  "numJets/I"       );                
   _outTree->Branch("numBJets"      ,  &numBJets         ,  "numBJets/I"       );                
@@ -581,6 +596,10 @@ int main(int argc, char* argv[])
 //   _outTree->Branch("SimBs_Hphi", &SimBs_Hphi,"SimBs_Hphi/F");
 
 
+  _outTree->Branch("rho"		,  &rho	         ,   "rho/F");
+  _outTree->Branch("rho25"		,  &rho25	         ,   "rho25/F");
+  _outTree->Branch("nPVs"		,  &nPVs	         ,   "nPVs/I");
+  _outTree->Branch("METnoPU"		,  &METnoPU	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("MET"		,  &MET	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("MHT"		,  &MHT	         ,   "mht/F:ht:sig/F:phi/F");
   _outTree->Branch("minDeltaPhijetMET"		,  &minDeltaPhijetMET	         ,   "minDeltaPhijetMET/F");
@@ -634,7 +653,6 @@ int main(int argc, char* argv[])
 	EVENT.lumi = ev.id().luminosityBlock();
 	EVENT.event = ev.id().event();
 	EVENT.json = jsonContainsEvent (jsonVector, ev);
-
 
 	//FIXME : need to update EDM ntuple with BHadron infos
 // 	// simBHadrons
@@ -728,6 +746,7 @@ int main(int argc, char* argv[])
 	H.eta = vhCand.H.p4.Eta();
 	H.phi = vhCand.H.p4.Phi();
 	V.mass = vhCand.V.p4.M();
+        if(isW) V.mass = vhCand.Mt(); 
 	V.pt = vhCand.V.p4.Pt();
 	V.eta = vhCand.V.p4.Eta();
 	V.phi = vhCand.V.p4.Phi();
@@ -755,12 +774,22 @@ int main(int argc, char* argv[])
   
 	hJets.cosTheta[0]=  vhCand.H.helicities[0];
 	hJets.cosTheta[1]=  vhCand.H.helicities[1];
+// METInfo calomet;  METInfo tcmet;  METInfo pfmet;  METInfo mht;  METInfo metNoPU
 
 	MET.et = vhCand.V.mets.at(0).p4.Pt();
 	MET.phi = vhCand.V.mets.at(0).p4.Phi();
 	MET.sumet = vhCand.V.mets.at(0).sumEt;
 	MET.sig = vhCand.V.mets.at(0).metSig;
 
+	METnoPU.et = iEvent->metNoPU.p4.Pt();
+	METnoPU.phi = iEvent->metNoPU.p4.Phi();
+	METnoPU.sumet = iEvent->metNoPU.sumEt;
+	METnoPU.sig = iEvent->metNoPU.metSig;
+
+        rho = aux.puInfo.rho;
+        rho25 = aux.puInfo.rho25;
+        nPVs=aux.pvInfo.nVertices; 
+ 
         if(!fromCandidate) {
 	  MHT.mht = iEvent->mht.p4.Pt(); 
 	  MHT.phi = iEvent->mht.p4.Phi(); 

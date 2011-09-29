@@ -8,6 +8,7 @@ process = cms.Process("FWLitePlots")
 process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(
 "/gpfs/gpfsddn/cms/user/arizzi/Hbb/V9/CMSSW_4_2_8_patch3/src/VHbbAnalysis/HbbAnalyzer/test/PAT.edm.root"
+
 ),
 
     PUmcfileName = cms.string("ttbarPU.root"),
@@ -26,7 +27,7 @@ process.fwliteInput = cms.PSet(
 #process.fwliteInput.lumisToProcess.extend(lumiList)
 
 
-channel =  "TTbar"
+channel =  "DYpt100"
 import os
 dirnameOld = "//pnfs/pi.infn.it/data/cms/store/user/bortigno/DoubleMu/HBB_EDMNtupleV3_ProcV1_may/07fb60889166b64f474d8d0aa162db69/"
 
@@ -71,6 +72,11 @@ process.Analyzer = cms.PSet(
 	"HLT_CentralJet80_MET80_v.*", #9
 	"HLT_PFMHT150_v.*", #10
 	"HLT_DiCentralJet20_MET80_v.*", #11
+        "HLT_DiCentralJet20_MET100_v.*" #12
+        "HLT_IsoMu20_v,HLT_IsoMu24_v.*", #13
+        "HLT_IsoMu30_eta2p1_v.*", #14
+        "HLT_Mu17_Mu8_v.*" #15
+
    ),
     isMC =     cms.bool(True),
     verbose = cms.bool(False),
