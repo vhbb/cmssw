@@ -13,7 +13,7 @@
 //
 // Original Author:  Lukas Wehrli (IPP/ETHZ) [wehrlilu]
 //         Created:  Wed May 12 09:34:25 CEST 2010
-// $Id: BCandidateProducer.cc,v 1.1 2010/07/29 16:34:24 leo Exp $
+// $Id: BCandidateProducer.cc,v 1.2 2010/11/25 09:25:27 wehrlilu Exp $
 //
 //
 
@@ -299,19 +299,19 @@ BCandidateProducer::testOnBCchain(unsigned int &bCand, unsigned int &i, std::vec
     ptrel = sqrt(1.0 - cosa*cosa)*axis1.mag();  
   }
 
-  
-  std::cout << "pv pos " << pv.position().x() << " " << pv.position().y() << " " << pv.position().z() << std::endl;
-  std::cout << "V1 pos " << ownVertices[bCand].vert.position().x() << " " 
-	    << ownVertices[bCand].vert.position().y() << " " 
-	    << ownVertices[bCand].vert.position().z() << std::endl;
-  std::cout << "V1 mom " << axis1.x() << " " << axis1.y() << " " << axis1.z() << std::endl;
-
-  std::cout << "V2 pos " << ownVertices[i].vert.position().x() << " " 
-	    << ownVertices[i].vert.position().y() << " " 
-	    << ownVertices[i].vert.position().z() << std::endl;
-  std::cout << "V2 mom " << axis2.x() << " " << axis2.y() << " " << axis2.z() << std::endl;
-
-
+  if (debug){
+    std::cout << "pv pos " << pv.position().x() << " " << pv.position().y() << " " << pv.position().z() << std::endl;
+    std::cout << "V1 pos " << ownVertices[bCand].vert.position().x() << " " 
+	      << ownVertices[bCand].vert.position().y() << " " 
+	      << ownVertices[bCand].vert.position().z() << std::endl;
+    std::cout << "V1 mom " << axis1.x() << " " << axis1.y() << " " << axis1.z() << std::endl;
+    
+    std::cout << "V2 pos " << ownVertices[i].vert.position().x() << " " 
+	      << ownVertices[i].vert.position().y() << " " 
+	      << ownVertices[i].vert.position().z() << std::endl;
+    std::cout << "V2 mom " << axis2.x() << " " << axis2.y() << " " << axis2.z() << std::endl;
+  }
+    
 
   if(debug) std::cout << "dR " << dR << " pair sum " << pairTrkSum.M() << " cosPA " << cosPA << " ptrel " << ptrel << std::endl;
 
