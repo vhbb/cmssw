@@ -55,6 +55,7 @@ process.out1 = cms.OutputModule(
         'keep *_selectedVertices_*_*',
 #        'keep *_hltTriggerSummaryAOD_*_*',
 #        'keep *_TriggerResults_*_*',
+	'keep *_bcandidates_*_*',
        	"keep *_HLTDiCentralJet20MET80_*_*",
        	"keep *_HLTDiCentralJet20MET100HBHENoiseFiltered_*_*",
 	"keep *_HLTPFMHT150_*_*",
@@ -375,6 +376,12 @@ process.goodPatJetsAK5PF = cms.EDFilter("PFJetIDSelectionFunctorFilter",
 
 ### rerun isolation for muons and electrons
 process.load("VHbbAnalysis.HbbAnalyzer.pfIsoDeltaBeta04_cff")
+
+process.selectedPatElectrons.cut = (
+    "(ecalDrivenSeed==1) &&"                                       +
+    "pt > 15.0 && abs(eta) < 2.5 &&"                               +
+    "(isEE || isEB) && !isEBEEGap"                              
+)
 
 
 process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",

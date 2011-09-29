@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.47 2011/09/19 15:09:36 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.48 2011/09/29 14:09:28 tboccali Exp $
 //
 //
 
@@ -1206,7 +1206,7 @@ void HbbAnalyzerNew::setJecUnc(VHbbEvent::SimpleJet& sj,JetCorrectionUncertainty
   // test 
   //
 
-  return;
+  //  return;
   double eta = sj.p4.Eta();
   double pt = sj.p4.Pt();
   
