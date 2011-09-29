@@ -179,7 +179,6 @@ void HbbCandidateFinderAlgo::findMET(const VHbbEvent::METInfo & met, std::vector
 }
 bool HbbCandidateFinderAlgo::jetID(const VHbbEvent::SimpleJet & j)
 {
-return true; 
     if(j.neutralHadronEFraction > 0.99) return false;
     if(j.neutralEmEFraction > 0.99) return false;
     if(j.chargedEmEFraction > 0.99) return false;
@@ -215,7 +214,7 @@ if (verbose_){
  //
  unsigned int index1=999999, index2=999999;
  for (unsigned int i =0; i< jets.size(); ++i){
-   if (jets[i].p4.Pt()> jetPtThreshold && fabs(jets[i].p4.Eta()) < etaThr && jetID(jets[i])){
+   if (jets[i].p4.Pt()> jetPtThreshold && fabs(jets[i].p4.Eta()) < etaThr /*&& jetID(jets[i])*/){
      if (index1 == 999999) {
        index1=i;
      }else if (index2 == 999999){
@@ -328,12 +327,12 @@ For both W -> mu nu and Z -> mu mu, we adopt the standard VBTF muon selection de
     if (
 	muons[it]. globChi2<10 &&
 	muons[it].nPixelHits>= 1 &&
-        muons[it].globNHits != 0
+        muons[it].globNHits != 0 &&
 	muons[it].nHits > 10 &&
         //tracker
 	(muons[it].cat & 0x1) && 
 	//global
-	(muons[it].cat & 0x2) 
+	(muons[it].cat & 0x2) && 
 	muons[it].nMatches >=2 &&
 	muons[it].ipDb<.2 &&
 	//	(muons[it].hIso+muons[it].eIso+muons[it].tIso)/muons[it].p4.Pt()<.15 &&
