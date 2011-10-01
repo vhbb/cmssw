@@ -302,10 +302,12 @@ typedef struct
   {
     if(nhf[i] > 0.99) return false;
     if(nef[i] > 0.99) return false;
-    if(cef[i] > 0.99) return false;
-    if(cef[i] == 0) return false;
-    if(nch[i]== 0) return false;
     if(nconstituents[i]  <= 1) return false;
+    if(fabs(eta[i])>2.4) {
+    if(cef[i] > 0.99) return false;
+    if(chf[i] == 0) return false;
+    if(nch[i]== 0) return false;
+    }
     return true;
   }
   void reset()
