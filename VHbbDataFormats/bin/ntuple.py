@@ -73,10 +73,12 @@ process.Analyzer = cms.PSet(
 	"HLT_PFMHT150_v.*", #10
 	"HLT_DiCentralJet20_MET80_v.*", #11
         "HLT_DiCentralJet20_MET100_v.*", #12
-        "HLT_IsoMu20_v,HLT_IsoMu24_v.*", #13
-        "HLT_IsoMu30_eta2p1_v.*", #14
-        "HLT_Mu17_Mu8_v.*" #15
-
+        "HLT_IsoMu20_v.*", #13
+        "HLT_IsoMu24_v.*", #14
+        "HLT_IsoMu30_eta2p1_v.*", #15
+        "HLT_Mu17_Mu8_v.*", #16
+        "HLT_Ele17_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_CentralJet30_CentralJet25_PFMHT15_v.*", #17
+        "HLT_Ele22_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_CentralJet30_CentralJet25_PFMHT20_v.*" #18
    ),
     isMC =     cms.bool(True),
     verbose = cms.bool(False),
