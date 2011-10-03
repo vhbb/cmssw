@@ -362,7 +362,7 @@ int main(int argc, char* argv[])
   TrackInfo V;
   int nvlep=0,nalep=0; 
   
-  float HVdPhi,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMET, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
+  float HVdPhi,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
   float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart;
 
   //FIXME
@@ -505,6 +505,8 @@ int main(int argc, char* argv[])
   _outTree->Branch("genZpt"    , &genZpt      ,  "genZpt/F");
   _outTree->Branch("genWpt"    , &genWpt      ,  "genWpt/F");
   _outTree->Branch("weightTrig"        , &weightTrig          ,  "weightTrig/F");
+  _outTree->Branch("weightTrigMay"        , &weightTrigMay          ,  "weightTrigMay/F");
+  _outTree->Branch("weightTrigV4"        , &weightTrigV4          ,  "weightTrigV4/F");
   _outTree->Branch("weightTrigMET"        , &weightTrigMET          ,  "weightTrigMET/F");
   _outTree->Branch("weightEleRecoAndId"        , &weightEleRecoAndId     ,  "weightEleRecoAndId/F");
   _outTree->Branch("weightEleTrigJetMETPart"        , &weightEleTrigJetMETPart          ,  "weightEleTrigJetMETPart/F");
@@ -922,6 +924,8 @@ int main(int argc, char* argv[])
 	  }
 	vLeptons.reset();
 	weightTrig = 1.; // better to default to 1 
+	weightTrigMay = -1.;
+	weightTrigV4 = -1.; 
 	TLorentzVector leptonForTop;
 	size_t firstAddMu=0;
 	size_t firstAddEle=0;
@@ -967,16 +971,16 @@ int main(int argc, char* argv[])
 	  vLeptons.set(vhCand.V.electrons[0],0,11);
 	  nvlep=1;
 	  firstAddEle=1;
-	  float weightMay = triggerWeight.scaleSingleEleMay(vLeptons.pt[0],vLeptons.eta[0]);
-	  float weightV4 = triggerWeight.scaleSingleEleV4(vLeptons.pt[0],vLeptons.eta[0]);
+	  weightTrigMay = triggerWeight.scaleSingleEleMay(vLeptons.pt[0],vLeptons.eta[0]);
+	  weightTrigV4 = triggerWeight.scaleSingleEleV4(vLeptons.pt[0],vLeptons.eta[0]);
 	  weightEleRecoAndId=triggerWeight.scaleID80Ele(vLeptons.pt[0],vLeptons.eta[0]) * triggerWeight.scaleRecoEle(vLeptons.pt[0],vLeptons.eta[0]);
 	  weightEleTrigJetMETPart=triggerWeight.scaleJet30Jet25(jet30eta,jet30pt)*triggerWeight.scalePFMHTEle(MET.et);
-	  weightEleTrigElePart= weightV4; //this is for debugging only, checking only the V4 part
+	  weightEleTrigElePart= weightTrigV4; //this is for debugging only, checking only the V4 part
 
-	  weightMay*=weightEleRecoAndId;
-	  weightV4*=weightEleRecoAndId;
-	  weightV4*=weightEleTrigJetMETPart;
-	  weightTrig = weightMay * 0.187 + weightV4 * (1.-0.187); //FIXME: use proper lumi if we reload 2.fb
+	  weightTrigMay*=weightEleRecoAndId;
+	  weightTrigV4*=weightEleRecoAndId;
+	  weightTrigV4*=weightEleTrigJetMETPart;
+	  weightTrig = weightTrigMay * 0.187 + weightTrigV4 * (1.-0.187); //FIXME: use proper lumi if we reload 2.fb
 	}
 	if( Vtype == VHbbCandidate::Znn ){
 	  nvlep=0;
@@ -984,7 +988,10 @@ int main(int argc, char* argv[])
 	  weightTrig = weightTrig1;
 	  weightTrigMET = weightTrig1;  
 	}
-          
+      
+        if(weightTrigMay < 0) weightTrigMay=weightTrig;
+        if(weightTrigV4 < 0) weightTrigV4=weightTrig;
+  
 	aLeptons.reset();
 	nalep=0;
 	if(fromCandidate)
