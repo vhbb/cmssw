@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.49 2011/09/29 14:09:52 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.50 2011/09/29 15:32:11 tboccali Exp $
 //
 //
 
@@ -171,7 +171,9 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   
   auxInfo->pvInfo.firstPVInPT2 = TVector3(RecVtxFirst.x(), RecVtxFirst.y(), RecVtxFirst.z());
   auxInfo->pvInfo.firstPVInProb = TVector3(RecVtx.x(), RecVtx.y(), RecVtx.z());
-
+  
+  (auxInfo->pvInfo).efirstPVInPT2 = (RecVtxFirst.error());
+  (auxInfo->pvInfo).efirstPVInProb = RecVtx.error();
     
   edm::Handle<double> rhoHandle;
   iEvent.getByLabel(edm::InputTag("kt6PFJets", "rho"),rhoHandle);   
