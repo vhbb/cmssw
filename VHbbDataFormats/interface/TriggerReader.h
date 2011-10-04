@@ -57,6 +57,7 @@ class TriggerReader {
       if(nit==nameMap.end() || ( regexec(&regex, oldiname.c_str(), 0, NULL, 0) != 0 ))   //; ! oldiname.Contains( TRegexp(triggername)) ) // changed, search it
         {
          std::cout << "searching " << triggername << std::endl;
+         nameMap[triggername]=100000000;
          for (unsigned i = 0; i < triggerNames.size(); ++i) {
            std::string iname(triggerNames.triggerName(i));
        
