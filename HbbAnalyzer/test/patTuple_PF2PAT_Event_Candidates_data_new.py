@@ -4,7 +4,7 @@ import FWCore.ParameterSet.Config as cms
 
 import os 
 
-isMC = False
+isMC = False 
 
 # define the process
 process = cms.Process("VH")
@@ -56,6 +56,7 @@ process.out1 = cms.OutputModule(
 #        'keep *_hltTriggerSummaryAOD_*_*',
 #        'keep *_TriggerResults_*_*',
 	'keep *_bcandidates_*_*',
+	'keep *_bhadrons_*_*',
        	"keep *_HLTDiCentralJet20MET80_*_*",
        	"keep *_HLTDiCentralJet20MET100HBHENoiseFiltered_*_*",
 	"keep *_HLTPFMHT150_*_*",
@@ -670,6 +671,14 @@ process.HLTDoubleMu7 = cms.EDProducer("HLTInfoDumperGeneral",
   )
 )
 
+
+
+
+#simBHadron producer                                                                                                                                                                 
+process.bhadrons = cms.EDProducer('MCBHadronProducer',
+                                 quarkId = cms.uint32(5)
+                                 )
+
 ### Paths ###
 
 process.nTuplizePath=cms.Path(process.HLTDiCentralJet20MET80 +
@@ -750,6 +759,7 @@ else :
                      process.inclusiveVertexing*
                      process.inclusiveMergedVertices*process.selectedVertices*
                      process.bcandidates*
+		     process.bhadrons*
                      process.HbbAnalyzerNew
 #process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
                      )
