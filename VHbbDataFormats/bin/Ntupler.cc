@@ -372,7 +372,7 @@ int main(int argc, char* argv[])
   int Vtype,nSvs,nSimBs,numJets,numBJets,eventFlav;
   //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
   bool triggerFlags[500],hbhe;
-  float btag1T2CSF=1.,btag2TSF=1.,btag1TSF=1.;
+  float btag1T2CSF=1.,btag2TSF=1.,btag1TSF=1.,btagA0CSF=1., btag2CSF=1.;
   // ----------------------------------------------------------------------
   // First Part: 
   //
@@ -621,6 +621,8 @@ int main(int argc, char* argv[])
   _outTree->Branch("btag1TSF"		,  &btag1TSF	         ,   "btag1TSF/F");
   _outTree->Branch("btag2TSF"		,  &btag2TSF	         ,   "btag2TSF/F");
   _outTree->Branch("btag1T2CSF"	,  &btag1T2CSF	         ,   "btag1T2CSF/F");
+  _outTree->Branch("btag2CSF"	,  &btag2CSF	         ,   "btag2CSF/F");
+  _outTree->Branch("btagA0CSF"	,  &btagA0CSF	         ,   "btagA0CSF/F");
 
   int ievt=0;  
   int totalcount=0;
@@ -1033,6 +1035,8 @@ int main(int argc, char* argv[])
 		btag1T2CSF = btag.weight<BTag1Tight2CustomFilter>(btagJetInfos);
 		btag2TSF = btag.weight<BTag2TightFilter>(btagJetInfos);
 		btag1TSF = btag.weight<BTag1TightFilter>(btagJetInfos);
+		btagA0CSF = btag.weight<BTagAntiMax0CustomFilter>(btagJetInfos);
+		btag2CSF = btag.weight<BTag2CustomFilter>(btagJetInfos);
 	      }
 	    else
 	      {

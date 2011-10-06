@@ -72,7 +72,7 @@ process.Analyzer = cms.PSet(
 	"HLT_CentralJet80_MET80_v.*", #9
 	"HLT_PFMHT150_v.*", #10
 	"HLT_DiCentralJet20_MET80_v.*", #11
-        "HLT_DiCentralJet20_MET100_v.*", #12
+        "HLT_DiCentralJet20_MET100_HBHENoiseFiltered_v.*", #12
         "HLT_IsoMu20_v.*", #13
         "HLT_IsoMu24_v.*", #14
         "HLT_IsoMu30_eta2p1_v.*", #15

@@ -46,6 +46,7 @@ class BTag2TightFilter
 }
 };
 
+
 class BTag1Tight2CustomFilter
 {
  public:
@@ -54,7 +55,22 @@ class BTag1Tight2CustomFilter
     return t[1] >= 1 && t[0] >= 2;
 }
 };
-
+class BTag2CustomFilter
+{
+ public:
+  static bool filter(std::vector<int> t)
+  {
+    return  t[0] >= 2;
+}
+};
+class BTagAntiMax0CustomFilter
+{
+ public:
+  static bool filter(std::vector<int> t)
+  {
+    return t[0] == 0;
+}
+};
 
 
 template <class Filter> float BTagWeight::weight(vector<vector<JetInfo> >jets)
