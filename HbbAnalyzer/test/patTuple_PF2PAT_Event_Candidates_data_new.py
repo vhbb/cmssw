@@ -4,7 +4,7 @@ import FWCore.ParameterSet.Config as cms
 
 import os 
 
-isMC = False 
+isMC = False
 
 # define the process
 process = cms.Process("VH")
@@ -148,8 +148,8 @@ process.pfNoElectron.enable = False
 
 # Compute the mean pt per unit area (rho) from the
 # PFchs inputs
-from RecoJets.JetProducers.kt4PFJets_cfi import kt4PFJets
-process.kt6PFJets = kt4PFJets.clone(
+process.load("RecoJets.JetProducers.kt4PFJets_cfi")
+process.kt6PFJets = process.kt4PFJets.clone(
     rParam = cms.double(0.6),
     src = cms.InputTag('pfNoElectron'),
     doAreaFastjet = cms.bool(True),
@@ -291,7 +291,7 @@ switchJetCollection(process,
         doJetID = False,
         jetIdLabel = 'ak5'
                     )
-
+process.patJetCorrFactors.rho = cms.InputTag("kt6PFJets", "rho")
 
 from PhysicsTools.PatAlgos.tools.metTools import *
 addTcMET(process, 'TC')
@@ -782,3 +782,7 @@ process.e = cms.EndPath(process.out1)
 process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.e)
 
 #
+temp = process.dumpPython()
+outputfile = file("patexp.py",'w')
+outputfile.write(temp)
+outputfile.close()
