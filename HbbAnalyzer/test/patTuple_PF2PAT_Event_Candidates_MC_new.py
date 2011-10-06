@@ -155,7 +155,7 @@ process.kt6PFJets = process.kt4PFJets.clone(
     doAreaFastjet = cms.bool(True),
     doRhoFastjet = cms.bool(True)
     )
-process.patJetCorrFactors.rho = cms.InputTag("kt6PFJets", "rho")
+#process.patJetCorrFactors.rho = cms.InputTag("kt6PFJets", "rho")
 
 ### to compute rho to subtract to lepton isolation cone, so with particles up to eta 2.5  
 process.kt6PFJets25 = process.kt4PFJets.clone(
