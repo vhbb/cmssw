@@ -363,7 +363,7 @@ int main(int argc, char* argv[])
   TrackInfo V;
   int nvlep=0,nalep=0; 
   
-  float HVdPhi,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
+  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
   float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart;
 
   //FIXME
@@ -443,10 +443,10 @@ int main(int argc, char* argv[])
     }
  
   //   TFile *_outPUFile	= new TFile((outputFile_+"_PU").c_str(), "recreate");	
-  //   TH1F * pu = new TH1F("pileup","",-0.5,24.5,25);
   TFile *_outFile	= new TFile(outputFile_.c_str(), "recreate");	
   TH1F *  count = new TH1F("Count","Count", 1,0,2 );
   TH1F *  countWithPU = new TH1F("CountWithPU","CountWithPU", 1,0,2 );
+  TH1F * pu = new TH1F("pileup","",51,-0.5,50.5);
   _outTree = new TTree("tree", "myTree");
   
   _outTree->Branch("H"		,  &H	            ,  "mass/F:pt/F:eta:phi/F:dR/F:dPhi/F:dEta/F");
@@ -523,6 +523,7 @@ int main(int argc, char* argv[])
     
   _outTree->Branch("Vtype"     ,  &Vtype   ,   "Vtype/I" );                
   _outTree->Branch("HVdPhi"     ,  &HVdPhi   ,   "HVdPhi/F" );                
+  _outTree->Branch("HVMass"     ,  &HVMass   ,   "HVMass/F" );                
   _outTree->Branch("HMETdPhi"     ,  &HMETdPhi   ,   "HMETdPhi/F" );                
   _outTree->Branch("VMt"  	,  &VMt      ,   "VMt/F"    );             	
 
@@ -646,10 +647,11 @@ int main(int argc, char* argv[])
       const VHbbEventAuxInfo & aux = *vhbbAuxHandle.product();
       PUweight=1.;
  	  if(isMC_){
-
+ 
  	  // PU weights
 	  std::map<int, unsigned int>::const_iterator puit = aux.puInfo.pus.find(0);
 	  PUweight =  lumiWeights.weight3BX( puit->second /3. );        
+	  pu->Fill(puit->second);
 	}
 	countWithPU->Fill(PUweight);
       
@@ -773,6 +775,7 @@ int main(int argc, char* argv[])
 	H.dPhi = deltaPhi(vhCand.H.jets[0].p4.Phi(),vhCand.H.jets[1].p4.Phi());
 	H.dEta= TMath::Abs( vhCand.H.jets[0].p4.Eta() - vhCand.H.jets[1].p4.Eta() );
 	HVdPhi = fabs( deltaPhi(vhCand.H.p4.Phi(),vhCand.V.p4.Phi()) ) ;
+	HVMass = (vhCand.H.p4 + vhCand.V.p4).M() ;
 	HMETdPhi = fabs( deltaPhi(vhCand.H.p4.Phi(),vhCand.V.mets.at(0).p4.Phi()) ) ;
 	VMt = vhCand.Mt() ;
 	deltaPullAngle = vhCand.H.deltaTheta;
