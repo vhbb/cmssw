@@ -992,7 +992,13 @@ int main(int argc, char* argv[])
       
         if(weightTrigMay < 0) weightTrigMay=weightTrig;
         if(weightTrigV4 < 0) weightTrigV4=weightTrig;
-  
+        if(!isMC_)
+        {
+         weightTrig = 1.; 
+         weightTrigMay = 1.;
+         weightTrigV4 = 1.;
+
+        } 
 	aLeptons.reset();
 	nalep=0;
 	if(fromCandidate)
