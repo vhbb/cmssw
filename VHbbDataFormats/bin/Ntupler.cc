@@ -650,7 +650,7 @@ int main(int argc, char* argv[])
  
  	  // PU weights
 	  std::map<int, unsigned int>::const_iterator puit = aux.puInfo.pus.find(0);
-	  PUweight =  lumiWeights.weight3BX( puit->second /3. );        
+	  PUweight =  lumiWeights.weight( puit->second );        
 	  pu->Fill(puit->second);
 	}
 	countWithPU->Fill(PUweight);
