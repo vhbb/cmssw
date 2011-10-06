@@ -4,7 +4,7 @@ import FWCore.ParameterSet.Config as cms
 
 import os 
 
-isMC = False
+isMC = False 
 
 # define the process
 process = cms.Process("VH")
@@ -62,6 +62,7 @@ process.out1 = cms.OutputModule(
 	"keep *_HLTPFMHT150_*_*",
 	"keep *_HLTQuadJet40_*_*",
 	"keep *_HLTDoubleMu7_*_*",
+	"keep *_EcalDeadCellEventFilter_*_*",
 
 	),
     dropMetaData = cms.untracked.string('ALL'),
@@ -670,6 +671,8 @@ process.HLTDoubleMu7 = cms.EDProducer("HLTInfoDumperGeneral",
     cms.InputTag('hltDiMuonL3PreFiltered7', '', 'HLT')
   )
 )
+# ecal filter
+process.load('JetMETAnalysis.ecalDeadCellTools.EcalDeadCellEventFilter_cfi') ## still not in the release
 
 
 
@@ -765,7 +768,7 @@ else :
                      )
 
 process.hbhepath = cms.Path(process.HBHENoiseFilter)
-
+process.ecalFilter = cms.Path(process.EcalDeadCellEventFilter)
 
 #process.candidates = cms.Path(process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates)
 
@@ -779,7 +782,7 @@ process.options = cms.untracked.PSet(
 process.e = cms.EndPath(process.out1)
 
 
-process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.e)
+process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.ecalFilter,process.e)
 
 #
 temp = process.dumpPython()

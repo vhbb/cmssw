@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.50 2011/09/29 15:32:11 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.51 2011/10/04 11:14:56 tboccali Exp $
 //
 //
 
@@ -815,6 +815,9 @@ BTagSFContainer btagSFs;
     Geom::Phi<double> deltaphi(mu->phi()-atan2(mf.p4.Px(), mf.p4.Py()));
     double acop = deltaphi.value();
     mf.acop=acop;
+
+    mf.emEnergy = mu->calEnergy().em;
+    mf.hadEnergy = mu->calEnergy().had;
 
     mf.nMatches = mu->numberOfMatches();
 
