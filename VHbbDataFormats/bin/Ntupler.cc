@@ -347,7 +347,8 @@ int main(int argc, char* argv[])
   IVFInfo IVF;
   //FIXME
   //  SimBHadronInfo SimBs;
-  float rho,rho25,nPVs;
+  float rho,rho25;
+  int nPVs;
   METInfo MET;
   METInfo METnoPU;
   MHTInfo MHT;
@@ -739,7 +740,7 @@ int main(int argc, char* argv[])
 	trigger.setEvent(&ev);
 	for(size_t j=0;j < triggers.size();j++)
           triggerFlags[j]=trigger.accept(triggers[j]);
-     
+ 
 	eventFlav=0;
 	if(aux.mcBbar.size() > 0 || aux.mcB.size() > 0) eventFlav=5;
 	else if(aux.mcC.size() > 0) eventFlav=4;
@@ -869,9 +870,9 @@ int main(int argc, char* argv[])
 	    //Loop on Higgs Jets
 	    for(unsigned int j=0; j < vhCand.H.jets.size(); j++ ){
 	      if (vhCand.H.jets[j].csv > maxBtag) { bJet=vhCand.H.jets[j].p4 ; maxBtag =vhCand.H.jets[j].csv; }
-	      if (deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[j].p4.Phi()) < minDeltaPhijetMET) 
+	      if (fabs(deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[j].p4.Phi())) < minDeltaPhijetMET) 
 		{
-                  minDeltaPhijetMET=deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[j].p4.Phi()); 
+                  minDeltaPhijetMET=fabs(deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.H.jets[j].p4.Phi())); 
                   jetPt_minDeltaPhijetMET=vhCand.H.jets[j].p4.Pt();
 		}
 	      btagJetInfos.push_back(btagEff.jetInfo(vhCand.H.jets[j]));
@@ -879,9 +880,9 @@ int main(int argc, char* argv[])
 	    //Loop on Additional Jets
 	    for(unsigned int j=0; j < vhCand.additionalJets.size(); j++ ){
 	      if (vhCand.additionalJets[j].csv > maxBtag) { bJet=vhCand.additionalJets[j].p4 ; maxBtag =vhCand.additionalJets[j].csv; }
-	      if (deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.additionalJets[j].p4.Phi()) < minDeltaPhijetMET) 
+	      if (fabs(deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.additionalJets[j].p4.Phi())) < minDeltaPhijetMET) 
 		{
-                  minDeltaPhijetMET=deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.additionalJets[j].p4.Phi());
+                  minDeltaPhijetMET=fabs(deltaPhi( vhCand.V.mets.at(0).p4.Phi(), vhCand.additionalJets[j].p4.Phi()));
                   jetPt_minDeltaPhijetMET=vhCand.additionalJets[j].p4.Pt();
 		}
 	      if( ( isW && ! useHighestPtHiggsW ) ||  ( ! isW && ! useHighestPtHiggsZ )  )  // btag SF computed using only H-jets if best-H made with dijetPt rather than best CSV
@@ -895,9 +896,9 @@ int main(int argc, char* argv[])
 	  {
 	    for(unsigned int j=0; j < iEvent->simpleJets2.size(); j++ ){
 	      if (iEvent->simpleJets2[j].csv > maxBtag) { bJet=iEvent->simpleJets2[j].p4 ; maxBtag =iEvent->simpleJets2[j].csv; }
-	      if (deltaPhi( vhCand.V.mets.at(0).p4.Phi(), iEvent->simpleJets2[j].p4.Phi()) < minDeltaPhijetMET)
+	      if (fabs(deltaPhi( vhCand.V.mets.at(0).p4.Phi(), iEvent->simpleJets2[j].p4.Phi())) < minDeltaPhijetMET)
 		{
-                  minDeltaPhijetMET=deltaPhi( vhCand.V.mets.at(0).p4.Phi(), iEvent->simpleJets2[j].p4.Phi());
+                  minDeltaPhijetMET=fabs(deltaPhi( vhCand.V.mets.at(0).p4.Phi(), iEvent->simpleJets2[j].p4.Phi()));
                   jetPt_minDeltaPhijetMET=iEvent->simpleJets2[j].p4.Pt();
 		}
 	      if(iEvent->simpleJets2[j].p4.Pt() > 30)
