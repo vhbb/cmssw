@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.51 2011/10/04 11:14:56 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.52 2011/10/06 09:19:18 tboccali Exp $
 //
 //
 
@@ -1031,6 +1031,8 @@ BTagSFContainer btagSFs;
   iEvent.put(hbbInfo);
   iEvent.put(auxInfo);
 
+
+  delete jecUnc;
 
 }
   
