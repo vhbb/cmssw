@@ -375,7 +375,7 @@ int main(int argc, char* argv[])
 
   //FIXME
   //  float SimBs_dr = -99, SimBs_dEta= -99, SimBs_dPhi = -99, SimBs_Hmass = -99, SimBs_Hpt = -99, SimBs_Heta = -99, SimBs_Hphi = -99;
-
+  int WplusMode,WminusMode;
   int Vtype,nSvs,nSimBs,numJets,numBJets,eventFlav;
   //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
   bool triggerFlags[500],hbhe;
@@ -572,6 +572,8 @@ int main(int argc, char* argv[])
   _outTree->Branch("aLepton_vbtf",aLeptons.vbtf ,"vbtf[nalep]/F");
  
   _outTree->Branch("top"		,  &top	         ,   "mass/F:pt/F:wMass/F");
+  _outTree->Branch("WplusMode"		,  &WplusMode	 ,   "WplusMode/I");
+  _outTree->Branch("WminusMode"		,  &WminusMode	 ,   "WminusMode/I");
 
   //IVF
   _outTree->Branch("nSvs",&nSvs ,"nSvs/I");
@@ -664,7 +666,7 @@ int main(int argc, char* argv[])
 	  PUweight =  lumiWeights.weight( puit->second );        
 	  pu->Fill(puit->second);
 	}
-	countWithPU->Fill(PUweight);
+	countWithPU->Fill(1,PUweight);
       
 	//Write event info 
 	EVENT.run = ev.id().run();
@@ -1082,7 +1084,22 @@ int main(int argc, char* argv[])
 	//         gendrbb=aux.genBBDeltaR(); 
 	genZpt=aux.mcZ.size() > 0 ? aux.mcZ[0].p4.Pt():-99;
 	genWpt=aux.mcW.size() > 0 ? aux.mcW[0].p4.Pt():-99;
+        WminusMode=-99;
+        WplusMode=-99;
+        for(unsigned int j=0; j<= aux.mcW.size();j++)
+         {
+          for(unsigned int k=0;k< aux.mcW[j].dauid.size();k++)
+           {
+             int idd=abs(aux.mcW[j].dauid[k]);
+             if(idd==11 || idd==13 || idd==15|| (idd<=5 && idd >=1)) 
+             {
+	             if(WminusMode==-99 && aux.mcW[j].charge ==-1) WminusMode = idd;
+	             if(WplusMode==-99 && aux.mcW[j].charge ==-1) WplusMode = idd;
+             }
+           }
 
+   
+         }
 
         /// Compute pull angle from AK7
         if(!fromCandidate){
