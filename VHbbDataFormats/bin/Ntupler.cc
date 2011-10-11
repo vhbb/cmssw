@@ -902,6 +902,11 @@ int main(int argc, char* argv[])
             //Loop on all jets
 	    for(unsigned int j=0; j < iEvent->simpleJets2.size(); j++ ){
 	      if (iEvent->simpleJets2[j].csv > maxBtag) { bJet=iEvent->simpleJets2[j].p4 ; maxBtag =iEvent->simpleJets2[j].csv; }
+	      if ( iEvent->simpleJets2[j].p4.Pt() > 20 &&  fabs(iEvent->simpleJets2[j].p4.Eta()) < 2.4&& fabs(deltaPhi( vhCand.V.mets.at(0).p4.Phi(), iEvent->simpleJets2[j].p4.Phi())) < minDeltaPhijetMET)
+		{
+                  minDeltaPhijetMET=fabs(deltaPhi( vhCand.V.mets.at(0).p4.Phi(), iEvent->simpleJets2[j].p4.Phi()));
+                  jetPt_minDeltaPhijetMET=iEvent->simpleJets2[j].p4.Pt();
+		}
 	      if(iEvent->simpleJets2[j].p4.Pt() > 30)
 		{
 		  jet30eta.push_back(iEvent->simpleJets2[j].p4.Eta());
@@ -920,11 +925,6 @@ int main(int argc, char* argv[])
             //Loop on Higgs jets
 
 	    for(unsigned int j=0; j < vhCand.H.jets.size(); j++ ) {
-	      if (fabs(deltaPhi( vhCand.V.mets.at(0).p4.Phi(), iEvent->simpleJets2[j].p4.Phi())) < minDeltaPhijetMET)
-		{
-                  minDeltaPhijetMET=fabs(deltaPhi( vhCand.V.mets.at(0).p4.Phi(), iEvent->simpleJets2[j].p4.Phi()));
-                  jetPt_minDeltaPhijetMET=iEvent->simpleJets2[j].p4.Pt();
-		}
 
 	    //if we use the highest pt pair, only the two higgs jet should be used to compute the SF because the other jets are excluded 
 	    // by a criteria (pt of the dijet) that is not btag SF dependent 
