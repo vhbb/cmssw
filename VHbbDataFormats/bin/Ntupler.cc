@@ -187,7 +187,10 @@ struct  LeptonInfo
 {
   void reset()
   {
-    for(int i =0; i < MAXL;i++){      mass[i]=-99; pt[i]=-99; eta[i]=-99; phi[i]=-99; aodCombRelIso[i]=-99; pfCombRelIso[i]=-99; photonIso[i]=-99; neutralHadIso[i]=-99; chargedHadIso[i]=-99; particleIso[i]=-99; dxy[i]=-99; dz[i]=-99; type[i]=-99; }
+    for(int i =0; i < MAXL;i++){ 
+     mass[i]=-99; pt[i]=-99; eta[i]=-99; phi[i]=-99; aodCombRelIso[i]=-99; pfCombRelIso[i]=-99; photonIso[i]=-99; neutralHadIso[i]=-99; chargedHadIso[i]=-99; particleIso[i]=-99; dxy[i]=-99; dz[i]=-99; type[i]=-99; 
+     id80[i]=-99; id95[i]=-99; vbtf[i]=-99;
+     }
   }
 
   template <class Input> void set(const Input & i, int j,int t)
@@ -226,6 +229,7 @@ struct  LeptonInfo
   int type[MAXL];
   float id80[MAXL];
   float id95[MAXL];
+  float vbtf[MAXL];
 };
   
 template <> void LeptonInfo::setSpecific<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j){
@@ -235,6 +239,9 @@ template <> void LeptonInfo::setSpecific<VHbbEvent::ElectronInfo>(const VHbbEven
 template <> void LeptonInfo::setSpecific<VHbbEvent::MuonInfo>(const VHbbEvent::MuonInfo & i, int j){
   dxy[j]=i.ipDb;
   dz[j]=i.zPVPt;
+  vbtf[j]=( i.globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 && i.nHits > 10 && i.cat & 0x1 && i.cat & 0x2 && i.nMatches >=2 && i.ipDb<.2 &&
+        (i.pfChaIso+i.pfPhoIso+i.pfNeuIso)/i.p4.Pt()<.15  && fabs(i.p4.Eta())<2.4 && i.p4.Pt()>20 ) ;
+
 }
 
 
@@ -545,6 +552,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("vLepton_type",vLeptons.type ,"type[nvlep]/I");
   _outTree->Branch("vLepton_id80",vLeptons.id80 ,"id80[nvlep]/F");
   _outTree->Branch("vLepton_id95",vLeptons.id95 ,"id95[nvlep]/F");
+  _outTree->Branch("vLepton_vbtf",vLeptons.vbtf ,"vbtf[nvlep]/F");
  
   _outTree->Branch("aLepton_mass",aLeptons.mass ,"mass[nalep]/F");
   _outTree->Branch("aLepton_pt",aLeptons.pt ,"pt[nalep]/F");
@@ -559,8 +567,9 @@ int main(int argc, char* argv[])
   _outTree->Branch("aLepton_dxy",aLeptons.dxy ,"dxy[nalep]/F");
   _outTree->Branch("aLepton_dz",aLeptons.dz ,"dz[nalep]/F");
   _outTree->Branch("aLepton_type",aLeptons.type ,"type[nalep]/I");
-  _outTree->Branch("aLepton_id80",aLeptons.id80 ,"id[nalep]/F");
-  _outTree->Branch("aLepton_id95",aLeptons.id95 ,"id[nalep]/F");
+  _outTree->Branch("aLepton_id80",aLeptons.id80 ,"id80[nalep]/F");
+  _outTree->Branch("aLepton_id95",aLeptons.id95 ,"id95[nalep]/F");
+  _outTree->Branch("aLepton_vbtf",aLeptons.vbtf ,"vbtf[nalep]/F");
  
   _outTree->Branch("top"		,  &top	         ,   "mass/F:pt/F:wMass/F");
 
