@@ -63,7 +63,7 @@ process.Analyzer = cms.PSet(
 	"HLT_IsoMu17_v.*" , #0
 	"HLT_DoubleMu7_v.*", #1
 	"HLT_Mu13_Mu8_v.*", #2
-	"HLT_Ele27_CaloIdVT_CaloIsoT_TrkId_TrkIsoT_v.*", #3
+	"HLT_Ele27_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_v.*", #3
 	"HLT_Ele27_WP80_PFMHT50_v.*", #4
         "HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v.*", #5
         "HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v.*", #6
@@ -78,7 +78,8 @@ process.Analyzer = cms.PSet(
         "HLT_IsoMu30_eta2p1_v.*", #15
         "HLT_Mu17_Mu8_v.*", #16
         "HLT_Ele17_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_CentralJet30_CentralJet25_PFMHT15_v.*", #17
-        "HLT_Ele22_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_CentralJet30_CentralJet25_PFMHT20_v.*" #18
+        "HLT_Ele22_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_CentralJet30_CentralJet25_PFMHT20_v.*", #18
+        "HLT_Ele27_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_CentralJet30_CentralJet25_PFMHT20_v.*" #19
    ),
     isMC =     cms.bool(True),
     verbose = cms.bool(False),
