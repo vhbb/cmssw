@@ -1086,7 +1086,7 @@ int main(int argc, char* argv[])
 	genWpt=aux.mcW.size() > 0 ? aux.mcW[0].p4.Pt():-99;
         WminusMode=-99;
         WplusMode=-99;
-        for(unsigned int j=0; j<= aux.mcW.size();j++)
+        for(unsigned int j=0; j< aux.mcW.size();j++)
          {
           for(unsigned int k=0;k< aux.mcW[j].dauid.size();k++)
            {
