@@ -101,7 +101,6 @@ process.Analyzer = cms.PSet(
     hltSingleEleMayFileName = cms.string("TriggerEfficiency_Electrons_May10.root"),
     hltSingleEleV4FileName = cms.string("TriggerEfficiency_Electrons_PromptV4.root"),
     idEleFileName = cms.string("ScaleFactor_PFElectrons_DataMontecarlo.root"),
-
     btagEffFileName = cms.string("btag_generic.txt")
     )
 
