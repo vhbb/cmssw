@@ -167,6 +167,7 @@ class VHbbEvent{
   METInfo pfmet;
   METInfo mht;
   METInfo metNoPU;
+  METInfo metCh;
 
   std::vector<MuonInfo> muInfo;
   std::vector<ElectronInfo> eleInfo;

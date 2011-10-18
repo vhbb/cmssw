@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.52 2011/10/06 09:19:18 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.53 2011/10/07 16:00:31 tboccali Exp $
 //
 //
 
@@ -731,6 +731,20 @@ BTagSFContainer btagSFs;
 
   }
 
+  //
+  // add charged met
+  //
+  
+  edm::Handle<edm::View<reco::MET> > metChargedHandle;
+  iEvent.getByLabel("pfMETNoPUCharge",metChargedHandle);
+  edm::View<reco::MET> metsCh = *metChargedHandle;
+  if(metsCh.size()){
+    hbbInfo->metCh.sumEt=(metsCh[0]).sumEt();
+    hbbInfo->metCh.metSig=(metsCh[0]).significance();
+    hbbInfo->metCh.eLong=(metsCh[0]).e_longitudinal();
+    hbbInfo->metCh.p4=GENPTOLOR((metsCh[0]));
+    if (verbose_)     std::cout <<" METCharged "<<     hbbInfo->metCh.metSig <<" " <<     hbbInfo->metCh.sumEt<<std::endl;
+  }
 
   //
   // met is calomet

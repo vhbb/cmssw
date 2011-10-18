@@ -1,10 +1,9 @@
-
 #import configurations
 import FWCore.ParameterSet.Config as cms
 
 import os 
 
-isMC = False 
+isMC = False
 
 # define the process
 process = cms.Process("VH")
@@ -18,7 +17,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
 
 # source
 process.source = cms.Source("PoolSource",
@@ -33,7 +32,7 @@ process.source = cms.Source("PoolSource",
 #	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/42622800-C1AD-E011-AD65-485B39800BF2.root',
 #		"/store/mc/CMSSW_4_2_3/RelValProdTTbar/GEN-SIM-RECO/MC_42_V12_JobRobot-v1/0000/B89A0B07-818C-E011-953E-0030487CD7E0.root"
 #	"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat//store/mc/Summer11/BdToMuMu_2MuPtFilter_7TeV-pythia6-evtgen//GEN-SIM-RECO//PU_S4_START42_V11-v1///0000//92DE42C9-CD8C-E011-A421-001F296B758E.root"
-	),
+),
 )
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -382,8 +381,7 @@ process.selectedPatElectronsWithIso = process.selectedPatElectrons.clone(
    ))
 
 
-process.cleanPatJetsAK5PF = cms.EDProducer("PATJetCleaner",
-					   src = cms.InputTag("selectedPatJetsAK5PF"),
+process.cleanPatJetsAK5PF = cms.EDProducer("PATJetCleaner",					   src = cms.InputTag("selectedPatJetsAK5PF"),
 					   # preselection = cms.string('pt > 20.0  && ( (neutralEmEnergy/energy < 0.99) &&  (neutralHadronEnergy/energy < 0.99) && numberOfDaughters>1) '),
 					   preselection = cms.string('abs(eta)< 5.0 && pt > 15.0'),
 					   
@@ -584,6 +582,21 @@ process.patMETsHT = cms.EDProducer("MHTProducer",
 
 process.pfMETNoPU = process.pfMET.clone()
 process.pfMETNoPU.src=cms.InputTag("pfNoPileUp")
+#
+# for charged MET
+#
+process.pfNoPileUpCharge  = cms.EDFilter(
+   "GenericPFCandidateSelector",
+   src = cms.InputTag("pfNoPileUp"),
+     cut = cms.string("charge !=0")
+ )
+ 
+process.pfMETNoPUCharge = process.pfMET.clone()
+process.pfMETNoPUCharge.src=cms.InputTag("pfNoPileUpCharge")
+
+#
+# now build a mET out of it
+#
 
 process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
@@ -720,6 +733,8 @@ if isMC == False :
 #                     process.patPF2PATSequence* # added with usePF2PAT
 		     process.patMETsHT*
 		     process.pfMETNoPU*
+		     process.pfNoPileUpCharge*
+       		     process.pfMETNoPUCharge*
                      process.leptonTrigMatch*
                      process.inclusiveVertexing*
                      process.inclusiveMergedVertices*process.selectedVertices*
@@ -757,6 +772,8 @@ else :
 #                     process.patPF2PATSequence* # added with usePF2PAT
 		     process.patMETsHT*
 		     process.pfMETNoPU*
+		     process.pfNoPileUpCharge*
+       		     process.pfMETNoPUCharge*
 #		     process.dump*
                      process.leptonTrigMatch*
                      process.inclusiveVertexing*
