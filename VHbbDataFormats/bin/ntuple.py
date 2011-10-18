@@ -12,7 +12,7 @@ process.fwliteInput = cms.PSet(
 ),
 
     PUmcfileName = cms.string("ttbarPU.root"),
-    PUdatafileName = cms.string("PUdist_160404-167151_7TeV_PromptReco_Collisions11.root"),
+    PUdatafileName = cms.string("Pileup_2011_to_173692_LPLumiScale_68mb_51bins.root"),
     maxEvents   = cms.int32(-1),                             ## optional
     skipEvents   = cms.int32(0),                             ## optional
     outputEvery = cms.uint32(0),                            ## optional
@@ -102,6 +102,7 @@ process.Analyzer = cms.PSet(
     hltSingleEleMayFileName = cms.string("TriggerEfficiency_Electrons_May10.root"),
     hltSingleEleV4FileName = cms.string("TriggerEfficiency_Electrons_PromptV4.root"),
     idEleFileName = cms.string("ScaleFactor_PFElectrons_DataMontecarlo.root"),
+    hltMuOr30FileName =  cms.string("ScaleFactor_muonEffsIsoToHLTMu30NotIso_efficiency.root"),
     btagEffFileName = cms.string("btag_generic.txt")
     )
 
