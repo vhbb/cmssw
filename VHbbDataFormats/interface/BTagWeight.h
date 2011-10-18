@@ -63,12 +63,22 @@ class BTag2CustomFilter
     return  t[0] >= 2;
 }
 };
+
 class BTagAntiMax0CustomFilter
 {
  public:
   static bool filter(std::vector<int> t)
   {
     return t[0] == 0;
+}
+};
+
+class BTag1TightAndMax1CustomFilter
+{
+ public:
+  static bool filter(std::vector<int> t)
+  {
+    return t[1] >= 1 &&  t[0] <= 1;
 }
 };
 

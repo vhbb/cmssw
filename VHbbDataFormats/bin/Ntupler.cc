@@ -283,6 +283,7 @@ typedef struct
     pt[i]=j.p4.Pt();
     eta[i]=j.p4.Eta();
     phi[i]=j.p4.Phi();
+    e[i]=j.p4.E();
     csv[i]=j.csv;
     numTracksSV[i] = j.vtxMass;
     vtxMass[i]= j.vtxMass;
@@ -320,12 +321,13 @@ typedef struct
   void reset()
   {
     for(int i=0;i<MAXJ;i++) {
-      pt[i]=-99; eta[i]=-99; phi[i]=-99; csv[i]=-99; cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99;
+      pt[i]=-99; eta[i]=-99; phi[i]=-99;e[i]=-99;csv[i]=-99; cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99;
     }
   }
   float pt[MAXJ];
   float eta[MAXJ];
   float phi[MAXJ];
+  float e[MAXJ];
   float csv[MAXJ];
   float cosTheta[MAXJ];
   int numTracksSV[MAXJ];
@@ -370,7 +372,7 @@ int main(int argc, char* argv[])
   TrackInfo V;
   int nvlep=0,nalep=0; 
   
-  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
+  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
   float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart;
 
   //FIXME
@@ -379,7 +381,7 @@ int main(int argc, char* argv[])
   int Vtype,nSvs,nSimBs,numJets,numBJets,eventFlav;
   //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
   bool triggerFlags[500],hbhe;
-  float btag1T2CSF=1.,btag2TSF=1.,btag1TSF=1.,btagA0CSF=1., btag2CSF=1.;
+  float btag1T2CSF=1.,btag2TSF=1.,btag1TSF=1.,btagA0CSF=1., btag2CSF=1., btag1TA1C=1.;
   // ----------------------------------------------------------------------
   // First Part: 
   //
@@ -464,6 +466,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("hJet_pt",hJets.pt ,"pt[nhJets]/F");
   _outTree->Branch("hJet_eta",hJets.eta ,"eta[nhJets]/F");
   _outTree->Branch("hJet_phi",hJets.phi ,"phi[nhJets]/F");
+  _outTree->Branch("hJet_e",hJets.e ,"e[nhJets]/F");
   _outTree->Branch("hJet_csv",hJets.csv ,"csv[nhJets]/F");
   _outTree->Branch("hJet_cosTheta",hJets.cosTheta ,"cosTheta[nhJets]/F");
   _outTree->Branch("hJet_numTracksSV",hJets.numTracksSV ,"numTracksSV[nhJets]/I");
@@ -486,6 +489,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_pt",aJets.pt ,"pt[naJets]/F");
   _outTree->Branch("aJet_eta",aJets.eta ,"eta[naJets]/F");
   _outTree->Branch("aJet_phi",aJets.phi ,"phi[naJets]/F");
+  _outTree->Branch("aJet_e",aJets.e ,"e[naJets]/F");
   _outTree->Branch("aJet_csv",aJets.csv ,"csv[naJets]/F");
   _outTree->Branch("aJet_cosTheta",aJets.cosTheta ,"cosTheta[naJets]/F");
   _outTree->Branch("aJet_numTracksSV",aJets.numTracksSV ,"numTracksSV[naJets]/I");
@@ -516,6 +520,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("weightTrigMay"        , &weightTrigMay          ,  "weightTrigMay/F");
   _outTree->Branch("weightTrigV4"        , &weightTrigV4          ,  "weightTrigV4/F");
   _outTree->Branch("weightTrigMET"        , &weightTrigMET          ,  "weightTrigMET/F");
+  _outTree->Branch("weightTrigOrMu30"  , &weightTrigOrMu30    , "weightTrigOrMu30/F");
   _outTree->Branch("weightEleRecoAndId"        , &weightEleRecoAndId     ,  "weightEleRecoAndId/F");
   _outTree->Branch("weightEleTrigJetMETPart"        , &weightEleTrigJetMETPart          ,  "weightEleTrigJetMETPart/F");
   _outTree->Branch("weightEleTrigElePart"        , &weightEleTrigElePart          ,  "weightEleTrigElePart/F");
@@ -634,6 +639,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("btag1T2CSF"	,  &btag1T2CSF	         ,   "btag1T2CSF/F");
   _outTree->Branch("btag2CSF"	,  &btag2CSF	         ,   "btag2CSF/F");
   _outTree->Branch("btagA0CSF"	,  &btagA0CSF	         ,   "btagA0CSF/F");
+  _outTree->Branch("btag1TA1C"	,  &btag1TA1C	         ,   "btag1TA1C/F");
 
   int ievt=0;  
   int totalcount=0;
@@ -949,6 +955,7 @@ int main(int argc, char* argv[])
 	weightTrig = 1.; // better to default to 1 
 	weightTrigMay = -1.;
 	weightTrigV4 = -1.; 
+	weightTrigOrMu30 = 1.;
 	TLorentzVector leptonForTop;
 	size_t firstAddMu=0;
 	size_t firstAddEle=0;
@@ -986,6 +993,8 @@ int main(int argc, char* argv[])
 	  float weightTrig1 = triggerWeight.scaleMuIsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
 	  float cweightTrig = weightTrig1;
 	  weightTrig = cweightID * cweightTrig;
+          float weightTrig1OrMu30 = triggerWeight.scaleMuOr30IsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
+          weightTrigOrMu30 = cweightID*(cweightTrig+weightTrig1OrMu30);
 	  nvlep=1;
 	  firstAddMu=1;
 	}
@@ -1054,6 +1063,7 @@ int main(int argc, char* argv[])
 		btag1TSF = btag.weight<BTag1TightFilter>(btagJetInfos);
 		btagA0CSF = btag.weight<BTagAntiMax0CustomFilter>(btagJetInfos);
 		btag2CSF = btag.weight<BTag2CustomFilter>(btagJetInfos);
+	        btag1TA1C = btag.weight<BTag1TightAndMax1CustomFilter>(btagJetInfos);
 	      }
 	    else
 	      {
@@ -1062,6 +1072,9 @@ int main(int argc, char* argv[])
 		btag1T2CSF = 1.;
 		btag2TSF =  1.;
 		btag1TSF =  1.;
+                btagA0CSF = 1.;
+	        btag2CSF = 1.;
+	        btag1TA1C = 1.;
 	      }
 	  }
             

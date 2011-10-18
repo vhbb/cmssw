@@ -28,6 +28,7 @@ public:
 //   tscalePFMHTele=openFile(ana,"hltPFMHTEleFileName");
    tscaleSingleEleMay=openFile(ana,"hltSingleEleMayFileName");
    tscaleSingleEleV4=openFile(ana,"hltSingleEleV4FileName");
+   tscaleHLTmuOr30=openFile(ana,"hltMuOr30FileName");
 
    if(tscaleHLTmu == 0 || tscaleIDmu == 0) 
     {
@@ -158,6 +159,10 @@ for(unsigned int j=0; j< pt.size(); j++)
   return   combiner2Thr.weight<Trigger1High2Loose>(allJetsWithEffs);
 }
 
+float scaleMuOr30IsoHLT(float pt1, float eta1)
+{
+   return efficiencyFromPtEta(pt1,eta1,tscaleHLTmuOr30).first;
+}
 
 
 private:
@@ -168,6 +173,8 @@ private:
   TTree * tscaleID80Ele;
   TTree * tscaleID95Ele;
   TTree * tscaleRecoEle;
+  TTree * tscaleHLTmuOr30;
+
 //  TTree * tscalePFMHTele;
   TTree * tscaleSingleEleMay;
   TTree * tscaleSingleEleV4;
