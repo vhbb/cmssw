@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.53 2011/10/07 16:00:31 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.54 2011/10/18 09:08:09 tboccali Exp $
 //
 //
 
@@ -103,7 +103,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   //  JetCorrectionUncertainty *jecUnc=0;
   edm::ESHandle<JetCorrectorParametersCollection> JetCorParColl;
-  iSetup.get<JetCorrectionsRecord>().get("AK5PF",JetCorParColl); 
+  iSetup.get<JetCorrectionsRecord>().get("AK5PFchs",JetCorParColl); 
   JetCorrectionUncertainty *jecUnc=0;
   //  if (!runOnMC_){
   JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
