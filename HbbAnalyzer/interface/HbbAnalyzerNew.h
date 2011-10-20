@@ -119,7 +119,7 @@ class HbbAnalyzerNew : public edm::EDProducer {
  protected:
   void fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Jet>::const_iterator iter);
   void setJecUnc(VHbbEvent::SimpleJet& sj,JetCorrectionUncertainty* jecunc);
-
+  float metSignificance(const reco::MET * met);
 };
 
 

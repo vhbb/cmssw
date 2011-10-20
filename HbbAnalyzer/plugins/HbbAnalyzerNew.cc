@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.54 2011/10/18 09:08:09 tboccali Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.55 2011/10/18 09:58:20 arizzi Exp $
 //
 //
 
@@ -740,7 +740,7 @@ BTagSFContainer btagSFs;
   edm::View<reco::MET> metsCh = *metChargedHandle;
   if(metsCh.size()){
     hbbInfo->metCh.sumEt=(metsCh[0]).sumEt();
-    hbbInfo->metCh.metSig=(metsCh[0]).significance();
+    hbbInfo->metCh.metSig=metSignificance(& (metsCh[0]));
     hbbInfo->metCh.eLong=(metsCh[0]).e_longitudinal();
     hbbInfo->metCh.p4=GENPTOLOR((metsCh[0]));
     if (verbose_)     std::cout <<" METCharged "<<     hbbInfo->metCh.metSig <<" " <<     hbbInfo->metCh.sumEt<<std::endl;
@@ -755,7 +755,7 @@ BTagSFContainer btagSFs;
   edm::View<pat::MET> metsTC = *metTCHandle;
   if(metsTC.size()){
     hbbInfo->tcmet.sumEt=(metsTC[0]).sumEt();
-    hbbInfo->tcmet.metSig=(metsTC[0]).significance();
+    hbbInfo->tcmet.metSig=metSignificance(&(metsTC[0]));
     hbbInfo->tcmet.eLong=(metsTC[0]).e_longitudinal();
     hbbInfo->tcmet.p4=GENPTOLOR((metsTC[0]));
     if (verbose_)     std::cout <<" METTC "<<     hbbInfo->tcmet.metSig <<" " <<     hbbInfo->tcmet.sumEt<<std::endl;
@@ -766,7 +766,7 @@ BTagSFContainer btagSFs;
   edm::View<reco::MET> metspfMETNoPU = *pfMETNoPUHandle;
   if(metspfMETNoPU.size()){
     hbbInfo->metNoPU.sumEt=(metspfMETNoPU[0]).sumEt();
-    hbbInfo->metNoPU.metSig=(metspfMETNoPU[0]).significance();
+    hbbInfo->metNoPU.metSig=metSignificance(&(metspfMETNoPU[0]));                
     hbbInfo->metNoPU.eLong=(metspfMETNoPU[0]).e_longitudinal();
     hbbInfo->metNoPU.p4=GENPTOLOR((metspfMETNoPU[0]));
     if (verbose_)     std::cout <<" pfMETNoPU "<<     hbbInfo->metNoPU.metSig <<" " <<     hbbInfo->metNoPU.sumEt<<std::endl;
@@ -777,7 +777,7 @@ BTagSFContainer btagSFs;
   edm::View<reco::MET> metsHT = *mHTHandle;
   if(metsHT.size()){
     hbbInfo->mht.sumEt=(metsHT[0]).sumEt();
-    hbbInfo->mht.metSig=(metsHT[0]).significance();
+    hbbInfo->mht.metSig=metSignificance(&(metsHT[0]));
     hbbInfo->mht.eLong=(metsHT[0]).e_longitudinal();
     hbbInfo->mht.p4=GENPTOLOR((metsHT[0]));
     if (verbose_)     std::cout <<" METHT "<<     hbbInfo->mht.metSig <<" " <<     hbbInfo->mht.sumEt<<std::endl;
@@ -789,7 +789,7 @@ BTagSFContainer btagSFs;
   
   if(mets.size()){
     hbbInfo->calomet.sumEt=(mets[0]).sumEt();
-    hbbInfo->calomet.metSig=(mets[0]).significance();
+    hbbInfo->calomet.metSig=metSignificance(&(mets[0]));
     hbbInfo->calomet.eLong=(mets[0]).e_longitudinal();
     hbbInfo->calomet.p4=GENPTOLOR((mets[0]));
     if (verbose_)     std::cout <<" METCALO "<<     hbbInfo->calomet.metSig <<" " <<     hbbInfo->calomet.sumEt<<std::endl;
@@ -801,7 +801,7 @@ BTagSFContainer btagSFs;
   
   if(metsPF.size()){
     hbbInfo->pfmet.sumEt=(metsPF[0]).sumEt();
-    hbbInfo->pfmet.metSig=(metsPF[0]).significance();
+    hbbInfo->pfmet.metSig=metSignificance(&(metsPF[0]));
     hbbInfo->pfmet.eLong=(metsPF[0]).e_longitudinal();
     hbbInfo->pfmet.p4=GENPTOLOR((metsPF[0]));
     if (verbose_)     std::cout <<" METPF "<<     hbbInfo->pfmet.metSig <<" " <<     hbbInfo->pfmet.sumEt<<std::endl;
@@ -1303,6 +1303,21 @@ void HbbAnalyzerNew ::fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Je
     // add tVector
     //
     sj.tVector = getTvect(&(*jet_iter));
+}
+
+float HbbAnalyzerNew::metSignificance(const reco::MET * met)
+{
+double sigmaX2= met->getSignificanceMatrix()(0,0);
+double sigmaY2= met->getSignificanceMatrix()(1,1);
+double significance = 0;
+try {
+if(sigmaX2<1.e10 && sigmaY2<1.e10) significance = met->significance();
+}
+catch(...)
+{
+ std::cout << "PROBLEM WITH MET SIGNIFICANCE sigma X2 and Y2 are: " << sigmaX2 << " " << sigmaY2 << std::endl;
+}
+return significance;
 }
 
 
