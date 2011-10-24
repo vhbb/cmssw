@@ -98,7 +98,7 @@ process.Analyzer = cms.PSet(
     useHighestPtHiggsW = cms.bool(True),
     useHighestPtHiggsZ = cms.bool(False),
     idMuFileName = cms.string("ScaleEffs42.root"),
-    hltMuFileName = cms.string("IsoToHLT42.root"),
+    hltMuFileName = cms.string("ScaleFactor_muonEffsIsoToHLT2.2fb_efficiency.root"),
 
     hltEle1FileName = cms.string("Ele17.root"),
     hltEle2FileName = cms.string("Ele8NotEle17.root"),
