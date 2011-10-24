@@ -770,6 +770,7 @@ int main(int argc, char* argv[])
 	if(aux.mcBbar.size() > 0 || aux.mcB.size() > 0) eventFlav=5;
 	else if(aux.mcC.size() > 0) eventFlav=4;
          
+	Vtype = vhCand.candidateType;
 
 	H.mass = vhCand.H.p4.M();
 	H.pt = vhCand.H.p4.Pt();
@@ -847,7 +848,6 @@ int main(int argc, char* argv[])
 	  MHT.sig = iEvent->mht.metSig; 
 	}
  
-	Vtype = vhCand.candidateType;
 
 
 	//Secondary Vertices
