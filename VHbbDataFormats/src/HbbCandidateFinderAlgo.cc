@@ -374,7 +374,8 @@ We adopt the standard cut-based selection from VBTF described in detail here.
 	// fake
 	(fabs(electrons[it].id95 - 7)) < 0.1  &&
 	fabs(electrons[it].p4.Eta()) < 2.5 &&
-	!( fabs(electrons[it].p4.Eta()) < 1.57 && fabs(electrons[it].p4.Eta()) > 1.44) &&
+//Remove this workaround as now we have the proper flags
+//	!( fabs(electrons[it].p4.Eta()) < 1.57 && fabs(electrons[it].p4.Eta()) > 1.44) &&
 	electrons[it].p4.Pt()>20 //  I use the minimum ok for both Z and W
 	){
       out.push_back(electrons[it]);

@@ -359,6 +359,7 @@ int main(int argc, char* argv[])
   float rho,rho25;
   int nPVs;
   METInfo MET;
+  METInfo fakeMET;
   METInfo METnoPU;
   MHTInfo MHT;
   TopInfo top;
@@ -372,7 +373,7 @@ int main(int argc, char* argv[])
   TrackInfo V;
   int nvlep=0,nalep=0; 
   
-  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
+  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
   float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart;
 
   //FIXME
@@ -512,6 +513,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("numJets"      ,  &numJets         ,  "numJets/I"       );                
   _outTree->Branch("numBJets"      ,  &numBJets         ,  "numBJets/I"       );                
   _outTree->Branch("deltaPullAngle", &deltaPullAngle  ,  "deltaPullAngle/F");
+  _outTree->Branch("deltaPullAngle2", &deltaPullAngle2  ,  "deltaPullAngle2/F");
   _outTree->Branch("gendrcc"    , &gendrcc      ,  "gendrcc/F");
   _outTree->Branch("gendrbb"    , &gendrbb      ,  "gendrbb/F");
   _outTree->Branch("genZpt"    , &genZpt      ,  "genZpt/F");
@@ -527,6 +529,7 @@ int main(int argc, char* argv[])
 
 
   _outTree->Branch("deltaPullAngleAK7", &deltaPullAngleAK7  ,  "deltaPullAngleAK7/F");
+  _outTree->Branch("deltaPullAngle2AK7", &deltaPullAngle2AK7  ,  "deltaPullAngle2AK7/F");
   _outTree->Branch("PUweight",       &PUweight  ,  "PUweight/F");
   _outTree->Branch("eventFlav",       &eventFlav  ,  "eventFlav/I");
  
@@ -623,6 +626,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("nPVs"		,  &nPVs	         ,   "nPVs/I");
   _outTree->Branch("METnoPU"		,  &METnoPU	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("MET"		,  &MET	         ,   "et/F:sumet:sig/F:phi/F");
+  _outTree->Branch("fakeMET"		,  &fakeMET	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("MHT"		,  &MHT	         ,   "mht/F:ht:sig/F:phi/F");
   _outTree->Branch("minDeltaPhijetMET"		,  &minDeltaPhijetMET	         ,   "minDeltaPhijetMET/F");
   _outTree->Branch("jetPt_minDeltaPhijetMET"		,  &jetPt_minDeltaPhijetMET	         ,   "jetPt_minDeltaPhijetMET/F");
@@ -751,7 +755,7 @@ int main(int argc, char* argv[])
 
 	// secondary vtxs
 	fwlite::Handle<std::vector<reco::Vertex> > SVC;
-	SVC.getByLabel(ev,"selectedVertices");
+	SVC.getByLabel(ev,"bcandidates");
 	const std::vector<reco::Vertex> svc = *(SVC.product());
 
 	const VHbbCandidate & vhCand =  cand->at(0);
@@ -797,16 +801,35 @@ int main(int argc, char* argv[])
 	HVMass = (vhCand.H.p4 + vhCand.V.p4).M() ;
 	HMETdPhi = fabs( deltaPhi(vhCand.H.p4.Phi(),vhCand.V.mets.at(0).p4.Phi()) ) ;
 	VMt = vhCand.Mt() ;
-	deltaPullAngle = vhCand.H.deltaTheta;
+//eltaPullAngle = vhCand.H.deltaTheta;
+        deltaPullAngle  =  VHbbCandidateTools::getDeltaTheta(vhCand.H.jets[0],vhCand.H.jets[1]);
+        deltaPullAngle2 =  VHbbCandidateTools::getDeltaTheta(vhCand.H.jets[1],vhCand.H.jets[0]);
+
   
 	hJets.cosTheta[0]=  vhCand.H.helicities[0];
 	hJets.cosTheta[1]=  vhCand.H.helicities[1];
 // METInfo calomet;  METInfo tcmet;  METInfo pfmet;  METInfo mht;  METInfo metNoPU
-
 	MET.et = vhCand.V.mets.at(0).p4.Pt();
 	MET.phi = vhCand.V.mets.at(0).p4.Phi();
 	MET.sumet = vhCand.V.mets.at(0).sumEt;
 	MET.sig = vhCand.V.mets.at(0).metSig;
+
+
+	fakeMET.sumet = 0;
+	fakeMET.sig = 0;
+	fakeMET.et = 0;
+	fakeMET.phi = 0;
+        if( Vtype == VHbbCandidate::Zmumu) {
+ 	        TVector3 mu1 = vhCand.V.muons[0].p4.Vect();
+	        TVector3 mu2 = vhCand.V.muons[1].p4.Vect();
+// Not needed with PFMET
+//		mu1.SetMag( mu1.Mag() - vhCand.V.muons[0].emEnergy - vhCand.V.muons[0].hadEnergy);
+//		mu2.SetMag( mu2.Mag() - vhCand.V.muons[1].emEnergy - vhCand.V.muons[1].hadEnergy);
+	        TVector3 sum = vhCand.V.mets.at(0).p4.Vect() + mu1 + mu2;
+		fakeMET.et = sum.Pt();
+		fakeMET.phi = sum.Phi();
+                fakeMET.sumet = vhCand.V.mets.at(0).sumEt - mu1.Pt() - mu2.Pt();
+         }
 
 	METnoPU.et = iEvent->metNoPU.p4.Pt();
 	METnoPU.phi = iEvent->metNoPU.p4.Phi();
@@ -1149,6 +1172,7 @@ int main(int argc, char* argv[])
                and ak7_matched[1].p4.DeltaR(vhCand.H.jets[1].p4) < 0.5)
               {
                 deltaPullAngleAK7 =  VHbbCandidateTools::getDeltaTheta(ak7_matched[0],ak7_matched[1]);
+                deltaPullAngle2AK7 =  VHbbCandidateTools::getDeltaTheta(ak7_matched[1],ak7_matched[0]);
               }
           }
         }
