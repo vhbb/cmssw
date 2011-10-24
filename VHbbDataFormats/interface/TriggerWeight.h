@@ -59,10 +59,17 @@ public:
      t->SetBranchAddress("etaMax",&etaMax);
      t->SetBranchAddress("scale",&scale);
      t->SetBranchAddress("error",&error);
-
+    float lastPtBin = 200;
+/*    for(int jentry = 0; jentry < t->GetEntries(); jentry++)
+      {
+        t->GetEntry(jentry);
+         if(ptMax >= lastPtBin) lastPtBin =ptMax;
+      }*/
     for(int jentry = 0; jentry < t->GetEntries(); jentry++)
       {
         t->GetEntry(jentry);
+        if(ptMax==lastPtBin) ptMax=1e99;
+
         if((pt1 > ptMin) && (pt1 < ptMax) && (eta1 > etaMin) && (eta1 < etaMax))
           {
             s1 = scale;
