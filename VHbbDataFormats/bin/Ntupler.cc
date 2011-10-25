@@ -373,7 +373,11 @@ int main(int argc, char* argv[])
   TrackInfo V;
   int nvlep=0,nalep=0; 
   
-  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight;
+
+
+	  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweight2011B;
+
+
   float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart;
 
   //FIXME
@@ -442,14 +446,25 @@ int main(int argc, char* argv[])
   std::string PUmcfileName_ = in.getParameter<std::string> ("PUmcfileName") ;
   std::string PUdatafileName_ = in.getParameter<std::string> ("PUdatafileName") ;
 
+  std::string PUdatafileName2011B_ = in.getParameter<std::string> ("PUdatafileName2011B") ;
+
+
+
   bool isMC_( ana.getParameter<bool>("isMC") );  
   TriggerReader trigger(isMC_);
   TriggerReader patFilters(false);
 
   edm::LumiReWeighting   lumiWeights;
+  edm::LumiReWeighting   lumiWeights2011B;
   if(isMC_)
     {
         	   lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
+
+        	   lumiWeights2011B = edm::LumiReWeighting(PUmcfileName_,PUdatafileName2011B_ , "pileup", "pileup");
+		   //                   lumiWeights2011B.weight3D_init(); // generate the weights the fisrt time;
+		   lumiWeights2011B.weight3D_init("Weight3D.root");
+
+
     }
  
   //   TFile *_outPUFile	= new TFile((outputFile_+"_PU").c_str(), "recreate");	
@@ -531,6 +546,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("deltaPullAngleAK7", &deltaPullAngleAK7  ,  "deltaPullAngleAK7/F");
   _outTree->Branch("deltaPullAngle2AK7", &deltaPullAngle2AK7  ,  "deltaPullAngle2AK7/F");
   _outTree->Branch("PUweight",       &PUweight  ,  "PUweight/F");
+  _outTree->Branch("PUweight2011B",       &PUweight2011B  ,  "PUweight2011B/F");
   _outTree->Branch("eventFlav",       &eventFlav  ,  "eventFlav/I");
  
 
@@ -669,12 +685,21 @@ int main(int argc, char* argv[])
       vhbbAuxHandle.getByLabel(ev,"HbbAnalyzerNew");
       const VHbbEventAuxInfo & aux = *vhbbAuxHandle.product();
       PUweight=1.;
+      PUweight2011B=1.;
  	  if(isMC_){
  
- 	  // PU weights
+ 	  // PU weights // Run2011A
 	  std::map<int, unsigned int>::const_iterator puit = aux.puInfo.pus.find(0);
 	  PUweight =  lumiWeights.weight( puit->second );        
 	  pu->Fill(puit->second);
+	  // PU weight Run2011B
+	  // PU weight Run2011B
+	  std::map<int, unsigned int>::const_iterator puit0 =  aux.puInfo.pus.find(0);
+	  std::map<int, unsigned int>::const_iterator puitm1 = aux.puInfo.pus.find(-1);
+	  std::map<int, unsigned int>::const_iterator puitp1 = aux.puInfo.pus.find(+1);
+	  
+	  PUweight2011B = lumiWeights2011B.weight3D( puitm1->second, puit0->second,puitp1->second); 
+
 	}
 	countWithPU->Fill(1,PUweight);
       
@@ -753,6 +778,7 @@ int main(int argc, char* argv[])
             continue;
           }
 
+	
 	// secondary vtxs
 	fwlite::Handle<std::vector<reco::Vertex> > SVC;
 	SVC.getByLabel(ev,"bcandidates");

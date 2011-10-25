@@ -7,11 +7,13 @@ process = cms.Process("FWLitePlots")
 #fileNames   = cms.vstring('file:2l2bMetEdmNtuples.root'),         ## mandatory
 process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(
-"/gpfs/gpfsddn/cms/user/arizzi/Hbb/V9/CMSSW_4_2_8_patch3/src/VHbbAnalysis/HbbAnalyzer/test/PAT.edm.root"
+"/tmp/arizzi/PAT.edm_2_1_a51.root"
+###/gpfs/gpfsddn/cms/user/arizzi/Hbb/V9/CMSSW_4_2_8_patch3/src/VHbbAnalysis/HbbAnalyzer/test/PAT.edm.root"
 
 ),
 
     PUmcfileName = cms.string("ttbarPU.root"),
+    PUdatafileName2011B = cms.string("Cert_175832-178078_7TeV_PromptReco_Collisons11_JSON.pileupTruth_v2.root"),
     PUdatafileName = cms.string("Pileup_2011_to_173692_LPLumiScale_68mb_51bins.root"),
     maxEvents   = cms.int32(-1),                             ## optional
     skipEvents   = cms.int32(0),                             ## optional
