@@ -188,7 +188,7 @@ struct  LeptonInfo
   void reset()
   {
     for(int i =0; i < MAXL;i++){ 
-     mass[i]=-99; pt[i]=-99; eta[i]=-99; phi[i]=-99; aodCombRelIso[i]=-99; pfCombRelIso[i]=-99; photonIso[i]=-99; neutralHadIso[i]=-99; chargedHadIso[i]=-99; particleIso[i]=-99; dxy[i]=-99; dz[i]=-99; type[i]=-99; 
+     mass[i]=-99; pt[i]=-99; eta[i]=-99; phi[i]=-99; aodCombRelIso[i]=-99; pfCombRelIso[i]=-99; photonIso[i]=-99; neutralHadIso[i]=-99; chargedHadIso[i]=-99; chargedPUIso[i]=-99; particleIso[i]=-99; dxy[i]=-99; dz[i]=-99; type[i]=-99; 
      id80[i]=-99; id95[i]=-99; vbtf[i]=-99;
      }
   }
@@ -205,6 +205,7 @@ struct  LeptonInfo
     photonIso[j]=i.pfPhoIso;
     neutralHadIso[j]=i.pfNeuIso;
     chargedHadIso[j]=i.pfChaIso;
+    chargedPUIso[j]=i.pfChaPUIso;
     setSpecific(i,j);
   }
   template <class Input> void setSpecific(const Input & i, int j)
@@ -223,6 +224,7 @@ struct  LeptonInfo
   float photonIso[MAXL];
   float neutralHadIso[MAXL];
   float chargedHadIso[MAXL];
+  float chargedPUIso[MAXL];
   float particleIso[MAXL];
   float dxy[MAXL];
   float dz[MAXL];
@@ -570,6 +572,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("vLepton_photonIso",vLeptons.photonIso ,"photonIso[nvlep]/F");
   _outTree->Branch("vLepton_neutralHadIso",vLeptons.neutralHadIso ,"neutralHadIso[nvlep]/F");
   _outTree->Branch("vLepton_chargedHadIso",vLeptons.chargedHadIso ,"chargedHadIso[nvlep]/F");
+  _outTree->Branch("vLepton_chargedPUIso",vLeptons.chargedPUIso ,"chargedPUIso[nvlep]/F");
   _outTree->Branch("vLepton_particleIso",vLeptons.particleIso ,"particleIso[nvlep]/F");
   _outTree->Branch("vLepton_dxy",vLeptons.dxy ,"dxy[nvlep]/F");
   _outTree->Branch("vLepton_dz",vLeptons.dz ,"dz[nvlep]/F");
@@ -587,6 +590,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("aLepton_photonIso",aLeptons.photonIso ,"photonIso[nalep]/F");
   _outTree->Branch("aLepton_neutralHadIso",aLeptons.neutralHadIso ,"neutralHadIso[nalep]/F");
   _outTree->Branch("aLepton_chargedHadIso",aLeptons.chargedHadIso ,"chargedHadIso[nalep]/F");
+  _outTree->Branch("aLepton_chargedPUIso",aLeptons.chargedPUIso ,"chargedPUIso[nalep]/F");
   _outTree->Branch("aLepton_particleIso",aLeptons.particleIso ,"particleIso[nalep]/F");
   _outTree->Branch("aLepton_dxy",aLeptons.dxy ,"dxy[nalep]/F");
   _outTree->Branch("aLepton_dz",aLeptons.dz ,"dz[nalep]/F");
