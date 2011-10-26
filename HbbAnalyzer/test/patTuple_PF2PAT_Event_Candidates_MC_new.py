@@ -787,6 +787,9 @@ else :
 process.hbhepath = cms.Path(process.HBHENoiseFilter)
 process.ecalFilter = cms.Path(process.EcalDeadCellEventFilter)
 
+process.load('GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi');
+process.totalKinematics=cms.Path(process.totalKinematicsFilter)
+
 #process.candidates = cms.Path(process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates)
 
 
@@ -798,8 +801,11 @@ process.options = cms.untracked.PSet(
 	)
 process.e = cms.EndPath(process.out1)
 
+if isMC == False :
+ process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.ecalFilter,process.e)
+else :
+ process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.ecalFilter,process.totalKinematics,process.e)
 
-process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.ecalFilter,process.e)
 
 #
 temp = process.dumpPython()
