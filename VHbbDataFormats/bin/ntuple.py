@@ -20,7 +20,12 @@ process.fwliteInput = cms.PSet(
 
 ),
 
+<<<<<<< ntuple.py
     PUmcfileName = cms.string("ttbarPU_36bins.root"),
+    PUmcfileName2011B= cms.string("PU1D2011B.root"),
+=======
+    PUmcfileName = cms.string("ttbarPU_36bins.root"),
+>>>>>>> 1.25
     PUdatafileName2011B = cms.string("Cert_175832-178078_7TeV_PromptReco_Collisons11_JSON.pileupTruth_v2.root"),
     PUdatafileName = cms.string("Pileup_2011_to_173692_LPLumiScale_68mb_36bins.root"),
     maxEvents   = cms.int32(-1),                             ## optional

@@ -446,8 +446,9 @@ int main(int argc, char* argv[])
   //  std::string inputFile( in.getParameter<std::string> ("fileName") );
 
   std::string PUmcfileName_ = in.getParameter<std::string> ("PUmcfileName") ;
-  std::string PUdatafileName_ = in.getParameter<std::string> ("PUdatafileName") ;
+  std::string PUmcfileName2011B_ = in.getParameter<std::string> ("PUmcfileName2011B") ;
 
+  std::string PUdatafileName_ = in.getParameter<std::string> ("PUdatafileName") ;
   std::string PUdatafileName2011B_ = in.getParameter<std::string> ("PUdatafileName2011B") ;
 
 
@@ -462,8 +463,8 @@ int main(int argc, char* argv[])
     {
         	   lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
 
-        	   lumiWeights2011B = edm::LumiReWeighting(PUmcfileName_,PUdatafileName2011B_ , "pileup", "pileup");
-		   //                   lumiWeights2011B.weight3D_init(); // generate the weights the fisrt time;
+		   lumiWeights2011B = edm::LumiReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
+		   //lumiWeights2011B.weight3D_init(); // generate the weights the fisrt time;
 		   lumiWeights2011B.weight3D_init("Weight3D.root");
 
 
