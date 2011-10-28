@@ -363,6 +363,7 @@ int main(int argc, char* argv[])
   METInfo MET;
   METInfo fakeMET;
   METInfo METnoPU;
+  METInfo METnoPUCh;
   MHTInfo MHT;
   TopInfo top;
   EventInfo EVENT;
@@ -474,6 +475,8 @@ int main(int argc, char* argv[])
   TFile *_outFile	= new TFile(outputFile_.c_str(), "recreate");	
   TH1F *  count = new TH1F("Count","Count", 1,0,2 );
   TH1F *  countWithPU = new TH1F("CountWithPU","CountWithPU", 1,0,2 );
+  TH1F *  countWithPU2011B = new TH1F("CountWithPU2011B","CountWithPU2011B", 1,0,2 );
+
   TH1F * pu = new TH1F("pileup","",51,-0.5,50.5);
   _outTree = new TTree("tree", "myTree");
   
@@ -646,6 +649,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("rho25"		,  &rho25	         ,   "rho25/F");
   _outTree->Branch("nPVs"		,  &nPVs	         ,   "nPVs/I");
   _outTree->Branch("METnoPU"		,  &METnoPU	         ,   "et/F:sumet:sig/F:phi/F");
+  _outTree->Branch("METnoPUCh"		,  &METnoPUCh	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("MET"		,  &MET	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("fakeMET"		,  &fakeMET	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("MHT"		,  &MHT	         ,   "mht/F:ht:sig/F:phi/F");
@@ -708,6 +712,7 @@ int main(int argc, char* argv[])
 
 	}
 	countWithPU->Fill(1,PUweight);
+	countWithPU2011B->Fill(1,PUweight2011B);
       
 	//Write event info 
 	EVENT.run = ev.id().run();
@@ -870,6 +875,11 @@ int main(int argc, char* argv[])
 	METnoPU.sumet = iEvent->metNoPU.sumEt;
 	METnoPU.sig = iEvent->metNoPU.metSig;
 
+	METnoPUCh.et = iEvent->metCh.p4.Pt();
+	METnoPUCh.phi = iEvent->metCh.p4.Phi();
+	METnoPUCh.sumet = iEvent->metCh.sumEt;
+	METnoPUCh.sig = iEvent->metCh.metSig;
+
         rho = aux.puInfo.rho;
         rho25 = aux.puInfo.rho25;
         nPVs=aux.pvInfo.nVertices; 
@@ -990,7 +1000,7 @@ int main(int argc, char* argv[])
 	      // because for example a light jet not used for the Higgs can have in reality a higher CSV due to SF > 1 and become a higgs jet
 	      if( ( isW && ! useHighestPtHiggsW ) ||  ( ! isW && ! useHighestPtHiggsZ )  ) 
 		{ 
-		  if(iEvent->simpleJets2[j].p4.Pt() > 20)
+		  if(iEvent->simpleJets2[j].p4.Pt() > 20 && fabs(iEvent->simpleJets2[j].p4.Eta()) < 2.5)
 		    btagJetInfos.push_back(btagEff.jetInfo(iEvent->simpleJets2[j]));
 		}
 	    }
