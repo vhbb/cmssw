@@ -110,7 +110,7 @@ process.Analyzer = cms.PSet(
     useHighestPtHiggsW = cms.bool(True),
     useHighestPtHiggsZ = cms.bool(False),
     idMuFileName = cms.string("ScaleEffs42.root"),
-    hltMuFileName = cms.string("ScaleFactor_muonEffsIsoToHLT2.2fb_efficiency.root"),
+    hltMuFileName = cms.string("ScaleFactor_muonEffsOnlyIsoToHLT2.2fb_efficiency.root"),
 
     hltEle1FileName = cms.string("Ele17.root"),
     hltEle2FileName = cms.string("Ele8NotEle17.root"),
@@ -122,7 +122,7 @@ process.Analyzer = cms.PSet(
     hltSingleEleMayFileName = cms.string("TriggerEfficiency_Electrons_May10.root"),
     hltSingleEleV4FileName = cms.string("TriggerEfficiency_Electrons_PromptV4.root"),
     idEleFileName = cms.string("ScaleFactor_PFElectrons_DataMontecarlo.root"),
-    hltMuOr30FileName =  cms.string("ScaleFactor_muonEffsIsoToHLTMu30NotIso_efficiency.root"),
+    hltMuOr30FileName =  cms.string("ScaleFactor_muonEffsIsoToHLT2.2fb_efficiency.root"),
     btagEffFileName = cms.string("btag_generic.txt")
     )
 
