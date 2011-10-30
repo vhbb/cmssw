@@ -136,18 +136,20 @@ double scalePFMHTEle( float MetPFPt){
     double weightPFMHTrigger=0.;
 
     //FIXME: read from file
-    if(MetPFPt>0. && MetPFPt<5.) weightPFMHTrigger=0.3834;
-    if(MetPFPt>5. && MetPFPt<10.) weightPFMHTrigger=0.4493;
-    if(MetPFPt>10. && MetPFPt<15.) weightPFMHTrigger=0.5676;
-    if(MetPFPt>15. && MetPFPt<20.) weightPFMHTrigger=0.6474;
-    if(MetPFPt>20. && MetPFPt<25.) weightPFMHTrigger=0.7695;
-    if(MetPFPt>25. && MetPFPt<30.) weightPFMHTrigger=0.8936;
-    if(MetPFPt>30. && MetPFPt<35.) weightPFMHTrigger=0.9304;
-    if(MetPFPt>35. && MetPFPt<40.) weightPFMHTrigger=0.9620;
-    if(MetPFPt>40. && MetPFPt<45.) weightPFMHTrigger=0.9894;
-    if(MetPFPt>45. && MetPFPt<50.) weightPFMHTrigger=0.9863;
-    if(MetPFPt>50. && MetPFPt<60.) weightPFMHTrigger=0.9978;
-    if(MetPFPt>60.) weightPFMHTrigger=1;
+    if(MetPFPt>0. && MetPFPt<5.) weightPFMHTrigger=0.305;
+    if(MetPFPt>5. && MetPFPt<10.) weightPFMHTrigger=0.351;
+    if(MetPFPt>10. && MetPFPt<15.) weightPFMHTrigger=0.461;
+    if(MetPFPt>15. && MetPFPt<20.) weightPFMHTrigger=0.572;
+    if(MetPFPt>20. && MetPFPt<25.) weightPFMHTrigger=0.713;
+    if(MetPFPt>25. && MetPFPt<30.) weightPFMHTrigger=0.844;
+    if(MetPFPt>30. && MetPFPt<35.) weightPFMHTrigger=0.914;
+    if(MetPFPt>35. && MetPFPt<40.) weightPFMHTrigger=0.939;
+    if(MetPFPt>40. && MetPFPt<45.) weightPFMHTrigger=0.981;
+    if(MetPFPt>45. && MetPFPt<50.) weightPFMHTrigger=0.982;
+    if(MetPFPt>50. && MetPFPt<60.) weightPFMHTrigger=0.993;
+    if(MetPFPt>60. && MetPFPt<70.) weightPFMHTrigger=0.995;
+    if(MetPFPt>70. && MetPFPt<100.) weightPFMHTrigger=0.995;
+    if(MetPFPt>100.) weightPFMHTrigger=1.;
     return weightPFMHTrigger;
 }
 
