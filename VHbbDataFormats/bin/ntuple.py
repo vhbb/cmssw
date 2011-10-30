@@ -114,6 +114,8 @@ process.Analyzer = cms.PSet(
 
     hltEle1FileName = cms.string("Ele17.root"),
     hltEle2FileName = cms.string("Ele8NotEle17.root"),
+    hltEle1AugFileName = cms.string("Ele17Aug5PromptRecoV6.root"),
+    hltEle2AugFileName = cms.string("Ele8NotEle17Aug5PromptRecoV6.root"),
     idEle80FileName = cms.string("PFElectronToWP80.root"),
     idEle95FileName = cms.string("PFElectronToWP95.root"),
     hltJetEle1FileName = cms.string("TriggerEfficiency_Jet30_PromptV4Aug05PromptV6.root"),
