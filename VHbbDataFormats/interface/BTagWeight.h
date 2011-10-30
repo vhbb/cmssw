@@ -73,6 +73,15 @@ class BTagAntiMax0CustomFilter
 }
 };
 
+class BTagAntiMax0TightFilter
+{
+ public:
+  static bool filter(std::vector<int> t)
+  {
+    return t[1] == 0;
+}
+};
+
 class BTag1TightAndMax1CustomFilter
 {
  public:

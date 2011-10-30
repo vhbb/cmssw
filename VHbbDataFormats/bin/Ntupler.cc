@@ -381,7 +381,7 @@ int main(int argc, char* argv[])
 	  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweight2011B;
 
 
-  float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart;
+  float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart,weightEleTrigEleAugPart;
 
   //FIXME
   //  float SimBs_dr = -99, SimBs_dEta= -99, SimBs_dPhi = -99, SimBs_Hmass = -99, SimBs_Hpt = -99, SimBs_Heta = -99, SimBs_Hphi = -99;
@@ -389,7 +389,7 @@ int main(int argc, char* argv[])
   int Vtype,nSvs,nSimBs,numJets,numBJets,eventFlav;
   //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
   bool triggerFlags[500],hbhe,ecalFlag;
-  float btag1T2CSF=1.,btag2TSF=1.,btag1TSF=1.,btagA0CSF=1., btag2CSF=1., btag1TA1C=1.;
+  float btag1T2CSF=1.,btag2TSF=1.,btag1TSF=1.,btagA0CSF=1., btagA0TSF=1., btag2CSF=1., btag1TA1C=1.;
   // ----------------------------------------------------------------------
   // First Part: 
   //
@@ -547,6 +547,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("weightEleRecoAndId"        , &weightEleRecoAndId     ,  "weightEleRecoAndId/F");
   _outTree->Branch("weightEleTrigJetMETPart"        , &weightEleTrigJetMETPart          ,  "weightEleTrigJetMETPart/F");
   _outTree->Branch("weightEleTrigElePart"        , &weightEleTrigElePart          ,  "weightEleTrigElePart/F");
+  _outTree->Branch("weightEleTrigEleAugPart"        , &weightEleTrigEleAugPart          ,  "weightEleTrigEleAugPart/F");
 
 
   _outTree->Branch("deltaPullAngleAK7", &deltaPullAngleAK7  ,  "deltaPullAngleAK7/F");
@@ -669,6 +670,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("btag1T2CSF"	,  &btag1T2CSF	         ,   "btag1T2CSF/F");
   _outTree->Branch("btag2CSF"	,  &btag2CSF	         ,   "btag2CSF/F");
   _outTree->Branch("btagA0CSF"	,  &btagA0CSF	         ,   "btagA0CSF/F");
+  _outTree->Branch("btagA0TSF"	,  &btagA0TSF	         ,   "btagA0TSF/F");
   _outTree->Branch("btag1TA1C"	,  &btag1TA1C	         ,   "btag1TA1C/F");
 
   int ievt=0;  
@@ -1051,7 +1053,8 @@ int main(int argc, char* argv[])
 	  weightEleRecoAndId=triggerWeight.scaleID95Ele(vLeptons.pt[0],vLeptons.eta[0]) * triggerWeight.scaleRecoEle(vLeptons.pt[0],vLeptons.eta[0]) *
 	    triggerWeight.scaleID95Ele(vLeptons.pt[1],vLeptons.eta[1]) * triggerWeight.scaleRecoEle(vLeptons.pt[1],vLeptons.eta[1]);
 	  weightEleTrigElePart = triggerWeight.scaleDoubleEle17Ele8(pt,eta); 
-	  weightTrig = weightEleTrigElePart * weightEleRecoAndId;
+	  weightEleTrigEleAugPart = triggerWeight.scaleDoubleEle17Ele8Aug(pt,eta); 
+	  weightTrig = (weightEleTrigElePart*1.14+weightEleTrigEleAugPart*0.98 )/2.12 * weightEleRecoAndId;
  
                  
 
@@ -1082,7 +1085,8 @@ int main(int argc, char* argv[])
 	  weightTrigMay*=weightEleRecoAndId;
 	  weightTrigV4*=weightEleRecoAndId;
 	  weightTrigV4*=weightEleTrigJetMETPart;
-	  weightTrig = weightTrigMay * 0.187 + weightTrigV4 * (1.-0.187); //FIXME: use proper lumi if we reload 2.fb
+//	  weightTrig = weightTrigMay * 0.187 + weightTrigV4 * (1.-0.187); //FIXME: use proper lumi if we reload 2.fb
+	  weightTrig = (weightTrigMay * 0.215 + weightTrigV4 * 1.915)/ 2.13; //FIXME: use proper lumi if we reload 2.fb
 	}
 	if( Vtype == VHbbCandidate::Znn ){
 	  nvlep=0;
@@ -1132,6 +1136,7 @@ int main(int argc, char* argv[])
 		btag2TSF = btag.weight<BTag2TightFilter>(btagJetInfos);
 		btag1TSF = btag.weight<BTag1TightFilter>(btagJetInfos);
 		btagA0CSF = btag.weight<BTagAntiMax0CustomFilter>(btagJetInfos);
+		btagA0TSF = btag.weight<BTagAntiMax0TightFilter>(btagJetInfos);
 		btag2CSF = btag.weight<BTag2CustomFilter>(btagJetInfos);
 	        btag1TA1C = btag.weight<BTag1TightAndMax1CustomFilter>(btagJetInfos);
 	      }
@@ -1143,6 +1148,7 @@ int main(int argc, char* argv[])
 		btag2TSF =  1.;
 		btag1TSF =  1.;
                 btagA0CSF = 1.;
+                btagA0TSF = 1.;
 	        btag2CSF = 1.;
 	        btag1TA1C = 1.;
 	      }

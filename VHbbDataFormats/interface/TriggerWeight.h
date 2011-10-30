@@ -20,6 +20,8 @@ public:
    tscaleIDmu=openFile(ana,"idMuFileName");
    tscaleHLTele1=openFile(ana,"hltEle1FileName");
    tscaleHLTele2=openFile(ana,"hltEle2FileName");
+   tscaleHLTele1Aug=openFile(ana,"hltEle1AugFileName");
+   tscaleHLTele2Aug=openFile(ana,"hltEle2AugFileName");
    tscaleID80Ele=openFile(ana,"idEle80FileName");
    tscaleID95Ele=openFile(ana,"idEle95FileName");
    tscaleHLTeleJet1=openFile(ana,"hltJetEle1FileName");
@@ -69,7 +71,6 @@ public:
       {
         t->GetEntry(jentry);
         if(ptMax==lastPtBin) ptMax=1e99;
-
         if((pt1 > ptMin) && (pt1 < ptMax) && (eta1 > etaMin) && (eta1 < etaMax))
           {
             s1 = scale;
@@ -112,6 +113,23 @@ double  scaleMetHLT( double met){
   }
   
 
+double scaleDoubleEle17Ele8Aug( std::vector<float> pt, std::vector<float> eta )
+{
+   std::vector< std::vector<float> > allEleWithEffs;
+for(unsigned int j=0; j< pt.size(); j++)
+ {
+  std::vector<float> thisEleEffs;
+  thisEleEffs.push_back(efficiencyFromPtEta(pt[j],eta[j],tscaleHLTele1Aug).first);
+  thisEleEffs.push_back(efficiencyFromPtEta(pt[j],eta[j],tscaleHLTele2Aug).first);
+
+  allEleWithEffs.push_back(thisEleEffs);
+ }
+
+  return   combiner2Thr.weight<Trigger1High2Loose>(allEleWithEffs);
+
+}
+
+
 double scaleDoubleEle17Ele8( std::vector<float> pt, std::vector<float> eta )
 {
    std::vector< std::vector<float> > allEleWithEffs;
@@ -120,6 +138,7 @@ for(unsigned int j=0; j< pt.size(); j++)
   std::vector<float> thisEleEffs;
   thisEleEffs.push_back(efficiencyFromPtEta(pt[j],eta[j],tscaleHLTele1).first);
   thisEleEffs.push_back(efficiencyFromPtEta(pt[j],eta[j],tscaleHLTele2).first);
+
   allEleWithEffs.push_back(thisEleEffs);
  }
 
@@ -187,6 +206,9 @@ private:
 //  TTree * tscalePFMHTele;
   TTree * tscaleSingleEleMay;
   TTree * tscaleSingleEleV4;
+
+  TTree * tscaleHLTele1Aug;
+  TTree * tscaleHLTele2Aug;
 
   TTree * tscaleHLTmu;
   TTree * tscaleIDmu;
