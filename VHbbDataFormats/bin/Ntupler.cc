@@ -874,6 +874,10 @@ int main(int argc, char* argv[])
 	METnoPU.phi = iEvent->metNoPU.p4.Phi();
 	METnoPU.sumet = iEvent->metNoPU.sumEt;
 	METnoPU.sig = iEvent->metNoPU.metSig;
+	METnoPUCh.et = iEvent->metCh.p4.Pt();
+	METnoPUCh.phi = iEvent->metCh.p4.Phi();
+	METnoPUCh.sumet = iEvent->metCh.sumEt;
+	METnoPUCh.sig = iEvent->metCh.metSig;
 
 	METnoPUCh.et = iEvent->metCh.p4.Pt();
 	METnoPUCh.phi = iEvent->metCh.p4.Phi();
@@ -1072,7 +1076,7 @@ int main(int argc, char* argv[])
 	  weightTrigMay = triggerWeight.scaleSingleEleMay(vLeptons.pt[0],vLeptons.eta[0]);
 	  weightTrigV4 = triggerWeight.scaleSingleEleV4(vLeptons.pt[0],vLeptons.eta[0]);
 	  weightEleRecoAndId=triggerWeight.scaleID80Ele(vLeptons.pt[0],vLeptons.eta[0]) * triggerWeight.scaleRecoEle(vLeptons.pt[0],vLeptons.eta[0]);
-	  weightEleTrigJetMETPart=triggerWeight.scaleJet30Jet25(jet30eta,jet30pt)*triggerWeight.scalePFMHTEle(MET.et);
+	  weightEleTrigJetMETPart=triggerWeight.scaleJet30Jet25(jet30pt,jet30eta)*triggerWeight.scalePFMHTEle(MET.et);
 	  weightEleTrigElePart= weightTrigV4; //this is for debugging only, checking only the V4 part
 
 	  weightTrigMay*=weightEleRecoAndId;
