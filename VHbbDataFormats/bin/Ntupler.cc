@@ -1,4 +1,5 @@
 #include <TH1F.h>
+#include <TH3F.h>
 #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
 #include <TH2F.h>
 #include <TROOT.h>
@@ -378,8 +379,8 @@ int main(int argc, char* argv[])
   
 
 
-	  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweight2011B;
-
+  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweight2011B;
+  float PU0,PUp1,PUm1;
 
   float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart,weightEleTrigEleAugPart;
 
@@ -476,6 +477,7 @@ int main(int argc, char* argv[])
   TH1F *  count = new TH1F("Count","Count", 1,0,2 );
   TH1F *  countWithPU = new TH1F("CountWithPU","CountWithPU", 1,0,2 );
   TH1F *  countWithPU2011B = new TH1F("CountWithPU2011B","CountWithPU2011B", 1,0,2 );
+  TH3F *  input3DPU = new TH3F("Input3DPU","Input3DPU", 36,-0.5,35.5,36,-0.5,35.5, 36,-0.5,35.5 );
 
   TH1F * pu = new TH1F("pileup","",51,-0.5,50.5);
   _outTree = new TTree("tree", "myTree");
@@ -552,6 +554,9 @@ int main(int argc, char* argv[])
 
   _outTree->Branch("deltaPullAngleAK7", &deltaPullAngleAK7  ,  "deltaPullAngleAK7/F");
   _outTree->Branch("deltaPullAngle2AK7", &deltaPullAngle2AK7  ,  "deltaPullAngle2AK7/F");
+  _outTree->Branch("PU0",       &PU0  ,  "PU0/F");
+  _outTree->Branch("PUm1",       &PUm1  ,  "PUm1/F");
+  _outTree->Branch("PUp1",       &PUp1  ,  "PUp1/F");
   _outTree->Branch("PUweight",       &PUweight  ,  "PUweight/F");
   _outTree->Branch("PUweight2011B",       &PUweight2011B  ,  "PUweight2011B/F");
   _outTree->Branch("eventFlav",       &eventFlav  ,  "eventFlav/I");
@@ -709,7 +714,10 @@ int main(int argc, char* argv[])
 	  std::map<int, unsigned int>::const_iterator puit0 =  aux.puInfo.pus.find(0);
 	  std::map<int, unsigned int>::const_iterator puitm1 = aux.puInfo.pus.find(-1);
 	  std::map<int, unsigned int>::const_iterator puitp1 = aux.puInfo.pus.find(+1);
-	  
+          PU0=puit0->second;
+          PUp1=puitp1->second;
+          PUm1=puitm1->second;
+          input3DPU->Fill(PUm1,PU0,PUp1);	  
 	  PUweight2011B = lumiWeights2011B.weight3D( puitm1->second, puit0->second,puitp1->second); 
 
 	}

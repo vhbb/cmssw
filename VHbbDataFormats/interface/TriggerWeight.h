@@ -41,14 +41,14 @@ public:
 
   }
  
-  TTree * openFile(const edm::ParameterSet& ana, const char * name)
+static TTree * openFile(const edm::ParameterSet& ana, const char * name)
   {
    TFile *hltMuFile = new TFile (ana.getParameter<std::string> (name).c_str(),"read");
    if(hltMuFile)   return (TTree*) hltMuFile->Get("tree");
    else return 0;
   }
 
-  std::pair<float,float> efficiencyFromPtEta(float pt1, float eta1, TTree *t)
+static  std::pair<float,float> efficiencyFromPtEta(float pt1, float eta1, TTree *t)
   {
      float s1 = 1.,err=1.;
      std::pair<float,float> r(s1,err);

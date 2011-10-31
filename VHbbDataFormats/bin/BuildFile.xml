@@ -17,4 +17,5 @@
   <bin  file="TMVAClassification.cxx"></bin>
   <bin  file="make_tree.cxx"></bin>
   <bin  file="Ntupler.cc"></bin>
+  <bin  file="Updater.cc"></bin>
 </environment>
