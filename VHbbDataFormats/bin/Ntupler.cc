@@ -1067,7 +1067,7 @@ int main(int argc, char* argv[])
 	  float cweightTrig = weightTrig1;
 	  weightTrig = cweightID * cweightTrig;
           float weightTrig1OrMu30 = triggerWeight.scaleMuOr30IsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
-          weightTrigOrMu30 = cweightID*(cweightTrig+weightTrig1OrMu30);
+          weightTrigOrMu30 = cweightID*weightTrig1OrMu30;
 	  nvlep=1;
 	  firstAddMu=1;
 	}
