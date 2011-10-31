@@ -4,7 +4,7 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("FWLitePlots")
 
 #fileNames   = cms.vstring('file:2l2bMetEdmNtuples.root'),         ## mandatory
-fname = "BestCSV_TTJets_TuneZ2_7TeV-madgraph-tauola.root";
+fname = "BestCSV_ZH_ZToLL_HToBB_M-110_7TeV-powheg-herwigpp_split_00.root";
 
 process.fwliteInput = cms.PSet(
     fileName   = cms.string(fname),
@@ -24,6 +24,7 @@ process.fwliteOutput = cms.PSet(
 
 process.Analyzer = cms.PSet(
     replaceWeights = cms.bool(True),
+    redoPU = cms.bool(True),
     idMuFileName = cms.string("ScaleEffs42.root"),
     hltMuFileName = cms.string("ScaleFactor_muonEffsOnlyIsoToHLT2.2fb_efficiency.root"),
     hltEle1FileName = cms.string("Ele17.root"),

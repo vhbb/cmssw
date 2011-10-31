@@ -51,7 +51,27 @@ int main(int argc, char* argv[])
   std::string outputFile_( out.getParameter<std::string>("fileName" ) );
   std::string inputFile_( in.getParameter<std::string>("fileName" ) );
   bool replaceWeights( ana.getParameter<bool>("replaceWeights" ) );
+  bool redoPU( ana.getParameter<bool>("redoPU" ) );
+
   TriggerWeight triggerWeight(ana);
+
+  edm::LumiReWeighting   lumiWeights;
+  edm::LumiReWeighting   lumiWeights2011B;
+
+  if(redoPU)
+  {
+  std::string PUmcfileName_ = in.getParameter<std::string> ("PUmcfileName") ;
+  std::string PUmcfileName2011B_ = in.getParameter<std::string> ("PUmcfileName2011B") ;
+  std::string PUdatafileName_ = in.getParameter<std::string> ("PUdatafileName") ;
+  std::string PUdatafileName2011B_ = in.getParameter<std::string> ("PUdatafileName2011B") ;
+  lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
+  lumiWeights2011B = edm::LumiReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
+
+
+  //lumiWeights2011B.weight3D_init(); // generate the weights the fisrt time;
+  lumiWeights2011B.weight3D_init("Weight3D.root");
+
+  }
 
 
 
@@ -93,7 +113,7 @@ int main(int argc, char* argv[])
    oldtree->SetBranchAddress("Vtype", &Vtype);
    oldtree->SetBranchAddress("MET", &MET);
 
-
+   // Trigger weights
    Float_t         weightTrig;
    Float_t         weightTrigMay;
    Float_t         weightTrigV4;
@@ -114,15 +134,56 @@ int main(int argc, char* argv[])
    oldtree->SetBranchAddress("weightEleTrigJetMETPart", &weightEleTrigJetMETPart);
    oldtree->SetBranchAddress("weightEleTrigElePart", &weightEleTrigElePart);
    } 
+
+   //Pileup Info
+   Float_t         PUweight;
+   Float_t         PUweight2011B;
+   Float_t  PU0,PUp1,PUm1;
+   if(redoPU)
+   {
+    oldtree->SetBranchAddress("PU0", &PU0);
+    oldtree->SetBranchAddress("PUp1", &PUp1);
+    oldtree->SetBranchAddress("PUm1", &PUm1);
+    oldtree->SetBranchAddress("PUweight", &PUweight);
+    oldtree->SetBranchAddress("PUweight2011B", &PUweight2011B);
+   }
+
+
    //Create a new file + a clone of old tree in new file + clone of the histos + additional/updated weights
 
    TFile *newfile = new TFile(outputFile_.c_str(),"RECREATE");
    TTree *newtree = oldtree->CloneTree(0);
    if(count) count->Clone()->Write();
-   if(countWithPU) countWithPU->Clone()->Write();
-   if(countWithPU2011B) countWithPU2011B->Clone()->Write();
    if(input3DPU) input3DPU->Clone()->Write();
-   
+
+   if(redoPU)
+   { 
+     if(countWithPU) countWithPU->Clone("CountWithPU_OLD")->Write();
+     if(countWithPU2011B) countWithPU2011B->Clone("CountWithPU2011B_OLD")->Write();
+
+//recompute the normalization
+     countWithPU = new TH1F("CountWithPU","CountWithPU", 1,0,2 );
+     countWithPU2011B = new TH1F("CountWithPU2011B","CountWithPU2011B", 1,0,2 );
+     for(int ix=1;ix<=input3DPU->GetNbinsX();ix++)
+      for(int iy=1;iy<=input3DPU->GetNbinsY();iy++)
+       for(int iz=1;iz<=input3DPU->GetNbinsZ();iz++)
+        {
+          Float_t nev=input3DPU->GetBinContent(ix,iy,iz);
+          PUweight =  lumiWeights.weight( iy-1 );  // bin 1 is [-0.5,0.5]
+          PUweight2011B = lumiWeights2011B.weight3D( ix-1, iy-1, iz-1);
+          countWithPU->Fill(1,PUweight*nev);
+          countWithPU2011B->Fill(1,PUweight2011B*nev);
+        }
+
+     countWithPU->Write();
+     countWithPU2011B->Write();
+ 
+   }
+   else
+   { //Just clone the old ones
+     if(countWithPU) countWithPU->Clone()->Write();
+     if(countWithPU2011B) countWithPU2011B->Clone()->Write();
+   }
     
   if(!replaceWeights)
    {
@@ -145,6 +206,13 @@ int main(int argc, char* argv[])
 
    for (Int_t i=0;i<nentries; i++) {
          oldtree->GetEntry(i);
+
+         if(redoPU) {
+          PUweight =  lumiWeights.weight( PU0 );
+          PUweight2011B = lumiWeights2011B.weight3D( PUm1, PU0, PUp1);
+        }
+  
+
 
          std::vector<float> jet30eta;
          std::vector<float> jet30pt;
