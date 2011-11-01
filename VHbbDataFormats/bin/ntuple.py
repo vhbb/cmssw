@@ -8,23 +8,16 @@ process = cms.Process("FWLitePlots")
 process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(
 "root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/WH_WToLNu_HToBB_M-110_7TeV-powheg-herwigpp/HBB_EDMNtupleV11_ProcV1/68dcc5b95bb3c453e1bd27a02f6327b5//PAT.edm_1_3_00h.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/WH_WToLNu_HToBB_M-110_7TeV-powheg-herwigpp/HBB_EDMNtupleV11_ProcV1/68dcc5b95bb3c453e1bd27a02f6327b5//PAT.edm_2_1_ov7.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/WH_WToLNu_HToBB_M-110_7TeV-powheg-herwigpp/HBB_EDMNtupleV11_ProcV1/68dcc5b95bb3c453e1bd27a02f6327b5//PAT.edm_3_1_7er.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/WH_WToLNu_HToBB_M-110_7TeV-powheg-herwigpp/HBB_EDMNtupleV11_ProcV1/68dcc5b95bb3c453e1bd27a02f6327b5//PAT.edm_4_1_3Yw.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/WH_WToLNu_HToBB_M-110_7TeV-powheg-herwigpp/HBB_EDMNtupleV11_ProcV1/68dcc5b95bb3c453e1bd27a02f6327b5//PAT.edm_5_1_Ren.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/WH_WToLNu_HToBB_M-110_7TeV-powheg-herwigpp/HBB_EDMNtupleV11_ProcV1/68dcc5b95bb3c453e1bd27a02f6327b5//PAT.edm_6_1_axp.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/WH_WToLNu_HToBB_M-110_7TeV-powheg-herwigpp/HBB_EDMNtupleV11_ProcV1/68dcc5b95bb3c453e1bd27a02f6327b5//PAT.edm_7_1_gId.root",
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/WH_WToLNu_HToBB_M-110_7TeV-powheg-herwigpp/HBB_EDMNtupleV11_ProcV1/68dcc5b95bb3c453e1bd27a02f6327b5//PAT.edm_8_1_h1I.root"
-
 ###/gpfs/gpfsddn/cms/user/arizzi/Hbb/V9/CMSSW_4_2_8_patch3/src/VHbbAnalysis/HbbAnalyzer/test/PAT.edm.root"
 
 ),
 
 
-    PUmcfileName = cms.string("ttbarPU_36bins.root"),
-    PUmcfileName2011B= cms.string("PU1D2011B.root"),
-    PUdatafileName2011B = cms.string("Cert_175832-178078_7TeV_PromptReco_Collisons11_JSON.pileupTruth_v2.root"),
-    PUdatafileName = cms.string("Pileup_2011_to_173692_LPLumiScale_68mb_36bins.root"),
+    PUmcfileName = cms.string("ttbarPU_35bins.root"),
+    PUmcfileName2011B= cms.string("Fall11_Generated.root"),
+    PUdatafileName2011B = cms.string("Cert_175832-178078_7TeV_PromptReco_Collisons11_JSON.pileupTruth_v2_35bins.root"),
+    PUdatafileName = cms.string("Pileup_2011_to_173692_LPLumiScale_68mb_35bins.root"),
+    Weight3DfileName = cms.string(""),
     maxEvents   = cms.int32(-1),                             ## optional
     skipEvents   = cms.int32(0),                             ## optional
     outputEvery = cms.uint32(0),                            ## optional

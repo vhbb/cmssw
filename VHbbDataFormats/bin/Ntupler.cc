@@ -389,7 +389,7 @@ int main(int argc, char* argv[])
   int WplusMode,WminusMode;
   int Vtype,nSvs,nSimBs,numJets,numBJets,eventFlav;
   //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
-  bool triggerFlags[500],hbhe,ecalFlag;
+  bool triggerFlags[500],hbhe,ecalFlag,totalKinematics;
   float btag1T2CSF=1.,btag2TSF=1.,btag1TSF=1.,btagA0CSF=1., btagA0TSF=1., btag2CSF=1., btag1TA1C=1.;
   // ----------------------------------------------------------------------
   // First Part: 
@@ -452,6 +452,7 @@ int main(int argc, char* argv[])
 
   std::string PUdatafileName_ = in.getParameter<std::string> ("PUdatafileName") ;
   std::string PUdatafileName2011B_ = in.getParameter<std::string> ("PUdatafileName2011B") ;
+  std::string Weight3DfileName_ = in.getParameter<std::string> ("Weight3DfileName") ;
 
 
 
@@ -466,9 +467,12 @@ int main(int argc, char* argv[])
         	   lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
 
 		   lumiWeights2011B = edm::LumiReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
-		   //lumiWeights2011B.weight3D_init(); // generate the weights the fisrt time;
-		   lumiWeights2011B.weight3D_init("Weight3D.root");
-
+                   if(Weight3DfileName_!="")
+		      { lumiWeights2011B.weight3D_init(Weight3DfileName_.c_str()); }
+		   else
+                      {
+                        lumiWeights2011B.weight3D_init(); // generate the weights the fisrt time;
+		      }
 
     }
  
@@ -665,10 +669,10 @@ int main(int argc, char* argv[])
   std::stringstream s;
   s << "triggerFlags[" << triggers.size() << "]/b";
   _outTree->Branch("triggerFlags", triggerFlags, s.str().c_str()); 
-  
  
   _outTree->Branch("EVENT"		,  &EVENT	         ,   "run/I:lumi/I:event/I:json/I");
   _outTree->Branch("hbhe"		,  &hbhe	         ,   "hbhe/b");
+  _outTree->Branch("totalKinematics"		,  &totalKinematics	         ,   "totalKinematics/b");
   _outTree->Branch("ecalFlag"		,  &ecalFlag	         ,   "ecalFlag/b");
   _outTree->Branch("btag1TSF"		,  &btag1TSF	         ,   "btag1TSF/F");
   _outTree->Branch("btag2TSF"		,  &btag2TSF	         ,   "btag2TSF/F");
@@ -809,6 +813,7 @@ int main(int argc, char* argv[])
 	patFilters.setEvent(&ev,"VH");
 	hbhe = patFilters.accept("hbhe");
 	ecalFlag = patFilters.accept("ecalFilter");
+	totalKinematics = patFilters.accept("totalKinematics");
 
 	trigger.setEvent(&ev);
 	for(size_t j=0;j < triggers.size();j++)
