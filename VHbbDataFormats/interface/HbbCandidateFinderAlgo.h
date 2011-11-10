@@ -15,11 +15,12 @@ class HbbCandidateFinderAlgo {
  VHbbCandidate changeHiggs(bool useHighestPtHiggs , const VHbbCandidate & old);
 
   
- protected:
 static  bool jetID(const VHbbEvent::SimpleJet & );  
  
   bool  findDiJets (const std::vector<VHbbEvent::SimpleJet>& , VHbbEvent::SimpleJet& , VHbbEvent::SimpleJet& ,std::vector<VHbbEvent::SimpleJet>&);
   bool  findDiJetsHighestPt (const std::vector<VHbbEvent::SimpleJet>& , VHbbEvent::SimpleJet& , VHbbEvent::SimpleJet& ,std::vector<VHbbEvent::SimpleJet>&);
+
+ protected:
   
   void findMuons (const std::vector<VHbbEvent::MuonInfo>& muons, std::vector<VHbbEvent::MuonInfo>& out, std::vector<unsigned int>&);
   void findElectrons(const std::vector<VHbbEvent::ElectronInfo>& electrons, std::vector<VHbbEvent::ElectronInfo>& out,std::vector<unsigned int>&);

@@ -1,6 +1,7 @@
 #include <TH1F.h>
 #include <TH3F.h>
 #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
+#include "PhysicsTools/Utilities/interface/Lumi3DReWeighting.h"
 #include <TH2F.h>
 #include <TROOT.h>
 #include <TFile.h>
@@ -88,6 +89,15 @@ bool jsonContainsEvent (const std::vector< edm::LuminosityBlockRange > &jsonVec,
 		  boost::bind(funcPtr, _1, lumiID) );
   return jsonVec.end() != iter;
 
+}
+
+float resolutionBias(float eta)
+{
+// return 0;//Nominal!
+ if(eta< 1.1) return 0.05;
+ if(eta< 2.5) return 0.10;
+ if(eta< 5) return 0.30;
+ return 0;
 }
 
 
@@ -189,8 +199,8 @@ struct  LeptonInfo
   void reset()
   {
     for(int i =0; i < MAXL;i++){ 
-     mass[i]=-99; pt[i]=-99; eta[i]=-99; phi[i]=-99; aodCombRelIso[i]=-99; pfCombRelIso[i]=-99; photonIso[i]=-99; neutralHadIso[i]=-99; chargedHadIso[i]=-99; chargedPUIso[i]=-99; particleIso[i]=-99; dxy[i]=-99; dz[i]=-99; type[i]=-99; 
-     id80[i]=-99; id95[i]=-99; vbtf[i]=-99;
+     mass[i]=-99; pt[i]=-99; eta[i]=-99; phi[i]=-99; aodCombRelIso[i]=-99; pfCombRelIso[i]=-99; photonIso[i]=-99; neutralHadIso[i]=-99; chargedHadIso[i]=-99; chargedPUIso[i]=-99; particleIso[i]=-99; dxy[i]=-99; dz[i]=-99; type[i]=-99;  genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99;  
+     id80[i]=-99; id95[i]=-99; vbtf[i]=-99; id80NoIso[i]=-99;
      }
   }
 
@@ -207,7 +217,13 @@ struct  LeptonInfo
     neutralHadIso[j]=i.pfNeuIso;
     chargedHadIso[j]=i.pfChaIso;
     chargedPUIso[j]=i.pfChaPUIso;
-    setSpecific(i,j);
+    if(i.mcFourMomentum.Pt() > 0)
+    { 
+     genPt[j]=i.mcFourMomentum.Pt();
+    genEta[j]=i.mcFourMomentum.Eta();
+    genPhi[j]=i.mcFourMomentum.Phi();
+   }
+      setSpecific(i,j);
   }
   template <class Input> void setSpecific(const Input & i, int j)
   {
@@ -227,17 +243,23 @@ struct  LeptonInfo
   float chargedHadIso[MAXL];
   float chargedPUIso[MAXL];
   float particleIso[MAXL];
+  float genPt[MAXL];
+  float genEta[MAXL];
+  float genPhi[MAXL];
   float dxy[MAXL];
   float dz[MAXL];
   int type[MAXL];
   float id80[MAXL];
   float id95[MAXL];
   float vbtf[MAXL];
+  float id80NoIso[MAXL];
 };
   
 template <> void LeptonInfo::setSpecific<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j){
   id80[j]=i.id80;
   id95[j]=i.id95;
+  id80NoIso[j]=(i.innerHits ==0 && !(fabs(i.convDist)<0.02 && fabs(i.convDcot)<0.02) &&
+((i.isEB && i.sihih<0.01 && fabs(i.Dphi)<0.06 && fabs(i.Deta)<0.004) || (i.isEE && i.sihih<0.03 && fabs(i.Dphi)<0.03  && fabs(i.Deta)<0.007)));
 }
 template <> void LeptonInfo::setSpecific<VHbbEvent::MuonInfo>(const VHbbEvent::MuonInfo & i, int j){
   dxy[j]=i.ipDb;
@@ -298,6 +320,12 @@ typedef struct
     nef[i]  =j.neutralEmEFraction;
     nconstituents[i]  =j.nConstituents;
     nch[i]=j.ntracks;
+    SF_CSVL[i]=j.SF_CSVL;
+    SF_CSVM[i]=j.SF_CSVM;
+    SF_CSVT[i]=j.SF_CSVT;
+    SF_CSVLerr[i]=j.SF_CSVLerr;
+    SF_CSVMerr[i]=j.SF_CSVMerr;
+    SF_CSVTerr[i]=j.SF_CSVTerr;
 
     flavour[i]=j.flavour;
     if(j.bestMCp4.Pt() > 0)
@@ -349,6 +377,12 @@ typedef struct
   float vtx3dL [MAXJ];
   float vtx3deL[MAXJ];
   bool id[MAXJ];
+    float SF_CSVL[MAXJ];
+    float SF_CSVM[MAXJ];
+    float SF_CSVT[MAXJ]; 
+    float SF_CSVLerr[MAXJ];
+    float SF_CSVMerr[MAXJ];
+    float SF_CSVTerr[MAXJ];  
 } JetInfo;
   
 int main(int argc, char* argv[]) 
@@ -383,6 +417,7 @@ int main(int argc, char* argv[])
   float PU0,PUp1,PUm1;
 
   float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart,weightEleTrigEleAugPart;
+  float  weightTrigMET80, weightTrigMET100,    weightTrig2CJet20 , weightTrigMET150  , weightTrigMET802CJet, weightTrigMET1002CJet, weightTrigMETLP ;
 
   //FIXME
   //  float SimBs_dr = -99, SimBs_dEta= -99, SimBs_dPhi = -99, SimBs_Hmass = -99, SimBs_Hpt = -99, SimBs_Heta = -99, SimBs_Hphi = -99;
@@ -430,6 +465,8 @@ int main(int argc, char* argv[])
   // now get each parameter
   int maxEvents_( in.getParameter<int>("maxEvents") );
   int skipEvents_( in.getParameter<int>("skipEvents") );
+  int runMin_( in.getParameter<int>("runMin") );
+  int runMax_( in.getParameter<int>("runMax") );
   unsigned int outputEvery_( in.getParameter<unsigned int>("outputEvery") );
   std::string outputFile_( out.getParameter<std::string>("fileName" ) );
   std::vector<std::string> triggers( ana.getParameter<std::vector<std::string> >("triggers") );
@@ -439,6 +476,7 @@ int main(int argc, char* argv[])
   bool useHighestPtHiggsW = ana.getParameter<bool>("useHighestPtHiggsW");
   HbbCandidateFinderAlgo * algoZ = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdZ"),useHighestPtHiggsZ);
   HbbCandidateFinderAlgo * algoW = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), ana.getParameter<double>("jetPtThresholdW"),useHighestPtHiggsW );
+  HbbCandidateFinderAlgo * algoRecoverLowPt = new HbbCandidateFinderAlgo(ana.getParameter<bool>("verbose"), 15, true);
 
   TriggerWeight triggerWeight(ana);
   BTagWeight btag(2); // 2 operating points "Custom" = 0.5 and "Tight = 0.898"
@@ -461,17 +499,17 @@ int main(int argc, char* argv[])
   TriggerReader patFilters(false);
 
   edm::LumiReWeighting   lumiWeights;
-  edm::LumiReWeighting   lumiWeights2011B;
+  edm::Lumi3DReWeighting   lumiWeights2011B;
   if(isMC_)
     {
         	   lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
 
-		   lumiWeights2011B = edm::LumiReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
+		   lumiWeights2011B = edm::Lumi3DReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
                    if(Weight3DfileName_!="")
 		      { lumiWeights2011B.weight3D_init(Weight3DfileName_.c_str()); }
 		   else
                       {
-                        lumiWeights2011B.weight3D_init(); // generate the weights the fisrt time;
+                        lumiWeights2011B.weight3D_init(1.0); // generate the weights the fisrt time;
 		      }
 
     }
@@ -513,6 +551,12 @@ int main(int argc, char* argv[])
   _outTree->Branch("hJet_vtx3dL",hJets.vtx3dL ,"vtx3dL[nhJets]/F");
   _outTree->Branch("hJet_vtx3deL",hJets.vtx3deL ,"vtx3deL[nhJets]/F");
   _outTree->Branch("hJet_id",hJets.id ,"id[nhJets]/b");
+  _outTree->Branch("hJet_SF_CSVL",hJets.SF_CSVL ,"SF_CSVL[nhJets]/b");
+  _outTree->Branch("hJet_SF_CSVM",hJets.SF_CSVM ,"SF_CSVM[nhJets]/b");
+  _outTree->Branch("hJet_SF_CSVT",hJets.SF_CSVT ,"SF_CSVT[nhJets]/b");
+  _outTree->Branch("hJet_SF_CSVLerr",hJets.SF_CSVLerr ,"SF_CSVLerr[nhJets]/b");
+  _outTree->Branch("hJet_SF_CSVMerr",hJets.SF_CSVMerr ,"SF_CSVMerr[nhJets]/b");
+  _outTree->Branch("hJet_SF_CSVTerr",hJets.SF_CSVTerr ,"SF_CSVTerr[nhJets]/b");
 
   _outTree->Branch("aJet_pt",aJets.pt ,"pt[naJets]/F");
   _outTree->Branch("aJet_eta",aJets.eta ,"eta[naJets]/F");
@@ -536,6 +580,12 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_vtx3dL",aJets.vtx3dL ,"vtx3dL[naJets]/F");
   _outTree->Branch("aJet_vtx3deL",aJets.vtx3deL ,"vtx3deL[naJets]/F");
   _outTree->Branch("aJet_id",aJets.id ,"id[naJets]/b");
+  _outTree->Branch("aJet_SF_CSVL",aJets.SF_CSVL ,"SF_CSVL[naJets]/b");
+  _outTree->Branch("aJet_SF_CSVM",aJets.SF_CSVM ,"SF_CSVM[naJets]/b");
+  _outTree->Branch("aJet_SF_CSVT",aJets.SF_CSVT ,"SF_CSVT[naJets]/b");
+  _outTree->Branch("aJet_SF_CSVLerr",aJets.SF_CSVLerr ,"SF_CSVLerr[naJets]/b");
+  _outTree->Branch("aJet_SF_CSVMerr",aJets.SF_CSVMerr ,"SF_CSVMerr[naJets]/b");
+  _outTree->Branch("aJet_SF_CSVTerr",aJets.SF_CSVTerr ,"SF_CSVTerr[naJets]/b");
 
   _outTree->Branch("numJets"      ,  &numJets         ,  "numJets/I"       );                
   _outTree->Branch("numBJets"      ,  &numBJets         ,  "numBJets/I"       );                
@@ -554,6 +604,14 @@ int main(int argc, char* argv[])
   _outTree->Branch("weightEleTrigJetMETPart"        , &weightEleTrigJetMETPart          ,  "weightEleTrigJetMETPart/F");
   _outTree->Branch("weightEleTrigElePart"        , &weightEleTrigElePart          ,  "weightEleTrigElePart/F");
   _outTree->Branch("weightEleTrigEleAugPart"        , &weightEleTrigEleAugPart          ,  "weightEleTrigEleAugPart/F");
+
+  _outTree->Branch("weightTrigMET80"        , &weightTrigMET80          , "weightTrigMET80/F");
+  _outTree->Branch("weightTrigMET100"        , &weightTrigMET100          , "weightTrigMET100/F");
+  _outTree->Branch("weightTrig2CJet20"        , &weightTrig2CJet20          , "weightTrig2CJet20/F");
+  _outTree->Branch("weightTrigMET150"        , &weightTrigMET150          , "weightTrigMET150/F");
+  _outTree->Branch("weightTrigMET802CJet"        , &weightTrigMET802CJet          , "weightTrigMET802CJet/F");
+  _outTree->Branch("weightTrigMET1002CJet"        , &weightTrigMET1002CJet          , "weightTrigMET1002CJet/F");
+  _outTree->Branch("weightTrigMETLP"        , &weightTrigMETLP          , "weightTrigMETLP/F");
 
 
   _outTree->Branch("deltaPullAngleAK7", &deltaPullAngleAK7  ,  "deltaPullAngleAK7/F");
@@ -594,6 +652,10 @@ int main(int argc, char* argv[])
   _outTree->Branch("vLepton_id80",vLeptons.id80 ,"id80[nvlep]/F");
   _outTree->Branch("vLepton_id95",vLeptons.id95 ,"id95[nvlep]/F");
   _outTree->Branch("vLepton_vbtf",vLeptons.vbtf ,"vbtf[nvlep]/F");
+  _outTree->Branch("vLepton_id80NoIso",vLeptons.id80NoIso ,"id80NoIso[nvlep]/F");
+  _outTree->Branch("vLepton_genPt",vLeptons.genPt ,"genPt[nvlep]/F");
+  _outTree->Branch("vLepton_genEta",vLeptons.genEta ,"genEta[nvlep]");
+  _outTree->Branch("vLepton_genPhi",vLeptons.genPhi ,"genPhi[nvlep]/F");
  
   _outTree->Branch("aLepton_mass",aLeptons.mass ,"mass[nalep]/F");
   _outTree->Branch("aLepton_pt",aLeptons.pt ,"pt[nalep]/F");
@@ -612,6 +674,10 @@ int main(int argc, char* argv[])
   _outTree->Branch("aLepton_id80",aLeptons.id80 ,"id80[nalep]/F");
   _outTree->Branch("aLepton_id95",aLeptons.id95 ,"id95[nalep]/F");
   _outTree->Branch("aLepton_vbtf",aLeptons.vbtf ,"vbtf[nalep]/F");
+  _outTree->Branch("aLepton_id80NoIso",aLeptons.id80NoIso ,"id80NoIso[nalep]/F");
+  _outTree->Branch("aLepton_genPt",aLeptons.genPt ,"genPt[nalep]/F");
+  _outTree->Branch("aLepton_genEta",aLeptons.genEta ,"genEta[nalep]");
+  _outTree->Branch("aLepton_genPhi",aLeptons.genPhi ,"genPhi[nalep]/F");
  
   _outTree->Branch("top"		,  &top	         ,   "mass/F:pt/F:wMass/F");
   _outTree->Branch("WplusMode"		,  &WplusMode	 ,   "WplusMode/I");
@@ -700,18 +766,24 @@ int main(int argc, char* argv[])
           if (maxEvents_ >= 0){
               if (ievt > maxEvents_ + skipEvents_) break;
           };
-          count->Fill(1.);
 
       fwlite::Handle< VHbbEventAuxInfo > vhbbAuxHandle; 
       vhbbAuxHandle.getByLabel(ev,"HbbAnalyzerNew");
       const VHbbEventAuxInfo & aux = *vhbbAuxHandle.product();
+
+      if(EVENT.run < runMin_ && runMin_ > 0) continue;
+      if(EVENT.run > runMax_ && runMax_ > 0) continue;
+
+      count->Fill(1.);
+
       PUweight=1.;
       PUweight2011B=1.;
  	  if(isMC_){
  
  	  // PU weights // Run2011A
 	  std::map<int, unsigned int>::const_iterator puit = aux.puInfo.pus.find(0);
-	  PUweight =  lumiWeights.weight( puit->second );        
+          int npu =puit->second ;
+	  PUweight =  lumiWeights.weight( npu );        
 	  pu->Fill(puit->second);
 	  // PU weight Run2011B
 	  // PU weight Run2011B
@@ -733,7 +805,6 @@ int main(int argc, char* argv[])
 	EVENT.lumi = ev.id().luminosityBlock();
 	EVENT.event = ev.id().event();
 	EVENT.json = jsonContainsEvent (jsonVector, ev);
-
 	//FIXME : need to update EDM ntuple with BHadron infos
 // 	// simBHadrons
 // 	fwlite::Handle<SimBHadronCollection> SBHC;
@@ -742,6 +813,7 @@ int main(int argc, char* argv[])
 	
 	const std::vector<VHbbCandidate> * candZ ;
 	const std::vector<VHbbCandidate> * candW ;
+	VHbbEvent modifiedEvent;;
 	const VHbbEvent *  iEvent =0;
 	if(fromCandidate)
 	  {
@@ -759,12 +831,38 @@ int main(int argc, char* argv[])
 	    candWlocal->clear();
 	    fwlite::Handle< VHbbEvent > vhbbHandle; 
 	    vhbbHandle.getByLabel(ev,"HbbAnalyzerNew");
-	    iEvent = vhbbHandle.product();
-	    algoZ->run(vhbbHandle.product(),*candZlocal);
-	    algoW->run(vhbbHandle.product(),*candWlocal);
+            modifiedEvent = *vhbbHandle.product();
+            if(isMC_)
+            {
+            iEvent= &modifiedEvent;
+           
+            for(size_t j=0; j< modifiedEvent.simpleJets2.size() ; j++)
+            {
+               TLorentzVector & p4 = modifiedEvent.simpleJets2[j].p4; 
+               TLorentzVector & mcp4 = modifiedEvent.simpleJets2[j].bestMCp4;
+	       if ((fabs(p4.Pt() - mcp4.Pt())/ p4.Pt())<0.5) { //Limit the effect to the core 
+                  float cor = (p4.Pt()+resolutionBias(fabs(p4.Eta()))*(p4.Pt()-mcp4.Pt()))/p4.Pt();
+                  p4.SetPtEtaPhiE(p4.Pt()*cor,p4.Eta(), p4.Phi(), p4.E()*cor);
+               }
+            }
+            } else
+            {
+	      iEvent = vhbbHandle.product();
+            }  
+
+	    algoZ->run(iEvent,*candZlocal);
+	    algoW->run(iEvent,*candWlocal);
+
+	    if(candZlocal->size() == 0 or candZlocal->at(0).H.jets.size() < 2)  //recover low pt 
+              {
+		 candZlocal->clear();
+		 candWlocal->clear();
+                 algoRecoverLowPt->run(iEvent,*candZlocal);
+                 algoRecoverLowPt->run(iEvent,*candWlocal);
+              }
+
 	    candZ= candZlocal; 
 	    candW= candWlocal; 
-
 	    /*     for(size_t m=0;m<iEvent->muInfo.size();m++)
 		   { 
 
@@ -970,6 +1068,8 @@ int main(int argc, char* argv[])
 	minDeltaPhijetMET = 999;
 	TLorentzVector bJet;
 	std::vector<std::vector<BTagWeight::JetInfo> > btagJetInfos;
+	std::vector<float> jet10eta;
+	std::vector<float> jet10pt;
 	std::vector<float> jet30eta;
 	std::vector<float> jet30pt;
 	if(fromCandidate)
@@ -1008,6 +1108,11 @@ int main(int argc, char* argv[])
 		{
                   minDeltaPhijetMET=fabs(deltaPhi( vhCand.V.mets.at(0).p4.Phi(), iEvent->simpleJets2[j].p4.Phi()));
                   jetPt_minDeltaPhijetMET=iEvent->simpleJets2[j].p4.Pt();
+		}
+	      if(iEvent->simpleJets2[j].p4.Pt() > 10)
+		{
+		  jet10eta.push_back(iEvent->simpleJets2[j].p4.Eta());
+		  jet10pt.push_back(iEvent->simpleJets2[j].p4.Pt());
 		}
 	      if(iEvent->simpleJets2[j].p4.Pt() > 30)
 		{
@@ -1101,11 +1206,20 @@ int main(int argc, char* argv[])
 //	  weightTrig = weightTrigMay * 0.187 + weightTrigV4 * (1.-0.187); //FIXME: use proper lumi if we reload 2.fb
 	  weightTrig = (weightTrigMay * 0.215 + weightTrigV4 * 1.915)/ 2.13; //FIXME: use proper lumi if we reload 2.fb
 	}
+
+
+        weightTrigMET80 =  triggerWeight.scaleMET80(MET.et);
+        weightTrigMET100 =  triggerWeight.scaleMET80(MET.et);
+        weightTrig2CJet20 = triggerWeight.scale2CentralJet( jet10pt, jet10eta);
+        weightTrigMET150 = triggerWeight.scaleMET150(MET.et);
+        weightTrigMET802CJet= weightTrigMET80 * weightTrig2CJet20;
+        weightTrigMET1002CJet= weightTrigMET100 * weightTrig2CJet20;
+
 	if( Vtype == VHbbCandidate::Znn ){
 	  nvlep=0;
 	  float weightTrig1 = triggerWeight.scaleMetHLT(vhCand.V.mets.at(0).p4.Pt());
-	  weightTrig = weightTrig1;
-	  weightTrigMET = weightTrig1;  
+          weightTrigMETLP = weightTrig1;
+          weightTrig = weightTrigMET150 + weightTrigMET802CJet  - weightTrigMET802CJet*weightTrigMET150;
 	}
       
         if(weightTrigMay < 0) weightTrigMay=weightTrig;
@@ -1115,6 +1229,17 @@ int main(int argc, char* argv[])
          weightTrig = 1.; 
          weightTrigMay = 1.;
          weightTrigV4 = 1.;
+         weightEleRecoAndId= 1.;
+	 weightEleTrigJetMETPart= 1.;
+         weightEleTrigElePart= 1.;
+         weightEleTrigEleAugPart=1.;
+         weightTrigMET80= 1.;
+         weightTrigMET100= 1.;
+         weightTrig2CJet20= 1.;
+	 weightTrigMET150= 1.;
+	 weightTrigMET802CJet= 1.;
+	 weightTrigMET1002CJet= 1.;
+	 weightTrigMETLP = 1.;
 
         } 
 	aLeptons.reset();

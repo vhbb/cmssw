@@ -13,12 +13,14 @@ process.fwliteInput = cms.PSet(
 ),
 
 
-    PUmcfileName = cms.string("ttbarPU_35bins.root"),
+    PUmcfileName = cms.string("ttbarPU_35bins_fall11.root"),
     PUmcfileName2011B= cms.string("Fall11_Generated.root"),
-    PUdatafileName2011B = cms.string("Cert_175832-178078_7TeV_PromptReco_Collisons11_JSON.pileupTruth_v2_35bins.root"),
+    PUdatafileName2011B = cms.string("Cert_175832-180252_PromptReco_JSON.pileupTruth_v2_finebin.root"),
     PUdatafileName = cms.string("Pileup_2011_to_173692_LPLumiScale_68mb_35bins.root"),
     Weight3DfileName = cms.string(""),
     maxEvents   = cms.int32(-1),                             ## optional
+    runMin  = cms.int32(-1),
+    runMax  = cms.int32(-1),
     skipEvents   = cms.int32(0),                             ## optional
     outputEvery = cms.uint32(0),                            ## optional
     lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange()),

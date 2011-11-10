@@ -4,14 +4,15 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("FWLitePlots")
 
 #fileNames   = cms.vstring('file:2l2bMetEdmNtuples.root'),         ## mandatory
-fname = "BestCSV_ZH_ZToLL_HToBB_M-110_7TeV-powheg-herwigpp_split_00.root";
+fname = "DiJetPt_TTJets_TuneZ2_7TeV-madgraph-tauola.root"
 
 process.fwliteInput = cms.PSet(
     fileName   = cms.string(fname),
     PUmcfileName = cms.string("ttbarPU_36bins.root"),
-    PUmcfileName2011B= cms.string("PU1D2011B.root"),
-    PUdatafileName2011B = cms.string("Cert_175832-178078_7TeV_PromptReco_Collisons11_JSON.pileupTruth_v2.root"),
+    PUmcfileName2011B= cms.string("Summer11_Generated.root"),
+    PUdatafileName2011B = cms.string("Cert_175832-180252_PromptReco_JSON.pileupTruth_v2_finebin.root"),
     PUdatafileName = cms.string("Pileup_2011_to_173692_LPLumiScale_68mb_36bins.root"),
+    Weight3DfileName = cms.string(""),
     maxEvents   = cms.int32(-1),                             ## optional
     skipEvents   = cms.int32(0),                             ## optional
     outputEvery = cms.uint32(0),                            ## optional

@@ -2,6 +2,8 @@
 #include <TH3F.h>
 #include <TH2F.h>
 #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
+#include "PhysicsTools/Utilities/interface/Lumi3DReWeighting.h"
+
 #include <TROOT.h>
 #include <TFile.h>
 #include <TTree.h>
@@ -12,12 +14,17 @@
 #include "DataFormats/Math/interface/deltaPhi.h"
 
 //btagging
-//#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
 //#include "VHbbAnalysis/VHbbDataFormats/interface/BTagWeight.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/HbbCandidateFinderAlgo.h"
+#include "VHbbAnalysis/VHbbDataFormats/src/HbbCandidateFinderAlgo.cc"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidateTools.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/TriggerWeight.h"
 
 #include <sstream>
 #include <string>
+#define nhJets_MAX 2
+#define naJets_MAX 20
 
 #define MAXJ 30
 #define MAXL 10
@@ -52,11 +59,16 @@ int main(int argc, char* argv[])
   std::string inputFile_( in.getParameter<std::string>("fileName" ) );
   bool replaceWeights( ana.getParameter<bool>("replaceWeights" ) );
   bool redoPU( ana.getParameter<bool>("redoPU" ) );
+  std::string Weight3DfileName_ = in.getParameter<std::string> ("Weight3DfileName") ;
 
   TriggerWeight triggerWeight(ana);
 
   edm::LumiReWeighting   lumiWeights;
-  edm::LumiReWeighting   lumiWeights2011B;
+  edm::Lumi3DReWeighting   lumiWeights2011B;
+
+  HbbCandidateFinderAlgo finder(false, 20, true);
+  VHbbCandidateTools selector(false);
+
 
   if(redoPU)
   {
@@ -65,11 +77,17 @@ int main(int argc, char* argv[])
   std::string PUdatafileName_ = in.getParameter<std::string> ("PUdatafileName") ;
   std::string PUdatafileName2011B_ = in.getParameter<std::string> ("PUdatafileName2011B") ;
   lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
-  lumiWeights2011B = edm::LumiReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
+  lumiWeights2011B = edm::Lumi3DReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
 
 
   //lumiWeights2011B.weight3D_init(); // generate the weights the fisrt time;
-  lumiWeights2011B.weight3D_init("Weight3D.root");
+                   if(Weight3DfileName_!="")
+                      { lumiWeights2011B.weight3D_init(Weight3DfileName_.c_str()); }
+                   else
+                      {
+                        lumiWeights2011B.weight3D_init(1.0); // generate the weights the fisrt time;
+                      }
+
 
   }
 
@@ -88,14 +106,60 @@ int main(int argc, char* argv[])
    Int_t           nvlep;
    Float_t         vLepton_pt[50];
    Float_t         vLepton_eta[50];
-   Int_t           nhJets;
+/*   Int_t           nhJets;
    Float_t         hJet_pt[50];
    Float_t         hJet_eta[50];
    Int_t           naJets;
    Float_t         aJet_pt[50];
    Float_t         aJet_eta[50];
-   Int_t           Vtype;
+*/   Int_t           Vtype;
    METInfo         MET;
+   Int_t           nhJets;
+   Int_t           naJets;
+   Float_t         hJet_pt[nhJets_MAX];
+   Float_t         hJet_eta[nhJets_MAX];
+   Float_t         hJet_phi[nhJets_MAX];
+   Float_t         hJet_e[nhJets_MAX];
+   Float_t         hJet_csv[nhJets_MAX];
+   Float_t         hJet_cosTheta[nhJets_MAX];
+   Int_t           hJet_numTracksSV[nhJets_MAX];
+   Float_t         hJet_chf[nhJets_MAX];
+   Float_t         hJet_nhf[nhJets_MAX];
+   Float_t         hJet_cef[nhJets_MAX];
+   Float_t         hJet_nef[nhJets_MAX];
+   Float_t         hJet_nch[nhJets_MAX];
+   Float_t         hJet_nconstituents[nhJets_MAX];
+   Float_t         hJet_flavour[nhJets_MAX];
+   Float_t         hJet_genPt[nhJets_MAX];
+   Float_t         hJet_genEta[nhJets_MAX];
+   Float_t         hJet_genPhi[nhJets_MAX];
+   Float_t         hJet_JECUnc[nhJets_MAX];
+   Float_t         hJet_vtxMass[nhJets_MAX];
+   Float_t         hJet_vtx3dL[nhJets_MAX];
+   Float_t         hJet_vtx3deL[nhJets_MAX];
+   UChar_t         hJet_id[nhJets_MAX];
+   Float_t         aJet_pt[naJets_MAX];
+   Float_t         aJet_eta[naJets_MAX];
+   Float_t         aJet_phi[naJets_MAX];
+   Float_t         aJet_e[naJets_MAX];
+   Float_t         aJet_csv[naJets_MAX];
+   Float_t         aJet_cosTheta[naJets_MAX];
+   Int_t           aJet_numTracksSV[naJets_MAX];
+   Float_t         aJet_chf[naJets_MAX];
+   Float_t         aJet_nhf[naJets_MAX];
+   Float_t         aJet_cef[naJets_MAX];
+   Float_t         aJet_nef[naJets_MAX];
+   Float_t         aJet_nch[naJets_MAX];
+   Float_t         aJet_nconstituents[naJets_MAX];
+   Float_t         aJet_flavour[naJets_MAX];
+   Float_t         aJet_genPt[naJets_MAX];
+   Float_t         aJet_genEta[naJets_MAX];
+   Float_t         aJet_genPhi[naJets_MAX];
+   Float_t         aJet_JECUnc[naJets_MAX];
+   Float_t         aJet_vtxMass[naJets_MAX];
+   Float_t         aJet_vtx3dL[naJets_MAX];
+   Float_t         aJet_vtx3deL[naJets_MAX];
+   UChar_t         aJet_id[naJets_MAX];
 
    oldtree->SetBranchAddress("nvlep", &nvlep);
    oldtree->SetBranchAddress("nhJets", &nhJets);
@@ -134,7 +198,60 @@ int main(int argc, char* argv[])
    oldtree->SetBranchAddress("weightEleTrigJetMETPart", &weightEleTrigJetMETPart);
    oldtree->SetBranchAddress("weightEleTrigElePart", &weightEleTrigElePart);
    } 
+ //Jet variables
+   bool redoHiggs = true;
+  if(redoHiggs)
+  {
+//   oldtree->SetBranchAddress("nhJets", &nhJets);
+//   oldtree->SetBranchAddress("naJets", &naJets);
+//   oldtree->SetBranchAddress("hJet_pt", hJet_pt);
+//   oldtree->SetBranchAddress("hJet_eta", hJet_eta);
+   oldtree->SetBranchAddress("hJet_phi", hJet_phi);
+   oldtree->SetBranchAddress("hJet_e", hJet_e);
+   oldtree->SetBranchAddress("hJet_csv", hJet_csv);
+   oldtree->SetBranchAddress("hJet_cosTheta", hJet_cosTheta);
+   oldtree->SetBranchAddress("hJet_numTracksSV", hJet_numTracksSV);
+   oldtree->SetBranchAddress("hJet_chf", hJet_chf);
+   oldtree->SetBranchAddress("hJet_nhf", hJet_nhf);
+   oldtree->SetBranchAddress("hJet_cef", hJet_cef);
+   oldtree->SetBranchAddress("hJet_nef", hJet_nef);
+   oldtree->SetBranchAddress("hJet_nch", hJet_nch);
+   oldtree->SetBranchAddress("hJet_nconstituents", hJet_nconstituents);
+   oldtree->SetBranchAddress("hJet_flavour", hJet_flavour);
+   oldtree->SetBranchAddress("hJet_genPt", hJet_genPt);
+   oldtree->SetBranchAddress("hJet_genEta", hJet_genEta);
+   oldtree->SetBranchAddress("hJet_genPhi", hJet_genPhi);
+   oldtree->SetBranchAddress("hJet_JECUnc", hJet_JECUnc);
+   oldtree->SetBranchAddress("hJet_vtxMass", hJet_vtxMass);
+   oldtree->SetBranchAddress("hJet_vtx3dL", hJet_vtx3dL);
+   oldtree->SetBranchAddress("hJet_vtx3deL", hJet_vtx3deL);
+   oldtree->SetBranchAddress("hJet_id", hJet_id);
 
+//   oldtree->SetBranchAddress("aJet_pt", aJet_pt);
+//   oldtree->SetBranchAddress("aJet_eta", aJet_eta);
+   oldtree->SetBranchAddress("aJet_phi", aJet_phi);
+   oldtree->SetBranchAddress("aJet_e", aJet_e);
+   oldtree->SetBranchAddress("aJet_csv", aJet_csv);
+   oldtree->SetBranchAddress("aJet_cosTheta", aJet_cosTheta);
+   oldtree->SetBranchAddress("aJet_numTracksSV", aJet_numTracksSV);
+   oldtree->SetBranchAddress("aJet_chf", aJet_chf);
+   oldtree->SetBranchAddress("aJet_nhf", aJet_nhf);
+   oldtree->SetBranchAddress("aJet_cef", aJet_cef);
+   oldtree->SetBranchAddress("aJet_nef", aJet_nef);
+   oldtree->SetBranchAddress("aJet_nch", aJet_nch);
+   oldtree->SetBranchAddress("aJet_nconstituents", aJet_nconstituents);
+   oldtree->SetBranchAddress("aJet_flavour", aJet_flavour);
+   oldtree->SetBranchAddress("aJet_genPt", aJet_genPt);
+   oldtree->SetBranchAddress("aJet_genEta", aJet_genEta);
+   oldtree->SetBranchAddress("aJet_genPhi", aJet_genPhi);
+   oldtree->SetBranchAddress("aJet_JECUnc", aJet_JECUnc);
+   oldtree->SetBranchAddress("aJet_vtxMass", aJet_vtxMass);
+   oldtree->SetBranchAddress("aJet_vtx3dL", aJet_vtx3dL);
+   oldtree->SetBranchAddress("aJet_vtx3deL", aJet_vtx3deL);
+   oldtree->SetBranchAddress("aJet_id", aJet_id);
+
+  } 
+ 
    //Pileup Info
    Float_t         PUweight;
    Float_t         PUweight2011B;
@@ -212,8 +329,91 @@ int main(int argc, char* argv[])
           PUweight2011B = lumiWeights2011B.weight3D( PUm1, PU0, PUp1);
         }
   
+        if(redoHiggs)
+        {
+
+std::vector<VHbbEvent::SimpleJet> jets;
+for(int i =0; i < nhJets; i++)
+{
+  VHbbEvent::SimpleJet j;
+  float scale=1.0;
+  j.p4.SetPtEtaPhiE(hJet_pt[i]*scale,hJet_eta[i],hJet_phi[i],hJet_e[i]*scale);
+  j.csv=hJet_csv[i];
+  j.vtxMass=hJet_numTracksSV[i] ;
+  j.vtxMass=hJet_vtxMass[i];
+  j.vtx3dL=hJet_vtx3dL[i] ;
+  j.vtx3deL=hJet_vtx3deL[i] ;
+  j.chargedHadronEFraction=hJet_chf[i];
+  j.neutralHadronEFraction=hJet_nhf[i]  ;
+  j.chargedEmEFraction=hJet_cef[i]  ;
+  j.neutralEmEFraction=hJet_nef[i]  ;
+  j.nConstituents=hJet_nconstituents[i]  ;
+  j.ntracks=hJet_nch[i];
+/*  j.SF_CSVL=hJet_SF_CSVL[i];
+  j.SF_CSVM=hJet_SF_CSVM[i];
+  j.SF_CSVT=hJet_SF_CSVT[i];
+  j.SF_CSVLerr=hJet_SF_CSVLerr[i];
+  j.SF_CSVMerr=hJet_SF_CSVMerr[i];
+  j.SF_CSVTerr=hJet_SF_CSVTerr[i];
+*/
+  j.flavour=hJet_flavour[i];
+  j.bestMCp4.SetPtEtaPhiE(hJet_genPt[i], hJet_genEta[i], hJet_genPhi[i],  hJet_genPt[i]); //E not saved!
+//j.bestMCp4.Phi()=hJet_genPhi[i];
+  j.jecunc=hJet_JECUnc[i];
+  jets.push_back(j);
+}
 
 
+for(int i =0; i < naJets; i++)
+{
+  VHbbEvent::SimpleJet j;
+  float scale=1.0;
+  j.p4.SetPtEtaPhiE(aJet_pt[i]*scale,aJet_eta[i],aJet_phi[i],aJet_e[i]*scale);
+  j.csv=aJet_csv[i];
+  j.vtxMass=aJet_numTracksSV[i] ;
+  j.vtxMass=aJet_vtxMass[i];
+  j.vtx3dL=aJet_vtx3dL[i] ;
+  j.vtx3deL=aJet_vtx3deL[i] ;
+  j.chargedHadronEFraction=aJet_chf[i];
+  j.neutralHadronEFraction=aJet_nhf[i]  ;
+  j.chargedEmEFraction=aJet_cef[i]  ;
+  j.neutralEmEFraction=aJet_nef[i]  ;
+  j.nConstituents=aJet_nconstituents[i]  ;
+  j.ntracks=aJet_nch[i];
+/*  j.SF_CSVL=aJet_SF_CSVL[i];
+  j.SF_CSVM=aJet_SF_CSVM[i];
+  j.SF_CSVT=aJet_SF_CSVT[i];
+  j.SF_CSVLerr=aJet_SF_CSVLerr[i];
+  j.SF_CSVMerr=aJet_SF_CSVMerr[i];
+  j.SF_CSVTerr=aJet_SF_CSVTerr[i];
+*/
+  j.flavour=aJet_flavour[i];
+  j.bestMCp4.SetPtEtaPhiE(aJet_genPt[i],aJet_genEta[i],aJet_genPhi[i],aJet_genPt[i]);
+  j.jecunc=aJet_JECUnc[i];
+  jets.push_back(j);
+}
+
+/*if (useHighestPtHiggs == false){
+    foundJets = findDiJets(jets,j1,j2,addJets) ;
+  }else{*/
+  std::vector<VHbbEvent::SimpleJet> addJets;
+  VHbbEvent::SimpleJet j1;
+  VHbbEvent::SimpleJet j2;
+  
+   bool foundJets = finder.findDiJetsHighestPt(jets,j1,j2,addJets) ;
+/*  TVector3 higgsBoost;
+  higgsBoost = (temp.H.p4).BoostVector();
+  temp.H.helicities.clear();
+  temp.H.helicities.push_back(selector.getHelicity(j1,higgsBoost));
+  temp.H.helicities.push_back(selector.getHelicity(j2,higgsBoost));
+  temp.H.deltaTheta = selector.getDeltaTheta(j1,j2);
+  temp.additionalJets = addJets;
+          hJets.cosTheta[0]=  vhCand.H.helicities[0];
+        hJets.cosTheta[1]=  vhCand.H.helicities[1];*/
+
+        }
+ 
+    
          std::vector<float> jet30eta;
          std::vector<float> jet30pt;
          for( int j = 0 ; j < nhJets; j++) if(hJet_pt[j]>30 ) { jet30eta.push_back(hJet_eta[j]); jet30pt.push_back(hJet_pt[j]); } 

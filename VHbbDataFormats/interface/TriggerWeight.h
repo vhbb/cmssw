@@ -3,7 +3,7 @@
 
 #include "FWCore/ParameterSet/interface/ProcessDesc.h"
 #include "FWCore/PythonParameterSet/interface/PythonProcessDesc.h"
-#include "VHbbAnalysis/VHbbDataFormats/interface/TriggerZnunuCurve.h"
+//#include "VHbbAnalysis/VHbbDataFormats/interface/TriggerZnunuCurve.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/MultiThresholdEfficiency.h"
 #include <TH1F.h>
 #include <TF1.h>
@@ -14,7 +14,7 @@
 class TriggerWeight
 {
 public:  
-  TriggerWeight(const edm::ParameterSet& ana) : combiner2Thr(2)
+  TriggerWeight(const edm::ParameterSet& ana) : combiner2Thr(2), combiner1Thr(1)
   {
    tscaleHLTmu=openFile(ana,"hltMuFileName");
    tscaleIDmu=openFile(ana,"idMuFileName");
@@ -101,17 +101,6 @@ static  std::pair<float,float> efficiencyFromPtEta(float pt1, float eta1, TTree 
     return efficiencyFromPtEta(pt1,eta1,tscaleIDmu).first;
   }
 
-double  scaleMetHLT( double met){
-
-    float s1 = 1;
-    TF1 * f = new TF1 ("f",TriggerZnunuCurve::trigMet, 0,99999, 0, "triggerZnunuCurve"  );
-    
-    s1 = f->Eval(met);
-    
-    return (s1);
-    
-  }
-  
 
 double scaleDoubleEle17Ele8Aug( std::vector<float> pt, std::vector<float> eta )
 {
@@ -172,6 +161,7 @@ double scalePFMHTEle( float MetPFPt){
     return weightPFMHTrigger;
 }
 
+
 double scaleJet30Jet25( std::vector<float> pt, std::vector<float> eta)
 {
 
@@ -181,10 +171,73 @@ for(unsigned int j=0; j< pt.size(); j++)
   std::vector<float> thisJetEffs;
   thisJetEffs.push_back(efficiencyFromPtEta(pt[j],eta[j],tscaleHLTeleJet1).first);
   thisJetEffs.push_back(efficiencyFromPtEta(pt[j],eta[j],tscaleHLTeleJet2).first);
+//  std::cout << " jet pt " << pt[j] << " eta " << eta[j] << " eff1 "  <<  thisJetEffs[0] << " eff2 " << thisJetEffs[1] << std::endl;  
   allJetsWithEffs.push_back(thisJetEffs);
+  
+ }
+ float res = combiner2Thr.weight<Trigger1High2Loose>(allJetsWithEffs);
+// std::cout << "Result is " << res << std::endl;
+ return res;
+//  return   combiner2Thr.weight<Trigger1High2Loose>(allJetsWithEffs);
+
+}
+/*
+TF1 fpt("f","1-exp(-0.157*(x-19.3))", 0., 9999999.);
+
+MET80:
+TF1 fmet80("f","1/ (1 + exp( -0.0709 * (x - 100.7)))", 0., 9999999.);
+
+MET100:
+TF1 fmet100("f","1/ (1 + exp( -0.0679 * (x - 128.8)))", 0., 9999999.);
+*/
+
+//LP curve used for MET
+double  scaleMetHLT( double met){
+    return 1. / (1. +  ( exp( 0.059486 * ( 123.27 - met ))));
+}
+
+//MET80 component of the factorized JET+MET trigger
+double scaleMET80(double et)
+{
+ return 1. / (1. +  exp( -0.0709 * (et - 100.7)));
+}
+
+//MET100 component
+double scaleMET100(double et)
+{
+ return 1. / (1. +  exp( -0.0679 * (et - 128.8)));
+}
+
+//Single jet20 efficiency for MET+2CJet20
+double jet20efficiency( double pt)
+{
+ if(pt < 10 ) return 0;
+ return 1. - exp(-0.157*(pt-19.3));
+}
+
+//combined 2 jets efficiency out of N jets, using jet20 efficiency curve
+double scale2CentralJet( std::vector<float> pt, std::vector<float> eta)
+{
+
+  std::vector< std::vector<float> > allJetsWithEffs;
+for(unsigned int j=0; j< pt.size(); j++)
+ {
+  if(fabs(eta[j]) < 2.5)
+  {
+   std::vector<float> thisJetEffs;
+   thisJetEffs.push_back(jet20efficiency(pt[j]));
+   allJetsWithEffs.push_back(thisJetEffs);
+  }
+
  }
 
-  return   combiner2Thr.weight<Trigger1High2Loose>(allJetsWithEffs);
+ return   combiner1Thr.weight<Trigger2SingleThr>(allJetsWithEffs);
+}
+
+//New MET 150 
+double scaleMET150(double et)
+{ 
+  return 1./ (1. +  exp( -0.129226 * (et - 156.699)));
 }
 
 float scaleMuOr30IsoHLT(float pt1, float eta1)
@@ -213,6 +266,7 @@ private:
   TTree * tscaleHLTmu;
   TTree * tscaleIDmu;
   MultiThresholdEfficiency combiner2Thr; 
+  MultiThresholdEfficiency combiner1Thr; 
 };
 
 #endif

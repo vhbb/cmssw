@@ -28,6 +28,15 @@ class Trigger1High2Loose
 }
 };
 
+class Trigger2SingleThr
+{
+ public:
+  static bool filter(std::vector<int> t)
+  {
+    return t[0] >= 2;
+}
+};
+
 
 
 
