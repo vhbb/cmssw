@@ -1207,14 +1207,15 @@ int main(int argc, char* argv[])
 	  weightTrig = (weightTrigMay * 0.215 + weightTrigV4 * 1.915)/ 2.13; //FIXME: use proper lumi if we reload 2.fb
 	}
 
-
+ if(isMC_)
+{
         weightTrigMET80 =  triggerWeight.scaleMET80(MET.et);
         weightTrigMET100 =  triggerWeight.scaleMET80(MET.et);
         weightTrig2CJet20 = triggerWeight.scale2CentralJet( jet10pt, jet10eta);
         weightTrigMET150 = triggerWeight.scaleMET150(MET.et);
         weightTrigMET802CJet= weightTrigMET80 * weightTrig2CJet20;
         weightTrigMET1002CJet= weightTrigMET100 * weightTrig2CJet20;
-
+}
 	if( Vtype == VHbbCandidate::Znn ){
 	  nvlep=0;
 	  float weightTrig1 = triggerWeight.scaleMetHLT(vhCand.V.mets.at(0).p4.Pt());
