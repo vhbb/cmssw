@@ -59,6 +59,9 @@ int main(int argc, char* argv[])
   std::string inputFile_( in.getParameter<std::string>("fileName" ) );
   bool replaceWeights( ana.getParameter<bool>("replaceWeights" ) );
   bool redoPU( ana.getParameter<bool>("redoPU" ) );
+  bool redoTrigger( ana.getParameter<bool>("redoTrigger" ) );
+  bool redoHiggs( ana.getParameter<bool>("redoHiggs" ) );
+
   std::string Weight3DfileName_ = in.getParameter<std::string> ("Weight3DfileName") ;
 
   TriggerWeight triggerWeight(ana);
@@ -85,7 +88,7 @@ int main(int argc, char* argv[])
                       { lumiWeights2011B.weight3D_init(Weight3DfileName_.c_str()); }
                    else
                       {
-                        lumiWeights2011B.weight3D_init(1.0); // generate the weights the fisrt time;
+                        lumiWeights2011B.weight3D_init(73.5/68.); // generate the weights the fisrt time;
                       }
 
 
@@ -199,7 +202,7 @@ int main(int argc, char* argv[])
    oldtree->SetBranchAddress("weightEleTrigElePart", &weightEleTrigElePart);
    } 
  //Jet variables
-   bool redoHiggs = true;
+ //  bool redoHiggs = true;
   if(redoHiggs)
   {
 //   oldtree->SetBranchAddress("nhJets", &nhJets);
@@ -314,6 +317,19 @@ int main(int argc, char* argv[])
    newtree->Branch("weightEleTrigJetMETPart_up",  &weightEleTrigJetMETPart,"weightEleTrigJetMETPart/F");
    newtree->Branch("weightEleTrigElePart_up",  &weightEleTrigElePart,"weightEleTrigElePart/F");
 
+/* TODO:
+  _outTree->Branch("weightEleTrigEleAugPart"        , &weightEleTrigEleAugPart          ,  "weightEleTrigEleAugPart/F");
+  
+  _outTree->Branch("weightTrigMET80"        , &weightTrigMET80          , "weightTrigMET80/F");
+  _outTree->Branch("weightTrigMET100"        , &weightTrigMET100          , "weightTrigMET100/F");
+  _outTree->Branch("weightTrig2CJet20"        , &weightTrig2CJet20          , "weightTrig2CJet20/F");
+  _outTree->Branch("weightTrigMET150"        , &weightTrigMET150          , "weightTrigMET150/F");
+  _outTree->Branch("weightTrigMET802CJet"        , &weightTrigMET802CJet          , "weightTrigMET802CJet/F");
+  _outTree->Branch("weightTrigMET1002CJet"        , &weightTrigMET1002CJet          , "weightTrigMET1002CJet/F");
+  _outTree->Branch("weightTrigMETLP"        , &weightTrigMETLP          , "weightTrigMETLP/F");
+*/
+
+
    }
 
 
@@ -411,9 +427,10 @@ for(int i =0; i < naJets; i++)
           hJets.cosTheta[0]=  vhCand.H.helicities[0];
         hJets.cosTheta[1]=  vhCand.H.helicities[1];*/
 
-        }
+  }
  
-    
+ if(redoTrigger) 
+ {    
          std::vector<float> jet30eta;
          std::vector<float> jet30pt;
          for( int j = 0 ; j < nhJets; j++) if(hJet_pt[j]>30 ) { jet30eta.push_back(hJet_eta[j]); jet30pt.push_back(hJet_pt[j]); } 
@@ -465,14 +482,25 @@ for(int i =0; i < naJets; i++)
 
 
         }
-        if( Vtype == 4 ){
-          float weightTrig1 = triggerWeight.scaleMetHLT(MET.et);
-          weightTrig = weightTrig1;
-          weightTrigMET = weightTrig1;
-
+/* TODO
+ if(isMC_)
+{
+        weightTrigMET80 =  triggerWeight.scaleMET80(MET.et);
+        weightTrigMET100 =  triggerWeight.scaleMET80(MET.et);
+        weightTrig2CJet20 = triggerWeight.scale2CentralJet( jet10pt, jet10eta);
+        weightTrigMET150 = triggerWeight.scaleMET150(MET.et);
+        weightTrigMET802CJet= weightTrigMET80 * weightTrig2CJet20;
+        weightTrigMET1002CJet= weightTrigMET100 * weightTrig2CJet20;
+}
+        if( Vtype == VHbbCandidate::Znn ){
+          nvlep=0;
+          float weightTrig1 = triggerWeight.scaleMetHLT(vhCand.V.mets.at(0).p4.Pt());
+          weightTrigMETLP = weightTrig1;
+          weightTrig = weightTrigMET150 + weightTrigMET802CJet  - weightTrigMET802CJet*weightTrigMET150;
         }
+*/
 
-
+  }
 
 
       newtree->Fill();
