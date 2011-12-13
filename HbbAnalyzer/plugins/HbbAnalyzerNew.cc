@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.55 2011/10/18 09:58:20 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.56 2011/10/20 14:38:01 arizzi Exp $
 //
 //
 
@@ -268,7 +268,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	for(int j = 0; j < ndau; ++ j) {
 	  const Candidate * Zdau = p.daughter( j );
 	  ztemp.dauid.push_back(Zdau->pdgId());
-	  ztemp.dauFourMomentum.push_back(GENPTOLOR(p));
+	  ztemp.dauFourMomentum.push_back(GENPTOLORP(Zdau));
 	}
 	auxInfo->mcZ.push_back(ztemp);
       }
