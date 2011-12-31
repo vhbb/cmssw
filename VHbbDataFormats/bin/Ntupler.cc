@@ -328,6 +328,8 @@ typedef struct
     SF_CSVTerr[i]=j.SF_CSVTerr;
 
     flavour[i]=j.flavour;
+    isSemiLeptMCtruth[i]=j.isSemiLeptMCtruth;
+    isSemiLept[i]=j.isSemiLept;
     if(j.bestMCp4.Pt() > 0)
       {
 	genPt[i]=j.bestMCp4.Pt();
@@ -352,7 +354,7 @@ typedef struct
   void reset()
   {
     for(int i=0;i<MAXJ;i++) {
-      pt[i]=-99; eta[i]=-99; phi[i]=-99;e[i]=-99;csv[i]=-99; cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99;
+      pt[i]=-99; eta[i]=-99; phi[i]=-99;e[i]=-99;csv[i]=-99; cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; isSemiLeptMCtruth[i]=-99; isSemiLept[i]=-99;  genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99;
     }
   }
   float pt[MAXJ];
@@ -369,6 +371,8 @@ typedef struct
   float nch[MAXJ];
   float nconstituents[MAXJ];
   float flavour[MAXJ];
+  float isSemiLept[MAXJ];
+  float isSemiLeptMCtruth[MAXJ];
   float genPt[MAXJ];
   float genEta[MAXJ];
   float genPhi[MAXJ];
@@ -543,6 +547,8 @@ int main(int argc, char* argv[])
   _outTree->Branch("hJet_nch",hJets.nch ,"nch[nhJets]/F");
   _outTree->Branch("hJet_nconstituents",hJets.nconstituents ,"nconstituents[nhJets]");
   _outTree->Branch("hJet_flavour",hJets.flavour ,"flavour[nhJets]/F");
+  _outTree->Branch("hJet_isSemiLept",hJets.isSemiLept ,"isSemiLept[nhJets]/F");
+  _outTree->Branch("hJet_isSemiLeptMCtruth",hJets.isSemiLeptMCtruth ,"isSemiLeptMCtruth[nhJets]/F");
   _outTree->Branch("hJet_genPt",hJets.genPt ,"genPt[nhJets]/F");
   _outTree->Branch("hJet_genEta",hJets.genEta ,"genEta[nhJets]/F");
   _outTree->Branch("hJet_genPhi",hJets.genPhi ,"genPhi[nhJets]/F");
@@ -572,6 +578,8 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_nch",aJets.nch ,"nch[naJets]/F");
   _outTree->Branch("aJet_nconstituents",aJets.nconstituents ,"nconstituents[naJets]");
   _outTree->Branch("aJet_flavour",aJets.flavour ,"flavour[naJets]/F");
+  _outTree->Branch("aJet_isSemiLept",aJets.isSemiLept ,"isSemiLept[naJets]/F");
+  _outTree->Branch("aJet_isSemiLeptMCtruth",aJets.isSemiLeptMCtruth ,"isSemiLeptMCtruth[naJets]/F");
   _outTree->Branch("aJet_genPt",aJets.genPt ,"genPt[naJets]/F");
   _outTree->Branch("aJet_genEta",aJets.genEta ,"genEta[naJets]/F");
   _outTree->Branch("aJet_genPhi",aJets.genPhi ,"genPhi[naJets]/F");
@@ -1316,19 +1324,29 @@ int main(int argc, char* argv[])
         WplusMode=-99;
         for(unsigned int j=0; j< aux.mcW.size();j++)
          {
-          for(unsigned int k=0;k< aux.mcW[j].dauid.size();k++)
-           {
-             int idd=abs(aux.mcW[j].dauid[k]);
-             if(idd==11 || idd==13 || idd==15|| (idd<=5 && idd >=1)) 
-             {
-	             if(WminusMode==-99 && aux.mcW[j].charge ==-1) WminusMode = idd;
-	             if(WplusMode==-99 && aux.mcW[j].charge ==-1) WplusMode = idd;
-             }
-           }
-
-   
-         }
-
+	   for(unsigned int k=0;k< aux.mcW[j].dauid.size();k++)
+	     {
+	       int idd=abs(aux.mcW[j].dauid[k]);
+	       if(idd==11 || idd==13 || idd==15|| (idd<=5 && idd >=1)) 
+		 {
+		   if(WminusMode==-99 && aux.mcW[j].charge ==-1) WminusMode = idd;
+		   if(WplusMode==-99 && aux.mcW[j].charge ==+1) WplusMode = idd;
+		 }
+	     }
+	    /*
+	       /// now check if a semileptonic W is also in a bjets....      
+	       if ( ( (WminusMode==11 || WminusMode==13 || WminusMode==15  ) || (WplusMode==11 || WplusMode==13 || WplusMode==15  ))  && deltaR(vhCand.H.jets[0].p4.Eta(),vhCand.H.jets[0].p4.Phi(), aux.mcW[j].p4.Eta(), aux.mcW[j].p4.Phi())<0.3 ) hJets.isSemiLeptMCtruth[0]=1;
+	       if ( ( (WminusMode==11 || WminusMode==13 || WminusMode==15  ) || (WplusMode==11 || WplusMode==13 || WplusMode==15  ))  && deltaR(vhCand.H.jets[1].p4.Eta(),vhCand.H.jets[1].p4.Phi(), aux.mcW[j].p4.Eta(), aux.mcW[j].p4.Phi())<0.3 ) hJets.isSemiLeptMCtruth[1]=1;
+	       
+	       for( int j=0; j < naJets && j < MAXJ; j++ ) 
+	       {
+	       if ((idd==11 || idd==13 || idd==15  )  && deltaR(vhCand.additionalJets[j].p4.Eta(),vhCand.additionalJets[j].p4.Phi(), aux.mcW[j].p4.Eta(), aux.mcW[j].p4.Phi()) <0.3) aJets.isSemiLept[j]=1;
+	       
+	       }
+	       */      
+	   
+	 }
+	
         /// Compute pull angle from AK7
         if(!fromCandidate){
           std::vector<VHbbEvent::SimpleJet> ak7wrt1(iEvent->simpleJets3);

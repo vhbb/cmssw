@@ -98,6 +98,9 @@ class HbbAnalyzerNew : public edm::EDProducer {
   
   edm::InputTag eleLabel_;
   edm::InputTag muoLabel_;
+  double lep_ptCutForBjets_;
+  edm::InputTag elenoCutsLabel_;
+  edm::InputTag muonoCutsLabel_;
   edm::InputTag jetLabel_;
   edm::InputTag subjetLabel_;
   edm::InputTag simplejet1Label_;

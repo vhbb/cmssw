@@ -4,8 +4,7 @@ import FWCore.ParameterSet.Config as cms
 import os 
 
 isMC = False
-
-# define the process
+##define the process
 process = cms.Process("VH")
 process.load("RecoLocalCalo.EcalRecAlgos.EcalSeverityLevelESProducer_cfi")
 
@@ -17,18 +16,36 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
+<<<<<<< patTuple_PF2PAT_Event_Candidates_data_new.py
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+
+process.load("FWCore.MessageLogger.MessageLogger_cfi")
+process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
+
+process.MessageLogger.cerr.threshold = ''
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
+
+=======
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2500) )
+>>>>>>> 1.33
 
 # source
 process.source = cms.Source("PoolSource",
  skipEvents = cms.untracked.uint32(5652),
 			    fileNames=cms.untracked.vstring(
+"file:Summer11_ZH_ZToLL_HToBB_M-115_7TeV-powheg_1.root",
+#"rfio:/castor/cern.ch/user/d/degrutto/test/Summer11_ZH_ZToLL_HToBB_M-115_7TeV-powheg_1.root",
+
 #"rfio:/castor/cern.ch/user/d/degrutto/test/DYJetsToLL_PtZ-100.root",
 
+<<<<<<< patTuple_PF2PAT_Event_Candidates_data_new.py
+#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/32CECED6-BFAD-E011-B08D-00261834B5A4.root',
+=======
 #'file:/gpfs/gpfsddn/cms/user/arizzi/Hbb/submit/CMSSW_4_2_8_patch1/src/VHbbAnalysis/VHbbDataFormats/bin/submissions/testbortigno/24233412-65AD-E011-B930-E0CB4E553667.root'
 "dcap://cmsdcache.pi.infn.it/pnfs/pi.infn.it/data/cms/store/data/Run2011A/SingleMu/AOD/PromptReco-v6/000/173/660/06111E42-C4CD-E011-9DE6-0030486780AC.root"
 #	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/02E676EE-BDAD-E011-B9ED-E0CB4EA0A929.root',
 #	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/32CECED6-BFAD-E011-B08D-00261834B5A4.root',
+>>>>>>> 1.33
 #	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/3EE916B3-C4AD-E011-9159-90E6BA0D09B0.root',
 #	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/42622800-C1AD-E011-AD65-485B39800BF2.root',
 #		"/store/mc/CMSSW_4_2_3/RelValProdTTbar/GEN-SIM-RECO/MC_42_V12_JobRobot-v1/0000/B89A0B07-818C-E011-953E-0030487CD7E0.root"
@@ -41,6 +58,23 @@ if isMC == False :
 	process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
 else :
 	process.GlobalTag.globaltag = cms.string('START42_V13::All')
+
+
+process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+process.printList = cms.EDAnalyzer("ParticleListDrawer",
+					     src = cms.InputTag("genParticles"),
+					     maxEventsToPrint = cms.untracked.int32(-1)
+					 )
+
+process.printTree = cms.EDAnalyzer("ParticleTreeDrawer",
+					     src = cms.InputTag("genParticles"),
+					     printP4 = cms.untracked.bool(False),
+					     printPtEtaPhi = cms.untracked.bool(False),
+					     printVertex = cms.untracked.bool(True),
+					     printStatus = cms.untracked.bool(False),
+					     printIndex = cms.untracked.bool(False),
+					     status = cms.untracked.vint32(1, 2, 3)
+					 )
 
 process.out1 = cms.OutputModule(
     'PoolOutputModule',
@@ -344,6 +378,7 @@ process.selectedPatJetsCAPF.cut = cms.string('pt > 0. & abs(eta) < 5.0')
 ##process.selectedLayer1Muons.cut = cms.string('pt > 20. & abs(eta) < 2.5 & muonID("TMLastStationLoose")')
 ##process.selectedLayer1Electrons.cut = cms.string('pt > 20. & abs(eta) < 2.5 & electronID("eidLoose")')
 process.selectedPatMuons.cut = cms.string('isGlobalMuon || (isTrackerMuon && muonID("TrackerMuonArbitrated"))')
+process.selectedPatMuons.cut = cms.string('')
 #process.selectedPatElectrons.cut = cms.string('')
 
 process.selectedPatMuonsWithIso = process.selectedPatMuons.clone(
@@ -453,10 +488,13 @@ process.selectedPatElectrons.cut = (
 process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     runOnMC = cms.bool(isMC),
     hltResultsTag = cms.InputTag("TriggerResults::HLT"),
+    lep_ptCutForBjets = cms.double(5),
+    electronNoCutsTag = cms.InputTag("pfAllElectrons"),
     electronTag = cms.InputTag("selectedElectronsMatched"),
 #    electronTag = cms.InputTag("selectedPatElectrons"),
     tauTag = cms.InputTag("patTaus"),
 #   muonTag = cms.InputTag("selectedPatMuons"),
+    muonNoCutsTag = cms.InputTag("pfAllMuons"),
     muonTag = cms.InputTag("selectedMuonsMatched"),
     jetTag = cms.InputTag("selectedPatJetsCAPF"),
     subjetTag = cms.InputTag("selectedPatJetssubCAPF"),
@@ -746,7 +784,9 @@ if isMC == False :
                      )
 else :
         process.p = cms.Path(
-                    process.goodOfflinePrimaryVertices*
+#		process.printTree *
+#		    process.printList *
+		process.goodOfflinePrimaryVertices*
                      process.genParticlesForJets*
                      process.ak5GenJets*
                      process.PF2PAT*

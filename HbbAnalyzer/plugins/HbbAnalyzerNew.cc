@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.56 2011/10/20 14:38:01 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.57 2011/12/13 22:00:28 sdas Exp $
 //
 //
 
@@ -32,9 +32,12 @@ Implementation:
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "DataFormats/Math/interface/deltaR.h"
+
 
 #define GENPTOLOR(a) TLorentzVector((a).px(), (a).py(), (a).pz(), (a).energy())
 #define GENPTOLORP(a) TLorentzVector((a)->px(), (a)->py(), (a)->pz(), (a)->energy())
+
 
 
 struct CompareJetPtMuons {
@@ -58,6 +61,9 @@ struct CompareJetPtTaus {
 HbbAnalyzerNew::HbbAnalyzerNew(const edm::ParameterSet& iConfig):
   eleLabel_(iConfig.getParameter<edm::InputTag>("electronTag")),
   muoLabel_(iConfig.getParameter<edm::InputTag>("muonTag")),
+  lep_ptCutForBjets_(iConfig.getParameter<double>("lep_ptCutForBjets")),
+  elenoCutsLabel_(iConfig.getParameter<edm::InputTag>("electronNoCutsTag")),
+  muonoCutsLabel_(iConfig.getParameter<edm::InputTag>("muonNoCutsTag")),
   jetLabel_(iConfig.getParameter<edm::InputTag>("jetTag")),
   subjetLabel_(iConfig.getParameter<edm::InputTag>("subjetTag")),
   simplejet1Label_(iConfig.getParameter<edm::InputTag>("simplejet1Tag")),
@@ -470,7 +476,6 @@ BTagSFContainer btagSFs;
     //    if(!runOnMC_)  
   setJecUnc(sj,jecUnc);
 
-
    Particle::LorentzVector p4Jet = jet_iter->p4();
 
     if(runOnMC_){
@@ -499,6 +504,9 @@ BTagSFContainer btagSFs;
       }
       
     } //isMC
+    // 
+
+
     hbbInfo->simpleJets3.push_back(sj);
     
   }
@@ -624,7 +632,40 @@ BTagSFContainer btagSFs;
 	}
       }
 
-    }   //isMC
+        // add flag if a mc lepton is find inside a cone around the jets... 
+      iEvent.getByLabel("genParticles", genParticles);
+      
+      for(size_t i = 0; i < genParticles->size(); ++ i) {
+     
+      const GenParticle & p = (*genParticles)[i];
+      int id = 0; 
+      p.pt()> lep_ptCutForBjets_ ? id= p.pdgId(): 0;
+   
+      //      std::cout<< "found a muon with pt " << mu->pt()   << std::endl;
+      if   ((abs(id)==13 || abs(id)==11) && deltaR(p.eta(), p.phi(), sj.p4.Eta(), sj.p4.Phi() ) <0.3)  sj.isSemiLeptMCtruth=1;
+      }
+
+    }  //isMC
+        // add flag if a reco lepton is find inside a cone around the jets... 
+    edm::Handle<edm::View<reco::Candidate> > muonNoCutsHandle;
+    iEvent.getByLabel(muonoCutsLabel_,muonNoCutsHandle);
+    edm::View<reco::Candidate> muonsNoCuts = *muonNoCutsHandle;
+    
+
+    for(edm::View<reco::Candidate>::const_iterator mu = muonsNoCuts.begin(); mu!=muonsNoCuts.end() && sj.isSemiLept!=1; ++mu){
+      //      std::cout<< "found a muon with pt " << mu->pt()   << std::endl;
+      if   ( (mu->pt()> lep_ptCutForBjets_) && deltaR(mu->eta(), mu->phi(), sj.p4.Eta(), sj.p4.Phi() ) <0.3)  sj.isSemiLept=1;
+    }
+    
+    edm::Handle<edm::View<reco::Candidate> > electronNoCutsHandle;
+      iEvent.getByLabel(elenoCutsLabel_,electronNoCutsHandle);
+      edm::View<reco::Candidate> electronsNoCuts = *electronNoCutsHandle;
+      for(edm::View<reco::Candidate>::const_iterator ele = electronsNoCuts.begin(); ele!=electronsNoCuts.end() && sj.isSemiLept!=1; ++ele){
+	if   ( (ele->pt()> lep_ptCutForBjets_) && deltaR(ele->eta(), ele->phi(), sj.p4.Eta(), sj.p4.Phi() ) <0.3)  sj.isSemiLept=1;
+	//  std::cout<< " found an electron with pt " << ele->pt()   << std::endl;
+      }  
+ 
+    
     
     hbbInfo->simpleJets2.push_back(sj);
     
@@ -1303,6 +1344,8 @@ void HbbAnalyzerNew ::fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Je
     // add tVector
     //
     sj.tVector = getTvect(&(*jet_iter));
+
+
 }
 
 float HbbAnalyzerNew::metSignificance(const reco::MET * met)

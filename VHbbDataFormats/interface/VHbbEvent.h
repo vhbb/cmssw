@@ -11,7 +11,7 @@ class VHbbEvent{
 
   class SimpleJet {
     public:
-    SimpleJet(): flavour(-99), tche(-99), tchp(-99), jpb(-99), jp(-99), 
+    SimpleJet(): flavour(-99), isSemiLept(-99), isSemiLeptMCtruth(-99),  tche(-99), tchp(-99), jpb(-99), jp(-99), 
       ssvhe(-99), csv(-99), csvmva(-99),
       vtxMass(-99), vtx3dL(-99), vtx3deL(-99), vtxNTracks(-99), vtxProb(-99),
       ntracks(-99), charge(-99),jecunc(-99),
@@ -19,7 +19,7 @@ class VHbbEvent{
       bestMCid(-99), bestMCmomid(-99){}
   public:
     double Pt() {return p4.Pt();}
-    int flavour;
+    int flavour, isSemiLept, isSemiLeptMCtruth;
     float tche,tchp, jpb,jp , ssvhe, csv, csvmva;
     // CSV vertex info
     float vtxMass, vtx3dL, vtx3deL, vtxNTracks, vtxProb;
