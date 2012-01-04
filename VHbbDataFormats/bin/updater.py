@@ -11,7 +11,7 @@ fname =  os.environ.get("FILETOPROCESS")
 
 process.fwliteInput = cms.PSet(
     fileName   = cms.string(fname),
-    PUmcfileName2011B= cms.string("Summer11_Generated.root"),
+    PUmcfileName2011B= cms.string("Fall11_Generated.root"),
     PUdatafileName2011B = cms.string("Cert_175832-180252_PromptReco_JSON.pileupTruth_v2_finebin.root"),
     PUmcfileName = cms.string("ttbarPU_35bins.root"),
     PUdatafileName = cms.string("Pileup_2011_to_173692_LPLumiScale_68mb_35bins.root"),
