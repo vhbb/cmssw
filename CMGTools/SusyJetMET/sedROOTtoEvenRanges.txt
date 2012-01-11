@@ -1,1 +1,0 @@
- cat eventLists_sedtest.txt | sed -r "s/\*\s+\S+\s+\*\s+/'1:/" | sed "s/ \*/',/"
