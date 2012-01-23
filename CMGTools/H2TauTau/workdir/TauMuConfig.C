@@ -1,10 +1,10 @@
 {  
   TauMuAnalysis analysis("analysis");
   //analysis.setPupWeightName("vertexWeight2invfb");
-  analysis.setPupWeightName("vertexWeight2011AB");
+  //analysis.setPupWeightName("vertexWeight3D2011AB");
   //analysis.setPupWeightName("vertexWeight2011B");
+  analysis.setPupWeightName("vertexWeight2011AB");
   analysis.setInputTag("cmgTauMuCorSVFitFullSel");
-  //analysis.setInputTag("cmgTauMuCorSVFitPreSel");
   analysis.setdiLeptonVetoListName("cmgMuonSel");
   analysis.setQCDOStoSSRatio(1.11);//value from AN-11-390 v4
   analysis.setTransverseMassSignalMax(40);
@@ -17,7 +17,10 @@
 
   //analysis.calcSVFit(1);
   float MCEffCorrFactor = 1.0;// 0.968;// * 0.92; 
-    
+
+  TString localpath="/data/benitezj/Samples";
+
+  //TString tag="/PAT_CMG_V2_4_0/H2TAUTAU_Dec2";     
   //TString outpath="./output/Test";
   //TString outpath="./output/V240Json";//compare embedded massT and vismass against this
   //TString outpath="./output/V240Embedded";
@@ -26,14 +29,18 @@
   //TString outpath="./output/V240EoverP";
   //TString outpath="./output/V240MuPt";
   
-  TString outpath="./output/V240AB";//changes done: 1)tau eff, 2)mu eff, 3) vertex-weight
+  //TString outpath="./output/V240AB";//changes done: 1)tau eff, 2)mu eff, 3) vertex-weight
   //for B alone modified TauMuConfigB.C, TauMuAnalysis.cc, batchSample.C, processSamples.pl
+
+  TString tag="/PAT_CMG_V2_4_1/H2TAUTAU_Jan16"; ///V241 samples  
+  //TString outpath="./output/V241AB";//1)trig objs
+  //TString outpath="./output/V241AB3D";//1)vtx w.
+  //TString outpath="./output/V241ABTrigMatch";//1)trig match mu and tau
+  TString outpath="./output/V241ABTruthMatch";//1)change Z->tau tau truth-matching
+
   
   analysis.setOutputPath(outpath);
 
-  TString datapath="/data/benitezj/Samples";
-  TString tag="/PAT_CMG_V2_4_0/H2TAUTAU_Dec2"; 
-  
   /////////////////////////
   //define samples    
   /////////////////////////
@@ -44,7 +51,7 @@
   //   analysis.addSample(&TestSample);  
   
   
-  Sample WJetsToLNu("WJetsToLNu",(const char*)(datapath+"/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
+  Sample WJetsToLNu("WJetsToLNu",(const char*)(localpath+"/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
   WJetsToLNu.setDataType("MC");
   WJetsToLNu.setRecoilCorr("../data/recoilfit_wjets_njet.root"); 
   WJetsToLNu.setCrossection(31314);
@@ -55,7 +62,7 @@
   analysis.addSample(&WJetsToLNu);  
   
 
-  Sample TTJets("TTJets",(const char*)(datapath+"/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
+  Sample TTJets("TTJets",(const char*)(localpath+"/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
   TTJets.setDataType("MC");
   TTJets.setCrossection(165.8);//157.5=NLO theory, 165.8=CMS TOP-11-024
   TTJets.setSampleGenEvents(3542770); // 3701947=Enriques PFAOD integrity, 3701947="DBS"
@@ -63,7 +70,7 @@
   TTJets.setEffCorrFactor(MCEffCorrFactor);
   analysis.addSample(&TTJets);
  
-  Sample ZToMuMu("ZToMuMu",(const char*)(datapath+"/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
+  Sample ZToMuMu("ZToMuMu",(const char*)(localpath+"/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
   ZToMuMu.setDataType("MC");
   ZToMuMu.setTruthEventType(3);
   ZToMuMu.setRecoilCorr("../data/recoilfit_zmm42X_njet.root");
@@ -73,9 +80,9 @@
   ZToMuMu.setEffCorrFactor(MCEffCorrFactor);
   analysis.addSample(&ZToMuMu);
 
-  Sample ZToTauTau("ZToTauTau",(const char*)(datapath+"/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
+  Sample ZToTauTau("ZToTauTau",(const char*)(localpath+"/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
   ZToTauTau.setDataType("MC");
-  ZToTauTau.setTruthEventType(5);
+  ZToTauTau.setGenEventType(5);
   ZToTauTau.setRecoilCorr("../data/recoilfit_zjets_ltau_njet.root");
   ZToTauTau.setCrossection(3048);
   ZToTauTau.setSampleGenEvents(34915945);// 35035820=PFAOD integrity, 36277961="DBS"
@@ -83,7 +90,7 @@
   ZToTauTau.setEffCorrFactor(MCEffCorrFactor);
   analysis.addSample(&ZToTauTau);
 
-  Sample ZToLJet("ZToLJet",(const char*)(datapath+"/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
+  Sample ZToLJet("ZToLJet",(const char*)(localpath+"/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
   ZToLJet.setDataType("MC");
   ZToLJet.setTruthEventType(6);
   ZToLJet.setRecoilCorr("../data/recoilfit_wjets_njet.root");
@@ -93,7 +100,7 @@
   ZToLJet.setEffCorrFactor(MCEffCorrFactor);
   analysis.addSample(&ZToLJet);
 
-  Sample WW("WW",(const char*)(datapath+"/WW_TuneZ2_7TeV_pythia6_tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
+  Sample WW("WW",(const char*)(localpath+"/WW_TuneZ2_7TeV_pythia6_tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
   WW.setDataType("MC");
   WW.setCrossection(27.83);
   WW.setSampleGenEvents(4052865);
@@ -101,7 +108,7 @@
   WW.setEffCorrFactor(MCEffCorrFactor);
   analysis.addSample(&WW);
 
-  Sample WZ("WZ",(const char*)(datapath+"/WZ_TuneZ2_7TeV_pythia6_tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
+  Sample WZ("WZ",(const char*)(localpath+"/WZ_TuneZ2_7TeV_pythia6_tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
   WZ.setDataType("MC");
   WZ.setCrossection(10.47);
   WZ.setSampleGenEvents(4169751);
@@ -109,7 +116,7 @@
   WZ.setEffCorrFactor(MCEffCorrFactor);
   analysis.addSample(&WZ);
 
-  Sample ZZ("ZZ",(const char*)(datapath+"/ZZ_TuneZ2_7TeV_pythia6_tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
+  Sample ZZ("ZZ",(const char*)(localpath+"/ZZ_TuneZ2_7TeV_pythia6_tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
   ZZ.setDataType("MC");
   ZZ.setCrossection(4.287);
   ZZ.setSampleGenEvents(4112445);
@@ -120,20 +127,20 @@
   ///Crossections taken from here:
   ///https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt7TeV#gluon_gluon_Fusion_Process 
   ///Higgs --> tau tau branching ratios taken from http://arxiv.org/abs/1101.0593 v3
-  Float_t HiggsGGcross[8]={21.78,19.84,18.13,16.63,15.31,14.12,13.08,12.13};
-  Float_t HiggsVBFcross[8]={1.472,1.398,1.332,1.269,1.211,1.154,1.100,1.052};
-  Float_t HiggsTauTauBF[8]={8.25e-2,8.03e-2,7.65e-2,7.11e-2,6.37e-2,5.49e-2,4.52e-2,3.54e-2};
-  Sample * HiggsGG[8];
-  Sample * HiggsVBF[8];
+  Float_t HiggsGGcross[7]= {  19.84,   18.13,   16.63,   15.31,   14.12,   13.08,   12.13};
+  Float_t HiggsVBFcross[7]={  1.398,   1.332,   1.269,   1.211,   1.154,   1.100,   1.052};
+  Float_t HiggsTauTauBF[7]={8.03e-2, 7.65e-2, 7.11e-2, 6.37e-2, 5.49e-2, 4.52e-2, 3.54e-2};
+  Sample * HiggsGG[7];
+  Sample * HiggsVBF[7];
   for(Int_t i=0;i<7;i++){
-    HiggsGG[i]=new Sample((const char*)(TString("HiggsGG")+(long)(105+i*5)),(const char*)(datapath+"/GluGluToHToTauTau_M-"+(long)(105+i*5)+"_7TeV-powheg-pythia6/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
+    HiggsGG[i]=new Sample((const char*)(TString("HiggsGG")+(long)(110+i*5)),(const char*)(localpath+"/GluGluToHToTauTau_M-"+(long)(110+i*5)+"_7TeV-powheg-pythia6/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
     HiggsGG[i]->setDataType("Signal");
     HiggsGG[i]->setCrossection(HiggsGGcross[i]*HiggsTauTauBF[i]);
     HiggsGG[i]->setSampleGenEvents(196002);
     HiggsGG[i]->setEffCorrFactor(MCEffCorrFactor);
     analysis.addSample(HiggsGG[i]);    
 
-    HiggsVBF[i]=new Sample((const char*)(TString("HiggsVBF")+(long)(105+i*5)),(const char*)(datapath+"/VBF_HToTauTau_M-"+(long)(105+i*5)+"_7TeV-powheg-pythia6-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
+    HiggsVBF[i]=new Sample((const char*)(TString("HiggsVBF")+(long)(110+i*5)),(const char*)(localpath+"/VBF_HToTauTau_M-"+(long)(110+i*5)+"_7TeV-powheg-pythia6-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
     HiggsVBF[i]->setDataType("Signal");
     HiggsVBF[i]->setCrossection(HiggsVBFcross[i]*HiggsTauTauBF[i]);
     HiggsVBF[i]->setSampleGenEvents(196002);
@@ -142,65 +149,65 @@
   }
 
 
-  Sample TauPlusXMay("TauPlusXMay",(const char*)(datapath+"/TauPlusX/Run2011A-May10ReReco-v1/AOD/V2"+tag));
+  Sample TauPlusXMay("TauPlusXMay",(const char*)(localpath+"/TauPlusX/Run2011A-May10ReReco-v1/AOD/V2"+tag));
   TauPlusXMay.setDataType("Data");
   TauPlusXMay.setSampleLumi(168.597);
   TauPlusXMay.setRunRange(163262,170000);
-  TauPlusXMay.addTrigPath("HLT_IsoMu12_LooseIsoPFTau10_v4");
+  TauPlusXMay.addTrigPath("HLT_IsoMu12_LooseIsoPFTau10_v4","hltFilterIsoMu12IsoPFTau10LooseIsolation","hltSingleMuIsoL3IsoFiltered12");
   analysis.addSample(&TauPlusXMay);
 
-  Sample TauPlusXv4("TauPlusXv4",(const char*)(datapath+"/TauPlusX/Run2011A-PromptReco-v4/AOD/V2"+tag));
+  Sample TauPlusXv4("TauPlusXv4",(const char*)(localpath+"/TauPlusX/Run2011A-PromptReco-v4/AOD/V2"+tag));
   TauPlusXv4.setDataType("Data");
   TauPlusXv4.setSampleLumi(929.748);
-  TauPlusXv4.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v2");
-  TauPlusXv4.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v4");
-  TauPlusXv4.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v5");
-  TauPlusXv4.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v6");
+  TauPlusXv4.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v2","hltPFTau15TrackLooseIso","hltSingleMuIsoL3IsoFiltered15");
+  TauPlusXv4.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v4","hltPFTau15TrackLooseIso","hltSingleMuIsoL3IsoFiltered15");
+  TauPlusXv4.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v5","hltPFTau15TrackLooseIso","hltSingleMuIsoL3IsoFiltered15");
+  TauPlusXv4.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v6","hltPFTau15TrackLooseIso","hltSingleMuIsoL3IsoFiltered15");
   analysis.addSample(&TauPlusXv4);
 
-  Sample TauPlusXAug("TauPlusXAug",(const char*)(datapath+"/TauPlusX/Run2011A-05Aug2011-v1/AOD/V2"+tag));
+  Sample TauPlusXAug("TauPlusXAug",(const char*)(localpath+"/TauPlusX/Run2011A-05Aug2011-v1/AOD/V2"+tag));
   TauPlusXAug.setDataType("Data");
   TauPlusXAug.setSampleLumi(373.349);
-  TauPlusXAug.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v8");
+  TauPlusXAug.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v8","hltPFTau15TrackLooseIso","hltSingleMuIsoL3IsoFiltered15");
   analysis.addSample(&TauPlusXAug);
 
-  Sample TauPlusXOct3("TauPlusXOct3",(const char*)(datapath+"/TauPlusX/Run2011A-03Oct2011-v1/AOD/V2"+tag));
+  Sample TauPlusXOct3("TauPlusXOct3",(const char*)(localpath+"/TauPlusX/Run2011A-03Oct2011-v1/AOD/V2"+tag));
   TauPlusXOct3.setDataType("Data");
   TauPlusXOct3.setSampleLumi(658.886);
-  TauPlusXOct3.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v8");
-  TauPlusXOct3.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v9");
+  TauPlusXOct3.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v8","hltPFTau15TrackLooseIso","hltSingleMuIsoL3IsoFiltered15");
+  TauPlusXOct3.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v9","hltPFTau15TrackLooseIso","hltSingleMuIsoL3IsoFiltered15");
   analysis.addSample(&TauPlusXOct3);
 
-  Sample TauPlusX2011B("TauPlusX2011B",(const char*)(datapath+"/TauPlusX/Run2011B-PromptReco-v1/AOD/V2"+tag));
+  Sample TauPlusX2011B("TauPlusX2011B",(const char*)(localpath+"/TauPlusX/Run2011B-PromptReco-v1/AOD/V2"+tag));
   TauPlusX2011B.setDataType("Data");
   TauPlusX2011B.setSampleLumi(2511);
   // HLT_IsoMu15_LooseIsoPFTau15_v9             173236 - 178380         1945    L1_SingleMu10    (Note! this trigger got prescaled in 2011B)
   // HLT_IsoMu15_eta2p1_LooseIsoPFTau20_v5      178420 - 179889         706.7   L1_SingleMu14_Eta2p1    ET(tau)>20 GeV, |eta(mu)|<2.1
   // HLT_IsoMu15_eta2p1_LooseIsoPFTau20_v6      179959 - 180252         120.7   L1_SingleMu14_Eta2p1    end of 2011 run 
-  TauPlusX2011B.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v9");//to recover ~100pb-1 
-  TauPlusX2011B.addTrigPath("HLT_IsoMu15_eta2p1_LooseIsoPFTau20_v1");//used when HLT_IsoMu15_LooseIsoPFTau15_v9 got prescaled 
-  TauPlusX2011B.addTrigPath("HLT_IsoMu15_eta2p1_LooseIsoPFTau20_v5");
-  TauPlusX2011B.addTrigPath("HLT_IsoMu15_eta2p1_LooseIsoPFTau20_v6");
+  TauPlusX2011B.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v9","hltPFTau15TrackLooseIso","hltSingleMuIsoL3IsoFiltered15");//to recover ~100pb-1 
+  TauPlusX2011B.addTrigPath("HLT_IsoMu15_eta2p1_LooseIsoPFTau20_v1","hltPFTau20TrackLooseIso","hltSingleMuIsoL1s14L3IsoFiltered15eta2p1");//used when HLT_IsoMu15_LooseIsoPFTau15_v9 got prescaled 
+  TauPlusX2011B.addTrigPath("HLT_IsoMu15_eta2p1_LooseIsoPFTau20_v5","hltPFTau20TrackLooseIso","hltSingleMuIsoL1s14L3IsoFiltered15eta2p1");
+  TauPlusX2011B.addTrigPath("HLT_IsoMu15_eta2p1_LooseIsoPFTau20_v6","hltPFTau20TrackLooseIso","hltSingleMuIsoL1s14L3IsoFiltered15eta2p1");
   analysis.addSample(&TauPlusX2011B);
 
 
-  Sample EmbeddedMay("EmbeddedMay",(const char*)(datapath+"/DoubleMu/StoreResults-DoubleMu_2011A_May10thRR_v1_embedded_trans1_tau116_ptmu1_13had1_17_v1-f456bdbb960236e5c696adfe9b04eaae/USER/"+tag));
+  Sample EmbeddedMay("EmbeddedMay",(const char*)(localpath+"/DoubleMu/StoreResults-DoubleMu_2011A_May10thRR_v1_embedded_trans1_tau116_ptmu1_13had1_17_v1-f456bdbb960236e5c696adfe9b04eaae/USER/"+tag));
   EmbeddedMay.setDataType("Embedded");
   analysis.addSample(&EmbeddedMay);
 
-  Sample EmbeddedV4("EmbeddedV4",(const char*)(datapath+"/DoubleMu/StoreResults-DoubleMu_2011A_PR_v4_embedded_trans1_tau116_ptmu1_13had1_17_v1-f456bdbb960236e5c696adfe9b04eaae/USER/"+tag));
+  Sample EmbeddedV4("EmbeddedV4",(const char*)(localpath+"/DoubleMu/StoreResults-DoubleMu_2011A_PR_v4_embedded_trans1_tau116_ptmu1_13had1_17_v1-f456bdbb960236e5c696adfe9b04eaae/USER/"+tag));
   EmbeddedV4.setDataType("Embedded");
   analysis.addSample(&EmbeddedV4);
 
-  Sample EmbeddedAug("EmbeddedAug",(const char*)(datapath+"/DoubleMu/StoreResults-DoubleMu_2011A_Aug05thRR_v1_embedded_trans1_tau116_ptmu1_13had1_17_v2-f456bdbb960236e5c696adfe9b04eaae/USER/"+tag));
+  Sample EmbeddedAug("EmbeddedAug",(const char*)(localpath+"/DoubleMu/StoreResults-DoubleMu_2011A_Aug05thRR_v1_embedded_trans1_tau116_ptmu1_13had1_17_v2-f456bdbb960236e5c696adfe9b04eaae/USER/"+tag));
   EmbeddedAug.setDataType("Embedded");
   analysis.addSample(&EmbeddedAug);
 
-  Sample EmbeddedOct("EmbeddedOct",(const char*)(datapath+"/DoubleMu/StoreResults-DoubleMu_2011A_03Oct2011_v1_embedded_trans1_tau116_ptmu1_13had1_17_v1-f456bdbb960236e5c696adfe9b04eaae/USER/"+tag));
+  Sample EmbeddedOct("EmbeddedOct",(const char*)(localpath+"/DoubleMu/StoreResults-DoubleMu_2011A_03Oct2011_v1_embedded_trans1_tau116_ptmu1_13had1_17_v1-f456bdbb960236e5c696adfe9b04eaae/USER/"+tag));
   EmbeddedOct.setDataType("Embedded");
   analysis.addSample(&EmbeddedOct);
 
-  Sample Embedded2011B("Embedded2011B",(const char*)(datapath+"/DoubleMu/StoreResults-DoubleMu_2011B_PR_v1_embedded_trans1_tau116_ptmu1_13had1_17_v2-f456bdbb960236e5c696adfe9b04eaae/USER/"+tag));
+  Sample Embedded2011B("Embedded2011B",(const char*)(localpath+"/DoubleMu/StoreResults-DoubleMu_2011B_PR_v1_embedded_trans1_tau116_ptmu1_13had1_17_v2-f456bdbb960236e5c696adfe9b04eaae/USER/"+tag));
   Embedded2011B.setDataType("Embedded");
   analysis.addSample(&Embedded2011B);
 

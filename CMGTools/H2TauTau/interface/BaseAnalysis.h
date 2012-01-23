@@ -52,6 +52,8 @@ public:
   virtual bool init();
   virtual bool createHistos(TString samplename="RelValZTT");
 
+  void createMCPileUP();
+
 protected:
 
   virtual bool addHistos(Sample* s);
@@ -88,6 +90,9 @@ protected:
   //useful functions
   edm::Handle< std::vector<reco::GenParticle> > genParticles_;
   void printMCGen(edm::Handle< std::vector<reco::GenParticle> > & genList);
+  
+  edm::Handle< std::vector<cmg::TriggerObject> > trigObjs_;
+  bool trigObjMatch(float eta, float phi, std::string path, std::string filter);
 
 private:
 

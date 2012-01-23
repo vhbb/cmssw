@@ -302,11 +302,18 @@ bool TauMuAnalysis::applySelections(TString exceptcut){
   //if none are selected returns 0
   diTauSel_=NULL;
   
-  //separate the Z->ll at gen level here, will speed up processing
-  //cand be done because a reconstruced tau-tau candidate can only be truth-matched if there is actually a generated Z-->tau tau, for example
-  if(sample_->getTruthEventType()==1 || sample_->getTruthEventType()==3 || sample_->getTruthEventType()==5
-     || sample_->getTruthEventType()==11 || sample_->getTruthEventType()==13 || sample_->getTruthEventType()==15)
-    if(sample_->getTruthEventType()!=genEventType_) return 0;
+  //apply gen level separation here
+  if( sample_->getGenEventType() !=0
+      && sample_->getGenEventType()!=genEventType_) return 0;
+
+  //separate the Z->ll at gen level here for truth-matching, will speed up processing
+  if((sample_->getTruthEventType()==1 
+     || sample_->getTruthEventType()==3 
+     || sample_->getTruthEventType()==5
+     || sample_->getTruthEventType()==11 
+     || sample_->getTruthEventType()==13 
+     || sample_->getTruthEventType()==15)
+     && sample_->getTruthEventType()!=genEventType_) return 0;
 
   ////other 
   if(exceptcut!="dileptonveto") if(computeDiLeptonVeto()) return 0;
@@ -324,7 +331,17 @@ bool TauMuAnalysis::applySelections(TString exceptcut){
     if(exceptcut!="taueop") 
       if(cand->leg1().decayMode()==0&&cand->leg1().p()>0.) 
 	if(((cand->leg1().leadChargedHadrECalEnergy()+cand->leg1().leadChargedHadrHCalEnergy())/cand->leg1().p())<0.2) continue; 
-        
+    //    if(exceptcut!="tautrigmatch")if(!trigObjMatch(cand->leg1().eta(),cand->leg1().phi(),"hltOverlapFilterIsoMu15IsoPFTau15"))continue;//hltPFTau15TrackLooseIso
+    if(exceptcut!="tautrigmatch"){
+      bool match=0;
+      if(sample_->getTrigPaths()->size()==0)match=1;//no match requirement
+      for(std::vector<std::vector<std::string> >::const_iterator path=sample_->getTrigPaths()->begin(); path!=sample_->getTrigPaths()->end(); path++){
+	if(trigObjMatch(cand->leg1().eta(),cand->leg1().phi(),(*path)[0],(*path)[1]))
+	  match=1;
+      }
+      if(!match)continue;
+    }
+
     ////selections on the muon
     if(exceptcut!="mupt") if(cand->leg2().pt()<17.0)continue;
     if(exceptcut!="mueta") if(fabs(cand->leg2().eta())>2.1)continue;
@@ -340,6 +357,21 @@ bool TauMuAnalysis::applySelections(TString exceptcut){
 	 || cand->leg2().normalizedChi2() >= 10
 	 ) continue;    
     if(exceptcut!="muiso") if(cand->leg2().relIso(0.5)>0.1)continue;    
+    //if(exceptcut!="mutrigmatch")if(!trigObjMatch(cand->leg2().eta(),cand->leg2().phi(),"hltSingleMuIsoL3IsoFiltered15"))continue;
+    if(exceptcut!="mutrigmatch"){
+      bool match=0;
+      if(sample_->getTrigPaths()->size()==0) match=1;//no match requirement
+      for(std::vector<std::vector<std::string> >::const_iterator path=sample_->getTrigPaths()->begin(); path!=sample_->getTrigPaths()->end(); path++){
+	if(trigObjMatch(cand->leg2().eta(),cand->leg2().phi(),(*path)[0],(*path)[2]))
+	  match=1;
+      }
+      if(!match)continue;
+    }
+
+    
+    //selections on the mu-tau combination
+    //this cut has no effect no effect after the full selections
+    //if(exceptcut!="mutaudr") if(reco::deltaR(cand->leg1().eta(),cand->leg1().phi(),cand->leg2().eta(),cand->leg2().phi())<0.3) continue;    
 
     diTauSelList_.push_back(*cand);
   }
@@ -577,9 +609,11 @@ bool TauMuAnalysis::createHistos(TString samplename){
     //sample_->cloneHistos("tauiso");
     //sample_->cloneHistos("tauagainstmuon");
     sample_->cloneHistos("taueop");
-    //sample_->cloneHistos("muiso");    tauEoPHisto_->Fill(diTauSel_->leg1().leadChargedHadrECalEnergy()/diTauSel_->leg1().p(),eventWeight_);
+    //sample_->cloneHistos("muiso");
     sample_->cloneHistos("mupt");
     sample_->cloneHistos("massT");
+    sample_->cloneHistos("tautrigmatch");
+    sample_->cloneHistos("mutrigmatch");
 
     sample_->cloneHistos("SM0");
     sample_->cloneHistos("SM1");
@@ -638,6 +672,8 @@ bool TauMuAnalysis::createHistos(TString samplename){
       if(applySelections("mupt")) if(!fillHistos("mupt")) return 0;
       //      if(applySelections("dileptonveto")) if(!fillHistos("dileptonveto")) return 0;
       if(applySelections("massT")) if(!fillHistos("massT")) return 0;   
+      if(applySelections("tautrigmatch")) if(!fillHistos("tautrigmatch")) return 0; 
+      if(applySelections("mutrigmatch")) if(!fillHistos("mutrigmatch")) return 0;
     }
 
     //fill fully selected inclusive histograms 
@@ -860,11 +896,14 @@ bool TauMuAnalysis::scaleHistos(){
     if(TString((*s)->GetName())=="ZToTauTau")
       ZToTauTauMC=(*s)->getHistoFromFile("transverseMassHisto_massT")->Integral();  
   }
-  if(ZToTauTauMC==0. || EmbeddedOS==0.){ cout<<" bad ZToTauTauMC or EmbeddedOS yields"<<endl; return 0;}
-  cout<<"Rescaling Embedded samples by factor : "<<ZToTauTauMC/EmbeddedOS<<endl;
-  for(std::vector<Sample*>::const_iterator s=samples_.begin(); s!=samples_.end(); ++s)
-    if((*s)->getDataType()=="Embedded" || (*s)->getDataType()=="Embedded_SS")
-      (*s)->scale(ZToTauTauMC/EmbeddedOS);
+  if(ZToTauTauMC==0. || EmbeddedOS==0.){
+    cout<<"Warning!!!: bad ZToTauTauMC or EmbeddedOS yields: ZToTauTauMC="<<ZToTauTauMC<<" EmbeddedOS="<<EmbeddedOS<<endl;
+  } else {
+    cout<<"Rescaling Embedded samples by factor : "<<ZToTauTauMC/EmbeddedOS<<endl;
+    for(std::vector<Sample*>::const_iterator s=samples_.begin(); s!=samples_.end(); ++s)
+      if((*s)->getDataType()=="Embedded" || (*s)->getDataType()=="Embedded_SS")
+	(*s)->scale(ZToTauTauMC/EmbeddedOS);
+  }
 
   return 1;
 }
@@ -1093,6 +1132,11 @@ bool TauMuAnalysis::plot(TString histoname, Int_t rebin, TString xlabel, TString
   delete hDataSS;
   delete hMCSS;
 
+  ////Total Data
+  TH1F* hData=getTotalData(histoname);
+  if(!hData){cout<<" Total Data not determined "<<endl; return 0;}
+  hData->Rebin(rebin);
+
 
   ////Total MC
   ///must get here before getting individual components below because same histo object name is used for each component inside
@@ -1105,15 +1149,6 @@ bool TauMuAnalysis::plot(TString histoname, Int_t rebin, TString xlabel, TString
   cout<<"Creating Bkg Stack:"<<endl;
   THStack hMCStack("hBkgStack","BkgStack");//dont't set any of the regular histogram properties on the THStack will crash.
  
-  //
-  TH1F*hTTJets=getSample("TTJets",histoname);
-  if(!hTTJets)return 0;
-  hTTJets->Rebin(rebin);
-  hTTJets->SetLineWidth(1);
-  hTTJets->SetLineColor(TTJetsColor_);
-  hTTJets->SetFillColor(TTJetsColor_);
-  cout<<"TTJets "<<hTTJets->Integral(0,hTTJets->GetNbinsX()+1)<<endl;
-  hMCStack.Add(hTTJets,"hist");
  
   //
   TH1F*hQCD=getQCD(histoname);
@@ -1122,16 +1157,7 @@ bool TauMuAnalysis::plot(TString histoname, Int_t rebin, TString xlabel, TString
   hQCD->SetLineWidth(1);
   hQCD->SetLineColor(QCDColor_);
   hQCD->SetFillColor(QCDColor_);
-  hMCStack.Add(hQCD,"hist");
   cout<<"   QCD "<<hQCD->Integral(0,hQCD->GetNbinsX()+1)<<endl;
-
-  //combine ZLJet with QCD 
-  TH1F*hZToLJet=getSample("ZToLJet",histoname);
-  if(!hZToLJet)return 0;
-  hZToLJet->Rebin(rebin);
-  cout<<"   ZToLJet "<<hZToLJet->Integral(0,hZToLJet->GetNbinsX()+1)<<endl;  
-  hQCD->Add(hZToLJet);
-  delete hZToLJet;
 
   cout<<"Fakes "<<hQCD->Integral(0,hQCD->GetNbinsX()+1)<<endl;
 
@@ -1143,7 +1169,6 @@ bool TauMuAnalysis::plot(TString histoname, Int_t rebin, TString xlabel, TString
   hWJetsToLNu->SetLineColor(WJetsColor_);
   hWJetsToLNu->SetFillColor(WJetsColor_);
   cout<<"   WJetsToLNu "<<hWJetsToLNu->Integral(0,hWJetsToLNu->GetNbinsX()+1)<<endl;
-  hMCStack.Add(hWJetsToLNu,"hist");
 
   //combine Di-Bosons with WJets
   TH1F*hVV=getDiBoson(histoname);
@@ -1153,7 +1178,13 @@ bool TauMuAnalysis::plot(TString histoname, Int_t rebin, TString xlabel, TString
   hWJetsToLNu->Add(hVV);
   delete hVV;
 
-  cout<<"ElectroWeak "<<hWJetsToLNu->Integral(0,hWJetsToLNu->GetNbinsX()+1)<<endl;
+  //combine ZLJet with Wjets
+  TH1F*hZToLJet=getSample("ZToLJet",histoname);
+  if(!hZToLJet)return 0;
+  hZToLJet->Rebin(rebin);
+  cout<<"   ZToLJet "<<hZToLJet->Integral(0,hZToLJet->GetNbinsX()+1)<<endl;  
+  hWJetsToLNu->Add(hZToLJet);
+  delete hZToLJet;  
 
   //combine Z->MuMu with WJets
   TH1F*hZToMuMu=getSample("ZToMuMu",histoname);
@@ -1162,29 +1193,41 @@ bool TauMuAnalysis::plot(TString histoname, Int_t rebin, TString xlabel, TString
   hZToMuMu->SetLineWidth(1);
   hZToMuMu->SetLineColor(ZMuMuColor_);
   hZToMuMu->SetFillColor(ZMuMuColor_);
-  hMCStack.Add(hZToMuMu,"hist");
   cout<<"   ZToMuMu "<<hZToMuMu->Integral(0,hZToMuMu->GetNbinsX()+1)<<endl;
-  //hWJetsToLNu->Add(hZToMuMu);
-  //delete hZToMuMu;
-  
+  hWJetsToLNu->Add(hZToMuMu);
+  delete hZToMuMu;
 
+  cout<<"ElectroWeak "<<hWJetsToLNu->Integral(0,hWJetsToLNu->GetNbinsX()+1)<<endl;
 
+  //
+  TH1F*hTTJets=getSample("TTJets",histoname);
+  if(!hTTJets)return 0;
+  hTTJets->Rebin(rebin);
+  hTTJets->SetLineWidth(1);
+  hTTJets->SetLineColor(TTJetsColor_);
+  hTTJets->SetFillColor(TTJetsColor_);
+  cout<<"TTJets "<<hTTJets->Integral(0,hTTJets->GetNbinsX()+1)<<endl;
+ 
+
+  ///Z->tau tau
   TH1F*hZToTauTau=getZToTauTau(histoname);
   if(!hZToTauTau)return 0;
   hZToTauTau->Rebin(rebin);
   hZToTauTau->SetLineWidth(1);
   hZToTauTau->SetLineColor(ZTauTauColor_);
   hZToTauTau->SetFillColor(ZTauTauColor_);
-  hMCStack.Add(hZToTauTau,"hist");
   cout<<"ZToTauTau "<<hZToTauTau->Integral(0,hZToTauTau->GetNbinsX()+1)<<endl;
-
-  ////Total Data
-  TH1F* hData=getTotalData(histoname);
-  if(!hData){cout<<" Total Data not determined "<<endl; return 0;}
-  hData->Rebin(rebin);
 
   cout<<"Total Background "<<(int)(hBkg->Integral(0,hBkg->GetNbinsX()+1))<<endl;
   cout<<"Total Data "<<(int)(hData->Integral(0,hData->GetNbinsX()+1))<<endl;
+
+  
+  //
+  hMCStack.Add(hTTJets,"hist");
+  hMCStack.Add(hQCD,"hist");
+  hMCStack.Add(hWJetsToLNu,"hist");
+  // hMCStack.Add(hZToMuMu,"hist");
+  hMCStack.Add(hZToTauTau,"hist");
 
   //create legend key
   TLegend legend;
@@ -1192,10 +1235,10 @@ bool TauMuAnalysis::plot(TString histoname, Int_t rebin, TString xlabel, TString
   legend.SetBorderSize(1);
   legend.AddEntry(hData,hData->GetTitle(),"p");
   legend.AddEntry(hZToTauTau,hZToTauTau->GetTitle(),"f");
-  legend.AddEntry(hZToMuMu,hZToMuMu->GetTitle(),"f");
-  legend.AddEntry(hTTJets,hTTJets->GetTitle(),"f");
+  //  legend.AddEntry(hZToMuMu,hZToMuMu->GetTitle(),"f");
   legend.AddEntry(hWJetsToLNu,hWJetsToLNu->GetTitle(),"f");
   legend.AddEntry(hQCD,"Fakes","f");
+  legend.AddEntry(hTTJets,hTTJets->GetTitle(),"f");
 
  
 

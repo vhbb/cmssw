@@ -77,7 +77,7 @@ void plotTauMu(){
 //   analysis.plot("tauIsoHisto",2," tau isolation  ","",c,0);
   
 //   Float_t c[4]={.5,.75,.42,.81};
-//   Float_t r[4]={0,150,0,5000};
+//   Float_t r[4]={0,150,0,8000};
 //   analysis.plot("metHisto",4," MET   (GeV)","Events / 4 GeV",c,r);
 
 //   Float_t c[4]={.5,.75,.42,.81};
@@ -93,11 +93,11 @@ void plotTauMu(){
 //    analysis.plot("pZetaHisto_pzeta",6,"P_{#zeta} - 1.5*P_{#zeta}^{vis}    (GeV)","Events / 6 GeV",c,r);
   
 //   Float_t c[4]={.5,.75,.42,.81};
-//   Float_t r[4]={0,200,0,6000};
+//   Float_t r[4]={0,200,0,10000};
 //   analysis.plot("transverseMassHisto_massT",4,"m_{T}   (GeV)","Events / 4 GeV",c,r);
 
 //   Float_t c[4]={.5,.75,.42,.81};
-//   Float_t r[4]={0,200,0,6000};
+//   Float_t r[4]={0,200,0,7000};
 //   //   Float_t c[4]={.5,.75,.42,.81};
 //   //   Float_t r[4]={0,350,5,1e7};
 //   analysis.plot("diTauMassHisto",4,"m_{vis}   (GeV)","Events / 4 GeV",c,r,0);
@@ -112,10 +112,10 @@ void plotTauMu(){
 //   //Float_t r[4]={-0.5,5.5,1,500000};
 //   analysis.plot("njetHisto",1,"# of jets","",c,r,0);
 
-//   Float_t c[4]={.55,.8,.47,.81};
-//   Float_t r[4]={-0.5,5.5,0,40000};
-//   //Float_t r[4]={-0.5,5.5,1,500000};
-//   analysis.plot("njetLCHisto",1,"# of jets","",c,r,0);
+  Float_t c[4]={.55,.8,.47,.81};
+  Float_t r[4]={-0.5,5.5,0,40000};
+  //Float_t r[4]={-0.5,5.5,1,500000};
+  analysis.plot("njetLCHisto",1,"# of jets","",c,r,0);
 
   
 //   Float_t c[4]={.5,.75,.42,.81};

@@ -38,13 +38,20 @@ public:
   void setSampleLumi(float lumi){lumi_=lumi;}
   void setSampleGenEvents(int Ngen){genEvents_=Ngen;}
   
-  void addTrigPath(std::string pathname){trigPaths_.push_back(pathname);}
-  void addTrigPaths(std::vector<std::string> * paths){
+  void addTrigPath(std::string pathname, std::string filterLeg1 = "", std::string filterLeg2 = ""){
+    std::vector<std::string> pth; pth.push_back(pathname); pth.push_back(filterLeg1);pth.push_back(filterLeg2);
+    trigPaths_.push_back(pth);
+  }
+  void addTrigPaths(std::vector<std::vector<std::string> > * paths){
     if(!paths)return;
-    for(std::vector<std::string>::const_iterator p=paths->begin(); p!=paths->end(); ++p) trigPaths_.push_back(*p);
+    for(std::vector<std::vector<std::string> >::const_iterator p=paths->begin(); p!=paths->end(); ++p)
+      trigPaths_.push_back(*p);
   }
   void setRunRange(unsigned int first, unsigned int last){firstrun_=first; lastrun_=last;}
   void setEffCorrFactor(float factor){effCorrFactor_=factor;}
+
+
+
 
   bool addHisto(TH1* hist) {
     if(!hist)return 0;
@@ -90,6 +97,7 @@ public:
   void setLegendOption(TString opt){legendOption_=opt;}
   void setRecoilCorr(TString processfile){applyRecoilCorr_=1; recoilCorrProcessFile_=processfile;}
   void setApplyTauRateWeight(bool applyWeight){applyTauRateWeight_=applyWeight;}
+  void setGenEventType(unsigned int eventtype){genEventType_=eventtype;}
   void setTruthEventType(unsigned int eventtype){truthEventType_=eventtype;}
 
 
@@ -141,6 +149,7 @@ public:
   bool getApplyRecoilCorr(){return applyRecoilCorr_;}
   TString getRecoilCorrProcessFile(){return recoilCorrProcessFile_;}
   bool getApplyTauRateWeight(){return applyTauRateWeight_;}
+  unsigned int getGenEventType(){return genEventType_;}
   unsigned int getTruthEventType(){return truthEventType_;}
 
   fwlite::ChainEvent* getEvents();
@@ -167,7 +176,7 @@ public:
     return (TH1*)(histFile_->Get(TString(GetName())+"_"+name)) ;
   }
 
-  std::vector<std::string> * getTrigPaths(){return &trigPaths_;}
+  std::vector<std::vector<std::string> > * getTrigPaths(){return &trigPaths_;}
   unsigned int getFirstRun(){return firstrun_;}
   unsigned int getLastRun(){return lastrun_;}
 
@@ -190,7 +199,7 @@ private:
   fwlite::ChainEvent* sampleChain_;
   std::vector<TH1*> sampleHist_;//all histos including clones
   std::vector<TH1*> mainsampleHist_;//list of histos added with addHisto()
-  std::vector<std::string> trigPaths_;
+  std::vector<std::vector<std::string> > trigPaths_;
   unsigned int firstrun_;
   unsigned int lastrun_;
   float effCorrFactor_;
@@ -209,6 +218,7 @@ private:
   TString legendOption_;
   bool applyRecoilCorr_;
   bool applyTauRateWeight_;
+  unsigned int genEventType_;
   unsigned int truthEventType_;
 
   std::vector<TString> countername_;
