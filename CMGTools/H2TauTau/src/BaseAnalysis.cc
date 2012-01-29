@@ -57,7 +57,7 @@ bool BaseAnalysis::addHistos(Sample* s){
   if(!s)return 0;
      
   if(!s->addHisto((TH1*)(new TH1F(TString(s->GetName())+"_runNumberHisto","",1500,160000,175000))))return 0;
-  if(!s->addHisto((TH1*)(new TH1F(TString(s->GetName())+"_nVertexHisto","",25,-.5,24.5))))return 0;
+  if(!s->addHisto((TH1*)(new TH1F(TString(s->GetName())+"_nVertexHisto","",35,-.5,34.5))))return 0;
   if(!s->addHisto((TH1*)(new TH2F(TString(s->GetName())+"_vertexXYHisto","",100,0.2,0.3,100,0.34,0.44))))return 0;
   if(!s->addHisto((TH1*)(new TH1F(TString(s->GetName())+"_vertexZHisto","",100,-20,20))))return 0;
   
@@ -105,28 +105,12 @@ bool BaseAnalysis::fillVariables(const fwlite::Event * event){
 
   ///Event weight definition starts here:
   pupWeight_=1.;//do not comment out needs to be used.
-
-//   //determine PUP weight
-//   mcPUPWeight_=1.0;
-//   if(sample_->getDataType()=="MC" || sample_->getDataType()=="MC_SS"){
-//     edm::Handle<std::vector< PileupSummaryInfo > >  PupInfo;
-//     event->getByLabel(edm::InputTag("addPileupInfo"), PupInfo);    
-//     int npv=-1;
-//     for( std::vector<PileupSummaryInfo>::const_iterator PVI = PupInfo->begin(); PVI != PupInfo->end(); ++PVI) {    
-//       int BX = PVI->getBunchCrossing();    
-//       if(BX == 0) { 
-// 	npv = PVI->getPU_NumInteractions();
-// 	continue;
-//       }    
-//     }
-//     if(npv == -1)return 0;
-//     if(-1 < npv && npv < mcPUPWeightHisto_->GetXaxis()->GetNbins())
-//       mcPUPWeight_= mcPUPWeightHisto_->GetBinContent(npv+1);//npv=0 corresponds to bin # 1
-//   }
-
-  if(sample_->getDataType()=="MC" || sample_->getDataType()=="MC_SS"){
+  if(sample_->getDataType()=="MC" || sample_->getDataType()=="MC_SS"
+     || sample_->getDataType()=="MCCat" || sample_->getDataType()=="MCCat_SS" 
+     || sample_->getDataType()=="Signal"){
     edm::Handle<double>  PupWeight;
-    event->getByLabel(edm::InputTag(pupWeightName_.c_str()), PupWeight);    
+    //event->getByLabel(edm::InputTag(pupWeightName_.c_str()), PupWeight);    
+    event->getByLabel(edm::InputTag((sample_->getPileupWeight())->c_str()), PupWeight);    
     pupWeight_=(*PupWeight);
   }
 

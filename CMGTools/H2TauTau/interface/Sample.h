@@ -37,7 +37,8 @@ public:
   void setCrossection(float crossection){crossection_=crossection;} //in pb
   void setSampleLumi(float lumi){lumi_=lumi;}
   void setSampleGenEvents(int Ngen){genEvents_=Ngen;}
-  
+  void setPileupWeight(std::string weight){pileupWeight_=weight;}
+
   void addTrigPath(std::string pathname, std::string filterLeg1 = "", std::string filterLeg2 = ""){
     std::vector<std::string> pth; pth.push_back(pathname); pth.push_back(filterLeg1);pth.push_back(filterLeg2);
     trigPaths_.push_back(pth);
@@ -102,22 +103,25 @@ public:
 
 
   bool scale(Float_t factor){
-    if(dataType_=="Data" || dataType_=="Data_SS") return 0;
-    if(!histFile_){//check the histograms exist
-      histFile_=new TFile(outputpath_+"/"+GetName()+"_Sample_Histograms.root","read");
-      if(histFile_->IsZombie()) return NULL;
-      if(!histFile_->GetListOfKeys()) return NULL;
-      if(histFile_->GetListOfKeys()->GetSize()==0) return NULL;
-      //cout<<" opened file :"<<outputpath_+"/"+GetName()+"_Sample_Histograms.root"<<endl;
-    }
-    //scale all histograms
-    TList* keys=histFile_->GetListOfKeys();
-    if(!keys)return 0;
-    TIterator* keyiter=keys->MakeIterator();
-    for(TKey* histname=(TKey*)keyiter->Next(); histname; histname=(TKey*)keyiter->Next())
-      ((TH1*)histFile_->Get(histname->GetName()))->Scale(factor);//(effCorrFactor_*lumi)/getLumi()
 
-    cout<<"Scaled histos in "<<histFile_->GetName()<<" by "<<factor<<endl;
+//     if(!histFile_){//check the histograms exist
+//       histFile_=new TFile(outputpath_+"/"+GetName()+"_Sample_Histograms.root","read");
+//       if(histFile_->IsZombie()) return NULL;
+//       if(!histFile_->GetListOfKeys()) return NULL;
+//       if(histFile_->GetListOfKeys()->GetSize()==0) return NULL;
+//       //cout<<" opened file :"<<outputpath_+"/"+GetName()+"_Sample_Histograms.root"<<endl;
+//       gROOT->cd();
+//     }
+//     //scale all histograms
+//     TList* keys=histFile_->GetListOfKeys();
+//     if(!keys)return 0;
+//     TIterator* keyiter=keys->MakeIterator();
+//     for(TKey* histname=(TKey*)keyiter->Next(); histname; histname=(TKey*)keyiter->Next())
+//       ((TH1*)histFile_->Get(histname->GetName()))->Scale(factor);//(effCorrFactor_*lumi)/getLumi()
+//    cout<<"Scaled histos in "<<histFile_->GetName()<<" by "<<factor<<endl;
+    
+    normFactor_*=factor;
+
     return 1;
   }
 
@@ -129,16 +133,15 @@ public:
   int getNEvents(){return nEvents_;}
   float getCrossection(){return crossection_;}
   TString getDataType(){return dataType_;}
+  const std::string * getPileupWeight() const {return &pileupWeight_;}
   int getSampleGenEvents(){return genEvents_;}
   float getEffCorrFactor(){return effCorrFactor_;}
-
   float getLumi(){ 
-    if(dataType_=="Data" || dataType_=="Data_SS")return lumi_;
-    else {
-      if(crossection_<1e-6)return 0.;
-      return genEvents_/crossection_;
-    }
+    if(dataType_=="Data" || dataType_=="Data_SS" || dataType_=="Embedded" || dataType_=="Embedded_SS")return lumi_;
+    else if(crossection_>0.) return genEvents_/crossection_;
+    return 0.;
   }
+  float getNorm(){return normFactor_;}
   
   Int_t getColor(){return color_;}
   Int_t getLineColor(){return lcolor_;}
@@ -162,17 +165,14 @@ public:
   }
 
   
-  TH1* getHistoFromFile(TString name){
-    
+  const TH1* getHistoFromFile(TString name){
     if(!histFile_){
       histFile_=new TFile(outputpath_+"/"+GetName()+"_Sample_Histograms.root","read");
       if(histFile_->IsZombie()) return NULL;
       if(!histFile_->GetListOfKeys()) return NULL;
       if(histFile_->GetListOfKeys()->GetSize()==0) return NULL;
-      //cout<<" opened file :"<<outputpath_+"/"+GetName()+"_Sample_Histograms.root"<<endl;
+      gROOT->cd();
     }
-    //histFile_->Print();
-    //cout<<"name="<<TString(GetName())+"_"+name<<"="<<endl;
     return (TH1*)(histFile_->Get(TString(GetName())+"_"+name)) ;
   }
 
@@ -210,6 +210,7 @@ private:
   TTree* tree_;
 
   TString dataType_;
+  std::string pileupWeight_;
   Int_t color_;
   Int_t lcolor_;
   Int_t lstyle_;
@@ -224,8 +225,10 @@ private:
   std::vector<TString> countername_;
   std::vector<int*> countervalue_;
 
+  float normFactor_;
   bool init_;
-    
+
+
   ClassDef(Sample, 1);
 };
 

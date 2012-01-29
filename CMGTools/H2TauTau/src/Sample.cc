@@ -2,6 +2,7 @@
 
 //ClassImp(Sample);
 
+//do not use this default constructor may not be up to date
 Sample::Sample():
   TNamed("Sample","Sample"),
   crossection_(1.0),
@@ -25,6 +26,7 @@ Sample::Sample():
   applyTauRateWeight_(0),
   genEventType_(0),
   truthEventType_(0),
+  normFactor_(1),
   init_(0)
 {}
 
@@ -51,6 +53,7 @@ Sample::Sample(const char * name, const char * path):
   applyTauRateWeight_(0),
   genEventType_(0),
   truthEventType_(0),
+  normFactor_(1),
   init_(0)
 {
   
