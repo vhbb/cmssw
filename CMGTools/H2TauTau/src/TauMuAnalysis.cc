@@ -13,8 +13,6 @@
 
 #include "DataFormats/Math/interface/deltaR.h"
 
-#include "TauAnalysis/SVFitStandAlone/interface/NSVfitStandaloneAlgorithm.h"
-
 #include <TVectorD.h>
 
 TauMuAnalysis::TauMuAnalysis():
@@ -926,6 +924,7 @@ TH1F* TauMuAnalysis::getTotalDataSS(TString histoname){
   if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
 
   TH1F* h=new TH1F("hData_SS","Data SS",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
+  h->Sumw2();
   for( std::vector<Sample*>::const_iterator s=samples_.begin(); s!=samples_.end(); ++s)
     if((*s)->getDataType()=="Data_SS")
       h->Add((TH1F*)((*s)->getHistoFromFile(histoname)));  
@@ -940,6 +939,7 @@ TH1F* TauMuAnalysis::getTotalData(TString histoname){
   if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
 
   TH1F* h=new TH1F(histoname+"hData","Data",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
+  h->Sumw2();
   for( std::vector<Sample*>::const_iterator s=samples_.begin(); s!=samples_.end(); ++s)
     if((*s)->getDataType()=="Data")
       h->Add((TH1F*)((*s)->getHistoFromFile(histoname)));  
@@ -947,24 +947,27 @@ TH1F* TauMuAnalysis::getTotalData(TString histoname){
   return h;
 }
 
-TH1F* TauMuAnalysis::getTotalMC(TString histoname, Int_t WJetsType){
+TH1F* TauMuAnalysis::getTotalMC(TString histoname, Int_t SMType){
 
   cout<<" Calculating Total MC for: "<<histoname<<endl;
   TH1F* href=(TH1F*)((*(samples_.begin()))->getHistoFromFile(histoname));
   if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
 
   TH1F* h=new TH1F(histoname+"hTotalMC","TotalMC",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
+  h->Sumw2();
 
-  TH1F*hWJets=0;
-  if(WJetsType==0)hWJets=getSample("WJetsToLNu",histoname);
-  if(WJetsType==1)hWJets=getSample("WJetsToLNu",histoname);
-  if(WJetsType==2)hWJets=getSample("W3JetsToLNu",histoname);
+  TH1F*hZToTauTau=getZToTauTau(histoname);
+  if(!hZToTauTau)return 0;
+  h->Add(hZToTauTau);
+  delete hZToTauTau;
+
+  TH1F*hWJets=getWJets(histoname,SMType);
   if(!hWJets)return 0;
   h->Add(hWJets);
   delete hWJets;
 
   for( std::vector<Sample*>::const_iterator s=samples_.begin(); s!=samples_.end(); ++s)
-    if((*s)->getDataType()=="MC" && TString((*s)->GetName()) != "WJetsToLNu")
+    if((*s)->getDataType()=="MC" && TString((*s)->GetName()) != "ZToTauTau" && TString((*s)->GetName()) != "WJetsToLNu")
       h->Add((TH1F*)((*s)->getHistoFromFile(histoname)),(*s)->getNorm());  
  
   return h;
@@ -976,6 +979,7 @@ TH1F* TauMuAnalysis::getTotalEmbeddedSS(TString histoname){
   if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
 
   TH1F* h=new TH1F("hEmbeddedSS","",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
+  h->Sumw2();
   for( std::vector<Sample*>::const_iterator s=samples_.begin(); s!=samples_.end(); ++s)
     if((*s)->getDataType()=="Embedded_SS")
       h->Add((TH1F*)((*s)->getHistoFromFile(histoname)),(*s)->getNorm());  
@@ -989,6 +993,7 @@ TH1F* TauMuAnalysis::getTotalEmbedded(TString histoname){
   if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
 
   TH1F* h=new TH1F("hEmbedded","",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
+  h->Sumw2();
   for( std::vector<Sample*>::const_iterator s=samples_.begin(); s!=samples_.end(); ++s)
     if((*s)->getDataType()=="Embedded")
       h->Add((TH1F*)((*s)->getHistoFromFile(histoname)),(*s)->getNorm());  
@@ -997,7 +1002,7 @@ TH1F* TauMuAnalysis::getTotalEmbedded(TString histoname){
 }
 
 
-TH1F* TauMuAnalysis::getMCSS(TString histoname){
+TH1F* TauMuAnalysis::getMCSS(TString histoname, Int_t SMType){
   ///Does not include Signals
   ///currently uses ZToTauTau MC not the embedded
 
@@ -1006,8 +1011,20 @@ TH1F* TauMuAnalysis::getMCSS(TString histoname){
   if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
 
   TH1F* h=new TH1F("hMC_SS","",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
+  h->Sumw2();
+
+  TH1F*hZToTauTau=getZToTauTauSS(histoname);
+  if(!hZToTauTau)return 0;
+  h->Add(hZToTauTau);
+  delete hZToTauTau;
+
+  TH1F*hWJets=getWJetsSS(histoname,SMType);
+  if(!hWJets)return 0;
+  h->Add(hWJets);
+  delete hWJets;
+
   for( std::vector<Sample*>::const_iterator s=samples_.begin(); s!=samples_.end(); ++s)
-    if((*s)->getDataType()=="MC_SS")
+    if((*s)->getDataType()=="MC_SS"  && TString((*s)->GetName()) != "ZToTauTau_SS" && TString((*s)->GetName()) != "WJetsToLNu_SS" )
       h->Add((TH1F*)((*s)->getHistoFromFile(histoname)),(*s)->getNorm());  
  
   return h;
@@ -1021,6 +1038,8 @@ TH1F* TauMuAnalysis::getSample(TString samplename, TString histoname){
   if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
 
   TH1F* h=new TH1F(samplename+histoname,"",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
+  h->Sumw2();
+
   bool found=0;
   for( std::vector<Sample*>::const_iterator s=samples_.begin(); s!=samples_.end(); ++s)
     if(TString((*s)->GetName())==samplename){
@@ -1037,13 +1056,26 @@ TH1F* TauMuAnalysis::getSample(TString samplename, TString histoname){
   return h;
 }
 
-TH1F* TauMuAnalysis::getQCD(TString histoname){
+TH1F* TauMuAnalysis::getQCD(TString histoname, Int_t SMType){
+
+  if(SMType==0)return getQCDSS(histoname);
+  if(SMType==1)return getQCDSide(histoname);
+  //if(SMType==1)return getQCDFullSide(histoname,SMType);
+  if(SMType==2)return getQCDSide(histoname);
+  //if(SMType==2)return getQCDFullSide(histoname,SMType);
+   
+  return 0;
+}
+
+
+TH1F* TauMuAnalysis::getQCDSS(TString histoname){
 
   cout<<" Calculating QCD: "<<endl;
   TH1F* href=(TH1F*)((*(samples_.begin()))->getHistoFromFile(histoname));
   if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
 
   TH1F* h=new TH1F("hQCD","QCD",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
+  h->Sumw2();
   
   TH1F* hDataSS=getTotalDataSS(histoname);
   if(hDataSS){
@@ -1069,13 +1101,14 @@ TH1F* TauMuAnalysis::getQCD(TString histoname){
 }
 
 //////////Different QCD determinations
-TH1F* TauMuAnalysis::getSMQCD(TString histoname){
+TH1F* TauMuAnalysis::getQCDSide(TString histoname){
   //QCD determination from sideband in muon isolation
   cout<<" Calculating SMQCD: "<<endl;
 
   TH1F* href=(TH1F*)((*(samples_.begin()))->getHistoFromFile(histoname+"QCD"));
   if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
   TH1F* h=new TH1F("hSMQCD","SMQCD",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
+  h->Sumw2();
   
   TH1F* hData=getTotalData(histoname+"QCD");
   h->Add(hData);
@@ -1098,19 +1131,20 @@ TH1F* TauMuAnalysis::getSMQCD(TString histoname){
 }
 
 
-TH1F* TauMuAnalysis::getSMQCD2(TString histoname,Int_t WJetsType){
+TH1F* TauMuAnalysis::getQCDFullSide(TString histoname,Int_t SMType){
   //QCD determination from sideband in muon isolation
   cout<<" Calculating SMQCD2: "<<endl;
 
   TH1F* href=(TH1F*)((*(samples_.begin()))->getHistoFromFile(histoname+"QCD2"));
   if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
   TH1F* h=new TH1F("hSMQCD2","SMQCD2",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
-  
+  h->Sumw2();
+
   TH1F* hData=getTotalData(histoname+"QCD2");
   h->Add(hData);
   delete hData;
 
-  TH1F* hMC=getTotalMC(histoname+"QCD2",WJetsType);
+  TH1F* hMC=getTotalMC(histoname+"QCD2",SMType);
   h->Add(hMC,-1);
   delete hMC;
 
@@ -1136,7 +1170,8 @@ TH1F* TauMuAnalysis::getDiBoson(TString histoname){
   if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
 
   TH1F* h=new TH1F("hVV","VV",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
-  
+  h->Sumw2();  
+
   TH1F* hWW=getSample("WW",histoname);
   if(!hWW)return 0;
   cout<<"   WW "<<hWW->Integral(0,hWW->GetNbinsX()+1)<<endl;
@@ -1169,18 +1204,65 @@ TH1F* TauMuAnalysis::getZToTauTau(TString histoname){
   return h;
 }
 
-TH1F* TauMuAnalysis::getTotalBackground(TString histoname, Int_t QCDType, Int_t WJetsType){
+TH1F* TauMuAnalysis::getZToTauTauSS(TString histoname){
+  
+  //TH1F*h=getSample("ZToTauTau_SS",histoname);
+  TH1F*h=getTotalEmbeddedSS(histoname);
+  
+  h->SetTitle("Z#rightarrow#tau^{+}#tau^{-}");
+
+  return h;
+}
+
+TH1F* TauMuAnalysis::getWJets(TString histoname, Int_t SMType){
+  cout<<" Calculating WJets: "<<endl;
+  TH1F* href=(TH1F*)((*(samples_.begin()))->getHistoFromFile(histoname));
+  if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
+
+  TH1F* h=new TH1F("hWJets","WJets",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
+  h->Sumw2();
+
+  TH1F*hWJets=0;
+  if(SMType==0)hWJets=getSample("WJetsToLNu",histoname);
+  if(SMType==1)hWJets=getSample("W2JetsToLNu",histoname);
+  if(SMType==2)hWJets=getSample("W3JetsToLNu",histoname);
+  if(!hWJets)return 0;  
+  h->Add(hWJets);
+  delete hWJets;
+
+  return h;
+}
+
+TH1F* TauMuAnalysis::getWJetsSS(TString histoname, Int_t SMType){
+  cout<<" Calculating WJetsSS: "<<endl;
+  TH1F* href=(TH1F*)((*(samples_.begin()))->getHistoFromFile(histoname));
+  if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
+
+  TH1F* h=new TH1F("hWJetsSS","WJetsSS",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
+  h->Sumw2();
+
+  TH1F*hWJets=0;
+  if(SMType==0)hWJets=getSample("WJetsToLNu_SS",histoname);
+  if(SMType==1)hWJets=getSample("W2JetsToLNu_SS",histoname);
+  if(SMType==2)hWJets=getSample("W3JetsToLNu_SS",histoname);
+  if(!hWJets)return 0;  
+  h->Add(hWJets);
+  delete hWJets;
+    
+  return h;
+}
+
+
+TH1F* TauMuAnalysis::getTotalBackground(TString histoname, Int_t SMType){
 
   cout<<" Calculating Total Background: "<<endl;
   TH1F* href=(TH1F*)((*(samples_.begin()))->getHistoFromFile(histoname));
   if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
 
   TH1F* h=new TH1F("hBackground","",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
+  h->Sumw2();
 
-  TH1F*hQCD=0;
-  if(QCDType==0)hQCD=getQCD(histoname);
-  if(QCDType==1)hQCD=getSMQCD(histoname);
-  if(QCDType==2)hQCD=getSMQCD2(histoname);
+  TH1F*hQCD=getQCD(histoname,SMType);
   if(!hQCD)return 0;
   h->Add(hQCD);
   delete hQCD;
@@ -1190,10 +1272,7 @@ TH1F* TauMuAnalysis::getTotalBackground(TString histoname, Int_t QCDType, Int_t 
   h->Add(hZToTauTau);
   delete hZToTauTau;
 
-  TH1F*hWJets=0;
-  if(WJetsType==0)hWJets=getSample("WJetsToLNu",histoname);
-  if(WJetsType==1)hWJets=getSample("WJetsToLNu",histoname);
-  if(WJetsType==2)hWJets=getSample("W3JetsToLNu",histoname);
+  TH1F*hWJets=getWJets(histoname,SMType);
   if(!hWJets)return 0;
   h->Add(hWJets);
   delete hWJets;
@@ -1230,11 +1309,11 @@ bool TauMuAnalysis::plot(TString histoname, Int_t SMType, Int_t rebin, TString x
   }
   if(SMType==1){
     hDataQCD=getTotalData(histoname+"QCD");
-    //hMCQCD=getTotalMC(histoname+"QCD",1);
+    //hMCQCD=getTotalMC(histoname+"QCD2",1);
   } 
   if(SMType==2){
-    hDataQCD=getTotalData(histoname+"QCD2");
-    hMCQCD=getTotalMC(histoname+"QCD2",2);
+    hDataQCD=getTotalData(histoname+"QCD");
+    //hMCQCD=getTotalMC(histoname+"QCD2",2);
   }
   if(!hDataQCD){cout<<" Total Data for QCD not determined "<<endl; return 0;}
   hDataQCD->Rebin(rebin);
@@ -1258,10 +1337,7 @@ bool TauMuAnalysis::plot(TString histoname, Int_t SMType, Int_t rebin, TString x
 
   ////Total MC
   ///must get here before getting individual components below because same histo object name is used for each component inside
-  TH1F* hBkg=0;
-  if(SMType==0)hBkg=getTotalBackground(histoname,0,0);
-  if(SMType==1)hBkg=getTotalBackground(histoname,1,1);
-  if(SMType==2)hBkg=getTotalBackground(histoname,2,2);
+  TH1F* hBkg=getTotalBackground(histoname,SMType);
   if(!hBkg){cout<<" Total Background not determined "<<endl; return 0;}
   hBkg->Rebin(rebin);
   hBkg->SetLineWidth(1);
@@ -1271,10 +1347,7 @@ bool TauMuAnalysis::plot(TString histoname, Int_t SMType, Int_t rebin, TString x
   THStack hMCStack("hBkgStack","BkgStack");//dont't set any of the regular histogram properties on the THStack will crash.
   
   //
-  TH1F*hQCD=0;
-  if(SMType==0)hQCD=getQCD(histoname);
-  if(SMType==1)hQCD=getSMQCD(histoname);
-  if(SMType==2)hQCD=getSMQCD2(histoname);
+  TH1F*hQCD=getQCD(histoname,SMType);
   if(!hQCD)return 0;
   hQCD->Rebin(rebin);
   hQCD->SetLineWidth(1);
@@ -1283,10 +1356,7 @@ bool TauMuAnalysis::plot(TString histoname, Int_t SMType, Int_t rebin, TString x
   cout<<"QCD "<<hQCD->Integral(0,hQCD->GetNbinsX()+1)<<endl;
 
 
-  TH1F*hWJetsToLNu=0;
-  if(SMType==0)hWJetsToLNu=getSample("WJetsToLNu",histoname);
-  if(SMType==1)hWJetsToLNu=getSample("WJetsToLNu",histoname);
-  if(SMType==2)hWJetsToLNu=getSample("W3JetsToLNu",histoname);
+  TH1F*hWJetsToLNu=getWJets(histoname,SMType);
   if(!hWJetsToLNu)return 0;
   hWJetsToLNu->Rebin(rebin);
   hWJetsToLNu->SetLineWidth(1);

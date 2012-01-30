@@ -103,7 +103,7 @@ void histosForLimit(long sm, long mass){
   C.Print(filename+"[");
   
   Int_t rebin=30;
-  Int_t xmax=350;
+  Int_t xmax=360;
   
 
   TH1F* htmp = (TH1F*)(analysis.getSample(TString("HiggsVH")+mass,histoname));
@@ -165,10 +165,7 @@ void histosForLimit(long sm, long mass){
   ZJ->Draw();
   C.Print(filename);
 
-  TH1F* htmp = 0;
-  if(sm==0)htmp=(TH1F*)(analysis.getSample("WJetsToLNu",histoname));
-  if(sm==1)htmp=(TH1F*)(analysis.getSample("WJetsToLNu",histoname));
-  if(sm==2)htmp=(TH1F*)(analysis.getSample("W3JetsToLNu",histoname));
+  TH1F* htmp = analysis.getWJets(histoname,sm);
   TH1F* W =(TH1F*)(htmp->Clone("W"));//rename otherwise default name may conflict below
   W=changeBinning(W,rebin,xmax);
   delete htmp;
@@ -186,41 +183,17 @@ void histosForLimit(long sm, long mass){
   TT->Draw();
   C.Print(filename);
   
-  TH1F* htmp = (TH1F*)(analysis.getSample("WW",histoname));
-  TH1F* WW =(TH1F*)(htmp->Clone("WW"));//rename otherwise default name may conflict below
-  WW=changeBinning(WW,rebin,xmax);
+  TH1F* htmp = (TH1F*)(analysis.getDiBoson(histoname));
+  TH1F* VV =(TH1F*)(htmp->Clone("VV"));//rename otherwise default name may conflict below
+  VV=changeBinning(VV,rebin,xmax);
   delete htmp;
   C.Clear();
-  WW->SetTitle("WW");
-  WW->Draw();
+  VV->SetTitle("VV");
+  VV->Draw();
   C.Print(filename);
   
-  TH1F* htmp = (TH1F*)(analysis.getSample("WZ",histoname));
-  TH1F* WZ =(TH1F*)(htmp->Clone("WZ"));//rename otherwise default name may conflict below
-  WZ=changeBinning(WZ,rebin,xmax);
-  delete htmp;
-  C.Clear();
-  WZ->SetTitle("WZ");
-  WZ->Draw();
-  C.Print(filename);
   
-  TH1F* htmp = (TH1F*)(analysis.getSample("ZZ",histoname));
-  TH1F* ZZ =(TH1F*)(htmp->Clone("ZZ"));//rename otherwise default name may conflict below
-  ZZ=changeBinning(ZZ,rebin,xmax);
-  delete htmp;
-  C.Clear();
-  ZZ->SetTitle("ZZ");
-  ZZ->Draw();
-  C.Print(filename);
-  
-  TH1F* VV =(TH1F*)(WW->Clone("VV"));
-  VV->Add(WZ);
-  VV->Add(ZZ);
-  
-  TH1F* htmp=0;
-  if(sm==0)htmp=analysis.getQCD(histoname);
-  if(sm==1)htmp=analysis.getSMQCD(histoname);
-  if(sm==2)htmp=analysis.getSMQCD2(histoname);
+  TH1F* htmp=analysis.getQCD(histoname,sm);
   TH1F* QCD=(TH1F*)(htmp->Clone("QCD"));//rename otherwise default name may conflict below
   QCD=changeBinning(QCD,rebin,xmax);
   delete htmp;
@@ -229,11 +202,7 @@ void histosForLimit(long sm, long mass){
   QCD->Draw();
   C.Print(filename);
 
-  
-  TH1F* htmp=0;
-  if(sm==0)htmp=analysis.getTotalBackground(histoname,0,0);
-  if(sm==1)htmp=analysis.getTotalBackground(histoname,1,1);
-  if(sm==2)htmp=analysis.getTotalBackground(histoname,2,2);
+  TH1F* htmp=analysis.getTotalBackground(histoname,sm);
   TH1F* bkg_obs = (TH1F*)(htmp->Clone("bkg_obs"));//rename otherwise default name may conflict below
   bkg_obs=changeBinning(bkg_obs,rebin,xmax);
   delete htmp;
@@ -243,7 +212,16 @@ void histosForLimit(long sm, long mass){
   data_obs=changeBinning(data_obs,rebin,xmax);
   delete htmp;
 
+  TH1F* htmp=analysis.getTotalDataSS(histoname);
+  TH1F* data_obsSS=(TH1F*)(htmp->Clone("data_obsSS"));//rename otherwise default name may conflict below
+  data_obsSS=changeBinning(data_obsSS,rebin,xmax);
+  delete htmp;
+  C.Clear();
+  data_obsSS->SetTitle("data_obsSS");
+  data_obsSS->Draw();
+  C.Print(filename);
 
+  //just for plot
   C.Clear();
   TH1F*hSig=(TH1F*)(VH->Clone("hSig"));
   hSig->Add(SM);
@@ -255,19 +233,8 @@ void histosForLimit(long sm, long mass){
   data_obs->Draw("pesame");
   bkg_obs->Draw("histsame");
   C.Print(filename);
-
   cout<<" Data yield = "<<data_obs->Integral()<<"  Background yield = "<<bkg_obs->Integral()<<"  5xSM="<<hSig->Integral()<<endl;
-
   delete hSig;
-
-  TH1F* htmp=analysis.getTotalDataSS(histoname);
-  TH1F* data_obsSS=(TH1F*)(htmp->Clone("data_obsSS"));//rename otherwise default name may conflict below
-  data_obsSS=changeBinning(data_obsSS,rebin,xmax);
-  delete htmp;
-  C.Clear();
-  data_obsSS->SetTitle("data_obsSS");
-  data_obsSS->Draw();
-  C.Print(filename);
 
   C.Print(filename+"]");
 

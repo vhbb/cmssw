@@ -56,9 +56,7 @@ public:
 
   bool addHisto(TH1* hist) {
     if(!hist)return 0;
-    if(color_>0)hist->SetFillColor(color_);
-    if(lcolor_>0)hist->SetLineColor(lcolor_);
-    if(lstyle_>0) hist->SetLineStyle(lstyle_);
+    hist->Sumw2();
     sampleHist_.push_back(hist);
     mainsampleHist_.push_back(hist);
     return 1;

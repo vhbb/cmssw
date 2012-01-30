@@ -27,13 +27,11 @@ BaseAnalysis::BaseAnalysis(const char * name):
 
 BaseAnalysis::~BaseAnalysis(){
   
-  delete mcPUPWeightHisto_;
 }
 
 
 bool BaseAnalysis::init(){
   
-  //if(!fillPUPWeightHisto())return 0;
  
   ///init each sample
   std::vector<Sample*>::const_iterator s=samples_.begin();
@@ -135,40 +133,6 @@ bool BaseAnalysis::fillHistos(TString tag){
   nVertexHisto_->Fill(vertices_->size(),eventWeight_);
   vertexXYHisto_->Fill(vertices_->begin()->x(),vertices_->begin()->y(),eventWeight_);
   vertexZHisto_->Fill(vertices_->begin()->z(),eventWeight_);
-
-  return 1;
-}
-
-
-bool BaseAnalysis::fillPUPWeightHisto(){
-
-  //read the pile-up weights
-  TFile DataPUP("../data/PileUp_160404-173692_2.1invfb.pileup.root","read");
-  TFile MCPUP("../data/Pileup_Summer11MC_36bins.root","read");
-  if(DataPUP.IsZombie()||MCPUP.IsZombie()){
-    cout<<DataPUP.GetName()<<" or "<<MCPUP.GetName()<<" not valid "<<endl;
-  }
-  gROOT->cd();
-  TH1D* DataPUPHisto=(TH1D*)DataPUP.Get("pileup");
-  if(!DataPUPHisto){
-    cout<<"Data pileup do not exist"<<endl;    return 0;
-  }
-  TH1D* MCPUPHisto=(TH1D*)MCPUP.Get("pileup");
-  if(!MCPUPHisto){
-    cout<<"MC pileup do not exist"<<endl; return 0;
-  }
-
-  if(DataPUPHisto->GetXaxis()->GetNbins()!=MCPUPHisto->GetXaxis()->GetNbins()){
-    cout<<"DataPUPHisto does not have same number of bins as  MCPUPHisto"<<endl;
-    return 0;
-  }
-  DataPUPHisto->Scale(1./DataPUPHisto->Integral());
-  MCPUPHisto->Scale(1./MCPUPHisto->Integral());
-  mcPUPWeightHisto_=new TH1F("mcPUPWeightHisto","",DataPUPHisto->GetXaxis()->GetNbins(),-0.5,DataPUPHisto->GetXaxis()->GetNbins()-0.5);
-  for(int b=1;b<=DataPUPHisto->GetXaxis()->GetNbins();b++)
-    if(MCPUPHisto->GetBinContent(b)>0) 
-      mcPUPWeightHisto_->SetBinContent(b,DataPUPHisto->GetBinContent(b)/MCPUPHisto->GetBinContent(b));
-    else mcPUPWeightHisto_->SetBinContent(b,0);
 
   return 1;
 }

@@ -62,8 +62,6 @@ protected:
   virtual bool applySelections();
   virtual bool fillHistos(TString tag = "");
 
-  bool fillPUPWeightHisto();
-
   std::vector<Sample*> samples_;
   Sample* sample_;
 
@@ -80,7 +78,7 @@ protected:
   TString outputpath_;
   bool trigpass_;
 
-  ///Histograms
+  ///Event level histograms Histograms
   TH1F* runNumberHisto_;
   TH1F* nVertexHisto_;
   TH2F* vertexXYHisto_;
@@ -95,9 +93,6 @@ protected:
   bool trigObjMatch(float eta, float phi, std::string path, std::string filter);
 
 private:
-
-  TH1F* mcPUPWeightHisto_;
-  
 
 
   ClassDef(BaseAnalysis, 1);

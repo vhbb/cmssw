@@ -50,13 +50,16 @@ public:
   TH1F* getTotalData(TString histoname);
   TH1F* getTotalEmbeddedSS(TString histoname);
   TH1F* getTotalEmbedded(TString histoname);
-  TH1F* getTotalMC(TString histoname, Int_t WJetsType=0);//sum of all samples declared as "MC"
-  TH1F* getMCSS(TString histoname);//sum of SS MC's used in the QCD extraction (may exclude additional MC samples declared)
+  TH1F* getTotalMC(TString histoname, Int_t SMType=0);//sum of all MCs contributing to the background
+  TH1F* getMCSS(TString histoname, Int_t SMType=0);//sum of SS MC's used in the QCD extraction (may exclude additional MC samples declared)
   TH1F* getSample(TString samplename, TString histoname);//can be used to get histo for any MC or Data sample
-  TH1F* getQCD(TString histoname);
+  TH1F* getQCD(TString histoname, Int_t SMType=0);
   TH1F* getDiBoson(TString histoname);
   TH1F* getZToTauTau(TString histoname);//Z-->tau tau (either from MC or Embedded)
-  TH1F* getTotalBackground(TString histoname, Int_t QCDType=0, Int_t WJetsType=0);
+  TH1F* getWJets(TString histoname, Int_t SMType=0);
+  TH1F* getZToTauTauSS(TString histoname);//Z-->tau tau (either from MC or Embedded)
+  TH1F* getWJetsSS(TString histoname, Int_t SMType=0);
+  TH1F* getTotalBackground(TString histoname, Int_t SMType=0);
  
 
   bool printRawYields(TString histoname);
@@ -67,8 +70,9 @@ public:
   bool plot(TString histoname, Int_t SMType=0, Int_t rebin=1, TString xlabel="", TString ylabel="", Float_t* legendcoords=0, Float_t* axesrange=0, bool log=0);
 
   //QCD for SM1/SM2 categories
-  TH1F* getSMQCD(TString histoname);//note that this does not necessarily correspond to SM1
-  TH1F* getSMQCD2(TString histoname, Int_t WJetsType=0);
+  TH1F* getQCDSS(TString histoname);
+  TH1F* getQCDSide(TString histoname);
+  TH1F* getQCDFullSide(TString histoname, Int_t SMType);
    
 
 protected:

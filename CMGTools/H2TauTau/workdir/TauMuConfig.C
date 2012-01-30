@@ -79,7 +79,7 @@
   Sample W2JetsToLNu("W2JetsToLNu",(const char*)(localpath+"/W2Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V3"+tag));
   W2JetsToLNu.setDataType("MCCat");
   W2JetsToLNu.setPileupWeight("vertexWeightFall112011AB");
-  W2JetsToLNu.setCrossection(1.);
+  W2JetsToLNu.setCrossection(1435);//need to revisit this crossections look here: https://hypernews.cern.ch/HyperNews/CMS/get/generators/1324.html
   W2JetsToLNu.setSampleGenEvents(25057238); 
   //W2JetsToLNu.addTrigPath("HLT_IsoMu12_v1");
   W2JetsToLNu.setEffCorrFactor(MCEffCorrFactor);
@@ -89,7 +89,7 @@
   Sample W3JetsToLNu("W3JetsToLNu",(const char*)(localpath+"/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V3"+tag));
   W3JetsToLNu.setDataType("MCCat");
   W3JetsToLNu.setPileupWeight("vertexWeightFall112011AB");
-  W3JetsToLNu.setCrossection(304.0);
+  W3JetsToLNu.setCrossection(304.0);//need to revisit this crossections look here: https://hypernews.cern.ch/HyperNews/CMS/get/generators/1324.html
   W3JetsToLNu.setSampleGenEvents(7506183); 
   //W3JetsToLNu.addTrigPath("HLT_IsoMu12_v1");
   W3JetsToLNu.setEffCorrFactor(MCEffCorrFactor);
