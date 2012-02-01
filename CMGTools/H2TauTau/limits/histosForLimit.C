@@ -72,7 +72,7 @@ std::string fillFloat(float input){
 
 void histosForLimit(long sm, long mass){
   //defines samples
-  gROOT->ProcessLine(".x ../workdir/TauMuConfig_limits.C");
+  gROOT->ProcessLine(".x ../workdir/TauMuConfig.C");
   
   //normalizes backgrounds for the data
   if(!analysis.init()){cout<<" could not init"<<endl;return 0;}  

@@ -324,7 +324,7 @@ bool TauMuAnalysis::applySelections(TString exceptcut){
       if(cand->leg1().decayMode()==0&&cand->leg1().p()>0.) 
 	if(cand->leg1().eOverP()<0.2) continue;
     //    if(((cand->leg1().leadChargedHadrECalEnergy()+cand->leg1().leadChargedHadrHCalEnergy())/cand->leg1().p())<0.2) continue; 
-    if(exceptcut!="tautrigmatch"){
+    if(exceptcut!="trigmatch"){
       bool match=0;
       if(sample_->getTrigPaths()->size()==0)match=1;//no match requirement
       for(std::vector<std::vector<std::string> >::const_iterator path=sample_->getTrigPaths()->begin(); path!=sample_->getTrigPaths()->end(); path++){
@@ -336,7 +336,7 @@ bool TauMuAnalysis::applySelections(TString exceptcut){
 
     ////selections on the muon
     //if(exceptcut!="mupt") if(cand->leg2().pt()<17.0) continue;//this cut needs to be updated in the python baseline cuts
-    if(exceptcut!="mutrigmatch"){
+    if(exceptcut!="trigmatch"){
       bool match=0;
       if(sample_->getTrigPaths()->size()==0) match=1;//no match requirement
       for(std::vector<std::vector<std::string> >::const_iterator path=sample_->getTrigPaths()->begin(); path!=sample_->getTrigPaths()->end(); path++){
@@ -364,7 +364,7 @@ bool TauMuAnalysis::applySelections(TString exceptcut){
       highsumpt=diTauSel_->leg1().pt()+diTauSel_->leg2().pt();
     }
 
-  //determine the jets
+  //lepton clean the jet list
   fillPFJetListLC(diTauSel_);
   
   ///apply selections for control regions here
@@ -449,7 +449,40 @@ bool TauMuAnalysis::applySelections(TString exceptcut){
   }
 
   
-  //fill tree variables here
+
+
+  ////Define event weights here, these should not depend on the event categorization
+
+  /////trigger efficiency weight
+  triggerEffWeight_=1.;
+  selectionEffWeight_=1.;
+  if(sample_->getDataType()=="MC" || sample_->getDataType()=="MC_SS" 
+     || sample_->getDataType()=="MCCat" || sample_->getDataType()=="MCCat_SS" 
+     || sample_->getDataType()=="Signal"
+     || sample_->getDataType()=="Embedded" || sample_->getDataType()=="Embedded_SS"){
+
+    ///trigger corrections
+    if(sample_->getTrigPaths()->size()>0){//trigger applied--> apply a correction factor
+      triggerEffWeight_ *= triggerEff_.effTau2011AB(diTauSel_->leg1().pt(),diTauSel_->leg1().eta())
+	                  /triggerEff_.effLooseTau15MC(diTauSel_->leg1().pt(),diTauSel_->leg1().eta());
+      triggerEffWeight_ *= triggerEff_.effMu2011AB(diTauSel_->leg2().pt(),diTauSel_->leg2().eta())
+	                  /triggerEff_.effIsoMu15MC(diTauSel_->leg2().pt(),diTauSel_->leg2().eta());
+    }else{//no trigger applied --> apply efficiency
+      triggerEffWeight_ *= triggerEff_.effTau2011AB(diTauSel_->leg1().pt(),diTauSel_->leg1().eta());
+      triggerEffWeight_ *= triggerEff_.effMu2011AB(diTauSel_->leg2().pt(),diTauSel_->leg2().eta());
+    }
+
+    //id+isolation corrections
+    selectionEffWeight_ *= selectionEff_.effCorrMu2011AB(diTauSel_->leg2().pt(),diTauSel_->leg2().eta());
+
+  }
+  
+  //total event weight
+  eventWeight_ = pupWeight_*embeddedGenWeight_*triggerEffWeight_*selectionEffWeight_;
+
+  
+  ////////////////////fill tree variables here
+  tree_eventweight_=eventWeight_;
   tree_ditaumass_=diTauSel_->mass();
 
   tree_mupt_=diTauSel_->leg2().pt();
@@ -466,36 +499,6 @@ bool TauMuAnalysis::applySelections(TString exceptcut){
   tree_transversemass_=diTauSel_->mTLeg2();
   tree_met_=diTauSel_->met().pt();
   tree_svfitmass_=diTauSel_->massSVFit();
-
-
-  ////Define event weights here, these should not depend on the event categorization
-  
-  //tau fake rate reweight
-  tauFakeWeight_=1.;//do not comment out needs to be used
-  //   if(sample_->getApplyTauRateWeight()){//
-  //     tauFakeWeight_=tauRate_.getScale(TauRate::Inclusive,diTauSel_->leg1().pt(),diTauSel_->leg1().eta());
-  //     if(diTauSel_->leg1().decayMode()==0)tauFakeWeight_=tauRate_.getScale(TauRate::OneProng,diTauSel_->leg1().pt(),diTauSel_->leg1().eta());
-  //     if(diTauSel_->leg1().decayMode()==1)tauFakeWeight_=tauRate_.getScale(TauRate::OneProngEM,diTauSel_->leg1().pt(),diTauSel_->leg1().eta());
-  //     if(diTauSel_->leg1().decayMode()==2)tauFakeWeight_=tauRate_.getScale(TauRate::OneProngEM,diTauSel_->leg1().pt(),diTauSel_->leg1().eta());
-  //     if(diTauSel_->leg1().decayMode()==10)tauFakeWeight_=tauRate_.getScale(TauRate::ThreeProng,diTauSel_->leg1().pt(),diTauSel_->leg1().eta());
-  //   }
-  //this fake rate has been dropped at some point
-
-
-  /////trigger efficiency weight
-  triggerEffWeight_=1.;
-  if(sample_->getDataType()=="MC" || sample_->getDataType()=="MC_SS" 
-     || sample_->getDataType()=="MCCat" || sample_->getDataType()=="MCCat_SS" 
-     || sample_->getDataType()=="Signal"
-     || sample_->getDataType()=="Embedded" || sample_->getDataType()=="Embedded_SS"){
-    triggerEffWeight_ *= triggerEff_.effTau2011AB(diTauSel_->leg1().pt());
-    triggerEffWeight_ *= triggerEff_.effMu2011AB(diTauSel_->leg2().pt(),diTauSel_->leg2().eta());
-    //triggerEffWeight_ *= triggerEff_.effTau2011B(diTauSel_->leg1().pt());
-    //triggerEffWeight_ *= triggerEff_.effMu2011B(diTauSel_->leg2().pt(),diTauSel_->leg2().eta());
-  }
-  
-  //total event weight
-  eventWeight_ = pupWeight_*embeddedGenWeight_*triggerEffWeight_;//*tauFakeWeight_
 
 
   return 1;
@@ -598,8 +601,7 @@ bool TauMuAnalysis::createHistos(TString samplename){
     sample_->cloneHistos("muiso");
     //sample_->cloneHistos("mupt");
     sample_->cloneHistos("massT");//gives normalization of WJets
-    //sample_->cloneHistos("tautrigmatch");
-    //sample_->cloneHistos("mutrigmatch");
+    sample_->cloneHistos("trigmatch");
 
     sample_->cloneHistos("muisoJet0");
     sample_->cloneHistos("muisoJet1");
@@ -675,6 +677,7 @@ bool TauMuAnalysis::createHistos(TString samplename){
 
       }
       if(applySelections("massT")) if(!fillHistos("massT")) return 0;   
+      if(applySelections("trigmatch")) if(!fillHistos("trigmatch")) return 0;   
     }
 
     //fill fully selected inclusive histograms 
@@ -1059,10 +1062,21 @@ TH1F* TauMuAnalysis::getSample(TString samplename, TString histoname){
 TH1F* TauMuAnalysis::getQCD(TString histoname, Int_t SMType){
 
   if(SMType==0)return getQCDSS(histoname);
-  if(SMType==1)return getQCDSide(histoname);
-  //if(SMType==1)return getQCDFullSide(histoname,SMType);
-  if(SMType==2)return getQCDSide(histoname);
-  //if(SMType==2)return getQCDFullSide(histoname,SMType);
+  if(SMType==1){
+    TH1F* h=getQCDSide(histoname);
+    //TH1F* h=getQCDFullSide(histoname,SMType);
+    TH1F* hs=smearHisto(h);
+    delete h;
+    return hs;
+  }
+
+  if(SMType==2){
+    TH1F* h=getQCDSide(histoname);
+    //TH1F* h=getQCDFullSide(histoname,SMType);
+    TH1F* hs=smearHisto(h);
+    delete h;
+    return hs;
+  }
    
   return 0;
 }
@@ -1096,6 +1110,7 @@ TH1F* TauMuAnalysis::getQCDSS(TString histoname){
   cout<<"QCD before OS/SS rescaling = "<<h->Integral()<<endl;
   h->Scale(QCDOStoSSRatio_);
   cout<<"QCD after OS/SS rescaling = "<<h->Integral()<<endl;
+
 
   return h;
 }
@@ -1215,39 +1230,30 @@ TH1F* TauMuAnalysis::getZToTauTauSS(TString histoname){
 }
 
 TH1F* TauMuAnalysis::getWJets(TString histoname, Int_t SMType){
-  cout<<" Calculating WJets: "<<endl;
-  TH1F* href=(TH1F*)((*(samples_.begin()))->getHistoFromFile(histoname));
-  if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
 
-  TH1F* h=new TH1F("hWJets","WJets",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
-  h->Sumw2();
+  if(SMType==0)return getSample("WJetsToLNu",histoname);
+  if(SMType==1){
+    TH1F*h=getSample("W2JetsToLNu",histoname);
+    TH1F*hs=smearHisto(h);
+    delete h;
+    return hs;
+  }
+  if(SMType==2){
+    TH1F*h=getSample("W3JetsToLNu",histoname);
+    TH1F*hs=smearHisto(h);
+    delete h;
+    return hs;
+  }
 
-  TH1F*hWJets=0;
-  if(SMType==0)hWJets=getSample("WJetsToLNu",histoname);
-  if(SMType==1)hWJets=getSample("W2JetsToLNu",histoname);
-  if(SMType==2)hWJets=getSample("W3JetsToLNu",histoname);
-  if(!hWJets)return 0;  
-  h->Add(hWJets);
-  delete hWJets;
-
-  return h;
+  return 0;
 }
 
 TH1F* TauMuAnalysis::getWJetsSS(TString histoname, Int_t SMType){
-  cout<<" Calculating WJetsSS: "<<endl;
-  TH1F* href=(TH1F*)((*(samples_.begin()))->getHistoFromFile(histoname));
-  if(!href){cout<<" histoname not found in first sample"<<endl; return 0;}
 
-  TH1F* h=new TH1F("hWJetsSS","WJetsSS",href->GetXaxis()->GetNbins(),href->GetXaxis()->GetXmin(),href->GetXaxis()->GetXmax());
-  h->Sumw2();
-
-  TH1F*hWJets=0;
-  if(SMType==0)hWJets=getSample("WJetsToLNu_SS",histoname);
-  if(SMType==1)hWJets=getSample("W2JetsToLNu_SS",histoname);
-  if(SMType==2)hWJets=getSample("W3JetsToLNu_SS",histoname);
-  if(!hWJets)return 0;  
-  h->Add(hWJets);
-  delete hWJets;
+  TH1F*h=0;
+  if(SMType==0)h=getSample("WJetsToLNu_SS",histoname);
+  if(SMType==1)h=getSample("W2JetsToLNu_SS",histoname);
+  if(SMType==2)h=getSample("W3JetsToLNu_SS",histoname);
     
   return h;
 }

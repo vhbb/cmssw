@@ -7,8 +7,6 @@ BaseAnalysis::BaseAnalysis():
   TNamed("BaseAnalysis","BaseAnalysis"),
   sample_(NULL),
   verbosity_(0),
-  truncateEvents_(100000000),
-  printFreq_(100),
   outputpath_("./")
 {
 }
@@ -20,7 +18,8 @@ BaseAnalysis::BaseAnalysis(const char * name):
   truncateEvents_(100000000),
   printFreq_(100),
   pupWeightName_(""),
-  outputpath_("./")
+  outputpath_("./"),
+  smearHistoRes_(0.)
 {
 
 }
@@ -138,11 +137,13 @@ bool BaseAnalysis::fillHistos(TString tag){
 }
 
 bool BaseAnalysis::trigObjMatch(float eta, float phi, std::string path, std::string filter){
-  for(std::vector<cmg::TriggerObject>::const_iterator obj=trigObjs_->begin(); obj!=trigObjs_->end(); obj++)
+  for(std::vector<cmg::TriggerObject>::const_iterator obj=trigObjs_->begin(); obj!=trigObjs_->end(); obj++){
     if(obj->hasSelection(path.c_str())
        &&obj->hasSelection(filter.c_str())
        &&reco::deltaR(eta,phi,obj->eta(),obj->phi())<0.3)
-       return 1;
+      return 1;      
+  }
+  
   return 0;
 }
 
@@ -152,6 +153,38 @@ void BaseAnalysis::printMCGen(edm::Handle< std::vector<reco::GenParticle> > & ge
   for(std::vector<reco::GenParticle>::const_iterator g=genList->begin(); g!=genList->end(); ++g){    
     cout<<"pdgID = "<<g->pdgId()<<" , pt = "<<g->p4().pt()<<" motherRef="<<g->mother()<<endl;
   }
+}
+
+TH1F* BaseAnalysis::smearHisto(TH1F* h){
+  if(!h){
+    cout<<"BaseAnalysis::smearHisto : histo is NULL"<<endl;
+    return 0;
+  }
+
+ 
+  TH1F* hs=0;
+ 
+  if(smearHistoRes_==0.){//just copy
+    hs=(TH1F*)h->Clone(TString(h->GetName())+"smeared");
+  }else {
+    hs=new TH1F(TString(h->GetName())+"smeared",h->GetTitle(),h->GetXaxis()->GetNbins(),h->GetXaxis()->GetXmin(),h->GetXaxis()->GetXmax());
+    TF1 gaus("gauss","[0]*exp(-0.5*(x-[1])**2/[2]**2)",h->GetXaxis()->GetXmin(),h->GetXaxis()->GetXmax());
+    gaus.SetParameter(2,smearHistoRes_);
+
+    for(Int_t b=1;b<=h->GetXaxis()->GetNbins();b++){
+      gaus.SetParameter(0,h->GetBinContent(b));
+      gaus.SetParameter(1,h->GetBinCenter(b));
+      for(Int_t bs=1;bs<=h->GetXaxis()->GetNbins();bs++){
+	hs->AddBinContent(bs,gaus.Eval(hs->GetBinCenter(bs)));
+      }
+    }
+    for(Int_t bs=1;bs<=h->GetXaxis()->GetNbins();bs++){
+      hs->SetBinError(bs,0.);//not sure this is necessary
+    }
+    hs->Scale(h->Integral()/hs->Integral());
+  }
+  
+  return hs;
 }
 
 

@@ -9,8 +9,7 @@
 #include "AnalysisDataFormats/CMGTools/interface/METSignificance.h"
 
 #include "CMGTools/H2TauTau/interface/TriggerEfficiency.h"
-//#include "CMGTools/H2TauTau/interface/RecoilCorrector.h"
-//#include "CMGTools/Common/interface/RecoilCorrector.h"
+#include "CMGTools/H2TauTau/interface/SelectionEfficiency.h"
 #include "CMGTools/H2TauTau/interface/TauRate.h"
 
 #include <TVector3.h>
@@ -111,17 +110,15 @@ private:
   float tauFakeWeight_;
   TriggerEfficiency triggerEff_;
   float triggerEffWeight_;
+  SelectionEfficiency selectionEff_;
+  float selectionEffWeight_;
 
-  float embeddedGenWeight_;
+  float embeddedGenWeight_;//for tau embedded samples
 
   void fillPFJetListLC(const cmg::TauMu * cand);
-  //void applyRecoilCorr(const cmg::TauMu * cand, TVector3 * MET);
-  //float computePZeta(const cmg::TauMu * cand);
-  //float computeTransverseMass(const cmg::TauMu * cand);
-  //float computeTauIso(const cmg::Tau * tau);
   bool computeDiLeptonVeto();
 
-  int truthMatchTau();//1=e, 3=mu, 5=tau, 9=other
+  int truthMatchTau();
 
 
   //

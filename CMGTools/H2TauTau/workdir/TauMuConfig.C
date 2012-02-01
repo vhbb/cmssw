@@ -1,20 +1,18 @@
 {  
   TauMuAnalysis analysis("analysis");
-  //analysis.setPupWeightName("vertexWeight2011AB");//vertexWeightFall112011AB, vertexWeight2011B, vertexWeight2invfb, vertexWeight3D2011AB
   analysis.setInputTag("cmgTauMuCorSVFitFullSel");
   analysis.setdiLeptonVetoListName("cmgMuonSel");
   analysis.setQCDOStoSSRatio(1.11);//value from AN-11-390 v4
   analysis.setTransverseMassSignalMax(40);
   analysis.setTransverseMassSideBandMin(60);
   analysis.setVerbosity(0);
-
   //analysis.setTruncateEvents(1000); 
   analysis.makeAllHistos(1);
   analysis.setPrintFreq(1000);
 
-  //analysis.calcSVFit(1);
   float MCEffCorrFactor = 1.0;// 0.968;// * 0.92; 
 
+  //analysis.setPupWeightName("vertexWeight2011AB");//vertexWeightFall112011AB, vertexWeight2011B, vertexWeight2invfb, vertexWeight3D2011AB
 
   //TString localpath="/data/benitezj/Samples";
   //TString tag="/PAT_CMG_V2_4_0/H2TAUTAU_Dec2";     
@@ -40,7 +38,8 @@
   //TString outpath="./output/V241ABMuIso";
   //TString outpath="./output/V241ABQCD";
   //TString outpath="./output/V241ABQCD2";
-  TString outpath="./output/V241ABFall";
+  //TString outpath="./output/V241ABFall";
+  TString outpath="./output/V241ABFallTrigEff";
 
   
   analysis.setOutputPath(outpath);
@@ -53,8 +52,78 @@
   //   TestSample.setDataType("MC");
   //   TestSample.setRecoilCorr("../../Common/data/metRecoilCorrection/recoilfit_wjets_njet.root");
   //   analysis.addSample(&TestSample);  
+
+  //fall11 samples
+  Sample WJetsToLNu("WJetsToLNu",(const char*)(localpath+"/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V2"+tag));
+  WJetsToLNu.setDataType("MC");
+  WJetsToLNu.setPileupWeight("vertexWeightFall112011AB");
+  WJetsToLNu.setCrossection(31314);
+  WJetsToLNu.setSampleGenEvents(81273381); 
+  WJetsToLNu.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v9","hltPFTau15TrackLooseIso","hltSingleMuIsoL3IsoFiltered15");
+  WJetsToLNu.setEffCorrFactor(MCEffCorrFactor);
+  WJetsToLNu.setApplyTauRateWeight(0);
+  analysis.addSample(&WJetsToLNu);  
   
+  Sample W2JetsToLNu("W2JetsToLNu",(const char*)(localpath+"/W2Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V3"+tag));
+  W2JetsToLNu.setDataType("MCCat");
+  W2JetsToLNu.setPileupWeight("vertexWeightFall112011AB");
+  W2JetsToLNu.setCrossection(1435);//need to revisit this crossections look here: https://hypernews.cern.ch/HyperNews/CMS/get/generators/1324.html
+  W2JetsToLNu.setSampleGenEvents(25057238); 
+  W2JetsToLNu.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v9","hltPFTau15TrackLooseIso","hltSingleMuIsoL3IsoFiltered15");
+  W2JetsToLNu.setEffCorrFactor(MCEffCorrFactor);
+  W2JetsToLNu.setApplyTauRateWeight(0);
+  analysis.addSample(&W2JetsToLNu);  
+
+  Sample W3JetsToLNu("W3JetsToLNu",(const char*)(localpath+"/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V3"+tag));
+  W3JetsToLNu.setDataType("MCCat");
+  W3JetsToLNu.setPileupWeight("vertexWeightFall112011AB");
+  W3JetsToLNu.setCrossection(304.0);//need to revisit this crossections look here: https://hypernews.cern.ch/HyperNews/CMS/get/generators/1324.html
+  W3JetsToLNu.setSampleGenEvents(7506183); 
+  W3JetsToLNu.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v9","hltPFTau15TrackLooseIso","hltSingleMuIsoL3IsoFiltered15");
+  W3JetsToLNu.setEffCorrFactor(MCEffCorrFactor);
+  W3JetsToLNu.setApplyTauRateWeight(0);
+  analysis.addSample(&W3JetsToLNu);  
+   
+  Sample TTJets("TTJets",(const char*)(localpath+"/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V2"+tag));
+  TTJets.setDataType("MC");
+  TTJets.setPileupWeight("vertexWeightFall112011AB");
+  TTJets.setCrossection(165.8);//157.5=NLO theory, 165.8=CMS TOP-11-024
+  TTJets.setSampleGenEvents(3701947); 
+  TTJets.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v9","hltPFTau15TrackLooseIso","hltSingleMuIsoL3IsoFiltered15");
+  TTJets.setEffCorrFactor(MCEffCorrFactor);
+  analysis.addSample(&TTJets);
+
+  Sample ZToTauTau("ZToTauTau",(const char*)(localpath+"/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V2"+tag));
+  ZToTauTau.setDataType("MC");
+  ZToTauTau.setPileupWeight("vertexWeightFall112011AB");
+  ZToTauTau.setGenEventType(5);
+  ZToTauTau.setCrossection(3048);
+  ZToTauTau.setSampleGenEvents(28480417);// 35035820=PFAOD integrity, 36277961="DBS"
+  ZToTauTau.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v9","hltPFTau15TrackLooseIso","hltSingleMuIsoL3IsoFiltered15");
+  ZToTauTau.setEffCorrFactor(MCEffCorrFactor);
+  analysis.addSample(&ZToTauTau);
+
+  Sample ZToMuMu("ZToMuMu",(const char*)(localpath+"/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V2"+tag));
+  ZToMuMu.setDataType("MC");
+  ZToMuMu.setPileupWeight("vertexWeightFall112011AB");
+  ZToMuMu.setTruthEventType(3);
+  ZToMuMu.setCrossection(ZToTauTau.getCrossection());
+  ZToMuMu.setSampleGenEvents(ZToTauTau.getSampleGenEvents());// 35035820=PFAOD integrity, 36277961="DBS"
+  ZToMuMu.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v9","hltPFTau15TrackLooseIso","hltSingleMuIsoL3IsoFiltered15");
+  ZToMuMu.setEffCorrFactor(MCEffCorrFactor);
+  analysis.addSample(&ZToMuMu);
+
+  Sample ZToLJet("ZToLJet",(const char*)(localpath+"/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V2"+tag));
+  ZToLJet.setDataType("MC");
+  ZToLJet.setPileupWeight("vertexWeightFall112011AB");
+  ZToLJet.setTruthEventType(6);
+  ZToLJet.setCrossection(ZToTauTau.getCrossection());
+  ZToLJet.setSampleGenEvents(ZToTauTau.getSampleGenEvents());// 35035820=PFAOD integrity, 36277961="DBS"
+  ZToLJet.addTrigPath("HLT_IsoMu15_LooseIsoPFTau15_v9","hltPFTau15TrackLooseIso","hltSingleMuIsoL3IsoFiltered15");
+  ZToLJet.setEffCorrFactor(MCEffCorrFactor);
+  analysis.addSample(&ZToLJet);
   
+  //old Summer11 samples  
 //   Sample WJetsToLNu("WJetsToLNu",(const char*)(localpath+"/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
 //   WJetsToLNu.setDataType("MC");
 //   WJetsToLNu.setPileupWeight("vertexWeight2011AB");
@@ -66,37 +135,6 @@
 //   WJetsToLNu.setApplyTauRateWeight(0);
 //   analysis.addSample(&WJetsToLNu);  
 
-  Sample WJetsToLNu("WJetsToLNu",(const char*)(localpath+"/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V2"+tag));
-  WJetsToLNu.setDataType("MC");
-  WJetsToLNu.setPileupWeight("vertexWeightFall112011AB");
-  WJetsToLNu.setCrossection(31314);
-  WJetsToLNu.setSampleGenEvents(81273381); 
-  //WJetsToLNu.addTrigPath("HLT_IsoMu12_v1");
-  WJetsToLNu.setEffCorrFactor(MCEffCorrFactor);
-  WJetsToLNu.setApplyTauRateWeight(0);
-  analysis.addSample(&WJetsToLNu);  
-  
-  Sample W2JetsToLNu("W2JetsToLNu",(const char*)(localpath+"/W2Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V3"+tag));
-  W2JetsToLNu.setDataType("MCCat");
-  W2JetsToLNu.setPileupWeight("vertexWeightFall112011AB");
-  W2JetsToLNu.setCrossection(1435);//need to revisit this crossections look here: https://hypernews.cern.ch/HyperNews/CMS/get/generators/1324.html
-  W2JetsToLNu.setSampleGenEvents(25057238); 
-  //W2JetsToLNu.addTrigPath("HLT_IsoMu12_v1");
-  W2JetsToLNu.setEffCorrFactor(MCEffCorrFactor);
-  W2JetsToLNu.setApplyTauRateWeight(0);
-  analysis.addSample(&W2JetsToLNu);  
-
-  Sample W3JetsToLNu("W3JetsToLNu",(const char*)(localpath+"/W3Jets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V3"+tag));
-  W3JetsToLNu.setDataType("MCCat");
-  W3JetsToLNu.setPileupWeight("vertexWeightFall112011AB");
-  W3JetsToLNu.setCrossection(304.0);//need to revisit this crossections look here: https://hypernews.cern.ch/HyperNews/CMS/get/generators/1324.html
-  W3JetsToLNu.setSampleGenEvents(7506183); 
-  //W3JetsToLNu.addTrigPath("HLT_IsoMu12_v1");
-  W3JetsToLNu.setEffCorrFactor(MCEffCorrFactor);
-  W3JetsToLNu.setApplyTauRateWeight(0);
-  analysis.addSample(&W3JetsToLNu);  
-  
-
 //   Sample TTJets("TTJets",(const char*)(localpath+"/TTJets_TuneZ2_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
 //   TTJets.setDataType("MC");
 //   TTJets.setPileupWeight("vertexWeight2011AB");
@@ -105,15 +143,6 @@
 //   //TTJets.addTrigPath("HLT_IsoMu12_v1");
 //   TTJets.setEffCorrFactor(MCEffCorrFactor);
 //   analysis.addSample(&TTJets);
- 
-  Sample TTJets("TTJets",(const char*)(localpath+"/TTJets_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V2"+tag));
-  TTJets.setDataType("MC");
-  TTJets.setPileupWeight("vertexWeightFall112011AB");
-  TTJets.setCrossection(165.8);//157.5=NLO theory, 165.8=CMS TOP-11-024
-  TTJets.setSampleGenEvents(3701947); 
-  //TTJets.addTrigPath("HLT_IsoMu12_v1");
-  TTJets.setEffCorrFactor(MCEffCorrFactor);
-  analysis.addSample(&TTJets);
  
 //   Sample ZToTauTau("ZToTauTau",(const char*)(localpath+"/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
 //   ZToTauTau.setDataType("MC");
@@ -126,17 +155,6 @@
 //   ZToTauTau.setEffCorrFactor(MCEffCorrFactor);
 //   analysis.addSample(&ZToTauTau);
 
-  Sample ZToTauTau("ZToTauTau",(const char*)(localpath+"/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V2"+tag));
-  ZToTauTau.setDataType("MC");
-  ZToTauTau.setPileupWeight("vertexWeightFall112011AB");
-  ZToTauTau.setGenEventType(5);
-  ZToTauTau.setCrossection(3048);
-  ZToTauTau.setSampleGenEvents(28480417);// 35035820=PFAOD integrity, 36277961="DBS"
-  //ZToTauTau.addTrigPath("HLT_IsoMu12_v1");
-  ZToTauTau.setEffCorrFactor(MCEffCorrFactor);
-  analysis.addSample(&ZToTauTau);
-
-
 //   Sample ZToMuMu("ZToMuMu",(const char*)(localpath+"/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
 //   ZToMuMu.setDataType("MC");
 //   ZToMuMu.setPileupWeight("vertexWeight2011AB");
@@ -148,19 +166,6 @@
 //   ZToMuMu.setEffCorrFactor(MCEffCorrFactor);
 //   analysis.addSample(&ZToMuMu);
 
-
-  Sample ZToMuMu("ZToMuMu",(const char*)(localpath+"/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V2"+tag));
-  ZToMuMu.setDataType("MC");
-  ZToMuMu.setPileupWeight("vertexWeightFall112011AB");
-  ZToMuMu.setTruthEventType(3);
-  ZToMuMu.setCrossection(ZToTauTau.getCrossection());
-  ZToMuMu.setSampleGenEvents(ZToTauTau.getSampleGenEvents());// 35035820=PFAOD integrity, 36277961="DBS"
-  //ZToMuMu.addTrigPath("HLT_IsoMu12_v1");
-  ZToMuMu.setEffCorrFactor(MCEffCorrFactor);
-  analysis.addSample(&ZToMuMu);
-
-
-
 //   Sample ZToLJet("ZToLJet",(const char*)(localpath+"/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
 //   ZToLJet.setDataType("MC");
 //   ZToLJet.setPileupWeight("vertexWeight2011AB");
@@ -171,16 +176,6 @@
 //   //ZToLJet.addTrigPath("HLT_IsoMu12_v1");
 //   ZToLJet.setEffCorrFactor(MCEffCorrFactor);
 //   analysis.addSample(&ZToLJet);
-
-  Sample ZToLJet("ZToLJet",(const char*)(localpath+"/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V2"+tag));
-  ZToLJet.setDataType("MC");
-  ZToLJet.setPileupWeight("vertexWeightFall112011AB");
-  ZToLJet.setTruthEventType(6);
-  ZToLJet.setCrossection(ZToTauTau.getCrossection());
-  ZToLJet.setSampleGenEvents(ZToTauTau.getSampleGenEvents());// 35035820=PFAOD integrity, 36277961="DBS"
-  //ZToLJet.addTrigPath("HLT_IsoMu12_v1");
-  ZToLJet.setEffCorrFactor(MCEffCorrFactor);
-  analysis.addSample(&ZToLJet);
 
   Sample WW("WW",(const char*)(localpath+"/WW_TuneZ2_7TeV_pythia6_tauola/Summer11-PU_S4_START42_V11-v1/AODSIM/V2"+tag));
   WW.setDataType("MC");
@@ -244,12 +239,12 @@
     HiggsVH[i]->setDataType("Signal");
     HiggsVH[i]->setPileupWeight("vertexWeight2011AB");
     HiggsVH[i]->setCrossection((HiggsWHcross[i]+HiggsZHcross[i]+HiggsttHcross[i])*HiggsTauTauBF[i]);
-    HiggsVH[i]->setSampleGenEvents(HiggsVHNevt[i]);
+    HiggsVH[i]->setSampleGenEvents(HiggsVHNevt[i]);//number of events varies due to bad crab jobs
     HiggsVH[i]->setEffCorrFactor(MCEffCorrFactor);
     analysis.addSample(HiggsVH[i]);    
   }
 
-
+  //2011 Data samples
   Sample TauPlusXMay("TauPlusXMay",(const char*)(localpath+"/TauPlusX/Run2011A-May10ReReco-v1/AOD/V2"+tag));
   TauPlusXMay.setDataType("Data");
   TauPlusXMay.setSampleLumi(168.597);
@@ -471,34 +466,3 @@
   analysis.addSample(&Embedded2011B_SS);
 }
 
-
-  ///Crossections taken from here:
-  ///https://twiki.cern.ch/twiki/bin/view/LHCPhysics/CERNYellowReportPageAt7TeV#gluon_gluon_Fusion_Process 
-  ///Gluon-Gluon
-  // 105.0 	21.78 	20.8 	-15.5 	
-  // 110.0 	19.84 	20.4 	-15.3 	
-  // 115.0 	18.13 	20.0 	-15.3 	
-  // 120.0 	16.63 	19.7 	-15.1 	
-  // 125.0 	15.31 	19.5 	-15.1 	
-  // 130.0 	14.12 	19.2 	-15.1 	
-  // 135.0 	13.08 	18.9 	-15.0 	
-  // 140.0 	12.13 	18.8 	-14.9 
-  ///VBF  
-  // 105.0 	1.472 	2.5 	-2.4 	
-  // 110.0 	1.398 	2.8 	-2.3 	
-  // 115.0 	1.332 	2.5 	-2.3 	
-  // 120.0 	1.269 	2.8 	-2.5 	
-  // 125.0 	1.211 	2.7 	-2.4 	
-  // 130.0 	1.154 	2.8 	-2.3 	
-  // 135.0 	1.100 	3.0 	-2.2 	
-  // 140.0 	1.052 	2.8 	-2.2 	
-
-  ///Higgs --> tau tau branching ratios taken from http://arxiv.org/abs/1101.0593 v3
-  // 105  8.25e-2 
-  // 110  8.03e-2 
-  // 115  7.65e-2 
-  // 120  7.11e-2 
-  // 125  6.37e-2 
-  // 130  5.49e-2 
-  // 135  4.52e-2 
-  // 140  3.54e-2 

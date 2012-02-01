@@ -121,10 +121,10 @@ void plotTauMu(){
 //   analysis.plot("diJetMassHisto",50,"m_{jj} (GeV)","Events / 50 GeV",c,r,0);
 
 
-//   //////////////SM0
-//   Float_t c[4]={.5,.75,.42,.81};
-//   Float_t r[4]={0,300,0,8000};
-//   analysis.plot("diTauMassHisto_SM0",0,5,"m_{vis}   (GeV)","Events / 5 GeV",c,r,0);
+  //////////////SM0
+  Float_t c[4]={.5,.75,.42,.81};
+  Float_t r[4]={0,300,0,8000};
+  analysis.plot("diTauMassHisto_SM0",0,5,"m_{vis}   (GeV)","Events / 5 GeV",c,r,0);
 
 //   Float_t c[4]={.5,.75,.42,.81};
 //   Float_t r[4]={0,300,0,5000};
@@ -137,6 +137,7 @@ void plotTauMu(){
 //   Float_t r[4]={0,1.0,0,1000};
 //   analysis.plot("muIsoHisto_muisoJet1",0,10," muon relIso(0.5)"," Events / 0.01",c,r);
 
+//   analysis.setSmearHistoRes(15.0);
 //   Float_t c[4]={.5,.75,.42,.81};
 //   Float_t r[4]={0,300,0,250};
 //   analysis.plot("diTauMassHisto_SM1",1,25,"m_{vis}   (GeV)","Events / 25 GeV",c,r,0);
@@ -152,9 +153,10 @@ void plotTauMu(){
 //   Float_t r[4]={0,1.0,0,400};
 //   analysis.plot("muIsoHisto_muisoJet2",0,10," muon relIso(0.5)"," Events / 0.01",c,r);
 
-  Float_t c[4]={.5,.75,.42,.81};
-  Float_t r[4]={0,300,0,30};
-  analysis.plot("diTauMassHisto_SM2",2,25,"m_{vis}   (GeV)","Events / 25 GeV",c,r,0);
+//   analysis.setSmearHistoRes(15.0);
+//   Float_t c[4]={.5,.75,.42,.81};
+//   Float_t r[4]={0,300,0,30};
+//   analysis.plot("diTauMassHisto_SM2",2,25,"m_{vis}   (GeV)","Events / 25 GeV",c,r,0);
 
 //   Float_t c[4]={.5,.75,.42,.81};
 //   Float_t r[4]={0,350,0,30};

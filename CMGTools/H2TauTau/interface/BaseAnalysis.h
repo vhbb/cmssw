@@ -21,7 +21,7 @@ using namespace std;
 #include <TH2F.h>
 #include <TCanvas.h>
 #include <TString.h>
-
+#include <TF1.h>
 
 #include "DataFormats/FWLite/interface/Event.h"
 #include "DataFormats/FWLite/interface/ChainEvent.h"
@@ -48,6 +48,7 @@ public:
   void setTruncateEvents(int maxEvents){truncateEvents_=maxEvents;}
   void setPrintFreq(int freq){ printFreq_=freq;}
   void setPupWeightName(string weightname){pupWeightName_=weightname;}
+  void setSmearHistoRes(float res){smearHistoRes_=res;}
 
   virtual bool init();
   virtual bool createHistos(TString samplename="RelValZTT");
@@ -91,6 +92,9 @@ protected:
   
   edm::Handle< std::vector<cmg::TriggerObject> > trigObjs_;
   bool trigObjMatch(float eta, float phi, std::string path, std::string filter);
+
+  float smearHistoRes_;
+  TH1F* smearHisto(TH1F* h);
 
 private:
 
