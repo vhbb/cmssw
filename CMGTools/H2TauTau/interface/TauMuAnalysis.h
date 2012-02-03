@@ -63,6 +63,8 @@ public:
 
   bool printRawYields(TString histoname);
   Float_t getWJetsSignalToSBFraction();
+  Float_t getWJetsScaleFactor(Int_t SMType);
+  Float_t getQCDScaleFactor(Int_t SMType);
 
 
   //bool plotDistribution(TString histoname, Int_t rebin, TString xlabel, TString ylabel, Float_t* legendcoords, Float_t* axesrange, bool log=0);

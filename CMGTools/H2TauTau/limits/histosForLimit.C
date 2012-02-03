@@ -1,3 +1,6 @@
+#include <TF1.h>
+#include <TString.h>
+#include <TH1F.h>
 
 TH1F* changeBinning(TH1F* hinput, int rebin,float xmax){
   int nbins=(int)(xmax);
@@ -72,11 +75,32 @@ std::string fillFloat(float input){
 
 void histosForLimit(long sm, long mass){
   //defines samples
-  gROOT->ProcessLine(".x ../workdir/TauMuConfig.C");
+  gROOT->ProcessLine(".L ../workdir/TauMuConfig.C");
   
+
+  //histogram used for fit in limit calcualtion
+  TString histoname=TString("diTauMassHisto_SM")+sm;//"diTauMassHisto_SM1" "diTauMassHisto_SM2"
+  Int_t rebin=30;
+  Int_t xmax=240;  
+  float smearRes=25.0;//should be changed based on which variable is being used
+
   //normalizes backgrounds for the data
-  if(!analysis.init()){cout<<" could not init"<<endl;return 0;}  
-  if(!analysis.scaleHistos())return 0;
+  TauMuAnalysis* analysis = TauMuConfig("");
+  analysis->init();
+  analysis->scaleHistos();
+  analysis->setSmearHistoRes(smearRes);
+
+  TauMuAnalysis* analysisUp = TauMuConfig("tUp");
+  analysisUp->setOutputPath("./output/V241ABFallTrigEfftUp");
+  analysisUp->init();
+  analysisUp->scaleHistos();
+  analysisUp->setSmearHistoRes(smearRes);
+
+  TauMuAnalysis* analysisDown = TauMuConfig("tDown");
+  analysisDown->setOutputPath("./output/V241ABFallTrigEfftDown");
+  analysisDown->init();
+  analysisDown->scaleHistos();
+  analysisDown->setSmearHistoRes(smearRes);
   
 
   /* ***************************************
@@ -85,28 +109,21 @@ void histosForLimit(long sm, long mass){
     -individual backgrounds obtained using getSample(), except for ZtoTauTau and QCD 
     -methods return ownership of object --> delete objects
     ****************************************** 
-    analysis.getTotalDataSS(TString histoname);//sum of SS Data samples 
-    analysis.getTotalData(TString histoname);
-    analysis.getSample(TString samplename, TString histoname);//can be used to get histo for any MC or Data sample
-    analysis.getQCD(TString histoname);
-    analysis.getZToTauTau(TString histoname);//Z-->tau tau (either from MC or Embedded)
-    analysis.getTotalBackground(TString histoname);
+    analysis->getTotalDataSS(TString histoname);//sum of SS Data samples 
+    analysis->getTotalData(TString histoname);
+    analysis->getSample(TString samplename, TString histoname);//can be used to get histo for any MC or Data sample
+    analysis->getQCD(TString histoname);
+    analysis->getZToTauTau(TString histoname);//Z-->tau tau (either from MC or Embedded)
+    analysis->getTotalBackground(TString histoname);
   */
 
-
-  //histogram used for fit in limit calcualtion
-  TString histoname=TString("diTauMassHisto_SM")+sm;//"diTauMassHisto_SM1" "diTauMassHisto_SM2"
   
-
   TCanvas C("Canvas");
-  TString filename=TString("plots_SM")+sm+"_mH"+mass+".ps";
+  TString filename=TString("muTau_SM")+sm+"_mH"+mass+".ps";
   C.Print(filename+"[");
   
-  Int_t rebin=30;
-  Int_t xmax=360;
   
-
-  TH1F* htmp = (TH1F*)(analysis.getSample(TString("HiggsVH")+mass,histoname));
+  TH1F* htmp = (TH1F*)(analysis->getSample(TString("HiggsVH")+mass,histoname));
   TH1F* VH =(TH1F*)(htmp->Clone(TString("VH")+mass));//rename otherwise default name may conflict below
   VH=changeBinning(VH,rebin,xmax);//use 10GeV wide bins from 0-->300
   delete htmp;
@@ -114,9 +131,8 @@ void histosForLimit(long sm, long mass){
   VH->SetTitle(TString("VH")+mass);
   VH->Draw();
   C.Print(filename);
-  
  
-  TH1F* htmp = (TH1F*)(analysis.getSample(TString("HiggsGG")+mass,histoname));
+  TH1F* htmp = (TH1F*)(analysis->getSample(TString("HiggsGG")+mass,histoname));
   TH1F* SM =(TH1F*)(htmp->Clone(TString("SM")+mass));//rename otherwise default name may conflict below
   SM=changeBinning(SM,rebin,xmax);//use 10GeV wide bins from 0-->300
   delete htmp;
@@ -124,9 +140,8 @@ void histosForLimit(long sm, long mass){
   SM->SetTitle(TString("SM")+mass);
   SM->Draw();
   C.Print(filename);
- 
 
-  TH1F* htmp = (TH1F*)(analysis.getSample(TString("HiggsVBF")+mass,histoname));
+  TH1F* htmp = (TH1F*)(analysis->getSample(TString("HiggsVBF")+mass,histoname));
   TH1F* VBF =(TH1F*)(htmp->Clone(TString("VBF")+mass));//rename otherwise default name may conflict below
   VBF=changeBinning(VBF,rebin,xmax);
   delete htmp;
@@ -134,9 +149,8 @@ void histosForLimit(long sm, long mass){
   VBF->SetTitle(TString("VBF")+mass);
   VBF->Draw();
   C.Print(filename);
-
   
-  TH1F* htmp = (TH1F*)(analysis.getZToTauTau(histoname));
+  TH1F* htmp = (TH1F*)(analysis->getZToTauTau(histoname));
   TH1F* ZTT =(TH1F*)(htmp->Clone("ZTT"));//rename otherwise default name may conflict below
   ZTT=changeBinning(ZTT,rebin,xmax);
   delete htmp;
@@ -144,9 +158,8 @@ void histosForLimit(long sm, long mass){
   ZTT->SetTitle("ZTT");
   ZTT->Draw();
   C.Print(filename);
-
   
-  TH1F* htmp = (TH1F*)(analysis.getSample("ZToMuMu",histoname));
+  TH1F* htmp = (TH1F*)(analysis->getSample("ZToMuMu",histoname));
   TH1F* ZL =(TH1F*)(htmp->Clone("ZL"));//rename otherwise default name may conflict below
   ZL=changeBinning(ZL,rebin,xmax);
   delete htmp;
@@ -155,8 +168,7 @@ void histosForLimit(long sm, long mass){
   ZL->Draw();
   C.Print(filename);
 
-
-  TH1F* htmp = (TH1F*)(analysis.getSample("ZToLJet",histoname));
+  TH1F* htmp = (TH1F*)(analysis->getSample("ZToLJet",histoname));
   TH1F* ZJ =(TH1F*)(htmp->Clone("ZJ"));//rename otherwise default name may conflict below
   ZJ=changeBinning(ZJ,rebin,xmax);
   delete htmp;
@@ -165,7 +177,7 @@ void histosForLimit(long sm, long mass){
   ZJ->Draw();
   C.Print(filename);
 
-  TH1F* htmp = analysis.getWJets(histoname,sm);
+  TH1F* htmp = analysis->getWJets(histoname,sm);
   TH1F* W =(TH1F*)(htmp->Clone("W"));//rename otherwise default name may conflict below
   W=changeBinning(W,rebin,xmax);
   delete htmp;
@@ -174,7 +186,7 @@ void histosForLimit(long sm, long mass){
   W->Draw();
   C.Print(filename);
 
-  TH1F* htmp = (TH1F*)(analysis.getSample("TTJets",histoname));
+  TH1F* htmp = (TH1F*)(analysis->getSample("TTJets",histoname));
   TH1F* TT =(TH1F*)(htmp->Clone("TT"));//rename otherwise default name may conflict below
   TT=changeBinning(TT,rebin,xmax);
   delete htmp;
@@ -183,7 +195,7 @@ void histosForLimit(long sm, long mass){
   TT->Draw();
   C.Print(filename);
   
-  TH1F* htmp = (TH1F*)(analysis.getDiBoson(histoname));
+  TH1F* htmp = (TH1F*)(analysis->getDiBoson(histoname));
   TH1F* VV =(TH1F*)(htmp->Clone("VV"));//rename otherwise default name may conflict below
   VV=changeBinning(VV,rebin,xmax);
   delete htmp;
@@ -192,8 +204,7 @@ void histosForLimit(long sm, long mass){
   VV->Draw();
   C.Print(filename);
   
-  
-  TH1F* htmp=analysis.getQCD(histoname,sm);
+  TH1F* htmp=analysis->getQCD(histoname,sm);
   TH1F* QCD=(TH1F*)(htmp->Clone("QCD"));//rename otherwise default name may conflict below
   QCD=changeBinning(QCD,rebin,xmax);
   delete htmp;
@@ -201,50 +212,143 @@ void histosForLimit(long sm, long mass){
   QCD->SetTitle("QCD");
   QCD->Draw();
   C.Print(filename);
-
-  TH1F* htmp=analysis.getTotalBackground(histoname,sm);
-  TH1F* bkg_obs = (TH1F*)(htmp->Clone("bkg_obs"));//rename otherwise default name may conflict below
-  bkg_obs=changeBinning(bkg_obs,rebin,xmax);
-  delete htmp;
   
-  TH1F* htmp=analysis.getTotalData(histoname);
-  TH1F* data_obs = (TH1F*)(htmp->Clone("data_obs"));//rename otherwise default name may conflict below
-  data_obs=changeBinning(data_obs,rebin,xmax);
+  
+  /////blind the result, get fake data from background below
+  //TH1F* htmp=analysis->getTotalData(histoname);
+  //TH1F* data_obs = (TH1F*)(htmp->Clone("data_obs"));//rename otherwise default name may conflict below
+  //data_obs=changeBinning(data_obs,rebin,xmax);
+  //delete htmp;
+  
+  TH1F* htmp=analysis->getTotalBackground(histoname,sm);
+  TH1F* totalbkg = (TH1F*)(htmp->Clone("totalbkg"));//rename otherwise default name may conflict below
+  totalbkg=changeBinning(totalbkg,rebin,xmax);
   delete htmp;
 
-  TH1F* htmp=analysis.getTotalDataSS(histoname);
-  TH1F* data_obsSS=(TH1F*)(htmp->Clone("data_obsSS"));//rename otherwise default name may conflict below
-  data_obsSS=changeBinning(data_obsSS,rebin,xmax);
-  delete htmp;
-  C.Clear();
-  data_obsSS->SetTitle("data_obsSS");
-  data_obsSS->Draw();
-  C.Print(filename);
+  ///blind the result
+  TH1F* data_obs = new TH1F("data_obs","",totalbkg->GetNbinsX(),totalbkg->GetXaxis()->GetXmin(),totalbkg->GetXaxis()->GetXmax());
+  data_obs->Sumw2();
+  data_obs->FillRandom(totalbkg,(int)(totalbkg->Integral()+0.5));
 
-  //just for plot
+
   C.Clear();
-  TH1F*hSig=(TH1F*)(VH->Clone("hSig"));
-  hSig->Add(SM);
-  hSig->Add(VBF);
-  hSig->Scale(5);
-  hSig->Add(bkg_obs);
-  hSig->SetLineColor(2);
-  hSig->Draw("hist");
+  totalbkg->GetYaxis()->SetRangeUser(0,totalbkg->GetMaximum()*1.4);
+  totalbkg->Draw("hist");
   data_obs->Draw("pesame");
-  bkg_obs->Draw("histsame");
   C.Print(filename);
-  cout<<" Data yield = "<<data_obs->Integral()<<"  Background yield = "<<bkg_obs->Integral()<<"  5xSM="<<hSig->Integral()<<endl;
-  delete hSig;
+
+  TH1F* hratio = new TH1F("hratio","",totalbkg->GetNbinsX(),totalbkg->GetXaxis()->GetXmin(),totalbkg->GetXaxis()->GetXmax());
+  hratio->Sumw2();
+  hratio->Add(data_obs);
+  hratio->Divide(totalbkg);
+  C.Clear();
+  hratio->Draw("hist pe");
+  C.Print(filename);
+  delete hratio;
+
 
   C.Print(filename+"]");
 
+  
+  ////////////////tau energy scaled up
 
-  ////////////////Histograms file
+  TH1F* htmp = (TH1F*)(analysisUp->getSample(TString("HiggsVH")+mass,histoname));
+  TH1F* VH_CMS_scale_tUp =(TH1F*)(htmp->Clone(TString(VH->GetName())+"_CMS_scale_tUp"));//rename otherwise default name may conflict below
+  VH_CMS_scale_tUp=changeBinning(VH_CMS_scale_tUp,rebin,xmax);//use 10GeV wide bins from 0-->300
+  delete htmp;
 
+  TH1F* htmp = (TH1F*)(analysisUp->getSample(TString("HiggsGG")+mass,histoname));
+  TH1F* SM_CMS_scale_tUp =(TH1F*)(htmp->Clone(TString(SM->GetName())+"_CMS_scale_tUp"));//rename otherwise default name may conflict below
+  SM_CMS_scale_tUp=changeBinning(SM_CMS_scale_tUp,rebin,xmax);//use 10GeV wide bins from 0-->300
+  delete htmp;
+
+  TH1F* htmp = (TH1F*)(analysisUp->getSample(TString("HiggsVBF")+mass,histoname));
+  TH1F* VBF_CMS_scale_tUp =(TH1F*)(htmp->Clone(TString(VBF->GetName())+"_CMS_scale_tUp"));//rename otherwise default name may conflict below
+  VBF_CMS_scale_tUp=changeBinning(VBF_CMS_scale_tUp,rebin,xmax);
+  delete htmp;
+
+  TH1F* htmp = (TH1F*)(analysisUp->getZToTauTau(histoname));
+  TH1F* ZTT_CMS_scale_tUp =(TH1F*)(htmp->Clone("ZTT_CMS_scale_tUp"));//rename otherwise default name may conflict below
+  ZTT_CMS_scale_tUp=changeBinning(ZTT_CMS_scale_tUp,rebin,xmax);
+  delete htmp;
+
+  TH1F* htmp = (TH1F*)(analysisUp->getSample("ZToMuMu",histoname));
+  TH1F* ZL_CMS_scale_tUp =(TH1F*)(htmp->Clone("ZL_CMS_scale_tUp"));//rename otherwise default name may conflict below
+  ZL_CMS_scale_tUp=changeBinning(ZL_CMS_scale_tUp,rebin,xmax);
+  delete htmp;
+
+  TH1F* htmp = (TH1F*)(analysisUp->getSample("ZToLJet",histoname));
+  TH1F* ZJ_CMS_scale_tUp =(TH1F*)(htmp->Clone("ZJ_CMS_scale_tUp"));//rename otherwise default name may conflict below
+  ZJ_CMS_scale_tUp=changeBinning(ZJ_CMS_scale_tUp,rebin,xmax);
+  delete htmp;
+
+  TH1F* htmp = (TH1F*)(analysisUp->getWJets(histoname,sm));
+  TH1F* W_CMS_scale_tUp =(TH1F*)(htmp->Clone("W_CMS_scale_tUp"));//rename otherwise default name may conflict below
+  W_CMS_scale_tUp=changeBinning(W_CMS_scale_tUp,rebin,xmax);
+  delete htmp;
+
+  TH1F* htmp = (TH1F*)(analysisUp->getSample("TTJets",histoname));
+  TH1F* TT_CMS_scale_tUp =(TH1F*)(htmp->Clone("TT_CMS_scale_tUp"));//rename otherwise default name may conflict below
+  TT_CMS_scale_tUp=changeBinning(TT_CMS_scale_tUp,rebin,xmax);
+  delete htmp;
+
+  TH1F* htmp = (TH1F*)(analysisUp->getDiBoson(histoname));
+  TH1F* VV_CMS_scale_tUp =(TH1F*)(htmp->Clone("VV_CMS_scale_tUp"));//rename otherwise default name may conflict below
+  VV_CMS_scale_tUp=changeBinning(VV_CMS_scale_tUp,rebin,xmax);
+  delete htmp;
+
+  ////////////////tau energy scaled down
+
+  TH1F* htmp = (TH1F*)(analysisDown->getSample(TString("HiggsVH")+mass,histoname));
+  TH1F* VH_CMS_scale_tDown =(TH1F*)(htmp->Clone(TString(VH->GetName())+"_CMS_scale_tDown"));//rename otherwise default name may conflict below
+  VH_CMS_scale_tDown=changeBinning(VH_CMS_scale_tDown,rebin,xmax);//use 10GeV wide bins from 0-->300
+  delete htmp;
+
+  TH1F* htmp = (TH1F*)(analysisDown->getSample(TString("HiggsGG")+mass,histoname));
+  TH1F* SM_CMS_scale_tDown =(TH1F*)(htmp->Clone(TString(SM->GetName())+"_CMS_scale_tDown"));//rename otherwise default name may conflict below
+  SM_CMS_scale_tDown=changeBinning(SM_CMS_scale_tDown,rebin,xmax);//use 10GeV wide bins from 0-->300
+  delete htmp;
+
+  TH1F* htmp = (TH1F*)(analysisDown->getSample(TString("HiggsVBF")+mass,histoname));
+  TH1F* VBF_CMS_scale_tDown =(TH1F*)(htmp->Clone(TString(VBF->GetName())+"_CMS_scale_tDown"));//rename otherwise default name may conflict below
+  VBF_CMS_scale_tDown=changeBinning(VBF_CMS_scale_tDown,rebin,xmax);
+  delete htmp;
+
+  TH1F* htmp = (TH1F*)(analysisDown->getZToTauTau(histoname));
+  TH1F* ZTT_CMS_scale_tDown =(TH1F*)(htmp->Clone("ZTT_CMS_scale_tDown"));//rename otherwise default name may conflict below
+  ZTT_CMS_scale_tDown=changeBinning(ZTT_CMS_scale_tDown,rebin,xmax);
+  delete htmp;
+
+  TH1F* htmp = (TH1F*)(analysisDown->getSample("ZToMuMu",histoname));
+  TH1F* ZL_CMS_scale_tDown =(TH1F*)(htmp->Clone("ZL_CMS_scale_tDown"));//rename otherwise default name may conflict below
+  ZL_CMS_scale_tDown=changeBinning(ZL_CMS_scale_tDown,rebin,xmax);
+  delete htmp;
+
+  TH1F* htmp = (TH1F*)(analysisDown->getSample("ZToLJet",histoname));
+  TH1F* ZJ_CMS_scale_tDown =(TH1F*)(htmp->Clone("ZJ_CMS_scale_tDown"));//rename otherwise default name may conflict below
+  ZJ_CMS_scale_tDown=changeBinning(ZJ_CMS_scale_tDown,rebin,xmax);
+  delete htmp;
+
+  TH1F* htmp = (TH1F*)(analysisDown->getWJets(histoname,sm));
+  TH1F* W_CMS_scale_tDown =(TH1F*)(htmp->Clone("W_CMS_scale_tDown"));//rename otherwise default name may conflict below
+  W_CMS_scale_tDown=changeBinning(W_CMS_scale_tDown,rebin,xmax);
+  delete htmp;
+
+  TH1F* htmp = (TH1F*)(analysisDown->getSample("TTJets",histoname));
+  TH1F* TT_CMS_scale_tDown =(TH1F*)(htmp->Clone("TT_CMS_scale_tDown"));//rename otherwise default name may conflict below
+  TT_CMS_scale_tDown=changeBinning(TT_CMS_scale_tDown,rebin,xmax);
+  delete htmp;
+
+  TH1F* htmp = (TH1F*)(analysisDown->getDiBoson(histoname));
+  TH1F* VV_CMS_scale_tDown =(TH1F*)(htmp->Clone("VV_CMS_scale_tDown"));//rename otherwise default name may conflict below
+  VV_CMS_scale_tDown=changeBinning(VV_CMS_scale_tDown,rebin,xmax);
+  delete htmp;
+
+  ///////////////////////create root file and data card
   char rootfilename[256];
   sprintf(rootfilename,"muTau_SM%d_mH%d.root",sm,mass);  
   TFile output(rootfilename,"recreate");
-  TDirectory* dir = output.mkdir(TString("muTau_SM")+sm);  
+  TDirectory* dir = output.mkdir((TString("muTau_SM")+sm).Data());  
   dir->cd();
 
   VH->Write();
@@ -259,20 +363,61 @@ void histosForLimit(long sm, long mass){
   QCD->Write();
   data_obs->Write();
 
+  ////Not sure the reprocessings used the same number of events ==> normalize to nominal for now
+  VH_CMS_scale_tUp->Scale(VH->Integral()/VH_CMS_scale_tUp->Integral());
+  SM_CMS_scale_tUp->Scale(SM->Integral()/SM_CMS_scale_tUp->Integral());
+  VBF_CMS_scale_tUp->Scale(VBF->Integral()/VBF_CMS_scale_tUp->Integral());
+  ZTT_CMS_scale_tUp->Scale(ZTT->Integral()/ZTT_CMS_scale_tUp->Integral());
+  ZL_CMS_scale_tUp->Scale(ZL->Integral()/ZL_CMS_scale_tUp->Integral());
+  ZJ_CMS_scale_tUp->Scale(ZJ->Integral()/ZJ_CMS_scale_tUp->Integral());
+  W_CMS_scale_tUp->Scale(W->Integral()/W_CMS_scale_tUp->Integral());
+  TT_CMS_scale_tUp->Scale(TT->Integral()/TT_CMS_scale_tUp->Integral());
+  VV_CMS_scale_tUp->Scale(VV->Integral()/VV_CMS_scale_tUp->Integral());
+
+  VH_CMS_scale_tDown->Scale(VH->Integral()/VH_CMS_scale_tDown->Integral());
+  SM_CMS_scale_tDown->Scale(SM->Integral()/SM_CMS_scale_tDown->Integral());
+  VBF_CMS_scale_tDown->Scale(VBF->Integral()/VBF_CMS_scale_tDown->Integral());
+  ZTT_CMS_scale_tDown->Scale(ZTT->Integral()/ZTT_CMS_scale_tDown->Integral());
+  ZL_CMS_scale_tDown->Scale(ZL->Integral()/ZL_CMS_scale_tDown->Integral());
+  ZJ_CMS_scale_tDown->Scale(ZJ->Integral()/ZJ_CMS_scale_tDown->Integral());
+  W_CMS_scale_tDown->Scale(W->Integral()/W_CMS_scale_tDown->Integral());
+  TT_CMS_scale_tDown->Scale(TT->Integral()/TT_CMS_scale_tDown->Integral());
+  VV_CMS_scale_tDown->Scale(VV->Integral()/VV_CMS_scale_tDown->Integral());
+
+  VH_CMS_scale_tUp->Write();
+  SM_CMS_scale_tUp->Write();
+  VBF_CMS_scale_tUp->Write();
+  ZTT_CMS_scale_tUp ->Write();
+  ZL_CMS_scale_tUp->Write();
+  ZJ_CMS_scale_tUp->Write();
+  W_CMS_scale_tUp->Write();
+  TT_CMS_scale_tUp->Write();
+  VV_CMS_scale_tUp->Write();
+
+  VH_CMS_scale_tDown->Write();
+  SM_CMS_scale_tDown->Write();
+  VBF_CMS_scale_tDown->Write();
+  ZTT_CMS_scale_tDown ->Write();
+  ZL_CMS_scale_tDown->Write();
+  ZJ_CMS_scale_tDown->Write();
+  W_CMS_scale_tDown->Write();
+  TT_CMS_scale_tDown->Write();
+  VV_CMS_scale_tDown->Write();
+
   output.Close();
 
 
   
   //////////////////////////////////////Data Card
   ofstream file;
-  file.open((const char*)(TString("muTau_SM")+sm+"_mH"+mass+".txt"));
+  file.open((TString("muTau_SM")+sm+"_mH"+mass+".txt").Data());
 
   file << "imax 1" <<endl;
   file << "jmax *" <<endl;
   file << "kmax *" <<endl;
   file << "shapes *  *  "<< rootfilename << "  $CHANNEL/$PROCESS $CHANNEL/$PROCESS_$SYSTEMATIC" << endl;
   file << endl;
-  file << "observation " << data_obs->Integral()<<endl;
+  file << "observation " <<data_obs->Integral()<<endl;
   file<<endl;
 
 
@@ -288,6 +433,7 @@ void histosForLimit(long sm, long mass){
        <<fillString((const char*)(TString("muTau_SM")+sm))
        <<fillString((const char*)(TString("muTau_SM")+sm))
        <<fillString((const char*)(TString("muTau_SM")+sm))<<endl;
+
   file <<fillStringLong("process")<<fillString(" ")
        <<fillString(" ")
        <<fillString((const char*)(TString("VH")+mass))
@@ -300,6 +446,7 @@ void histosForLimit(long sm, long mass){
        <<fillString("ZL")
        <<fillString("TT")
        <<fillString("VV")<<endl;
+
   file <<fillStringLong("process")<<fillString(" ")
        <<fillString(" ")
        <<fillInt(-2)
@@ -312,6 +459,7 @@ void histosForLimit(long sm, long mass){
        <<fillInt(5)
        <<fillInt(6)
        <<fillInt(7)<<endl;
+
   file <<fillStringLong("rate")<<fillString(" ")
        <<fillString(" ")
        <<fillFloat(VH->Integral())
@@ -343,6 +491,21 @@ void histosForLimit(long sm, long mass){
        <<fillString("-")
        <<"luminosity"<<endl;
 
+  //turn off the shape systematics on the small backgrounds due to instabilities
+  file <<fillStringLong("CMS_scale_t")<<fillString("shape")
+       <<fillString(" ")
+       <<fillInt(1)
+       <<fillInt(1)
+       <<fillInt(1)
+       <<fillInt(1)
+       <<fillString("-")
+       <<fillInt(1)
+       <<fillString("-")
+       <<fillString("-")
+       <<fillString("-")
+       <<fillString("-")
+       <<"shape"<<endl;
+
   file <<fillStringLong("CMS_eff_m")<<fillString("lnN")
        <<fillString(" ")
        <<fillFloat(1.020)
@@ -370,6 +533,50 @@ void histosForLimit(long sm, long mass){
        <<fillFloat(1.06)
        <<fillFloat(1.06)
        <<"Tau ID"<<endl;
+
+  file <<fillStringLong("CMS_scale_j")<<fillString("lnN")
+       <<fillString(" ")
+       <<fillFloat(0.96)
+       <<fillFloat(0.99)
+       <<fillFloat(0.92)
+       <<fillString("-")
+       <<fillString("-")
+       <<fillString("-")
+       <<fillString("-")
+       <<fillString("-")
+       <<fillFloat(0.97)
+       <<fillFloat(0.94)
+       <<"Jet scale"<<endl;
+
+  std::string wsys=(TString("CMS_htt_muTau_SM")+sm+"_WNorm").Data();
+  file <<fillStringLong(wsys)<<fillString("gmN")
+       <<fillInt(W->Integral()/analysis->getWJetsScaleFactor(sm))
+       <<fillString("-")
+       <<fillString("-")
+       <<fillString("-")
+       <<fillString("-")
+       <<fillString("-")
+       <<fillFloat(analysis->getWJetsScaleFactor(sm))
+       <<fillString("-")
+       <<fillString("-")
+       <<fillString("-")
+       <<fillString("-")
+       <<"W Background"<<endl;
+  
+  std::string qcdsys=(TString("CMS_htt_muTau_SM")+sm+"_QCDNorm").Data();
+  file <<fillStringLong(qcdsys)<<fillString("gmN")
+       <<fillInt((QCD->Integral()/analysis->getQCDScaleFactor(sm))+0.5)
+       <<fillString("-")
+       <<fillString("-")
+       <<fillString("-")
+       <<fillString("-")
+       <<fillFloat(analysis->getQCDScaleFactor(sm))
+       <<fillString("-")
+       <<fillString("-")
+       <<fillString("-")
+       <<fillString("-")
+       <<fillString("-")
+       <<"QCD Background"<<endl;
 
   file <<fillStringLong("CMS_htt_zttNorm")<<fillString("lnN")
        <<fillString(" ")
@@ -413,50 +620,6 @@ void histosForLimit(long sm, long mass){
        <<fillFloat(1.30)
        <<"Norm DiBoson"<<endl;
 
-  file <<fillStringLong("CMS_htt_WNorm")<<fillString("lnN")
-       <<fillString(" ")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillFloat(1.066)
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<"Norm W+Jets"<<endl;
-
-//  file <<fillStringLong("CMS_htt_muTau_SM0_WNorm")<<fillString("gmN")
-file <<fillStringLong("CMS_htt_muTau_WNorm")<<fillString("gmN")
-       <<fillInt(W->Integral()/analysis.getWJetsSignalToSBFraction())
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillFloat(analysis.getWJetsSignalToSBFraction())
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<"W Background"<<endl;
-
-//file <<fillStringLong("CMS_htt_muTau_SM0_QCDNorm")<<fillString("gmN")
-file <<fillStringLong("CMS_htt_muTau_QCDNorm")<<fillString("gmN")
-       <<fillInt(QCD->Integral()/analysis.getQCDOStoSSRatio())
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillFloat(analysis.getQCDOStoSSRatio())
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<"QCD Background"<<endl;
-
   file <<fillStringLong("CMS_htt_ZJetFakeTau")<<fillString("lnN")
        <<fillString(" ")
        <<fillString("-")
@@ -484,20 +647,6 @@ file <<fillStringLong("CMS_htt_muTau_QCDNorm")<<fillString("gmN")
        <<fillString("-")
        <<fillString("-")
        <<"Z(lepton->tau) background"<<endl;
-
-  file <<fillStringLong("CMS_scale_j")<<fillString("lnN")
-       <<fillString(" ")
-       <<fillFloat(0.96)
-       <<fillFloat(0.99)
-       <<fillFloat(0.92)
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillString("-")
-       <<fillFloat(0.97)
-       <<fillFloat(0.94)
-       <<"Jet scale"<<endl;
 
   file <<fillStringLong("CMS_scale_met")<<fillString("lnN")
        <<fillString(" ")
@@ -600,76 +749,48 @@ file <<fillStringLong("CMS_htt_muTau_QCDNorm")<<fillString("gmN")
        <<"Underlying events & PS"<<endl;
 
   file.close();
+
+  analysis->deleteSamples();  
+  analysisUp->deleteSamples();  
+  analysisDown->deleteSamples();  
+  delete analysis;
+  delete analysisUp;
+  delete analysisDown;
+
+
+  delete VH;
+  delete SM;
+  delete VBF;
+  delete ZTT ;
+  delete ZL;
+  delete ZJ;
+  delete W;
+  delete TT;
+  delete VV;
+  delete QCD;
+  delete data_obs;
+  delete totalbkg;
+
+  delete VH_CMS_scale_tUp;
+  delete SM_CMS_scale_tUp;
+  delete VBF_CMS_scale_tUp;
+  delete ZTT_CMS_scale_tUp ;
+  delete ZL_CMS_scale_tUp;
+  delete ZJ_CMS_scale_tUp;
+  delete W_CMS_scale_tUp;
+  delete TT_CMS_scale_tUp;
+  delete VV_CMS_scale_tUp;
+
+  delete VH_CMS_scale_tDown;
+  delete SM_CMS_scale_tDown;
+  delete VBF_CMS_scale_tDown;
+  delete ZTT_CMS_scale_tDown ;
+  delete ZL_CMS_scale_tDown;
+  delete ZJ_CMS_scale_tDown;
+  delete W_CMS_scale_tDown;
+  delete TT_CMS_scale_tDown;
+  delete VV_CMS_scale_tDown;
   
   gROOT->ProcessLine(".q");
 }
 
-
-//   TH1F* SM115_CMS_scale_tUp = (TH1F*)SM115->Clone("SM115_CMS_scale_tUp");
-//   TH1F* SM115_CMS_scale_tDown = (TH1F*)SM115->Clone("SM115_CMS_scale_tDown");
-//   TH1F* SM115_CMS_scale_jUp = (TH1F*)SM115->Clone("SM115_CMS_scale_jUp");
-//   TH1F* SM115_CMS_scale_jDown = (TH1F*)SM115->Clone("SM115_CMS_scale_jDown");
-  
-//   TH1F* VBF115_CMS_scale_tUp = (TH1F*)VBF115->Clone("VBF115_CMS_scale_tUp");
-//   TH1F* VBF115_CMS_scale_tDown = (TH1F*)VBF115->Clone("VBF115_CMS_scale_tDown");
-//   TH1F* VBF115_CMS_scale_jUp = (TH1F*)VBF115->Clone("VBF115_CMS_scale_jUp");
-//   TH1F* VBF115_CMS_scale_jDown = (TH1F*)VBF115->Clone("VBF115_CMS_scale_jDown");  
-
-//   TH1F* ZTT_CMS_scale_tUp = (TH1F*)ZTT->Clone("ZTT_CMS_scale_tUp");
-//   TH1F* ZTT_CMS_scale_tDown = (TH1F*)ZTT->Clone("ZTT_CMS_scale_tDown");
-//   TH1F* ZTT_CMS_scale_jUp = (TH1F*)ZTT->Clone("ZTT_CMS_scale_jUp");
-//   TH1F* ZTT_CMS_scale_jDown = (TH1F*)ZTT->Clone("ZTT_CMS_scale_jDown");
-  
-//   TH1F* ZL_CMS_scale_tUp = (TH1F*)ZL->Clone("ZL_CMS_scale_tUp");
-//   TH1F* ZL_CMS_scale_tDown = (TH1F*)ZL->Clone("ZL_CMS_scale_tDown");
-//   TH1F* ZL_CMS_scale_jUp = (TH1F*)ZL->Clone("ZL_CMS_scale_jUp");
-//   TH1F* ZL_CMS_scale_jDown = (TH1F*)ZL->Clone("ZL_CMS_scale_jDown");
-  
-//   TH1F* ZJ_CMS_scale_tUp = (TH1F*)ZJ->Clone("ZJ_CMS_scale_tUp");
-//   TH1F* ZJ_CMS_scale_tDown = (TH1F*)ZJ->Clone("ZJ_CMS_scale_tDown");
-//   TH1F* ZJ_CMS_scale_jUp = (TH1F*)ZJ->Clone("ZJ_CMS_scale_jUp");
-//   TH1F* ZJ_CMS_scale_jDown = (TH1F*)ZJ->Clone("ZJ_CMS_scale_jDown");
-
-//   TH1F* W_CMS_scale_tUp = (TH1F*)W->Clone("W_CMS_scale_tUp");
-//   TH1F* W_CMS_scale_tDown = (TH1F*)W->Clone("W_CMS_scale_tDown");
-//   TH1F* W_CMS_scale_jUp = (TH1F*)W->Clone("W_CMS_scale_jUp");
-//   TH1F* W_CMS_scale_jDown = (TH1F*)W->Clone("W_CMS_scale_jDown");
-
-//   TH1F* TT_CMS_scale_tUp = (TH1F*)TT->Clone("TT_CMS_scale_tUp");
-//   TH1F* TT_CMS_scale_tDown = (TH1F*)TT->Clone("TT_CMS_scale_tDown");
-//   TH1F* TT_CMS_scale_jUp = (TH1F*)TT->Clone("TT_CMS_scale_jUp");
-//   TH1F* TT_CMS_scale_jDown = (TH1F*)TT->Clone("TT_CMS_scale_jDown");
-    
-//   SM115_CMS_scale_tUp   ->Write();
-//   SM115_CMS_scale_tDown ->Write();
-//   SM115_CMS_scale_jUp   ->Write();
-//   SM115_CMS_scale_jDown ->Write();
-
-//   VBF115_CMS_scale_tUp   ->Write();
-//   VBF115_CMS_scale_tDown ->Write();
-//   VBF115_CMS_scale_jUp   ->Write();
-//   VBF115_CMS_scale_jDown ->Write();
-
-//   ZTT_CMS_scale_tUp   ->Write();
-//   ZTT_CMS_scale_tDown ->Write();
-//   ZTT_CMS_scale_jUp   ->Write();
-//   ZTT_CMS_scale_jDown ->Write();
-
-//   ZL_CMS_scale_tUp   ->Write();
-//   ZL_CMS_scale_tDown ->Write();
-//   ZL_CMS_scale_jUp   ->Write();
-//   ZL_CMS_scale_jDown ->Write();
-
-//   ZJ_CMS_scale_tUp   ->Write();
-//   ZJ_CMS_scale_tDown ->Write();
-//   ZJ_CMS_scale_jUp   ->Write();
-//   ZJ_CMS_scale_jDown ->Write();
-
-//   W_CMS_scale_tUp   ->Write();
-//   W_CMS_scale_tDown ->Write();
-//   W_CMS_scale_jUp   ->Write();
-//   W_CMS_scale_jDown ->Write();
-//   TT_CMS_scale_tUp   ->Write();
-//   TT_CMS_scale_tDown ->Write();
-//   TT_CMS_scale_jUp   ->Write();
-//   TT_CMS_scale_jDown ->Write();

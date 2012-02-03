@@ -52,7 +52,13 @@ public:
 
   virtual bool init();
   virtual bool createHistos(TString samplename="RelValZTT");
-
+  
+  void deleteSamples(){
+    for(std::vector<Sample*>::const_iterator s=samples_.begin();s!=samples_.end();s++)
+      delete *s;
+    samples_.clear();
+  }  
+  
   void createMCPileUP();
 
 protected:

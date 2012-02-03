@@ -19,7 +19,8 @@ void plotLimits(long sm){
     float ex97=0.;
 
     char filenm[100];
-    sprintf(filenm,"combine_%d_%d.log",sm,mass[m]);
+    if(sm==3)sprintf(filenm,"combine_%d.log",mass[m]);
+    else sprintf(filenm,"combine_%d_%d.log",sm,mass[m]);
     cout<<"sm="<<sm<<" m="<<m<<" file="<<filenm<<endl;
 
     ifstream file;
@@ -89,10 +90,10 @@ void plotLimits(long sm){
   C.Clear();
   h.Draw("hist");
 
-  GExp2.SetFillColor(3);
+  GExp2.SetFillColor(5);
   GExp2.Draw("E3same");
 
-  GExp1.SetFillColor(5);
+  GExp1.SetFillColor(3);
   GExp1.Draw("E3same");
 
   GExp.SetLineColor(2);

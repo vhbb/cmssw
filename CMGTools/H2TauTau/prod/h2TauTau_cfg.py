@@ -62,6 +62,11 @@ runOnMC = process.source.fileNames[0].find('Run201')==-1 and process.source.file
 
 process.load('CMGTools.H2TauTau.h2TauTau_cff')
 
+##uncomment the following for tau energy scale systematics
+####scale the tau momentum by +-3%
+#process.cmgTauScaler.cfg.uncertainty = cms.double(0.03)
+#process.cmgTauScaler.cfg.nSigma = cms.double(1.0)
+#process.cmgTauScaler.cfg.nSigma = cms.double(-1.0)
 
 process.schedule = cms.Schedule(
     # this path corresponds to the basic preselection:
