@@ -68,6 +68,10 @@ process.load('CMGTools.H2TauTau.h2TauTau_cff')
 #process.cmgTauScaler.cfg.nSigma = cms.double(1.0)
 #process.cmgTauScaler.cfg.nSigma = cms.double(-1.0)
 
+##remove tau isolation like this
+#process.cmgTauMu.cuts.baseline.tauLeg.iso = ''
+
+
 process.schedule = cms.Schedule(
     # this path corresponds to the basic preselection:
     process.tauMuPreSelPath,

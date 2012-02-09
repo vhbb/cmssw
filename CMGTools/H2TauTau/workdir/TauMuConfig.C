@@ -54,9 +54,9 @@ TauMuAnalysis * TauMuConfig(const char * name){
   //TString outpath="./output/V241ABFall";
  
   TString outpath="./output/V241ABFallTrigEff";
-  //TString tag="/PAT_CMG_V2_4_1/H2TAUTAU_Jan26Up"; 
+  //TString tag="/PAT_CMG_V2_4_1/H2TAUTAU_Jan26Up"; //checkFailed.pl Summary : files: 112/115, events = 853415/28086242
   //TString outpath="./output/V241ABFallTrigEfftUp";
-  //TString tag="/PAT_CMG_V2_4_1/H2TAUTAU_Jan26Down"; 
+  //TString tag="/PAT_CMG_V2_4_1/H2TAUTAU_Jan26Down"; //checkFailed.pl Summary : files: 111/115, events = 791627/27991634
   //TString outpath="./output/V241ABFallTrigEfftDown";
 
 
