@@ -19,6 +19,7 @@ static  bool jetID(const VHbbEvent::SimpleJet & );
  
   bool  findDiJets (const std::vector<VHbbEvent::SimpleJet>& , VHbbEvent::SimpleJet& , VHbbEvent::SimpleJet& ,std::vector<VHbbEvent::SimpleJet>&);
   bool  findDiJetsHighestPt (const std::vector<VHbbEvent::SimpleJet>& , VHbbEvent::SimpleJet& , VHbbEvent::SimpleJet& ,std::vector<VHbbEvent::SimpleJet>&);
+  bool findFatJet (const std::vector<VHbbEvent::HardJet>& , const std::vector<VHbbEvent::SimpleJet>& , const std::vector<VHbbEvent::SimpleJet>&, VHbbEvent::HardJet& ,std::vector<VHbbEvent::SimpleJet>& );
 
  protected:
   

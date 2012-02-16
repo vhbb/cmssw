@@ -128,14 +128,21 @@ class VHbbEvent{
     TauInfo()  : charge(-99), tIso(-99), eIso(-99), hIso(-99),pfChaIso(-99), pfPhoIso(-99), pfNeuIso(-99), acop(-99), 
     idbyIso(-99),idbyTrackIso(-99),idbyTaNCfrOnePercent(-99),
     idbyTaNCfrHalfPercent(-99), idbyTaNCfrQuarterPercent(-99), 
-      idbyTaNCfrTenthPercent(-99), idbyTaNC(-99), mcId(-99), mcMomId(-99), mcgMomId(-99) {}
+      idbyTaNCfrTenthPercent(-99), idbyTaNC(-99), mcId(-99), mcMomId(-99), mcgMomId(-99),
+      idagainstElectronLoose(-99),  idagainstElectronMedium(-99),  idagainstElectronTight(-99),  idagainstMuonLoose(-99),  idagainstMuonTight(-99),  
+      idbyLooseIsolation(-99),  idbyMediumIsolation(-99),  idbyTightIsolation(-99),  idbyVLooseIsolation(-99),  iddecayModeFinding(-99),
+      isolationPFChargedHadrCandsPtSum(-999999.), isolationPFGammaCandsEtSum(-999999.),leadPFChargedHadrCandPt(-999999.) {}
   public:
     TLorentzVector p4;
     int charge;
     float tIso, eIso, hIso,pfChaIso,pfPhoIso,pfNeuIso, acop;
     float  idbyIso,idbyTrackIso,idbyTaNCfrOnePercent,idbyTaNCfrHalfPercent, idbyTaNCfrQuarterPercent, idbyTaNCfrTenthPercent, idbyTaNC;
-    TLorentzVector mcFourMomentum;
     int mcId, mcMomId, mcgMomId;
+    float idagainstElectronLoose, idagainstElectronMedium, idagainstElectronTight, idagainstMuonLoose, idagainstMuonTight;
+    float idbyLooseIsolation, idbyMediumIsolation, idbyTightIsolation, idbyVLooseIsolation, iddecayModeFinding;
+
+    float isolationPFChargedHadrCandsPtSum,isolationPFGammaCandsEtSum,leadPFChargedHadrCandPt;
+    TLorentzVector mcFourMomentum;
   };
 
 
@@ -160,6 +167,7 @@ class VHbbEvent{
   std::vector<SimpleJet> simpleJets3;
   std::vector<SimpleJet> simpleJets4; //???
   std::vector<SimpleJet> subJets; //???
+  std::vector<SimpleJet> filterJets; //???
   std::vector<HardJet> hardJets;
   
  METInfo calomet;

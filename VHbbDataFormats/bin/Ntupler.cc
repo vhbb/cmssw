@@ -184,7 +184,22 @@ typedef struct
   float dPhi;
   float dEta;
 } HiggsInfo;
-  
+ 
+typedef struct
+{
+  bool FatHiggsFlag; 
+  float mass;
+  float pt;
+  float eta;
+  float phi;
+  float filteredmass;
+  float filteredpt; 
+//  float dR;
+//  float dPhi;
+//  float dEta;
+} FatHiggsInfo;
+
+ 
 typedef struct 
 {
   float mass;  //MT in case of W
@@ -408,10 +423,11 @@ int main(int argc, char* argv[])
   EventInfo EVENT;
   //  JetInfo jet1,jet2, addJet1, addJet2;
   // lepton1,lepton2;
-  JetInfo hJets, aJets;
+  JetInfo hJets, aJets, fathFilterJets;
   LeptonInfo vLeptons, aLeptons;
-  int naJets=0, nhJets=0;
+  int naJets=0, nhJets=0, nfathFilterJets=0;
   HiggsInfo H,SVH; //add here the fatjet higgs
+  FatHiggsInfo FatH;
   TrackInfo V;
   int nvlep=0,nalep=0; 
   
@@ -530,7 +546,9 @@ int main(int argc, char* argv[])
   
   _outTree->Branch("H"		,  &H	            ,  "mass/F:pt/F:eta:phi/F:dR/F:dPhi/F:dEta/F");
   _outTree->Branch("V"		,  &V	            ,  "mass/F:pt/F:eta:phi/F");
+  _outTree->Branch("FatH"          ,  &FatH               ,  "FatHiggsFlag/I:mass/F:pt/F:eta:phi/F:filteredmass/F:filteredpt/F");
   _outTree->Branch("nhJets"		,  &nhJets	            ,  "nhJets/I");
+  _outTree->Branch("nfathFilterJets",   &nfathFilterJets,   "nfathFilterJets/I");
   _outTree->Branch("naJets"		,  &naJets	            ,  "naJets/I");
 
   _outTree->Branch("hJet_pt",hJets.pt ,"pt[nhJets]/F");
@@ -563,6 +581,13 @@ int main(int argc, char* argv[])
   _outTree->Branch("hJet_SF_CSVLerr",hJets.SF_CSVLerr ,"SF_CSVLerr[nhJets]/b");
   _outTree->Branch("hJet_SF_CSVMerr",hJets.SF_CSVMerr ,"SF_CSVMerr[nhJets]/b");
   _outTree->Branch("hJet_SF_CSVTerr",hJets.SF_CSVTerr ,"SF_CSVTerr[nhJets]/b");
+
+  _outTree->Branch("fathFilterJets_pt",fathFilterJets.pt ,"pt[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_eta",fathFilterJets.eta ,"eta[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_phi",fathFilterJets.phi ,"phi[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_e",fathFilterJets.e ,"e[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_csv",fathFilterJets.csv ,"csv[nfathFilterJets]/F");
+
 
   _outTree->Branch("aJet_pt",aJets.pt ,"pt[naJets]/F");
   _outTree->Branch("aJet_eta",aJets.eta ,"eta[naJets]/F");
@@ -935,6 +960,28 @@ int main(int argc, char* argv[])
 	H.pt = vhCand.H.p4.Pt();
 	H.eta = vhCand.H.p4.Eta();
 	H.phi = vhCand.H.p4.Phi();
+
+        FatH.FatHiggsFlag = vhCand.FatH.FatHiggsFlag;
+        if(vhCand.FatH.FatHiggsFlag){ FatH.mass= vhCand.FatH.p4.M(); 
+        FatH.pt = vhCand.FatH.p4.Pt();
+        FatH.eta = vhCand.FatH.p4.Eta();
+        FatH.phi = vhCand.FatH.p4.Phi();
+        
+//        if(vhCand.FatH.FatHiggsFlag)  vhCand.FatH.subjetsSize; 
+        nfathFilterJets=vhCand.FatH.subjetsSize;  
+        for( int j=0; j < nfathFilterJets; j++ ){
+        fathFilterJets.set(vhCand.FatH.jets[j],j);
+        }
+            
+        if(nfathFilterJets==2){
+        FatH.filteredmass=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4).M();
+        FatH.filteredpt=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4).Pt();}
+        else if(nfathFilterJets==3){
+        FatH.filteredmass=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4+vhCand.FatH.jets[2].p4).M();
+        FatH.filteredpt=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4+vhCand.FatH.jets[2].p4).Pt();}
+  
+        }
+
 	V.mass = vhCand.V.p4.M();
         if(isW) V.mass = vhCand.Mt(); 
 	V.pt = vhCand.V.p4.Pt();

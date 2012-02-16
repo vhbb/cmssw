@@ -60,6 +60,18 @@ class VHbbCandidate {
     VHbbEvent::SimpleJet& secondJet(){return jets[1];}
  };
   
+  class FatHiggsCandidate {
+  public:
+   TLorentzVector p4;
+    std::vector<VHbbEvent::SimpleJet> jets;
+    bool FatHiggsFlag;
+    int subjetsSize;
+    float deltaTheta;
+    std::vector <float> helicities;
+ public:
+    VHbbEvent::SimpleJet& firstJet(){return jets[0];}
+    VHbbEvent::SimpleJet& secondJet(){return jets[1];}
+ };
 
   void setCandidateType (CandidateType c){candidateType = c;}
 
@@ -85,6 +97,7 @@ class VHbbCandidate {
   TLorentzVector p4(){return V.p4+H.p4;}
   CandidateType candidateType;
   HiggsCandidate H;
+  FatHiggsCandidate FatH;
   VectorCandidate V;
   std::vector<VHbbEvent::SimpleJet> additionalJets;
 };

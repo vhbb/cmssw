@@ -152,6 +152,9 @@ process.load('CommonTools.ParticleFlow.PF2PAT_cff')
 from PhysicsTools.PatAlgos.tools.pfTools import *
 usePF2PAT(process,runPF2PAT=True,jetAlgo='AK5',runOnMC=isMC,postfix='')
 
+from PhysicsTools.PatAlgos.tools.tauTools import *
+switchToPFTauHPS(process)
+
 # Get a list of good primary vertices, in 42x, these are DAF vertices
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 process.goodOfflinePrimaryVertices = cms.EDFilter(
@@ -212,17 +215,31 @@ process.ak5GenJets = ak5GenJets
 process.load("RecoJets.Configuration.GenJetParticles_cff")
 from RecoJets.JetProducers.ca4GenJets_cfi import ca4GenJets
 process.ca4GenJets = ca4GenJets
-process.load("VHbbAnalysis.HbbAnalyzer.caTopJets_cff")
+###process.load("VHbbAnalysis.HbbAnalyzer.HbbFilterJets_cff")
 
 process.ca8GenJets = ca4GenJets.clone( rParam = cms.double(0.8) )
 
+
+process.load('RecoJets.JetProducers.caSubjetFilterPFJets_cfi')
+from RecoJets.JetProducers.caSubjetFilterPFJets_cfi import caSubjetFilterPFJets
+process.caVHPFJets = caSubjetFilterPFJets.clone()
+
+process.load('RecoJets.JetProducers.caSubjetFilterCaloJets_cfi')
+from RecoJets.JetProducers.caSubjetFilterCaloJets_cfi import caSubjetFilterCaloJets
+process.caVHCaloJets = caSubjetFilterCaloJets.clone()
+
+process.load('RecoJets.JetProducers.caSubjetFilterGenJets_cfi')
+from RecoJets.JetProducers.caSubjetFilterGenJets_cfi import caSubjetFilterGenJets
+process.caVHGenJets = caSubjetFilterGenJets.clone()
+
+
 ## tune DeltaR for C/A
 
-process.caTopCaloJets.rBins = cms.vdouble(1.2,1.2,1.2)
-process.caTopPFJets.rBins = cms.vdouble(1.2,1.2,1.2)
+##process.caTopCaloJets.rBins = cms.vdouble(1.2,1.2,1.2)
+##process.caTopPFJets.rBins = cms.vdouble(1.2,1.2,1.2)
 
-process.caTopCaloJets.rParam = cms.double(1.2)
-process.caTopPFJets.rParam = cms.double(1.2)
+##process.caTopCaloJets.rParam = cms.double(1.2)
+##process.caTopPFJets.rParam = cms.double(1.2)
 
 #process.caTopCaloJets.rBins = cms.vdouble(1.4,1.4,1.4)
 #process.caTopPFJets.rBins = cms.vdouble(1.4,1.4,1.4)
@@ -230,18 +247,18 @@ process.caTopPFJets.rParam = cms.double(1.2)
 #process.caTopPFJets.rParam = cms.double(1.4)
 
 ##test
-process.caTopCaloJets.useAdjacency = cms.int32(0)
-process.caTopPFJets.useAdjacency = cms.int32(0)
+process.caVHCaloJets.useAdjacency = cms.int32(0)
+process.caVHPFJets.useAdjacency = cms.int32(0)
 ######
 
 process.ak5PFJets.src = cms.InputTag('pfNoElectron')
 process.ak7PFJets.src = cms.InputTag('pfNoElectron')
-process.caTopPFJets.src = cms.InputTag('pfNoElectron')
+process.caVHPFJets.src = cms.InputTag('pfNoElectron')
 
 
 # subJetProducer
-process.CAsubJetsProducer = cms.EDProducer('SubProducer',
-jetTag = cms.untracked.InputTag("caTopPFJets"))
+##process.CAsubJetsProducer = cms.EDProducer('SubProducer',
+##jetTag = cms.untracked.InputTag("caTopPFJets"))
 
 
 # switch jet collection to our juets
@@ -254,8 +271,8 @@ else :
         inputJetCorrLabel = ['L1FastJet','L2Relative', 'L3Absolute']
 
 addJetCollection(process, 
-        cms.InputTag('caTopCaloJets'),         # Jet collection; must be already in the event when patLayer0 sequence is executed
-        "CA","Calo",
+        cms.InputTag('caVHCaloJets:fat'),         # Jet collection; must be already in the event when patLayer0 sequence is executed
+        "CAVHFat","Calo",
         doJTA=True,            # Run Jet-Track association & JetCharge
         doBTagging=True,       # Run b-tagging
 #        jetCorrLabel=('KT6Calo', inputJetCorrLabel),
@@ -266,9 +283,36 @@ addJetCollection(process,
         doJetID=False
                  )
 
+addJetCollection(process,
+        cms.InputTag('caVHCaloJets:sub'),         # Jet collection; must be already in the event when patLayer0 sequence is executed
+        "CAVHSub","Calo",
+        doJTA=True,            # Run Jet-Track association & JetCharge
+        doBTagging=True,       # Run b-tagging
+#        jetCorrLabel=('KT6Calo', inputJetCorrLabel),
+        jetCorrLabel=('AK7Calo', inputJetCorrLabel),
+        doType1MET=False,
+        doL1Cleaning=False,
+        doL1Counters=False,
+        doJetID=False
+                 )
+
+addJetCollection(process,
+        cms.InputTag('caVHCaloJets:filter'),         # Jet collection; must be already in the event when patLayer0 sequence is executed
+        "CAVHFilter","Calo",
+        doJTA=True,            # Run Jet-Track association & JetCharge
+        doBTagging=True,       # Run b-tagging
+#        jetCorrLabel=('KT6Calo', inputJetCorrLabel),
+        jetCorrLabel=('AK7Calo', inputJetCorrLabel),
+        doType1MET=False,
+        doL1Cleaning=False,
+        doL1Counters=False,
+        doJetID=False
+                 )
+
+
 addJetCollection(process, 
-        cms.InputTag('caTopPFJets'),         # Jet collection; must be already in the event when patLayer0 sequence is executed
-        'CA',"PF",
+        cms.InputTag('caVHPFJets',"fat","VH"),         # Jet collection; must be already in the event when patLayer0 sequence is executed
+        'CAVHFat',"PF",
         doJTA=True,            # Run Jet-Track association & JetCharge
         doBTagging=True,       # Run b-tagging
 #        jetCorrLabel=('KT6PF',  inputJetCorrLabel),
@@ -279,10 +323,36 @@ addJetCollection(process,
         doJetID = False
                  )
 
-addJetCollection(process,cms.InputTag("CAsubJetsProducer"),"subCA","PF",
-                 doJTA=True,doBTagging=True,jetCorrLabel=('KT4PF',  inputJetCorrLabel),
-                 doType1MET=False,doL1Cleaning = False,doL1Counters=False,
-                 doJetID = False)
+addJetCollection(process,
+        cms.InputTag('caVHPFJets',"sub","VH"),         # Jet collection; must be already in the event when patLayer0 sequence is executed
+        'CAVHSub',"PF",
+        doJTA=True,            # Run Jet-Track association & JetCharge
+        doBTagging=True,       # Run b-tagging
+#        jetCorrLabel=('KT6PF',  inputJetCorrLabel),
+        jetCorrLabel=('KT4PF',  inputJetCorrLabel),
+        doType1MET=False,
+        doL1Cleaning=False,
+        doL1Counters=False,
+        doJetID = False
+                 )
+
+addJetCollection(process,
+        cms.InputTag('caVHPFJets',"filter","VH"),         # Jet collection; must be already in the event when patLayer0 sequence is executed
+        'CAVHFilter',"PF",
+        doJTA=True,            # Run Jet-Track association & JetCharge
+        doBTagging=True,       # Run b-tagging
+        jetCorrLabel=('KT4PF',  inputJetCorrLabel),
+        doType1MET=False,
+        doL1Cleaning=False,
+        doL1Counters=False,
+        doJetID = False
+                 )
+
+
+#addJetCollection(process,cms.InputTag("CAsubJetsProducer"),"subCA","PF",
+#                 doJTA=True,doBTagging=True,jetCorrLabel=('KT4PF',  inputJetCorrLabel),
+#                 doType1MET=False,doL1Cleaning = False,doL1Counters=False,
+#                 doJetID = False)
 
 addJetCollection(process,cms.InputTag("ak7CaloJets"),"AK7","Calo",
                  doJTA=True,doBTagging=True,jetCorrLabel=('AK7Calo',  inputJetCorrLabel),
@@ -328,7 +398,7 @@ addPfMET(process, 'PF')
 #            tagInfos = cms.vstring("secondaryVertex")
 #            )
 
-for jetcoll in (process.selectedPatJetsCACalo, process.selectedPatJetsCAPF):
+for jetcoll in (process.selectedPatJetsCAVHFatCalo, process.selectedPatJetsCAVHFatPF, process.selectedPatJetsCAVHSubPF, process.selectedPatJetsCAVHFilterPF):
 	jetcoll.embedGenJetMatch = cms.bool(isMC)
 	#getJetMCFlavour uses jetFlavourAssociation*, see below
 	jetcoll.getJetMCFlavour = cms.bool(True)
@@ -362,8 +432,10 @@ process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
 process.selectedPatJets.cut = cms.string('pt > 15. & abs(eta) < 5.0')
 process.selectedPatJetsAK5PF.cut = cms.string('pt > 15. & abs(eta) < 5.0')
 process.selectedPatJetsAK7PF.cut = cms.string('pt > 15. & abs(eta) < 5.0')
-process.selectedPatJetsCACalo.cut = cms.string('pt > 0. & abs(eta) < 5.0')
-process.selectedPatJetsCAPF.cut = cms.string('pt > 0. & abs(eta) < 5.0')
+process.selectedPatJetsCAVHFatCalo.cut = cms.string('pt > 15. & abs(eta) < 5.0')
+process.selectedPatJetsCAVHFatPF.cut = cms.string('pt > 15. & abs(eta) < 5.0')
+process.selectedPatJetsCAVHSubPF.cut = cms.string('pt > 10. & abs(eta) < 5.0')
+process.selectedPatJetsCAVHFilterPF.cut = cms.string('pt > 2. & abs(eta) < 5.0')
 ##process.selectedLayer1Muons.cut = cms.string('pt > 20. & abs(eta) < 2.5 & muonID("TMLastStationLoose")')
 ##process.selectedLayer1Electrons.cut = cms.string('pt > 20. & abs(eta) < 2.5 & electronID("eidLoose")')
 process.selectedPatMuons.cut = cms.string('isGlobalMuon || (isTrackerMuon && muonID("TrackerMuonArbitrated"))')
@@ -435,23 +507,23 @@ process.cleanPatJetsAK5PF = cms.EDProducer("PATJetCleaner",					   src = cms.Inp
 					   
 					   )
 #obsolete
-algorithm = 'ca'
+#algorithm = 'ca'
 
-if algorithm == 'kt' :
-    process.caTopCaloJets.algorithm = cms.int32(0)
-    process.caTopGenJets.algorithm = cms.int32(0)
-    process.caTopPFJets.algorithm = cms.int32(0)
-elif algorithm == 'ca' :
-    process.caTopCaloJets.algorithm = cms.int32(1)
-    process.caTopGenJets.algorithm = cms.int32(1)
-    process.caTopPFJets.algorithm = cms.int32(1)    
-elif algorithm == 'antikt' :
-    process.caTopCaloJets.algorithm = cms.int32(2)
-    process.caTopGenJets.algorithm = cms.int32(2)
-    process.caTopPFJets.algorithm = cms.int32(2)
-else:
-    print "Error: algorithm '%s' unknown. Use one of kt, ca, antikt." % algorithm
-    raise AttributeError()
+##if algorithm == 'kt' :
+#    process.caTopCaloJets.algorithm = cms.int32(0)
+#    process.caTopGenJets.algorithm = cms.int32(0)
+#    process.caTopPFJets.algorithm = cms.int32(0)
+#elif algorithm == 'ca' :
+#    process.caTopCaloJets.algorithm = cms.int32(1)
+#    process.caTopGenJets.algorithm = cms.int32(1)
+#    process.caTopPFJets.algorithm = cms.int32(1)    
+#elif algorithm == 'antikt' :
+#    process.caTopCaloJets.algorithm = cms.int32(2)
+#    process.caTopGenJets.algorithm = cms.int32(2)
+#    process.caTopPFJets.algorithm = cms.int32(2)
+#else:
+#    print "Error: algorithm '%s' unknown. Use one of kt, ca, antikt." % algorithm
+#    raise AttributeError()
 ####
 
 
@@ -485,8 +557,9 @@ process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
 #   muonTag = cms.InputTag("selectedPatMuons"),
     muonNoCutsTag = cms.InputTag("pfAllMuons"),
     muonTag = cms.InputTag("selectedMuonsMatched"),
-    jetTag = cms.InputTag("selectedPatJetsCAPF"),
-    subjetTag = cms.InputTag("selectedPatJetssubCAPF"),
+    jetTag = cms.InputTag("selectedPatJetsCAVHFatPF"),
+    subjetTag = cms.InputTag("selectedPatJetsCAVHSubPF"),
+    filterjetTag = cms.InputTag("selectedPatJetsCAVHFilterPF"),
     simplejet1Tag = cms.InputTag("selectedPatJets"),
     simplejet2Tag = cms.InputTag("cleanPatJetsAK5PF"),
     simplejet4Tag = cms.InputTag("selectedPatJetsAK7Calo"),
@@ -746,9 +819,8 @@ if isMC == False :
 		     process.kt6PFJets25* 
                      process.ak5PFJets*
                      process.ak7PFJets*
-                     process.caTopCaloJets*
-                     process.caTopPFJets*
-                     process.CAsubJetsProducer*
+                     process.caVHCaloJets*
+                     process.caVHPFJets*
                      process.eidSequence*
                      process.patDefaultSequence*
 		    		    #
@@ -788,9 +860,9 @@ else :
 	      	     process.kt6PFJets25* 
                      process.ak5PFJets*
                      process.ak7PFJets*
-                     process.caTopCaloJets*
-                     process.caTopPFJets*
-                     process.CAsubJetsProducer*
+                     process.caVHCaloJets*
+                     process.caVHPFJets*
+                     process.caVHGenJets*
                      process.eidSequence*
                      process.patDefaultSequence*
 		    #

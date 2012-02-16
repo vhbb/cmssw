@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.57 2011/12/13 22:00:28 sdas Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.58 2011/12/31 15:09:42 degrutto Exp $
 //
 //
 
@@ -66,6 +66,7 @@ HbbAnalyzerNew::HbbAnalyzerNew(const edm::ParameterSet& iConfig):
   muonoCutsLabel_(iConfig.getParameter<edm::InputTag>("muonNoCutsTag")),
   jetLabel_(iConfig.getParameter<edm::InputTag>("jetTag")),
   subjetLabel_(iConfig.getParameter<edm::InputTag>("subjetTag")),
+  filterjetLabel_(iConfig.getParameter<edm::InputTag>("filterjetTag")),
   simplejet1Label_(iConfig.getParameter<edm::InputTag>("simplejet1Tag")),
   simplejet2Label_(iConfig.getParameter<edm::InputTag>("simplejet2Tag")),
   simplejet3Label_(iConfig.getParameter<edm::InputTag>("simplejet3Tag")),
@@ -361,6 +362,11 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   edm::Handle<edm::View<pat::Jet> > subjetHandle;
   iEvent.getByLabel(subjetLabel_,subjetHandle);
   edm::View<pat::Jet> subjets = *subjetHandle;
+
+  // filter jet   
+  edm::Handle<edm::View<pat::Jet> > filterjetHandle;
+  iEvent.getByLabel(filterjetLabel_,filterjetHandle);
+  edm::View<pat::Jet> filterjets = *filterjetHandle;
 
   // standard jets
 
@@ -772,6 +778,21 @@ BTagSFContainer btagSFs;
 
   }
 
+  for(edm::View<pat::Jet>::const_iterator filterjet_iter = filterjets.begin(); filterjet_iter!=filterjets.end(); ++filterjet_iter){
+ 
+    if(printJet) {std::cout << "FilterjetTagged Pt: " << filterjet_iter->pt() << " E,M,eta,phi,Btag: " << filterjet_iter->p4().E()  << "," << filterjet_iter->p4().M() << "," << filterjet_iter->eta() << "," << filterjet_iter->phi()  << "," << filterjet_iter->bDiscriminator("combinedSecondaryVertexBJetTags") << "\n";}
+ 
+    VHbbEvent::SimpleJet fj;
+    //    std::cout <<" sub jet "<<std::endl;
+    fillSimpleJet(fj,filterjet_iter);
+    //  if(!runOnMC_)  
+    setJecUnc(fj,jecUnc);
+
+    hbbInfo->filterJets.push_back(fj);
+    
+
+  }
+
   //
   // add charged met
   //
@@ -1048,14 +1069,51 @@ BTagSFContainer btagSFs;
     Geom::Phi<double> deltaphi(tau->phi()-atan2(hbbInfo->pfmet.p4.Py(),hbbInfo->pfmet.p4.Px()));
     double acop = deltaphi.value();
     tf.acop=acop;
-    tf.idbyIso=tau->tauID("byIsolation");
-    tf.idbyTrackIso=tau->tauID("trackIsolation");
-    tf.idbyTaNCfrOnePercent=tau->tauID("byTaNCfrOnePercent");
-    tf.idbyTaNCfrHalfPercent=tau->tauID("byTaNCfrHalfPercent");
-    tf.idbyTaNCfrQuarterPercent=tau->tauID("byTaNCfrQuarterPercent");
-    tf.idbyTaNCfrTenthPercent=tau->tauID("byTaNCfrTenthPercent");  
-    tf.idbyTaNC=tau->tauID("byTaNC");
+    if (tau->isTauIDAvailable("againstElectronLoose")) tf.idagainstElectronLoose=tau->tauID("againstElectronLoose");
+    if (tau->isTauIDAvailable("againstElectronMedium")) tf.idagainstElectronMedium=tau->tauID("againstElectronMedium");
+    if (tau->isTauIDAvailable("againstElectronTight")) tf.idagainstElectronTight=tau->tauID("againstElectronTight");
+    if (tau->isTauIDAvailable("againstMuonLoose")) tf.idagainstMuonLoose=tau->tauID("againstMuonLoose");
+    if (tau->isTauIDAvailable("againstMuonTight")) tf.idagainstMuonTight=tau->tauID("againstMuonTight");
+    if (tau->isTauIDAvailable("byLooseIsolation")) tf.idbyLooseIsolation=tau->tauID("byLooseIsolation");
+    if (tau->isTauIDAvailable("byMediumIsolation")) tf.idbyMediumIsolation=tau->tauID("byMediumIsolation");
+    if (tau->isTauIDAvailable("byTightIsolation")) tf.idbyTightIsolation=tau->tauID("byTightIsolation");
+    if (tau->isTauIDAvailable("byVLooseIsolation")) tf.idbyVLooseIsolation=tau->tauID("byVLooseIsolation");
+    if (tau->isTauIDAvailable("decayModeFinding")) tf.iddecayModeFinding=tau->tauID("decayModeFinding");
+    if (tau->isTauIDAvailable("byIsolation")) tf.idbyIso=tau->tauID("byIsolation");
+    if (tau->isTauIDAvailable("trackIsolation")) tf.idbyTrackIso=tau->tauID("trackIsolation");
+    if (tau->isTauIDAvailable("byTaNCfrOnePercent")) tf.idbyTaNCfrOnePercent=tau->tauID("byTaNCfrOnePercent");
+    if (tau->isTauIDAvailable("byTaNCfrHalfPercent")) tf.idbyTaNCfrHalfPercent=tau->tauID("byTaNCfrHalfPercent");
+    if (tau->isTauIDAvailable("byTaNCfrQuarterPercent")) tf.idbyTaNCfrQuarterPercent=tau->tauID("byTaNCfrQuarterPercent");
+    if (tau->isTauIDAvailable("byTaNCfrTenthPercent")) tf.idbyTaNCfrTenthPercent=tau->tauID("byTaNCfrTenthPercent");
+    if (tau->isTauIDAvailable("byTaNC")) tf.idbyTaNC=tau->tauID("byTaNC");
+    if (tau->isPFTau()) {
+      tf.isolationPFChargedHadrCandsPtSum = tau->isolationPFChargedHadrCandsPtSum();
+      tf.isolationPFGammaCandsEtSum = tau->isolationPFGammaCandsEtSum();
+      if (tau->leadPFChargedHadrCand().isAvailable()) tf.leadPFChargedHadrCandPt = tau->leadPFChargedHadrCand()->pt(); 
+    }
     hbbInfo->tauInfo.push_back(tf);
+    if (verbose_) {
+      std::cout << "SCZ DEBUG: againstElectronLoose is " << tf.idagainstElectronLoose << std::endl;
+      std::cout << "SCZ DEBUG: againstElectronMedium is " << tf.idagainstElectronMedium << std::endl;
+      std::cout << "SCZ DEBUG: againstElectronTight is " << tf.idagainstElectronTight << std::endl;
+      std::cout << "SCZ DEBUG: againstMuonLoose is " << tf.idagainstMuonLoose << std::endl;
+      std::cout << "SCZ DEBUG: againstMuonTight is " << tf.idagainstMuonTight << std::endl;
+      std::cout << "SCZ DEBUG: byLooseIsolation is " << tf.idbyLooseIsolation << std::endl;
+      std::cout << "SCZ DEBUG: byMediumIsolation is " << tf.idbyMediumIsolation << std::endl;
+      std::cout << "SCZ DEBUG: byTightIsolation is " << tf.idbyTightIsolation << std::endl;
+      std::cout << "SCZ DEBUG: byVLooseIsolation is " << tf.idbyVLooseIsolation << std::endl;
+      std::cout << "SCZ DEBUG: decayModeFinding is " << tf.iddecayModeFinding << std::endl;
+      std::cout << "SCZ DEBUG: byIsolation is " << tf.idbyIso<< std::endl;
+      std::cout << "SCZ DEBUG: trackIsolation is " << tf.idbyTrackIso << std::endl;
+      std::cout << "SCZ DEBUG: byTaNCfrOnePercent is " << tf.idbyTaNCfrOnePercent << std::endl;
+      std::cout << "SCZ DEBUG: byTaNCfrHalfPercent is " << tf.idbyTaNCfrHalfPercent << std::endl;
+      std::cout << "SCZ DEBUG: byTaNCfrQuarterPercent is " << tf.idbyTaNCfrQuarterPercent << std::endl;
+      std::cout << "SCZ DEBUG: byTaNCfrTenthPercent is " << tf.idbyTaNCfrTenthPercent << std::endl;
+      std::cout << "SCZ DEBUG: byTaNC is " << tf.idbyTaNC << std::endl;
+      std::cout << "SCZ DEBUG: isolationPFChargedHadrCandsPtSum is " << tf.isolationPFChargedHadrCandsPtSum << std::endl;
+      std::cout << "SCZ DEBUG: isolationPFGammaCandsEtSum is " << tf.isolationPFGammaCandsEtSum << std::endl;
+      std::cout << "SCZ DEBUG: isolationPFGammaCandsEtSum is " << tf.leadPFChargedHadrCandPt << std::endl;
+    }
   }
 
   CompareJetPtMuons ptComparatorMu;
@@ -1075,6 +1133,7 @@ BTagSFContainer btagSFs;
        " SimpleJets2 = "<<hbbInfo->simpleJets2.size()<<std::endl<<
        " SubJets = "<<hbbInfo->subJets.size()<<std::endl<<
        " HardJets = "<<hbbInfo->hardJets.size()<<std::endl<<
+       " FilterJets = "<<hbbInfo->filterJets.size()<<std::endl<<
        " Muons = "<<hbbInfo->muInfo.size()<<std::endl<<
        " Electrons = "<<hbbInfo->eleInfo.size()<<std::endl<<
        " Taus = "<<hbbInfo->tauInfo.size()<<std::endl<<

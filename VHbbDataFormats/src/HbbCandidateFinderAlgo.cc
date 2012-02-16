@@ -1,5 +1,6 @@
 #include "VHbbAnalysis/VHbbDataFormats/interface/HbbCandidateFinderAlgo.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidateTools.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include <algorithm>
 
 #include <iostream>
@@ -75,6 +76,15 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   }
   
   if (foundJets == false) return;
+
+  bool foundHardJets;
+  VHbbEvent::HardJet fatj1;
+  std::vector<VHbbEvent::SimpleJet> subJetsout;
+  foundHardJets= findFatJet(event->hardJets,event->subJets,event->filterJets,fatj1,subJetsout) ;
+
+//  if (foundHardJets == false) return;
+
+
   //
   // search for leptons
   //
@@ -107,6 +117,16 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   temp.H.helicities.push_back(selector.getHelicity(j1,higgsBoost));
   temp.H.helicities.push_back(selector.getHelicity(j2,higgsBoost));
   temp.H.deltaTheta = selector.getDeltaTheta(j1,j2);
+
+  temp.FatH.FatHiggsFlag= foundHardJets;
+  if(foundHardJets){
+  temp.FatH.p4 = fatj1.p4;
+  temp.FatH.subjetsSize=subJetsout.size();
+  if(subJetsout.size()==2) {temp.FatH.jets.push_back(subJetsout[0]);temp.FatH.jets.push_back(subJetsout[1]);}
+  if(subJetsout.size()==3) {temp.FatH.jets.push_back(subJetsout[0]);
+  temp.FatH.jets.push_back(subJetsout[1]);temp.FatH.jets.push_back(subJetsout[2]);}
+  }
+
   temp.additionalJets = addJets;
   temp.V.mets = met;
   temp.V.muons = mu;
@@ -303,6 +323,131 @@ bool HbbCandidateFinderAlgo::findDiJetsHighestPt (const std::vector<VHbbEvent::S
   return true;
 }
 
+
+bool HbbCandidateFinderAlgo::findFatJet (const std::vector<VHbbEvent::HardJet>& jetsin, const std::vector<VHbbEvent::SimpleJet>& subjetsin, const std::vector<VHbbEvent::SimpleJet>& filterjetsin, VHbbEvent::HardJet& fatj1,std::vector<VHbbEvent::SimpleJet>& subJetsout){
+
+  if (verbose_){
+    std::cout <<" CandidateFinder: Input Jets = "<<jetsin.size()<<std::endl;
+  }
+  if (jetsin.size()<1) return false;
+  
+//  float etaThr = 2.5;
+  std::vector<VHbbEvent::HardJet> hardjets = jetsin;
+  std::vector<VHbbEvent::SimpleJet> subjets = subjetsin;
+  std::vector<VHbbEvent::SimpleJet> filterjets = filterjetsin;
+
+/*  TMatrixD *pointerEta = new TMatrixD(90,80);
+  TMatrixD* pointerPhi = new TMatrixD(90,80);
+  for (unsigned int i =0; i< hardjets.size(); i++){
+   for (unsigned int j=0; j< i.constituents; j++){
+   TMatrixDRow(*pointerEta,i)(j)=i.etaSub[j];
+   TMatrixDRow(*pointerPhi,i)(j)=i.phiSub[j];
+   }
+  }
+*/
+
+// debug
+/*    std::cout << "hardjet size: " << hardjets.size() << "\n";
+    std::cout << "subjet size: " << subjets.size() << "\n";
+    std::cout << "filterjet size: " << filterjets.size() << "\n";
+       for(unsigned int kk=0;kk<subjets.size();kk++){
+    std::cout << "subjet  pt: " << subjets[kk].p4.Pt() << " eta,phi " <<
+    subjets[kk].p4.Eta()  << " , " << subjets[kk].p4.Phi()  << "\n";
+      }
+       for(unsigned int kk=0;kk<filterjets.size();kk++){
+    std::cout << "filterjet  pt: " << filterjets[kk].p4.Pt() << " eta,phi " <<
+    filterjets[kk].p4.Eta()  << " , " << filterjets[kk].p4.Phi()  << "\n";
+      }*/
+// debug
+
+  double minBtag1=-9999.;
+  for (unsigned int i =0; i< hardjets.size(); i++){
+     int subJetIn[300]; 
+     for(int k=0;k<300;k++)subJetIn[k]=-99;
+     int subJetIn1st[2]; 
+     for(int k=0;k<2;k++)subJetIn1st[k]=-99;
+//    TMatrixDRow* roweta=new TMatrixDRow(*pointerEta,i);	 
+//    TMatrixDRow* rowphi=new TMatrixDRow(*pointerPhi,i);	 
+ 
+
+// debug
+//    std::cout << "HardJet pt: " << hardjets[i].p4.Pt() << " # daughters " << 
+//    hardjets[i].constituents << "\n";
+// debug
+
+   if(hardjets[i].constituents<4) continue;
+
+// first get ja and jb  from first decomposition
+     int In1st=0; 
+     for(int j=0;j<2;j++){
+// debug
+//    std::cout << "hardJet constituent pt: " << hardjets[i].subFourMomentum[j].Pt() << " eta,phi " <<
+//    hardjets[i].subFourMomentum[j].Eta()  << " , " << hardjets[i].subFourMomentum[j].Phi()  << "\n";
+// debug
+       for(unsigned int kk=0;kk<subjets.size();kk++){
+//       if(subjets.eta[kk]==roweta->GetPtr()[j] && subjets.phi[kk]==rowphi->GetPtr()[j])
+//       subJetIn1st[In1st]=kk;} 
+//        if(subjets[kk].p4.Eta()==hardjets[i].etaSub[j] && subjets[kk].p4.Phi()==hardjets[i].phiSub[j])
+//        subJetIn1st[In1st]=kk;} 
+//       if(subjets[kk].p4.Eta()==hardjets[i].subFourMomentum[j].Eta() && subjets[kk].p4.Phi()==hardjets[i].subFourMomentum[j].Phi())
+//        subJetIn1st[In1st]=kk;}
+       double deltaR_1=deltaR(subjets[kk].p4.Eta(),subjets[kk].p4.Phi(),hardjets[i].subFourMomentum[j].Eta(),hardjets[i].subFourMomentum[j].Phi()); if(deltaR_1<0.01) subJetIn1st[In1st]=kk;} 
+       In1st++;
+     }
+
+// then get all subjets from decomposition with
+     for(int j=2;j<hardjets[i].constituents;j++){
+// debug
+//    std::cout << "hardJet constituent pt: " << hardjets[i].subFourMomentum[j].Pt() << " eta,phi " <<
+//    hardjets[i].subFourMomentum[j].Eta()  << " , " << hardjets[i].subFourMomentum[j].Phi()  << "\n";
+// debug
+//    cout << "n: " << i << "," << j << " hardjetsub eta: " << roweta->GetPtr()[j] << " phi: " << 
+//    rowphi->GetPtr()[j] << "\n";
+       for(unsigned int kk=0;kk<filterjets.size();kk++){
+//       if(subjets.eta[kk]==roweta->GetPtr()[j] && subjets.phi[kk]==rowphi->GetPtr()[j])
+//       subJetIn[j]=kk;} 
+//        if(subjets[kk].p4.Eta()==hardjets[i].etaSub[j] && subjets[kk].p4.Phi()==hardjets[i].phiSub[j])
+//        subJetIn[j]=kk;} 
+//       if(subjets[kk].p4.Eta()==hardjets[i].subFourMomentum[j].Eta() && subjets[kk].p4.Phi()==hardjets[i].subFourMomentum[j].Phi()) subJetIn[j]=kk;
+       double deltaR_1=deltaR(filterjets[kk].p4.Eta(),filterjets[kk].p4.Phi(),hardjets[i].subFourMomentum[j].Eta(),hardjets[i].subFourMomentum[j].Phi()); if(deltaR_1<0.01) subJetIn[j-2]=kk;}
+           } 
+ 
+
+//debug
+//  std::cout << "index in subjetTag: " << subJetIn1st[0] << "," << subJetIn1st[1] << "\n";
+//  std::cout << "index in subfilterTag: " << subJetIn[0] << "," << subJetIn[1] << "," << subJetIn[2] << "\n";
+// debug
+    
+     if(subJetIn1st[0]==-99 || subJetIn1st[1]==-99) continue;
+     if(subJetIn[0]==-99 || subJetIn[1]==-99) continue;
+
+     int nBtag=0;
+     for(int j=0;j<2;j++){
+     if(subjets[subJetIn1st[j]].csv>0.) nBtag++;}
+
+     int nPt=0;
+     for(int j=0;j<2;j++){
+     if(subjets[subJetIn1st[j]].p4.Pt()>30.) nPt++;}
+
+//     if(nBtag<2 || nPt<2) continue;
+     if(nPt<2) continue;
+
+//      if(subjets[subJetIn1st[0]].csv+subjets[subJetIn1st[1]].csv>minBtag1){
+//      minBtag1=subjets[subJetIn1st[0]].csv+subjets[subJetIn1st[1]].csv;       
+       if((subjets[subJetIn1st[0]].p4+subjets[subJetIn1st[1]].p4).Pt()>minBtag1){
+       minBtag1=(subjets[subJetIn1st[0]].p4+subjets[subJetIn1st[1]].p4).Pt();
+       fatj1=hardjets[i];
+       subJetsout.clear();
+       if(subJetIn[0]!=-99) subJetsout.push_back(filterjets[subJetIn[0]]);
+       if(subJetIn[1]!=-99) subJetsout.push_back(filterjets[subJetIn[1]]);
+       if(subJetIn[2]!=-99) subJetsout.push_back(filterjets[subJetIn[2]]);
+       }  
+
+  } // loop hard jet
+
+  
+  return true;
+}
 
 
 void HbbCandidateFinderAlgo::findMuons(const std::vector<VHbbEvent::MuonInfo>& muons, std::vector<VHbbEvent::MuonInfo>& out, std::vector<unsigned int>& positions){

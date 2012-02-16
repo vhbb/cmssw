@@ -103,6 +103,7 @@ class HbbAnalyzerNew : public edm::EDProducer {
   edm::InputTag muonoCutsLabel_;
   edm::InputTag jetLabel_;
   edm::InputTag subjetLabel_;
+  edm::InputTag filterjetLabel_;
   edm::InputTag simplejet1Label_;
   edm::InputTag simplejet2Label_;
   edm::InputTag simplejet3Label_;
