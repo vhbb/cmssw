@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.58 2011/12/31 15:09:42 degrutto Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.59 2012/02/16 00:17:42 dlopes Exp $
 //
 //
 
@@ -1090,6 +1090,8 @@ BTagSFContainer btagSFs;
       tf.isolationPFChargedHadrCandsPtSum = tau->isolationPFChargedHadrCandsPtSum();
       tf.isolationPFGammaCandsEtSum = tau->isolationPFGammaCandsEtSum();
       if (tau->leadPFChargedHadrCand().isAvailable()) tf.leadPFChargedHadrCandPt = tau->leadPFChargedHadrCand()->pt(); 
+      tf.NsignalPFChargedHadrCands = tau->signalPFChargedHadrCands().size();
+      tf.NsignalPFGammaCands = tau->signalPFGammaCands().size();
     }
     hbbInfo->tauInfo.push_back(tf);
     if (verbose_) {
@@ -1113,6 +1115,8 @@ BTagSFContainer btagSFs;
       std::cout << "SCZ DEBUG: isolationPFChargedHadrCandsPtSum is " << tf.isolationPFChargedHadrCandsPtSum << std::endl;
       std::cout << "SCZ DEBUG: isolationPFGammaCandsEtSum is " << tf.isolationPFGammaCandsEtSum << std::endl;
       std::cout << "SCZ DEBUG: isolationPFGammaCandsEtSum is " << tf.leadPFChargedHadrCandPt << std::endl;
+      std::cout << "SCZ DEBUG: NsignalPFChargedHadrCands is " << tf.NsignalPFChargedHadrCands << std::endl;
+      std::cout << "SCZ DEBUG: NsignalPFGammaCands is " << tf.NsignalPFGammaCands << std::endl;
     }
   }
 

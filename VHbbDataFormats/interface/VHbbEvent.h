@@ -131,7 +131,8 @@ class VHbbEvent{
       idbyTaNCfrTenthPercent(-99), idbyTaNC(-99), mcId(-99), mcMomId(-99), mcgMomId(-99),
       idagainstElectronLoose(-99),  idagainstElectronMedium(-99),  idagainstElectronTight(-99),  idagainstMuonLoose(-99),  idagainstMuonTight(-99),  
       idbyLooseIsolation(-99),  idbyMediumIsolation(-99),  idbyTightIsolation(-99),  idbyVLooseIsolation(-99),  iddecayModeFinding(-99),
-      isolationPFChargedHadrCandsPtSum(-999999.), isolationPFGammaCandsEtSum(-999999.),leadPFChargedHadrCandPt(-999999.) {}
+      isolationPFChargedHadrCandsPtSum(-999999.), isolationPFGammaCandsEtSum(-999999.),leadPFChargedHadrCandPt(-999999.),
+      NsignalPFChargedHadrCands (-99),NsignalPFGammaCands(-99) {}
   public:
     TLorentzVector p4;
     int charge;
@@ -142,6 +143,7 @@ class VHbbEvent{
     float idbyLooseIsolation, idbyMediumIsolation, idbyTightIsolation, idbyVLooseIsolation, iddecayModeFinding;
 
     float isolationPFChargedHadrCandsPtSum,isolationPFGammaCandsEtSum,leadPFChargedHadrCandPt;
+    int NsignalPFChargedHadrCands, NsignalPFGammaCands;
     TLorentzVector mcFourMomentum;
   };
 
