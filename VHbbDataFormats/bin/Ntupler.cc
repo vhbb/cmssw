@@ -345,6 +345,13 @@ typedef struct
     flavour[i]=j.flavour;
     isSemiLeptMCtruth[i]=j.isSemiLeptMCtruth;
     isSemiLept[i]=j.isSemiLept;
+    SoftLeptpdgId[i] = j.SoftLeptpdgId;
+    SoftLeptIdlooseMu[i] = j.SoftLeptIdlooseMu;
+    SoftLeptId95[i] = j.SoftLeptId95;
+    SoftLeptPt[i] = j.SoftLeptPt;
+    SoftLeptdR[i] = j.SoftLeptdR;  
+    SoftLeptptRel[i] = j.SoftLeptptRel;
+    SoftLeptRelCombIso[i] = j.SoftLeptRelCombIso;
     if(j.bestMCp4.Pt() > 0)
       {
 	genPt[i]=j.bestMCp4.Pt();
@@ -369,7 +376,7 @@ typedef struct
   void reset()
   {
     for(int i=0;i<MAXJ;i++) {
-      pt[i]=-99; eta[i]=-99; phi[i]=-99;e[i]=-99;csv[i]=-99; cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; isSemiLeptMCtruth[i]=-99; isSemiLept[i]=-99;  genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99;
+      pt[i]=-99; eta[i]=-99; phi[i]=-99;e[i]=-99;csv[i]=-99; cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; isSemiLeptMCtruth[i]=-99; isSemiLept[i]=-99;      SoftLeptpdgId[i] = -99; SoftLeptIdlooseMu[i] = -99;  SoftLeptId95[i] =  -99;   SoftLeptPt[i] = -99;  SoftLeptdR[i] = -99;   SoftLeptptRel[i] = -99; SoftLeptRelCombIso[i] = -99;  genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99;
     }
   }
   float pt[MAXJ];
@@ -386,8 +393,15 @@ typedef struct
   float nch[MAXJ];
   float nconstituents[MAXJ];
   float flavour[MAXJ];
-  float isSemiLept[MAXJ];
-  float isSemiLeptMCtruth[MAXJ];
+  int isSemiLept[MAXJ];
+  int isSemiLeptMCtruth[MAXJ];
+  int SoftLeptpdgId[MAXJ] ;
+  int SoftLeptIdlooseMu[MAXJ] ;  
+  int SoftLeptId95[MAXJ]  ;   
+  float SoftLeptPt[MAXJ] ;  
+  float SoftLeptdR[MAXJ] ;   
+  float SoftLeptptRel[MAXJ] ; 
+  float SoftLeptRelCombIso[MAXJ];
   float genPt[MAXJ];
   float genEta[MAXJ];
   float genPhi[MAXJ];
@@ -565,9 +579,16 @@ int main(int argc, char* argv[])
   _outTree->Branch("hJet_nch",hJets.nch ,"nch[nhJets]/F");
   _outTree->Branch("hJet_nconstituents",hJets.nconstituents ,"nconstituents[nhJets]");
   _outTree->Branch("hJet_flavour",hJets.flavour ,"flavour[nhJets]/F");
-  _outTree->Branch("hJet_isSemiLept",hJets.isSemiLept ,"isSemiLept[nhJets]/F");
-  _outTree->Branch("hJet_isSemiLeptMCtruth",hJets.isSemiLeptMCtruth ,"isSemiLeptMCtruth[nhJets]/F");
-  _outTree->Branch("hJet_genPt",hJets.genPt ,"genPt[nhJets]/F");
+  _outTree->Branch("hJet_isSemiLept",hJets.isSemiLept ,"isSemiLept[nhJets]/I");
+  _outTree->Branch("hJet_isSemiLeptMCtruth",hJets.isSemiLeptMCtruth ,"isSemiLeptMCtruth[nhJets]/I");
+  _outTree->Branch("hJet_SoftLeptpdgId", hJets.SoftLeptpdgId , "SoftLeptpdgId[nhJets]/I");
+  _outTree->Branch("hJet_SoftLeptIdlooseMu", hJets.SoftLeptIdlooseMu , "SoftLeptIdlooseMu[nhJets]/I");
+  _outTree->Branch("hJet_SoftLeptId95", hJets.SoftLeptId95 , "SoftLeptId95[nhJets]/I");
+  _outTree->Branch("hJet_SoftLeptPt", hJets.SoftLeptPt , "SoftLeptPt[nhJets]/F");
+  _outTree->Branch("hJet_SoftLeptdR", hJets.SoftLeptdR , "SoftLeptdR[nhJets]/F");
+  _outTree->Branch("hJet_SoftLeptptRel", hJets.SoftLeptptRel , "SoftLeptptRel[nhJets]/F");
+  _outTree->Branch("hJet_SoftLeptRelCombIso", hJets.SoftLeptRelCombIso , "SoftLeptRelCombIso[nhJets]/F");
+ _outTree->Branch("hJet_genPt",hJets.genPt ,"genPt[nhJets]/F");
   _outTree->Branch("hJet_genEta",hJets.genEta ,"genEta[nhJets]/F");
   _outTree->Branch("hJet_genPhi",hJets.genPhi ,"genPhi[nhJets]/F");
   _outTree->Branch("hJet_JECUnc",hJets.JECUnc ,"JECUnc[nhJets]/F");
@@ -603,8 +624,16 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_nch",aJets.nch ,"nch[naJets]/F");
   _outTree->Branch("aJet_nconstituents",aJets.nconstituents ,"nconstituents[naJets]");
   _outTree->Branch("aJet_flavour",aJets.flavour ,"flavour[naJets]/F");
-  _outTree->Branch("aJet_isSemiLept",aJets.isSemiLept ,"isSemiLept[naJets]/F");
-  _outTree->Branch("aJet_isSemiLeptMCtruth",aJets.isSemiLeptMCtruth ,"isSemiLeptMCtruth[naJets]/F");
+  _outTree->Branch("aJet_isSemiLept",aJets.isSemiLept ,"isSemiLept[naJets]/I");
+  _outTree->Branch("aJet_isSemiLeptMCtruth",aJets.isSemiLeptMCtruth ,"isSemiLeptMCtruth[naJets]/I");
+  _outTree->Branch("aJet_SoftLeptpdgId",aJets.SoftLeptpdgId , "SoftLeptpdgId[naJets]/I");
+  _outTree->Branch("aJet_SoftLeptIdlooseMu", aJets.SoftLeptIdlooseMu , "SoftLeptIdlooseMu[naJets]/I");
+  _outTree->Branch("aJet_SoftLeptId95", aJets.SoftLeptId95 , "SoftLeptId95[naJets]/I");
+  _outTree->Branch("aJet_SoftLeptPt", aJets.SoftLeptPt , "SoftLeptPt[naJets]/F");
+  _outTree->Branch("aJet_SoftLeptdR", aJets.SoftLeptdR , "SoftLeptdR[naJets]/F");
+  _outTree->Branch("aJet_SoftLeptptRel", aJets.SoftLeptptRel , "SoftLeptptRel[naJets]/F");
+  _outTree->Branch("aJet_SoftLeptRelCombIso", aJets.SoftLeptRelCombIso , "SoftLeptRelCombIso[naJets]/F");
+
   _outTree->Branch("aJet_genPt",aJets.genPt ,"genPt[naJets]/F");
   _outTree->Branch("aJet_genEta",aJets.genEta ,"genEta[naJets]/F");
   _outTree->Branch("aJet_genPhi",aJets.genPhi ,"genPhi[naJets]/F");
