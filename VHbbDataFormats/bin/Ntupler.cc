@@ -55,6 +55,8 @@
 #define MAXJ 30
 #define MAXL 10
 #define MAXB 10
+#define nMetUnc 24 
+//eleEnDown/Up, muEn, tauEn, JES, JER, Unclustered for type1 MET [0-11] and than type1p2 MET [12-23]
 
 struct CompareDeltaR {
   CompareDeltaR(TLorentzVector p4dir_): p4dir(p4dir_) {}
@@ -184,6 +186,43 @@ typedef struct
   float dPhi;
   float dEta;
 } HiggsInfo;
+
+typedef struct 
+{
+  float mass; 
+  float pt;
+  float eta;
+  float phi;
+  float status;
+  float charge;
+  float momid;
+} genParticleInfo;
+
+
+
+typedef struct 
+
+{
+  float bmass; 
+  float bpt;
+  float beta;
+  float bphi;
+  float bstatus;
+  float wdau1mass; 
+  float wdau1pt;
+  float wdau1eta;
+  float wdau1phi;
+  float wdau1id;
+  float wdau2mass; 
+  float wdau2pt;
+  float wdau2eta;
+  float wdau2phi;
+  float wdau2id;
+
+  
+} genTopInfo;
+
+
  
 typedef struct
 {
@@ -216,6 +255,7 @@ struct  LeptonInfo
     for(int i =0; i < MAXL;i++){ 
      mass[i]=-99; pt[i]=-99; eta[i]=-99; phi[i]=-99; aodCombRelIso[i]=-99; pfCombRelIso[i]=-99; photonIso[i]=-99; neutralHadIso[i]=-99; chargedHadIso[i]=-99; chargedPUIso[i]=-99; particleIso[i]=-99; dxy[i]=-99; dz[i]=-99; type[i]=-99;  genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99;  
      id80[i]=-99; id95[i]=-99; vbtf[i]=-99; id80NoIso[i]=-99;
+     charge[i]=-99; 
      }
   }
 
@@ -232,13 +272,14 @@ struct  LeptonInfo
     neutralHadIso[j]=i.pfNeuIso;
     chargedHadIso[j]=i.pfChaIso;
     chargedPUIso[j]=i.pfChaPUIso;
+    charge[j]=i.charge;
     if(i.mcFourMomentum.Pt() > 0)
     { 
      genPt[j]=i.mcFourMomentum.Pt();
     genEta[j]=i.mcFourMomentum.Eta();
     genPhi[j]=i.mcFourMomentum.Phi();
    }
-      setSpecific(i,j);
+         setSpecific(i,j);
   }
   template <class Input> void setSpecific(const Input & i, int j)
   {
@@ -268,6 +309,8 @@ struct  LeptonInfo
   float id95[MAXL];
   float vbtf[MAXL];
   float id80NoIso[MAXL];
+  float charge[MAXL];
+
 };
   
 template <> void LeptonInfo::setSpecific<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j){
@@ -292,6 +335,21 @@ typedef struct
   float sig;
   float phi;
 } METInfo;
+
+
+typedef struct 
+ {
+ 
+  float  et[nMetUnc]; float phi[nMetUnc]; float sumet[nMetUnc]; 
+  template <class Input> void set(const Input & i, int j)
+  {
+    et[j]=i.p4.Pt(); 
+    phi[j]=i.p4.Phi();
+    sumet[j]=i.sumEt;
+
+  }      
+} METUncInfo ;
+
   
 typedef struct 
 {
@@ -422,6 +480,8 @@ int main(int argc, char* argv[])
 {
   gROOT->Reset();
 
+
+
   TTree *_outTree;
   IVFInfo IVF;
   //FIXME
@@ -432,7 +492,16 @@ int main(int argc, char* argv[])
   METInfo fakeMET;
   METInfo METnoPU;
   METInfo METnoPUCh;
+  METInfo METtype1corr;
+  METInfo METtype1p2corr;
+  METInfo METnoPUtype1corr;
+  METInfo METnoPUtype1p2corr;
+
   MHTInfo MHT;
+  
+  METUncInfo  metUnc;
+
+
   TopInfo top;
   EventInfo EVENT;
   //  JetInfo jet1,jet2, addJet1, addJet2;
@@ -442,12 +511,14 @@ int main(int argc, char* argv[])
   int naJets=0, nhJets=0, nfathFilterJets=0;
   HiggsInfo H,SVH; //add here the fatjet higgs
   FatHiggsInfo FatH;
+  genParticleInfo genZ, genZstar, genWstar, genW,  genH, genB, genBbar; //add here the fatjet higgs
+  genTopInfo genTop, genTbar;
   TrackInfo V;
   int nvlep=0,nalep=0; 
   
 
 
-  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweight2011B;
+  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, genHpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweight2011B;
   float PU0,PUp1,PUm1;
 
   float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart,weightEleTrigEleAugPart;
@@ -458,7 +529,9 @@ int main(int argc, char* argv[])
   int WplusMode,WminusMode;
   int Vtype,nSvs,nSimBs,numJets,numBJets,eventFlav;
   //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
-  bool triggerFlags[500],hbhe,ecalFlag,totalKinematics;
+  bool triggerFlags[500],hbhe,ecalFlag,totalKinematics,  cschaloFlag,  hcallaserFlag,   trackingfailureFlag ;
+
+
   float btag1T2CSF=1.,btag2TSF=1.,btag1TSF=1.,btagA0CSF=1., btagA0TSF=1., btag2CSF=1., btag1TA1C=1.;
   // ----------------------------------------------------------------------
   // First Part: 
@@ -561,9 +634,24 @@ int main(int argc, char* argv[])
   _outTree->Branch("H"		,  &H	            ,  "mass/F:pt/F:eta:phi/F:dR/F:dPhi/F:dEta/F");
   _outTree->Branch("V"		,  &V	            ,  "mass/F:pt/F:eta:phi/F");
   _outTree->Branch("FatH"          ,  &FatH               ,  "FatHiggsFlag/I:mass/F:pt/F:eta:phi/F:filteredmass/F:filteredpt/F");
+  _outTree->Branch("genZ"		,  &genZ	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+  _outTree->Branch("genZstar"		,  &genZstar	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+  _outTree->Branch("genW"		,  &genW	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+  _outTree->Branch("genWstar"		,  &genWstar	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+  _outTree->Branch("genH"		,  &genH	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+  _outTree->Branch("genB"		,  &genB	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+  _outTree->Branch("genBbar"		,  &genBbar	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+
+  _outTree->Branch("genTop"		,  &genTop	            ,  "bmass/F:bpt/F:beta:bphi/F:bstatus/F:wdau1mass/F:wdau1pt/F:wdau1eta:wdau1phi/F:wdau1id/F:wdau2mass/F:wdau2pt/F:wdau2eta:wdau2phi/F:wdau2id/F");
+  _outTree->Branch("genTbar"		,  &genTbar	            ,  "bmass/F:bpt/F:beta:bphi/F:bstatus/F:wdau1mass/F:wdau1pt/F:wdau1eta:wdau1phi/F:wdau1id/F:wdau2mass/F:wdau2pt/F:wdau2eta:wdau2phi/F:wdau2id/F");
+
+
+
   _outTree->Branch("nhJets"		,  &nhJets	            ,  "nhJets/I");
   _outTree->Branch("nfathFilterJets",   &nfathFilterJets,   "nfathFilterJets/I");
   _outTree->Branch("naJets"		,  &naJets	            ,  "naJets/I");
+
+
 
   _outTree->Branch("hJet_pt",hJets.pt ,"pt[nhJets]/F");
   _outTree->Branch("hJet_eta",hJets.eta ,"eta[nhJets]/F");
@@ -657,6 +745,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("gendrbb"    , &gendrbb      ,  "gendrbb/F");
   _outTree->Branch("genZpt"    , &genZpt      ,  "genZpt/F");
   _outTree->Branch("genWpt"    , &genWpt      ,  "genWpt/F");
+  _outTree->Branch("genHpt"    , &genHpt      ,  "genHpt/F");
   _outTree->Branch("weightTrig"        , &weightTrig          ,  "weightTrig/F");
   _outTree->Branch("weightTrigMay"        , &weightTrigMay          ,  "weightTrigMay/F");
   _outTree->Branch("weightTrigV4"        , &weightTrigV4          ,  "weightTrigV4/F");
@@ -718,6 +807,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("vLepton_genPt",vLeptons.genPt ,"genPt[nvlep]/F");
   _outTree->Branch("vLepton_genEta",vLeptons.genEta ,"genEta[nvlep]");
   _outTree->Branch("vLepton_genPhi",vLeptons.genPhi ,"genPhi[nvlep]/F");
+  _outTree->Branch("vLepton_charge",vLeptons.charge ,"charge[nvlep]/F");
  
   _outTree->Branch("aLepton_mass",aLeptons.mass ,"mass[nalep]/F");
   _outTree->Branch("aLepton_pt",aLeptons.pt ,"pt[nalep]/F");
@@ -740,7 +830,8 @@ int main(int argc, char* argv[])
   _outTree->Branch("aLepton_genPt",aLeptons.genPt ,"genPt[nalep]/F");
   _outTree->Branch("aLepton_genEta",aLeptons.genEta ,"genEta[nalep]");
   _outTree->Branch("aLepton_genPhi",aLeptons.genPhi ,"genPhi[nalep]/F");
- 
+  _outTree->Branch("aLepton_charge",aLeptons.charge ,"charge[nalep]/F");
+
   _outTree->Branch("top"		,  &top	         ,   "mass/F:pt/F:wMass/F");
   _outTree->Branch("WplusMode"		,  &WplusMode	 ,   "WplusMode/I");
   _outTree->Branch("WminusMode"		,  &WminusMode	 ,   "WminusMode/I");
@@ -789,6 +880,17 @@ int main(int argc, char* argv[])
   _outTree->Branch("METnoPU"		,  &METnoPU	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("METnoPUCh"		,  &METnoPUCh	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("MET"		,  &MET	         ,   "et/F:sumet:sig/F:phi/F");
+  _outTree->Branch("METtype1corr"		,  &METtype1corr	         ,   "et/F:sumet:sig/F:phi/F");
+  _outTree->Branch("METtype1p2corr"		,  &METtype1p2corr	         ,   "et/F:sumet:sig/F:phi/F");
+  _outTree->Branch("METnoPUtype1corr"		,  &METnoPUtype1corr	         ,   "et/F:sumet:sig/F:phi/F");
+  _outTree->Branch("METnoPUtype1p2corr"		,  &METnoPUtype1p2corr	         ,   "et/F:sumet:sig/F:phi/F");
+
+  _outTree->Branch("metUnc_et",&metUnc.et ,"et[24]/F");
+  _outTree->Branch("metUnc_phi",&metUnc.phi ,"phi[24]/F");
+  _outTree->Branch("metUnc_sumet",&metUnc.sumet ,"sumet[24]/F");
+
+
+
   _outTree->Branch("fakeMET"		,  &fakeMET	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("MHT"		,  &MHT	         ,   "mht/F:ht:sig/F:phi/F");
   _outTree->Branch("minDeltaPhijetMET"		,  &minDeltaPhijetMET	         ,   "minDeltaPhijetMET/F");
@@ -802,6 +904,9 @@ int main(int argc, char* argv[])
   _outTree->Branch("hbhe"		,  &hbhe	         ,   "hbhe/b");
   _outTree->Branch("totalKinematics"		,  &totalKinematics	         ,   "totalKinematics/b");
   _outTree->Branch("ecalFlag"		,  &ecalFlag	         ,   "ecalFlag/b");
+  _outTree->Branch("cschaloFlag"		,  &cschaloFlag	         ,   "cschaloFlag/b");
+  _outTree->Branch("hcallaserFlag"		,  &hcallaserFlag	         ,   "hcallaserFlag/b");
+  _outTree->Branch("trackingfailureFlag"		,  &trackingfailureFlag	         ,   "trackingfailureFlag/b");
   _outTree->Branch("btag1TSF"		,  &btag1TSF	         ,   "btag1TSF/F");
   _outTree->Branch("btag2TSF"		,  &btag2TSF	         ,   "btag2TSF/F");
   _outTree->Branch("btag1T2CSF"	,  &btag1T2CSF	         ,   "btag1T2CSF/F");
@@ -837,6 +942,11 @@ int main(int argc, char* argv[])
       if(EVENT.run > runMax_ && runMax_ > 0) continue;
 
       count->Fill(1.);
+
+
+
+
+
 
       PUweight=1.;
       PUweight2011B=1.;
@@ -950,8 +1060,16 @@ int main(int argc, char* argv[])
 	//      std::clog << "Filling tree "<< std::endl;
 	bool isW=false;
 
- 
+	// to check how much we gain with jets subtraction 
+
+
+
+	genHpt=aux.mcH.size() > 0 ? aux.mcH[0].p4.Pt():-99;
+
 	if(cand->size() == 0 or cand->at(0).H.jets.size() < 2) continue;
+	//if(cand->size() == 0 ) continue;
+        //std::cout << "cand->size() " << cand->size() << std::endl;
+	//std::cout << "cand->at(0).H.jets.size() " << cand->at(0).H.jets.size() << std::endl;
 	if(cand->size() > 1 ) 
           {
 	    std::cout << "MULTIPLE CANDIDATES: " << cand->size() << std::endl;
@@ -968,27 +1086,37 @@ int main(int argc, char* argv[])
 	fwlite::Handle<std::vector<reco::Vertex> > SVC;
 	SVC.getByLabel(ev,"bcandidates");
 	const std::vector<reco::Vertex> svc = *(SVC.product());
-
+        
 	const VHbbCandidate & vhCand =  cand->at(0);
 	patFilters.setEvent(&ev,"VH");
 	hbhe = patFilters.accept("hbhe");
 	ecalFlag = patFilters.accept("ecalFilter");
 	totalKinematics = patFilters.accept("totalKinematics");
+        cschaloFlag = patFilters.accept("cschaloFilter");   
+        hcallaserFlag = patFilters.accept("hcallaserFilter");   
+        trackingfailureFlag = patFilters.accept("trackingfailureFilter");   
 
 	trigger.setEvent(&ev);
 	for(size_t j=0;j < triggers.size();j++)
           triggerFlags[j]=trigger.accept(triggers[j]);
  
 	eventFlav=0;
+
+
+
 	if(aux.mcBbar.size() > 0 || aux.mcB.size() > 0) eventFlav=5;
 	else if(aux.mcC.size() > 0) eventFlav=4;
-         
+
+
 	Vtype = vhCand.candidateType;
 
 	H.mass = vhCand.H.p4.M();
 	H.pt = vhCand.H.p4.Pt();
+
+
 	H.eta = vhCand.H.p4.Eta();
 	H.phi = vhCand.H.p4.Phi();
+
 
         FatH.FatHiggsFlag = vhCand.FatH.FatHiggsFlag;
         if(vhCand.FatH.FatHiggsFlag){ FatH.mass= vhCand.FatH.p4.M(); 
@@ -1011,6 +1139,8 @@ int main(int argc, char* argv[])
   
         }
 
+
+
 	V.mass = vhCand.V.p4.M();
         if(isW) V.mass = vhCand.Mt(); 
 	V.pt = vhCand.V.p4.Pt();
@@ -1019,6 +1149,8 @@ int main(int argc, char* argv[])
 	nhJets=2;
 	hJets.set(vhCand.H.jets[0],0);
 	hJets.set(vhCand.H.jets[1],1);
+
+
 	aJets.reset();
 	naJets=vhCand.additionalJets.size();
 	numBJets=0;
@@ -1067,6 +1199,8 @@ int main(int argc, char* argv[])
                 fakeMET.sumet = vhCand.V.mets.at(0).sumEt - mu1.Pt() - mu2.Pt();
          }
 
+
+
 	METnoPU.et = iEvent->metNoPU.p4.Pt();
 	METnoPU.phi = iEvent->metNoPU.p4.Phi();
 	METnoPU.sumet = iEvent->metNoPU.sumEt;
@@ -1080,6 +1214,38 @@ int main(int argc, char* argv[])
 	METnoPUCh.phi = iEvent->metCh.p4.Phi();
 	METnoPUCh.sumet = iEvent->metCh.sumEt;
 	METnoPUCh.sig = iEvent->metCh.metSig;
+
+
+	METtype1corr.et = iEvent->pfmetType1corr.p4.Pt();
+	METtype1corr.phi = iEvent->pfmetType1corr.p4.Phi();
+	METtype1corr.sumet = iEvent->pfmetType1corr.sumEt;
+	METtype1corr.sig = iEvent->pfmetType1corr.metSig;
+
+
+	METtype1p2corr.et = iEvent->pfmetType1p2corr.p4.Pt();
+	METtype1p2corr.phi = iEvent->pfmetType1p2corr.p4.Phi();
+	METtype1p2corr.sumet = iEvent->pfmetType1p2corr.sumEt;
+	METtype1p2corr.sig = iEvent->pfmetType1p2corr.metSig;
+
+
+	METnoPUtype1corr.et = iEvent->pfmetNoPUType1corr.p4.Pt();
+	METnoPUtype1corr.phi = iEvent->pfmetNoPUType1corr.p4.Phi();
+	METnoPUtype1corr.sumet = iEvent->pfmetNoPUType1corr.sumEt;
+	METnoPUtype1corr.sig = iEvent->pfmetNoPUType1corr.metSig;
+
+
+	METnoPUtype1p2corr.et = iEvent->pfmetNoPUType1p2corr.p4.Pt();
+	METnoPUtype1p2corr.phi = iEvent->pfmetNoPUType1p2corr.p4.Phi();
+	METnoPUtype1p2corr.sumet = iEvent->pfmetNoPUType1p2corr.sumEt;
+	METnoPUtype1p2corr.sig = iEvent->pfmetNoPUType1p2corr.metSig;
+
+	//	std::cout << " iEvent->metUncInfo.size() " << iEvent->metUncInfo.size() << std::endl;
+	for(size_t m=0;m<iEvent->metUncInfo.size();m++)
+	  { 
+	    metUnc.set(iEvent->metUncInfo[m], m );
+	    //	     std::cout << "metUncInfo[" << m <<" ].et = " << metUnc.et[m] << std::endl; 
+	  }
+
 
         rho = aux.puInfo.rho;
         rho25 = aux.puInfo.rho25;
@@ -1394,8 +1560,152 @@ int main(int argc, char* argv[])
 	//FIXME: too much  warnings... figure out why 
 	//         gendrcc=aux.genCCDeltaR(); 
 	//         gendrbb=aux.genBBDeltaR(); 
+
+
+
 	genZpt=aux.mcZ.size() > 0 ? aux.mcZ[0].p4.Pt():-99;
 	genWpt=aux.mcW.size() > 0 ? aux.mcW[0].p4.Pt():-99;
+
+	// Z* is status=3 and Nmother=2 (q and qbar)  
+	// Z is status=2 and Ndau=2 (mup and mum)  
+        for (unsigned int i=0; i<aux.mcZ.size(); i++){
+	  if (aux.mcZ[i].status==3) {
+	    genZstar.mass = aux.mcZ[i].p4.M();
+	    genZstar.pt = aux.mcZ[i].p4.Pt();
+	    genZstar.eta = aux.mcZ[i].p4.Eta();
+	    genZstar.phi = aux.mcZ[i].p4.Phi();
+	    genZstar.status = aux.mcZ[i].status;
+	    genZstar.charge = aux.mcZ[i].charge;
+	    if (aux.mcZ[i].momid!=-99) genZstar.momid  =  aux.mcZ[i].momid ;
+	  }
+
+
+
+          if (aux.mcZ[i].dauid.size()>1) {
+	    if ( abs(aux.mcZ[i].dauid[0])==13 || abs(aux.mcZ[i].dauid[0])==11 ) {
+	      genZ.mass = aux.mcZ[i].p4.M();
+	      genZ.pt = aux.mcZ[i].p4.Pt();
+	      genZ.eta = aux.mcZ[i].p4.Eta();
+	      genZ.phi = aux.mcZ[i].p4.Phi();
+	      genZ.status = aux.mcZ[i].status;
+	      genZ.charge = aux.mcZ[i].charge;
+	      if ( aux.mcZ[i].momid!=-99) genZ.momid = aux.mcZ[i].momid;
+	  }
+	  }
+	}
+
+
+
+        for (unsigned int i=0; i<aux.mcW.size(); i++){
+          if  ( aux.mcW[i].momid==6 && aux.mcW[i].dauid.size()>1 ){
+            genTop.wdau1mass= aux.mcW[i].dauFourMomentum[0].M();
+            genTop.wdau1pt= aux.mcW[i].dauFourMomentum[0].Pt();
+            genTop.wdau1eta= aux.mcW[i].dauFourMomentum[0].Eta();
+            genTop.wdau1phi= aux.mcW[i].dauFourMomentum[0].Phi();
+            genTop.wdau1id= aux.mcW[i].dauid[0];
+
+            genTop.wdau2mass= aux.mcW[i].dauFourMomentum[1].M();
+            genTop.wdau2pt= aux.mcW[i].dauFourMomentum[1].Pt();
+            genTop.wdau2eta= aux.mcW[i].dauFourMomentum[1].Eta();
+            genTop.wdau2phi= aux.mcW[i].dauFourMomentum[1].Phi();
+            genTop.wdau2id= aux.mcW[i].dauid[1];
+
+	  }
+
+
+          if  ( aux.mcW[i].momid==-6 && aux.mcW[i].dauid.size()>1 ){
+            genTbar.wdau1mass= aux.mcW[i].dauFourMomentum[0].M();
+            genTbar.wdau1pt= aux.mcW[i].dauFourMomentum[0].Pt();
+            genTbar.wdau1eta= aux.mcW[i].dauFourMomentum[0].Eta();
+            genTbar.wdau1phi= aux.mcW[i].dauFourMomentum[0].Phi();
+            genTbar.wdau1id= aux.mcW[i].dauid[0];
+
+            genTbar.wdau2mass= aux.mcW[i].dauFourMomentum[1].M();
+            genTbar.wdau2pt= aux.mcW[i].dauFourMomentum[1].Pt();
+            genTbar.wdau2eta= aux.mcW[i].dauFourMomentum[1].Eta();
+            genTbar.wdau2phi= aux.mcW[i].dauFourMomentum[1].Phi();
+            genTbar.wdau2id= aux.mcW[i].dauid[1];
+
+	  }
+
+	  if (aux.mcW[i].status==3 ) {
+	    genWstar.mass = aux.mcW[i].p4.M();
+	    genWstar.pt = aux.mcW[i].p4.Pt();
+	    genWstar.eta = aux.mcW[i].p4.Eta();
+	    genWstar.phi = aux.mcW[i].p4.Phi();
+	    genWstar.status = aux.mcW[i].status;
+	    genWstar.charge = aux.mcW[i].charge;
+	    if ( aux.mcW[i].momid!=-99) genWstar.momid =  aux.mcW[i].momid;
+	  }
+	  if (aux.mcW[i].dauid.size()>1 && (abs(aux.mcW[i].dauid[0])==13 || abs(aux.mcW[i].dauid[0])==11 )) {
+	    genW.mass = aux.mcW[i].p4.M();
+	    genW.pt = aux.mcW[i].p4.Pt();
+	    genW.eta = aux.mcW[i].p4.Eta();
+	    genW.phi = aux.mcW[i].p4.Phi();
+	    genW.status = aux.mcW[i].status;
+	    genW.charge = aux.mcW[i].charge;
+	    if (aux.mcW[i].momid!=-99) genW.momid =  aux.mcW[i].momid;
+	  }
+	}
+	// b coming from Higgs
+	for (unsigned int i=0; i<aux.mcB.size(); i++){
+	  if (abs(aux.mcB[i].momid)!=5) {
+	    genB.mass = aux.mcB[i].p4.M();
+	    genB.pt = aux.mcB[i].p4.Pt();
+	    genB.eta = aux.mcB[i].p4.Eta();
+	    genB.phi = aux.mcB[i].p4.Phi();
+	    genB.status = aux.mcB[i].status;
+	    genB.charge = aux.mcB[i].charge;
+	    if (aux.mcB[i].momid!=-99) genB.momid = aux.mcB[i].momid;
+	  }
+
+          if  ( aux.mcB[i].momid==6 ){
+	    genTop.bmass = aux.mcB[i].p4.M();
+	    genTop.bpt = aux.mcB[i].p4.Pt();
+	    genTop.beta = aux.mcB[i].p4.Eta();
+	    genTop.bphi = aux.mcB[i].p4.Phi();
+	    genTop.bstatus = aux.mcB[i].status;
+            
+	  }
+	}
+	
+	for (unsigned int i=0; i<aux.mcBbar.size(); i++){
+	  if (abs(aux.mcBbar[i].momid)!=5 ) {
+	    genBbar.mass = aux.mcBbar[i].p4.M();
+	    genBbar.pt = aux.mcBbar[i].p4.Pt();
+	    genBbar.eta = aux.mcBbar[i].p4.Eta();
+	    genBbar.phi = aux.mcBbar[i].p4.Phi();
+	    genBbar.status = aux.mcBbar[i].status;
+	    if (aux.mcBbar[i].momid!=-99) genBbar.momid =  aux.mcBbar[i].momid;
+	  }
+          if  ( aux.mcBbar[i].momid==-6 ){
+	    genTbar.bmass = aux.mcBbar[i].p4.M();
+	    genTbar.bpt = aux.mcBbar[i].p4.Pt();
+	    genTbar.beta = aux.mcBbar[i].p4.Eta();
+	    genTbar.bphi = aux.mcBbar[i].p4.Phi();
+	    genTbar.bstatus = aux.mcBbar[i].status;
+
+            
+	  }
+
+	}
+
+
+
+
+	if (aux.mcH.size()>0) {
+	  genH.mass = aux.mcH[0].p4.M();
+	  genH.pt = aux.mcH[0].p4.Pt();
+	  genH.eta = aux.mcH[0].p4.Eta();
+	  genH.phi = aux.mcH[0].p4.Phi();
+	  genH.status = aux.mcH[0].status;
+	  genH.charge = aux.mcH[0].charge;
+	  if (aux.mcH[0].momid!=-99) genH.momid =  aux.mcH[0].momid;
+	}
+
+
+
+
         WminusMode=-99;
         WplusMode=-99;
         for(unsigned int j=0; j< aux.mcW.size();j++)
@@ -1465,7 +1775,7 @@ int main(int argc, char* argv[])
 
 	_outTree->Fill();
 
-      }// closed event loop
+	}// closed event loop
 
     std::cout << "closing the file: " << inputFiles_[iFile] << std::endl;
     inFile->Close();

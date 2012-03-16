@@ -173,12 +173,17 @@ class VHbbEvent{
   std::vector<SimpleJet> filterJets; //???
   std::vector<HardJet> hardJets;
   
- METInfo calomet;
+  METInfo calomet;
   METInfo tcmet;
   METInfo pfmet;
+  METInfo pfmetType1corr;
+  METInfo pfmetType1p2corr;
+  METInfo pfmetNoPUType1corr;
+  METInfo pfmetNoPUType1p2corr;
   METInfo mht;
   METInfo metNoPU;
   METInfo metCh;
+  std::vector<METInfo> metUncInfo;
 
   std::vector<MuonInfo> muInfo;
   std::vector<ElectronInfo> eleInfo;

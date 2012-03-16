@@ -17,6 +17,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
+
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
@@ -34,11 +35,7 @@ process.source = cms.Source("PoolSource",
 
 #"rfio:/castor/cern.ch/user/d/degrutto/test/DYJetsToLL_PtZ-100.root",
 
-#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/32CECED6-BFAD-E011-B08D-00261834B5A4.root',
-#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/3EE916B3-C4AD-E011-9159-90E6BA0D09B0.root',
-#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/42622800-C1AD-E011-AD65-485B39800BF2.root',
-#		"/store/mc/CMSSW_4_2_3/RelValProdTTbar/GEN-SIM-RECO/MC_42_V12_JobRobot-v1/0000/B89A0B07-818C-E011-953E-0030487CD7E0.root"
-#	"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat//store/mc/Summer11/BdToMuMu_2MuPtFilter_7TeV-pythia6-evtgen//GEN-SIM-RECO//PU_S4_START42_V11-v1///0000//92DE42C9-CD8C-E011-A421-001F296B758E.root"
+
 ),
 )
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -86,6 +83,8 @@ process.out1 = cms.OutputModule(
 	"keep *_HLTQuadJet40_*_*",
 	"keep *_HLTDoubleMu7_*_*",
 	"keep *_EcalDeadCellEventFilter_*_*",
+	"keep *_patType1CorrectedPFMet*_*_*",
+ 	"keep *_patType1p2CorrectedPFMet*_*_*"
 
 	),
     dropMetaData = cms.untracked.string('ALL'),
@@ -107,8 +106,24 @@ from PhysicsTools.PatAlgos.patEventContent_cff import patEventContentNoCleaning
 process.load("CommonTools.ParticleFlow.PF2PAT_EventContent_cff")
 process.out.outputCommands.extend(process.PATEventContent.outputCommands)
 
+
+### BEGIN of filters required by JETMET for  MET analysis
 # HB + HE noise filtering
 process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
+# ecal filter
+process.load('JetMETAnalysis.ecalDeadCellTools.EcalDeadCellEventFilter_cfi') ## still not in the release
+# CSC beam halo....
+process.load('RecoMET.METAnalyzers.CSCHaloFilter_cfi')
+# HCAL laser filter
+process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
+# tracking failurefilter
+process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
+process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
+process.trackingFailureFilter.JetSource = cms.InputTag('ak5PFJetsL2L3Residual')
+process.trackingFailureFilter.VertexSource = cms.InputTag('goodOfflinePrimaryVertices')
+### END of filters required by JETMET for  MET analysis
+
+
 
 # load the standard PAT config
 process.load("PhysicsTools.PatAlgos.patSequences_cff")
@@ -695,9 +710,74 @@ process.pfNoPileUpCharge  = cms.EDFilter(
 process.pfMETNoPUCharge = process.pfMET.clone()
 process.pfMETNoPUCharge.src=cms.InputTag("pfNoPileUpCharge")
 
-#
-# now build a mET out of it
-#
+
+# type 1 +2 MET corrected
+#process.load("PhysicsTools.PatUtils.patPFMETCorrections_cff")
+from PhysicsTools.PatUtils.patPFMETCorrections_cff import *
+process.patPFMet = patPFMet
+process.pfCandsNotInJet = pfCandsNotInJet
+
+
+process.selectedPatJetsForMETtype1p2Corr = selectedPatJetsForMETtype1p2Corr
+process.selectedPatJetsForMETtype1p2Corr.src = cms.InputTag('selectedPatJetsAK5PF')
+process.selectedPatJetsForMETtype2Corr = selectedPatJetsForMETtype2Corr
+process.selectedPatJetsForMETtype2Corr.src = cms.InputTag('selectedPatJetsAK5PF')
+process.patPFJetMETtype1p2Corr = patPFJetMETtype1p2Corr
+process.patPFJetMETtype1p2Corr.type1JetPtThreshold = cms.double(10.0)
+process.patPFJetMETtype1p2Corr.skipEM = cms.bool(False)
+process.patPFJetMETtype1p2Corr.skipMuons = cms.bool(False)
+if isMC == False :
+	process.patPFJetMETtype1p2Corr.jetCorrLabel = cms.string("L2L3Residual")
+ 	process.patPFMet.addGenMET = cms.bool(False)
+process.patPFJetMETtype2Corr= patPFJetMETtype2Corr
+process.pfCandMETcorr = pfCandMETcorr
+process.patType1CorrectedPFMet = patType1CorrectedPFMet
+process.patType1p2CorrectedPFMet = patType1p2CorrectedPFMet
+
+
+
+
+#--------------------------------------------------------------------------------
+# define sequence to run all modules
+process.producePatPFMETCorrections = cms.Sequence(
+    process.patPFMet
+   * process.kt6PFJets
+   * process.ak5PFJets
+   * process.pfCandsNotInJet
+   * process.selectedPatJetsForMETtype1p2Corr
+   * process.selectedPatJetsForMETtype2Corr 
+   * process.patPFJetMETtype1p2Corr
+   * process.patPFJetMETtype2Corr
+   * process.pfCandMETcorr 
+   * process.patType1CorrectedPFMet
+   * process.patType1p2CorrectedPFMet
+   
+ 
+    
+)
+#--------------------------------------------------------------------------------
+
+from PhysicsTools.PatUtils.tools.metUncertaintyTools import runMEtUncertainties
+
+runMEtUncertainties(process, 'selectedPatElectrons', '', 'selectedPatMuons', 'selectedPatTaus' , 'selectedPatJetsAK5PF') 
+
+
+### build type1/2 correction also on top of pfMETnoPU
+process.patType1CorrectedPFMetNoPU = process.patType1CorrectedPFMet.clone()
+from PhysicsTools.PatAlgos.producersLayer1.metProducer_cfi import patMETs
+process.patPFMetNoPU = patMETs.clone(
+    metSource = cms.InputTag('pfMETNoPU'),
+    addMuonCorrections = cms.bool(False),
+    genMETSource = cms.InputTag('genMetTrue')
+)
+
+#process.patPFMetNoPU = process.patMets.clone()
+#process.patPFMetNoPU.metSource = cms.InputTag('pfMETNoPU'),
+process.patType1CorrectedPFMetNoPU.src = cms.InputTag('patPFMetNoPU')
+process.patType1p2CorrectedPFMetNoPU = process.patType1p2CorrectedPFMet.clone()
+process.patType1p2CorrectedPFMetNoPU.src = cms.InputTag('patPFMetNoPU')
+from PhysicsTools.PatUtils.tools.metUncertaintyTools import runMEtUncertainties
+
 
 process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
@@ -785,8 +865,8 @@ process.HLTDoubleMu7 = cms.EDProducer("HLTInfoDumperGeneral",
     cms.InputTag('hltDiMuonL3PreFiltered7', '', 'HLT')
   )
 )
-# ecal filter
-process.load('JetMETAnalysis.ecalDeadCellTools.EcalDeadCellEventFilter_cfi') ## still not in the release
+
+
 
 
 
@@ -835,6 +915,9 @@ if isMC == False :
 		     process.pfMETNoPU*
 		     process.pfNoPileUpCharge*
        		     process.pfMETNoPUCharge*
+		      process.patPFMetNoPU *
+		    process.patType1CorrectedPFMetNoPU *
+		    process.patType1p2CorrectedPFMetNoPU *
                      process.leptonTrigMatch*
                      process.inclusiveVertexing*
                      process.inclusiveMergedVertices*process.selectedVertices*
@@ -876,6 +959,9 @@ else :
 		     process.pfMETNoPU*
 		     process.pfNoPileUpCharge*
        		     process.pfMETNoPUCharge*
+		  process.patPFMetNoPU *
+		    process.patType1CorrectedPFMetNoPU *
+		    process.patType1p2CorrectedPFMetNoPU *
 #		     process.dump*
                      process.leptonTrigMatch*
                      process.inclusiveVertexing*
@@ -886,8 +972,14 @@ else :
 #process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
                      )
 
+
+### begin of  filters required by JETMET for  MET analysis
 process.hbhepath = cms.Path(process.HBHENoiseFilter)
 process.ecalFilter = cms.Path(process.EcalDeadCellEventFilter)
+process.cschaloFilter = cms.Path(process.CSCTightHaloFilter)
+process.hcallaserFilter=cms.Path(process.hcalLaserEventFilter)
+process.trackingfailureFilter = cms.Path( process.goodOfflinePrimaryVertices*process.ak5PFJetsL2L3Residual*process.trackingFailureFilter)
+### end of  filters required by JETMET for  MET analysis
 
 process.load('GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi');
 process.totalKinematics=cms.Path(process.totalKinematicsFilter)
@@ -904,9 +996,9 @@ process.options = cms.untracked.PSet(
 process.e = cms.EndPath(process.out1)
 
 if isMC == False :
- process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.ecalFilter,process.e)
+ process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.ecalFilter, process.cschaloFilter, process.hcallaserFilter, process.trackingfailureFilter, process.e)
 else :
- process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.ecalFilter,process.totalKinematics,process.e)
+ process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.ecalFilter,process.cschaloFilter, process.hcallaserFilter, process.trackingfailureFilter, process.totalKinematics,process.e)
 
 
 #
