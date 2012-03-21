@@ -7,8 +7,8 @@ process = cms.Process("FWLitePlots")
 #fileNames   = cms.vstring('file:2l2bMetEdmNtuples.root'),         ## mandatory
 process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(
-"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/arizzi/WH_WToLNu_HToBB_M-110_7TeV-powheg-herwigpp/HBB_EDMNtupleV11_ProcV1/68dcc5b95bb3c453e1bd27a02f6327b5//PAT.edm_1_3_00h.root",
-###/gpfs/gpfsddn/cms/user/arizzi/Hbb/V9/CMSSW_4_2_8_patch3/src/VHbbAnalysis/HbbAnalyzer/test/PAT.edm.root"
+"../../HbbAnalyzer/test/PAT.edm.root"
+
 
 ),
 
@@ -103,7 +103,7 @@ process.Analyzer = cms.PSet(
     jetPtThresholdW = cms.double(20),
     bJetCountThreshold = cms.double(0.898),
     useHighestPtHiggsW = cms.bool(True),
-    useHighestPtHiggsZ = cms.bool(False),
+    useHighestPtHiggsZ = cms.bool(True),
     idMuFileName = cms.string("ScaleEffs42.root"),
     hltMuFileName = cms.string("ScaleFactor_muonEffsOnlyIsoToHLT2.2fb_efficiency.root"),
 
