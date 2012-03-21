@@ -17,7 +17,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
@@ -29,6 +29,7 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 # source
 process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
+#	"file:/uscms/home/sethzenz/nobackup/9ECB2776-81AD-E011-8B94-E0CB4E19F972.root"
 "file:/data/uftrig01b/jhugon/kinFitter/filesFall11/ttbarTestSampleEDM5k.root" 
 #"file:DYJetsToLL_PtZ-100.root",
 #"file:Summer11_ZH_ZToLL_HToBB_M-115_7TeV-powheg_1.root",
@@ -169,6 +170,9 @@ process.patJets.addTagInfos  = True
 process.load('CommonTools.ParticleFlow.PF2PAT_cff')
 from PhysicsTools.PatAlgos.tools.pfTools import *
 usePF2PAT(process,runPF2PAT=True,jetAlgo='AK5',runOnMC=isMC,postfix='')
+
+#### Taus ####
+process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
 
 from PhysicsTools.PatAlgos.tools.tauTools import *
 switchToPFTauHPS(process)
@@ -900,6 +904,7 @@ if isMC == False :
         process.p = cms.Path(
                     process.goodOfflinePrimaryVertices*
                      process.PF2PAT*
+		    process.PFTau* # re-run PFTau sequence as per tau POG recommendation
 		    process.pfCandsForIsolationSequence *
 		     process.muonPFIsolationSequence *
 		     process.electronPFIsolationSequence *
@@ -945,6 +950,7 @@ else :
                      process.genParticlesForJets*
                      process.ak5GenJets*
                      process.PF2PAT*
+		process.PFTau* # re-run PFTau sequence as per tau POG recommendation
 		    process.pfCandsForIsolationSequence *
 		     process.muonPFIsolationSequence *
 		     process.electronPFIsolationSequence *

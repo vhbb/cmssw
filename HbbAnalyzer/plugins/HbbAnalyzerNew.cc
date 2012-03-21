@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.61 2012/02/23 19:52:35 degrutto Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.62 2012/03/16 09:12:46 degrutto Exp $
 //
 //
 
@@ -1493,54 +1493,58 @@ BTagSFContainer btagSFs;
     Geom::Phi<double> deltaphi(tau->phi()-atan2(hbbInfo->pfmet.p4.Py(),hbbInfo->pfmet.p4.Px()));
     double acop = deltaphi.value();
     tf.acop=acop;
-    if (tau->isTauIDAvailable("againstElectronLoose")) tf.idagainstElectronLoose=tau->tauID("againstElectronLoose");
-    if (tau->isTauIDAvailable("againstElectronMedium")) tf.idagainstElectronMedium=tau->tauID("againstElectronMedium");
-    if (tau->isTauIDAvailable("againstElectronTight")) tf.idagainstElectronTight=tau->tauID("againstElectronTight");
-    if (tau->isTauIDAvailable("againstMuonLoose")) tf.idagainstMuonLoose=tau->tauID("againstMuonLoose");
-    if (tau->isTauIDAvailable("againstMuonTight")) tf.idagainstMuonTight=tau->tauID("againstMuonTight");
-    if (tau->isTauIDAvailable("byLooseIsolation")) tf.idbyLooseIsolation=tau->tauID("byLooseIsolation");
-    if (tau->isTauIDAvailable("byMediumIsolation")) tf.idbyMediumIsolation=tau->tauID("byMediumIsolation");
-    if (tau->isTauIDAvailable("byTightIsolation")) tf.idbyTightIsolation=tau->tauID("byTightIsolation");
-    if (tau->isTauIDAvailable("byVLooseIsolation")) tf.idbyVLooseIsolation=tau->tauID("byVLooseIsolation");
-    if (tau->isTauIDAvailable("decayModeFinding")) tf.iddecayModeFinding=tau->tauID("decayModeFinding");
-    if (tau->isTauIDAvailable("byIsolation")) tf.idbyIso=tau->tauID("byIsolation");
-    if (tau->isTauIDAvailable("trackIsolation")) tf.idbyTrackIso=tau->tauID("trackIsolation");
-    if (tau->isTauIDAvailable("byTaNCfrOnePercent")) tf.idbyTaNCfrOnePercent=tau->tauID("byTaNCfrOnePercent");
-    if (tau->isTauIDAvailable("byTaNCfrHalfPercent")) tf.idbyTaNCfrHalfPercent=tau->tauID("byTaNCfrHalfPercent");
-    if (tau->isTauIDAvailable("byTaNCfrQuarterPercent")) tf.idbyTaNCfrQuarterPercent=tau->tauID("byTaNCfrQuarterPercent");
-    if (tau->isTauIDAvailable("byTaNCfrTenthPercent")) tf.idbyTaNCfrTenthPercent=tau->tauID("byTaNCfrTenthPercent");
-    if (tau->isTauIDAvailable("byTaNC")) tf.idbyTaNC=tau->tauID("byTaNC");
+    if (tau->isTauIDAvailable("againstElectronLoose")) tf.againstElectronLoose=tau->tauID("againstElectronLoose");
+    if (tau->isTauIDAvailable("againstElectronMedium")) tf.againstElectronMedium=tau->tauID("againstElectronMedium");
+    if (tau->isTauIDAvailable("againstElectronTight")) tf.againstElectronTight=tau->tauID("againstElectronTight");
+    if (tau->isTauIDAvailable("againstMuonLoose")) tf.againstMuonLoose=tau->tauID("againstMuonLoose");
+    if (tau->isTauIDAvailable("againstMuonTight")) tf.againstMuonTight=tau->tauID("againstMuonTight");
+    if (tau->isTauIDAvailable("byLooseIsolation")) tf.byLooseIsolation=tau->tauID("byLooseIsolation");
+    if (tau->isTauIDAvailable("byMediumIsolation")) tf.byMediumIsolation=tau->tauID("byMediumIsolation");
+    if (tau->isTauIDAvailable("byTightIsolation")) tf.byTightIsolation=tau->tauID("byTightIsolation");
+    if (tau->isTauIDAvailable("byVLooseIsolation")) tf.byVLooseIsolation=tau->tauID("byVLooseIsolation");
+    if (tau->isTauIDAvailable("decayModeFinding")) tf.decayModeFinding=tau->tauID("decayModeFinding");
+    if (tau->isTauIDAvailable("byIsolation")) tf.byIsolation=tau->tauID("byIsolation");
+    if (tau->isTauIDAvailable("trackIsolation")) tf.trackIsolation=tau->tauID("trackIsolation");
+    if (tau->isTauIDAvailable("byTaNCfrOnePercent")) tf.byTaNCfrOnePercent=tau->tauID("byTaNCfrOnePercent");
+    if (tau->isTauIDAvailable("byTaNCfrHalfPercent")) tf.byTaNCfrHalfPercent=tau->tauID("byTaNCfrHalfPercent");
+    if (tau->isTauIDAvailable("byTaNCfrQuarterPercent")) tf.byTaNCfrQuarterPercent=tau->tauID("byTaNCfrQuarterPercent");
+    if (tau->isTauIDAvailable("byTaNCfrTenthPercent")) tf.byTaNCfrTenthPercent=tau->tauID("byTaNCfrTenthPercent");
+    if (tau->isTauIDAvailable("byTaNC")) tf.byTaNC=tau->tauID("byTaNC");
+    if (tau->isTauIDAvailable("byLooseCombinedIsolationDeltaBetaCorr")) tf.byLooseCombinedIsolationDeltaBetaCorr=tau->tauID("byLooseCombinedIsolationDeltaBetaCorr");
+    if (tau->isTauIDAvailable("againstElectronMVA")) tf.againstElectronMVA=tau->tauID("againstElectronMVA");
     if (tau->isPFTau()) {
       tf.isolationPFChargedHadrCandsPtSum = tau->isolationPFChargedHadrCandsPtSum();
       tf.isolationPFGammaCandsEtSum = tau->isolationPFGammaCandsEtSum();
-      if (tau->leadPFChargedHadrCand().isAvailable()) tf.leadPFChargedHadrCandPt = tau->leadPFChargedHadrCand()->pt(); 
+      if (tau->leadPFChargedHadrCand().isAvailable()) tf.leadPFChargedHadrCandPt = tau->leadPFChargedHadrCand()->pt();
       tf.NsignalPFChargedHadrCands = tau->signalPFChargedHadrCands().size();
       tf.NsignalPFGammaCands = tau->signalPFGammaCands().size();
     }
     hbbInfo->tauInfo.push_back(tf);
     if (verbose_) {
-      std::cout << "SCZ DEBUG: againstElectronLoose is " << tf.idagainstElectronLoose << std::endl;
-      std::cout << "SCZ DEBUG: againstElectronMedium is " << tf.idagainstElectronMedium << std::endl;
-      std::cout << "SCZ DEBUG: againstElectronTight is " << tf.idagainstElectronTight << std::endl;
-      std::cout << "SCZ DEBUG: againstMuonLoose is " << tf.idagainstMuonLoose << std::endl;
-      std::cout << "SCZ DEBUG: againstMuonTight is " << tf.idagainstMuonTight << std::endl;
-      std::cout << "SCZ DEBUG: byLooseIsolation is " << tf.idbyLooseIsolation << std::endl;
-      std::cout << "SCZ DEBUG: byMediumIsolation is " << tf.idbyMediumIsolation << std::endl;
-      std::cout << "SCZ DEBUG: byTightIsolation is " << tf.idbyTightIsolation << std::endl;
-      std::cout << "SCZ DEBUG: byVLooseIsolation is " << tf.idbyVLooseIsolation << std::endl;
-      std::cout << "SCZ DEBUG: decayModeFinding is " << tf.iddecayModeFinding << std::endl;
-      std::cout << "SCZ DEBUG: byIsolation is " << tf.idbyIso<< std::endl;
-      std::cout << "SCZ DEBUG: trackIsolation is " << tf.idbyTrackIso << std::endl;
-      std::cout << "SCZ DEBUG: byTaNCfrOnePercent is " << tf.idbyTaNCfrOnePercent << std::endl;
-      std::cout << "SCZ DEBUG: byTaNCfrHalfPercent is " << tf.idbyTaNCfrHalfPercent << std::endl;
-      std::cout << "SCZ DEBUG: byTaNCfrQuarterPercent is " << tf.idbyTaNCfrQuarterPercent << std::endl;
-      std::cout << "SCZ DEBUG: byTaNCfrTenthPercent is " << tf.idbyTaNCfrTenthPercent << std::endl;
-      std::cout << "SCZ DEBUG: byTaNC is " << tf.idbyTaNC << std::endl;
+      std::cout << "SCZ DEBUG: againstElectronLoose is " << tf.againstElectronLoose << std::endl;
+      std::cout << "SCZ DEBUG: againstElectronMedium is " << tf.againstElectronMedium << std::endl;
+      std::cout << "SCZ DEBUG: againstElectronTight is " << tf.againstElectronTight << std::endl;
+      std::cout << "SCZ DEBUG: againstMuonLoose is " << tf.againstMuonLoose << std::endl;
+      std::cout << "SCZ DEBUG: againstMuonTight is " << tf.againstMuonTight << std::endl;
+      std::cout << "SCZ DEBUG: byLooseIsolation is " << tf.byLooseIsolation << std::endl;
+      std::cout << "SCZ DEBUG: byMediumIsolation is " << tf.byMediumIsolation << std::endl;
+      std::cout << "SCZ DEBUG: byTightIsolation is " << tf.byTightIsolation << std::endl;
+      std::cout << "SCZ DEBUG: byVLooseIsolation is " << tf.byVLooseIsolation << std::endl;
+      std::cout << "SCZ DEBUG: decayModeFinding is " << tf.decayModeFinding << std::endl;
+      std::cout << "SCZ DEBUG: byIsolation is " << tf.byIsolation<< std::endl;
+      std::cout << "SCZ DEBUG: trackIsolation is " << tf.trackIsolation << std::endl;
+      std::cout << "SCZ DEBUG: byTaNCfrOnePercent is " << tf.byTaNCfrOnePercent << std::endl;
+      std::cout << "SCZ DEBUG: byTaNCfrHalfPercent is " << tf.byTaNCfrHalfPercent << std::endl;
+      std::cout << "SCZ DEBUG: byTaNCfrQuarterPercent is " << tf.byTaNCfrQuarterPercent << std::endl;
+      std::cout << "SCZ DEBUG: byTaNCfrTenthPercent is " << tf.byTaNCfrTenthPercent << std::endl;
+      std::cout << "SCZ DEBUG: byTaNC is " << tf.byTaNC << std::endl;
       std::cout << "SCZ DEBUG: isolationPFChargedHadrCandsPtSum is " << tf.isolationPFChargedHadrCandsPtSum << std::endl;
       std::cout << "SCZ DEBUG: isolationPFGammaCandsEtSum is " << tf.isolationPFGammaCandsEtSum << std::endl;
       std::cout << "SCZ DEBUG: isolationPFGammaCandsEtSum is " << tf.leadPFChargedHadrCandPt << std::endl;
       std::cout << "SCZ DEBUG: NsignalPFChargedHadrCands is " << tf.NsignalPFChargedHadrCands << std::endl;
       std::cout << "SCZ DEBUG: NsignalPFGammaCands is " << tf.NsignalPFGammaCands << std::endl;
+      std::cout << "SCZ DEBUG: byLooseCombinedIsolationDeltaBetaCorr is " << tf.byLooseCombinedIsolationDeltaBetaCorr << std::endl;
+      std::cout << "SCZ DEBUG: againstElectronMVA is " << tf.againstElectronMVA << std::endl;
     }
   }
 

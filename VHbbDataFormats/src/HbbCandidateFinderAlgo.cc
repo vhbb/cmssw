@@ -94,6 +94,9 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   std::vector<VHbbEvent::ElectronInfo> ele;
   std::vector<unsigned int> elePos;
   findElectrons(event->eleInfo,ele, elePos);
+  std::vector<VHbbEvent::TauInfo> tau;
+  std::vector<unsigned int> tauPos;
+  findTaus(event->tauInfo,tau, tauPos);
   
   std::vector<VHbbEvent::METInfo> met;
   findMET(event->pfmet, met);
@@ -101,9 +104,10 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   if (verbose_){
     std::cout <<" Electrons: "<< ele.size()<<std::endl;
     std::cout <<" Muons    : "<< mu.size()<<std::endl;
+    std::cout <<" Taus    : "<< tau.size()<<std::endl;
     std::cout <<" MET      : "<< met.size()<<std::endl;
   }
-  if (ele.size()<1 && mu.size() < 1 && met.size()<1) return;
+  if (ele.size()<1 && mu.size() < 1 && met.size()<1 && tau.size()<1) return;
 
   //
   // fill!
@@ -127,10 +131,16 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   temp.FatH.jets.push_back(subJetsout[1]);temp.FatH.jets.push_back(subJetsout[2]);}
   }
 
+  std::vector<VHbbEvent::TauInfo> tauNoCandidateJetOverlap;
+  std::vector<unsigned int> tauPosNoCandidateJetOverlap;
+  removeTauOverlapWithJets(tau,temp.H.jets,tauNoCandidateJetOverlap,tauPos,tauPosNoCandidateJetOverlap);
+
+
   temp.additionalJets = addJets;
   temp.V.mets = met;
   temp.V.muons = mu;
   temp.V.electrons = ele;
+  temp.V.taus = tauNoCandidateJetOverlap;
   
   //
   // now see which kind of andidate this can be
@@ -173,6 +183,21 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
     result.setCandidateType(VHbbCandidate::Wen);
     candidates.push_back(result);
   }
+  // New tau categorizations currently commented out
+  /*
+  result = selector.getHWtaunCandidate(temp,ok,tauPosNoCandidateJetOverlap);
+  if ( ok == true ){
+    if (verbose_) std::cout << "We have a taun candidate" << std::endl;
+    result.setCandidateType(VHbbCandidate::Wtaun);
+    candidates.push_back(result);
+  }
+  result = selector.getHZtaumuCandidate(temp,ok,muPos,tauPosNoCandidateJetOverlap);
+  if ( ok == true ){
+    if (verbose_) std::cout << "We have a HZtaumu candidate" << std::endl;
+    result.setCandidateType(VHbbCandidate::Ztaumu);
+    candidates.push_back(result);
+  }
+  */
 
   if (candidates.size()!=0 ) return;
 
@@ -447,6 +472,63 @@ bool HbbCandidateFinderAlgo::findFatJet (const std::vector<VHbbEvent::HardJet>& 
 
   
   return true;
+}
+
+
+void HbbCandidateFinderAlgo::removeTauOverlapWithJets(const std::vector<VHbbEvent::TauInfo>& taus, const std::vector<VHbbEvent::SimpleJet>& jets, std::vector<VHbbEvent::TauInfo>& out, const std::vector<unsigned int>& oldPositions,std::vector<unsigned int>& positions) {
+  for (unsigned int it = 0; it < taus.size();  ++it){
+    bool overlap = false;
+    for (unsigned int jit = 0 ; jit < jets.size() ; ++jit) {
+      if (taus[it].p4.DeltaR(jets[jit].p4) < 0.2) {
+	overlap = true;
+	if (verbose_) {
+	  std::cout << "Found overlap of tau (pt,eta,phi)=(" << taus[it].p4.Pt() <<","<< taus[it].p4.Eta() <<","<< taus[it].p4.Phi() << ")"
+		    << "with candidate jet (pt,eta,phi)=(" << jets[jit].p4.Pt() <<","<< jets[jit].p4.Eta() <<","<< jets[jit].p4.Phi() << ")"
+		    << std::endl;
+	}
+      }
+    }
+    if (!overlap) {
+      if (verbose_) {
+	std::cout << "No overlap with tau (pt,eta,phi)=(" << taus[it].p4.Pt() <<","<< taus[it].p4.Eta() <<","<< taus[it].p4.Phi() << "); keeping it " << std::endl;
+      }
+      out.push_back(taus[it]);
+	             positions.push_back(oldPositions[it]);
+    }
+  }
+}
+ 
+void HbbCandidateFinderAlgo::findTaus(const std::vector<VHbbEvent::TauInfo>& taus, std::vector<VHbbEvent::TauInfo>& out, std::vector<unsigned int>& positions){
+  if (verbose_) std::cout << "[SCZ] Tau size=" << taus.size() << std::endl;
+  for (unsigned int it = 0; it < taus.size();  ++it){
+    /*
+      myPatTau.tauID("decayModeFinding"); // cuts on tau invariant mass, etc
+      myPatTau.tauID("byLooseCombinedIsolationDeltaBetaCorr") // isolated
+      taus, corrected for PU use DB technique
+      myPatTau.tauID("againstMuonTight");  // remove muons faking hadronic taus
+      myPatTau.tauID("againstElectronLoose/againstElectronMedium/againstElectronMVA");
+      // remove electrons faking hadronic taus, choose based on your fake - e background.
+      */
+ 
+    if (verbose_) {
+      std::cout << "(pt,decayModeFinding,byLooseCombinedIsolationDeltaBetaCorr,againstMuonTight,againstElectronLoose,againstElectronMedium,againstElectronMVA)=("
+		<< taus[it].p4.Pt() << ","
+		<< (taus[it].decayModeFinding>0.5) << ","
+		<< (taus[it].byLooseCombinedIsolationDeltaBetaCorr>0.5) << ","
+		<< (taus[it].againstMuonTight>0.5) << ","
+		<< (taus[it].againstElectronLoose>0.5) <<","
+		<< (taus[it].againstElectronMedium>0.5) <<","
+		<< (taus[it].againstElectronMVA>0.5) << ")" << std::endl;
+    }
+    
+    if (taus[it].decayModeFinding>0.5&&taus[it].byLooseCombinedIsolationDeltaBetaCorr>0.5&&taus[it].againstMuonTight>0.5&&taus[it].againstElectronLoose>0.5&&taus[it].p4.Pt()>20.) {
+      out.push_back(taus[it]);
+      positions.push_back(it);
+    }
+  }
+  if (verbose_){
+    std::cout <<" CandidateFinder: Input Taus = "<<taus.size()<<" Output Taus = "<<out.size()<<std::endl;
+  }
 }
 
 

@@ -34,7 +34,48 @@ class VHbbCandidateTools {
   }
   
   
-  
+  VHbbCandidate getHZtaumuCandidate(const VHbbCandidate & in, bool & ok, std::vector<unsigned int>& muPos, std::vector<unsigned int>& tauPos){
+    if (verbose_) std::cout <<" getHZtaumuCandidate input mu "<<in.V.muons.size()<<" e "<<in.V.electrons.size()<< " tau " << in.V.taus.size() << std::endl;
+    ok = false;
+    VHbbCandidate temp=in;
+    // Require exactly one tau and muon, and no electrons
+    if (temp.V.taus.size()!=1) return in;
+    if (temp.V.muons.size()!=1) return in ;
+    if (temp.V.electrons.size()!=0) return in ;
+    temp.V.p4 = temp.V.taus[0].p4 + temp.V.muons[0].p4;
+    temp.V.firstLepton = muPos[0];
+    temp.V.secondLepton = tauPos[0];
+    
+    ok = true;
+    return temp;
+    
+  }
+  VHbbCandidate getHWtaunCandidate(const VHbbCandidate & in, bool & ok , std::vector<unsigned int>& pos){
+    
+    if (verbose_){
+      std::cout <<" getHWtaunCandidate input mu "<<in.V.muons.size()<<" e "<<in.V.electrons.size()<< " tau " << in.V.taus.size() << std::endl;
+      std::cout << " pos.size()=" << pos.size() << std::endl;
+    }
+    
+    ok = false;
+    VHbbCandidate temp=in;
+    // require a tau and no electrons or muons
+    if (temp.V.taus.size()!=1) return in;
+    if (temp.V.muons.size()!=0) return in ;
+    if (temp.V.electrons.size()!=0) return in ;
+    if (temp.V.mets.size()<1) return in ;
+    temp.V.p4 = temp.V.taus[0].p4+temp.V.mets[0].p4;
+    temp.V.firstLepton=pos[0];
+    
+    if (verbose_){
+      std::cout << "Done with getHWtaunCandidate" << std::endl;
+    }
+    
+    ok=true;
+    return temp;
+  }
+ 
+
   
   VHbbCandidate getHZmumuCandidate(const VHbbCandidate & in, bool & ok, std::vector<unsigned int>& pos){
     if (verbose_){

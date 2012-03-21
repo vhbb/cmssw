@@ -167,6 +167,9 @@ process.load('CommonTools.ParticleFlow.PF2PAT_cff')
 from PhysicsTools.PatAlgos.tools.pfTools import *
 usePF2PAT(process,runPF2PAT=True,jetAlgo='AK5',runOnMC=isMC,postfix='')
 
+#### Taus ####
+process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
+
 from PhysicsTools.PatAlgos.tools.tauTools import *
 switchToPFTauHPS(process)
 
@@ -890,6 +893,7 @@ if isMC == False :
         process.p = cms.Path(
                     process.goodOfflinePrimaryVertices*
                      process.PF2PAT*
+		    process.PFTau* # re-run PFTau sequence as per tau POG recommendation
 		     process.pfCandsForIsolationSequence *
 		     process.muonPFIsolationSequence *
 		     process.electronPFIsolationSequence *
@@ -934,6 +938,7 @@ else :
                      process.genParticlesForJets*
                      process.ak5GenJets*
                      process.PF2PAT*
+		process.PFTau* # re-run PFTau sequence as per tau POG recommendation
 		    process.pfCandsForIsolationSequence *
 		     process.muonPFIsolationSequence *
 		     process.electronPFIsolationSequence *

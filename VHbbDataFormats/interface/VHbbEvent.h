@@ -127,24 +127,27 @@ class VHbbEvent{
   class TauInfo{
   public:
     TauInfo()  : charge(-99), tIso(-99), eIso(-99), hIso(-99),pfChaIso(-99), pfPhoIso(-99), pfNeuIso(-99), acop(-99), 
-    idbyIso(-99),idbyTrackIso(-99),idbyTaNCfrOnePercent(-99),
-    idbyTaNCfrHalfPercent(-99), idbyTaNCfrQuarterPercent(-99), 
-      idbyTaNCfrTenthPercent(-99), idbyTaNC(-99), mcId(-99), mcMomId(-99), mcgMomId(-99),
-      idagainstElectronLoose(-99),  idagainstElectronMedium(-99),  idagainstElectronTight(-99),  idagainstMuonLoose(-99),  idagainstMuonTight(-99),  
-      idbyLooseIsolation(-99),  idbyMediumIsolation(-99),  idbyTightIsolation(-99),  idbyVLooseIsolation(-99),  iddecayModeFinding(-99),
+      byIsolation(-99),trackIsolation(-99),byTaNCfrOnePercent(-99),
+      byTaNCfrHalfPercent(-99), byTaNCfrQuarterPercent(-99), 
+      byTaNCfrTenthPercent(-99), byTaNC(-99), mcId(-99), mcMomId(-99), mcgMomId(-99),
+      againstElectronLoose(-99),  againstElectronMedium(-99),  againstElectronTight(-99),  againstMuonLoose(-99),  againstMuonTight(-99),  
+      byLooseIsolation(-99),  byMediumIsolation(-99),  byTightIsolation(-99),  byVLooseIsolation(-99),  decayModeFinding(-99),
       isolationPFChargedHadrCandsPtSum(-999999.), isolationPFGammaCandsEtSum(-999999.),leadPFChargedHadrCandPt(-999999.),
-      NsignalPFChargedHadrCands (-99),NsignalPFGammaCands(-99) {}
+      NsignalPFChargedHadrCands (-99),NsignalPFGammaCands(-99), byLooseCombinedIsolationDeltaBetaCorr(-99), againstElectronMVA(-99) {}
   public:
     TLorentzVector p4;
     int charge;
     float tIso, eIso, hIso,pfChaIso,pfPhoIso,pfNeuIso, acop;
-    float  idbyIso,idbyTrackIso,idbyTaNCfrOnePercent,idbyTaNCfrHalfPercent, idbyTaNCfrQuarterPercent, idbyTaNCfrTenthPercent, idbyTaNC;
+    float  byIsolation,trackIsolation,byTaNCfrOnePercent,byTaNCfrHalfPercent, byTaNCfrQuarterPercent, byTaNCfrTenthPercent, byTaNC;
     int mcId, mcMomId, mcgMomId;
-    float idagainstElectronLoose, idagainstElectronMedium, idagainstElectronTight, idagainstMuonLoose, idagainstMuonTight;
-    float idbyLooseIsolation, idbyMediumIsolation, idbyTightIsolation, idbyVLooseIsolation, iddecayModeFinding;
+    float againstElectronLoose, againstElectronMedium, againstElectronTight, againstMuonLoose, againstMuonTight;
+    float byLooseIsolation, byMediumIsolation, byTightIsolation, byVLooseIsolation, decayModeFinding;
 
     float isolationPFChargedHadrCandsPtSum,isolationPFGammaCandsEtSum,leadPFChargedHadrCandPt;
     int NsignalPFChargedHadrCands, NsignalPFGammaCands;
+    float byLooseCombinedIsolationDeltaBetaCorr, againstElectronMVA;
+
+
     TLorentzVector mcFourMomentum;
   };
 

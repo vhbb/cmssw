@@ -26,6 +26,10 @@ static  bool jetID(const VHbbEvent::SimpleJet & );
   void findMuons (const std::vector<VHbbEvent::MuonInfo>& muons, std::vector<VHbbEvent::MuonInfo>& out, std::vector<unsigned int>&);
   void findElectrons(const std::vector<VHbbEvent::ElectronInfo>& electrons, std::vector<VHbbEvent::ElectronInfo>& out,std::vector<unsigned int>&);
   void findMET(const VHbbEvent::METInfo& met, std::vector<VHbbEvent::METInfo>& out);
+
+  void findTaus (const std::vector<VHbbEvent::TauInfo>& taus, std::vector<VHbbEvent::TauInfo>& out, std::vector<unsigned int>&);
+  void removeTauOverlapWithJets(const std::vector<VHbbEvent::TauInfo>& taus, const std::vector<VHbbEvent::SimpleJet>& jets, std::vector<VHbbEvent::TauInfo>& out, const std::vector<unsigned int>&,std::vector<unsigned int>&);
+
   
  private:
   bool verbose_;
