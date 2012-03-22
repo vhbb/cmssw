@@ -126,7 +126,7 @@ class VHbbEvent{
 
   class TauInfo{
   public:
-    TauInfo()  : charge(-99), tIso(-99), eIso(-99), hIso(-99),pfChaIso(-99), pfPhoIso(-99), pfNeuIso(-99), acop(-99), 
+    TauInfo()  : charge(-99), tIso(-99), eIso(-99), hIso(-99),pfChaIso(-99), pfChaPUIso(-99),pfPhoIso(-99), pfNeuIso(-99), acop(-99), 
       byIsolation(-99),trackIsolation(-99),byTaNCfrOnePercent(-99),
       byTaNCfrHalfPercent(-99), byTaNCfrQuarterPercent(-99), 
       byTaNCfrTenthPercent(-99), byTaNC(-99), mcId(-99), mcMomId(-99), mcgMomId(-99),
@@ -137,7 +137,7 @@ class VHbbEvent{
   public:
     TLorentzVector p4;
     int charge;
-    float tIso, eIso, hIso,pfChaIso,pfPhoIso,pfNeuIso, acop;
+    float tIso, eIso, hIso,pfChaIso,pfChaPUIso,pfPhoIso,pfNeuIso, acop;
     float  byIsolation,trackIsolation,byTaNCfrOnePercent,byTaNCfrHalfPercent, byTaNCfrQuarterPercent, byTaNCfrTenthPercent, byTaNC;
     int mcId, mcMomId, mcgMomId;
     float againstElectronLoose, againstElectronMedium, againstElectronTight, againstMuonLoose, againstMuonTight;
