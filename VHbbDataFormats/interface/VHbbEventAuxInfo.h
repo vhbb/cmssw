@@ -66,5 +66,6 @@ class VHbbEventAuxInfo{
   std::vector<ParticleMCInfo> mcB;
   std::vector<ParticleMCInfo> mcC;       
 
+  std::vector<ParticleMCInfo> mcTau;
 };
 #endif

@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.62 2012/03/16 09:12:46 degrutto Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.63 2012/03/21 22:07:26 sethzenz Exp $
 //
 //
 
@@ -267,6 +267,23 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 	  wtemp.dauFourMomentum.push_back(GENPTOLORP(Wdau));
 	}
 	auxInfo->mcW.push_back(wtemp);
+      }
+
+      if(abs(id)==15) {
+	VHbbEventAuxInfo::ParticleMCInfo tautemp;
+        tautemp.status=st;
+        tautemp.charge=p.charge();
+        if(p.mother(0)!=0) tautemp.momid=p.mother(0)->pdgId();
+        if(p.mother(0)!=0 && p.mother(0)->mother(0)!=0) tautemp.gmomid=p.mother(0)->mother(0)->pdgId();
+        tautemp.p4=GENPTOLOR(p);
+
+        int ndau = p.numberOfDaughters();
+        for(int j = 0; j < ndau; ++ j) {
+          const Candidate * Taudau = p.daughter( j );
+          tautemp.dauid.push_back(Taudau->pdgId());
+          tautemp.dauFourMomentum.push_back(GENPTOLORP(Taudau));
+        }
+        auxInfo->mcTau.push_back(tautemp);
       }
 	
       if(abs(id)==23){
