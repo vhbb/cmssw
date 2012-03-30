@@ -17,8 +17,7 @@ from PhysicsTools.PatAlgos.tools.cmsswVersionTools import *
 process.load("Configuration.StandardSequences.GeometryDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
-
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.load("FWCore.MessageLogger.MessageLogger_cfi")
 process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
@@ -30,12 +29,26 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 # source
 process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
-"file:Summer11_ZH_ZToLL_HToBB_M-115_7TeV-powheg_1.root",
+#	"file:/uscms/home/sethzenz/nobackup/9ECB2776-81AD-E011-8B94-E0CB4E19F972.root"
+
+#"file:/data/uftrig01b/jhugon/kinFitter/filesFall11/ttbarTestSampleEDM5k.root" 
+#"file:DYJetsToLL_PtZ-100.root",
+"/store/relval/CMSSW_4_2_6/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0009/5645192C-E7AA-E011-A714-0026189437F8.root"
+#/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/E0457C77-11BB-E011-8C7C-00304867C0C4.root
+#/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/D27FB95F-10BB-E011-A4D4-003048678E94.root
+#/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/B885B6EB-13BB-E011-8ADC-001A92971ACE.root
+#/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/7C859A88-15BB-E011-B629-00304867918A.root
+#/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/06CA9A61-0EBB-E011-B9EE-003048678F8A.root
+#"file:Summer11_ZH_ZToLL_HToBB_M-115_7TeV-powheg_1.root",
 #"rfio:/castor/cern.ch/user/d/degrutto/test/Summer11_ZH_ZToLL_HToBB_M-115_7TeV-powheg_1.root",
 
 #"rfio:/castor/cern.ch/user/d/degrutto/test/DYJetsToLL_PtZ-100.root",
 
-
+#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/32CECED6-BFAD-E011-B08D-00261834B5A4.root',
+#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/3EE916B3-C4AD-E011-9159-90E6BA0D09B0.root',
+#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/42622800-C1AD-E011-AD65-485B39800BF2.root',
+#		"/store/mc/CMSSW_4_2_3/RelValProdTTbar/GEN-SIM-RECO/MC_42_V12_JobRobot-v1/0000/B89A0B07-818C-E011-953E-0030487CD7E0.root"
+#	"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat//store/mc/Summer11/BdToMuMu_2MuPtFilter_7TeV-pythia6-evtgen//GEN-SIM-RECO//PU_S4_START42_V11-v1///0000//92DE42C9-CD8C-E011-A421-001F296B758E.root"
 ),
 )
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -83,9 +96,8 @@ process.out1 = cms.OutputModule(
 	"keep *_HLTQuadJet40_*_*",
 	"keep *_HLTDoubleMu7_*_*",
 	"keep *_EcalDeadCellEventFilter_*_*",
-	"keep *_patType1CorrectedPFMet*_*_*",
- 	"keep *_patType1p2CorrectedPFMet*_*_*"
-
+        "keep *_patType1CorrectedPFMet*_*_*",
+	"keep *_patType1p2CorrectedPFMet*_*_*"
 	),
     dropMetaData = cms.untracked.string('ALL'),
     splitLevel = cms.untracked.int32(99),
@@ -106,13 +118,12 @@ from PhysicsTools.PatAlgos.patEventContent_cff import patEventContentNoCleaning
 process.load("CommonTools.ParticleFlow.PF2PAT_EventContent_cff")
 process.out.outputCommands.extend(process.PATEventContent.outputCommands)
 
-
-### BEGIN of filters required by JETMET for  MET analysis
+### BEGIN of filters required by JETMET for  MET analysis 
 # HB + HE noise filtering
 process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
 # ecal filter
 process.load('JetMETAnalysis.ecalDeadCellTools.EcalDeadCellEventFilter_cfi') ## still not in the release
-# CSC beam halo....
+# CSC beam halo.... 
 process.load('RecoMET.METAnalyzers.CSCHaloFilter_cfi')
 # HCAL laser filter
 process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
@@ -121,7 +132,7 @@ process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
 process.trackingFailureFilter.JetSource = cms.InputTag('ak5PFJetsL2L3Residual')
 process.trackingFailureFilter.VertexSource = cms.InputTag('goodOfflinePrimaryVertices')
-### END of filters required by JETMET for  MET analysis
+### END of filters required by JETMET for  MET analysis 
 
 
 
@@ -193,16 +204,20 @@ process.pfNoElectron.enable = False
 
 # Compute the mean pt per unit area (rho) from the
 # PFchs inputs
+### already included in JetMETCorrections/Type1MET/python/pfMETCorrections_cff.py, just change the inputs
 process.load("RecoJets.JetProducers.kt4PFJets_cfi")
-process.kt6PFJets = process.kt4PFJets.clone(
-    rParam = cms.double(0.6),
-    src = cms.InputTag('pfNoElectron'),
-    doAreaFastjet = cms.bool(True),
-    doRhoFastjet = cms.bool(True)
-    )
+process.kt6PFJets.src = cms.InputTag('pfNoElectron')
+
+#process.kt6PFJets = process.kt4PFJets.clone(
+#    rParam = cms.double(0.6),
+#    src = cms.InputTag('pfNoElectron'),
+#    doAreaFastjet = cms.bool(True),
+#    doRhoFastjet = cms.bool(True)
+#    )
 #process.patJetCorrFactors.rho = cms.InputTag("kt6PFJets", "rho")
 
 ### to compute rho to subtract to lepton isolation cone, so with particles up to eta 2.5  
+
 process.kt6PFJets25 = process.kt4PFJets.clone(
 	src = 'pfNoElectron',
 	rParam = 0.6,
@@ -213,7 +228,9 @@ process.kt6PFJets25 = process.kt4PFJets.clone(
 
 
 
-process.load('RecoJets.JetProducers.ak5PFJets_cfi')
+
+from RecoJets.JetProducers.ak5PFJets_cfi import ak5PFJets
+process.ak5PFJets = ak5PFJets
 process.ak5PFJets.jetPtMin      = 1.0
 process.ak5PFJets.doAreaFastjet = True
 process.ak5PFJets.src           = 'pfNoElectron'
@@ -713,7 +730,6 @@ process.pfNoPileUpCharge  = cms.EDFilter(
 process.pfMETNoPUCharge = process.pfMET.clone()
 process.pfMETNoPUCharge.src=cms.InputTag("pfNoPileUpCharge")
 
-
 # type 1 +2 MET corrected
 #process.load("PhysicsTools.PatUtils.patPFMETCorrections_cff")
 from PhysicsTools.PatUtils.patPFMETCorrections_cff import *
@@ -782,15 +798,17 @@ process.patType1p2CorrectedPFMetNoPU.src = cms.InputTag('patPFMetNoPU')
 from PhysicsTools.PatUtils.tools.metUncertaintyTools import runMEtUncertainties
 
 
+
+
 process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 
 # drop the meta data for dropped data
 #process.out.dropMetaData = cms.string("DROPPED")
 process.load('RecoVertex/AdaptiveVertexFinder/inclusiveVertexing_cff')
-process.inclusiveMergedVertices = process.vertexMerger.clone()
-process.inclusiveMergedVertices.secondaryVertices = cms.InputTag("inclusiveVertices")
-process.inclusiveMergedVertices.maxFraction = 0.2
-process.inclusiveMergedVertices.minSignificance = cms.double(10.)
+#process.inclusiveMergedVertices = process.vertexMerger.clone()
+#process.inclusiveMergedVertices.secondaryVertices = cms.InputTag("inclusiveVertices")
+#process.inclusiveMergedVertices.maxFraction = 0.2
+#process.inclusiveMergedVertices.minSignificance = cms.double(10.)
 
 process.load("RecoBTag/SecondaryVertex/bVertexFilter_cfi")
 process.selectedVertices = process.bVertexFilter.clone()
@@ -798,8 +816,6 @@ process.selectedVertices.secondaryVertices = cms.InputTag("inclusiveMergedVertic
 process.selectedVertices.minVertices = 0
 process.selectedVertices.vertexFilter.multiplicityMin = 3
 
-process.inclusiveVertexFinder.clusterScale = 1.
-process.inclusiveVertexFinder.clusterMinAngleCosine = 0.5
 
 
 #process.out.fileName = '/tigress-hsm/dlopes/PatEDM.root'
@@ -892,9 +908,10 @@ process.nTuplizePath=cms.Path(process.HLTDiCentralJet20MET80 +
 if isMC == False :
         process.p = cms.Path(
                     process.goodOfflinePrimaryVertices*
+                     process.inclusiveVertexing*
                      process.PF2PAT*
 		    process.PFTau* # re-run PFTau sequence as per tau POG recommendation
-		     process.pfCandsForIsolationSequence *
+		    process.pfCandsForIsolationSequence *
 		     process.muonPFIsolationSequence *
 		     process.electronPFIsolationSequence *
                      process.ak5CaloJets*
@@ -915,16 +932,17 @@ if isMC == False :
 		    process.cleanPatJetsAK5PF*
 
 #                     process.patPF2PATSequence* # added with usePF2PAT
-		     process.patMETsHT*
+	            process.patMETsHT*
 		     process.pfMETNoPU*
 		     process.pfNoPileUpCharge*
        		     process.pfMETNoPUCharge*
-		      process.patPFMetNoPU *
+		    process.patPFMetNoPU *
 		    process.patType1CorrectedPFMetNoPU *
 		    process.patType1p2CorrectedPFMetNoPU *
-                     process.leptonTrigMatch*
-                     process.inclusiveVertexing*
-                     process.inclusiveMergedVertices*process.selectedVertices*
+#		     process.producePatPFMETCorrections *
+		    process.leptonTrigMatch*
+#                     process.inclusiveMergedVertices* #already included now in inclusiveVertexing sequence
+		     process.selectedVertices*
                      process.bcandidates*
                      process.HbbAnalyzerNew
 
@@ -935,6 +953,7 @@ else :
 #		process.printTree *
 #		    process.printList *
 		process.goodOfflinePrimaryVertices*
+                     process.inclusiveVertexing*
                      process.genParticlesForJets*
                      process.ak5GenJets*
                      process.PF2PAT*
@@ -960,32 +979,33 @@ else :
 		    process.selectedPatElectronsWithIso*
 		    process.cleanPatJetsAK5PF*
 #                     process.patPF2PATSequence* # added with usePF2PAT
-		     process.patMETsHT*
+ 		     process.patMETsHT*
 		     process.pfMETNoPU*
 		     process.pfNoPileUpCharge*
        		     process.pfMETNoPUCharge*
 		  process.patPFMetNoPU *
-		    process.patType1CorrectedPFMetNoPU *
-		    process.patType1p2CorrectedPFMetNoPU *
+		process.patType1CorrectedPFMetNoPU *
+		process.patType1p2CorrectedPFMetNoPU *
+		 #    process.producePatPFMETCorrections *
+
 #		     process.dump*
                      process.leptonTrigMatch*
-                     process.inclusiveVertexing*
-                     process.inclusiveMergedVertices*process.selectedVertices*
+#                     process.inclusiveMergedVertices* #already included now in inclusiveVertexing sequence
+                     process.selectedVertices*
                      process.bcandidates*
 		     process.bhadrons*
                      process.HbbAnalyzerNew
 #process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
                      )
 
-
-### begin of  filters required by JETMET for  MET analysis
+### begin of  filters required by JETMET for  MET analysis 
 process.hbhepath = cms.Path(process.HBHENoiseFilter)
 process.ecalFilter = cms.Path(process.EcalDeadCellEventFilter)
 process.cschaloFilter = cms.Path(process.CSCTightHaloFilter)
 process.hcallaserFilter=cms.Path(process.hcalLaserEventFilter)
 process.trackingfailureFilter = cms.Path( process.goodOfflinePrimaryVertices*process.ak5PFJetsL2L3Residual*process.trackingFailureFilter)
-### end of  filters required by JETMET for  MET analysis
-
+### end of  filters required by JETMET for  MET analysis 
+	    
 process.load('GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi');
 process.totalKinematics=cms.Path(process.totalKinematicsFilter)
 
@@ -1000,10 +1020,11 @@ process.options = cms.untracked.PSet(
 	)
 process.e = cms.EndPath(process.out1)
 
+
 if isMC == False :
- process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.ecalFilter, process.cschaloFilter, process.hcallaserFilter, process.trackingfailureFilter, process.e)
+ process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.ecalFilter, process.cschaloFilter, process.hcallaserFilter, process.trackingfailureFilter,  process.e)
 else :
- process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.ecalFilter,process.cschaloFilter, process.hcallaserFilter, process.trackingfailureFilter, process.totalKinematics,process.e)
+ process.schedule = cms.Schedule(process.p, process.hbhepath, process.nTuplizePath ,process.ecalFilter, process.cschaloFilter, process.hcallaserFilter, process.trackingfailureFilter, process.totalKinematics,process.e)
 
 
 #
