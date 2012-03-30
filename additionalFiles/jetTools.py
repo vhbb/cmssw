@@ -90,7 +90,7 @@ class RunBTagging(ConfigToolBase):
         svTILabel = 'secondaryVertexTagInfos'     + label + postfix
         ivfTILabel = 'inclusiveSecondaryVertexFinderTagInfos'     + label + postfix
         #nvTILabel = ''     + label + postfix
-        #seTILabel = 'softElectronTagInfos'        + label + postfix
+        seTILabel = 'softElectronTagInfos'        + label + postfix
         smTILabel = 'softMuonTagInfos'            + label + postfix
     
         ## produce tag infos
@@ -98,7 +98,7 @@ class RunBTagging(ConfigToolBase):
         setattr( process, svTILabel, btag.secondaryVertexTagInfos.clone(trackIPTagInfos = cms.InputTag(ipTILabel)) )
         setattr( process, ivfTILabel, btag.inclusiveSecondaryVertexFinderTagInfos.clone(trackIPTagInfos = cms.InputTag(ipTILabel)) ) 
         #setattr( process, nvTILabel, nbtag.secondaryVertexNegativeTagInfos.clone(trackIPTagInfos = cms.InputTag(ipTILabel)) )
-        #setattr( process, seTILabel, btag.softElectronTagInfos.clone(jets = jetCollection) )
+        setattr( process, seTILabel, btag.softElectronTagInfos.clone(jets = jetCollection) )
         setattr( process, smTILabel, btag.softMuonTagInfos.clone(jets = jetCollection) )
 
         ## make VInputTag from strings
@@ -114,7 +114,7 @@ class RunBTagging(ConfigToolBase):
         #setattr( process, 'simpleSecondaryVertexNegativeBJetTags'+label+postfix, nbtag.simpleSecondaryVertexNegativeBJetTags.clone(tagInfos = vit(nvTILabel)) )
         setattr( process, 'combinedSecondaryVertexBJetTags'+label+postfix, btag.combinedSecondaryVertexBJetTags.clone(tagInfos = vit(ipTILabel, svTILabel)) )
         setattr( process, 'combinedInclusiveSecondaryVertexBJetTags'+label+postfix, btag.combinedInclusiveSecondaryVertexBJetTags.clone(tagInfos = vit(ipTILabel, ivfTILabel)) )
-        setattr( process, 'combinedMVABJetTags'+label+postfix, btag.combinedInclusiveSecondaryVertexBJetTags.clone(tagInfos = vit(ipTILabel, ivfTILabel)) )
+        setattr( process, 'combinedMVABJetTags'+label+postfix, btag.combinedMVABJetTags.clone(tagInfos = vit(ipTILabel, ivfTILabel,smTILabel,seTILabel)) )
         setattr( process, 'combinedSecondaryVertexMVABJetTags'+label+postfix, btag.combinedSecondaryVertexMVABJetTags.clone(tagInfos = vit(ipTILabel, svTILabel)) )
         #setattr( process, 'softElectronByPtBJetTags'+label+postfix, btag.softElectronByPtBJetTags.clone(tagInfos = vit(seTILabel)) )
         #setattr( process, 'softElectronByIP3dBJetTags'+label+postfix, btag.softElectronByIP3dBJetTags.clone(tagInfos = vit(seTILabel)) )
@@ -124,8 +124,8 @@ class RunBTagging(ConfigToolBase):
         
         ## define vector of (output) labels
         labels = { 'jta'      : jtaLabel, 
-                   #'tagInfos' : (ipTILabel,svTILabel,seTILabel,smTILabel),
-                   'tagInfos' : (ipTILabel,svTILabel,ivfTILabel,smTILabel), 
+#                   'tagInfos' : (ipTILabel,svTILabel,seTILabel,smTILabel),
+                   'tagInfos' : (ipTILabel,svTILabel,ivfTILabel,smTILabel,seTILabel), 
                    'jetTags'  : [ (x + label+postfix) for x in ('jetBProbabilityBJetTags',
                                                                 'jetProbabilityBJetTags',
                                                                 'trackCountingHighPurBJetTags',
