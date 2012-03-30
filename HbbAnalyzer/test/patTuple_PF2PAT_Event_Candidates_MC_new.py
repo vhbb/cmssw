@@ -30,8 +30,15 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
 #	"file:/uscms/home/sethzenz/nobackup/9ECB2776-81AD-E011-8B94-E0CB4E19F972.root"
-"file:/data/uftrig01b/jhugon/kinFitter/filesFall11/ttbarTestSampleEDM5k.root" 
+
+#"file:/data/uftrig01b/jhugon/kinFitter/filesFall11/ttbarTestSampleEDM5k.root" 
 #"file:DYJetsToLL_PtZ-100.root",
+"/store/relval/CMSSW_4_2_6/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0009/5645192C-E7AA-E011-A714-0026189437F8.root"
+#/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/E0457C77-11BB-E011-8C7C-00304867C0C4.root
+#/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/D27FB95F-10BB-E011-A4D4-003048678E94.root
+#/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/B885B6EB-13BB-E011-8ADC-001A92971ACE.root
+#/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/7C859A88-15BB-E011-B629-00304867918A.root
+#/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/06CA9A61-0EBB-E011-B9EE-003048678F8A.root
 #"file:Summer11_ZH_ZToLL_HToBB_M-115_7TeV-powheg_1.root",
 #"rfio:/castor/cern.ch/user/d/degrutto/test/Summer11_ZH_ZToLL_HToBB_M-115_7TeV-powheg_1.root",
 
@@ -798,10 +805,10 @@ process.dump = cms.EDAnalyzer("EventContentAnalyzer")
 # drop the meta data for dropped data
 #process.out.dropMetaData = cms.string("DROPPED")
 process.load('RecoVertex/AdaptiveVertexFinder/inclusiveVertexing_cff')
-process.inclusiveMergedVertices = process.vertexMerger.clone()
-process.inclusiveMergedVertices.secondaryVertices = cms.InputTag("inclusiveVertices")
-process.inclusiveMergedVertices.maxFraction = 0.2
-process.inclusiveMergedVertices.minSignificance = cms.double(10.)
+#process.inclusiveMergedVertices = process.vertexMerger.clone()
+#process.inclusiveMergedVertices.secondaryVertices = cms.InputTag("inclusiveVertices")
+#process.inclusiveMergedVertices.maxFraction = 0.2
+#process.inclusiveMergedVertices.minSignificance = cms.double(10.)
 
 process.load("RecoBTag/SecondaryVertex/bVertexFilter_cfi")
 process.selectedVertices = process.bVertexFilter.clone()
@@ -809,8 +816,6 @@ process.selectedVertices.secondaryVertices = cms.InputTag("inclusiveMergedVertic
 process.selectedVertices.minVertices = 0
 process.selectedVertices.vertexFilter.multiplicityMin = 3
 
-process.inclusiveVertexFinder.clusterScale = 1.
-process.inclusiveVertexFinder.clusterMinAngleCosine = 0.5
 
 
 #process.out.fileName = '/tigress-hsm/dlopes/PatEDM.root'
@@ -903,6 +908,7 @@ process.nTuplizePath=cms.Path(process.HLTDiCentralJet20MET80 +
 if isMC == False :
         process.p = cms.Path(
                     process.goodOfflinePrimaryVertices*
+                     process.inclusiveVertexing*
                      process.PF2PAT*
 		    process.PFTau* # re-run PFTau sequence as per tau POG recommendation
 		    process.pfCandsForIsolationSequence *
@@ -935,8 +941,8 @@ if isMC == False :
 		    process.patType1p2CorrectedPFMetNoPU *
 #		     process.producePatPFMETCorrections *
 		    process.leptonTrigMatch*
-                     process.inclusiveVertexing*
-                     process.inclusiveMergedVertices*process.selectedVertices*
+#                     process.inclusiveMergedVertices* #already included now in inclusiveVertexing sequence
+		     process.selectedVertices*
                      process.bcandidates*
                      process.HbbAnalyzerNew
 
@@ -947,6 +953,7 @@ else :
 #		process.printTree *
 #		    process.printList *
 		process.goodOfflinePrimaryVertices*
+                     process.inclusiveVertexing*
                      process.genParticlesForJets*
                      process.ak5GenJets*
                      process.PF2PAT*
@@ -983,8 +990,8 @@ else :
 
 #		     process.dump*
                      process.leptonTrigMatch*
-                     process.inclusiveVertexing*
-                     process.inclusiveMergedVertices*process.selectedVertices*
+#                     process.inclusiveMergedVertices* #already included now in inclusiveVertexing sequence
+                     process.selectedVertices*
                      process.bcandidates*
 		     process.bhadrons*
                      process.HbbAnalyzerNew

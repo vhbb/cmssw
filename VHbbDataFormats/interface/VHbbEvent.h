@@ -12,7 +12,7 @@ class VHbbEvent{
   class SimpleJet {
     public:
     SimpleJet(): flavour(-99), isSemiLept(-99), isSemiLeptMCtruth(-99), SoftLeptpdgId(-99), SoftLeptIdlooseMu(-99), SoftLeptId95(-99), SoftLeptPt(-99), SoftLeptdR(-99), SoftLeptptRel(-99),  SoftLeptRelCombIso(-99),   tche(-99), tchp(-99), jpb(-99), jp(-99), 
-      ssvhe(-99), csv(-99), csvmva(-99),
+      ssvhe(-99), csv(-99), csvmva(-99), csvivf(-99), cmva(-99),
       vtxMass(-99), vtx3dL(-99), vtx3deL(-99), vtxNTracks(-99), vtxProb(-99),
       ntracks(-99), charge(-99),jecunc(-99),
       chargedHadronEFraction(-99), neutralHadronEFraction(-99), chargedEmEFraction(-99), neutralEmEFraction(-99),nConstituents(-99),
@@ -21,7 +21,7 @@ class VHbbEvent{
     double Pt() {return p4.Pt();}
     int flavour, isSemiLept, isSemiLeptMCtruth, SoftLeptpdgId , SoftLeptIdlooseMu, SoftLeptId95;
     float SoftLeptPt, SoftLeptdR, SoftLeptptRel, SoftLeptRelCombIso; 
-    float tche,tchp, jpb,jp , ssvhe, csv, csvmva;
+    float tche,tchp, jpb,jp , ssvhe, csv, csvmva,csvivf,cmva;
     // CSV vertex info
     float vtxMass, vtx3dL, vtx3deL, vtxNTracks, vtxProb;
     std::vector<unsigned int> vtxTrackIds;

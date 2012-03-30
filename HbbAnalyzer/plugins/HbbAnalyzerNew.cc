@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.63 2012/03/21 22:07:26 sethzenz Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.64 2012/03/28 08:37:05 sethzenz Exp $
 //
 //
 
@@ -1805,7 +1805,9 @@ void HbbAnalyzerNew ::fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Je
     sj.jpb=jet_iter->bDiscriminator("jetBProbabilityBJetTags");
     sj.ssvhe=jet_iter->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
     sj.csv=jet_iter->bDiscriminator("combinedSecondaryVertexBJetTags");
-   sj.csvmva=jet_iter->bDiscriminator("combinedSecondaryVertexMVABJetTags");
+    sj.csvmva=jet_iter->bDiscriminator("combinedSecondaryVertexMVABJetTags");
+    sj.csvivf=jet_iter->bDiscriminator("combinedInclusiveSecondaryVertexBJetTags");
+    sj.cmva=jet_iter->bDiscriminator("combinedMVABJetTags");
     sj.charge=jet_iter->jetCharge();
     sj.ntracks=jet_iter->associatedTracks().size();
     sj.p4=GENPTOLORP(jet_iter);
