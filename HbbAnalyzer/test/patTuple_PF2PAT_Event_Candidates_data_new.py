@@ -54,9 +54,9 @@ process.source = cms.Source("PoolSource",
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 if isMC == False :
-	process.GlobalTag.globaltag = cms.string('GR_R_42_V19::All')
+	process.GlobalTag.globaltag = cms.string('GR_R_42_V23::All')
 else :
-	process.GlobalTag.globaltag = cms.string('START42_V13::All')
+	process.GlobalTag.globaltag = cms.string('START42_V17::All')
 
 
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
@@ -344,8 +344,8 @@ addJetCollection(process,
         doJetID=False
                  )
 
-
-addJetCollection(process, 
+if isMC == False :
+	addJetCollection(process, 
         cms.InputTag('caVHPFJets',"fat","VH"),         # Jet collection; must be already in the event when patLayer0 sequence is executed
         'CAVHFat',"PF",
         doJTA=True,            # Run Jet-Track association & JetCharge
@@ -358,7 +358,23 @@ addJetCollection(process,
         doJetID = False
                  )
 
-addJetCollection(process,
+else :
+        addJetCollection(process,
+        cms.InputTag('caVHPFJets',"fat","VH"),         # Jet collection; must be already in the event when patLayer0 sequence is executed
+        'CAVHFat',"PF",
+        doJTA=True,            # Run Jet-Track association & JetCharge
+        doBTagging=True,       # Run b-tagging
+#        jetCorrLabel=('KT6PF',  inputJetCorrLabel),
+        jetCorrLabel=('AK7PF',  inputJetCorrLabel),
+        doType1MET=False,
+        genJetCollection=cms.InputTag("ak5GenJets"),
+        doL1Cleaning=False,
+        doL1Counters=False,
+        doJetID = False
+                 )
+
+if isMC == False :
+	addJetCollection(process,
         cms.InputTag('caVHPFJets',"sub","VH"),         # Jet collection; must be already in the event when patLayer0 sequence is executed
         'CAVHSub',"PF",
         doJTA=True,            # Run Jet-Track association & JetCharge
@@ -370,8 +386,23 @@ addJetCollection(process,
         doL1Counters=False,
         doJetID = False
                  )
+else :
+        addJetCollection(process,
+        cms.InputTag('caVHPFJets',"sub","VH"),         # Jet collection; must be already in the event when patLayer0 sequence is executed
+        'CAVHSub',"PF",
+        doJTA=True,            # Run Jet-Track association & JetCharge
+        doBTagging=True,       # Run b-tagging
+#        jetCorrLabel=('KT6PF',  inputJetCorrLabel),
+        jetCorrLabel=('KT4PF',  inputJetCorrLabel),
+        doType1MET=False,
+        genJetCollection=cms.InputTag('caVHGenJets',"sub","VH"),
+        doL1Cleaning=False,
+        doL1Counters=False,
+        doJetID = False
+                 )
 
-addJetCollection(process,
+if isMC == False :
+	addJetCollection(process,
         cms.InputTag('caVHPFJets',"filter","VH"),         # Jet collection; must be already in the event when patLayer0 sequence is executed
         'CAVHFilter',"PF",
         doJTA=True,            # Run Jet-Track association & JetCharge
@@ -382,6 +413,20 @@ addJetCollection(process,
         doL1Counters=False,
         doJetID = False
                  )
+else :
+        addJetCollection(process,
+        cms.InputTag('caVHPFJets',"filter","VH"),         # Jet collection; must be already in the event when patLayer0 sequence is executed
+       'CAVHFilter',"PF",
+        doJTA=True,            # Run Jet-Track association & JetCharge
+        doBTagging=True,       # Run b-tagging
+        jetCorrLabel=('KT4PF',  inputJetCorrLabel),
+        doType1MET=False,
+        genJetCollection=cms.InputTag('caVHGenJets',"filter","VH"),
+        doL1Cleaning=False,
+        doL1Counters=False,
+        doJetID = False
+                 )
+
 
 
 #addJetCollection(process,cms.InputTag("CAsubJetsProducer"),"subCA","PF",
@@ -956,6 +1001,7 @@ else :
                      process.inclusiveVertexing*
                      process.genParticlesForJets*
                      process.ak5GenJets*
+                     process.caVHGenJets*
                      process.PF2PAT*
 		process.PFTau* # re-run PFTau sequence as per tau POG recommendation
 		    process.pfCandsForIsolationSequence *
@@ -969,7 +1015,6 @@ else :
                      process.ak7PFJets*
                      process.caVHCaloJets*
                      process.caVHPFJets*
-                     process.caVHGenJets*
                      process.eidSequence*
                      process.patDefaultSequence*
 		    #
