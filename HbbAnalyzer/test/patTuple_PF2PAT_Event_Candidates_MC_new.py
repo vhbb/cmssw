@@ -60,6 +60,10 @@ else :
 
 
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+process.printSavedList = cms.EDAnalyzer("ParticleListDrawer",
+					     src = cms.InputTag("savedGenParticles"),
+					     maxEventsToPrint = cms.untracked.int32(-1)
+					 )
 process.printList = cms.EDAnalyzer("ParticleListDrawer",
 					     src = cms.InputTag("genParticles"),
 					     maxEventsToPrint = cms.untracked.int32(-1)
@@ -80,6 +84,7 @@ process.out1 = cms.OutputModule(
     fileName       = cms.untracked.string('PAT.edm.root'),
     outputCommands = cms.untracked.vstring(
 	'drop *',
+        'keep *_savedGenParticles_*_*',
 	'keep *_HbbAnalyzerNew_*_*',
 	'keep VHbbCandidates_*_*_*',
 #	'keep PileupSummaryInfos_*_*_*',
@@ -948,6 +953,22 @@ process.nTuplizePath=cms.Path(process.HLTDiCentralJet20MET80 +
                               process.HLTQuadJet40 +
                               process.HLTDoubleMu7)
 
+#saves leptons with pt > 5 GeV, b and c quarks, B and D hadrons (and Lambda b,c), Z,W,Higgs, all status 3 particles. Daugthers of Z,W,H.
+process.savedGenParticles = cms.EDProducer(
+    "GenParticlePruner",
+    src = cms.InputTag("genParticles"),
+    select = cms.vstring(
+    "drop  *", # this is the default
+    "keep++ pdgId >= 23 && pdgId <= 25", #keep W,Z,H and theirs products
+    "drop++ status == 2", #drop unstable decay products (we will anyhow keep later the b-quarks)
+    "keep  (abs(pdgId) ==13 || abs(pdgId) ==11 || abs(pdgId) ==15 ) &&  pt > 5.0", #keep leptons of decent pT
+    "keep  (abs(pdgId) > 400 &&  abs(pdgId) < 600)    ||     (  (abs(pdgId) > 4000 &&  abs(pdgId) < 6000)  )",  # track-back the origin of B/D
+    "keep  (  (abs(pdgId) >= 4 &&  abs(pdgId) <= 6)) ", #keep heavy quarks
+    "keep ( status == 3)"  #keep event summary status3 (for pythia)
+    )
+)
+
+
 
 
 if isMC == False :
@@ -997,6 +1018,8 @@ else :
         process.p = cms.Path(
 #		process.printTree *
 #		    process.printList *
+	             process.savedGenParticles *
+#		    process.printSavedList *
 		process.goodOfflinePrimaryVertices*
                      process.inclusiveVertexing*
                      process.genParticlesForJets*
