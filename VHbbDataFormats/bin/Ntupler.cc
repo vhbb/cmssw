@@ -383,7 +383,9 @@ typedef struct
     phi[i]=j.p4.Phi();
     e[i]=j.p4.E();
     csv[i]=j.csv;
-    numTracksSV[i] = j.vtxMass;
+    csvivf[i]=j.csvivf;
+    cmva[i]=j.cmva;
+    numTracksSV[i] = j.vtxNTracks;
     vtxMass[i]= j.vtxMass;
     vtx3dL[i] = j.vtx3dL;
     vtx3deL[i] = j.vtx3deL;
@@ -434,7 +436,7 @@ typedef struct
   void reset()
   {
     for(int i=0;i<MAXJ;i++) {
-      pt[i]=-99; eta[i]=-99; phi[i]=-99;e[i]=-99;csv[i]=-99; cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; isSemiLeptMCtruth[i]=-99; isSemiLept[i]=-99;      SoftLeptpdgId[i] = -99; SoftLeptIdlooseMu[i] = -99;  SoftLeptId95[i] =  -99;   SoftLeptPt[i] = -99;  SoftLeptdR[i] = -99;   SoftLeptptRel[i] = -99; SoftLeptRelCombIso[i] = -99;  genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99;
+      pt[i]=-99; eta[i]=-99; phi[i]=-99;e[i]=-99;csv[i]=-99; csvivf[i]=-99; cmva[i]=-99; cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; isSemiLeptMCtruth[i]=-99; isSemiLept[i]=-99;      SoftLeptpdgId[i] = -99; SoftLeptIdlooseMu[i] = -99;  SoftLeptId95[i] =  -99;   SoftLeptPt[i] = -99;  SoftLeptdR[i] = -99;   SoftLeptptRel[i] = -99; SoftLeptRelCombIso[i] = -99;  genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99;
     }
   }
   float pt[MAXJ];
@@ -442,6 +444,8 @@ typedef struct
   float phi[MAXJ];
   float e[MAXJ];
   float csv[MAXJ];
+  float csvivf[MAXJ];
+  float cmva[MAXJ];
   float cosTheta[MAXJ];
   int numTracksSV[MAXJ];
   float chf[MAXJ];
@@ -658,6 +662,8 @@ int main(int argc, char* argv[])
   _outTree->Branch("hJet_phi",hJets.phi ,"phi[nhJets]/F");
   _outTree->Branch("hJet_e",hJets.e ,"e[nhJets]/F");
   _outTree->Branch("hJet_csv",hJets.csv ,"csv[nhJets]/F");
+  _outTree->Branch("hJet_csvivf",hJets.csvivf ,"csvivf[nhJets]/F");
+  _outTree->Branch("hJet_cmva",hJets.cmva ,"cmva[nhJets]/F");
   _outTree->Branch("hJet_cosTheta",hJets.cosTheta ,"cosTheta[nhJets]/F");
   _outTree->Branch("hJet_numTracksSV",hJets.numTracksSV ,"numTracksSV[nhJets]/I");
   _outTree->Branch("hJet_chf",hJets.chf ,"chf[nhJets]/F");
@@ -696,6 +702,9 @@ int main(int argc, char* argv[])
   _outTree->Branch("fathFilterJets_phi",fathFilterJets.phi ,"phi[nfathFilterJets]/F");
   _outTree->Branch("fathFilterJets_e",fathFilterJets.e ,"e[nfathFilterJets]/F");
   _outTree->Branch("fathFilterJets_csv",fathFilterJets.csv ,"csv[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_csvivf",fathFilterJets.csvivf ,"csvivf[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_cmva",fathFilterJets.cmva ,"cmva[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_flavour",fathFilterJets.flavour ,"flavour[nfathFilterJets]/F");
 
 
   _outTree->Branch("aJet_pt",aJets.pt ,"pt[naJets]/F");
@@ -703,6 +712,8 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_phi",aJets.phi ,"phi[naJets]/F");
   _outTree->Branch("aJet_e",aJets.e ,"e[naJets]/F");
   _outTree->Branch("aJet_csv",aJets.csv ,"csv[naJets]/F");
+  _outTree->Branch("aJet_csvivf",aJets.csvivf ,"csvivf[naJets]/F");
+  _outTree->Branch("aJet_cmva",aJets.cmva ,"cmva[naJets]/F");
   _outTree->Branch("aJet_cosTheta",aJets.cosTheta ,"cosTheta[naJets]/F");
   _outTree->Branch("aJet_numTracksSV",aJets.numTracksSV ,"numTracksSV[naJets]/I");
   _outTree->Branch("aJet_chf",aJets.chf ,"chf[naJets]/F");
@@ -1260,6 +1271,7 @@ int main(int argc, char* argv[])
  
 
 
+
 	//Secondary Vertices
 	IVF.reset();
 	nSvs = svc.size();
@@ -1732,7 +1744,6 @@ int main(int argc, char* argv[])
 	       */      
 	   
 	 }
-	
         /// Compute pull angle from AK7
         if(!fromCandidate){
           std::vector<VHbbEvent::SimpleJet> ak7wrt1(iEvent->simpleJets3);
