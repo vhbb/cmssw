@@ -24,6 +24,8 @@ class VHbbEvent{
     float tche,tchp, jpb,jp , ssvhe, csv, csvmva,csvivf,cmva;
     // CSV vertex info
     float vtxMass, vtx3dL, vtx3deL, vtxNTracks, vtxProb;
+    TVector3 vtxPosition;
+    TLorentzVector  vtxP4;
     std::vector<unsigned int> vtxTrackIds;
     int ntracks;
     float charge;

@@ -960,7 +960,11 @@ process.savedGenParticles = cms.EDProducer(
     select = cms.vstring(
     "drop  *", # this is the default
     "keep++ pdgId >= 23 && pdgId <= 25", #keep W,Z,H and theirs products
-    "drop++ status == 2", #drop unstable decay products (we will anyhow keep later the b-quarks)
+    "keep++ pdgId == 22 && pt > 15", #keep gamma above 15 GeV
+    "drop++   status == 2 ", #drop all non stable decay products (and daughters) [quarks are going to be added below]
+    "keep++ abs(pdgId) == 15", #keep tau and its decay prods
+    "keep  numberOfMothers() > 0 && abs(mother(0).pdgId) == 15", #keep first generation of tau daugthers (this is redundant I think)
+    "drop  numberOfMothers() > 0 && abs(mother(0).pdgId) == {pi0}", #drop pi0 daugthers photons
     "keep  (abs(pdgId) ==13 || abs(pdgId) ==11 || abs(pdgId) ==15 ) &&  pt > 5.0", #keep leptons of decent pT
     "keep  (abs(pdgId) > 400 &&  abs(pdgId) < 600)    ||     (  (abs(pdgId) > 4000 &&  abs(pdgId) < 6000)  )",  # track-back the origin of B/D
     "keep  (  (abs(pdgId) >= 4 &&  abs(pdgId) <= 6)) ", #keep heavy quarks

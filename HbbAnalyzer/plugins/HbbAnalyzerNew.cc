@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.64 2012/03/28 08:37:05 sethzenz Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.65 2012/03/30 12:26:25 arizzi Exp $
 //
 //
 
@@ -1838,8 +1838,16 @@ void HbbAnalyzerNew ::fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Je
 
     const reco::SecondaryVertexTagInfo * tf = jet_iter->tagInfoSecondaryVertex();
    if (tf){
+      math::XYZTLorentzVectorD vertexSum;
+      for(size_t vi=0;vi< tf->nVertices();vi++)
+      {
+        vertexSum+=tf->secondaryVertex(vi).p4();
+      }
+      sj.vtxP4 = GENPTOLOR(vertexSum);
+
      if (tf->nVertices() >0){
-	sj.vtxMass = tf->secondaryVertex(0).p4().mass();
+	sj.vtxPosition = TVector3(tf->secondaryVertex(0).position().x(),tf->secondaryVertex(0).position().y(),tf->secondaryVertex(0).position().z());
+	sj.vtxMass =  tf->secondaryVertex(0).p4().mass();
 	sj.vtxNTracks = tf->secondaryVertex(0).nTracks();
 	std::vector<reco::TrackBaseRef >::const_iterator tit =  tf->secondaryVertex(0).tracks_begin();
 	for (; tit<  tf->secondaryVertex(0).tracks_end(); ++tit){
