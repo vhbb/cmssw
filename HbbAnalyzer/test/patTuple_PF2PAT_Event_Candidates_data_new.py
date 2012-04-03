@@ -977,6 +977,7 @@ process.savedGenParticles = cms.EDProducer(
 
 if isMC == False :
         process.p = cms.Path(
+		process.softElectronCands*
                     process.goodOfflinePrimaryVertices*
                      process.inclusiveVertexing*
                      process.PF2PAT*
@@ -1020,6 +1021,7 @@ if isMC == False :
                      )
 else :
         process.p = cms.Path(
+		process.softElectronCands*
 #		process.printTree *
 #		    process.printList *
 	             process.savedGenParticles *
