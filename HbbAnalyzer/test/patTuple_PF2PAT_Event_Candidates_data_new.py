@@ -102,7 +102,8 @@ process.out1 = cms.OutputModule(
 	"keep *_HLTDoubleMu7_*_*",
 	"keep *_EcalDeadCellEventFilter_*_*",
         "keep *_patType1CorrectedPFMet*_*_*",
-	"keep *_patType1p2CorrectedPFMet*_*_*"
+	"keep *_patType1p2CorrectedPFMet*_*_*",
+	"keep LHEEventProduct_source_*_LHE"
 	),
     dropMetaData = cms.untracked.string('ALL'),
     splitLevel = cms.untracked.int32(99),
