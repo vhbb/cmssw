@@ -55,6 +55,7 @@
 #define MAXJ 30
 #define MAXL 10
 #define MAXB 10
+#define MAXT 60
 #define nMetUnc 24 
 //eleEnDown/Up, muEn, tauEn, JES, JER, Unclustered for type1 MET [0-11] and than type1p2 MET [12-23]
 
@@ -238,7 +239,16 @@ typedef struct
 //  float dEta;
 } FatHiggsInfo;
 
- 
+typedef struct
+{
+  bool HiggsCSVtkSharing;
+  bool HiggsIPtkSharing;
+  bool HiggsSVtkSharing;
+  bool FatHiggsCSVtkSharing;
+  bool FatHiggsIPtkSharing;
+  bool FatHiggsSVtkSharing;
+} TrackSharingInfo;
+
 typedef struct 
 {
   float mass;  //MT in case of W
@@ -520,7 +530,7 @@ int main(int argc, char* argv[])
   TrackInfo V;
   int nvlep=0,nalep=0; 
   
-
+  TrackSharingInfo TkSharing; // track sharing info;
 
   float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, genHpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweight2011B;
   float PU0,PUp1,PUm1;
@@ -649,7 +659,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("genTop"		,  &genTop	            ,  "bmass/F:bpt/F:beta:bphi/F:bstatus/F:wdau1mass/F:wdau1pt/F:wdau1eta:wdau1phi/F:wdau1id/F:wdau2mass/F:wdau2pt/F:wdau2eta:wdau2phi/F:wdau2id/F");
   _outTree->Branch("genTbar"		,  &genTbar	            ,  "bmass/F:bpt/F:beta:bphi/F:bstatus/F:wdau1mass/F:wdau1pt/F:wdau1eta:wdau1phi/F:wdau1id/F:wdau2mass/F:wdau2pt/F:wdau2eta:wdau2phi/F:wdau2id/F");
 
-
+  _outTree->Branch("TkSharing", &TkSharing, "HiggsCSVtkSharing/b:HiggsIPtkSharing:HiggsSVtkSharing:FatHiggsCSVtkSharing:FatHiggsIPtkSharing:FatHiggsSVtkSharing");
 
   _outTree->Branch("nhJets"		,  &nhJets	            ,  "nhJets/I");
   _outTree->Branch("nfathFilterJets",   &nfathFilterJets,   "nfathFilterJets/I");
@@ -1270,7 +1280,84 @@ int main(int argc, char* argv[])
 	}
  
 
+        /////////
+        // track sharing flags:
+        ////////
+        TkSharing.HiggsCSVtkSharing = TkSharing.HiggsIPtkSharing = TkSharing.HiggsSVtkSharing = TkSharing.FatHiggsCSVtkSharing = TkSharing.FatHiggsIPtkSharing = TkSharing.FatHiggsSVtkSharing = false;
 
+        // csv tracks
+        if (vhCand.H.jets[0].csvNTracks > 0 && vhCand.H.jets[1].csvNTracks > 0){
+          for (int t=0;t!=vhCand.H.jets[0].csvNTracks;t++){
+            for (int ti=0;ti!=vhCand.H.jets[1].csvNTracks;ti++){
+              if ((int)vhCand.H.jets[0].csvTrackIds[t] == (int)vhCand.H.jets[1].csvTrackIds[ti]){
+                TkSharing.HiggsCSVtkSharing = true;
+              }// same trackID
+            }// loop tracks in second hjet
+          }// loop tracks in first hjet
+        }// if tracks in jet
+
+        // ip tracks
+        if (vhCand.H.jets[0].btagNTracks > 0 && vhCand.H.jets[1].btagNTracks > 0){
+          for (int t=0;t!=vhCand.H.jets[0].btagNTracks;t++){
+            for (int ti=0;ti!=vhCand.H.jets[1].btagNTracks;ti++){
+              if ((int)vhCand.H.jets[0].btagTrackIds[t] == (int)vhCand.H.jets[1].btagTrackIds[ti]){
+                TkSharing.HiggsIPtkSharing = true;
+              }// same trackID
+            }// loop tracks in second hjet
+          }// loop tracks in first hjet
+        }// if tracks in jet
+        
+        // sv tracks
+        if (vhCand.H.jets[0].vtxNTracks > 0 && vhCand.H.jets[1].vtxNTracks > 0){
+          for (int t=0;t!=vhCand.H.jets[0].vtxNTracks;t++){
+            for (int ti=0;ti!=vhCand.H.jets[1].vtxNTracks;ti++){
+              if ((int)vhCand.H.jets[0].vtxTrackIds[t] == (int)vhCand.H.jets[1].vtxTrackIds[ti]){
+                TkSharing.HiggsSVtkSharing = true;
+              }// same trackID
+            }// loop tracks in second hjet
+          }// loop tracks in first hjet
+        }// if tracks in jet
+
+        // tracksharing for Filtered jets:
+        if(vhCand.FatH.FatHiggsFlag && nfathFilterJets > 1){
+        
+          // csv tracks
+          if (vhCand.FatH.jets[0].csvNTracks > 0 && vhCand.FatH.jets[1].csvNTracks > 0){
+            for (int t=0;t!=vhCand.FatH.jets[0].csvNTracks;t++){
+              for (int ti=0;ti!=vhCand.FatH.jets[1].csvNTracks;ti++){
+                if ((int)vhCand.FatH.jets[0].csvTrackIds[t] == (int)vhCand.FatH.jets[1].csvTrackIds[ti]){
+                  TkSharing.FatHiggsCSVtkSharing = true;
+                }// same trackID
+              }// loop tracks in second hjet
+            }// loop tracks in first hjet
+          }// if tracks in jet
+          
+          // ip tracks
+          if (vhCand.FatH.jets[0].btagNTracks > 0 && vhCand.FatH.jets[1].btagNTracks > 0){
+            for (int t=0;t!=vhCand.FatH.jets[0].btagNTracks;t++){
+              for (int ti=0;ti!=vhCand.FatH.jets[1].btagNTracks;ti++){
+                if ((int)vhCand.FatH.jets[0].btagTrackIds[t] == (int)vhCand.FatH.jets[1].btagTrackIds[ti]){
+                  TkSharing.FatHiggsIPtkSharing = true;
+                }// same trackID
+              }// loop tracks in second hjet
+            }// loop tracks in first hjet
+          }// if tracks in jet
+          
+          // sv tracks
+          if (vhCand.FatH.jets[0].vtxNTracks > 0 && vhCand.FatH.jets[1].vtxNTracks > 0){
+            for (int t=0;t!=vhCand.FatH.jets[0].vtxNTracks;t++){
+              for (int ti=0;ti!=vhCand.FatH.jets[1].vtxNTracks;ti++){
+                if ((int)vhCand.FatH.jets[0].vtxTrackIds[t] == (int)vhCand.FatH.jets[1].vtxTrackIds[ti]){
+                  TkSharing.FatHiggsSVtkSharing = true;
+                }// same trackID
+              }// loop tracks in second hjet
+            }// loop tracks in first hjet
+          }// if tracks in jet
+          
+        }// fatH
+        
+        ////////
+        ////////
 
 	//Secondary Vertices
 	IVF.reset();
