@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.66 2012/04/03 08:55:44 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.67 2012/04/05 13:49:53 dlopes Exp $
 //
 //
 
@@ -424,7 +424,11 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   edm::Handle<edm::View<pat::Tau> > tauHandle;
   iEvent.getByLabel(tauLabel_,tauHandle);
   edm::View<pat::Tau> taus = *tauHandle;
-
+  
+  //Get the computer for the CSV
+  ESHandle<JetTagComputer> handle;
+  iSetup.get<JetTagComputerRecord>().get("combinedSecondaryVertex", handle);
+  computer = dynamic_cast<const GenericMVAJetTagComputer*>(handle.product());
 
   //BTAGGING SCALE FACTOR FROM DATABASE
   //Combined Secondary Vertex Loose
@@ -1830,6 +1834,7 @@ void HbbAnalyzerNew ::fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Je
       sj.nConstituents = jet_iter->getPFConstituents().size();
       
     }
+    sj.jetArea = jet_iter->jetArea();
     //
     // addtaginfo for csv
     //
@@ -1858,6 +1863,34 @@ void HbbAnalyzerNew ::fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Je
 	sj.vtx3deL = m.error();
      }
     }
+    
+    // CSV track info
+    const reco::SecondaryVertexTagInfo * svTagInfos = jet_iter->tagInfoSecondaryVertex();
+    const reco::TrackIPTagInfo * ipTagInfos = jet_iter->tagInfoTrackIP();
+    for (edm::RefVector<reco::TrackCollection>::const_iterator t = ipTagInfos->selectedTracks().begin(); t != ipTagInfos->selectedTracks().end(); t++){
+      sj.btagTrackIds.push_back(t->key());
+    }// all btag IP selected tracks    
+    std::vector<const reco::BaseTagInfo*> tagInfos;
+    tagInfos.push_back(dynamic_cast<const reco::BaseTagInfo*>(ipTagInfos));
+    tagInfos.push_back(dynamic_cast<const reco::BaseTagInfo*>(svTagInfos));
+    JetTagComputer::TagInfoHelper helper(tagInfos);
+    reco::TaggingVariableList varList = computer->taggingVariables(helper); // computer for getting CSV variables
+      
+    for(reco::TaggingVariableList::const_iterator iter = varList.begin(); iter != varList.end(); ++iter)
+    {
+      //std::cout << reco::TaggingVariableTokens[iter->first] << " = " << iter->second << std::endl;
+      for (edm::RefVector<reco::TrackCollection>::const_iterator t = ipTagInfos->selectedTracks().begin(); t != ipTagInfos->selectedTracks().end(); t++){
+        
+        if (strcmp(reco::TaggingVariableTokens[iter->first], "trackMomentum") == 0 && (fabs((float)iter->second - (float)(*t)->p()) < 0.0001) ){
+          sj.csvTrackIds.push_back(t->key());
+        }// if tagged track
+      }// loop on IPtracks        
+    }// loop on CSV variables
+
+    
+    sj.btagNTracks= ipTagInfos->selectedTracks().size();
+    sj.csvNTracks = sj.csvTrackIds.size();
+
    //
     // add tVector
     //

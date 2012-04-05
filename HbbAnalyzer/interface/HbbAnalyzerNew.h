@@ -61,6 +61,13 @@ using namespace std;
 #include "CondFormats/PhysicsToolsObjects/interface/BinningPointByMap.h"
 #include "RecoBTag/PerformanceDB/interface/BtagPerformance.h"
 
+//Include files needed for CSV Variables
+#include "RecoBTau/JetTagComputer/interface/JetTagComputer.h"
+#include "RecoBTau/JetTagComputer/interface/JetTagComputerRecord.h"
+#include "DataFormats/BTauReco/interface/SecondaryVertexTagInfo.h"
+#include "DataFormats/BTauReco/interface/TrackIPTagInfo.h"
+#include "RecoBTau/JetTagComputer/interface/GenericMVAJetTagComputer.h"
+
 
 // class decleration
 //
@@ -118,6 +125,9 @@ class HbbAnalyzerNew : public edm::EDProducer {
   //  TMatrixD *pointerPt;
   TMatrixD *pointerEta;
   TMatrixD *pointerPhi;
+  
+  //The computer for the CSV variables
+  const GenericMVAJetTagComputer *computer;
 
   bool verbose_;
  protected:

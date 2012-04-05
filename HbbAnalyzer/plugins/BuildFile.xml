@@ -19,6 +19,7 @@
 <use   name="CondFormats/JetMETObjects"/>
 <use   name="VHbbAnalysis/VHbbDataFormats"/>
 <use   name="JetMETCorrections/Objects"/>
+<use   name="RecoBTau/JetTagComputer"/>
 <use   name="root"/>
 <use name="fastjet"/>
 <library   file="*.cc" name="VHbbAnalysisHbbAnalyzerPlugins">
