@@ -15,7 +15,7 @@ class VHbbEvent{
       ssvhe(-99), csv(-99), csvmva(-99), csvivf(-99), cmva(-99),
       vtxMass(-99), vtx3dL(-99), vtx3deL(-99), vtxNTracks(-99), vtxProb(-99),
       ntracks(-99), charge(-99),jecunc(-99),
-      chargedHadronEFraction(-99), neutralHadronEFraction(-99), chargedEmEFraction(-99), neutralEmEFraction(-99),nConstituents(-99),
+      chargedHadronEFraction(-99), neutralHadronEFraction(-99), chargedEmEFraction(-99), neutralEmEFraction(-99),nConstituents(-99), ptRaw(-99), ptLeadTrack(-99),
       bestMCid(-99), bestMCmomid(-99){}
   public:
     double Pt() {return p4.Pt();}
@@ -48,6 +48,7 @@ class VHbbEvent{
 
     float chargedHadronEFraction, neutralHadronEFraction, chargedEmEFraction, neutralEmEFraction;
     int nConstituents;
+    float ptRaw,ptLeadTrack;    
 
     //MC parton matching
     TLorentzVector bestMCp4,bestMCp4mom;

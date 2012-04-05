@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.65 2012/03/30 12:26:25 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.66 2012/04/03 08:55:44 arizzi Exp $
 //
 //
 
@@ -1862,6 +1862,18 @@ void HbbAnalyzerNew ::fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Je
     // add tVector
     //
     sj.tVector = getTvect(&(*jet_iter));
+
+    sj.ptRaw = jet_iter->correctedJet(0).pt();
+
+    sj.ptLeadTrack =-9999.;
+    if (jet_iter->isPFJet() == true) {
+       std::vector <reco::PFCandidatePtr> constituents = jet_iter->getPFConstituents ();
+       for (unsigned ic = 0; ic < constituents.size (); ++ic) {
+         if ( constituents[ic]->particleId() > 3 ) continue;
+         reco::TrackRef trackRef = constituents[ic]->trackRef();
+       if ( trackRef.isNonnull() ) { if(trackRef->pt() > sj.ptLeadTrack) sj.ptLeadTrack=trackRef->pt(); }
+      }
+     }
 
 
 }
