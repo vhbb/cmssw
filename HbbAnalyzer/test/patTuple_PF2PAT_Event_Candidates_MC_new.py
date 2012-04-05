@@ -30,10 +30,10 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
 #	"file:/uscms/home/sethzenz/nobackup/9ECB2776-81AD-E011-8B94-E0CB4E19F972.root"
-
+'file:////shome/bortigno/MadGraph/fromSimon/CMSSW_4_2_8_patch3/src/Analyzer/GenAnalyzer/test/WJETS_FEFFC5AA-91F9-E011-914B-E0CB4E1A1183.root'
 #"file:/data/uftrig01b/jhugon/kinFitter/filesFall11/ttbarTestSampleEDM5k.root" 
 #"file:DYJetsToLL_PtZ-100.root",
-"/store/relval/CMSSW_4_2_6/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0009/5645192C-E7AA-E011-A714-0026189437F8.root"
+#"/store/relval/CMSSW_4_2_6/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0009/5645192C-E7AA-E011-A714-0026189437F8.root"
 #/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/E0457C77-11BB-E011-8C7C-00304867C0C4.root
 #/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/D27FB95F-10BB-E011-A4D4-003048678E94.root
 #/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/B885B6EB-13BB-E011-8ADC-001A92971ACE.root
@@ -102,7 +102,9 @@ process.out1 = cms.OutputModule(
 	"keep *_HLTDoubleMu7_*_*",
 	"keep *_EcalDeadCellEventFilter_*_*",
         "keep *_patType1CorrectedPFMet*_*_*",
-	"keep *_patType1p2CorrectedPFMet*_*_*"
+	"keep *_patType1p2CorrectedPFMet*_*_*",
+	"keep LHEEventProduct_source_*_LHE"
+	
 	),
     dropMetaData = cms.untracked.string('ALL'),
     splitLevel = cms.untracked.int32(99),
