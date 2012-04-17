@@ -71,7 +71,7 @@ def fillFromCastor(dir,ffile=0,step=-1,generatePfn=True):
 wrapper to read the configuration from comand line
 args: castor_directory output_file first_file step
 """
-def configureFromCommandLine() :
+def configureSourceFromCommandLine() :
     castorDir='/store/cmst3/group/cmgtools/CMG/WWJetsTo2L2Nu_TuneZ2_7TeV-madgraph-tauola/Fall11-PU_S6-START44_V5-v1/AODSIM/V3'
     outputFile='output.root'
     ffile=0

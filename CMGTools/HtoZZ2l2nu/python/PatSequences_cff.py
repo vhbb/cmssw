@@ -4,48 +4,41 @@ from PhysicsTools.PatAlgos.tools.trigTools import *
 from RecoJets.Configuration.RecoPFJets_cff import kt6PFJets
 from PhysicsTools.PatAlgos.tools.trackTools import *
 from PhysicsTools.PatAlgos.tools.metTools import *
+
+
+from EGamma.EGammaAnalysisTools.electronIdMVAProducer_cfi import *
 from SHarper.HEEPAnalyzer.HEEPSelectionCuts_cfi import *
+from ElectroWeakAnalysis.WENu.simpleEleIdSequence_cff import *
 
-##
-## add trigger matching for the leptons
-##
-def addTriggerMatchingForLeptons(process, postfix='') :
-    # define the trigger matchers
-    process.muTriggerMatchPF = cms.EDProducer( "PATTriggerMatcherDRLessByR",
-                                               src     = cms.InputTag( "selectedPatMuons"+postfix ),
-                                               matched = cms.InputTag( "patTrigger" ),
-                                               matchedCuts = cms.string( 'type( "TriggerMuon" ) && ( path("HLT_Mu8_*") || path("HLT_Mu12_*") || path("HLT_Mu13_*") || path("HLT_DoubleMu7_*") )' ), 
-                                               maxDPtRel   = cms.double( 0.5 ), # no effect here
-                                               maxDeltaR   = cms.double( 0.5 ),
-                                               maxDeltaEta = cms.double( 0.2 ), # no effect here
-                                               # definition of matcher output
-                                               resolveAmbiguities    = cms.bool( False ),
-                                               resolveByMatchQuality = cms.bool( False )
-                                               )
-    process.muTriggerMatch = process.muTriggerMatchPF.clone(src     = cms.InputTag( "selectedPatMuons"))
+def addElectronID( process, sequenceName, postfix ):
+
+    electronIDs = cms.PSet( mvaTrigV0 = cms.InputTag("mvaTrigV0"),
+                            mvaNonTrigV0 = cms.InputTag("mvaNonTrigV0"),
+                            simpleEleId95relIso= cms.InputTag("simpleEleId95relIso"),
+                            simpleEleId90relIso= cms.InputTag("simpleEleId90relIso"),
+                            simpleEleId85relIso= cms.InputTag("simpleEleId85relIso"),
+                            simpleEleId80relIso= cms.InputTag("simpleEleId80relIso"),
+                            simpleEleId70relIso= cms.InputTag("simpleEleId70relIso"),
+                            simpleEleId60relIso= cms.InputTag("simpleEleId60relIso"),
+                            eidHEEP = cms.InputTag("HEEPId")
+                            )
+
+    process.HEEPId = cms.EDProducer("HEEPIdValueMapProducer",
+                                    eleLabel = cms.InputTag(getattr(process, "patElectrons" + postfix).inputSource),
+                                    barrelCuts = cms.PSet(heepBarrelCuts),
+                                    endcapCuts = cms.PSet(heepEndcapCuts)
+                                    )
+    process.HEEPId.barrelCuts.minEt = 5.
+    process.HEEPId.endcapCuts.minEt = 5.
+    process.patElectronIDSequence = cms.Sequence( mvaTrigV0 + mvaNonTrigV0 + process.HEEPId + process.simpleEleIdSequence)
     
-    process.eleTriggerMatchPF = cms.EDProducer( "PATTriggerMatcherDRLessByR",
-                                                src     = cms.InputTag( "selectedPatElectrons"+postfix ),
-                                                matched = cms.InputTag( "patTrigger" ),
-                                                #matchedCuts = cms.string( 'type( "TriggerL1NoIsoEG" ) || type( "TriggerL1IsoEG" ) || type( "TriggerElectron" )' ),
-                                                matchedCuts = cms.string( 'type( "TriggerElectron" )' ),
-                                                maxDPtRel   = cms.double( 0.5 ), # no effect here
-                                                maxDeltaR   = cms.double( 0.5 ),
-                                                maxDeltaEta = cms.double( 0.2 ), # no effect here
-                                                # definition of matcher output
-                                                resolveAmbiguities    = cms.bool( False ),
-                                                resolveByMatchQuality = cms.bool( False )
-                                                )
-    process.eleTriggerMatch = process.eleTriggerMatchPF.clone(src     = cms.InputTag( "selectedPatElectrons") )
+    getattr(process, "patElectrons" + postfix).addElectronID = cms.bool(True)
+    getattr(process, "patElectrons" + postfix).electronIDSources  = electronIDs.clone()
+    getattr(process, sequenceName + postfix).replace( getattr(process, "patElectrons" + postfix),
+                                                      process.patElectronIDSequence  + getattr(process, "patElectrons" + postfix)
+                                                      )
 
-    from PhysicsTools.PatAlgos.tools.coreTools import removeCleaning
-    removeCleaning( process )
-    setattr( process, 'muTriggerMatch' + postfix, process.muTriggerMatchPF )
-    setattr( process, 'eleTriggerMatch' + postfix, process.eleTriggerMatchPF )
-    setattr( process, 'muTriggerMatch', process.muTriggerMatch )
-    setattr( process, 'eleTriggerMatch', process.eleTriggerMatch )
-    switchOnTriggerMatching( process, triggerMatchers = [ 'muTriggerMatch','eleTriggerMatch','muTriggerMatchPFlow','eleTriggerMatchPFlow' ], sequence = 'patDefaultSequence' )
-    removeCleaningFromTriggerMatching( process ) #, sequence = 'patPF2PATSequence' + postfix )
+    
     
 ##
 ## adds pat sequence

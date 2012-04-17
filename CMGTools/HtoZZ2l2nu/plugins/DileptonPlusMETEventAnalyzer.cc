@@ -27,7 +27,7 @@
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
-#include "RecoEgamma/EgammaTools/interface/EGEnergyCorrector.h"
+//#include "RecoEgamma/EgammaTools/interface/EGEnergyCorrector.h"
 
 #include "TH1.h"
 #include "TH2.h"
@@ -94,7 +94,7 @@ private:
   edm::Handle<reco::VertexCollection> hVtx_;
 
   //regression corrector for electrons/photons
-  EGEnergyCorrector phocorr_,ecorr_;
+  //  EGEnergyCorrector phocorr_,ecorr_;
 
 };
 
@@ -332,12 +332,14 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     Handle<View<Candidate> > hEle;
     event.getByLabel(objConfig_["Electrons"].getParameter<edm::InputTag>("source"), hEle);
     EcalClusterLazyTools lazyTool(event,iSetup,objConfig_["Photons"].getParameter<edm::InputTag>("ebrechits"),objConfig_["Photons"].getParameter<edm::InputTag>("eerechits"));
+    /*
     if(!ecorr_.IsInitialized())
       {
 	TString path(objConfig_["Electrons"].getParameter<std::string>("scCorrector"));
 	gSystem->ExpandPathName(path);
 	ecorr_.Initialize(iSetup,path.Data());
       }
+    */
     std::vector<CandidatePtr> selLooseElectrons = getGoodElectrons(hEle, hMu, primVertex, *rho, objConfig_["LooseElectrons"]);
     std::vector<CandidatePtr> selElectrons      = getGoodElectrons(hEle, hMu, primVertex, *rho, objConfig_["Electrons"]);
 
@@ -451,12 +453,14 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     // PHOTON SELECTION
     //
     edm::Handle<edm::View<reco::Candidate> > hPhoton;
+    /*
     if(!phocorr_.IsInitialized())
       {
 	TString path(objConfig_["Photons"].getParameter<std::string>("scCorrector"));
 	gSystem->ExpandPathName(path);
 	phocorr_.Initialize(iSetup,path.Data());
       }
+    */
     event.getByLabel( objConfig_["Photons"].getParameter<edm::InputTag>("source"), hPhoton );
     edm::Handle<std::vector<reco::Track> > hTracks;
     try{ event.getByLabel( objConfig_["Photons"].getParameter<edm::InputTag>("trackSource"), hTracks ); } catch(std::exception &e){}
@@ -480,7 +484,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.g_iso3[ev.gn]  = pho->hcalTowerSumEtConeDR04();
 	ev.g_r9[ev.gn]    = pho->r9();
 	std::pair<double,double> cor(pho->energy(),1);
-	try{ cor = phocorr_.CorrectedEnergyWithErrorV2(*pho,*hVtx_,lazyTool,iSetup); } catch (std::exception &e){ }
+	//try{ cor = phocorr_.CorrectedEnergyWithErrorV2(*pho,*hVtx_,lazyTool,iSetup); } catch (std::exception &e){ }
 	ev.g_corren[ev.gn] = cor.first;
 	ev.g_correnerr[ev.gn] = cor.second;
 	ev.g_conv[ev.gn] = false;
@@ -734,7 +738,7 @@ int DileptonPlusMETEventAnalyzer::setLeptonPidSummary(reco::CandidatePtr l,
       ev.en_detain[ev.en] = ele->deltaEtaSuperClusterTrackAtVtx();
       ev.en_sihih[ev.en]  = ele->sigmaIetaIeta();
       std::pair<double,double> cor (ele->energy(),0);
-      try{ cor = ecorr_.CorrectedEnergyWithErrorV2(*ele,*hVtx_,lazyTool,iSetup); } catch(std::exception &e){}
+      //try{ cor = ecorr_.CorrectedEnergyWithErrorV2(*ele,*hVtx_,lazyTool,iSetup); } catch(std::exception &e){}
       ev.en_corren[ev.en] = cor.first;
       ev.en_correnerr[ev.en] = cor.second;
 
