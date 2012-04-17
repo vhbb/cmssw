@@ -3,15 +3,18 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("HtoZZto2l2nu")
 
 process.load("Configuration.StandardSequences.Geometry_cff")
-#process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+from Configuration.AlCa.autoCond import autoCond
+process.GlobalTag.globaltag=cms.string(autoCond.get('startup',autoCond['mc']))
+#else process.GlobalTag=autoCond['com10']
 
 
 #the source is configured from the command line
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring()
                             )
-from CMGTools.HtoZZ2l2nu.localPatTuples_cff import configureFromCommandLine
-castorDir, outputFile, process.source.fileNames = configureFromCommandLine()
+from CMGTools.HtoZZ2l2nu.localPatTuples_cff import configureSourceFromCommandLine
+castorDir, outputFile, process.source.fileNames = configureSourceFromCommandLine()
 
 # histogram service
 process.TFileService = cms.Service("TFileService", fileName = cms.string(outputFile) )

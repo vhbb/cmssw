@@ -17,8 +17,11 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 # global tag
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-if ( not runOnMC ): process.GlobalTag.globaltag = 'GR_R_52_V7::All'
-else              : process.GlobalTag.globaltag = 'START52_V9::All'
+from Configuration.AlCa.autoCond import autoCond
+if(runOnMC) : process.GlobalTag.globaltag=cms.string(autoCond.get('startup',autoCond['mc']))
+else        : process.GlobalTag.globaltag=cms.string(autoCond['com10'])
+##if ( not runOnMC ): process.GlobalTag.globaltag = 'GR_R_52_V7::All'
+#else              : process.GlobalTag.globaltag = 'START52_V9::All'
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 
@@ -115,10 +118,12 @@ for i in xrange(0,len(postfixes) ):
     getattr(process,"pfSelectedElectrons"+i_postfix).cut="pt()>5"
     addPATElectronID( process, 'patDefaultSequence', i_postfix)    
 
-    #finish jet corrections
+    # configure jets
     enablePileUpCorrection( process, postfix=i_postfix)
     getattr(process,"patJetCorrFactors"+i_postfix).payload = i_jetAlgoPayLoad 
-
+    getattr(process,"patJets"+i_postfix).embedPFCandidates = cms.bool(True)
+    getattr(process,"patJets"+i_postfix).embedCaloTowers   = cms.bool(True)
+    
     # use non pileup substracted rho as in the Jan2012 JEC set
     getattr(process,"patJetCorrFactors"+i_postfix).rho = cms.InputTag("kt6PFJets","rho")
 

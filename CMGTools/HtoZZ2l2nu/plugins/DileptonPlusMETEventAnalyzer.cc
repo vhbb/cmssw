@@ -581,7 +581,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
         ev.ajn_chHadFrac[ev.ajn]   = jet->chargedHadronEnergyFraction();
         const reco::GenJet *gJet   = jet->genJet();
         ev.ajn_genpt[ev.ajn]       = gJet ? gJet->pt() : 0;
-        PileupJetIdentifier puIdentifier = puJetIdAlgo_.computeIdVariables(dynamic_cast<const reco::Jet*>(jet), 0, primVertex.get(), *hVtx_.product(), true);
+	PileupJetIdentifier puIdentifier = puJetIdAlgo_.computeIdVariables(dynamic_cast<const reco::Jet*>(jet), 0, primVertex.get(), *hVtx_.product(), true);
         ev.ajn_pumva[ev.jn]=puIdentifier.mva();
 	hasId.set(false); ev.jn_tightId[ev.jn] = jetIdSelector(*jet,hasId);
 	ev.ajn++;
@@ -695,11 +695,11 @@ int DileptonPlusMETEventAnalyzer::getElectronPidSummary(const pat::Electron *ele
   }catch(std::exception &e){
   }
 
-  summary= ( (int(ele->electronID("eidVBTF70")) & 0x1) )
-    | ( (int(ele->electronID("eidVBTF80")) & 0x1) << 1)
-    | ( (int(ele->electronID("eidVBTF85")) & 0x1) << 2)
-    | ( (int(ele->electronID("eidVBTF90")) & 0x1) << 3)
-    | ( (int(ele->electronID("eidVBTF95")) & 0x1) << 4)
+  summary= ( (int(ele->electronID("simpleEleId70relIso")) & 0x1) )
+    | ( (int(ele->electronID("simpleEleId80relIso")) & 0x1) << 1)
+    | ( (int(ele->electronID("simpleEleId85relIso")) & 0x1) << 2)
+    | ( (int(ele->electronID("simpleEleId90relIso")) & 0x1) << 3)
+    | ( (int(ele->electronID("simpleEleId95relIso")) & 0x1) << 4)
     | (hasHEEPid << 5)
     | ( isEcalDriven << 10);
  

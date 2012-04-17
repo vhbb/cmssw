@@ -22,7 +22,6 @@ def configureOutput(process,selPaths=['llPath', 'photonPath'],outFile='/tmp/patT
                        'keep *_prunedGen_*_*',
                        'keep *_genMetTrue_*_*',
                        'keep *_flavorHistoryFilter_*_*',
-                       'keep recoGenJets_ak5GenJets_*_*',               
                        'keep recoGsfTracks_electronGsfTracks_*_*',             #electrons
                        'keep recoGsfElectronCores_gsfElectronCores_*_*',
                        'keep recoGsfElectrons_gsfElectrons_*_*',
@@ -39,10 +38,15 @@ def configureOutput(process,selPaths=['llPath', 'photonPath'],outFile='/tmp/patT
                        'keep double*_*_sigma_'+process.name_(),
                        'drop CaloTowers_selectedPatJets*_*_*',
                        'drop *_iterativeCone*_*_*',
-                       'drop recoGenJets_selectedPatJets*_*_*',
+                       'drop recoGenJets_*_*_*',               
+                       #'keep recoGenJets_ak5GenJets_*_*',
+                       'keep recoGenJets_selectedPatJets*_*_*',
+                       #'drop recoGenJets_selectedPatJets*_*_*',
                        'drop patTaus_*_*_*',
                        'drop *_*PFlowNoPuSub_*_*',
+                       'keep recoGenJets_selectedPatJetsPFlowNoPuSub_*_*',
                        'keep patJets_selectedPatJetsPFlowNoPuSub_*_*',
+                       'keep recoPFCandidates_selectedPatJetsPFlowNoPuSub_*_*',
                        'keep recoPFCandidates_particleFlow_*_*']               # particle flow
                       )
     process.out.outputCommands = outputCmds

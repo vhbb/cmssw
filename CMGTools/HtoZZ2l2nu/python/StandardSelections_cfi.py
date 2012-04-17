@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+from CMGTools.External.puJetIDAlgo_cff import basePtVtxCat as basePuJetId
+
 # base values for trigger event
 BaseTriggerSelection = cms.PSet( source = cms.InputTag("TriggerResults::HLT"),
                                  triggerPaths = cms.PSet( gamma=cms.vstring('HLT_Photon20_CaloIdVL_IsoL_v',
@@ -27,7 +29,7 @@ BaseTriggerSelection = cms.PSet( source = cms.InputTag("TriggerResults::HLT"),
 # base values for the vertex selection ------------------------------------------
 BaseGeneratorSelection = cms.PSet( source = cms.InputTag("prunedGen"),
                                    filterId = cms.int32(25),
-                                   genJets=cms.InputTag("ak5GenJets"),
+                                   genJets=cms.InputTag("selectedPatJetsPFlow"),
                                    puReweight=cms.InputTag("puWeights:puWeight")
                                    )
 
@@ -86,7 +88,7 @@ BasePhotonsSelection = cms.PSet( source = cms.InputTag("photons"),
                                  gsfElectrons = cms.InputTag("gsfElectrons"),
                                  #cf. https://twiki.cern.ch/twiki/bin/view/CMS/RegressionSCCorrections
                                  scCorrector = cms.string("${CMSSW_BASE}/src/CMGTools/HtoZZ2l2nu/data/PhoEnRegress.root"),
-                                 rho25 = cms.InputTag("kt6PFJets25:rho"),
+                                 rho25 = cms.InputTag("kt6PFJetsForIso:rho"),
                                  ebrechits = cms.InputTag("reducedEcalRecHitsEB"),
                                  eerechits = cms.InputTag("reducedEcalRecHitsEE"),
                                  minEt = cms.double(5), 
@@ -122,7 +124,7 @@ BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectrons")
                                    maxDz        = cms.vdouble(0.1,   0.1),
                                    maxTrackLostHits = cms.vint32(0,  0),
                                    maxRelIso    = cms.double(0.1),
-                                   applyConversionVetoFrom = cms.string("eidVBTF80"),
+                                   applyConversionVetoFrom = cms.string("simpleEleId80relIso"),
                                    minDeltaRtoMuons = cms.double(0.1),
                                    usePFIso = cms.bool(False),
                                    doDeltaBetaCorrection = cms.bool(False)
@@ -138,14 +140,9 @@ BaseJetSelection = cms.PSet( source = cms.InputTag("selectedPatJetsPFlow"),
                              minPt = cms.double(10),
                              maxEta = cms.double(5.0),
                              minDeltaRtoLepton = cms.double(0.4),
-                             puJetId = cms.PSet( impactParTkThreshold = cms.untracked.double(0.) ,
-                                                 tmvaWeights   = cms.untracked.string("CMGTools/External/data/mva_JetID.weights.xml"),
-                                                 tmvaMethod    = cms.untracked.string("JetID"),   
-                                                 tmvaVariables = cms.untracked.vstring(),
-                                                 version       = cms.untracked.int32(0)
-                                                 )
+                             puJetId = basePuJetId
                              )
-AssocJetSelection = BaseJetSelection.clone(source = cms.InputTag("selectedPatJets") ) #source = cms.InputTag("ClusteredPFMetProducer", "JET"),
+AssocJetSelection = BaseJetSelection.clone(source = cms.InputTag("selectedPatJetsPFlowNoPuSub") )
 
 # base values for the dilepton selection ------------------------------------------
 BaseDileptonSelection = cms.PSet( minDileptonMass = cms.double(0),
