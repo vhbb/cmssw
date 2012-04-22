@@ -173,7 +173,12 @@ process.stdElectronSeq = cms.Sequence( process.pfParticleSelectionSequence +
                                        process.makePatElectrons +
                                        process.selectedPatElectrons
                                        )
-process.stdPhotonSeq = cms.Sequence( process.makePatPhotons )
+if(runOnMC) :
+    process.stdPhotonSeq = cms.Sequence( process.makePatPhotons )
+else :
+    process.patPhotons.addGenMatch = cms.bool(False)
+    process.patPhotons.embedGenMatch = cms.bool(False)
+    process.stdPhotonSeq = cms.Sequence( process.patPhotons )
 
 #tweak further standard lepton/photon sequences
 addPATElectronID( process, 'stdElectronSequence', '')

@@ -1,29 +1,17 @@
 import FWCore.ParameterSet.Config as cms
 
 from CMGTools.External.puJetIDAlgo_cff import basePtVtxCat as basePuJetId
+from CMGTools.HtoZZ2l2nu.TriggerSequences_cff import getTriggerPaths
+DoubleElectronTrigs, DoubleMuTrigs, MuEGTrigs, PhotonTrigs, SingleMuTrigs, mcTrigs = getTriggerPaths(version=2012)
 
 # base values for trigger event
 BaseTriggerSelection = cms.PSet( source = cms.InputTag("TriggerResults::HLT"),
-                                 triggerPaths = cms.PSet( gamma=cms.vstring('HLT_Photon20_CaloIdVL_IsoL_v',
-                                                                            'HLT_Photon30_CaloIdVL_IsoL_v',
-                                                                            'HLT_Photon50_CaloIdVL_IsoL_v',
-                                                                            'HLT_Photon75_CaloIdVL_IsoL_v',
-                                                                            'HLT_Photon90_CaloIdVL_IsoL_v',
-                                                                            'HLT_Photon125_v', 
-                                                                            'HLT_Photon135_v',
-                                                                            'HLT_Photon200_v'),
-                                                          ee=cms.vstring('HLT_Ele17_CaloIdL_CaloIsoVL_Ele8_CaloIdL_CaloIsoVL_v',
-                                                                         'HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v'),
-                                                          mumu=cms.vstring('HLT_DoubleMu7_v',
-                                                                           'HLT_Mu13_Mu8_v'),
-                                                          emu=cms.vstring('HLT_Mu17_Ele8_CaloIdL_v',
-                                                                          'HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v',
-                                                                          'HLT_Mu8_Ele17_CaloIdL_v',
-                                                                          'HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v'),
-                                                          singleMu=cms.vstring('HLT_IsoMu17_v',
-                                                                               'HLT_IsoMu24_v',
-                                                                               'HLT_IsoMu30_eta2p1_v',
-                                                                               'HLT_IsoMu34_eta2p1_v'))
+                                 triggerPaths = cms.PSet( gamma=cms.vstring(PhotonTrigs),
+                                                          ee=cms.vstring(DoubleElectronTrigs),
+                                                          mumu=cms.vstring(DoubleMuTrigs),
+                                                          emu=cms.vstring(MuEGTrigs),
+                                                          singleMu=cms.vstring(SingleMuTrigs)
+                                                          )
                                  )
 
 # base values for the vertex selection ------------------------------------------

@@ -2,8 +2,9 @@
 # installation
 # Note: LandS has to be compiled on it's own cf. https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideLandS
 #
-scramv1 project CMSSW CMSSW_4_4_4
-cd CMSSW_4_4_4/src/
+export SCRAM_ARCH=slc5_amd64_gcc462
+scramv1 project CMSSW CMSSW_5_2_3_patch2
+cd ${CMSSW_BASE}/src/
 cvs co -p UserCode/CMG/CMGTools/HtoZZ2l2nu/TAGS.txt | sh
 scramv1 b
 

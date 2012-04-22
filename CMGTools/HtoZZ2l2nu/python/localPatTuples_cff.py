@@ -17,7 +17,7 @@ def fillFromCastor(dir,ffile=0,step=-1,generatePfn=True):
         prefix='rfio'
         lscommand ='rfdir ' + dir + ' | awk \'{print $9}\''
         lsout = commands.getstatusoutput(lscommand)[1].split()
-    elif(dir.find('/store/cmst3')==0):
+    elif(dir.find('/store/')==0):
         prefix='eoscms'
         lscommand = 'cmsLs ' + dir + ' | grep root | awk \'{print $5}\''
         lsouttmp = commands.getstatusoutput(lscommand)[1].split()
