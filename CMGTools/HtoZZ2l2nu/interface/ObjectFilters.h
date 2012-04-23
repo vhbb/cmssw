@@ -20,10 +20,15 @@
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
+#include "RecoEgamma/EgammaTools/interface/EGEnergyCorrector.h"
 #include "DataFormats/EgammaCandidates/interface/Conversion.h"
 
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"
+
+#include "CMGTools/External/interface/PileupJetIdAlgo.h"
+
+#include "SHarper/HEEPAnalyzer/interface/HEEPCutCodes.h"
 
 #include "TVector3.h"
 #include "TH1D.h"
@@ -74,8 +79,43 @@ reco::VertexRef getClosestVertexTo(const T *trk, std::vector<reco::VertexRef> &s
 ///                            ///   
 /// LEPTON SELECTION UTILITIES ///
 ///                            ///   
-std::vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> > &hMu, const reco::VertexRef &primVertex, const double& rho, const edm::ParameterSet &iConfig);
-std::vector<reco::CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &hEle,  edm::Handle<edm::View<reco::Candidate> > &hMu, const reco::VertexRef &primVertex, const double& rho, const edm::ParameterSet &iConfig);
+struct ObjectIdSummary
+{
+  //generic
+  LorentzVector p4,genP4;
+  int id,genid,genflav;
+  double charge;
+  int idBits;
+  std::vector<double> isoVals, mva;
+  double ensf,ensferr;
+  double trkd0,trkdZ,trkpt,trketa,trkphi,trkchi2,trkValidPixelHits,trkValidTrackerHits,trkLostInnerHits;
+  //muon specific
+  double trkValidMuonHits,trkMatches;
+  //electron specific
+  double dPhiTrack,dEtaTrack,ooemoop,fbrem,eopin;
+  //common to photon and electron
+  double hoe,sihih,sipip,sce,sceta,scphi,e2x5max,e1x5,e5x5,h2te,h2tebc,r9;
+  //common to electron, photon, muon and jet
+  double aeff;
+  //jet specific
+  double neutHadFrac,neutEmFrac,chHadFrac,tche, csv, jp,beta,betaStar,dRMean,ptD,ptRMS;
+};
+std::vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> > &hMu,
+					     const reco::VertexRef &primVertex, 
+					     const double& rho, 
+					     const edm::ParameterSet &iConfig,
+					     std::vector<ObjectIdSummary> &selMuonIds);
+std::vector<reco::CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &hEle, 
+						 edm::Handle<edm::View<reco::Candidate> > &hMu, 
+						 edm::Handle<reco::VertexCollection> &hVtx,
+						 const reco::BeamSpot &beamspot,
+						 edm::Handle<reco::ConversionCollection> &hConversions,
+						 EGEnergyCorrector *ecorr,
+						 EcalClusterLazyTools &lazyTool,
+						 const double& rho, 
+						 const edm::ParameterSet &iConfig,
+						 const edm::EventSetup & iSetup,
+						 std::vector<ObjectIdSummary> &selElectronIds);
 std::vector<reco::CandidatePtr> getDileptonCandidate(std::vector<reco::CandidatePtr> &selLeptons,  const edm::ParameterSet &iConfig,  const edm::EventSetup &iSetup);
 int getLeptonId(reco::CandidatePtr &lepton);
 int getDileptonId(std::vector<reco::CandidatePtr> &dilepton);
@@ -89,20 +129,28 @@ const reco::GenParticle *getLeptonGenMatch(reco::CandidatePtr &lepton);
 ///                            ///   
 // cf. https://twiki.cern.ch/twiki/bin/viewauth/CMS/Vgamma2011PhotonID
 std::vector<reco::CandidatePtr> getGoodPhotons(edm::Handle<edm::View<reco::Candidate> > &hPhoton,
+					       EGEnergyCorrector *ecorr,
 					       EcalClusterLazyTools &lazyTool,
 					       edm::Handle<reco::GsfElectronCollection> &hEle,
 					       edm::Handle<reco::ConversionCollection> &hConversions,
+					       edm::Handle<reco::TrackCollection> &hTracks,
+					       edm::Handle<reco::VertexCollection> &hVtx,
 					       edm::Handle<reco::BeamSpot> &beamSpot,
 					       double rho,
-					       const edm::ParameterSet &iConfig);
-bool getPhotonTrackVeto(const reco::Photon *pho,edm::Handle<std::vector<reco::Track> > &ctfTracks);
+					       const edm::ParameterSet &iConfig,
+					       const edm::EventSetup & iSetup,
+					       std::vector<ObjectIdSummary> &selPhotonIds);
 
 ///                            ///   
 /// JET SELECTION UTILITIES    ///
 ///                            ///   
-std::vector<reco::CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet, std::vector<reco::CandidatePtr> &selPhysicsObjects, const edm::ParameterSet &iConfig);
-double computeVtxAssocFracForJet(const pat::Jet *jet, const reco::Vertex *vtx);
-
+std::vector<reco::CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet, 
+					    std::vector<reco::CandidatePtr> &selPhysicsObjects, 
+					    edm::Handle<reco::VertexCollection> &hVtx,
+					    PileupJetIdAlgo &puJetIdAlgo,
+					    const edm::ParameterSet &iConfig,
+					    std::vector<ObjectIdSummary> &selJetsId);
+std::pair<double,double> computeBetaForJet(const pat::Jet *jet, edm::Handle<reco::VertexCollection> &hVtx);
 
 ///                           ///
 /// GENERATOR LEVEL UTILITIES ///

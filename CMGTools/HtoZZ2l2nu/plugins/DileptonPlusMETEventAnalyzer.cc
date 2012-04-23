@@ -26,9 +26,6 @@
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 
-#include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
-//#include "RecoEgamma/EgammaTools/interface/EGEnergyCorrector.h"
-
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
@@ -46,10 +43,6 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 
-#include "SHarper/HEEPAnalyzer/interface/HEEPCutCodes.h"
-
-#include "CMGTools/External/interface/PileupJetIdAlgo.h"
-
 using namespace std;
 using namespace edm;
 using namespace reco;
@@ -64,27 +57,8 @@ public:
   
 private:
 
-  int setLeptonPidSummary(reco::CandidatePtr l,const reco::VertexRef &primVertex,EcalClusterLazyTools &lazyTool,const edm::EventSetup &iSetup);
   void saveMCtruth(const edm::Event &event, const edm::EventSetup &iSetup );
-
-
-  inline int getLeptonIsoSummary(reco::CandidatePtr l ,std::vector<double> &leptoniso, bool isTight)
-  {
-    int id = fabs(getLeptonId(l));
-    
-    double maxRelIso = objConfig_[id==ELECTRON ? "Electrons" : "Muons"].getParameter<double>("maxRelIso");
-    if(!isTight) maxRelIso = objConfig_[id==ELECTRON ? "LooseElectrons" : "LooseMuons"].getParameter<double>("maxRelIso");
-    
-    int isoSummary(0);
-    isoSummary = (leptoniso[REL_ISO] < maxRelIso) 
-      | ((leptoniso[RELRHOCORR_ISO] < maxRelIso) << 1)
-      | ((leptoniso[PFREL_ISO] < maxRelIso) << 2)  
-      | ((leptoniso[PFRELBETCORR_ISO] < maxRelIso) << 3);
-
-    return isoSummary;
-  }
-  int getMuonPidSummary(const pat::Muon *mu);
-  int getElectronPidSummary(const pat::Electron *ele);
+  int addPidSummary(ObjectIdSummary &obj);
 
   std::map<std::string, edm::ParameterSet> objConfig_;
   ZZ2l2nuSummaryHandler summaryHandler_;
@@ -94,7 +68,7 @@ private:
   edm::Handle<reco::VertexCollection> hVtx_;
 
   //regression corrector for electrons/photons
-  //  EGEnergyCorrector phocorr_,ecorr_;
+  EGEnergyCorrector phocorr_,ecorr_;
 
 };
 
@@ -130,6 +104,26 @@ DileptonPlusMETEventAnalyzer::DileptonPlusMETEventAnalyzer(const edm::ParameterS
   catch(std::exception &e){
     cout << e.what() << endl;
   }  
+}
+
+
+//
+int DileptonPlusMETEventAnalyzer::addPidSummary(ObjectIdSummary &obj)
+{
+  if(fabs(obj.id)==1)
+    {
+    }
+  else if(fabs(obj.id)==11)
+    {
+    }
+  else if(fabs(obj.id)==13)
+    {
+    }
+  else if(fabs(obj.id)==22)
+    {
+    }
+
+  return 0;
 }
 
 //
@@ -324,47 +318,45 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     //muon selection
     Handle<View<Candidate> > hMu;
     event.getByLabel(objConfig_["Muons"].getParameter<edm::InputTag>("source"), hMu);
-    std::vector<CandidatePtr> selSoftMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["SoftMuons"]);
-    std::vector<CandidatePtr> selLooseMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["LooseMuons"]);
-    std::vector<CandidatePtr> selMuons      = getGoodMuons(hMu, primVertex, *rho, objConfig_["Muons"]);
+    std::vector<ObjectIdSummary> softMuonSummary, looseMuonSummary, muonSummary;
+    std::vector<CandidatePtr> selSoftMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["SoftMuons"], softMuonSummary);
+    std::vector<CandidatePtr> selLooseMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["LooseMuons"], looseMuonSummary);
+    std::vector<CandidatePtr> selMuons      = getGoodMuons(hMu, primVertex, *rho, objConfig_["Muons"], muonSummary);
 
     //electron selection
     Handle<View<Candidate> > hEle;
     event.getByLabel(objConfig_["Electrons"].getParameter<edm::InputTag>("source"), hEle);
     EcalClusterLazyTools lazyTool(event,iSetup,objConfig_["Photons"].getParameter<edm::InputTag>("ebrechits"),objConfig_["Photons"].getParameter<edm::InputTag>("eerechits"));
-    /*
-    if(!ecorr_.IsInitialized())
-      {
-	TString path(objConfig_["Electrons"].getParameter<std::string>("scCorrector"));
-	gSystem->ExpandPathName(path);
-	ecorr_.Initialize(iSetup,path.Data());
-      }
-    */
-    std::vector<CandidatePtr> selLooseElectrons = getGoodElectrons(hEle, hMu, primVertex, *rho, objConfig_["LooseElectrons"]);
-    std::vector<CandidatePtr> selElectrons      = getGoodElectrons(hEle, hMu, primVertex, *rho, objConfig_["Electrons"]);
+    edm::Handle<reco::ConversionCollection> hConversions;
+    try{ event.getByLabel(objConfig_["Photons"].getParameter<std::string>("conversions"), hConversions); }  catch(std::exception &e){}
+    std::vector<ObjectIdSummary> looseEleSummary, eleSummary;
+    std::vector<CandidatePtr> selLooseElectrons = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_, lazyTool, *rho, objConfig_["LooseElectrons"], iSetup, looseEleSummary);
+    std::vector<CandidatePtr> selElectrons      = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_, lazyTool, *rho, objConfig_["Electrons"], iSetup, eleSummary);
 
     //inclusive collection of leptons to store (include the soft muon selection)
-    std::vector<CandidatePtr> selLooseLeptons = selLooseMuons;
-    selLooseLeptons.insert(selLooseLeptons.end(),selLooseElectrons.begin(),selLooseElectrons.end());
-    std::vector<CandidatePtr> selLeptons = selMuons;
-    selLeptons.insert(selLeptons.end(), selElectrons.begin(), selElectrons.end());
-    for(std::vector<CandidatePtr>::iterator smIt = selSoftMuons.begin(); smIt != selSoftMuons.end(); smIt++)
+    std::vector<CandidatePtr> selLooseLeptons           = selLooseMuons;
+    std::vector<ObjectIdSummary> selLooseLeptonsSummary = looseMuonSummary;
+    selLooseLeptons.insert       ( selLooseLeptons.end(),        selLooseElectrons.begin(),  selLooseElectrons.end());
+    selLooseLeptonsSummary.insert( selLooseLeptonsSummary.end(), looseEleSummary.begin(),    looseEleSummary.end() );
+    for(size_t ism=0; ism<selSoftMuons.size(); ism++)
       {
 	bool keep(true);
 	for(std::vector<CandidatePtr>::iterator lmIt=selLooseMuons.begin(); lmIt != selLooseMuons.end(); lmIt++)
 	  {
-	    if(deltaR((*smIt)->eta(),(*smIt)->phi(),(*lmIt)->eta(),(*lmIt)->phi())>0.1) continue;
+	    if(deltaR(selSoftMuons[ism]->eta(),selSoftMuons[ism]->phi(),(*lmIt)->eta(),(*lmIt)->phi())>0.1) continue;
 	    keep=false;
 	    break;
 	  }
 	if(!keep) continue;
-	selLooseLeptons.push_back(*smIt);
+	selLooseLeptons.push_back(selSoftMuons[ism]);
+	selLooseLeptonsSummary.push_back(looseMuonSummary[ism]);
       }
 
     //dilepton candidate
+    std::vector<CandidatePtr> selLeptons = selMuons;
+    selLeptons.insert(selLeptons.end(), selElectrons.begin(), selElectrons.end());
     std::vector<CandidatePtr> dilepton = getDileptonCandidate(selLeptons, objConfig_["Dileptons"], iSetup);
     ev.cat = getDileptonId(dilepton);
-
     if(dilepton.size()==2)
       {
 	//require trigger for each event category
@@ -375,77 +367,71 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	    if(ev.cat==EMU  && (triggerBits["emu"]==false || triggerBits["ee"]==true || triggerBits["mumu"]==true))  return;
 	  }
 	ev.hasTrigger=true;
-	
-	const reco::GenParticle *genLepton = getLeptonGenMatch(dilepton[0]);
-	std::vector<double> leptoniso      = getLeptonIso(dilepton[0]);
-	ev.l1_px    = dilepton[0]->px(); 
-	ev.l1_py    = dilepton[0]->py(); 
-	ev.l1_pz    = dilepton[0]->pz(); 
-	ev.l1_en    = dilepton[0]->energy();  
-	ev.l1_id    = getLeptonId(dilepton[0]);
-	ev.l1_ptErr = getLeptonPtError(dilepton[0]); 
-	ev.l1_genid = (genLepton==0? 0 : genLepton->pdgId());
-	ev.l1_gIso  = leptoniso[G_ISO]; 
-	ev.l1_nhIso  = leptoniso[N_ISO]; 
-	ev.l1_chIso  = leptoniso[C_ISO];
-	ev.l1_puchIso = leptoniso[CPU_ISO];
-	ev.l1_ecalIso  = leptoniso[ECAL_ISO]; 
-	ev.l1_hcalIso  = leptoniso[HCAL_ISO]; 
-	ev.l1_trkIso  = leptoniso[TRACKER_ISO];
-	ev.l1_passIso = getLeptonIsoSummary(dilepton[0], leptoniso, true);
-	ev.l1_pid = setLeptonPidSummary( dilepton[0], primVertex, lazyTool, iSetup);
-
-	genLepton = getLeptonGenMatch(dilepton[1]);
-	leptoniso = getLeptonIso(dilepton[1]);
-	ev.l2_px     = dilepton[1]->px(); 
-	ev.l2_py     = dilepton[1]->py(); 
-	ev.l2_pz     = dilepton[1]->pz(); 
-	ev.l2_en     = dilepton[1]->energy();  
-	ev.l2_id     = getLeptonId(dilepton[1]);
-	ev.l2_genid  = (genLepton==0? 0 : genLepton->pdgId());
-	ev.l2_ptErr  = getLeptonPtError(dilepton[1]);
-	ev.l2_gIso  = leptoniso[G_ISO]; 
-	ev.l2_nhIso  = leptoniso[N_ISO]; 
-	ev.l2_chIso  = leptoniso[C_ISO];
-	ev.l2_puchIso = leptoniso[CPU_ISO];
-	ev.l2_ecalIso  = leptoniso[ECAL_ISO]; 
-	ev.l2_hcalIso  = leptoniso[HCAL_ISO]; 
-	ev.l2_trkIso  = leptoniso[TRACKER_ISO];
-	ev.l2_passIso = getLeptonIsoSummary(dilepton[1], leptoniso, true);
-	ev.l2_pid = setLeptonPidSummary( dilepton[1], primVertex, lazyTool, iSetup);
       }
-    
+
+    //save leptons
     ev.ln=0;
-    for (std::vector<CandidatePtr>::iterator lit= selLooseLeptons.begin(); lit!=selLooseLeptons.end(); lit++)
+    for(size_t ilep=0; ilep<selLooseLeptonsSummary.size(); ilep++)
       {
-	//do not consider if the lepton is building the dilepton
+	int leptonRank(3);
+	ObjectIdSummary &lep=selLooseLeptonsSummary[ilep];
 	if(dilepton.size()==2 )
 	  {
-	    if(
-	       deltaR((*lit)->eta(),(*lit)->phi(),dilepton[0]->eta(),dilepton[0]->phi())<0.1 || 
-	       deltaR((*lit)->eta(),(*lit)->phi(),dilepton[1]->eta(),dilepton[1]->phi())<0.1 
-	       ) 
-	      continue;
+	    if(deltaR(lep.p4.eta(),lep.p4.phi(),dilepton[0]->eta(),dilepton[0]->phi())<0.1) 
+	      {
+		ev.l1_px       = lep.p4.px();
+		ev.l1_py       = lep.p4.py();
+		ev.l1_pz       = lep.p4.pz();
+		ev.l1_en       = lep.p4.energy();
+		ev.l1_id       = lep.id;
+		ev.l1_ptErr    = getLeptonPtError(dilepton[0]); 
+		ev.l1_genid    = lep.genid;
+		ev.l1_gIso     = lep.isoVals[G_ISO]; 
+		ev.l1_nhIso    = lep.isoVals[N_ISO]; 
+		ev.l1_chIso    = lep.isoVals[C_ISO];
+		ev.l1_puchIso  = lep.isoVals[CPU_ISO];
+		ev.l1_ecalIso  = lep.isoVals[ECAL_ISO]; 
+		ev.l1_hcalIso  = lep.isoVals[HCAL_ISO]; 
+		ev.l1_trkIso   = lep.isoVals[TRACKER_ISO];
+		ev.l1_pid      = addPidSummary( lep );
+		leptonRank=1;
+	      }
+	    if(deltaR(lep.p4.eta(),lep.p4.phi(),dilepton[1]->eta(),dilepton[1]->phi())<0.1) 
+	      {
+		ev.l2_px       = lep.p4.px();
+		ev.l2_py       = lep.p4.py();
+		ev.l2_pz       = lep.p4.pz();
+		ev.l2_en       = lep.p4.energy();
+		ev.l2_id       = lep.id;
+		ev.l2_ptErr    = lep.p4.pt()*lep.ensferr;
+		ev.l2_genid    = lep.genid;
+		ev.l2_gIso     = lep.isoVals[G_ISO]; 
+		ev.l2_nhIso    = lep.isoVals[N_ISO]; 
+		ev.l2_chIso    = lep.isoVals[C_ISO];
+		ev.l2_puchIso  = lep.isoVals[CPU_ISO];
+		ev.l2_ecalIso  = lep.isoVals[ECAL_ISO]; 
+		ev.l2_hcalIso  = lep.isoVals[HCAL_ISO]; 
+		ev.l2_trkIso   = lep.isoVals[TRACKER_ISO];
+		ev.l2_pid      = addPidSummary( lep );
+		leptonRank=2; 
+	      } 
 	  }
-	
-	const reco::GenParticle *genLepton = getLeptonGenMatch(*lit);
-	std::vector<double> leptoniso      = getLeptonIso(*lit);
-	ev.ln_px[ev.ln]    = (*lit)->px();
-	ev.ln_py[ev.ln]    = (*lit)->py();
-	ev.ln_pz[ev.ln]    = (*lit)->pz();
-	ev.ln_en[ev.ln]    = (*lit)->energy();
-	ev.ln_id[ev.ln]    = getLeptonId(*lit);
-	ev.ln_genid[ev.ln] = (genLepton==0? 0 : genLepton->pdgId());
-	ev.ln_ptErr[ev.ln] = getLeptonPtError(*lit);
-	ev.ln_gIso[ev.ln]     = leptoniso[G_ISO]; 
-	ev.ln_nhIso[ev.ln]    = leptoniso[N_ISO]; 
-	ev.ln_chIso[ev.ln]    = leptoniso[C_ISO];
-	ev.ln_puchIso[ev.ln]  = leptoniso[CPU_ISO];
-	ev.ln_ecalIso[ev.ln]  = leptoniso[ECAL_ISO]; 
-	ev.ln_hcalIso[ev.ln]  = leptoniso[HCAL_ISO]; 
-	ev.ln_trkIso[ev.ln]   = leptoniso[TRACKER_ISO];
-	ev.ln_passIso[ev.ln] = getLeptonIsoSummary(*lit, leptoniso, false);
-	ev.ln_pid[ev.ln] = setLeptonPidSummary(*lit, primVertex, lazyTool, iSetup);
+	if(leptonRank!=3) continue;
+	ev.ln_px[ev.ln]       = lep.p4.px();
+	ev.ln_py[ev.ln]       = lep.p4.py();
+	ev.ln_pz[ev.ln]       = lep.p4.pz();
+	ev.ln_en[ev.ln]       = lep.p4.energy();
+	ev.ln_id[ev.ln]       = lep.id;
+	ev.ln_genid[ev.ln]    = lep.genid;
+	ev.ln_ptErr[ev.ln]    = lep.p4.pt()*lep.ensferr;
+	ev.ln_gIso[ev.ln]     = lep.isoVals[G_ISO]; 
+	ev.ln_nhIso[ev.ln]    = lep.isoVals[N_ISO]; 
+	ev.ln_chIso[ev.ln]    = lep.isoVals[C_ISO];
+	ev.ln_puchIso[ev.ln]  = lep.isoVals[CPU_ISO];
+	ev.ln_ecalIso[ev.ln]  = lep.isoVals[ECAL_ISO]; 
+	ev.ln_hcalIso[ev.ln]  = lep.isoVals[HCAL_ISO]; 
+	ev.ln_trkIso[ev.ln]   = lep.isoVals[TRACKER_ISO];
+	ev.ln_pid[ev.ln]      = addPidSummary(lep);
 	ev.ln++;
       }
 
@@ -453,23 +439,14 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     // PHOTON SELECTION
     //
     edm::Handle<edm::View<reco::Candidate> > hPhoton;
-    /*
-    if(!phocorr_.IsInitialized())
-      {
-	TString path(objConfig_["Photons"].getParameter<std::string>("scCorrector"));
-	gSystem->ExpandPathName(path);
-	phocorr_.Initialize(iSetup,path.Data());
-      }
-    */
     event.getByLabel( objConfig_["Photons"].getParameter<edm::InputTag>("source"), hPhoton );
     edm::Handle<std::vector<reco::Track> > hTracks;
     try{ event.getByLabel( objConfig_["Photons"].getParameter<edm::InputTag>("trackSource"), hTracks ); } catch(std::exception &e){}
     edm::Handle<reco::GsfElectronCollection> hGsfEle;
     try{ event.getByLabel(objConfig_["Photons"].getParameter<edm::InputTag>("gsfElectrons"),hGsfEle); }  catch(std::exception &e){}
-    edm::Handle<reco::ConversionCollection> hConversions;
-    try{ event.getByLabel(objConfig_["Photons"].getParameter<std::string>("conversions"), hConversions); }  catch(std::exception &e){}
     ev.gn=0;
-    std::vector<CandidatePtr> selPhotons=getGoodPhotons(hPhoton,lazyTool,hGsfEle,hConversions,beamSpot,*rho25,objConfig_["Photons"]);
+    std::vector<ObjectIdSummary> selPhotonIds;
+    std::vector<CandidatePtr> selPhotons=getGoodPhotons(hPhoton,&phocorr_,lazyTool,hGsfEle,hConversions,hTracks,hVtx_,beamSpot,*rho25,objConfig_["Photons"],iSetup,selPhotonIds);
     for(std::vector<CandidatePtr>::iterator phoIt = selPhotons.begin(); phoIt != selPhotons.end(); phoIt++)
       {
 	const reco::Photon *pho = dynamic_cast<const reco::Photon *>(phoIt->get());
@@ -483,28 +460,18 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.g_iso2[ev.gn]  = pho->ecalRecHitSumEtConeDR04();
 	ev.g_iso3[ev.gn]  = pho->hcalTowerSumEtConeDR04();
 	ev.g_r9[ev.gn]    = pho->r9();
-	std::pair<double,double> cor(pho->energy(),1);
-	//try{ cor = phocorr_.CorrectedEnergyWithErrorV2(*pho,*hVtx_,lazyTool,iSetup); } catch (std::exception &e){ }
-	ev.g_corren[ev.gn] = cor.first;
-	ev.g_correnerr[ev.gn] = cor.second;
+	ev.g_corren[ev.gn] =1.0;
+	ev.g_correnerr[ev.gn] = 0.;
 	ev.g_conv[ev.gn] = false;
-	ev.g_trkVeto[ev.gn] = getPhotonTrackVeto(pho,hTracks);
+	ev.g_trkVeto[ev.gn] = false;
 	LorentzVector convP4(0,0,0,0);
 	
-	//check for matched conversions
-	if(hConversions.isValid())
-	  {
-	    reco::ConversionRef conv = ConversionTools::matchedConversion(*pho->superCluster(),hConversions,beamSpot->position());
-	    if(!conv.isNull())
-	      {
-		ev.g_conv_px[ev.gn] = conv->refittedPair4Momentum().px();
-		ev.g_conv_py[ev.gn] = conv->refittedPair4Momentum().py();
-		ev.g_conv_pz[ev.gn] = conv->refittedPair4Momentum().pz();
-		ev.g_conv_en[ev.gn] = conv->refittedPair4Momentum().energy();
-		bool isVtxConstrained( fabs(primVertex->position().z()-conv->conversionVertex().position().z()) < 0.1 );
-		ev.g_conv_invtx[ev.gn] = isVtxConstrained;
-	      }
-	  }
+	ev.g_conv_px[ev.gn] = 1.0;
+	ev.g_conv_py[ev.gn] = 1.0;
+	ev.g_conv_pz[ev.gn] = 1.0;
+	ev.g_conv_en[ev.gn] = 1.0;
+	ev.g_conv_invtx[ev.gn] = false;
+
 	ev.gn++;
       }
     if(ev.cat==UNKNOWN && selPhotons.size() && triggerBits["gamma"]==true) ev.cat=GAMMA+1000*photonTrig.second;
@@ -519,7 +486,8 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     Handle<View<Candidate> > hJet;
     event.getByLabel(objConfig_["Jets"].getParameter<edm::InputTag>("source"), hJet);
     ev.jn=0;
-    std::vector<CandidatePtr> selJets = getGoodJets(hJet, selLeptons, objConfig_["Jets"]);    
+    std::vector<ObjectIdSummary> selJetsId;
+    std::vector<CandidatePtr> selJets = getGoodJets(hJet, selLeptons, hVtx_, puJetIdAlgo_, objConfig_["Jets"],selJetsId);    
     int nbcands(0);
     LorentzVector jetSum(0,0,0,0);
     PFJetIDSelectionFunctor jetIdSelector(PFJetIDSelectionFunctor::FIRSTDATA,PFJetIDSelectionFunctor::TIGHT);
@@ -563,7 +531,8 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     //const PFJet* jet = &(*jIt);  
     Handle<View<Candidate> > haJet;
     event.getByLabel(objConfig_["AssocJets"].getParameter<edm::InputTag>("source"), haJet);
-    std::vector<CandidatePtr> selaJets = getGoodJets(haJet, selLeptons, objConfig_["AssocJets"]);
+    std::vector<ObjectIdSummary> selAJetsId;
+    std::vector<CandidatePtr> selaJets = getGoodJets(haJet, selLeptons, hVtx_,puJetIdAlgo_, objConfig_["AssocJets"],selAJetsId);
     for (std::vector<CandidatePtr>::iterator jIt = selaJets.begin(); jIt != selaJets.end(); jIt++)
       {  
 	const pat::Jet *jet = dynamic_cast<const pat::Jet *>(jIt->get());
@@ -664,121 +633,6 @@ void DileptonPlusMETEventAnalyzer::endLuminosityBlock(const edm::LuminosityBlock
       }
     }
 }
-
-
-//
-int DileptonPlusMETEventAnalyzer::getElectronPidSummary(const pat::Electron *ele)
-{
-  int summary(0);
-  bool isEcalDriven(true);
-  try{
-    isEcalDriven = ele->ecalDrivenSeed();
-  }catch(std::exception &e){
-    cout << e.what() << endl;
-  }
-
-  bool hasHEEPid(false);  
-  try{
-    int myHeepBits[]={heep::CutCodes::DETAIN,          
-		      heep::CutCodes::DPHIIN,        
-		      heep::CutCodes::HADEM,
-		      heep::CutCodes::SIGMAIETAIETA, 
-		      heep::CutCodes::E2X5OVER5X5,
-		      heep::CutCodes::NRMISSHITS};
-    int heepIdVal( ele->electronID("eidHEEP"));
-    hasHEEPid=true;
-    if(heepIdVal>0)
-      {
-	for(size_t ibit=0; ibit<sizeof(myHeepBits)/sizeof(int); ibit++)
-	  hasHEEPid &= !(heep::CutCodes::passCuts(heepIdVal,myHeepBits[ibit]));
-      }
-  }catch(std::exception &e){
-  }
-
-  summary= ( (int(ele->electronID("simpleEleId70relIso")) & 0x1) )
-    | ( (int(ele->electronID("simpleEleId80relIso")) & 0x1) << 1)
-    | ( (int(ele->electronID("simpleEleId85relIso")) & 0x1) << 2)
-    | ( (int(ele->electronID("simpleEleId90relIso")) & 0x1) << 3)
-    | ( (int(ele->electronID("simpleEleId95relIso")) & 0x1) << 4)
-    | (hasHEEPid << 5)
-    | ( isEcalDriven << 10);
- 
-  return summary;
-}
-
-//
-int DileptonPlusMETEventAnalyzer::setLeptonPidSummary(reco::CandidatePtr l,
-						      const reco::VertexRef &primVertex,
-						      EcalClusterLazyTools &lazyTool,
-						      const edm::EventSetup &iSetup)
-{
-  int iidx(0);
-  ZZ2l2nuSummary_t &ev = summaryHandler_.getEvent();
-  int lid = fabs(getLeptonId(l));
-  if(lid==MUON) 
-    {
-      const pat::Muon *mu=dynamic_cast<const pat::Muon *>(l.get());
-      ev.mn_idbits[ev.mn]  = getMuonPidSummary( mu );
-      ev.mn_chi2[ev.mn]    = mu->isGlobalMuon() ? mu->globalTrack()->normalizedChi2() : 0;
-      ev.mn_pixHits[ev.mn] = mu->isGlobalMuon() ? mu->globalTrack()->hitPattern().numberOfValidPixelHits() : 0;
-      ev.mn_trkHits[ev.mn] = mu->isGlobalMuon() ? mu->globalTrack()->hitPattern().numberOfValidTrackerHits() : 0;
-      ev.mn_muHits[ev.mn]  = mu->isGlobalMuon() ? mu->globalTrack()->hitPattern().numberOfValidMuonHits() : 0;
-      ev.mn_nMatches[ev.mn] = mu->numberOfMatches();
-      ev.mn_d0[ev.mn] = fabs(mu->innerTrack()->dxy(primVertex->position()));
-      ev.mn_dZ[ev.mn] = fabs(mu->innerTrack()->dz(primVertex->position()));
-      iidx=ev.mn;
-      ev.mn++;
-    }
-  else
-    {
-      const pat::Electron *ele=dynamic_cast<const pat::Electron *>(l.get());
-      ev.en_idbits[ev.en] = getElectronPidSummary( ele );
-      ev.en_hoe[ev.en]    = ele->hadronicOverEm();
-      ev.en_dphiin[ev.en] = ele->deltaPhiSuperClusterTrackAtVtx();
-      ev.en_detain[ev.en] = ele->deltaEtaSuperClusterTrackAtVtx();
-      ev.en_sihih[ev.en]  = ele->sigmaIetaIeta();
-      std::pair<double,double> cor (ele->energy(),0);
-      //try{ cor = ecorr_.CorrectedEnergyWithErrorV2(*ele,*hVtx_,lazyTool,iSetup); } catch(std::exception &e){}
-      ev.en_corren[ev.en] = cor.first;
-      ev.en_correnerr[ev.en] = cor.second;
-
-      reco::SuperClusterRef sc = ele->superCluster();
-      ev.en_sce[ev.en] = sc->energy();
-      ev.en_sceta[ev.en] = sc->eta();
-      ev.en_scphi[ev.en] = sc->phi();
-      ev.en_e2x5max[ev.en] = ele->e2x5Max();
-      ev.en_e1x5[ev.en]=ele->e1x5();
-      ev.en_e5x5[ev.en]=ele->e5x5();
-      ev.en_h2te[ev.en]=ele->dr03HcalDepth2TowerSumEt();
-      ev.en_h2tebc[ev.en]=ele->dr03HcalDepth2TowerSumEtBc();
-      const reco::GsfTrackRef & eTrack = ele->gsfTrack();
-      ev.en_gsfpt[ev.en]=eTrack->pt();
-      ev.en_gsfeta[ev.en]=eTrack->eta();
-      ev.en_gsfphi[ev.en]=eTrack->phi();
-      ev.en_d0[ev.en]=fabs(eTrack->dxy(primVertex->position()));
-      ev.en_dZ[ev.en]=fabs(eTrack->dz(primVertex->position())); 
-      iidx=ev.en;
-      ev.en++;
-    }
-  return iidx;
-}
-
-
-//
-int DileptonPlusMETEventAnalyzer::getMuonPidSummary(const pat::Muon *mu)
-{
-  int summary(0);
-  summary=( (int(mu->muonID("GlobalMuonPromptTight")) & 0x1) )
-    | ( (int(mu->muonID("TMLastStationLoose")) & 0x1) << 1)
-    | ( (int(mu->muonID("TMLastStationTight")) & 0x1) << 2)
-    | ( (int(mu->muonID("TMLastStationAngTight")) & 0x1) << 3)
-    | (  mu->isTrackerMuon() << 4 )
-    | (  mu->isGlobalMuon() << 5 );
-  return summary;
-}
-
-DEFINE_FWK_MODULE(DileptonPlusMETEventAnalyzer);
-
 
  
 

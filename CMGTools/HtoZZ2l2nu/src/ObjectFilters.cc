@@ -1,7 +1,10 @@
 #include "CMGTools/HtoZZ2l2nu/interface/ObjectFilters.h"
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
+#include "EGamma/EGammaAnalysisTools/interface/EGammaCutBasedEleId.h"
 #include "TObjArray.h"
 #include "TObjString.h"
+#include "TString.h"
+#include "TSystem.h"
 
 using namespace std;
 using namespace reco;
@@ -65,16 +68,17 @@ float getVertexMomentumFlux(const reco::Vertex *vtx, float minWeight)
 vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> > &hMu, 
 					const reco::VertexRef &primVertex,
 					const double& rho, 
-					const edm::ParameterSet &iConfig)
+					const edm::ParameterSet &iConfig,
+					std::vector<ObjectIdSummary> &selMuonIds)
 {
     vector<reco::CandidatePtr> selMuons;
+    selMuonIds.clear();
     
     try{
       //config parameters
       double minPt = iConfig.getParameter<double>("minPt");
       double maxEta = iConfig.getParameter<double>("maxEta");
       bool requireGlobal = iConfig.getParameter<bool>("requireGlobal"); 
-      bool requireTracker = iConfig.getParameter<bool>("requireTracker"); 
       int minValidMuonHits = iConfig.getParameter<int>("minValidMuonHits");
       int minMatchingMuonStations = iConfig.getParameter<int>("minMatchingMuonStations");
       int minValidTrackerHits = iConfig.getParameter<int>("minValidTrackerHits");
@@ -94,63 +98,63 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	{
 	  reco::CandidatePtr muonPtr = hMu->ptrAt(iMuon);
 	  const pat::Muon *muon = dynamic_cast<const pat::Muon *>( muonPtr.get() );
+	  if(!muon->isTrackerMuon()) continue;  
 	  
-	  //kinematics
-	  double mPt = muon->pt();
-	  double mEta = muon->eta();
-	  if( mPt<minPt || fabs(mEta)>maxEta) continue; 
+	  ObjectIdSummary lepId;
+	  lepId.p4 = LorentzVector(muon->px(),muon->py(),muon->pz(),muon->energy());
+	  lepId.id=13;
+	  const reco::Candidate *genLep = muon->genLepton();
+	  lepId.genid   = genLep ? genLep->pdgId() : -9999;
+	  lepId.genflav = lepId.genid;
+	  if(genLep) lepId.genP4 = LorentzVector(genLep->px(),genLep->py(),genLep->pz(),genLep->energy());
+	  lepId.charge=muon->charge();
+	  lepId.ensf = 1.0;
+	  lepId.ensferr=fabs(muon->innerTrack()->ptError()/muon->innerTrack()->pt());
+	  lepId.isoVals = getLeptonIso( muonPtr, muon->pt(), rho );
+	  lepId.trkd0=fabs(muon->innerTrack()->dxy(primVertex->position())); //muon->dB(pat::Muon::PV2D);
+	  lepId.trkdZ = fabs(muon->innerTrack()->dz(primVertex->position()));
+	  lepId.trkchi2 = muon->innerTrack()->normalizedChi2();	  
+	  lepId.trkValidPixelHits = muon->innerTrack()->hitPattern().numberOfValidPixelHits();
+	  lepId.trkValidTrackerHits = muon->innerTrack()->hitPattern().numberOfValidTrackerHits();
+	  lepId.trkLostInnerHits  = muon->innerTrack()->trackerExpectedHitsInner().numberOfLostHits();
+	  lepId.trkValidMuonHits = 0;
+	  lepId.trkMatches = 0;
 
-	  //muon type
-	  bool isTracker = muon->isTrackerMuon();
-	  if(requireTracker && !isTracker)  continue;
 	  bool isGlobal = muon->isGlobalMuon();
-	  if(requireGlobal && !isGlobal) continue;
-	  
-	  //primary vertex compatibility (requires tracker)
-	  if(requireTracker)
+	  if(isGlobal)
 	    {
-	      double d0=fabs(muon->innerTrack()->dxy(primVertex->position())); //muon->dB(pat::Muon::PV2D);
-	      float dZ = fabs(muon->innerTrack()->dz(primVertex->position()));
-	      if(fabs(d0)>maxD0 || fabs(dZ)>maxDZ) continue;
-
-	      double sigmaPt=muon->innerTrack()->ptError();
-	      if(fabs(sigmaPt/mPt)>maxRelPtUncertainty) continue;
+	      lepId.trkchi2 = muon->globalTrack()->normalizedChi2();	  
+	      lepId.trkValidPixelHits = muon->globalTrack()->hitPattern().numberOfValidPixelHits();
+	      lepId.trkValidTrackerHits = muon->globalTrack()->hitPattern().numberOfValidTrackerHits();
+	      lepId.trkValidMuonHits = muon->globalTrack()->hitPattern().numberOfValidMuonHits();
+	      lepId.trkMatches = muon->numberOfMatches();
 	    }
-	  
-	  //global track selection	  
+	  lepId.idBits=( (int(muon->muonID("GlobalMuonPromptTight")) & 0x1) )
+	    | ( (int(muon->muonID("TMLastStationLoose")) & 0x1) << 1)
+	    | ( (int(muon->muonID("TMLastStationTight")) & 0x1) << 2)
+	    | ( (int(muon->muonID("TMLastStationAngTight")) & 0x1) << 3)
+	    | (  muon->isTrackerMuon() << 4 )
+	    | (  muon->isGlobalMuon() << 5 );
+
+	  //select the muon
+	  if( lepId.p4.pt()<minPt || fabs(lepId.p4.eta())>maxEta) continue; 
+	  if(fabs(lepId.ensferr)>maxRelPtUncertainty) continue;
+	  if(fabs(lepId.trkd0)>maxD0 || fabs(lepId.trkdZ)>maxDZ) continue;
+	  if(lepId.trkchi2>maxTrackChi2 || lepId.trkValidPixelHits<minPixelHits || lepId.trkValidTrackerHits<minValidTrackerHits) continue; 
 	  if(requireGlobal)
 	    {
-	      double chi2 = muon->globalTrack()->normalizedChi2();	  
-	      int nValidPixelHits = muon->globalTrack()->hitPattern().numberOfValidPixelHits();
-	      int nValidTrackerHits = muon->globalTrack()->hitPattern().numberOfValidTrackerHits();
-	      int nValidMuonHits = muon->globalTrack()->hitPattern().numberOfValidMuonHits();
-	      int nMatches = muon->numberOfMatches();
-	      if(chi2>maxTrackChi2
-		 || nValidPixelHits<minPixelHits
-		 || nValidTrackerHits<minValidTrackerHits 
-		 || nValidMuonHits<minValidMuonHits
-		 || nMatches<minMatchingMuonStations) continue;
+	      if(!isGlobal) continue;
+	      if(lepId.trkValidMuonHits<minValidMuonHits  || lepId.trkMatches<minMatchingMuonStations) continue;
 	    }
-      
-
-
-	  //id 
-	  if(!id.empty())
-	    {
-	      bool hasId = (muon->muonID(id)>0) ;
-	      if(!hasId) continue;
-	    }
-	  
-	  //isolation
-	  std::vector<double> isoVals = getLeptonIso( muonPtr, mPt, rho );
-	  double relIso = isoVals[REL_ISO];
-	  if(rho>0)     relIso = isoVals[RELRHOCORR_ISO];
-	  if(usePFIso)  relIso = isoVals[ doDeltaBetaCorrection ? PFRELBETCORR_ISO : PFREL_ISO];
-	  if(applySoftMuonIsolationVeto && mPt>20 && relIso<0.1) continue;
+	  double relIso = lepId.isoVals[REL_ISO];
+	  if(rho>0)     relIso = lepId.isoVals[RELRHOCORR_ISO];
+	  if(usePFIso)  relIso = lepId.isoVals[ doDeltaBetaCorrection ? PFRELBETCORR_ISO : PFREL_ISO];
+	  if(applySoftMuonIsolationVeto && muon->pt()>20 && relIso<0.1) continue;
 	  else if(relIso>maxRelIso) continue;
 
 	  //muon is selected
 	  selMuons.push_back(muonPtr);
+	  selMuonIds.push_back(lepId);
 	}
       
     }catch(exception &e){
@@ -164,80 +168,173 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 //
 vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &hEle, 
 				      edm::Handle<edm::View<reco::Candidate> > &hMu, 
-				      const reco::VertexRef &primVertex,
+				      edm::Handle<reco::VertexCollection> &hVtx,
+				      const reco::BeamSpot &beamspot,
+				      edm::Handle<reco::ConversionCollection> &hConversions,
+				      EGEnergyCorrector *ecorr,
+				      EcalClusterLazyTools &lazyTool,
 				      const double& rho, 
-				      const edm::ParameterSet &iConfig)
+				      const edm::ParameterSet &iConfig,
+				      const edm::EventSetup & iSetup,
+				      std::vector<ObjectIdSummary> &selElectronIds)
 {
   vector<CandidatePtr> selElectrons;
-
+  selElectronIds.clear();
+  reco::VertexRef primVtx(hVtx, 0);
+  
   try{
-    //config parameters                                                                                                                                                 
+    //config parameters
     double minPt = iConfig.getParameter<double>("minPt");
     double maxEta = iConfig.getParameter<double>("maxEta");
-    bool vetoTransitionElectrons     = iConfig.getParameter<bool>("vetoTransitionElectrons");
-    std::vector<double> maxSihih     = iConfig.getParameter<std::vector<double> >("maxSihih");
-    std::vector<double> maxDetaTrack = iConfig.getParameter<std::vector<double> >("maxDetaTrack");
-    std::vector<double> maxDphiTrack = iConfig.getParameter<std::vector<double> >("maxDphiTrack");
-    std::vector<double> maxHoE       = iConfig.getParameter<std::vector<double> >("maxHoE");
-    std::vector<double> maxD0        = iConfig.getParameter<std::vector<double> >("maxD0");
-    std::vector<double> maxDZ        = iConfig.getParameter<std::vector<double> >("maxDz");
-    std::vector<int> maxTrackLostHits = iConfig.getParameter<std::vector<int> >("maxTrackLostHits");
-    string applyConversionVetoFrom   = iConfig.getParameter<string>("applyConversionVetoFrom");
-    double maxRelIso    = iConfig.getParameter<double>("maxRelIso");
-    double minDeltaRtoMuons = iConfig.getParameter<double>("minDeltaRtoMuons");
-    bool usePFIso = iConfig.getParameter<bool>("usePFIso");
-    bool doDeltaBetaCorrection = iConfig.getParameter<bool>("doDeltaBetaCorrection");
-    
+    bool vetoTransitionElectrons      = iConfig.getParameter<bool>("vetoTransitionElectrons");
+    edm::ParameterSet vbtfCfg         = iConfig.getParameter<edm::ParameterSet>("vbtf2011");
+    std::vector<double> maxSihih      = vbtfCfg.getParameter<std::vector<double> >("maxSihih");
+    std::vector<double> maxDetaTrack  = vbtfCfg.getParameter<std::vector<double> >("maxDetaTrack");
+    std::vector<double> maxDphiTrack  = vbtfCfg.getParameter<std::vector<double> >("maxDphiTrack");
+    std::vector<double> maxHoE        = vbtfCfg.getParameter<std::vector<double> >("maxHoE");
+    std::vector<double> maxD0         = vbtfCfg.getParameter<std::vector<double> >("maxD0");
+    std::vector<double> maxDZ         = vbtfCfg.getParameter<std::vector<double> >("maxDz");
+    std::vector<int> maxTrackLostHits = vbtfCfg.getParameter<std::vector<int> >("maxTrackLostHits");
+    string vbtfConversionVetoSource   = vbtfCfg.getParameter<string>("applyConversionVetoFrom");
+    double maxRelIso                  = iConfig.getParameter<double>("maxRelIso");
+    bool usePFIso                     = iConfig.getParameter<bool>("usePFIso");
+    bool doDeltaBetaCorrection        = iConfig.getParameter<bool>("doDeltaBetaCorrection");
+    double minDeltaRtoMuons           = iConfig.getParameter<double>("minDeltaRtoMuons");
+    if(ecorr)
+      {
+	if(!ecorr->IsInitialized())
+	  {
+	    TString path(iConfig.getParameter<std::string>("scCorrector"));
+	    gSystem->ExpandPathName(path);
+	    ecorr->Initialize(iSetup,path.Data());
+	  }
+      }
+
     //iterate over the electrons
     for(size_t iElec=0; iElec< hEle.product()->size(); ++iElec)
       {
 	reco::CandidatePtr elePtr = hEle->ptrAt(iElec);
 	const pat::Electron *ele = dynamic_cast<const pat::Electron *>( elePtr.get() );
-	
-	//kinematics
-	double ePt = ele->pt();
-	reco::SuperClusterRef sc = ele->superCluster();
-	//double eSuperClusterEt  = sc->energy()/cosh(sc->eta());
-	double eEta = ele->eta();
-	double scEta= ele->superCluster()->eta();
+	if(ele->gsfTrack().isNull()) continue;
+	if(ele->superCluster().isNull()) continue;
 
-	if(ePt<minPt || fabs(eEta)>maxEta) continue; 
-	if(vetoTransitionElectrons && fabs(scEta)>1.4442 && fabs(scEta)<1.566) continue;
-
-	//electron id (apply on the fly simple cut based)
-	bool isEE(ele->isEE());
-	double hoe       = ele->hadronicOverEm();
-	double dPhiTrack = ele->deltaPhiSuperClusterTrackAtVtx();
-	double dEtaTrack = ele->deltaEtaSuperClusterTrackAtVtx();
-	double sihih     = ele->sigmaIetaIeta();
-	bool hasId( hoe<maxHoE[isEE] && sihih<maxSihih[isEE] && dPhiTrack<maxDphiTrack[isEE] && dEtaTrack<maxDetaTrack[isEE]);
-	if(!hasId) continue;
-
-	//vertex compatibility
-	const reco::GsfTrackRef & eTrack = ele->gsfTrack();
-	double d0=fabs(eTrack->dxy(primVertex->position())); 
-	float dZ = fabs(eTrack->dz(primVertex->position()));
-	bool isVertexCompatible(d0<maxD0[isEE] && dZ<maxDZ[isEE]);
-	if(!isVertexCompatible) continue;
-	
-	//conversion veto
-	int nTrackLostHits=eTrack->trackerExpectedHitsInner().numberOfLostHits();
-	bool hasConversionTag(nTrackLostHits>maxTrackLostHits[isEE]);
-	if( !applyConversionVetoFrom.empty() )
+	//build a summary of this object
+	ObjectIdSummary lepId;
+	lepId.p4 = LorentzVector(ele->px(),ele->py(),ele->pz(),ele->energy());
+	lepId.id=11;
+	const reco::Candidate *genLep = ele->genLepton();
+        lepId.genid   = genLep ? genLep->pdgId() : -9999;
+        lepId.genflav = lepId.genid;
+	if(genLep) lepId.genP4 = LorentzVector(genLep->px(),genLep->py(),genLep->pz(),genLep->energy());
+	lepId.charge=ele->charge();
+	std::pair<double,double> enSF(1.0,0);
+	if(ecorr) 
 	  {
-	    int eid = (int) ele->electronID(applyConversionVetoFrom);
-	    hasConversionTag = !((eid>>2) & 0x1);	 
+	    enSF=ecorr->CorrectedEnergyWithError(*ele,*hVtx,lazyTool,iSetup);
+	    enSF.first = enSF.first/ele->energy();  enSF.second = enSF.second/ele->energy();
 	  }
-	if(hasConversionTag) continue;
+	lepId.ensf              = enSF.first;
+	lepId.ensferr           = enSF.second;
+	lepId.isoVals           = getLeptonIso( elePtr, lepId.p4.pt(), rho);
+	lepId.hoe               = ele->hadronicOverEm();
+	lepId.dPhiTrack         = ele->deltaPhiSuperClusterTrackAtVtx();
+	lepId.dEtaTrack         = ele->deltaEtaSuperClusterTrackAtVtx();
+	vector<float> cov       = lazyTool.localCovariances(*ele->superCluster()->seed());
+	lepId.sihih             = ele->sigmaIetaIeta();
+	lepId.sipip             = sqrt(cov[2]);
+	lepId.ooemoop           = (1.0/ele->ecalEnergy() - ele->eSuperClusterOverP()/ele->ecalEnergy());
+	lepId.trkpt             = ele->gsfTrack()->pt();
+	lepId.trketa            = ele->gsfTrack()->eta();
+	lepId.trkphi            = ele->gsfTrack()->phi();
+	lepId.trkd0             = fabs(ele->gsfTrack()->dxy(primVtx->position()));
+	lepId.trkdZ             = fabs(ele->gsfTrack()->dz(primVtx->position()));
+	lepId.trkchi2           = ele->gsfTrack()->normalizedChi2();
+	lepId.trkValidPixelHits = ele->gsfTrack()->hitPattern().numberOfValidPixelHits();
+	lepId.trkValidTrackerHits = ele->gsfTrack()->hitPattern().numberOfValidTrackerHits();
+	lepId.trkLostInnerHits  = ele->gsfTrack()->trackerExpectedHitsInner().numberOfLostHits();
+	lepId.sce               = ele->superCluster()->energy();
+	lepId.sceta             = ele->superCluster()->eta();
+	lepId.scphi             = ele->superCluster()->phi();
+	lepId.e2x5max           = ele->e2x5Max();
+	lepId.e1x5              = ele->e1x5();
+	lepId.e5x5              = ele->e5x5();
+	lepId.h2te              = ele->dr03HcalDepth2TowerSumEt();
+	lepId.h2tebc            = ele->dr03HcalDepth2TowerSumEtBc();
+	lepId.fbrem             = ele->fbrem();
+	lepId.r9                = lazyTool.e3x3(*ele->superCluster()->seed())/ele->superCluster()->rawEnergy();
+	lepId.aeff              = EgammaCutBasedEleId::GetEffectiveArea(ele->eta());  
 	
-	//isolation
-	std::vector<double> isoVals = getLeptonIso( elePtr, ePt, rho);
-	double relIso = isoVals[REL_ISO];
-	if(rho>0)     relIso = isoVals[RELRHOCORR_ISO];
-	if(usePFIso)  relIso = isoVals[ doDeltaBetaCorrection ? PFRELBETCORR_ISO : PFREL_ISO];
+	//2011 VBTF like id
+	bool isEE(ele->isEE());	
+	bool hasConversionTag(lepId.trkLostInnerHits>maxTrackLostHits[isEE]);
+	int vbtf2011value = (int) ele->electronID(vbtfConversionVetoSource);
+	hasConversionTag = !((vbtf2011value>>2) & 0x1);	 
+	bool has2011Id = ( lepId.hoe<maxHoE[isEE] 
+			   && lepId.sihih<maxSihih[isEE] 
+			   && lepId.dPhiTrack<maxDphiTrack[isEE] 
+			   && lepId.dEtaTrack<maxDetaTrack[isEE] 
+			   && fabs(lepId.trkd0)<maxD0[isEE]
+			   && fabs(lepId.trkdZ)<maxDZ[isEE]
+			   && !hasConversionTag);
+	
+	//2012 CUT BASED IDs : require the loosest one, i.e. veto Id)
+	const reco::GsfElectron *gsfEle = dynamic_cast<const reco::GsfElectron *>(ele);
+	bool passconversionveto = !ConversionTools::hasMatchedConversion(*gsfEle,hConversions,beamspot.position());
+	bool passEoP            = EgammaCutBasedEleId::PassEoverPCuts(lepId.sceta,lepId.eopin,lepId.fbrem);
+	int  cutBasedIdsToTest[]= {EgammaCutBasedEleId::VETO, EgammaCutBasedEleId::LOOSE, EgammaCutBasedEleId::MEDIUM, EgammaCutBasedEleId::TIGHT};
+	bool hasCutBasedIds[]   = {false,                     false,                      false,                       false};
+	for(size_t iid=0; iid<4; iid++)
+	  {
+	    hasCutBasedIds[iid]=EgammaCutBasedEleId::PassWP(EgammaCutBasedEleId::WorkingPoint(cutBasedIdsToTest[iid]),
+							    ele->isEB(),
+							    ele->pt(),ele->eta(),
+							    lepId.dEtaTrack, lepId.dPhiTrack, lepId.sihih, lepId.hoe,
+							    lepId.ooemoop, lepId.trkd0, lepId.trkdZ, 
+							    0., 0., 0.,
+							    passconversionveto, uint(lepId.trkLostInnerHits),
+							    rho);
+	  }
+	int triggerCutsToTest[] = {EgammaCutBasedEleId::TRIGGERTIGHT,EgammaCutBasedEleId::TRIGGERWP70};
+	bool passTriggerCut[]   = {false,                            false};
+	for(size_t icut=0; icut<2; icut++)
+	  {
+	    passTriggerCut[icut] = EgammaCutBasedEleId::PassTriggerCuts(EgammaCutBasedEleId::TriggerWorkingPoint(triggerCutsToTest[icut]),
+									ele->isEB(),
+									ele->pt(),
+									lepId.dEtaTrack, lepId.dPhiTrack, lepId.sihih, lepId.hoe,
+									lepId.isoVals[TRACKER_ISO],lepId.isoVals[ECAL_ISO],lepId.isoVals[HCAL_ISO]);
+	  }
+	
+	int myHeepBits[]={heep::CutCodes::DETAIN,
+			  heep::CutCodes::DPHIIN,
+			  heep::CutCodes::HADEM,
+			  heep::CutCodes::SIGMAIETAIETA,
+			  heep::CutCodes::E2X5OVER5X5,
+			  heep::CutCodes::NRMISSHITS};
+	int heepIdVal( ele->electronID("eidHEEP"));
+	bool hasHEEPid=true;
+	for(size_t ibit=0; ibit<sizeof(myHeepBits)/sizeof(int); ibit++)
+	  hasHEEPid &= !(heep::CutCodes::passCuts(heepIdVal,myHeepBits[ibit]));
+	  
+	//build a summary of IDs
+	lepId.idBits = has2011Id |
+	  hasCutBasedIds[0] << 1 | hasCutBasedIds[1] << 2 | hasCutBasedIds[2] << 3 | hasCutBasedIds[3] << 4 |
+	  passconversionveto << 5 |
+	  passEoP << 6 |
+	  passTriggerCut[0] << 7 |
+	  passTriggerCut[1] << 8 |
+	  hasHEEPid << 9;
+
+	//now do its selection
+	if(lepId.p4.pt()<minPt || fabs(lepId.p4.eta())>maxEta) continue; 
+	if(vetoTransitionElectrons && fabs(lepId.sceta)>1.4442 && fabs(lepId.sceta)<1.566) continue;
+	if(!hasCutBasedIds[0]) continue;
+	double relIso        = lepId.isoVals[REL_ISO];
+	if(rho>0)     relIso = lepId.isoVals[RELRHOCORR_ISO];
+	if(usePFIso)  relIso = lepId.isoVals[ doDeltaBetaCorrection ? PFRELBETCORR_ISO : PFREL_ISO];
 	if(relIso>maxRelIso) continue;
 	
-	//cross clean with overlapping muons
+	//final cross clean with overlapping muons
 	bool isOverLappingWithMuon(false);
 	for(size_t iMuon=0; iMuon<hMu.product()->size(); ++iMuon)
 	  {
@@ -248,14 +345,15 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 	    if( muon->innerTrack().isNull() ) continue;
 	    if( muon->innerTrack()->numberOfValidHits() <=10 ) continue;
 	    
-	    double dR = deltaR(*muon->innerTrack(),*eTrack);
+	    double dR = deltaR(*muon->innerTrack(),*ele->gsfTrack());
 	    if(dR>minDeltaRtoMuons) continue;
 	    isOverLappingWithMuon=true;
 	    break;
 	  }
 	if(isOverLappingWithMuon) continue;
 	
-	//the electron is selected (add vertex)
+	//the electron is selected (add id summary)
+	selElectronIds.push_back(lepId);
 	selElectrons.push_back( elePtr );
       }
   }catch(exception &e){
@@ -424,11 +522,18 @@ int getDileptonId(std::vector<CandidatePtr> &selDilepton)
 ///                            ///   
 
 //
-vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet, vector<CandidatePtr> &selPhysicsObjects, const edm::ParameterSet &iConfig)
+vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet, 
+				 vector<CandidatePtr> &selPhysicsObjects, 
+				 edm::Handle<reco::VertexCollection> &hVtx,
+				 PileupJetIdAlgo &puJetIdAlgo,
+				 const edm::ParameterSet &iConfig,
+				 std::vector<ObjectIdSummary> &selJetsId)
 {
   
   vector<CandidatePtr> selJets;
-  
+  selJetsId.clear();
+  reco::VertexRef primVtx(hVtx, 0);
+
   using namespace edm;
   try{
     
@@ -436,8 +541,10 @@ vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet,
     double minPt = iConfig.getParameter<double>("minPt");
     double maxEta = iConfig.getParameter<double>("maxEta");
     double minDeltaRtoLepton = iConfig.getParameter<double>("minDeltaRtoLepton");
-    PFJetIDSelectionFunctor jetIdSelector( iConfig.getParameter<edm::ParameterSet>("jetId") );
-    pat::strbitset hasId = jetIdSelector.getBitTemplate();
+    PFJetIDSelectionFunctor looseJetIdSelector(PFJetIDSelectionFunctor::FIRSTDATA,PFJetIDSelectionFunctor::LOOSE);
+    PFJetIDSelectionFunctor tightJetIdSelector(PFJetIDSelectionFunctor::FIRSTDATA,PFJetIDSelectionFunctor::TIGHT);
+    pat::strbitset hasLooseId = looseJetIdSelector.getBitTemplate();
+    pat::strbitset hasTightId = tightJetIdSelector.getBitTemplate();
 
     //iterate over the jets
     for(size_t iJet=0; iJet< hJet.product()->size(); ++iJet)
@@ -445,11 +552,34 @@ vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet,
 	reco::CandidatePtr jetPtr = hJet->ptrAt(iJet);
 	const pat::Jet *jet = dynamic_cast<const pat::Jet *>( jetPtr.get() );
 	
-	//basic kinematics
-	double pt = jet->pt();
-	double eta = jet->eta();
-	if(pt<minPt || fabs(eta)>maxEta) continue;
-	
+	ObjectIdSummary jetId;
+        jetId.p4 = LorentzVector(jet->px(),jet->py(), jet->pz(), jet->energy());
+	jetId.id=1;
+	const reco::Candidate *genParton = jet->genParton();
+        jetId.genid   = genParton ? genParton->pdgId() : -9999;
+        jetId.genflav = jet->partonFlavour();
+	const reco::GenJet *gJet=jet->genJet();
+	if(gJet) jetId.genP4 = LorentzVector(gJet->px(),gJet->py(),gJet->pz(),gJet->energy());
+	jetId.charge = jet->charge();
+	jetId.ensf = jet->jecFactor("Uncorrected");
+	jetId.ensferr=0;
+	jetId.tche=jet->bDiscriminator("trackCountingHighEffBJetTags");
+	jetId.csv=jet->bDiscriminator("combinedSecondaryVertexBJetTags");
+	jetId.jp=jet->bDiscriminator("jetProbabilityBJetTags");
+	jetId.neutHadFrac = jet->neutralHadronEnergyFraction();
+        jetId.neutEmFrac  = jet->neutralEmEnergyFraction();
+        jetId.chHadFrac   = jet->chargedHadronEnergyFraction();
+	jetId.r9          = jet->n90();
+	PileupJetIdentifier puIdentifier = puJetIdAlgo.computeIdVariables(dynamic_cast<const reco::Jet*>(jet), 0, primVtx.get(), *hVtx.product(), true);
+	jetId.sihih       = puIdentifier.etaW();
+	jetId.sipip       = puIdentifier.phiW();
+	jetId.beta        = puIdentifier.beta();
+	jetId.betaStar    = puIdentifier.betaStar();
+	jetId.dRMean      = puIdentifier.dRMean();
+	jetId.ptD         = puIdentifier.ptD();
+	jetId.ptRMS       = puIdentifier.ptRMS();
+        jetId.mva.push_back( puIdentifier.mva() );
+
 	//check overlaps with selected leptons
 	double minDR(1000);
 	for(vector<CandidatePtr>::iterator lIt = selPhysicsObjects.begin(); lIt != selPhysicsObjects.end(); lIt++)
@@ -458,14 +588,22 @@ vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet,
 	    if(dR > minDR) continue; 
 	    minDR = dR;
 	  }
-	if(minDR < minDeltaRtoLepton) continue;
-	
+	jetId.isoVals.push_back(minDR);
+
 	//jet id
-	hasId.set(false);
-	if( !jetIdSelector( *jet, hasId ) ) continue;
+	hasLooseId.set(false);
+	hasTightId.set(false);
+	bool passLooseId(looseJetIdSelector( *jet, hasLooseId ));
+	bool passTightId(tightJetIdSelector( *jet, hasTightId ));
+	jetId.idBits=passLooseId |
+	  (passTightId << 1 ) |
+	  (int(puIdentifier.idFlag())<<2);
+
+	if(jet->pt()<minPt || fabs(jet->eta())>maxEta || minDR < minDeltaRtoLepton || !passLooseId) continue;
 	
 	//jet is selected
 	selJets.push_back(jetPtr);
+	selJetsId.push_back(jetId);
       }
   }catch(exception &e){
     cout << "[jet::filter] failed with " << e.what() << endl;
@@ -476,41 +614,31 @@ vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet,
 
 
 //
-double computeVtxAssocFracForJet(const pat::Jet *jet, const reco::Vertex *vtx)
+std::pair<double,double> computeBetaForJet(const pat::Jet *jet, edm::Handle<reco::VertexCollection> &hVtx)
 {
-  double fassoc(-1);
-  if(jet==0 || vtx==0) return fassoc;
-  try{
-    
-    //iterate over the tracks associated to a jet
-    double sumpttracks(0),assocsumpttracks(0);
-    const reco::TrackRefVector &jtracks = jet->associatedTracks();
-    for(reco::TrackRefVector::const_iterator jtIt = jtracks.begin();
-	jtIt != jtracks.end();
-	jtIt++)
-      {
-	if( jtIt->isNull() ) continue;
-	const reco::Track *jtrack = jtIt->get();
-	sumpttracks += jtrack->pt();
-	
-	//find track match
-	for(reco::Vertex::trackRef_iterator vtIt= vtx->tracks_begin(); vtIt != vtx->tracks_end(); vtIt++)
-	  {
-	    if( vtIt->isNull() ) continue;
-	    const reco::Track *vtrack = vtIt->get();
-	    if(vtrack!=jtrack) continue;
-	    assocsumpttracks += jtrack->pt();
-	    break;
+  double beta(0),betaStar(0), sumTkPt(0);
+  reco::VertexRef primVtx(hVtx, 0);
+  std::vector<reco::PFCandidatePtr> const &constituents=jet->getPFConstituents(); 
+  for(std::vector<reco::PFCandidatePtr>::const_iterator it=constituents.begin(); it!=constituents.end(); ++it) 
+    {
+      const reco::PFCandidatePtr & icand = *it;
+      if( icand->particleId() != reco::PFCandidate::h ) continue;
+      if( !icand->trackRef().isNonnull() || !icand->trackRef().isAvailable() ) continue;
+      float tkpt = icand->trackRef()->pt(); 
+      sumTkPt += tkpt;
+      for(reco::VertexCollection::const_iterator  vi=hVtx->begin(); vi!=hVtx->end(); ++vi ) 
+	{
+	  const reco::Vertex & iv = *vi;
+	  float dZ = fabs(icand->trackRef()->dz(primVtx->position()));
+	  if( dZ < 0.2 ) {
+	    if( (iv.position() - primVtx->position()).r() < 0.02 ) beta += tkpt;
+	    else                                                   betaStar += tkpt;
 	  }
-      }
-
-    if(sumpttracks>0) fassoc = assocsumpttracks/sumpttracks;
-    
-  }catch(exception &e){
-    //unable to associate (no tracks embed?)
-  }
-  
-  return fassoc;
+	  
+	}
+    }
+  if(sumTkPt>0) { beta/=sumTkPt; betaStar /=sumTkPt; }
+  return std::pair<double,double>(beta,betaStar);
 }
 
 
@@ -518,50 +646,31 @@ double computeVtxAssocFracForJet(const pat::Jet *jet, const reco::Vertex *vtx)
 //                               //
 //  PHOTON UTILITIES             //
 //                               //
-
-bool getPhotonTrackVeto(const reco::Photon *pho, edm::Handle<std::vector<reco::Track> > &ctfTracks)
-{
-  if(pho==0) return false;
-
-  //veto against any ctf track
-  try{
-    if(ctfTracks.isValid())
-      {
-	for(std::vector<reco::Track>::const_iterator tIt = ctfTracks->begin(); tIt != ctfTracks->end(); tIt++)
-	  {
-	    double dR=deltaR(pho->eta(),pho->phi(),tIt->eta(),tIt->phi());
-	    if(dR>0.1) continue;
-	    return true;
-	    break;
-	  }
-      }
-  }catch(std::exception &e){ }
-
-  return false;
-}
-
-//
 vector<CandidatePtr> getGoodPhotons(edm::Handle<edm::View<reco::Candidate> > &hPhoton,
+				    EGEnergyCorrector *phocorr,
 				    EcalClusterLazyTools &lazyTool,
 				    edm::Handle<reco::GsfElectronCollection> &hEle,
 				    edm::Handle<reco::ConversionCollection> &hConversions,
+				    edm::Handle<reco::TrackCollection> &hTracks,
+				    edm::Handle<reco::VertexCollection> &hVtx,
 				    edm::Handle<reco::BeamSpot> &beamSpot,
 				    double rho,
-				    const edm::ParameterSet &iConfig)
+				    const edm::ParameterSet &iConfig,
+				    const edm::EventSetup & iSetup,
+				    std::vector<ObjectIdSummary> &selPhotonIds)
 {
   vector<CandidatePtr> selPhotons;
-  if(!hPhoton.isValid()) return selPhotons;
-  if(hPhoton->size()==0) return selPhotons;
+  selPhotonIds.clear();
+  reco::VertexRef primVertex(hVtx, 0);
 
   try{
+    //config parameters
     double minEt = iConfig.getParameter<double>("minEt");
     double maxEta = iConfig.getParameter<double>("maxEta");
-
     double minSipipEB=iConfig.getParameter<double>("minSipipEB"); 
     double minSihihEB=iConfig.getParameter<double>("minSihihEB");
     double maxSihihEB=iConfig.getParameter<double>("maxSihihEB");
     double maxSihihEE=iConfig.getParameter<double>("maxSihihEE");
-
     double maxHoE=iConfig.getParameter<double>("maxHoE");
     std::vector<double> trkIsoCoeffsEB = iConfig.getParameter< std::vector<double> >("trkIsoCoeffsEB");
     std::vector<double> trkIsoCoeffsEE = iConfig.getParameter< std::vector<double> >("trkIsoCoeffsEE");
@@ -573,55 +682,95 @@ vector<CandidatePtr> getGoodPhotons(edm::Handle<edm::View<reco::Candidate> > &hP
     //iterate over the photons
     for(size_t iPhoton=0; iPhoton< hPhoton.product()->size(); ++iPhoton)
       {
-	//get PF photon candidates
-	const reco::Photon *pho = dynamic_cast<const reco::Photon *>( hPhoton->ptrAt(iPhoton).get() );
+	//get photon candidates
+	//const reco::Photon *pho = dynamic_cast<const reco::Photon *>( hPhoton->ptrAt(iPhoton).get() );
+	const pat::Photon *pho = dynamic_cast<const pat::Photon *>( hPhoton->ptrAt(iPhoton).get() );
 	if(pho==0) continue;
-		
-	//apply fiducial cuts on photon
-	float eta=pho->eta();
-	float et=pho->energy()/cosh(eta);
-	bool fallsInCrackRegion( fabs(eta)>1.4442 && fabs(eta)<1.566 );
-	bool isGood( et>minEt && fabs(eta)<maxEta);
-	if(fallsInCrackRegion || !isGood) continue;
 	
-	//shower shape
-	float hoe = pho->hadronicOverEm();
-	float sihih = pho->sigmaIetaIeta();
-	bool hasGoodShowerShape(hoe<maxHoE);
+	ObjectIdSummary phoId;
+	phoId.p4 = LorentzVector(pho->px(),pho->py(),pho->pz(),pho->energy());
+	phoId.id=22;
+	const reco::Candidate *genPho = pho->genPhoton();
+        phoId.genid   = genPho ? genPho->pdgId() : -9999;
+        phoId.genflav = phoId.genid;
+	if(genPho) phoId.genP4 = LorentzVector(genPho->px(),genPho->py(),genPho->pz(),genPho->energy());
+	phoId.charge=0;
+	std::pair<double,double> enSF(1.0,0);
+	if(phocorr) 
+	  {
+	    if(!phocorr->IsInitialized())
+	      {
+		TString path(iConfig.getParameter<std::string>("scCorrector"));
+		gSystem->ExpandPathName(path);
+		phocorr->Initialize(iSetup,path.Data());
+	      }
+	    enSF=phocorr->CorrectedEnergyWithError(*pho,*hVtx,lazyTool,iSetup);
+	    enSF.first = enSF.first/pho->energy();  enSF.second = enSF.second/pho->energy();
+	  }
+	phoId.ensf              = enSF.first;
+	phoId.ensferr           = enSF.second;
+	phoId.hoe               = pho->hadronicOverEm();
+	vector<float> cov       = lazyTool.localCovariances(*pho->superCluster()->seed());
+	phoId.sihih             = pho->sigmaIetaIeta();
+	phoId.sipip             = sqrt(cov[2]);
+	phoId.sce               = pho->superCluster()->energy();
+	phoId.sceta             = pho->superCluster()->eta();
+	phoId.scphi             = pho->superCluster()->phi();
+	phoId.e2x5max           = pho->e2x5();
+	phoId.e1x5              = pho->e1x5();
+	phoId.e5x5              = pho->e5x5();
+	phoId.h2te              = pho->hadronicDepth2OverEm();
+	phoId.h2tebc            = pho->hadTowDepth2OverEm();
+	phoId.r9                = pho->r9();
+	phoId.aeff              = EgammaCutBasedEleId::GetEffectiveArea(pho->eta());  
+	phoId.isoVals.push_back(pho->trkSumPtHollowConeDR04());
+	phoId.isoVals.push_back(pho->ecalRecHitSumEtConeDR04());
+	phoId.isoVals.push_back(pho->hcalTowerSumEtConeDR04());
+	phoId.isoVals.push_back(pho->chargedHadronIso());
+	phoId.isoVals.push_back(pho->neutralHadronIso());
+	phoId.isoVals.push_back(pho->photonIso());
+
+	bool hasPixelSeed=pho->hasPixelSeed();	
+	bool hasElectronVeto = ConversionTools::hasMatchedPromptElectron(pho->superCluster(), hEle, hConversions, beamSpot->position());
+	reco::ConversionRef conv = ConversionTools::matchedConversion(*(pho->superCluster()),hConversions,beamSpot->position());
+	bool isConverted(!conv.isNull());
+	bool isVtxConstrained(false);
+	if(isConverted)
+	  {
+	    phoId.trkpt=conv->refittedPair4Momentum().pt();
+	    phoId.trketa=conv->refittedPair4Momentum().eta();
+	    phoId.trkphi=conv->refittedPair4Momentum().phi();
+	    isVtxConstrained=(fabs(primVertex->position().z()-conv->conversionVertex().position().z()) < 0.1);
+	  }
+	bool hasTrkVeto(false);
+	for(std::vector<reco::Track>::const_iterator tIt = hTracks->begin(); tIt != hTracks->end(); tIt++)
+          {
+            double dR=deltaR(pho->eta(),pho->phi(),tIt->eta(),tIt->phi());
+            if(dR>0.1) continue;
+            hasTrkVeto = true;
+            break;
+          }
+	phoId.idBits = !hasPixelSeed |
+	  (!hasElectronVeto << 1) |
+	  (hasTrkVeto << 2 ) |
+	  (isConverted << 3) |
+	  (isVtxConstrained << 4);
+
+	//select the photon
+	float et=pho->energy()/cosh(pho->eta());
+	bool fallsInCrackRegion( fabs(pho->eta())>1.4442 && fabs(pho->eta())<1.566 );
+	bool isGood( et>minEt && fabs(pho->eta())<maxEta);
+	bool hasBaseId(phoId.hoe<maxHoE);
 	if(pho->isEB())
 	  {
-	    hasGoodShowerShape &= (sihih<maxSihihEB);
-	    hasGoodShowerShape &= (sihih>minSihihEB);
+	    hasBaseId &= (phoId.sihih<maxSihihEB);
+	    hasBaseId &= (phoId.sihih>minSihihEB);
+	    hasBaseId &= (phoId.sipip>minSipipEB);
 	  }
 	else
 	  {
-	    hasGoodShowerShape &= (sihih<maxSihihEE);
+	    hasBaseId &= (phoId.sihih<maxSihihEE);
 	  }
-
-	//these require the photon core
-	bool hasPixelSeed(false);
-	bool hasElectronVeto(false);
-	try{
-	  reco::SuperClusterRef scref = pho->superCluster();
-	  const reco::CaloClusterPtr  seed_clu = scref->seed();
-	  vector<float> cov = lazyTool.localCovariances(*seed_clu);
-	  float sipip = sqrt(cov[2]);
-	  if(pho->isEB()) hasGoodShowerShape &= (sipip>minSipipEB);
-
-	  //pixel seed veto
-	  hasPixelSeed=pho->hasPixelSeed();	
-
-	  if(hEle.isValid() && hConversions.isValid())
-	    hasElectronVeto = ConversionTools::hasMatchedPromptElectron(scref, hEle, hConversions, beamSpot->position());
-	  
-	}catch(std::exception &e){
-	  //	  cout << pho->isEB() << " " << pho->isEE() << " " << pho->isStandardPhoton() << " " << pho->isPFlowPhoton() << endl;
-	  // cout << e.what() << endl;
-	}
-
-	if(!hasGoodShowerShape || hasPixelSeed || hasElectronVeto) continue;
-
-	//isolation
 	float maxTrkIso(9999.), maxECALIso(99999.), maxHCALIso(99999.);
 	if(pho->isEB())
 	  {
@@ -639,10 +788,11 @@ vector<CandidatePtr> getGoodPhotons(edm::Handle<edm::View<reco::Candidate> > &hP
 	bool isEcalIso(pho->ecalRecHitSumEtConeDR04()< maxECALIso);
 	bool isHcalIso(pho->hcalTowerSumEtConeDR04()< maxHCALIso);
 	bool isIso(isTrkIso && isEcalIso && isHcalIso);
-	if(!isIso) continue;
-	
+	if(fallsInCrackRegion || !isGood || !hasBaseId || hasPixelSeed || hasElectronVeto || !isIso) continue;
+
 	//save this photon
 	selPhotons.push_back( hPhoton->ptrAt(iPhoton) );
+	selPhotonIds.push_back( phoId );
       }
   }catch(exception &e){
     cout << "[photon] failed with " << e.what() << endl;
