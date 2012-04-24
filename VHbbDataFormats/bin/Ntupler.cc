@@ -43,7 +43,7 @@
 //#include "VHbbAnalysis/VHbbDataFormats/interface/Ntupler.h"
 
 //for SimBhad: FIXME
-//#include "VHbbAnalysis/BAnalysis/interface/SimBHadron.h"
+#include "ZSV/BAnalysis/interface/SimBHadron.h"
 //btagging
 #include "VHbbAnalysis/VHbbDataFormats/interface/BTagWeight.h"
 //trigger
@@ -104,45 +104,44 @@ float resolutionBias(float eta)
 }
 
 
-//FIXME : need to update EDM ntuple with SimBhadron infos
-// typedef struct
-// {
-//   void set(const SimBHadron & sbhc, int i){
-//     mass[i] = sbhc.mass();
-//     pt[i] = sbhc.pt();
-//     eta[i] = sbhc.eta();
-//     phi[i] = sbhc.phi();
-//     vtx_x[i] = sbhc.decPosition.x();
-//     vtx_y[i] = sbhc.decPosition.y();
-//     vtx_z[i] = sbhc.decPosition.z();
-//     pdgId[i] = sbhc.pdgId();
-//     status[i] = sbhc.status();
-//   };
-//   void reset(){
-//     for(int i=0; i < MAXB; ++i){
-//       mass[i] = -99; pt[i] = -99; eta[i] = -99; phi[i] = -99; vtx_x[i] = -99; vtx_y[i] = -99; vtx_z[i] = -99; pdgId[i] = -99; status[i] = -99;
-//     }
-//   };
-//   float mass[MAXB];
-//   float pt[MAXB];
-//   float eta[MAXB];
-//   float phi[MAXB];
-//   float vtx_x[MAXB];
-//   float vtx_y[MAXB];
-//   float vtx_z[MAXB];
-//   int pdgId[MAXB];
-//   int status[MAXB];
-// //   int quarkStatus[MAXB];
-// //   int brotherStatus[MAXB];
-// //   int otherId[MAXB];
-// //   bool etaOk[MAXB];
-// //   bool simOk[MAXB];
-// //   bool trackOk[MAXB];
-// //   bool cutOk[MAXB];
-// //   bool cutNewOk[MAXB];
-// //   bool mcMatchOk[MAXB];
-// //   bool matchOk[MAXB];
-// } SimBHadronInfo;
+typedef struct
+{
+  void set(const SimBHadron & sbhc, int i){
+    mass[i] = sbhc.mass();
+    pt[i] = sbhc.pt();
+    eta[i] = sbhc.eta();
+    phi[i] = sbhc.phi();
+    vtx_x[i] = sbhc.decPosition.x();
+    vtx_y[i] = sbhc.decPosition.y();
+    vtx_z[i] = sbhc.decPosition.z();
+    pdgId[i] = sbhc.pdgId();
+    status[i] = sbhc.status();
+  };
+  void reset(){
+    for(int i=0; i < MAXB; ++i){
+      mass[i] = -99; pt[i] = -99; eta[i] = -99; phi[i] = -99; vtx_x[i] = -99; vtx_y[i] = -99; vtx_z[i] = -99; pdgId[i] = -99; status[i] = -99;
+    }
+  };
+  float mass[MAXB];
+  float pt[MAXB];
+  float eta[MAXB];
+  float phi[MAXB];
+  float vtx_x[MAXB];
+  float vtx_y[MAXB];
+  float vtx_z[MAXB];
+  int pdgId[MAXB];
+  int status[MAXB];
+//   int quarkStatus[MAXB];
+//   int brotherStatus[MAXB];
+//   int otherId[MAXB];
+//   bool etaOk[MAXB];
+//   bool simOk[MAXB];
+//   bool trackOk[MAXB];
+//   bool cutOk[MAXB];
+//   bool cutNewOk[MAXB];
+//   bool mcMatchOk[MAXB];
+//   bool matchOk[MAXB];
+} SimBHadronInfo;
 
 
 typedef struct
@@ -498,8 +497,7 @@ int main(int argc, char* argv[])
 
   TTree *_outTree;
   IVFInfo IVF;
-  //FIXME
-  //  SimBHadronInfo SimBs;
+  SimBHadronInfo SimBs;
   float rho,rho25;
   int nPVs;
   METInfo MET;
@@ -523,7 +521,7 @@ int main(int argc, char* argv[])
   JetInfo hJets, aJets, fathFilterJets;
   LeptonInfo vLeptons, aLeptons;
   int naJets=0, nhJets=0, nfathFilterJets=0;
-  HiggsInfo H,SVH; //add here the fatjet higgs
+  HiggsInfo H,SVH, SimBH; //add here the fatjet higgs
   FatHiggsInfo FatH;
   genParticleInfo genZ, genZstar, genWstar, genW,  genH, genB, genBbar; //add here the fatjet higgs
   genTopInfo genTop, genTbar;
@@ -538,8 +536,6 @@ int main(int argc, char* argv[])
   float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart,weightEleTrigEleAugPart;
   float  weightTrigMET80, weightTrigMET100,    weightTrig2CJet20 , weightTrigMET150  , weightTrigMET802CJet, weightTrigMET1002CJet, weightTrigMETLP ;
 
-  //FIXME
-  //  float SimBs_dr = -99, SimBs_dEta= -99, SimBs_dPhi = -99, SimBs_Hmass = -99, SimBs_Hpt = -99, SimBs_Heta = -99, SimBs_Hphi = -99;
   int WplusMode,WminusMode;
   int Vtype,nSvs,nSimBs,numJets,numBJets,eventFlav;
   //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
@@ -872,28 +868,19 @@ int main(int argc, char* argv[])
   //IVF higgs candidate
   _outTree->Branch("SVH"          ,  &SVH               ,  "mass/F:pt/F:eta:phi/F:dR/F:dPhi/F:dEta/F");
 
-
-  //FIXME : need to update the EDMNtuple with BHadron infos
 //   //SimBHadron
-//   _outTree->Branch("nSimBs",&nSimBs ,"nSimBs/I");
-//   _outTree->Branch("SimBs_mass", &SimBs.mass,"mass[nSvs]/F");
-//   _outTree->Branch("SimBs_pt", &SimBs.pt,"pt[nSvs]/F");
-//   _outTree->Branch("SimBs_eta", &SimBs.eta,"eta[nSvs]/F");
-//   _outTree->Branch("SimBs_phi", &SimBs.phi,"phi[nSvs]/F");
-//   _outTree->Branch("SimBs_vtx_x", &SimBs.vtx_x,"vtx_x[nSvs]/F");
-//   _outTree->Branch("SimBs_vtx_y", &SimBs.vtx_y,"vtx_y[nSvs]/F");
-//   _outTree->Branch("SimBs_vtx_z", &SimBs.vtx_z,"vtx_z[nSvs]/F");
-//   _outTree->Branch("SimBs_pdgId", &SimBs.pdgId,"pdgId[nSvs]/F");
-//   _outTree->Branch("SimBs_status", &SimBs.status,"status[nSvs]/F");
+  _outTree->Branch("nSimBs",&nSimBs ,"nSimBs/I");
+  _outTree->Branch("SimBs_mass", &SimBs.mass,"mass[nSvs]/F");
+  _outTree->Branch("SimBs_pt", &SimBs.pt,"pt[nSvs]/F");
+  _outTree->Branch("SimBs_eta", &SimBs.eta,"eta[nSvs]/F");
+  _outTree->Branch("SimBs_phi", &SimBs.phi,"phi[nSvs]/F");
+  _outTree->Branch("SimBs_vtx_x", &SimBs.vtx_x,"vtx_x[nSvs]/F");
+  _outTree->Branch("SimBs_vtx_y", &SimBs.vtx_y,"vtx_y[nSvs]/F");
+  _outTree->Branch("SimBs_vtx_z", &SimBs.vtx_z,"vtx_z[nSvs]/F");
+  _outTree->Branch("SimBs_pdgId", &SimBs.pdgId,"pdgId[nSvs]/F");
+  _outTree->Branch("SimBs_status", &SimBs.status,"status[nSvs]/F");
 //   //SimBHadron Higgs Candidate
-//   _outTree->Branch("SimBs_dr", &SimBs_dr,"SimBs_dr/F");
-//   _outTree->Branch("SimBs_dPhi", &SimBs_dPhi,"SimBs_dPhi/F");
-//   _outTree->Branch("SimBs_dEta", &SimBs_dEta,"SimBs_dEta/F");
-//   _outTree->Branch("SimBs_Hmass", &SimBs_Hmass,"SimBs_Hmass/F");
-//   _outTree->Branch("SimBs_Hpt", &SimBs_Hpt,"SimBs_Hpt/F");
-//   _outTree->Branch("SimBs_Heta", &SimBs_Heta,"SimBs_Heta/F");
-//   _outTree->Branch("SimBs_Hphi", &SimBs_Hphi,"SimBs_Hphi/F");
-
+  _outTree->Branch("SimBH"          ,  &SimBH               ,  "mass/F:pt/F:eta:phi/F:dR/F:dPhi/F:dEta/F");
 
   _outTree->Branch("rho"		,  &rho	         ,   "rho/F");
   _outTree->Branch("rho25"		,  &rho25	         ,   "rho25/F");
@@ -997,12 +984,11 @@ int main(int argc, char* argv[])
 	EVENT.run = ev.id().run();
 	EVENT.lumi = ev.id().luminosityBlock();
 	EVENT.event = ev.id().event();
-	EVENT.json = jsonContainsEvent (jsonVector, ev);
-	//FIXME : need to update EDM ntuple with BHadron infos
+	EVENT.json = jsonContainsEvent (jsonVector, ev);       
 // 	// simBHadrons
-// 	fwlite::Handle<SimBHadronCollection> SBHC;
-// 	SBHC.getByLabel(ev, "bhadrons");
-// 	const SimBHadronCollection sbhc = *(SBHC.product());
+ 	fwlite::Handle<SimBHadronCollection> SBHC;
+	SBHC.getByLabel(ev, "bhadrons");
+ 	const SimBHadronCollection sbhc = *(SBHC.product());
 	
 	const std::vector<VHbbCandidate> * candZ ;
 	const std::vector<VHbbCandidate> * candW ;
@@ -1377,7 +1363,7 @@ int main(int argc, char* argv[])
 	  reco::SecondaryVertex recoSv(recoVtxPv, svc[j], flightDir ,true);
 	  IVF.set( recoSv, recoPv ,j);
 	}
-	if(nSvs > 2){
+	if(nSvs > 1){
 	  TLorentzVector BCands_H1, BCands_H2, BCands_H;
 	  BCands_H1.SetPtEtaPhiM(IVF.pt[0], IVF.eta[0], IVF.phi[0], IVF.massBcand[0]);
 	  BCands_H2.SetPtEtaPhiM(IVF.pt[1], IVF.eta[1], IVF.phi[1], IVF.massBcand[1]);
@@ -1391,25 +1377,24 @@ int main(int argc, char* argv[])
 	  SVH.phi = BCands_H.Phi();
 	}
 
-	//FIXME : need to update EDM ntuple with simBhadron info
 // 	//SimBhadron
-// 	SimBs.reset();
-// 	nSimBs = sbhc.size();
-// 	for( int j=0; j < nSimBs && j < MAXB; ++j )
-// 	  SimBs.set( sbhc.at(j), j);
-// 	if(nSimBs > 2){
-// 	  TLorentzVector SimBs_H1, SimBs_H2, SimBs_H;
-// 	  SimBs_H1.SetPtEtaPhiM(SimBs.pt[0], SimBs.eta[0], SimBs.phi[0], SimBs.mass[0]);
-// 	  SimBs_H2.SetPtEtaPhiM(SimBs.pt[1], SimBs.eta[1], SimBs.phi[1], SimBs.mass[1]);
-// 	  SimBs_H = SimBs_H1 + SimBs_H2;
-// 	  SimBs_dr = deltaR(SimBs.eta[0], SimBs.phi[0], SimBs.eta[1], SimBs.phi[1] );
-// 	  SimBs_dPhi = deltaPhi(SimBs.phi[0], SimBs.phi[1] );
-// 	  SimBs_dEta = TMath::Abs(SimBs.eta[0] - SimBs.eta[1] );
-// 	  SimBs_Hmass = SimBs_H.M();
-// 	  SimBs_Hpt = SimBs_H.Pt();
-// 	  SimBs_Heta = SimBs_H.Eta();
-// 	  SimBs_Hphi = SimBs_H.Phi();
-// 	}
+ 	SimBs.reset();
+ 	nSimBs = sbhc.size();
+ 	for( int j=0; j < nSimBs && j < MAXB; ++j )
+ 	  SimBs.set( sbhc.at(j), j);
+	if(nSimBs > 1){
+	  TLorentzVector SimBs_H1, SimBs_H2, SimBs_H;
+	  SimBs_H1.SetPtEtaPhiM(SimBs.pt[0], SimBs.eta[0], SimBs.phi[0], SimBs.mass[0]);
+	  SimBs_H2.SetPtEtaPhiM(SimBs.pt[1], SimBs.eta[1], SimBs.phi[1], SimBs.mass[1]);
+	  SimBs_H = SimBs_H1 + SimBs_H2;
+	  SimBH.dR = deltaR(SimBs.eta[0], SimBs.phi[0], SimBs.eta[1], SimBs.phi[1] );
+	  SimBH.dPhi = deltaPhi(SimBs.phi[0], SimBs.phi[1] );
+	  SimBH.dEta = TMath::Abs(SimBs.eta[0] - SimBs.eta[1] );
+	  SimBH.mass = SimBs_H.M();
+	  SimBH.pt = SimBs_H.Pt();
+	  SimBH.eta = SimBs_H.Eta();
+	  SimBH.phi = SimBs_H.Phi();
+	}
 
 
 	//Loop on jets
