@@ -75,28 +75,29 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
     std::cout <<" Found Dijets: "<<foundJets<< " Additional: "<<addJets.size()<< std::endl;
   }
   
-  if (foundJets == false) return;
+//  if (foundJets == false) return;
+
+  std::vector<VHbbEvent::MuonInfo> mu;
+  std::vector<VHbbEvent::ElectronInfo> ele;
 
   bool foundHardJets;
   VHbbEvent::HardJet fatj1;
   std::vector<VHbbEvent::SimpleJet> subJetsout;
-  foundHardJets= findFatJet(event->hardJets,event->subJets,event->filterJets,fatj1,subJetsout) ;
+  std::vector<VHbbEvent::SimpleJet> addJetsFat;
+  foundHardJets= findFatJet(event->hardJets,event->subJets,event->filterJets,fatj1,subJetsout, event->simpleJets2, addJetsFat, mu, ele) ;
 
-//  if (foundHardJets == false) return;
+  if (foundJets == false && foundHardJets == false) return;
 
 
   //
   // search for leptons
   //
-  std::vector<VHbbEvent::MuonInfo> mu;
+//  std::vector<VHbbEvent::MuonInfo> mu;
   std::vector<unsigned int> muPos;
   findMuons(event->muInfo,mu, muPos);
-  std::vector<VHbbEvent::ElectronInfo> ele;
+//  std::vector<VHbbEvent::ElectronInfo> ele;
   std::vector<unsigned int> elePos;
   findElectrons(event->eleInfo,ele, elePos);
-  std::vector<VHbbEvent::TauInfo> tau;
-  std::vector<unsigned int> tauPos;
-  findTaus(event->tauInfo,tau, tauPos);
   
   std::vector<VHbbEvent::METInfo> met;
   findMET(event->pfmet, met);
@@ -104,15 +105,16 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   if (verbose_){
     std::cout <<" Electrons: "<< ele.size()<<std::endl;
     std::cout <<" Muons    : "<< mu.size()<<std::endl;
-    std::cout <<" Taus    : "<< tau.size()<<std::endl;
     std::cout <<" MET      : "<< met.size()<<std::endl;
   }
-  if (ele.size()<1 && mu.size() < 1 && met.size()<1 && tau.size()<1) return;
+  if (ele.size()<1 && mu.size() < 1 && met.size()<1) return;
 
   //
   // fill!
   //
   VHbbCandidate temp;
+  temp.H.HiggsFlag = foundJets;
+  if(foundJets){
   temp.H.jets.push_back(j1);
   temp.H.jets.push_back(j2);
   temp.H.p4 = (j1).p4+(j2).p4;
@@ -121,6 +123,7 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   temp.H.helicities.push_back(selector.getHelicity(j1,higgsBoost));
   temp.H.helicities.push_back(selector.getHelicity(j2,higgsBoost));
   temp.H.deltaTheta = selector.getDeltaTheta(j1,j2);
+  }
 
   temp.FatH.FatHiggsFlag= foundHardJets;
   if(foundHardJets){
@@ -131,16 +134,11 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   temp.FatH.jets.push_back(subJetsout[1]);temp.FatH.jets.push_back(subJetsout[2]);}
   }
 
-  std::vector<VHbbEvent::TauInfo> tauNoCandidateJetOverlap;
-  std::vector<unsigned int> tauPosNoCandidateJetOverlap;
-  removeTauOverlapWithJets(tau,temp.H.jets,tauNoCandidateJetOverlap,tauPos,tauPosNoCandidateJetOverlap);
-
-
   temp.additionalJets = addJets;
+  temp.additionalJetsFat = addJetsFat;
   temp.V.mets = met;
   temp.V.muons = mu;
   temp.V.electrons = ele;
-  temp.V.taus = tauNoCandidateJetOverlap;
   
   //
   // now see which kind of andidate this can be
@@ -183,21 +181,6 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
     result.setCandidateType(VHbbCandidate::Wen);
     candidates.push_back(result);
   }
-  // New tau categorizations currently commented out
-  /*
-  result = selector.getHWtaunCandidate(temp,ok,tauPosNoCandidateJetOverlap);
-  if ( ok == true ){
-    if (verbose_) std::cout << "We have a taun candidate" << std::endl;
-    result.setCandidateType(VHbbCandidate::Wtaun);
-    candidates.push_back(result);
-  }
-  result = selector.getHZtaumuCandidate(temp,ok,muPos,tauPosNoCandidateJetOverlap);
-  if ( ok == true ){
-    if (verbose_) std::cout << "We have a HZtaumu candidate" << std::endl;
-    result.setCandidateType(VHbbCandidate::Ztaumu);
-    candidates.push_back(result);
-  }
-  */
 
   if (candidates.size()!=0 ) return;
 
@@ -226,9 +209,9 @@ bool HbbCandidateFinderAlgo::jetID(const VHbbEvent::SimpleJet & j)
 {
     if(j.neutralHadronEFraction > 0.99) return false;
     if(j.neutralEmEFraction > 0.99) return false;
-    if(j.chargedEmEFraction > 0.99) return false;
-    if(j.chargedHadronEFraction == 0) return false;
-    if(j.ntracks == 0) return false;
+    if(fabs(j.p4.Eta())<2.4 && j.chargedEmEFraction > 0.99) return false;
+    if(fabs(j.p4.Eta())<2.4 && j.chargedHadronEFraction == 0) return false;
+    if(fabs(j.p4.Eta())<2.4 && j.ntracks == 0) return false;
     if(j.nConstituents <= 1) return false;
 return true;
 }
@@ -349,17 +332,20 @@ bool HbbCandidateFinderAlgo::findDiJetsHighestPt (const std::vector<VHbbEvent::S
 }
 
 
-bool HbbCandidateFinderAlgo::findFatJet (const std::vector<VHbbEvent::HardJet>& jetsin, const std::vector<VHbbEvent::SimpleJet>& subjetsin, const std::vector<VHbbEvent::SimpleJet>& filterjetsin, VHbbEvent::HardJet& fatj1,std::vector<VHbbEvent::SimpleJet>& subJetsout){
+bool HbbCandidateFinderAlgo::findFatJet (const std::vector<VHbbEvent::HardJet>& jetsin, const std::vector<VHbbEvent::SimpleJet>& subjetsin, const std::vector<VHbbEvent::SimpleJet>& filterjetsin, VHbbEvent::HardJet& fatj1,std::vector<VHbbEvent::SimpleJet>& subJetsout, const std::vector<VHbbEvent::SimpleJet>& ak5jetsin, std::vector<VHbbEvent::SimpleJet>& addJetsFat, const std::vector<VHbbEvent::MuonInfo>& muons, const std::vector<VHbbEvent::ElectronInfo>& electrons){
 
   if (verbose_){
     std::cout <<" CandidateFinder: Input Jets = "<<jetsin.size()<<std::endl;
   }
   if (jetsin.size()<1) return false;
-  
-//  float etaThr = 2.5;
+ 
+  float etaThr = 2.5;
   std::vector<VHbbEvent::HardJet> hardjets = jetsin;
   std::vector<VHbbEvent::SimpleJet> subjets = subjetsin;
   std::vector<VHbbEvent::SimpleJet> filterjets = filterjetsin;
+
+  fatj1=hardjets[0];  // to avoid warning if subjet below fail selection
+
 
 /*  TMatrixD *pointerEta = new TMatrixD(90,80);
   TMatrixD* pointerPhi = new TMatrixD(90,80);
@@ -452,15 +438,66 @@ bool HbbCandidateFinderAlgo::findFatJet (const std::vector<VHbbEvent::HardJet>& 
 
      int nPt=0;
      for(int j=0;j<2;j++){
-     if(subjets[subJetIn1st[j]].p4.Pt()>30.) nPt++;}
+////     if(subjets[subJetIn1st[j]].p4.Pt()>30. && fabs(subjets[subJetIn1st[j]].p4.Eta())<etaThr && jetID(subjets[subJetIn1st[j]])) nPt++;}
+     if(filterjets[subJetIn[j]].p4.Pt()>20. && fabs(filterjets[subJetIn[j]].p4.Eta())<etaThr && jetID(filterjets[subJetIn[j]])) nPt++;}
 
 //     if(nBtag<2 || nPt<2) continue;
      if(nPt<2) continue;
+
+///// lepton overlap
+     int muOverlap=0;
+  for (unsigned int it = 0; it < muons.size();  ++it){
+    if (
+        muons[it]. globChi2<10 &&
+        muons[it].nPixelHits>= 1 &&
+        muons[it].globNHits != 0 &&
+        muons[it].nHits > 10 &&
+        //tracker
+        (muons[it].cat & 0x1) &&
+        //global
+        (muons[it].cat & 0x2) &&
+        muons[it].nMatches >=2 &&
+        muons[it].ipDb<.2 &&
+        (muons[it].pfChaIso+muons[it].pfPhoIso+muons[it].pfNeuIso)/muons[it].p4.Pt()<.15  &&
+        fabs(muons[it].p4.Eta())<2.4 &&
+        muons[it].p4.Pt()>20 ) {
+     for(int j=0;j<2;j++){
+    if(deltaR(muons[it].p4.Eta(),muons[it].p4.Phi(),filterjets[subJetIn[j]].p4.Eta(),filterjets[subJetIn[j]].p4.Phi())<0.3) muOverlap++;}
+  }
+  }
+
+    int elecOverlap=0;
+  for (unsigned int  it = 0; it< electrons.size(); ++it){
+    if (
+        // fake
+        (fabs(electrons[it].id95 - 7)) < 0.1  &&
+        fabs(electrons[it].p4.Eta()) < 2.5 &&
+//Remove this workaround as now we have the proper flags
+//      !( fabs(electrons[it].p4.Eta()) < 1.57 && fabs(electrons[it].p4.Eta()) > 1.44) &&
+        electrons[it].p4.Pt()>15 //  I use the minimum ok for both Z and W
+         && (electrons[it].pfChaIso+electrons[it].pfPhoIso+electrons[it].pfNeuIso)/electrons[it].p4.Pt()<.15
+        ){
+     for(int j=0;j<2;j++){
+    if(deltaR(electrons[it].p4.Eta(),electrons[it].p4.Phi(),filterjets[subJetIn[j]].p4.Eta(),filterjets[subJetIn[j]].p4.Phi())<0.3) elecOverlap++;}
+    }
+  }
+
+
+   if(muOverlap>0) continue;
+   if(elecOverlap>0) continue;
 
 //      if(subjets[subJetIn1st[0]].csv+subjets[subJetIn1st[1]].csv>minBtag1){
 //      minBtag1=subjets[subJetIn1st[0]].csv+subjets[subJetIn1st[1]].csv;       
        if((subjets[subJetIn1st[0]].p4+subjets[subJetIn1st[1]].p4).Pt()>minBtag1){
        minBtag1=(subjets[subJetIn1st[0]].p4+subjets[subJetIn1st[1]].p4).Pt();
+/*       double filtpt=0;
+       if(subJetIn[0]!=-99 && subJetIn[1]!=-99) filtpt=(filterjets[subJetIn[0]].p4+filterjets[subJetIn[1]].p4).Pt(); 
+       if(subJetIn[0]!=-99 && subJetIn[1]!=-99 && subJetIn[2]!=-99) filtpt=(filterjets[subJetIn[0]].p4+filterjets[subJetIn[1]].p4+filterjets[subJetIn[2]].p4).Pt();
+       if(filtpt>minBtag1){
+       minBtag1=filtpt;
+*/
+//       if(hardjets[i].p4.Pt()>minBtag1){
+//       minBtag1=hardjets[i].p4.Pt();  
        fatj1=hardjets[i];
        subJetsout.clear();
        if(subJetIn[0]!=-99) subJetsout.push_back(filterjets[subJetIn[0]]);
@@ -470,65 +507,25 @@ bool HbbCandidateFinderAlgo::findFatJet (const std::vector<VHbbEvent::HardJet>& 
 
   } // loop hard jet
 
+
+ //
+ // additional jets
+ //
+   std::vector<VHbbEvent::SimpleJet> ak5jets = ak5jetsin;
+ 
+   addJetsFat.clear(); 
+   for (unsigned int i=0 ; i< ak5jets.size(); ++i){
+     int overlap=0;
+     for (unsigned int j=0 ; j< subJetsout.size(); ++j){ 
+      if(subJetsout[j].p4.Pt() <20.) continue; 
+      if (deltaR(ak5jets[i].p4.Eta(),ak5jets[i].p4.Phi(),subJetsout[j].p4.Eta(),subJetsout[j].p4.Phi())<0.3) overlap++;
+     }   
+      if(overlap==0) addJetsFat.push_back(ak5jets[i]);
+   }
+ 
+
   
   return true;
-}
-
-
-void HbbCandidateFinderAlgo::removeTauOverlapWithJets(const std::vector<VHbbEvent::TauInfo>& taus, const std::vector<VHbbEvent::SimpleJet>& jets, std::vector<VHbbEvent::TauInfo>& out, const std::vector<unsigned int>& oldPositions,std::vector<unsigned int>& positions) {
-  for (unsigned int it = 0; it < taus.size();  ++it){
-    bool overlap = false;
-    for (unsigned int jit = 0 ; jit < jets.size() ; ++jit) {
-      if (taus[it].p4.DeltaR(jets[jit].p4) < 0.2) {
-	overlap = true;
-	if (verbose_) {
-	  std::cout << "Found overlap of tau (pt,eta,phi)=(" << taus[it].p4.Pt() <<","<< taus[it].p4.Eta() <<","<< taus[it].p4.Phi() << ")"
-		    << "with candidate jet (pt,eta,phi)=(" << jets[jit].p4.Pt() <<","<< jets[jit].p4.Eta() <<","<< jets[jit].p4.Phi() << ")"
-		    << std::endl;
-	}
-      }
-    }
-    if (!overlap) {
-      if (verbose_) {
-	std::cout << "No overlap with tau (pt,eta,phi)=(" << taus[it].p4.Pt() <<","<< taus[it].p4.Eta() <<","<< taus[it].p4.Phi() << "); keeping it " << std::endl;
-      }
-      out.push_back(taus[it]);
-	             positions.push_back(oldPositions[it]);
-    }
-  }
-}
- 
-void HbbCandidateFinderAlgo::findTaus(const std::vector<VHbbEvent::TauInfo>& taus, std::vector<VHbbEvent::TauInfo>& out, std::vector<unsigned int>& positions){
-  if (verbose_) std::cout << "[SCZ] Tau size=" << taus.size() << std::endl;
-  for (unsigned int it = 0; it < taus.size();  ++it){
-    /*
-      myPatTau.tauID("decayModeFinding"); // cuts on tau invariant mass, etc
-      myPatTau.tauID("byLooseCombinedIsolationDeltaBetaCorr") // isolated
-      taus, corrected for PU use DB technique
-      myPatTau.tauID("againstMuonTight");  // remove muons faking hadronic taus
-      myPatTau.tauID("againstElectronLoose/againstElectronMedium/againstElectronMVA");
-      // remove electrons faking hadronic taus, choose based on your fake - e background.
-      */
- 
-    if (verbose_) {
-      std::cout << "(pt,decayModeFinding,byLooseCombinedIsolationDeltaBetaCorr,againstMuonTight,againstElectronLoose,againstElectronMedium,againstElectronMVA)=("
-		<< taus[it].p4.Pt() << ","
-		<< (taus[it].decayModeFinding>0.5) << ","
-		<< (taus[it].byLooseCombinedIsolationDeltaBetaCorr>0.5) << ","
-		<< (taus[it].againstMuonTight>0.5) << ","
-		<< (taus[it].againstElectronLoose>0.5) <<","
-		<< (taus[it].againstElectronMedium>0.5) <<","
-		<< (taus[it].againstElectronMVA>0.5) << ")" << std::endl;
-    }
-    
-    if (taus[it].decayModeFinding>0.5&&taus[it].byLooseCombinedIsolationDeltaBetaCorr>0.5&&taus[it].againstMuonTight>0.5&&taus[it].againstElectronLoose>0.5&&taus[it].p4.Pt()>20.) {
-      out.push_back(taus[it]);
-      positions.push_back(it);
-    }
-  }
-  if (verbose_){
-    std::cout <<" CandidateFinder: Input Taus = "<<taus.size()<<" Output Taus = "<<out.size()<<std::endl;
-  }
 }
 
 

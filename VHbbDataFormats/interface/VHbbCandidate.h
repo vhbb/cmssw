@@ -53,6 +53,7 @@ class VHbbCandidate {
   public:
    TLorentzVector p4;
     std::vector<VHbbEvent::SimpleJet> jets;
+    bool HiggsFlag;
     float deltaTheta;
     std::vector <float> helicities;
  public:
@@ -100,6 +101,7 @@ class VHbbCandidate {
   FatHiggsCandidate FatH;
   VectorCandidate V;
   std::vector<VHbbEvent::SimpleJet> additionalJets;
+  std::vector<VHbbEvent::SimpleJet> additionalJetsFat;
 };
 
 
