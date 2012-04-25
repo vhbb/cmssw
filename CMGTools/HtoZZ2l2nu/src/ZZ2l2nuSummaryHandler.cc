@@ -42,127 +42,166 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("id1",        &evSummary_.id1,        "id1/I");
   t_->Branch("id2",        &evSummary_.id2,        "id2/I");
 
-  //selection info
-  t_->Branch("pass",       &evSummary_.pass,       "pass/I");
-
   //selected di-leptons
-  t_->Branch("l1_px",      &evSummary_.l1_px,      "l1_px/F");
-  t_->Branch("l1_py",      &evSummary_.l1_py,      "l1_py/F");
-  t_->Branch("l1_pz",      &evSummary_.l1_pz,      "l1_pz/F");
-  t_->Branch("l1_en",      &evSummary_.l1_en,      "l1_en/F");
-  t_->Branch("l1_pid",     &evSummary_.l1_pid,      "l1_pid/I");  
-  t_->Branch("l1_id",      &evSummary_.l1_id,      "l1_id/I");
-  t_->Branch("l1_genid",   &evSummary_.l1_genid,   "l1_genid/I");
-  t_->Branch("l1_ptErr",   &evSummary_.l1_ptErr,   "l1_ptErr/F");
-  t_->Branch("l1_ecalIso",    &evSummary_.l1_ecalIso,    "l1_ecalIso/F");
-  t_->Branch("l1_hcalIso",    &evSummary_.l1_hcalIso,    "l1_hcalIso/F");
-  t_->Branch("l1_trkIso",    &evSummary_.l1_trkIso,    "l1_trkIso/F");
-  t_->Branch("l1_gIso",    &evSummary_.l1_gIso,    "l1_gIso/F");
-  t_->Branch("l1_chIso",    &evSummary_.l1_chIso,    "l1_chIso/F");
-  t_->Branch("l1_puchIso",    &evSummary_.l1_puchIso,    "l1_puchIso/F");
-  t_->Branch("l1_nhIso",    &evSummary_.l1_nhIso,    "l1_nhIso/F");
+  t_->Branch("l1_px",                  &evSummary_.l1_px,                  "l1_px/F");
+  t_->Branch("l1_py",                  &evSummary_.l1_py,                  "l1_py/F");
+  t_->Branch("l1_pz",                  &evSummary_.l1_pz,                  "l1_pz/F");
+  t_->Branch("l1_en",                  &evSummary_.l1_en,                  "l1_en/F");
+  t_->Branch("l1_ptErr",               &evSummary_.l1_ptErr,               "l1_ptErr/F");
+  t_->Branch("l1_ecalIso",             &evSummary_.l1_ecalIso,             "l1_ecalIso/F");
+  t_->Branch("l1_hcalIso",             &evSummary_.l1_hcalIso,             "l1_hcalIso/F");
+  t_->Branch("l1_trkIso",              &evSummary_.l1_trkIso,              "l1_trkIso/F");
+  t_->Branch("l1_gIso",                &evSummary_.l1_gIso,                "l1_gIso/F");
+  t_->Branch("l1_chIso",               &evSummary_.l1_chIso,               "l1_chIso/F");
+  t_->Branch("l1_puchIso",             &evSummary_.l1_puchIso,             "l1_puchIso/F");
+  t_->Branch("l1_nhIso",               &evSummary_.l1_nhIso,               "l1_nhIso/F");
+  t_->Branch("l1_id",                  &evSummary_.l1_id,                  "l1_id/I");
+  t_->Branch("l1_genid",               &evSummary_.l1_genid,               "l1_genid/I");
+  t_->Branch("l1_pid",                 &evSummary_.l1_pid,                 "l1_pid/I");  
+  t_->Branch("l1_ensf",                &evSummary_.l1_ensf,                "l1_ensf/F");
+  t_->Branch("l1_ensferr",             &evSummary_.l1_ensferr,             "l1_ensferr/F");
+  t_->Branch("l1_d0",                  &evSummary_.l1_d0,                  "l1_d0/F");
+  t_->Branch("l1_dZ",                  &evSummary_.l1_dZ,                  "l1_dZ/F");
+  t_->Branch("l1_trkpt",               &evSummary_.l1_trkpt,               "l1_trkpt/F");
+  t_->Branch("l1_trketa",              &evSummary_.l1_trketa,              "l1_trketa/F");
+  t_->Branch("l1_trkphi",              &evSummary_.l1_trkphi,              "l1_trkphi/F");
+  t_->Branch("l1_trkchi2",             &evSummary_.l1_trkchi2,             "l1_trkchi2/F");
+  t_->Branch("l1_trkValidPixelHits",   &evSummary_.l1_trkValidPixelHits,   "l1_trkValidPixelHits/F");
+  t_->Branch("l1_trkValidTrackerHits", &evSummary_.l1_trkValidTrackerHits, "l1_trkValidTrackerHits/F");
+  t_->Branch("l1_trkLostInnerHits",    &evSummary_.l1_trkLostInnerHits,    "l1_trkLostInnerHits/F");
 
-  t_->Branch("l2_px",      &evSummary_.l2_px,      "l2_px/F");
-  t_->Branch("l2_py",      &evSummary_.l2_py,      "l2_py/F");
-  t_->Branch("l2_pz",      &evSummary_.l2_pz,      "l2_pz/F");
-  t_->Branch("l2_en",      &evSummary_.l2_en,      "l2_en/F");
-  t_->Branch("l2_pid",     &evSummary_.l2_pid,      "l2_pid/I");
-  t_->Branch("l2_id",      &evSummary_.l2_id,      "l2_id/I");
-  t_->Branch("l2_genid",   &evSummary_.l2_genid,   "l2_genid/I");
-  t_->Branch("l2_ptErr",   &evSummary_.l2_ptErr,   "l2_ptErr/F");
-  t_->Branch("l2_ecalIso",    &evSummary_.l2_ecalIso,    "l2_ecalIso/F");
-  t_->Branch("l2_hcalIso",    &evSummary_.l2_hcalIso,    "l2_hcalIso/F");
-  t_->Branch("l2_trkIso",    &evSummary_.l2_trkIso,    "l2_trkIso/F");
-  t_->Branch("l2_gIso",    &evSummary_.l2_gIso,    "l2_gIso/F");
-  t_->Branch("l2_chIso",    &evSummary_.l2_chIso,    "l2_chIso/F");
-  t_->Branch("l2_puchIso",    &evSummary_.l2_puchIso,    "l2_puchIso/F");
-  t_->Branch("l2_nhIso",    &evSummary_.l2_nhIso,    "l2_nhIso/F");
+  t_->Branch("l2_px",                  &evSummary_.l2_px,                  "l2_px/F");
+  t_->Branch("l2_py",                  &evSummary_.l2_py,                  "l2_py/F");
+  t_->Branch("l2_pz",                  &evSummary_.l2_pz,                  "l2_pz/F");
+  t_->Branch("l2_en",                  &evSummary_.l2_en,                  "l2_en/F");
+  t_->Branch("l2_ptErr",               &evSummary_.l2_ptErr,               "l2_ptErr/F");
+  t_->Branch("l2_ecalIso",             &evSummary_.l2_ecalIso,             "l2_ecalIso/F");
+  t_->Branch("l2_hcalIso",             &evSummary_.l2_hcalIso,             "l2_hcalIso/F");
+  t_->Branch("l2_trkIso",              &evSummary_.l2_trkIso,              "l2_trkIso/F");
+  t_->Branch("l2_gIso",                &evSummary_.l2_gIso,                "l2_gIso/F");
+  t_->Branch("l2_chIso",               &evSummary_.l2_chIso,               "l2_chIso/F");
+  t_->Branch("l2_puchIso",             &evSummary_.l2_puchIso,             "l2_puchIso/F");
+  t_->Branch("l2_nhIso",               &evSummary_.l2_nhIso,               "l2_nhIso/F");
+  t_->Branch("l2_id",                  &evSummary_.l2_id,                  "l2_id/I");
+  t_->Branch("l2_genid",               &evSummary_.l2_genid,               "l2_genid/I");
+  t_->Branch("l2_pid",                 &evSummary_.l2_pid,                 "l2_pid/I");  
+  t_->Branch("l2_ensf",                &evSummary_.l2_ensf,                "l2_ensf/F");
+  t_->Branch("l2_ensferr",             &evSummary_.l2_ensferr,             "l2_ensferr/F");
+  t_->Branch("l2_d0",                  &evSummary_.l2_d0,                  "l2_d0/F");
+  t_->Branch("l2_dZ",                  &evSummary_.l2_dZ,                  "l2_dZ/F");
+  t_->Branch("l2_trkpt",               &evSummary_.l2_trkpt,               "l2_trkpt/F");
+  t_->Branch("l2_trketa",              &evSummary_.l2_trketa,              "l2_trketa/F");
+  t_->Branch("l2_trkphi",              &evSummary_.l2_trkphi,              "l2_trkphi/F");
+  t_->Branch("l2_trkchi2",             &evSummary_.l2_trkchi2,             "l2_trkchi2/F");
+  t_->Branch("l2_trkValidPixelHits",   &evSummary_.l2_trkValidPixelHits,   "l2_trkValidPixelHits/F");
+  t_->Branch("l2_trkValidTrackerHits", &evSummary_.l2_trkValidTrackerHits, "l2_trkValidTrackerHits/F");
+  t_->Branch("l2_trkLostInnerHits",    &evSummary_.l2_trkLostInnerHits,    "l2_trkLostInnerHits/F");
 
   //selected additional-leptons
-  t_->Branch("ln",         &evSummary_.ln,         "ln/I");
-  t_->Branch("ln_px",      evSummary_.ln_px,       "ln_px[ln]/F");
-  t_->Branch("ln_py",      evSummary_.ln_py,       "ln_py[ln]/F");
-  t_->Branch("ln_pz",      evSummary_.ln_pz,       "ln_pz[ln]/F");
-  t_->Branch("ln_en",      evSummary_.ln_en,       "ln_en[ln]/F");
-  t_->Branch("ln_pid",     evSummary_.ln_pid,      "ln_pid[ln]/I");
-  t_->Branch("ln_id",      evSummary_.ln_id,       "ln_id[ln]/I");
-  t_->Branch("ln_genid",   evSummary_.ln_genid,    "ln_genid[ln]/I");
-  t_->Branch("ln_ptErr",   evSummary_.ln_ptErr,    "ln_ptErr[ln]/F");
-  t_->Branch("ln_ecalIso",    evSummary_.ln_ecalIso,     "ln_ecalIso[ln]/F");
-  t_->Branch("ln_hcalIso",    evSummary_.ln_hcalIso,     "ln_hcalIso[ln]/F");
-  t_->Branch("ln_trkIso",    evSummary_.ln_trkIso,     "ln_trkIso[ln]/F");
-  t_->Branch("ln_gIso",    evSummary_.ln_gIso,    "l_gIso[ln]/F");
-  t_->Branch("ln_chIso",    evSummary_.ln_chIso,    "l_chIso[ln]/F");
-  t_->Branch("ln_puchIso",   evSummary_.ln_puchIso,    "l_puchIso[ln]/F");
-  t_->Branch("ln_nhIso",    evSummary_.ln_nhIso,    "l_nhIso[ln]/F");
+  t_->Branch("ln",                     &evSummary_.ln,                    "ln/I");
+  t_->Branch("ln_px",                  evSummary_.ln_px,                  "ln_px[ln]/F");
+  t_->Branch("ln_py",                  evSummary_.ln_py,                  "ln_py[ln]/F");
+  t_->Branch("ln_pz",                  evSummary_.ln_pz,                  "ln_pz[ln]/F");
+  t_->Branch("ln_en",                  evSummary_.ln_en,                  "ln_en[ln]/F");
+  t_->Branch("ln_ptErr",               evSummary_.ln_ptErr,               "ln_ptErr[ln]/F");
+  t_->Branch("ln_ecalIso",             evSummary_.ln_ecalIso,             "ln_ecalIso[ln]/F");
+  t_->Branch("ln_hcalIso",             evSummary_.ln_hcalIso,             "ln_hcalIso[ln]/F");
+  t_->Branch("ln_trkIso",              evSummary_.ln_trkIso,              "ln_trkIso[ln]/F");
+  t_->Branch("ln_gIso",                evSummary_.ln_gIso,                "ln_gIso[ln]/F");
+  t_->Branch("ln_chIso",               evSummary_.ln_chIso,               "ln_chIso[ln]/F");
+  t_->Branch("ln_puchIso",             evSummary_.ln_puchIso,             "ln_puchIso[ln]/F");
+  t_->Branch("ln_nhIso",               evSummary_.ln_nhIso,               "ln_nhIso[ln]/F");
+  t_->Branch("ln_id",                  evSummary_.ln_id,                  "ln_id[ln]/I");
+  t_->Branch("ln_genid",               evSummary_.ln_genid,               "ln_genid[ln]/I");
+  t_->Branch("ln_pid",                 evSummary_.ln_pid,                 "ln_pid[ln]/I");  
+  t_->Branch("ln_ensf",                evSummary_.ln_ensf,                "ln_ensf[ln]/F");
+  t_->Branch("ln_ensferr",             evSummary_.ln_ensferr,             "ln_ensferr[ln]/F");
+  t_->Branch("ln_d0",                  evSummary_.ln_d0,                  "ln_d0[ln]/F");
+  t_->Branch("ln_dZ",                  evSummary_.ln_dZ,                  "ln_dZ[ln]/F");
+  t_->Branch("ln_trkpt",               evSummary_.ln_trkpt,               "ln_trkpt[ln]/F");
+  t_->Branch("ln_trketa",              evSummary_.ln_trketa,              "ln_trketa[ln]/F");
+  t_->Branch("ln_trkphi",              evSummary_.ln_trkphi,              "ln_trkphi[ln]/F");
+  t_->Branch("ln_trkchi2",             evSummary_.ln_trkchi2,             "ln_trkchi2[ln]/F");
+  t_->Branch("ln_trkValidPixelHits",   evSummary_.ln_trkValidPixelHits,   "ln_trkValidPixelHits[ln]/F");
+  t_->Branch("ln_trkValidTrackerHits", evSummary_.ln_trkValidTrackerHits, "ln_trkValidTrackerHits[ln]/F");
+  t_->Branch("ln_trkLostInnerHits",    evSummary_.ln_trkLostInnerHits,    "ln_trkLostInnerHits[ln]/F");
 
   //lepton id fields
-  t_->Branch("en", &evSummary_.en,"en/I");
-  t_->Branch("en_idbits", evSummary_.en_idbits,"en_idbits[en]/I");
-  t_->Branch("en_hoe",evSummary_.en_hoe ,"en_hoe[en]/F");
-  t_->Branch("en_dphiin",evSummary_.en_dphiin ,"en_dphiin[en]/F");
-  t_->Branch("en_detain",evSummary_.en_detain ,"en_detain[en]/F");
-  t_->Branch("en_sihih",evSummary_.en_sihih ,"en_sihih[en]/F");
-  t_->Branch("en_corren",evSummary_.en_corren ,"en_corren[en]/F");
-  t_->Branch("en_correnerr",evSummary_.en_correnerr ,"en_correnerr[en]/F");
-  t_->Branch("en_sce",evSummary_.en_sce ,"en_sce[en]/F");
-  t_->Branch("en_sceta",evSummary_.en_sceta ,"en_sceta[en]/F");
-  t_->Branch("en_scphi",evSummary_.en_scphi ,"en_scphi[en]/F");
-  t_->Branch("en_e2x5max",evSummary_.en_e2x5max ,"en_e2x5max[en]/F");
-  t_->Branch("en_e1x5",evSummary_.en_e1x5 ,"en_e1x5[en]/F");
-  t_->Branch("en_e5x5",evSummary_.en_e5x5 ,"en_e5x5[en]/F");
-  t_->Branch("en_h2te",evSummary_.en_h2te ,"en_h2te[en]/F");
-  t_->Branch("en_h2tebc",evSummary_.en_h2tebc ,"en_h2tebc[en]/F");
-  t_->Branch("en_d0",evSummary_.en_d0 ,"en_d0[en]/F");
-  t_->Branch("en_dZ",evSummary_.en_dZ ,"en_dZ[en]/F");
-  t_->Branch("en_gsfpt",evSummary_.en_gsfpt ,"en_gsfpt[en]/F");
-  t_->Branch("en_gsfeta",evSummary_.en_gsfeta ,"en_gsfeta[en]/F");
-  t_->Branch("en_gsfphi",evSummary_.en_gsfphi ,"en_gsfphi[en]/F");
-  t_->Branch("mn", &evSummary_.mn,"mn/I");
-  t_->Branch("mn_idbits", evSummary_.mn_idbits,"mn_idbits[mn]/I");
-  t_->Branch("mn_chi2", evSummary_.mn_chi2 ,"mn_chi2[mn]/F");
-  t_->Branch("mn_pixHits",evSummary_.mn_pixHits ,"mn_pixHits[mn]/F");
-  t_->Branch("mn_trkHits",evSummary_.mn_trkHits ,"mn_trkHits[mn]/F");
-  t_->Branch("mn_muHits",evSummary_.mn_muHits ,"mn_muHits[mn]/F");
-  t_->Branch("mn_nMatches",evSummary_.mn_nMatches ,"mn_nMatches[mn]/F");
-  t_->Branch("mn_d0",evSummary_.mn_d0 ,"mn_d0[mn]/F");
-  t_->Branch("mn_dZ",evSummary_.mn_dZ ,"mn_dZ[mn]/F");
+  t_->Branch("en",         &evSummary_.en,         "en/I");
+  t_->Branch("en_idbits",  evSummary_.en_idbits,   "en_idbits[en]/I");
+  t_->Branch("en_hoe",     evSummary_.en_hoe ,     "en_hoe[en]/F");
+  t_->Branch("en_dphiin",  evSummary_.en_dphiin ,  "en_dphiin[en]/F");
+  t_->Branch("en_detain",  evSummary_.en_detain ,  "en_detain[en]/F");
+  t_->Branch("en_sihih",   evSummary_.en_sihih ,   "en_sihih[en]/F");
+  t_->Branch("en_sipip",   evSummary_.en_sipip ,   "en_sipip[en]/F");
+  t_->Branch("en_r9",      evSummary_.en_r9,       "en_r9[en]/F");
+  t_->Branch("en_sce",     evSummary_.en_sce ,     "en_sce[en]/F");
+  t_->Branch("en_sceta",   evSummary_.en_sceta ,   "en_sceta[en]/F");
+  t_->Branch("en_scphi",   evSummary_.en_scphi ,   "en_scphi[en]/F");
+  t_->Branch("en_e2x5max", evSummary_.en_e2x5max , "en_e2x5max[en]/F");
+  t_->Branch("en_e1x5",    evSummary_.en_e1x5 ,    "en_e1x5[en]/F");
+  t_->Branch("en_e5x5",    evSummary_.en_e5x5 ,    "en_e5x5[en]/F");
+  t_->Branch("en_h2te",    evSummary_.en_h2te ,    "en_h2te[en]/F");
+  t_->Branch("en_h2tebc",  evSummary_.en_h2tebc ,  "en_h2tebc[en]/F");
+  t_->Branch("en_ooemoop", evSummary_.en_ooemoop,  "en_ooemoop[en]/F");
+  t_->Branch("en_fbrem",   evSummary_.en_fbrem,    "en_fbrem[en]/F");
+  t_->Branch("en_eopin",   evSummary_.en_eopin,    "en_eopin[en]/F");
+
+  t_->Branch("mn",               &evSummary_.mn,              "mn/I");
+  t_->Branch("mn_idbits",        evSummary_.mn_idbits,        "mn_idbits[mn]/I");
+  t_->Branch("mn_nMatches",      evSummary_.mn_nMatches ,     "mn_nMatches[mn]/F");
+  t_->Branch("mn_validMuonHits", evSummary_.mn_validMuonHits, "mn_validMuonHits[mn]/F");
 
   //selected CHS jets
-  t_->Branch("jn",         &evSummary_.jn,         "jn/I");
-  t_->Branch("jn_px",      evSummary_.jn_px,       "jn_px[jn]/F");
-  t_->Branch("jn_py",      evSummary_.jn_py,       "jn_py[jn]/F");
-  t_->Branch("jn_pz",      evSummary_.jn_pz,       "jn_pz[jn]/F");
-  t_->Branch("jn_en",      evSummary_.jn_en,       "jn_en[jn]/F");
-  t_->Branch("jn_genid",   evSummary_.jn_genid,    "jn_genid[jn]/I");
-  t_->Branch("jn_genflav",   evSummary_.jn_genflav,    "jn_genflav[jn]/I");
-  t_->Branch("jn_btag1",   evSummary_.jn_btag1,    "jn_btag1[jn]/F");
-  t_->Branch("jn_btag2",   evSummary_.jn_btag2,    "jn_btag2[jn]/F");
-  t_->Branch("jn_neutHadFrac",  evSummary_.jn_neutHadFrac,  "jn_neutHadFrac[jn]/F");
-  t_->Branch("jn_neutEmFrac",   evSummary_.jn_neutEmFrac,   "jn_neutEmFrac[jn]/F");
-  t_->Branch("jn_chHadFrac",   evSummary_.jn_chHadFrac,    "jn_chHadFrac[jn]/F");
-  t_->Branch("jn_genpt",   evSummary_.jn_genpt,    "jn_genpt[jn]/F");
-  t_->Branch("jn_pumva",   evSummary_.jn_pumva,    "jn_pumva[jn]/F");
-  t_->Branch("jn_tightId",   evSummary_.jn_tightId,    "jn_tightId[jn]/O");
+  t_->Branch("jn",             &evSummary_.jn,            "jn/I");
+  t_->Branch("jn_px",          evSummary_.jn_px,          "jn_px[jn]/F");
+  t_->Branch("jn_py",          evSummary_.jn_py,          "jn_py[jn]/F");
+  t_->Branch("jn_pz",          evSummary_.jn_pz,          "jn_pz[jn]/F");
+  t_->Branch("jn_en",          evSummary_.jn_en,          "jn_en[jn]/F");
+  t_->Branch("jn_rawsf",       evSummary_.jn_rawsf,       "jn_rawsf[jn]/F");
+  t_->Branch("jn_genid",       evSummary_.jn_genid,       "jn_genid[jn]/I");
+  t_->Branch("jn_genflav",     evSummary_.jn_genflav,     "jn_genflav[jn]/I");
+  t_->Branch("jn_btag1",       evSummary_.jn_btag1,       "jn_btag1[jn]/F");
+  t_->Branch("jn_btag2",       evSummary_.jn_btag2,       "jn_btag2[jn]/F");
+  t_->Branch("jn_btag3",       evSummary_.jn_btag3,       "jn_btag3[jn]/F");
+  t_->Branch("jn_neutHadFrac", evSummary_.jn_neutHadFrac, "jn_neutHadFrac[jn]/F");
+  t_->Branch("jn_neutEmFrac",  evSummary_.jn_neutEmFrac,  "jn_neutEmFrac[jn]/F");
+  t_->Branch("jn_chHadFrac",   evSummary_.jn_chHadFrac,   "jn_chHadFrac[jn]/F");
+  t_->Branch("jn_genpt",       evSummary_.jn_genpt,       "jn_genpt[jn]/F");
+  t_->Branch("jn_pumva",       evSummary_.jn_pumva,       "jn_pumva[jn]/F");
+  t_->Branch("jn_beta",        evSummary_.jn_beta,        "jn_beta[jn]/F");
+  t_->Branch("jn_betaStar",    evSummary_.jn_betaStar,    "jn_betaStar[jn]/F");
+  t_->Branch("jn_dRMean",      evSummary_.jn_dRMean,      "jn_dRMean[jn]/F");
+  t_->Branch("jn_ptD",         evSummary_.jn_ptD,         "jn_ptD[jn]/F");
+  t_->Branch("jn_ptRMS",       evSummary_.jn_ptRMS,       "jn_ptRMS[jn]/F");
+  t_->Branch("jn_idbits",      evSummary_.jn_idbits,      "jn_idbits[jn]/I");
 
   //selected PF jets 
-  t_->Branch("ajn",         &evSummary_.ajn,         "ajn/I");
-  t_->Branch("ajn_px",      evSummary_.ajn_px,       "ajn_px[ajn]/F");
-  t_->Branch("ajn_py",      evSummary_.ajn_py,       "ajn_py[ajn]/F");
-  t_->Branch("ajn_pz",      evSummary_.ajn_pz,       "ajn_pz[ajn]/F");
-  t_->Branch("ajn_en",      evSummary_.ajn_en,       "ajn_en[ajn]/F");
-  t_->Branch("ajn_genid",   evSummary_.ajn_genid,    "ajn_genid[ajn]/I");
-  t_->Branch("ajn_genflav",   evSummary_.ajn_genflav,    "ajn_genflav[ajn]/I");
-  t_->Branch("ajn_btag1",   evSummary_.ajn_btag1,    "ajn_btag1[ajn]/F");
-  t_->Branch("ajn_btag2",   evSummary_.ajn_btag2,    "ajn_btag2[ajn]/F");
-  t_->Branch("ajn_neutHadFrac",  evSummary_.ajn_neutHadFrac,  "ajn_neutHadFrac[ajn]/F");
-  t_->Branch("ajn_neutEmFrac",   evSummary_.ajn_neutEmFrac,   "ajn_neutEmFrac[ajn]/F");
-  t_->Branch("ajn_chHadFrac",   evSummary_.ajn_chHadFrac,    "ajn_chHadFrac[ajn]/F");
-  t_->Branch("ajn_genpt",   evSummary_.ajn_genpt,    "ajn_genpt[jn]/F");
-  t_->Branch("ajn_pumva",   evSummary_.ajn_pumva,    "ajn_pumva[jn]/F");
-  t_->Branch("ajn_tightId",   evSummary_.ajn_tightId,    "ajn_tightId[jn]/O");
+  t_->Branch("ajn",             &evSummary_.ajn,            "ajn/I");
+  t_->Branch("ajn_px",          evSummary_.ajn_px,          "ajn_px[ajn]/F");
+  t_->Branch("ajn_py",          evSummary_.ajn_py,          "ajn_py[ajn]/F");
+  t_->Branch("ajn_pz",          evSummary_.ajn_pz,          "ajn_pz[ajn]/F");
+  t_->Branch("ajn_en",          evSummary_.ajn_en,          "ajn_en[ajn]/F");
+  t_->Branch("ajn_rawsf",       evSummary_.ajn_rawsf,       "ajn_rawsf[ajn]/F");
+  t_->Branch("ajn_genid",       evSummary_.ajn_genid,       "ajn_genid[ajn]/I");
+  t_->Branch("ajn_genflav",     evSummary_.ajn_genflav,     "ajn_genflav[ajn]/I");
+  t_->Branch("ajn_btag1",       evSummary_.ajn_btag1,       "ajn_btag1[ajn]/F");
+  t_->Branch("ajn_btag2",       evSummary_.ajn_btag2,       "ajn_btag2[ajn]/F");
+  t_->Branch("ajn_btag3",       evSummary_.ajn_btag3,       "ajn_btag3[ajn]/F");
+  t_->Branch("ajn_neutHadFrac", evSummary_.ajn_neutHadFrac, "ajn_neutHadFrac[ajn]/F");
+  t_->Branch("ajn_neutEmFrac",  evSummary_.ajn_neutEmFrac,  "ajn_neutEmFrac[ajn]/F");
+  t_->Branch("ajn_chHadFrac",   evSummary_.ajn_chHadFrac,   "ajn_chHadFrac[ajn]/F");
+  t_->Branch("ajn_genpt",       evSummary_.ajn_genpt,       "ajn_genpt[ajn]/F");
+  t_->Branch("ajn_pumva",       evSummary_.ajn_pumva,       "ajn_pumva[ajn]/F");
+  t_->Branch("ajn_beta",        evSummary_.ajn_beta,        "ajn_beta[ajn]/F");
+  t_->Branch("ajn_betaStar",    evSummary_.ajn_betaStar,    "ajn_betaStar[ajn]/F");
+  t_->Branch("ajn_dRMean",      evSummary_.ajn_dRMean,      "ajn_dRMean[ajn]/F");
+  t_->Branch("ajn_ptD",         evSummary_.ajn_ptD,         "ajn_ptD[ajn]/F");
+  t_->Branch("ajn_ptRMS",       evSummary_.ajn_ptRMS,       "ajn_ptRMS[ajn]/F");
+  t_->Branch("ajn_idbits",      evSummary_.ajn_idbits,      "ajn_idbits[ajn]/I");
 
-  //higgs
+
+  //HT
   t_->Branch("htvec_px",   &evSummary_.htvec_px, "htvec_px/F");
   t_->Branch("htvec_py",   &evSummary_.htvec_py, "htvec_py/F");
   t_->Branch("htvec_pz",   &evSummary_.htvec_pz, "htvec_pz/F");
@@ -195,27 +234,21 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("otherVertexNeutSumEt",    &evSummary_.otherVertexNeutSumEt, "otherVertexNeutSumEt/F");
 
   //Gamma Info
-  t_->Branch("gn",        &evSummary_.gn,         "gn/I"); 
-  t_->Branch("g_px",      evSummary_.g_px,        "g_px[gn]/F");
-  t_->Branch("g_py",      evSummary_.g_py,        "g_py[gn]/F");
-  t_->Branch("g_pz",      evSummary_.g_pz,        "g_pz[gn]/F");
-  t_->Branch("g_en",      evSummary_.g_en,        "g_en[gn]/F");
-  t_->Branch("g_iso1",    evSummary_.g_iso1,      "g_iso1[gn]/F");
-  t_->Branch("g_iso2",    evSummary_.g_iso2,      "g_iso2[gn]/F");
-  t_->Branch("g_iso3",    evSummary_.g_iso3,      "g_iso3[gn]/F");
-  t_->Branch("g_sihih",   evSummary_.g_sihih,     "g_sihih[gn]/F");
-  t_->Branch("g_r9",      evSummary_.g_r9,        "g_r9[gn]/F");
-  t_->Branch("g_mva",      evSummary_.g_mva,        "g_mva[gn]/F");
-  t_->Branch("g_mvaNeut",      evSummary_.g_mvaNeut,        "g_mvaNeut[gn]/F");
-  t_->Branch("g_corren",      evSummary_.g_corren,        "g_corren[gn]/F");
-  t_->Branch("g_correnerr",      evSummary_.g_correnerr,        "g_correnerr[gn]/F");
-  t_->Branch("g_trkVeto",  evSummary_.g_trkVeto, "g_trkVeto[gn]/O");
-  t_->Branch("g_conv",    evSummary_.g_conv,      "g_conv[gn]/O");
-  t_->Branch("g_conv_px", evSummary_.g_conv_px,   "g_conv_px[gn]/F");
-  t_->Branch("g_conv_py", evSummary_.g_conv_py,   "g_conv_py[gn]/F");
-  t_->Branch("g_conv_pz", evSummary_.g_conv_pz,   "g_conv_pz[gn]/F");
-  t_->Branch("g_conv_en", evSummary_.g_conv_en,   "g_conv_en[gn]/F");
-  t_->Branch("g_conv_invtx", evSummary_.g_conv_invtx,   "g_conv_en[gn]/O");
+  t_->Branch("gn",          &evSummary_.gn,         "gn/I"); 
+  t_->Branch("g_px",        evSummary_.g_px,        "g_px[gn]/F");
+  t_->Branch("g_py",        evSummary_.g_py,        "g_py[gn]/F");
+  t_->Branch("g_pz",        evSummary_.g_pz,        "g_pz[gn]/F");
+  t_->Branch("g_en",        evSummary_.g_en,        "g_en[gn]/F");
+  t_->Branch("g_iso1",      evSummary_.g_iso1,      "g_iso1[gn]/F");
+  t_->Branch("g_iso2",      evSummary_.g_iso2,      "g_iso2[gn]/F");
+  t_->Branch("g_iso3",      evSummary_.g_iso3,      "g_iso3[gn]/F");
+  t_->Branch("g_sihih",     evSummary_.g_sihih,     "g_sihih[gn]/F");
+  t_->Branch("g_sipip",     evSummary_.g_sipip,     "g_sipip[gn]/F");
+  t_->Branch("g_r9",        evSummary_.g_r9,        "g_r9[gn]/F");
+  t_->Branch("g_hoe",       evSummary_.g_hoe,       "g_hoe[gn]/F");
+  t_->Branch("g_corren",    evSummary_.g_corren,    "g_corren[gn]/F");
+  t_->Branch("g_correnerr", evSummary_.g_correnerr, "g_correnerr[gn]/F");
+  t_->Branch("g_idbits",    evSummary_.g_idbits,    "g_idbits[gn]/I");
 
   //Higgs Info
   t_->Branch("h_px",      &evSummary_.h_px,        "h_px/F");
@@ -236,7 +269,7 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
 }
 
 //
-bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t)
+bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
 {
   if(t==0) return false;
   t_ = t;
@@ -270,9 +303,6 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t)
   t_->GetBranch("id1")->SetAddress(&evSummary_.id1);
   t_->GetBranch("id2")->SetAddress(&evSummary_.id2);
 
-  //selection info
-  t_->GetBranch("pass")->SetAddress(&evSummary_.pass);
-  
   //selected di-leptons
   t_->GetBranch("l1_px")     ->SetAddress( &evSummary_.l1_px);
   t_->GetBranch("l1_py")     ->SetAddress( &evSummary_.l1_py);
@@ -324,85 +354,84 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t)
   t_->GetBranch("ln_puchIso")   ->SetAddress( &evSummary_.ln_puchIso);
   t_->GetBranch("ln_nhIso")   ->SetAddress( &evSummary_.ln_nhIso);
 
-  if(t_->GetBranch("en"))           t_->GetBranch("en")->SetAddress(&evSummary_.en);
-  if(t_->GetBranch("en_idbits"))    t_->GetBranch("en_idbits")->SetAddress(evSummary_.en_idbits);
-  if(t_->GetBranch("en_hoe"))       t_->GetBranch("en_hoe")->SetAddress(evSummary_.en_hoe);
-  if(t_->GetBranch("en_dphiin"))    t_->GetBranch("en_dphiin")->SetAddress(evSummary_.en_dphiin);
-  if(t_->GetBranch("en_detain"))    t_->GetBranch("en_detain")->SetAddress(evSummary_.en_detain);
-  if(t_->GetBranch("en_sihih"))     t_->GetBranch("en_sihih")->SetAddress(evSummary_.en_sihih);
-  if(t_->GetBranch("en_corren"))    t_->GetBranch("en_corren")->SetAddress(evSummary_.en_corren);
-  if(t_->GetBranch("en_correnerr")) t_->GetBranch("en_correnerr")->SetAddress(evSummary_.en_correnerr);
-  if(t_->GetBranch("en_sce"))       t_->GetBranch("en_sce")->SetAddress(evSummary_.en_sce);
-  if(t_->GetBranch("en_sceta"))     t_->GetBranch("en_sceta")->SetAddress(evSummary_.en_sceta);
-  if(t_->GetBranch("en_scphi"))     t_->GetBranch("en_scphi")->SetAddress(evSummary_.en_scphi);
-  if(t_->GetBranch("en_e2x5max"))   t_->GetBranch("en_e2x5max")->SetAddress(evSummary_.en_e2x5max);
-  if(t_->GetBranch("en_e1x5"))      t_->GetBranch("en_e1x5")->SetAddress(evSummary_.en_e1x5);
-  if(t_->GetBranch("en_e5x5"))      t_->GetBranch("en_e5x5")->SetAddress(evSummary_.en_e5x5);
-  if(t_->GetBranch("en_h2te"))      t_->GetBranch("en_h2te")->SetAddress(evSummary_.en_h2te);
-  if(t_->GetBranch("en_h2tebc"))    t_->GetBranch("en_h2tebc")->SetAddress(evSummary_.en_h2tebc);
-  if(t_->GetBranch("en_d0"))        t_->GetBranch("en_d0")->SetAddress(evSummary_.en_d0);
-  if(t_->GetBranch("en_dZ"))        t_->GetBranch("en_dZ")->SetAddress(evSummary_.en_dZ);
-  if(t_->GetBranch("en_gsfpt"))     t_->GetBranch("en_gsfpt")->SetAddress(evSummary_.en_gsfpt);
-  if(t_->GetBranch("en_gsfeta"))    t_->GetBranch("en_gsfeta")->SetAddress(evSummary_.en_gsfeta);
-  if(t_->GetBranch("en_gsfphi"))    t_->GetBranch("en_gsfphi")->SetAddress(evSummary_.en_gsfphi);
-  if(t_->GetBranch("mn"))           t_->GetBranch("mn")->SetAddress(&evSummary_.mn);
-  if(t_->GetBranch("mn_idbits"))    t_->GetBranch("mn_idbits")->SetAddress(evSummary_.mn_idbits);
-  if(t_->GetBranch("mn_chi2"))      t_->GetBranch("mn_chi2")->SetAddress(evSummary_.mn_chi2);
-  if(t_->GetBranch("mn_pixHits"))   t_->GetBranch("mn_pixHits")->SetAddress(evSummary_.mn_pixHits);
-  if(t_->GetBranch("mn_trkHits"))   t_->GetBranch("mn_trkHits")->SetAddress(evSummary_.mn_trkHits);
-  if(t_->GetBranch("mn_muHits"))    t_->GetBranch("mn_muHits")->SetAddress(evSummary_.mn_muHits);
-  if(t_->GetBranch("mn_nMatches"))  t_->GetBranch("mn_nMatches")->SetAddress(evSummary_.mn_nMatches);
-  if(t_->GetBranch("mn_d0"))        t_->GetBranch("mn_d0")->SetAddress(evSummary_.mn_d0);
-  if(t_->GetBranch("mn_dZ"))        t_->GetBranch("mn_dZ")->SetAddress(evSummary_.mn_dZ);
-
+  t_->GetBranch("en")->SetAddress(&evSummary_.en);
+  t_->GetBranch("en_idbits")->SetAddress(evSummary_.en_idbits);
+  t_->GetBranch("en_hoe")->SetAddress(evSummary_.en_hoe);
+  t_->GetBranch("en_dphiin")->SetAddress(evSummary_.en_dphiin);
+  t_->GetBranch("en_detain")->SetAddress(evSummary_.en_detain);
+  t_->GetBranch("en_sihih")->SetAddress(evSummary_.en_sihih);
+  t_->GetBranch("en_sipip")->SetAddress(evSummary_.en_sipip);
+  t_->GetBranch("en_sce")->SetAddress(evSummary_.en_sce);
+  t_->GetBranch("en_sceta")->SetAddress(evSummary_.en_sceta);
+  t_->GetBranch("en_scphi")->SetAddress(evSummary_.en_scphi);
+  t_->GetBranch("en_e2x5max")->SetAddress(evSummary_.en_e2x5max);
+  t_->GetBranch("en_e1x5")->SetAddress(evSummary_.en_e1x5);
+  t_->GetBranch("en_e5x5")->SetAddress(evSummary_.en_e5x5);
+  t_->GetBranch("en_h2te")->SetAddress(evSummary_.en_h2te);
+  t_->GetBranch("en_h2tebc")->SetAddress(evSummary_.en_h2tebc);
+  t_->GetBranch("mn")->SetAddress(&evSummary_.mn);
+  t_->GetBranch("mn_idbits")->SetAddress(evSummary_.mn_idbits);
+  t_->GetBranch("mn_nMatches")->SetAddress(evSummary_.mn_nMatches);
+ 
   //selected jets
-  t_->GetBranch("jn")        ->SetAddress( &evSummary_.jn);
-  t_->GetBranch("jn_px")     ->SetAddress(evSummary_.jn_px);
-  t_->GetBranch("jn_py")     ->SetAddress(evSummary_.jn_py);
-  t_->GetBranch("jn_pz")     ->SetAddress(evSummary_.jn_pz);
-  t_->GetBranch("jn_en")     ->SetAddress(evSummary_.jn_en);
-  t_->GetBranch("jn_genid")  ->SetAddress(evSummary_.jn_genid);
-  t_->GetBranch("jn_genflav")->SetAddress(evSummary_.jn_genflav);
-  t_->GetBranch("jn_btag1")  ->SetAddress(evSummary_.jn_btag1);
-  t_->GetBranch("jn_btag2")  ->SetAddress(evSummary_.jn_btag2);
+  t_->GetBranch("jn")             ->SetAddress(&evSummary_.jn);
+  t_->GetBranch("jn_px")          ->SetAddress(evSummary_.jn_px);
+  t_->GetBranch("jn_py")          ->SetAddress(evSummary_.jn_py);
+  t_->GetBranch("jn_pz")          ->SetAddress(evSummary_.jn_pz);
+  t_->GetBranch("jn_en")          ->SetAddress(evSummary_.jn_en);
+  t_->GetBranch("jn_genid")       ->SetAddress(evSummary_.jn_genid);
+  t_->GetBranch("jn_genflav")     ->SetAddress(evSummary_.jn_genflav);
+  t_->GetBranch("jn_btag1")       ->SetAddress(evSummary_.jn_btag1);
+  t_->GetBranch("jn_btag2")       ->SetAddress(evSummary_.jn_btag2);
+  t_->GetBranch("jn_btag3")       ->SetAddress(evSummary_.jn_btag3);
   t_->GetBranch("jn_neutHadFrac") ->SetAddress(evSummary_.jn_neutHadFrac);
-  t_->GetBranch("jn_neutEmFrac") ->SetAddress(evSummary_.jn_neutEmFrac);
-  t_->GetBranch("jn_chHadFrac") ->SetAddress(evSummary_.jn_chHadFrac);
-  if(t_->GetBranch("jn_genpt")) t_->GetBranch("jn_genpt")->SetAddress(evSummary_.jn_genpt);
-  if(t_->GetBranch("jn_pumva")) t_->GetBranch("jn_pumva")->SetAddress(evSummary_.jn_pumva);
-  if(t_->GetBranch("jn_tightId"))   t_->GetBranch("jn_tightId")->SetAddress(evSummary_.jn_tightId);
+  t_->GetBranch("jn_neutEmFrac")  ->SetAddress(evSummary_.jn_neutEmFrac);
+  t_->GetBranch("jn_chHadFrac")   ->SetAddress(evSummary_.jn_chHadFrac);
+  t_->GetBranch("jn_genpt")       ->SetAddress(evSummary_.jn_genpt);
+  t_->GetBranch("jn_pumva")       ->SetAddress(evSummary_.jn_pumva);
+  t_->GetBranch("jn_beta")        ->SetAddress(evSummary_.jn_beta);
+  t_->GetBranch("jn_betaStar")    ->SetAddress(evSummary_.jn_betaStar);
+  t_->GetBranch("jn_dRMean")      ->SetAddress(evSummary_.jn_dRMean);
+  t_->GetBranch("jn_ptD")         ->SetAddress(evSummary_.jn_ptD);
+  t_->GetBranch("jn_ptRMS")       ->SetAddress(evSummary_.jn_ptRMS);
+  t_->GetBranch("jn_idbits")      ->SetAddress(evSummary_.jn_idbits);
   
-  if(t_->GetBranch("htvec_px")) t_->GetBranch("htvec_px")->SetAddress(&evSummary_.htvec_px);
-  if(t_->GetBranch("htvec_py")) t_->GetBranch("htvec_py")->SetAddress(&evSummary_.htvec_py);
-  if(t_->GetBranch("htvec_pz")) t_->GetBranch("htvec_pz")->SetAddress(&evSummary_.htvec_pz);
-  if(t_->GetBranch("htvec_en")) t_->GetBranch("htvec_en")->SetAddress(&evSummary_.htvec_en);
+  t_->GetBranch("htvec_px")->SetAddress(&evSummary_.htvec_px);
+  t_->GetBranch("htvec_py")->SetAddress(&evSummary_.htvec_py);
+  t_->GetBranch("htvec_pz")->SetAddress(&evSummary_.htvec_pz);
+  t_->GetBranch("htvec_en")->SetAddress(&evSummary_.htvec_en);
 
-
-  t_->GetBranch("ajn")        ->SetAddress( &evSummary_.ajn);
-  t_->GetBranch("ajn_px")     ->SetAddress(evSummary_.ajn_px);
-  t_->GetBranch("ajn_py")     ->SetAddress(evSummary_.ajn_py);
-  t_->GetBranch("ajn_pz")     ->SetAddress(evSummary_.ajn_pz);
-  t_->GetBranch("ajn_en")     ->SetAddress(evSummary_.ajn_en);
-  t_->GetBranch("ajn_genid")  ->SetAddress(evSummary_.ajn_genid);
-  t_->GetBranch("ajn_genflav")->SetAddress(evSummary_.ajn_genflav);
-  t_->GetBranch("ajn_btag1")  ->SetAddress(evSummary_.ajn_btag1);
-  t_->GetBranch("ajn_btag2")  ->SetAddress(evSummary_.ajn_btag2);
+  t_->GetBranch("ajn")             ->SetAddress(&evSummary_.ajn);
+  t_->GetBranch("ajn_px")          ->SetAddress(evSummary_.ajn_px);
+  t_->GetBranch("ajn_py")          ->SetAddress(evSummary_.ajn_py);
+  t_->GetBranch("ajn_pz")          ->SetAddress(evSummary_.ajn_pz);
+  t_->GetBranch("ajn_en")          ->SetAddress(evSummary_.ajn_en);
+  t_->GetBranch("ajn_genid")       ->SetAddress(evSummary_.ajn_genid);
+  t_->GetBranch("ajn_genflav")     ->SetAddress(evSummary_.ajn_genflav);
+  t_->GetBranch("ajn_btag1")       ->SetAddress(evSummary_.ajn_btag1);
+  t_->GetBranch("ajn_btag2")       ->SetAddress(evSummary_.ajn_btag2);
+  t_->GetBranch("ajn_btag3")       ->SetAddress(evSummary_.ajn_btag3);
   t_->GetBranch("ajn_neutHadFrac") ->SetAddress(evSummary_.ajn_neutHadFrac);
-  t_->GetBranch("ajn_neutEmFrac") ->SetAddress(evSummary_.ajn_neutEmFrac);
-  t_->GetBranch("ajn_chHadFrac") ->SetAddress(evSummary_.ajn_chHadFrac);
-  if(t_->GetBranch("ajn_genpt")) t_->GetBranch("ajn_genpt")->SetAddress(evSummary_.ajn_genpt);
-  if(t_->GetBranch("ajn_pumva")) t_->GetBranch("ajn_pumva")->SetAddress(evSummary_.ajn_pumva);
-  if(t_->GetBranch("ajn_tightId"))   t_->GetBranch("ajn_tightId")->SetAddress(evSummary_.jn_tightId);
-  
+  t_->GetBranch("ajn_neutEmFrac")  ->SetAddress(evSummary_.ajn_neutEmFrac);
+  t_->GetBranch("ajn_chHadFrac")   ->SetAddress(evSummary_.ajn_chHadFrac);
+  t_->GetBranch("ajn_genpt")       ->SetAddress(evSummary_.ajn_genpt);
+  t_->GetBranch("ajn_pumva")       ->SetAddress(evSummary_.ajn_pumva);
+  t_->GetBranch("ajn_beta")        ->SetAddress(evSummary_.ajn_beta);
+  t_->GetBranch("ajn_betaStar")    ->SetAddress(evSummary_.ajn_betaStar);
+  t_->GetBranch("ajn_dRMean")      ->SetAddress(evSummary_.ajn_dRMean);
+  t_->GetBranch("ajn_ptD")         ->SetAddress(evSummary_.ajn_ptD);
+  t_->GetBranch("ajn_ptRMS")       ->SetAddress(evSummary_.ajn_ptRMS);
+  t_->GetBranch("ajn_idbits")      ->SetAddress(evSummary_.ajn_idbits);
+
   //primary vertex
-  t_->GetBranch("vtx_px")   ->SetAddress( &evSummary_.vtx_px);
-  t_->GetBranch("vtx_py")   ->SetAddress( &evSummary_.vtx_py);
-  t_->GetBranch("vtx_pz")   ->SetAddress( &evSummary_.vtx_pz);
-  t_->GetBranch("vtx_en")   ->SetAddress( &evSummary_.vtx_en);
+  t_->GetBranch("vtx_px")->SetAddress( &evSummary_.vtx_px);
+  t_->GetBranch("vtx_py")->SetAddress( &evSummary_.vtx_py);
+  t_->GetBranch("vtx_pz")->SetAddress( &evSummary_.vtx_pz);
+  t_->GetBranch("vtx_en")->SetAddress( &evSummary_.vtx_en);
   
   //MET
-  t_->GetBranch("nmet")  ->SetAddress( &evSummary_.nmet);
-  t_->GetBranch("met_phi")  ->SetAddress( evSummary_.met_phi);
+  t_->GetBranch("nmet")    ->SetAddress( &evSummary_.nmet);
+  t_->GetBranch("met_phi") ->SetAddress( evSummary_.met_phi);
   t_->GetBranch("met_pt")  ->SetAddress( evSummary_.met_pt);
 
   t_->GetBranch("sumEt")->SetAddress(&evSummary_.sumEt);
@@ -419,41 +448,35 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t)
   t_->GetBranch("otherVertexNeutSumEt")->SetAddress(&evSummary_.otherVertexNeutSumEt);
   
   //Gamma Info
-  t_->GetBranch("gn")->SetAddress(&evSummary_.gn);
-  t_->GetBranch("g_px")->SetAddress(evSummary_.g_px);
-  t_->GetBranch("g_py")->SetAddress(evSummary_.g_py);
-  t_->GetBranch("g_pz")->SetAddress(evSummary_.g_pz);
-  t_->GetBranch("g_en")->SetAddress(evSummary_.g_en);
-  t_->GetBranch("g_iso1")->SetAddress(evSummary_.g_iso1);
-  t_->GetBranch("g_iso2")->SetAddress(evSummary_.g_iso2);
-  t_->GetBranch("g_iso3")->SetAddress(evSummary_.g_iso3);
-  t_->GetBranch("g_sihih")->SetAddress(evSummary_.g_sihih);
-  t_->GetBranch("g_r9")->SetAddress(evSummary_.g_r9);
-  if(t_->GetBranch("g_mva"))     t_->GetBranch("g_mva")->SetAddress(evSummary_.g_mva);
-  if(t_->GetBranch("g_mvaNeut")) t_->GetBranch("g_mvaNeut")->SetAddress(evSummary_.g_mvaNeut);
-  if(t_->GetBranch("g_corren"))     t_->GetBranch("g_corren")->SetAddress(evSummary_.g_corren);
-  if(t_->GetBranch("g_correnerr"))  t_->GetBranch("g_correnerr")->SetAddress(evSummary_.g_correnerr);
-  if(t_->GetBranch("g_trkVeto")) t_->GetBranch("g_trkVeto")->SetAddress(evSummary_.g_trkVeto);
-  t_->GetBranch("g_conv")->SetAddress( evSummary_.g_conv );
-  t_->GetBranch("g_conv_px")->SetAddress( evSummary_.g_conv_px );
-  t_->GetBranch("g_conv_py")->SetAddress( evSummary_.g_conv_py );
-  t_->GetBranch("g_conv_pz")->SetAddress( evSummary_.g_conv_pz );
-  t_->GetBranch("g_conv_en")->SetAddress( evSummary_.g_conv_en );
-  if(t_->GetBranch("g_conv_invtx")) t_->GetBranch("g_conv_invtx")->SetAddress( evSummary_.g_conv_invtx );
-
+  t_->GetBranch("gn")          ->SetAddress(&evSummary_.gn);
+  t_->GetBranch("g_px")        ->SetAddress(evSummary_.g_px);
+  t_->GetBranch("g_py")        ->SetAddress(evSummary_.g_py);
+  t_->GetBranch("g_pz")        ->SetAddress(evSummary_.g_pz);
+  t_->GetBranch("g_en")        ->SetAddress(evSummary_.g_en);
+  t_->GetBranch("g_iso1")      ->SetAddress(evSummary_.g_iso1);
+  t_->GetBranch("g_iso2")      ->SetAddress(evSummary_.g_iso2);
+  t_->GetBranch("g_iso3")      ->SetAddress(evSummary_.g_iso3);
+  t_->GetBranch("g_sihih")     ->SetAddress(evSummary_.g_sihih);
+  t_->GetBranch("g_sipip")     ->SetAddress(evSummary_.g_sipip);
+  t_->GetBranch("g_r9")        ->SetAddress(evSummary_.g_r9);
+  t_->GetBranch("g_hoe")       ->SetAddress(evSummary_.g_hoe);
+  t_->GetBranch("g_corren")    ->SetAddress(evSummary_.g_corren);
+  t_->GetBranch("g_correnerr") ->SetAddress(evSummary_.g_correnerr);
+  t_->GetBranch("g_idbits")    ->SetAddress(evSummary_.g_idbits);
+  
   //Higgs Info
-  t_->GetBranch("h_px")     ->SetAddress( &evSummary_.h_px);
-  t_->GetBranch("h_py")     ->SetAddress( &evSummary_.h_py);
-  t_->GetBranch("h_pz")     ->SetAddress( &evSummary_.h_pz);
-  t_->GetBranch("h_en")     ->SetAddress( &evSummary_.h_en);
+  t_->GetBranch("h_px")->SetAddress(&evSummary_.h_px);
+  t_->GetBranch("h_py")->SetAddress(&evSummary_.h_py);
+  t_->GetBranch("h_pz")->SetAddress(&evSummary_.h_pz);
+  t_->GetBranch("h_en")->SetAddress(&evSummary_.h_en);
   
   //mc truth
-  t_->GetBranch("nmcparticles")->SetAddress( &evSummary_.nmcparticles);
-  t_->GetBranch("mc_px")->SetAddress(evSummary_.mc_px);
-  t_->GetBranch("mc_py")->SetAddress(evSummary_.mc_py);
-  t_->GetBranch("mc_pz")->SetAddress(evSummary_.mc_pz);
-  t_->GetBranch("mc_en")->SetAddress(evSummary_.mc_en);
-  t_->GetBranch("mc_id")->SetAddress(evSummary_.mc_id);
+  t_->GetBranch("nmcparticles") ->SetAddress(&evSummary_.nmcparticles);
+  t_->GetBranch("mc_px")        ->SetAddress(evSummary_.mc_px);
+  t_->GetBranch("mc_py")        ->SetAddress(evSummary_.mc_py);
+  t_->GetBranch("mc_pz")        ->SetAddress(evSummary_.mc_pz);
+  t_->GetBranch("mc_en")        ->SetAddress(evSummary_.mc_en);
+  t_->GetBranch("mc_id")        ->SetAddress(evSummary_.mc_id);
   
   return true;
 }

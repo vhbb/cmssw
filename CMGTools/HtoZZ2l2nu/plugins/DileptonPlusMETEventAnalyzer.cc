@@ -64,7 +64,7 @@ private:
   ZZ2l2nuSummaryHandler summaryHandler_;
   TSelectionMonitor controlHistos_;
   EventCategory eventClassifComp_;
-  PileupJetIdAlgo puJetIdAlgo_;
+  std::vector<PileupJetIdAlgo *> puJetIdAlgo_;
   edm::Handle<reco::VertexCollection> hVtx_;
 
   //regression corrector for electrons/photons
@@ -76,8 +76,7 @@ using namespace std;
 
 //
 DileptonPlusMETEventAnalyzer::DileptonPlusMETEventAnalyzer(const edm::ParameterSet &iConfig)
-  : controlHistos_( iConfig.getParameter<std::string>("dtag") ),
-    puJetIdAlgo_(iConfig.getParameter<edm::ParameterSet>("Jets").getParameter<edm::ParameterSet>("puJetId"))
+  : controlHistos_( iConfig.getParameter<std::string>("dtag") )
 {
   try{
 
@@ -86,6 +85,8 @@ DileptonPlusMETEventAnalyzer::DileptonPlusMETEventAnalyzer(const edm::ParameterS
     for(size_t iobj=0; iobj<sizeof(objs)/sizeof(string); iobj++)
       objConfig_[ objs[iobj] ] = iConfig.getParameter<edm::ParameterSet>( objs[iobj] );
 
+    std::vector<edm::ParameterSet> jetIdPsets =iConfig.getParameter<edm::ParameterSet>("Jets").getParameter<std::vector<edm::ParameterSet> >("puJetIds");
+    for(size_t iid=0; iid<jetIdPsets.size(); iid++) puJetIdAlgo_.push_back( new PileupJetIdAlgo( jetIdPsets[iid] ) );
     
     edm::Service<TFileService> fs;
     summaryHandler_.initTree(  fs->make<TTree>("data","Event Summary") );
@@ -110,14 +111,38 @@ DileptonPlusMETEventAnalyzer::DileptonPlusMETEventAnalyzer(const edm::ParameterS
 //
 int DileptonPlusMETEventAnalyzer::addPidSummary(ObjectIdSummary &obj)
 {
+  ZZ2l2nuSummary_t &ev = summaryHandler_.getEvent();
   if(fabs(obj.id)==1)
     {
     }
   else if(fabs(obj.id)==11)
     {
+      ev.en_idbits[ev.en]=obj.idBits;
+      ev.en_hoe[ev.en]=obj.hoe;
+      ev.en_dphiin[ev.en]=obj.dPhiTrack;
+      ev.en_detain[ev.en]=obj.dEtaTrack;
+      ev.en_sihih[ev.en]=obj.sihih;
+      ev.en_sipip[ev.en]=obj.sipip;
+      ev.en_sce[ev.en]=obj.sce;
+      ev.en_sceta[ev.en]=obj.sceta;
+      ev.en_scphi[ev.en]=obj.scphi;
+      ev.en_e2x5max[ev.en]=obj.e2x5max;
+      ev.en_e1x5[ev.en]=obj.e1x5;
+      ev.en_e5x5[ev.en]=obj.e5x5;
+      ev.en_h2te[ev.en]=obj.h2te;
+      ev.en_h2tebc[ev.en]=obj.h2tebc;
+      ev.en_r9[ev.en]=obj.r9;
+      ev.en_ooemoop[ev.en]=obj.ooemoop;
+      ev.en_fbrem[ev.en]=obj.fbrem;
+      ev.en_eopin[ev.en]=obj.eopin;
+      ev.en++;
     }
   else if(fabs(obj.id)==13)
     {
+      ev.mn_idbits[ev.en]=obj.idBits;
+      ev.mn_nMatches[ev.mn]=obj.trkMatches;
+      ev.mn_validMuonHits[ev.mn]=obj.trkValidMuonHits;
+      ev.mn++;
     }
   else if(fabs(obj.id)==22)
     {
@@ -328,7 +353,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     event.getByLabel(objConfig_["Electrons"].getParameter<edm::InputTag>("source"), hEle);
     EcalClusterLazyTools lazyTool(event,iSetup,objConfig_["Photons"].getParameter<edm::InputTag>("ebrechits"),objConfig_["Photons"].getParameter<edm::InputTag>("eerechits"));
     edm::Handle<reco::ConversionCollection> hConversions;
-    try{ event.getByLabel(objConfig_["Photons"].getParameter<std::string>("conversions"), hConversions); }  catch(std::exception &e){}
+    try{ event.getByLabel(objConfig_["Photons"].getParameter<edm::InputTag>("conversions"), hConversions); }  catch(std::exception &e){ cout << e.what() << endl; }
     std::vector<ObjectIdSummary> looseEleSummary, eleSummary;
     std::vector<CandidatePtr> selLooseElectrons = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_, lazyTool, *rho, objConfig_["LooseElectrons"], iSetup, looseEleSummary);
     std::vector<CandidatePtr> selElectrons      = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_, lazyTool, *rho, objConfig_["Electrons"], iSetup, eleSummary);
@@ -349,7 +374,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	  }
 	if(!keep) continue;
 	selLooseLeptons.push_back(selSoftMuons[ism]);
-	selLooseLeptonsSummary.push_back(looseMuonSummary[ism]);
+	selLooseLeptonsSummary.push_back(softMuonSummary[ism]);
       }
 
     //dilepton candidate
@@ -370,7 +395,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
       }
 
     //save leptons
-    ev.ln=0;
+    ev.ln=0; ev.mn=0; ev.en=0;
     for(size_t ilep=0; ilep<selLooseLeptonsSummary.size(); ilep++)
       {
 	int leptonRank(3);
@@ -393,6 +418,17 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 		ev.l1_ecalIso  = lep.isoVals[ECAL_ISO]; 
 		ev.l1_hcalIso  = lep.isoVals[HCAL_ISO]; 
 		ev.l1_trkIso   = lep.isoVals[TRACKER_ISO];
+		ev.l1_d0       = lep.trkd0;
+		ev.l1_dZ       = lep.trkdZ;
+		ev.l1_trkpt    = lep.trkpt;
+		ev.l1_trketa    = lep.trketa;
+		ev.l1_trkphi    = lep.trkphi;
+		ev.l1_trkchi2    = lep.trkchi2;
+		ev.l1_trkValidPixelHits   = lep.trkValidPixelHits;
+		ev.l1_trkValidTrackerHits   = lep.trkValidTrackerHits;
+		ev.l1_trkLostInnerHits   = lep.trkLostInnerHits;
+		ev.l1_ensf = lep.ensf;
+		ev.l1_ensferr = lep.ensferr;
 		ev.l1_pid      = addPidSummary( lep );
 		leptonRank=1;
 	      }
@@ -412,6 +448,17 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 		ev.l2_ecalIso  = lep.isoVals[ECAL_ISO]; 
 		ev.l2_hcalIso  = lep.isoVals[HCAL_ISO]; 
 		ev.l2_trkIso   = lep.isoVals[TRACKER_ISO];
+		ev.l2_d0       = lep.trkd0;
+		ev.l2_dZ       = lep.trkdZ;
+		ev.l2_trkpt    = lep.trkpt;
+		ev.l2_trketa    = lep.trketa;
+		ev.l2_trkphi    = lep.trkphi;
+		ev.l2_trkchi2    = lep.trkchi2;
+		ev.l2_trkValidPixelHits   = lep.trkValidPixelHits;
+		ev.l2_trkValidTrackerHits   = lep.trkValidTrackerHits;
+		ev.l2_trkLostInnerHits   = lep.trkLostInnerHits;
+		ev.l2_ensf = lep.ensf;
+		ev.l2_ensferr = lep.ensferr;
 		ev.l2_pid      = addPidSummary( lep );
 		leptonRank=2; 
 	      } 
@@ -431,6 +478,17 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.ln_ecalIso[ev.ln]  = lep.isoVals[ECAL_ISO]; 
 	ev.ln_hcalIso[ev.ln]  = lep.isoVals[HCAL_ISO]; 
 	ev.ln_trkIso[ev.ln]   = lep.isoVals[TRACKER_ISO];
+	ev.ln_d0[ev.ln]       = lep.trkd0;
+	ev.ln_dZ[ev.ln]       = lep.trkdZ;
+	ev.ln_trkpt[ev.ln]    = lep.trkpt;
+	ev.ln_trketa[ev.ln]    = lep.trketa;
+	ev.ln_trkphi[ev.ln]    = lep.trkphi;
+	ev.ln_trkchi2[ev.ln]    = lep.trkchi2;
+	ev.ln_trkValidPixelHits[ev.ln]   = lep.trkValidPixelHits;
+	ev.ln_trkValidTrackerHits[ev.ln]   = lep.trkValidTrackerHits;
+	ev.ln_trkLostInnerHits[ev.ln]   = lep.trkLostInnerHits;
+	ev.ln_ensf[ev.ln] = lep.ensf;
+	ev.ln_ensferr[ev.ln] = lep.ensferr;
 	ev.ln_pid[ev.ln]      = addPidSummary(lep);
 	ev.ln++;
       }
@@ -447,31 +505,22 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     ev.gn=0;
     std::vector<ObjectIdSummary> selPhotonIds;
     std::vector<CandidatePtr> selPhotons=getGoodPhotons(hPhoton,&phocorr_,lazyTool,hGsfEle,hConversions,hTracks,hVtx_,beamSpot,*rho25,objConfig_["Photons"],iSetup,selPhotonIds);
-    for(std::vector<CandidatePtr>::iterator phoIt = selPhotons.begin(); phoIt != selPhotons.end(); phoIt++)
+    for(size_t i=0; i<selPhotonIds.size(); i++)
       {
-	const reco::Photon *pho = dynamic_cast<const reco::Photon *>(phoIt->get());
- 	ev.g_px[ev.gn]    = pho->px();
-	ev.g_py[ev.gn]    = pho->py();
-	ev.g_pz[ev.gn]    = pho->pz();
-	ev.g_en[ev.gn]    = pho->energy();
-	ev.g_hoe[ev.gn]   = pho->hadronicOverEm();  
-	ev.g_sihih[ev.gn] = pho->sigmaIetaIeta();
-	ev.g_iso1[ev.gn]  = pho->trkSumPtSolidConeDR04();
-	ev.g_iso2[ev.gn]  = pho->ecalRecHitSumEtConeDR04();
-	ev.g_iso3[ev.gn]  = pho->hcalTowerSumEtConeDR04();
-	ev.g_r9[ev.gn]    = pho->r9();
-	ev.g_corren[ev.gn] =1.0;
-	ev.g_correnerr[ev.gn] = 0.;
-	ev.g_conv[ev.gn] = false;
-	ev.g_trkVeto[ev.gn] = false;
-	LorentzVector convP4(0,0,0,0);
-	
-	ev.g_conv_px[ev.gn] = 1.0;
-	ev.g_conv_py[ev.gn] = 1.0;
-	ev.g_conv_pz[ev.gn] = 1.0;
-	ev.g_conv_en[ev.gn] = 1.0;
-	ev.g_conv_invtx[ev.gn] = false;
-
+ 	ev.g_px[ev.gn]    = selPhotonIds[i].p4.px();
+	ev.g_py[ev.gn]    = selPhotonIds[i].p4.py();
+	ev.g_pz[ev.gn]    = selPhotonIds[i].p4.pz();
+	ev.g_en[ev.gn]    = selPhotonIds[i].p4.energy();
+	ev.g_hoe[ev.gn]   = selPhotonIds[i].hoe;
+	ev.g_sihih[ev.gn] = selPhotonIds[i].sihih;
+	ev.g_sipip[ev.gn] = selPhotonIds[i].sipip;
+	ev.g_iso1[ev.gn]  = selPhotonIds[i].isoVals[TRACKER_ISO];
+	ev.g_iso2[ev.gn]  = selPhotonIds[i].isoVals[ECAL_ISO];
+	ev.g_iso3[ev.gn]  = selPhotonIds[i].isoVals[HCAL_ISO];
+	ev.g_r9[ev.gn]    = selPhotonIds[i].r9;
+	ev.g_corren[ev.gn] = selPhotonIds[i].ensf;
+	ev.g_correnerr[ev.gn] =  selPhotonIds[i].ensferr;
+	ev.g_idbits[ev.gn] = selPhotonIds[i].idBits;
 	ev.gn++;
       }
     if(ev.cat==UNKNOWN && selPhotons.size() && triggerBits["gamma"]==true) ev.cat=GAMMA+1000*photonTrig.second;
@@ -488,33 +537,31 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     ev.jn=0;
     std::vector<ObjectIdSummary> selJetsId;
     std::vector<CandidatePtr> selJets = getGoodJets(hJet, selLeptons, hVtx_, puJetIdAlgo_, objConfig_["Jets"],selJetsId);    
-    int nbcands(0);
     LorentzVector jetSum(0,0,0,0);
-    PFJetIDSelectionFunctor jetIdSelector(PFJetIDSelectionFunctor::FIRSTDATA,PFJetIDSelectionFunctor::TIGHT);
-    pat::strbitset hasId = jetIdSelector.getBitTemplate();
-    for (std::vector<CandidatePtr>::iterator jIt = selJets.begin(); jIt != selJets.end(); jIt++)
+    for(size_t ijet=0; ijet<selJetsId.size(); ijet++)
       {
-	const pat::Jet *jet = dynamic_cast<const pat::Jet *>(jIt->get());
-	jetSum += LorentzVector(jet->px(),jet->py(),jet->pz(),jet->energy());
-	ev.jn_px[ev.jn] = jet->px();  
-	ev.jn_py[ev.jn] = jet->py(); 
-	ev.jn_pz[ev.jn] = jet->pz(); 
-	ev.jn_en[ev.jn] = jet->energy();
-	const reco::Candidate *genParton = jet->genParton();
-	ev.jn_genid[ev.jn]       = genParton ? genParton->pdgId() : -9999;
-	ev.jn_genflav[ev.jn]     = jet->partonFlavour();
-	ev.jn_btag1[ev.jn]       = jet->bDiscriminator("trackCountingHighEffBJetTags");
-	ev.jn_btag2[ev.jn]       = jet->bDiscriminator("combinedSecondaryVertexBJetTags");
-	ev.jn_neutHadFrac[ev.jn] = jet->neutralHadronEnergyFraction();
-	ev.jn_neutEmFrac[ev.jn]  = jet->neutralEmEnergyFraction();
-	ev.jn_chHadFrac[ev.jn]   = jet->chargedHadronEnergyFraction();
-	const reco::GenJet *gJet=jet->genJet();
-	ev.jn_genpt[ev.jn]=gJet ? gJet->pt() : 0;
-	PileupJetIdentifier puIdentifier = puJetIdAlgo_.computeIdVariables(dynamic_cast<const reco::Jet*>(jet), 0., primVertex.get(), *hVtx_.product(), true);
-	ev.jn_pumva[ev.jn]=puIdentifier.mva();
-	hasId.set(false); ev.jn_tightId[ev.jn] = jetIdSelector(*jet,hasId);
+	jetSum += selJetsId[ijet].p4;
+	ev.jn_px[ev.jn]          = selJetsId[ijet].p4.px();
+	ev.jn_py[ev.jn]          = selJetsId[ijet].p4.py();
+	ev.jn_pz[ev.jn]          = selJetsId[ijet].p4.pz();
+	ev.jn_en[ev.jn]          = selJetsId[ijet].p4.energy();
+	ev.jn_genid[ev.jn]       = selJetsId[ijet].genid;
+	ev.jn_genflav[ev.jn]     = selJetsId[ijet].genflav;
+	ev.jn_btag1[ev.jn]       = selJetsId[ijet].tche;
+	ev.jn_btag2[ev.jn]       = selJetsId[ijet].csv;
+	ev.jn_btag3[ev.jn]       = selJetsId[ijet].jp;
+	ev.jn_neutHadFrac[ev.jn] = selJetsId[ijet].neutHadFrac;
+	ev.jn_neutEmFrac[ev.jn]  = selJetsId[ijet].neutEmFrac;
+	ev.jn_chHadFrac[ev.jn]   = selJetsId[ijet].chHadFrac;
+	ev.jn_beta[ev.jn]        = selJetsId[ijet].beta;
+	ev.jn_betaStar[ev.jn]    = selJetsId[ijet].betaStar;
+	ev.jn_dRMean[ev.jn]      = selJetsId[ijet].dRMean;
+	ev.jn_ptD[ev.jn]         = selJetsId[ijet].ptD;
+	ev.jn_ptRMS[ev.jn]       = selJetsId[ijet].ptRMS;
+	ev.jn_genpt[ev.jn]       = selJetsId[ijet].genP4.pt();
+	ev.jn_idbits[ev.jn]      = selJetsId[ijet].idBits;
+	ev.jn_pumva[ev.jn]       = selJetsId[ijet].mva[0];
 	ev.jn++;
-	nbcands += (jet->pt()>30 && fabs(jet->eta())<2.4 && jet->bDiscriminator("trackCountingHighEffBJetTags")>2); 
       }
     ev.htvec_px = jetSum.px();
     ev.htvec_py = jetSum.py();
@@ -533,29 +580,32 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     event.getByLabel(objConfig_["AssocJets"].getParameter<edm::InputTag>("source"), haJet);
     std::vector<ObjectIdSummary> selAJetsId;
     std::vector<CandidatePtr> selaJets = getGoodJets(haJet, selLeptons, hVtx_,puJetIdAlgo_, objConfig_["AssocJets"],selAJetsId);
-    for (std::vector<CandidatePtr>::iterator jIt = selaJets.begin(); jIt != selaJets.end(); jIt++)
-      {  
-	const pat::Jet *jet = dynamic_cast<const pat::Jet *>(jIt->get());
-        ev.ajn_px[ev.ajn] = jet->px();
-        ev.ajn_py[ev.ajn] = jet->py(); 
-        ev.ajn_pz[ev.ajn] = jet->pz(); 
-        ev.ajn_en[ev.ajn] = jet->energy();
-        const reco::Candidate *genParton = jet->genParton();
-        ev.ajn_genid[ev.ajn]       = genParton ? genParton->pdgId() : -9999;
-        ev.ajn_genflav[ev.ajn]     = jet->partonFlavour();
-        ev.ajn_btag1[ev.ajn]       = jet->bDiscriminator("trackCountingHighEffBJetTags");
-        ev.ajn_btag2[ev.ajn]       = jet->bDiscriminator("combinedSecondaryVertexBJetTags");
-        ev.ajn_neutHadFrac[ev.ajn] = jet->neutralHadronEnergyFraction();
-        ev.ajn_neutEmFrac[ev.ajn]  = jet->neutralEmEnergyFraction();
-        ev.ajn_chHadFrac[ev.ajn]   = jet->chargedHadronEnergyFraction();
-        const reco::GenJet *gJet   = jet->genJet();
-        ev.ajn_genpt[ev.ajn]       = gJet ? gJet->pt() : 0;
-	PileupJetIdentifier puIdentifier = puJetIdAlgo_.computeIdVariables(dynamic_cast<const reco::Jet*>(jet), 0, primVertex.get(), *hVtx_.product(), true);
-        ev.ajn_pumva[ev.jn]=puIdentifier.mva();
-	hasId.set(false); ev.jn_tightId[ev.jn] = jetIdSelector(*jet,hasId);
+    for(size_t ijet=0; ijet<selAJetsId.size(); ijet++)
+      {
+	ev.ajn_px[ev.ajn]          = selAJetsId[ijet].p4.px();
+	ev.ajn_py[ev.ajn]          = selAJetsId[ijet].p4.py();
+	ev.ajn_pz[ev.ajn]          = selAJetsId[ijet].p4.pz();
+	ev.ajn_en[ev.ajn]          = selAJetsId[ijet].p4.energy();
+	ev.ajn_rawsf[ev.ajn]       = selAJetsId[ijet].ensf;
+	ev.ajn_genid[ev.ajn]       = selAJetsId[ijet].genid;
+	ev.ajn_genflav[ev.ajn]     = selAJetsId[ijet].genflav;
+	ev.ajn_btag1[ev.ajn]       = selAJetsId[ijet].tche;
+	ev.ajn_btag2[ev.ajn]       = selAJetsId[ijet].csv;
+	ev.ajn_btag3[ev.ajn]       = selAJetsId[ijet].jp;
+	ev.ajn_neutHadFrac[ev.ajn] = selAJetsId[ijet].neutHadFrac;
+	ev.ajn_neutEmFrac[ev.ajn]  = selAJetsId[ijet].neutEmFrac;
+	ev.ajn_chHadFrac[ev.ajn]   = selAJetsId[ijet].chHadFrac;
+	ev.ajn_beta[ev.ajn]        = selAJetsId[ijet].beta;
+	ev.ajn_betaStar[ev.ajn]    = selAJetsId[ijet].betaStar;
+	ev.ajn_dRMean[ev.ajn]      = selAJetsId[ijet].dRMean;
+	ev.ajn_ptD[ev.ajn]         = selAJetsId[ijet].ptD;
+	ev.ajn_ptRMS[ev.ajn]       = selAJetsId[ijet].ptRMS;
+	ev.ajn_genpt[ev.ajn]       = selAJetsId[ijet].genP4.pt();
+	ev.ajn_idbits[ev.ajn]      = selAJetsId[ijet].idBits;
+	ev.ajn_pumva[ev.ajn]       = selAJetsId[ijet].mva[0];
 	ev.ajn++;
       }
-
+   
     //
     // MET SELECTION
     //
@@ -593,18 +643,6 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     }catch(std::exception &e){
       cout << e.what() << endl;
     }
-        
-    //set flags for coarse selection
-    if(dilepton.size()==2)
-      {
-	ev.pass=ev.cat;
-	if(ev.ln==0)      ev.pass += 1000;
-	if(nbcands==0)    ev.pass += 2000;  
-	if(ev.met_pt[0]>60) ev.pass += 3000;
-	if(ev.met_pt[0]>100) ev.pass += 4000;
-	LorentzVector dilP4=dilepton[0]->p4()+dilepton[1]->p4();
-	if( fabs(dilP4.mass()-91)<15 ) ev.pass +=5000;
-      }
 
     // finish event summary
     summaryHandler_.fillTree();
@@ -635,5 +673,5 @@ void DileptonPlusMETEventAnalyzer::endLuminosityBlock(const edm::LuminosityBlock
 }
 
  
+DEFINE_FWK_MODULE(DileptonPlusMETEventAnalyzer);
 
-//  LocalWords:  beamSpot

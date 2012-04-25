@@ -26,28 +26,15 @@ class PhysicsObject_Lepton : public LorentzVector
  public :
   PhysicsObject_Lepton(LorentzVector vec, Int_t id_,Int_t genid_=0, Float_t ptErr_=0, 
 		       Float_t ecalIso_=0, Float_t hcalIso_=0, Float_t trkIso_=0, 
-		       Float_t gIso_=0,     Float_t chIso_=0,    Float_t puchIso_=0, Float_t nhIso_=0, Int_t passIso_=0,
+		       Float_t gIso_=0,     Float_t chIso_=0,    Float_t puchIso_=0, Float_t nhIso_=0,
 		       Float_t pid_=0):
     LorentzVector(vec), id(id_), genid(genid_), ptErr(ptErr_), 
-    ecalIso(ecalIso_), hcalIso(hcalIso_), trkIso(trkIso_), gIso(gIso_), chIso(chIso_), puchIso(puchIso_), nhIso(nhIso_),  passIso(passIso_),
+    ecalIso(ecalIso_), hcalIso(hcalIso_), trkIso(trkIso_), gIso(gIso_), chIso(chIso_), puchIso(puchIso_), nhIso(nhIso_),
     pid(pid_) { }
-
-    inline bool passesIso(int isoType=PFRELBETCORR_ISO)
-    {
-      bool pass(false);
-      switch(isoType)
-	{
-	case REL_ISO:          pass=(passIso & 0x1); break;
-	case RELRHOCORR_ISO:   pass=((passIso>>1) & 0x1); break;
-	case PFREL_ISO:        pass=((passIso>>2) & 0x1); break;
-	default:               pass=((passIso>>3) & 0x1); break;
-	}
-      return pass;
-    }
 
     Int_t id,genid;
     Float_t ptErr, ecalIso, hcalIso, trkIso, gIso, chIso, puchIso, nhIso;
-    Int_t passIso, pid;
+    Int_t  pid;
 };
 
 
@@ -75,7 +62,6 @@ public :
   PhysicsObject_Gamma(LorentzVector vec, Float_t ptErr_=0, Float_t iso1_=0, Float_t iso2_=0, Float_t iso3_=0, Float_t sihih_=0, Float_t r9_=0, Float_t hoe_=0):
     LorentzVector(vec), iso1(iso1_), iso2(iso2_), iso3(iso3_), sihih(sihih_), r9(r9_), hoe(hoe_) 
     { 
-      setConversionInfo(false,false,LorentzVector(0,0,0,0));
       hasCtfTrkVeto=false;
       scEnSF=1.0; scEnSFerr=0;
     }
@@ -84,15 +70,9 @@ public :
 	scEnSF    = scEnCorrected/this->energy();
 	scEnSFerr = scEnCorrectedError/this->energy();
       }
-    inline void setConversionInfo(bool isConv_, bool convMatchesPrimVertex_, LorentzVector convP4_)
-    {
-      isConv=isConv_;
-      convMatchesPrimVertex=convMatchesPrimVertex_;
-      convP4=convP4_;
-    }
-    inline void setTrackVeto(bool trkVeto)
+    inline void setID(int id)
       {
-	hasCtfTrkVeto=trkVeto;
+	hasCtfTrkVeto=false;
       }
     Bool_t hasCtfTrkVeto;
     Bool_t isConv,convMatchesPrimVertex;

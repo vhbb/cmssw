@@ -43,6 +43,33 @@ enum PhysicsObjects   { MET=0,JET=1,TOP=6,ELECTRON=11, MUON=13, TAU=15, GLUON=21
 enum DileptonChannels { UNKNOWN=0,MUMU=1,EE=2,EMU=3,ETAU=4,MUTAU=5, GAMMA=22};
 enum IsolType         { ECAL_ISO=0, HCAL_ISO, TRACKER_ISO, REL_ISO, RELRHOCORR_ISO, N_ISO, C_ISO, CPU_ISO, G_ISO, PFREL_ISO, PFRELBETCORR_ISO};
 
+class ObjectIdSummary
+{
+ public:
+  ObjectIdSummary();
+  ObjectIdSummary(ObjectIdSummary const &);
+  ~ObjectIdSummary() {}
+
+  //generic
+  LorentzVector p4,genP4;
+  int id,genid,genflav;
+  double charge;
+  int idBits;
+  double isoVals[15], mva[5];
+  double ensf,ensferr;
+  double trkd0,trkdZ,trkpt,trketa,trkphi,trkchi2,trkValidPixelHits,trkValidTrackerHits,trkLostInnerHits;
+  //muon specific
+  double trkValidMuonHits,trkMatches;
+  //electron specific
+  double dPhiTrack,dEtaTrack,ooemoop,fbrem,eopin;
+  //common to photon and electron
+  double hoe,sihih,sipip,sce,sceta,scphi,e2x5max,e1x5,e5x5,h2te,h2tebc,r9;
+  //common to electron, photon, muon and jet
+  double aeff;
+  //jet specific
+  double neutHadFrac,neutEmFrac,chHadFrac,tche, csv, jp,beta,betaStar,dRMean,ptD,ptRMS;
+};
+
 
 ///                            ///   
 /// VERTEX SELECTION UTILITIES ///                                                                                                                                                                                                                                                                 
@@ -79,27 +106,6 @@ reco::VertexRef getClosestVertexTo(const T *trk, std::vector<reco::VertexRef> &s
 ///                            ///   
 /// LEPTON SELECTION UTILITIES ///
 ///                            ///   
-struct ObjectIdSummary
-{
-  //generic
-  LorentzVector p4,genP4;
-  int id,genid,genflav;
-  double charge;
-  int idBits;
-  std::vector<double> isoVals, mva;
-  double ensf,ensferr;
-  double trkd0,trkdZ,trkpt,trketa,trkphi,trkchi2,trkValidPixelHits,trkValidTrackerHits,trkLostInnerHits;
-  //muon specific
-  double trkValidMuonHits,trkMatches;
-  //electron specific
-  double dPhiTrack,dEtaTrack,ooemoop,fbrem,eopin;
-  //common to photon and electron
-  double hoe,sihih,sipip,sce,sceta,scphi,e2x5max,e1x5,e5x5,h2te,h2tebc,r9;
-  //common to electron, photon, muon and jet
-  double aeff;
-  //jet specific
-  double neutHadFrac,neutEmFrac,chHadFrac,tche, csv, jp,beta,betaStar,dRMean,ptD,ptRMS;
-};
 std::vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> > &hMu,
 					     const reco::VertexRef &primVertex, 
 					     const double& rho, 
@@ -147,7 +153,7 @@ std::vector<reco::CandidatePtr> getGoodPhotons(edm::Handle<edm::View<reco::Candi
 std::vector<reco::CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet, 
 					    std::vector<reco::CandidatePtr> &selPhysicsObjects, 
 					    edm::Handle<reco::VertexCollection> &hVtx,
-					    PileupJetIdAlgo &puJetIdAlgo,
+					    std::vector<PileupJetIdAlgo *> &puJetIdAlgo,
 					    const edm::ParameterSet &iConfig,
 					    std::vector<ObjectIdSummary> &selJetsId);
 std::pair<double,double> computeBetaForJet(const pat::Jet *jet, edm::Handle<reco::VertexCollection> &hVtx);

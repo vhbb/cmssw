@@ -9,6 +9,43 @@
 using namespace std;
 using namespace reco;
 
+//
+ObjectIdSummary::ObjectIdSummary()
+{
+  p4=LorentzVector(0,0,0,0); genP4=p4;
+  id=0; genid=0; genflav=0;
+  charge=0;
+  idBits=0;
+  for(size_t i=0; i<15; i++) isoVals[i]=0;
+  for(size_t i=0; i<5; i++)  mva[i]=0; 
+  ensf=0;ensferr=0;
+  trkd0=0;trkdZ=0;trkpt=0;trketa=0;trkphi=0;trkchi2=0;trkValidPixelHits=0;trkValidTrackerHits=0;trkLostInnerHits=0;
+  trkValidMuonHits=0;trkMatches=0;
+  dPhiTrack=0;dEtaTrack=0;ooemoop=0;fbrem=0;eopin=0;
+  hoe=0;sihih=0;sipip=0;sce=0;sceta=0;scphi=0;e2x5max=0;e1x5=0;e5x5=0;h2te=0;h2tebc=0;r9=0;
+  aeff=0;
+  neutHadFrac=0;neutEmFrac=0;chHadFrac=0;tche=0; csv=0; jp=0;beta=0;betaStar=0;dRMean=0;ptD=0;ptRMS=0;
+}
+
+//
+ObjectIdSummary::ObjectIdSummary(ObjectIdSummary const&other)
+{
+  p4=other.p4; genP4=other.genP4;
+  id=other.id; genid=other.genid; genflav=other.genflav;
+  charge=other.charge;
+  idBits=other.idBits;
+  for(size_t i=0; i<15; i++) isoVals[i]=other.isoVals[i];
+  for(size_t i=0; i<5; i++)  mva[i]=other.mva[i]; 
+  ensf=other.ensf;ensferr=other.ensferr;
+  trkd0=other.trkd0;trkdZ=other.trkdZ;trkpt=other.trkpt;trketa=other.trketa;trkphi=other.trkphi;trkchi2=other.trkchi2;trkValidPixelHits=other.trkValidPixelHits;trkValidTrackerHits=other.trkValidTrackerHits;trkLostInnerHits=other.trkLostInnerHits;
+  trkValidMuonHits=other.trkValidMuonHits;trkMatches=other.trkMatches;
+  dPhiTrack=other.dPhiTrack;dEtaTrack=other.dEtaTrack;ooemoop=other.ooemoop;fbrem=other.fbrem;eopin=other.eopin;
+  hoe=other.hoe;sihih=other.sihih;sipip=other.sipip;sce=other.sce;sceta=other.sceta;scphi=other.scphi;e2x5max=other.e2x5max;e1x5=other.e1x5;e5x5=other.e5x5;h2te=other.h2te;h2tebc=other.h2tebc;r9=other.r9;
+  aeff=other.aeff;
+  neutHadFrac=other.neutHadFrac;neutEmFrac=other.neutEmFrac;chHadFrac=other.chHadFrac;tche=other.tche; csv=other.csv; jp=other.jp;beta=other.beta;betaStar=other.betaStar;dRMean=other.dRMean;ptD=other.ptD;ptRMS=other.ptRMS;
+}
+
+
 ///                            ///   
 /// VERTEX SELECTION UTILITIES ///
 ///                            ///   
@@ -110,7 +147,8 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	  lepId.charge=muon->charge();
 	  lepId.ensf = 1.0;
 	  lepId.ensferr=fabs(muon->innerTrack()->ptError()/muon->innerTrack()->pt());
-	  lepId.isoVals = getLeptonIso( muonPtr, muon->pt(), rho );
+	  std::vector<double> isoVals=getLeptonIso( muonPtr, muon->pt(), rho );
+	  for(size_t iiso=0; iiso<isoVals.size(); iiso++) lepId.isoVals[iiso] = isoVals[iiso]; 
 	  lepId.trkd0=fabs(muon->innerTrack()->dxy(primVertex->position())); //muon->dB(pat::Muon::PV2D);
 	  lepId.trkdZ = fabs(muon->innerTrack()->dz(primVertex->position()));
 	  lepId.trkchi2 = muon->innerTrack()->normalizedChi2();	  
@@ -235,7 +273,8 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 	  }
 	lepId.ensf              = enSF.first;
 	lepId.ensferr           = enSF.second;
-	lepId.isoVals           = getLeptonIso( elePtr, lepId.p4.pt(), rho);
+	std::vector<double> isoVals=getLeptonIso( elePtr, lepId.p4.pt(), rho);
+	for(size_t iiso=0; iiso<isoVals.size(); iiso++)	lepId.isoVals[iiso] = isoVals[iiso];
 	lepId.hoe               = ele->hadronicOverEm();
 	lepId.dPhiTrack         = ele->deltaPhiSuperClusterTrackAtVtx();
 	lepId.dEtaTrack         = ele->deltaEtaSuperClusterTrackAtVtx();
@@ -279,7 +318,9 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 	
 	//2012 CUT BASED IDs : require the loosest one, i.e. veto Id)
 	const reco::GsfElectron *gsfEle = dynamic_cast<const reco::GsfElectron *>(ele);
-	bool passconversionveto = !ConversionTools::hasMatchedConversion(*gsfEle,hConversions,beamspot.position());
+	bool passconversionveto(true);
+	if(hConversions.isValid()) passconversionveto = !ConversionTools::hasMatchedConversion(*gsfEle,hConversions,beamspot.position());
+
 	bool passEoP            = EgammaCutBasedEleId::PassEoverPCuts(lepId.sceta,lepId.eopin,lepId.fbrem);
 	int  cutBasedIdsToTest[]= {EgammaCutBasedEleId::VETO, EgammaCutBasedEleId::LOOSE, EgammaCutBasedEleId::MEDIUM, EgammaCutBasedEleId::TIGHT};
 	bool hasCutBasedIds[]   = {false,                     false,                      false,                       false};
@@ -525,7 +566,7 @@ int getDileptonId(std::vector<CandidatePtr> &selDilepton)
 vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet, 
 				 vector<CandidatePtr> &selPhysicsObjects, 
 				 edm::Handle<reco::VertexCollection> &hVtx,
-				 PileupJetIdAlgo &puJetIdAlgo,
+				 std::vector<PileupJetIdAlgo *> &puJetIdAlgo,
 				 const edm::ParameterSet &iConfig,
 				 std::vector<ObjectIdSummary> &selJetsId)
 {
@@ -570,16 +611,21 @@ vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet,
         jetId.neutEmFrac  = jet->neutralEmEnergyFraction();
         jetId.chHadFrac   = jet->chargedHadronEnergyFraction();
 	jetId.r9          = jet->n90();
-	PileupJetIdentifier puIdentifier = puJetIdAlgo.computeIdVariables(dynamic_cast<const reco::Jet*>(jet), 0, primVtx.get(), *hVtx.product(), true);
-	jetId.sihih       = puIdentifier.etaW();
-	jetId.sipip       = puIdentifier.phiW();
-	jetId.beta        = puIdentifier.beta();
-	jetId.betaStar    = puIdentifier.betaStar();
-	jetId.dRMean      = puIdentifier.dRMean();
-	jetId.ptD         = puIdentifier.ptD();
-	jetId.ptRMS       = puIdentifier.ptRMS();
-        jetId.mva.push_back( puIdentifier.mva() );
-
+	std::vector<int> puIdFlags(puJetIdAlgo.size(),0);
+	for(size_t iid=0; iid<puJetIdAlgo.size(); iid++)
+	  {
+	    PileupJetIdentifier puIdentifier = puJetIdAlgo[iid]->computeIdVariables(dynamic_cast<const reco::Jet*>(jet), 0, primVtx.get(), *hVtx.product(), true);
+	    jetId.sihih       = puIdentifier.etaW();
+	    jetId.sipip       = puIdentifier.phiW();
+	    jetId.beta        = puIdentifier.beta();
+	    jetId.betaStar    = puIdentifier.betaStar();
+	    jetId.dRMean      = puIdentifier.dRMean();
+	    jetId.ptD         = puIdentifier.ptD();
+	    jetId.ptRMS       = puIdentifier.ptRMS();
+	    puIdFlags[iid]    = int(puIdentifier.idFlag());
+	    jetId.mva[iid]= puIdentifier.mva();
+	  }
+	
 	//check overlaps with selected leptons
 	double minDR(1000);
 	for(vector<CandidatePtr>::iterator lIt = selPhysicsObjects.begin(); lIt != selPhysicsObjects.end(); lIt++)
@@ -588,17 +634,16 @@ vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet,
 	    if(dR > minDR) continue; 
 	    minDR = dR;
 	  }
-	jetId.isoVals.push_back(minDR);
+	jetId.isoVals[TRACKER_ISO]=minDR;
 
 	//jet id
 	hasLooseId.set(false);
 	hasTightId.set(false);
 	bool passLooseId(looseJetIdSelector( *jet, hasLooseId ));
 	bool passTightId(tightJetIdSelector( *jet, hasTightId ));
-	jetId.idBits=passLooseId |
-	  (passTightId << 1 ) |
-	  (int(puIdentifier.idFlag())<<2);
-
+	jetId.idBits=passLooseId | (passTightId << 1 );
+	for(size_t iid=0; iid<puJetIdAlgo.size(); iid++) jetId.idBits |= ((puIdFlags[iid] & 0xf) << (iid+1)*4);
+	
 	if(jet->pt()<minPt || fabs(jet->eta())>maxEta || minDR < minDeltaRtoLepton || !passLooseId) continue;
 	
 	//jet is selected
@@ -723,12 +768,12 @@ vector<CandidatePtr> getGoodPhotons(edm::Handle<edm::View<reco::Candidate> > &hP
 	phoId.h2tebc            = pho->hadTowDepth2OverEm();
 	phoId.r9                = pho->r9();
 	phoId.aeff              = EgammaCutBasedEleId::GetEffectiveArea(pho->eta());  
-	phoId.isoVals.push_back(pho->trkSumPtHollowConeDR04());
-	phoId.isoVals.push_back(pho->ecalRecHitSumEtConeDR04());
-	phoId.isoVals.push_back(pho->hcalTowerSumEtConeDR04());
-	phoId.isoVals.push_back(pho->chargedHadronIso());
-	phoId.isoVals.push_back(pho->neutralHadronIso());
-	phoId.isoVals.push_back(pho->photonIso());
+	phoId.isoVals[TRACKER_ISO]=pho->trkSumPtHollowConeDR04();
+	phoId.isoVals[ECAL_ISO]=pho->ecalRecHitSumEtConeDR04();
+	phoId.isoVals[HCAL_ISO]=pho->hcalTowerSumEtConeDR04();
+	phoId.isoVals[C_ISO]=pho->chargedHadronIso();
+	phoId.isoVals[N_ISO]=pho->neutralHadronIso();
+	phoId.isoVals[G_ISO]=pho->photonIso();
 
 	bool hasPixelSeed=pho->hasPixelSeed();	
 	bool hasElectronVeto = ConversionTools::hasMatchedPromptElectron(pho->superCluster(), hEle, hConversions, beamSpot->position());

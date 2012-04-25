@@ -7,7 +7,8 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 from Configuration.AlCa.autoCond import autoCond
 process.GlobalTag.globaltag=cms.string(autoCond.get('startup',autoCond['mc']))
 #else process.GlobalTag=autoCond['com10']
-
+process.load("Configuration.StandardSequences.MagneticField_cff")
+process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 
 #the source is configured from the command line
 process.source = cms.Source("PoolSource",
@@ -52,7 +53,9 @@ process.evAnalyzer = cms.EDAnalyzer("DileptonPlusMETEventAnalyzer",
                                     )
 
 #the path to execute
-process.p = cms.Path(process.ClusteredPFMetProducer*process.puWeightSequence*process.evAnalyzer)
+process.p = cms.Path(process.ClusteredPFMetProducer+
+                     process.puWeightSequence+
+                     process.evAnalyzer)
 
 
 # message logger

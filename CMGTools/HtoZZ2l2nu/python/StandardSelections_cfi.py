@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-from CMGTools.External.puJetIDAlgo_cff import basePtVtxCat as basePuJetId
+from CMGTools.External.puJetIDAlgo_cff import PhilV1, PuJetIdMinMVA, PuJetIdOptMVA
 from CMGTools.HtoZZ2l2nu.TriggerSequences_cff import getTriggerPaths
 DoubleElectronTrigs, DoubleMuTrigs, MuEGTrigs, PhotonTrigs, SingleMuTrigs, mcTrigs = getTriggerPaths(version=2012)
 
@@ -127,7 +127,10 @@ BaseJetSelection = cms.PSet( source = cms.InputTag("selectedPatJetsPFlow"),
                              minPt = cms.double(10),
                              maxEta = cms.double(5.0),
                              minDeltaRtoLepton = cms.double(0.4),
-                             puJetId = basePuJetId
+                             puJetIds = cms.VPSet( PhilV1,
+                                                   PuJetIdMinMVA,
+                                                   PuJetIdOptMVA
+                                                   )
                              )
 AssocJetSelection = BaseJetSelection.clone(source = cms.InputTag("selectedPatJetsPFlowNoPuSub") )
 
