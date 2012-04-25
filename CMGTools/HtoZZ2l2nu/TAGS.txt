@@ -1,4 +1,4 @@
-cvs co -r cbern_sip_27Mar12	-d AnalysisDataFormats/CMGTools UserCode/AnalysisDataFormats/CMGTools                     
+cvs co -r cbern_sip_27Mar12	-d AnalysisDataFormats/CMGTools UserCode/CMG/AnalysisDataFormats/CMGTools                     
 cvs co -r cbern_nomitid_11Apr12 -d CMGTools/Common		UserCode/CMG/CMGTools/Common                                  
 cvs co -r V00-00-08		-d CMGTools/External		UserCode/CMG/CMGTools/External                                
 cvs co -r CMSSW_5x_V12_04_25	-d CMGTools/HtoZZ2l2nu		UserCode/CMG/CMGTools/HtoZZ2l2nu                              
