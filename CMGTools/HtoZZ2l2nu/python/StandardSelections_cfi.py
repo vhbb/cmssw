@@ -44,7 +44,7 @@ BaseMuonsSelection = cms.PSet( source = cms.InputTag("selectedPatMuons"), #PFlow
                                maxD0=cms.double(0.02),
                                maxDz=cms.double(0.1),
                                id = cms.string(""),
-                               maxRelIso = cms.double(0.15),
+                               maxRelIso = cms.double(999999.),#0.15),
                                applySoftMuonIsolationVeto=cms.bool(False),
                                usePFIso = cms.bool(False),
                                doDeltaBetaCorrection = cms.bool(False)
@@ -112,7 +112,7 @@ BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectrons")
                                                         maxTrackLostHits = cms.vint32(0,  0),
                                                         applyConversionVetoFrom = cms.string("simpleEleId80relIso")
                                                         ),
-                                   maxRelIso    = cms.double(0.1),
+                                   maxRelIso    = cms.double(999999.),#0.1),
                                    minDeltaRtoMuons = cms.double(0.1),
                                    usePFIso = cms.bool(False),
                                    doDeltaBetaCorrection = cms.bool(False)
