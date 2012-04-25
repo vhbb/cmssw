@@ -12,9 +12,9 @@ cvs co -r V03-09-18-03   PhysicsTools/PatUtils
 cvs co -r V08-03-16      PhysicsTools/Utilities                           
 cvs co -r V15-01-05      RecoParticleFlow/PFProducer                      
 cvs co -r Colin_June23   -d RecoParticleFlow/PostProcessing UserCode/RecoParticleFlow/PostProcessing                 
-cvs co -r V00-08-01      SHarper/HEEPAnalyzer         
+cvs co -r V00-08-01      -d SHarper/HEEPAnalyzer UserCode/SHarper/HEEPAnalyzer        
 cvs co -r t3-04-13	 UserCode/mschen/LandS
-cvs co -r V00-00-05      EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
+cvs co -r V00-00-05      -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
 
 cmsenv
 #compile landS
