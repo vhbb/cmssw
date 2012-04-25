@@ -368,8 +368,8 @@ int main(int argc, char* argv[])
   mon.addHistogram( new TH1F("ZZ_in_RedBalance", ";RedMet/Pt(Z);Events", 50, 0., 2.) );
   mon.addHistogram( new TH1F("ZZ_in_BalRedIndMet_L", ";Balance (RedMet IND Long);Events [GeV]", 50, -1., 2.) );
   mon.addHistogram( new TH1F("ZZ_in_LeptId", ";Lept1+Lept2 Charge;Events", 2, 0., 2.) );
-  mon.addHistogram( new TH1F("ZZ_in_l1_passIso", ";Lept1 Pass Iso;Events", 2, 0., 2.) );
-  mon.addHistogram( new TH1F("ZZ_in_l2_passIso", ";Lept1 Pass Iso;Events", 2, 0., 2.) );
+  //  mon.addHistogram( new TH1F("ZZ_in_l1_passIso", ";Lept1 Pass Iso;Events", 2, 0., 2.) );
+  // mon.addHistogram( new TH1F("ZZ_in_l2_passIso", ";Lept1 Pass Iso;Events", 2, 0., 2.) );
 // After All selection
   mon.addHistogram( new TH1F("ZZ_fin_llMass", ";Dilepton Invariant mass [GeV];Events", 20, 75., 110.) );
   mon.addHistogram( new TH1F("ZZ_fin_llPt", ";Transvers momentum of lepton pair [GeV];Events", 30, 25., 325.) );
@@ -901,10 +901,10 @@ int main(int argc, char* argv[])
       mon.fillHisto("ZZ_in_BalRedIndMet_L", tags_cat, RedIndMet_L/zpt, iweight);
       if( ev.l1_id == -(ev.l2_id) ) mon.fillHisto("ZZ_in_LeptId", tags_cat, 0, iweight);
       else mon.fillHisto("ZZ_in_LeptId", tags_cat, 1, iweight);
-      if( ev.l1_passIso ) mon.fillHisto("ZZ_in_l1_passIso", tags_cat, 0, iweight);
-      else mon.fillHisto("ZZ_in_l1_passIso", tags_cat, 1, iweight);
-      if( ev.l2_passIso ) mon.fillHisto("ZZ_in_l2_passIso", tags_cat, 0, iweight);
-      else mon.fillHisto("ZZ_in_l2_passIso", tags_cat, 1, iweight);
+      //  if( ev.l1_passIso ) mon.fillHisto("ZZ_in_l1_passIso", tags_cat, 0, iweight);
+      //  else mon.fillHisto("ZZ_in_l1_passIso", tags_cat, 1, iweight);
+      // if( ev.l2_passIso ) mon.fillHisto("ZZ_in_l2_passIso", tags_cat, 0, iweight);
+      // else mon.fillHisto("ZZ_in_l2_passIso", tags_cat, 1, iweight);
  //FinalSelection
       if( PassSelectionRedMet ){
       mon.fillHisto("ZZ_fin_llMass", tags_cat, zmass, iweight);
