@@ -4,7 +4,7 @@
 #
 export SCRAM_ARCH=slc5_amd64_gcc462
 scramv1 project CMSSW CMSSW_5_2_3_patch2
-cd ${CMSSW_BASE}/src/
+cd CMSSW_5_2_3_patch2/src/
 cvs co -r CMSSW_5x -p UserCode/CMG/CMGTools/HtoZZ2l2nu/TAGS.txt | sh
 scramv1 b
 
