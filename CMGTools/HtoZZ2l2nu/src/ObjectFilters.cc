@@ -115,7 +115,7 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
       //config parameters
       double minPt = iConfig.getParameter<double>("minPt");
       double maxEta = iConfig.getParameter<double>("maxEta");
-      bool requireGlobal = iConfig.getParameter<bool>("requireGlobal"); 
+      int requireGlobal = iConfig.getParameter<int>("requireGlobal"); 
       int minValidMuonHits = iConfig.getParameter<int>("minValidMuonHits");
       int minMatchingMuonStations = iConfig.getParameter<int>("minMatchingMuonStations");
       int minValidTrackerHits = iConfig.getParameter<int>("minValidTrackerHits");
@@ -179,10 +179,10 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	  if(fabs(lepId.ensferr)>maxRelPtUncertainty) continue;
 	  if(fabs(lepId.trkd0)>maxD0 || fabs(lepId.trkdZ)>maxDZ) continue;
 	  if(lepId.trkchi2>maxTrackChi2 || lepId.trkValidPixelHits<minPixelHits || lepId.trkValidTrackerHits<minValidTrackerHits) continue; 
-	  if(requireGlobal)
+	  if(requireGlobal==1 || requireGlobal==2)
 	    {
-	      if(!isGlobal) continue;
-	      if(lepId.trkValidMuonHits<minValidMuonHits  || lepId.trkMatches<minMatchingMuonStations) continue;
+	      if(!isGlobal && requireGlobal==1) continue;
+	      if(isGlobal && (lepId.trkValidMuonHits<minValidMuonHits  || lepId.trkMatches<minMatchingMuonStations)) continue;
 	    }
 	  double relIso = lepId.isoVals[REL_ISO];
 	  if(rho>0)     relIso = lepId.isoVals[RELRHOCORR_ISO];

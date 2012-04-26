@@ -34,7 +34,7 @@ BaseVertexSelection = cms.PSet( source = cms.InputTag("offlinePrimaryVertices"),
 Base2011MuonsSelection = cms.PSet( source = cms.InputTag("selectedPatMuons"), #PFlow"),
                                    minPt = cms.double(20),
                                    maxEta = cms.double(2.4),
-                                   requireGlobal = cms.bool(True),
+                                   requireGlobal = cms.int32(1),  #0-no requirement; 1-and; 2-or 
                                    minValidMuonHits=cms.int32(1),
                                    minMatchingMuonStations = cms.int32(2),
                                    minValidTrackerHits = cms.int32(11),
@@ -53,7 +53,7 @@ Base2011MuonsSelection = cms.PSet( source = cms.InputTag("selectedPatMuons"), #P
 BaseMuonsSelection = cms.PSet( source = cms.InputTag("selectedPatMuons"), #PFlow"),
                                minPt = cms.double(20),
                                maxEta = cms.double(2.4),
-                               requireGlobal = cms.bool(False),
+                               requireGlobal = cms.int32(2),
                                minValidMuonHits=cms.int32(0),
                                minMatchingMuonStations = cms.int32(0),
                                minValidTrackerHits = cms.int32(0),
@@ -72,7 +72,7 @@ BaseMuonsSelection = cms.PSet( source = cms.InputTag("selectedPatMuons"), #PFlow
 # base values for loose muon selection ----------------------------------------------
 BaseLooseMuonsSelection = BaseMuonsSelection.clone( minPt = cms.double(10) )
 BaseSoftMuonsSelection  = BaseMuonsSelection.clone( minPt = cms.double(3),
-                                                    requireGlobal = cms.bool(False),
+                                                    requireGlobal = cms.int32(0),
                                                     minValidMuonHits=cms.int32(0),
                                                     minMatchingMuonStations = cms.int32(0),
                                                     minValidTrackerHits = cms.int32(11),
@@ -146,9 +146,9 @@ BaseJetSelection = cms.PSet( source = cms.InputTag("selectedPatJetsPFlow"),
                              minPt = cms.double(10),
                              maxEta = cms.double(5.0),
                              minDeltaRtoLepton = cms.double(0.4),
-                             puJetIds = cms.VPSet( PhilV1,
-                                                   PuJetIdMinMVA,
-                                                   PuJetIdOptMVA
+                             puJetIds = cms.VPSet( PuJetIdMinMVA,
+                                                   PuJetIdOptMVA,
+                                                   PhilV1
                                                    )
                              )
 AssocJetSelection = BaseJetSelection.clone(source = cms.InputTag("selectedPatJetsPFlowNoPuSub") )
