@@ -32,7 +32,22 @@ class PhysicsObject_Lepton : public LorentzVector
     ecalIso(ecalIso_), hcalIso(hcalIso_), trkIso(trkIso_), gIso(gIso_), chIso(chIso_), puchIso(puchIso_), nhIso(nhIso_),
     pid(pid_) { }
 
+    Float_t relIso()              { return (ecalIso+hcalIso+trkIso)/pt(); }
+    Float_t relIsoRho(double rho) { return (TMath::Max(ecalIso+hcalIso-0.3*0.3*3.1415*rho,0.)+trkIso)/pt(); }
+    Float_t pfRelIsoDbeta()       { return (TMath::Max(nhIso+gIso-0.5*puchIso,0.)+chIso)/pt(); }
+    Float_t pfRelIso()            { return (nhIso+gIso+chIso)/pt(); }
+    
+    void setTrackInfo(Float_t d0_, Float_t dZ_, Float_t trkpt_, Float_t trketa_, Float_t trkphi_, Float_t trkchi2_, Float_t trkValidPixelHits_, Float_t trkValidTrackerHits_, Float_t trkLostInnerHits_)
+    {
+      d0=d0_; dZ=dZ_;
+      trkpt=trkpt_; trketa=trketa_; trkphi=trkphi_; trkchi2=trkchi2_;
+      trkValidPixelHits=trkValidPixelHits_; trkValidTrackerHits=trkValidTrackerHits_;trkLostInnerHits=trkValidTrackerHits_;
+    }
+    void setEnergyCorrections(Float_t ensf_, Float_t ensferr_) { ensf=ensf_; ensferr=ensferr_; }
+ 
     Int_t id,genid;
+    Float_t ensf, ensferr;
+    Float_t d0, dZ, trkpt,trketa,trkphi,trkchi2,trkValidPixelHits,trkValidTrackerHits,trkLostInnerHits;
     Float_t ptErr, ecalIso, hcalIso, trkIso, gIso, chIso, puchIso, nhIso;
     Int_t  pid;
 };
@@ -41,16 +56,21 @@ class PhysicsObject_Lepton : public LorentzVector
 class PhysicsObject_Jet : public LorentzVector
 {
 public :
-  PhysicsObject_Jet(LorentzVector vec, Int_t genid_=0, Float_t btag1_=0, Float_t btag2_=0, Float_t neutHadFrac_=0, Float_t neutEmFrac_=0, Float_t chHadFrac_=0, Int_t pid_=0):
-    LorentzVector(vec), genid(genid_), btag1(btag1_), btag2(btag2_), neutHadFrac(neutHadFrac_), neutEmFrac(neutEmFrac_), chHadFrac(chHadFrac_), pid(pid_) 
+  PhysicsObject_Jet(LorentzVector vec, Int_t genid_=0, Float_t btag1_=0, Float_t btag2_=0, Float_t btag3_=0, Float_t neutHadFrac_=0, Float_t neutEmFrac_=0, Float_t chHadFrac_=0, Int_t pid_=0):
+    LorentzVector(vec), genid(genid_), btag1(btag1_), btag2(btag2_), btag3(btag3_), neutHadFrac(neutHadFrac_), neutEmFrac(neutEmFrac_), chHadFrac(chHadFrac_), pid(pid_) 
     {
       genPt=0;
       pumva=-9999.;
     }
     void setGenPt(float val) { if(val<0 || val>1000) genPt=0; else genPt=val; }
     void setPUmva(float val) { pumva=val; }
+    void setShapeVariables(float beta_,  float betaStar_, float dRMean_, float ptD_, float ptRMS_)
+    {
+      beta=beta_; betaStar=betaStar_; dRMean=dRMean_; ptD=ptD_; ptRMS=ptRMS_;
+    }
     Int_t genid;
-    Float_t btag1, btag2, neutHadFrac, neutEmFrac, chHadFrac, genPt,pumva;
+    Float_t beta,betaStar,dRMean,ptD,ptRMS;
+    Float_t btag1, btag2, btag3, neutHadFrac, neutEmFrac, chHadFrac, genPt,pumva;
     Int_t pid;
 };
 bool JetPtOrdering (PhysicsObject_Jet i,PhysicsObject_Jet j);
@@ -111,5 +131,6 @@ bool isDYToTauTau(int mcChannelCode);
 bool isZZ2l2nu(int mcChannelCode);
 bool isW(int mcChannelCode);
 bool isWW(int mcChannelCode);
+bool hasObjectId(int idcode,int arbitration);
 
 #endif

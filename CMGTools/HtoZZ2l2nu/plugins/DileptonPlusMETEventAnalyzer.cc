@@ -112,6 +112,7 @@ DileptonPlusMETEventAnalyzer::DileptonPlusMETEventAnalyzer(const edm::ParameterS
 int DileptonPlusMETEventAnalyzer::addPidSummary(ObjectIdSummary &obj)
 {
   ZZ2l2nuSummary_t &ev = summaryHandler_.getEvent();
+  int index(0);
   if(fabs(obj.id)==1)
     {
     }
@@ -135,6 +136,7 @@ int DileptonPlusMETEventAnalyzer::addPidSummary(ObjectIdSummary &obj)
       ev.en_ooemoop[ev.en]=obj.ooemoop;
       ev.en_fbrem[ev.en]=obj.fbrem;
       ev.en_eopin[ev.en]=obj.eopin;
+      index=ev.en;
       ev.en++;
     }
   else if(fabs(obj.id)==13)
@@ -142,13 +144,14 @@ int DileptonPlusMETEventAnalyzer::addPidSummary(ObjectIdSummary &obj)
       ev.mn_idbits[ev.en]=obj.idBits;
       ev.mn_nMatches[ev.mn]=obj.trkMatches;
       ev.mn_validMuonHits[ev.mn]=obj.trkValidMuonHits;
+      index=ev.mn;
       ev.mn++;
     }
   else if(fabs(obj.id)==22)
     {
     }
 
-  return 0;
+  return index;
 }
 
 //

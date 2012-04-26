@@ -320,6 +320,7 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 	const reco::GsfElectron *gsfEle = dynamic_cast<const reco::GsfElectron *>(ele);
 	bool passconversionveto(true);
 	if(hConversions.isValid()) passconversionveto = !ConversionTools::hasMatchedConversion(*gsfEle,hConversions,beamspot.position());
+	//	cout << passconversionveto << " " << hConversions.isValid() << endl;
 
 	bool passEoP            = EgammaCutBasedEleId::PassEoverPCuts(lepId.sceta,lepId.eopin,lepId.fbrem);
 	int  cutBasedIdsToTest[]= {EgammaCutBasedEleId::VETO, EgammaCutBasedEleId::LOOSE, EgammaCutBasedEleId::MEDIUM, EgammaCutBasedEleId::TIGHT};
@@ -332,7 +333,7 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 							    lepId.dEtaTrack, lepId.dPhiTrack, lepId.sihih, lepId.hoe,
 							    lepId.ooemoop, lepId.trkd0, lepId.trkdZ, 
 							    0., 0., 0.,
-							    passconversionveto, uint(lepId.trkLostInnerHits),
+							    !passconversionveto, uint(lepId.trkLostInnerHits),
 							    rho);
 	  }
 	int triggerCutsToTest[] = {EgammaCutBasedEleId::TRIGGERTIGHT,EgammaCutBasedEleId::TRIGGERWP70};
@@ -358,13 +359,16 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 	  hasHEEPid &= !(heep::CutCodes::passCuts(heepIdVal,myHeepBits[ibit]));
 	  
 	//build a summary of IDs
-	lepId.idBits = has2011Id |
-	  hasCutBasedIds[0] << 1 | hasCutBasedIds[1] << 2 | hasCutBasedIds[2] << 3 | hasCutBasedIds[3] << 4 |
-	  passconversionveto << 5 |
-	  passEoP << 6 |
-	  passTriggerCut[0] << 7 |
-	  passTriggerCut[1] << 8 |
-	  hasHEEPid << 9;
+	lepId.idBits = has2011Id << EID_VBTF2011 |
+	  hasCutBasedIds[0] << EID_VETO | 
+	  hasCutBasedIds[1] << EID_LOOSE | 
+	  hasCutBasedIds[2] << EID_MEDIUM | 
+	  hasCutBasedIds[3] << EID_TIGHT |
+	  passconversionveto << EID_CONVERSIONVETO |
+	  passEoP << EID_EOPCUT |
+	  passTriggerCut[0] << EID_TRIGGER2011 |
+	  passTriggerCut[1] << EID_TIGHTTRIGGER |
+	  hasHEEPid << EID_HEEPID;
 
 	//now do its selection
 	if(lepId.p4.pt()<minPt || fabs(lepId.p4.eta())>maxEta) continue; 
@@ -592,7 +596,7 @@ vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet,
       {
 	reco::CandidatePtr jetPtr = hJet->ptrAt(iJet);
 	const pat::Jet *jet = dynamic_cast<const pat::Jet *>( jetPtr.get() );
-	
+
 	ObjectIdSummary jetId;
         jetId.p4 = LorentzVector(jet->px(),jet->py(), jet->pz(), jet->energy());
 	jetId.id=1;
@@ -643,7 +647,7 @@ vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet,
 	bool passTightId(tightJetIdSelector( *jet, hasTightId ));
 	jetId.idBits=passLooseId | (passTightId << 1 );
 	for(size_t iid=0; iid<puJetIdAlgo.size(); iid++) jetId.idBits |= ((puIdFlags[iid] & 0xf) << (iid+1)*4);
-	
+ 
 	if(jet->pt()<minPt || fabs(jet->eta())>maxEta || minDR < minDeltaRtoLepton || !passLooseId) continue;
 	
 	//jet is selected
