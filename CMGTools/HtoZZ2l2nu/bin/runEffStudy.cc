@@ -210,10 +210,10 @@ int main(int argc, char* argv[])
       mon.addHistogram( new TH1F(jetRegs[ireg]+"jetdrmean"       , ";<#Delta R>;Events",50,0,0.5) );
       mon.addHistogram( new TH1F(jetRegs[ireg]+"jetptd"       , ";p_{T}D [GeV/c];Events",50,0,1) );
       mon.addHistogram( new TH1F(jetRegs[ireg]+"jetptrms"       , ";RMS p_{T} [GeV/c];Events",50,0,0.5) );
-      mon.addHistogram( new TH1F(jetRegs[ireg]+"jetpt"       , ";p_{T} [GeV/c];Events",50,0,250) );
-      mon.addHistogram( new TH1F(jetRegs[ireg]+"jeteta"       , ";|#eta|;Events",25,0,5) );
       mon.addHistogram( new TH1F(jetRegs[ireg]+"jetmva"      , ";MVA;Events",50,0,1) );
     }
+  mon.addHistogram( new TH1F("jetpt"       , ";p_{T} [GeV/c];Events",50,0,250) );
+  mon.addHistogram( new TH1F("jeteta"       , ";|#eta|;Events",25,0,5) );
   mon.addHistogram( new TH1F("njets"       , ";Jet multiplicity (p_{T}>30 GeV/c);Events",5,0,5) );
   int jetids[]  ={JETID_LOOSE, JETID_TIGHT,JETID_PHILV1_LOOSE, JETID_PHILV1_MEDIUM, JETID_MIN_LOOSE, JETID_MIN_MEDIUM, JETID_OPT_LOOSE, JETID_OPT_MEDIUM};
   for(size_t ijetid=0; ijetid<sizeof(jetids)/sizeof(int); ijetid++)
@@ -654,10 +654,13 @@ int main(int argc, char* argv[])
 			      mon.fillHisto(reg+"jetdrmean",tags_full,phys.ajets[ijet].dRMean,iweight);
 			      mon.fillHisto(reg+"jetptd",tags_full,phys.ajets[ijet].ptD,iweight);
 			      mon.fillHisto(reg+"jetptrms",tags_full,phys.ajets[ijet].ptRMS,iweight);
-			      mon.fillHisto(reg+"jetpt",tags_full,phys.ajets[ijet].pt(),iweight);
-			      mon.fillHisto(reg+"jeteta",tags_full,fabs(phys.ajets[ijet].eta()),iweight);
+			      
 			      mon.fillHisto(reg+"jetmva",tags_full,phys.ajets[ijet].pumva,iweight);
+			      
+			      mon.fillHisto("jetpt",tags_full,phys.ajets[ijet].pt(),iweight);
+			      mon.fillHisto("jeteta",tags_full,fabs(phys.ajets[ijet].eta()),iweight);
 			    }
+			  
 			  
 			  if(passDphijmet){
 			    mon.fillHisto("eventflow",tags_full,8,iweight);
