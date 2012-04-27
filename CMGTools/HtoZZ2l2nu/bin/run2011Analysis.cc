@@ -57,6 +57,7 @@ int main(int argc, char* argv[])
   gSystem->Exec("mkdir -p " + outUrl);
 
   bool isMC = runProcess.getParameter<bool>("isMC");
+  bool runBlinded = runProcess.getParameter<bool>("runBlinded"); 
   int mctruthmode=runProcess.getParameter<int>("mctruthmode");
   
   TString outTxtUrl= outUrl + "/" + gSystem->BaseName(url) + ".txt";
@@ -314,6 +315,7 @@ int main(int argc, char* argv[])
    
       //load the event content from tree
       evSummaryHandler.getEntry(iev);
+      if(runBlinded && evSummaryHandler.hasSpoilerAlert(!isMC)) continue;
       ZZ2l2nuSummary_t &ev=evSummaryHandler.getEvent();
       PhysicsEvent_t phys=getPhysicsEventFrom(ev);
       

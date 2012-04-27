@@ -58,6 +58,7 @@ int main(int argc, char* argv[])
   gSystem->Exec("mkdir -p " + outUrl);
 
   bool isMC = runProcess.getParameter<bool>("isMC");
+  bool runBlinded = runProcess.getParameter<bool>("runBlinded"); 
   int mctruthmode=runProcess.getParameter<int>("mctruthmode");
   
   TString outTxtUrl= outUrl + "/" + gSystem->BaseName(url) + ".txt";
@@ -154,37 +155,42 @@ int main(int argc, char* argv[])
 
       if(pre=="e")
 	{
-	  mon.addHistogram(new TH1F(pre+"detain",   ";#Delta#eta_{in};Leptons",20,0,0.01) );
-	  mon.addHistogram(new TH1F(pre+"dphiin",   ";#Delta#phi_{in};Leptons",20,0,0.1) );
-	  mon.addHistogram(new TH1F(pre+"sihih",    ";#sigma_{i#eta i#eta};Leptons",20,0,0.05) );
-	  mon.addHistogram(new TH1F(pre+"sipip",    ";#sigma_{i#phi i#phi};Leptons",20,0,0.05) );
-	  mon.addHistogram(new TH1F(pre+"r9",       ";R_{9};Leptons",20,0,1.) );
-	  mon.addHistogram(new TH1F(pre+"hoe",      ";h/e;Leptons",20,0,0.2) );
-	  mon.addHistogram(new TH1F(pre+"ooemoop",  ";1/E-1/p;Leptons",50,0,0.05) );
-	  mon.addHistogram(new TH1F(pre+"eopin",    ";E/p;Leptons",50,0,2) );
-	  mon.addHistogram(new TH1F(pre+"fbrem",    ";f_{brem};Leptons",50,0,2) );
+	  TString reg[]={"eb","ee"};
+	  for(size_t ireg=0; ireg<2; ireg++)
+	    { 
+	      mon.addHistogram(new TH1F(pre+reg[ireg]+"detain",   ";#Delta#eta_{in};Leptons",20,0,0.01) );
+	      mon.addHistogram(new TH1F(pre+reg[ireg]+"dphiin",   ";#Delta#phi_{in};Leptons",20,0,0.1) );
+	      mon.addHistogram(new TH1F(pre+reg[ireg]+"sihih",    ";#sigma_{i#eta i#eta};Leptons",20,0,0.05) );
+	      mon.addHistogram(new TH1F(pre+reg[ireg]+"sipip",    ";#sigma_{i#phi i#phi};Leptons",20,0,0.05) );
+	      mon.addHistogram(new TH1F(pre+reg[ireg]+"r9",       ";R_{9};Leptons",20,0,1.) );
+	      mon.addHistogram(new TH1F(pre+reg[ireg]+"hoe",      ";h/e;Leptons",20,0,0.2) );
+	      mon.addHistogram(new TH1F(pre+reg[ireg]+"ooemoop",  ";1/E-1/p;Leptons",50,0,0.05) );
+	      mon.addHistogram(new TH1F(pre+reg[ireg]+"eopin",    ";E/p;Leptons",50,0,2) );
+	      mon.addHistogram(new TH1F(pre+reg[ireg]+"fbrem",    ";f_{brem};Leptons",50,0,2) );
+	    }
 	}
       if(pre=="mu")
 	{
 	  mon.addHistogram(new TH1F(pre+"nmatches", ";Muon matches;Leptons",15,0,15) );
 	  mon.addHistogram(new TH1F(pre+"nmuonhits", ";Muon hits;Leptons",30,0,30) );
 	}
-      mon.addHistogram(new TH1F(pre+"d0",            ";d_{0};Leptons",50,0,0.1) );
+      mon.addHistogram(new TH1F(pre+"d0",            ";d_{0};Leptons",50,0,0.05) );
+      mon.addHistogram(new TH2F(pre+"d0vsreliso",    ";d_{0};Leptons",50,0,0.05,50,0,2) );
       mon.addHistogram(new TH1F(pre+"dZ",            ";d_{Z};Leptons",50,0,0.1) );
       mon.addHistogram(new TH1F(pre+"trkchi2",       ";#chi^{2};Leptons",50,0,10) );
       mon.addHistogram(new TH1F(pre+"trkvalidpixel",  ";Valid pixel hits;Leptons",20,0,20) );
       mon.addHistogram(new TH1F(pre+"trkvalidtracker",  ";Valid tracker hits;Leptons",50,0,50) );
-      mon.addHistogram(new TH1F(pre+"losthits", ";Lost hits;Leptons",4,0,4) );
-      mon.addHistogram(new TH1F(pre+"reliso",        ";RelIso;Leptons",50,0,2) );
-      mon.addHistogram(new TH1F(pre+"relisorho",     ";RelIso(#rho);Leptons",50,0,2) );
-      mon.addHistogram(new TH1F(pre+"pfreliso",      ";PFRelIso;Leptons",50,0,2) );
-      mon.addHistogram(new TH1F(pre+"pfrelisodbeta", ";PFRelIso(#Delta #beta);Leptons",50,0,2) );
-      mon.addHistogram(new TH1F(pre+"ecaliso",       ";ECALIso;Leptons",50,0,5) );
-      mon.addHistogram(new TH1F(pre+"hcaliso",       ";HCALIso;Leptons",50,0,5) );
-      mon.addHistogram(new TH1F(pre+"trkiso",        ";TrkIso;Leptons",50,0,5) );
-      mon.addHistogram(new TH1F(pre+"giso",          ";GammaIso;Leptons",50,0,5) );
-      mon.addHistogram(new TH1F(pre+"chiso",         ";ChHadronIso;Leptons",50,0,5) );
-      mon.addHistogram(new TH1F(pre+"nhiso",         ";NeutralHadron;Leptons",50,0,5) );
+      mon.addHistogram(new TH1F(pre+"losthits",         ";Lost hits;Leptons",4,0,4) );
+      mon.addHistogram(new TH1F(pre+"reliso",           ";RelIso;Leptons",50,0,2) );
+      mon.addHistogram(new TH1F(pre+"relisorho",        ";RelIso(#rho);Leptons",50,0,2) );
+      mon.addHistogram(new TH1F(pre+"pfreliso",         ";PFRelIso;Leptons",50,0,2) );
+      mon.addHistogram(new TH1F(pre+"pfrelisodbeta",    ";PFRelIso(#Delta #beta);Leptons",50,0,2) );
+      mon.addHistogram(new TH1F(pre+"ecaliso",          ";ECALIso;Leptons",50,0,5) );
+      mon.addHistogram(new TH1F(pre+"hcaliso",          ";HCALIso;Leptons",50,0,5) );
+      mon.addHistogram(new TH1F(pre+"trkiso",           ";TrkIso;Leptons",50,0,5) );
+      mon.addHistogram(new TH1F(pre+"giso",             ";GammaIso;Leptons",50,0,5) );
+      mon.addHistogram(new TH1F(pre+"chiso",            ";ChHadronIso;Leptons",50,0,5) );
+      mon.addHistogram(new TH1F(pre+"nhiso",            ";NeutralHadron;Leptons",50,0,5) );
       mon.addHistogram(new TH2F(pre+"relisovspu",         ";RelIso;Pileup;Leptons",50,0,50,50,0,2) );
       mon.addHistogram(new TH2F(pre+"relisorhovspu",      ";RelIso(#rho);Pileup;Leptons",50,0,50,50,0,2) ); 
       mon.addHistogram(new TH2F(pre+"pfrelisovspu",       ";PFRelIso;Pileup;Leptons",50,0,50,50,0,2) ); 
@@ -210,7 +216,7 @@ int main(int argc, char* argv[])
       mon.addHistogram( new TH1F(jetRegs[ireg]+"jetdrmean"       , ";<#Delta R>;Events",50,0,0.5) );
       mon.addHistogram( new TH1F(jetRegs[ireg]+"jetptd"       , ";p_{T}D [GeV/c];Events",50,0,1) );
       mon.addHistogram( new TH1F(jetRegs[ireg]+"jetptrms"       , ";RMS p_{T} [GeV/c];Events",50,0,0.5) );
-      mon.addHistogram( new TH1F(jetRegs[ireg]+"jetmva"      , ";MVA;Events",50,0,1) );
+      mon.addHistogram( new TH1F(jetRegs[ireg]+"jetmva"      , ";MVA;Events",50,-1,1) );
     }
   mon.addHistogram( new TH1F("jetpt"       , ";p_{T} [GeV/c];Events",50,0,250) );
   mon.addHistogram( new TH1F("jeteta"       , ";|#eta|;Events",25,0,5) );
@@ -324,6 +330,7 @@ int main(int argc, char* argv[])
    
       //load the event content from tree
       evSummaryHandler.getEntry(iev);
+      if(runBlinded && !isMC && evSummaryHandler.hasSpoilerAlert(!isMC)) continue;
       ZZ2l2nuSummary_t &ev=evSummaryHandler.getEvent();
       PhysicsEvent_t phys=getPhysicsEventFrom(ev);
       
@@ -388,7 +395,7 @@ int main(int argc, char* argv[])
       std::vector<bool> eidPass(7,false);
       if(ev.cat==EE)
 	{
-	  int lpid[]={phys.leptons[0].pid,phys.leptons[1].pid};
+	  int lpid[]={0,1};//phys.leptons[0].pid,phys.leptons[1].pid};
 	  int lid[]={ev.en_idbits[lpid[0]],ev.en_idbits[lpid[1]]};
 	  bool lpassConversion[]={hasObjectId(lid[0], EID_CONVERSIONVETO),hasObjectId(lid[1],EID_CONVERSIONVETO)};
 	  int cutBasedIdsToTest[]={EgammaCutBasedEleId::VETO, EgammaCutBasedEleId::LOOSE, EgammaCutBasedEleId::MEDIUM, EgammaCutBasedEleId::TIGHT };
@@ -543,22 +550,25 @@ int main(int argc, char* argv[])
 		if(fabs(phys.leptons[ilep].id)==ELECTRON) pre ="e";
 		if(pre=="e")
 		  {
-		    mon.fillHisto(pre+"detain",  tags_full,fabs(ev.en_detain[phys.leptons[ilep].pid]),weight);
-		    mon.fillHisto(pre+"dphiin",  tags_full,fabs(ev.en_dphiin[phys.leptons[ilep].pid]),weight);
-		    mon.fillHisto(pre+"sihih",   tags_full,fabs(ev.en_sihih[phys.leptons[ilep].pid]),weight);
-		    mon.fillHisto(pre+"sipip",   tags_full,fabs(ev.en_sipip[phys.leptons[ilep].pid]),weight);
-		    mon.fillHisto(pre+"r9",      tags_full,fabs(ev.en_r9[phys.leptons[ilep].pid]),weight);
-		    mon.fillHisto(pre+"hoe",     tags_full,fabs(ev.en_hoe[phys.leptons[ilep].pid]),weight);
-		    mon.fillHisto(pre+"eopin",   tags_full,fabs(ev.en_eopin[phys.leptons[ilep].pid]),weight);
-		    mon.fillHisto(pre+"fbrem",   tags_full,fabs(ev.en_fbrem[phys.leptons[ilep].pid]),weight);
-		    mon.fillHisto(pre+"ooemoop", tags_full,fabs(ev.en_ooemoop[phys.leptons[ilep].pid]),weight);
+		    TString reg="ee";
+		    if(fabs(phys.leptons[ilep].eta())<1.442) reg="eb";
+		    mon.fillHisto(pre+reg+"detain",  tags_full,fabs(ev.en_detain[ilep]),weight);
+		    mon.fillHisto(pre+reg+"dphiin",  tags_full,fabs(ev.en_dphiin[ilep]),weight);
+		    mon.fillHisto(pre+reg+"sihih",   tags_full,fabs(ev.en_sihih[ilep]),weight);
+		    mon.fillHisto(pre+reg+"sipip",   tags_full,fabs(ev.en_sipip[ilep]),weight);
+		    mon.fillHisto(pre+reg+"r9",      tags_full,fabs(ev.en_r9[ilep]),weight);
+		    mon.fillHisto(pre+reg+"hoe",     tags_full,fabs(ev.en_hoe[ilep]),weight);
+		    mon.fillHisto(pre+reg+"eopin",   tags_full,fabs(ev.en_eopin[ilep]),weight);
+		    mon.fillHisto(pre+reg+"fbrem",   tags_full,fabs(ev.en_fbrem[ilep]),weight);
+		    mon.fillHisto(pre+reg+"ooemoop", tags_full,fabs(ev.en_ooemoop[ilep]),weight);
 		  }
 		else
 		  {
-		    mon.fillHisto(pre+"nmuonhits",  tags_full,fabs(ev.mn_validMuonHits[phys.leptons[ilep].pid]),weight);
-		    mon.fillHisto(pre+"nmatches",   tags_full,fabs(ev.mn_nMatches[phys.leptons[ilep].pid]),weight);
+		    mon.fillHisto(pre+"nmuonhits",  tags_full,fabs(ev.mn_validMuonHits[ilep]),weight);
+		    mon.fillHisto(pre+"nmatches",   tags_full,fabs(ev.mn_nMatches[ilep]),weight);
 		  }
 		mon.fillHisto(pre+"d0",              tags_full,fabs(phys.leptons[ilep].d0),weight);
+		mon.fill2DHisto(pre+"d0vsreliso",              tags_full,fabs(phys.leptons[ilep].d0),phys.leptons[ilep].relIsoRho(ev.rho),weight);
 		mon.fillHisto(pre+"dZ",              tags_full,fabs(phys.leptons[ilep].dZ),weight);
 		mon.fillHisto(pre+"trkchi2",         tags_full,fabs(phys.leptons[ilep].trkchi2),weight);
 		mon.fillHisto(pre+"trkvalidpixel",   tags_full,fabs(phys.leptons[ilep].trkValidPixelHits),weight);

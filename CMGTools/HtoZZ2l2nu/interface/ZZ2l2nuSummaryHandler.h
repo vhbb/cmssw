@@ -11,8 +11,12 @@
 #include <cmath>
 
 #include "TTree.h"
+#include "TMath.h"
+#include "Math/LorentzVector.h"
 
 #endif
+
+typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
 
 #define MAXPARTICLES 50
 #define MAXMCPARTICLES 250
@@ -126,6 +130,8 @@ class ZZ2l2nuSummaryHandler{
     resetStruct();
     if(t_) t_->GetEntry(ientry); 
   }
+
+  bool hasSpoilerAlert(bool isData);
 
   int getEntries() { return (t_ ? t_->GetEntriesFast() : 0); }
 
