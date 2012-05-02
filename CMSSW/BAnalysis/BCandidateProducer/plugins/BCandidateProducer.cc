@@ -13,7 +13,7 @@
 //
 // Original Author:  Lukas Wehrli (IPP/ETHZ) [wehrlilu]
 //         Created:  Wed May 12 09:34:25 CEST 2010
-// $Id: BCandidateProducer.cc,v 1.2 2010/11/25 09:25:27 wehrlilu Exp $
+// $Id: BCandidateProducer.cc,v 1.3 2011/09/29 15:31:23 tboccali Exp $
 //
 //
 
@@ -160,7 +160,7 @@ BCandidateProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
    for(unsigned int i=0; i<svc.size(); i++){
 
         reco::Vertex sv = svc[i];
-	ownVertex ov = {i,sv,sv.p4(0.13957,0.5).M(),sv.tracksSize()};
+	ownVertex ov = {i,sv,sv.p4(0.13957,0.5).M(),(unsigned int)sv.tracksSize()};
 	ownVertices.push_back(ov);
    }
    sort(ownVertices.begin(), ownVertices.end()); 
