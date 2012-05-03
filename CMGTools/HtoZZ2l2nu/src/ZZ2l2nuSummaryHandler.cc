@@ -152,9 +152,9 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("mn_idbits",        evSummary_.mn_idbits,        "mn_idbits[mn]/I");
   t_->Branch("mn_nMatches",      evSummary_.mn_nMatches ,     "mn_nMatches[mn]/F");
   t_->Branch("mn_validMuonHits", evSummary_.mn_validMuonHits, "mn_validMuonHits[mn]/F");
-  t_->Branch("mn_innerTrackChi2",evSummary_.mn_innerTrackChi2,"mn_innerTrackChi2/F");
-  t_->Branch("mn_trkLayersWithMeasurement",evSummary_.mn_trkLayersWithMeasurement,"mn_trkLayersWithMeasurement/F");
-  t_->Branch("mn_pixelLayersWithMeasurement",evSummary_.mn_pixelLayersWithMeasurement,"mn_pixelLayersWithMeasurement/F");
+  t_->Branch("mn_innerTrackChi2",evSummary_.mn_innerTrackChi2,"mn_innerTrackChi2[mn]/F");
+  t_->Branch("mn_trkLayersWithMeasurement",evSummary_.mn_trkLayersWithMeasurement,"mn_trkLayersWithMeasurement[mn]/F");
+  t_->Branch("mn_pixelLayersWithMeasurement",evSummary_.mn_pixelLayersWithMeasurement,"mn_pixelLayersWithMeasurement[mn]/F");
 
   //selected CHS jets
   t_->Branch("jn",             &evSummary_.jn,            "jn/I");
@@ -209,7 +209,6 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("ajn_etaW",        evSummary_.ajn_etaW,        "ajn_etaW[jn]/F");
   t_->Branch("ajn_phiW",        evSummary_.ajn_phiW,        "ajn_phiW[jn]/F");
   t_->Branch("ajn_idbits",      evSummary_.ajn_idbits,      "ajn_idbits[ajn]/I");
-
 
   //HT
   t_->Branch("htvec_px",   &evSummary_.htvec_px, "htvec_px/F");

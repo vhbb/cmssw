@@ -60,6 +60,44 @@
                 }
           ]
         },
+	{
+	"tag":"QCD",
+        "isdata":false,
+	"color":"400",
+	"lcolor":1,
+	"data":[
+	     {	
+		"dtag":"MC_QCDPt30to80",
+		"xsec":74330000,
+		"br":[0.0621]
+	     },
+	     {	
+		"dtag":"MC_QCDPt80to170",
+		"xsec":1191000,
+		"br":[0.1539]
+	     },
+	     {	
+		"dtag":"MC_QCDPt170to250",
+		"xsec":30990,
+		"br":[0.148]
+	     },
+	     {	
+		"dtag":"MC_QCDPt250to350",
+		"xsec":4250,
+		"br":[0.131]
+	     },
+	     {	
+		"dtag":"MC_QCDPt350toInf",
+		"xsec":810,
+		"br":[0.11]
+	     },
+     	     {	
+		"dtag":"MC_QCDMuPt20toInf",
+		"xsec":364000000,
+		"br":[0.00037]
+	     }
+	  ]
+    	},
         {
          "tag":"W#rightarrow l#nu",
          "isdata":false,

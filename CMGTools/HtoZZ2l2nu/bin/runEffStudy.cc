@@ -140,19 +140,15 @@ int main(int argc, char* argv[])
   mon.addHistogram( new TH1F( "zmass", ";M^{ll};Events", 100,40,250) );
 
   //lepton control
-  h=(TH1F *)mon.addHistogram( new TH1F( "zeeselafterid", ";Id;Events", 7,0,7) );
-  h->GetXaxis()->SetBinLabel(1,"Veto");
-  h->GetXaxis()->SetBinLabel(2,"Loose");
-  h->GetXaxis()->SetBinLabel(3,"Medium");
-  h->GetXaxis()->SetBinLabel(4,"Tight");
-  h->GetXaxis()->SetBinLabel(5,"2011");
-  h->GetXaxis()->SetBinLabel(6,"Conversion");
-  h->GetXaxis()->SetBinLabel(7,"Trigger+Veto");
   TString lepTypes[]={"e","mu"};
   for(size_t ilep=0; ilep<2; ilep++)
     {
       TString pre=lepTypes[ilep];
-
+      h=(TH1F *)mon.addHistogram( new TH1F( "z"+pre+pre+"selafterid", ";Id;Events", 4,0,4) );
+      h->GetXaxis()->SetBinLabel(1,"Loose");
+      h->GetXaxis()->SetBinLabel(2,"Medium");
+      h->GetXaxis()->SetBinLabel(3,"Tight");
+      h->GetXaxis()->SetBinLabel(4,"2011");
       if(pre=="e")
 	{
 	  TString reg[]={"eb","ee"};
@@ -203,10 +199,11 @@ int main(int argc, char* argv[])
       mon.addHistogram(new TH2F(pre+"nhisovspu",          ";NeutralHadronIso;Pileup;Leptons",50,0,50,50,0,5) ); 
     }
 
-
   mon.addHistogram( new TH1F( "nvtx",";Vertices;Events",50,0,50) ); 
   mon.addHistogram( new TH1F( "rho",";#rho;Events",50,0,25) ); 
   mon.addHistogram( new TH1F( "rho25",";#rho(#eta<2.5);Events",50,0,25) ); 
+  mon.addHistogram(new TH2F( "rhovspu",          ";#rho;Pileup;Leptons",50,0,50,50,0,10) ); 
+  mon.addHistogram(new TH2F( "rho25vspu",          ";#rho(|#eta|<2.5);Pileup;Leptons",50,0,50,50,0,10) ); 
 
   TString jetRegs[]={"TK","HEin","HEout","HF"};
   for(size_t ireg=0; ireg<4; ireg++)
@@ -392,31 +389,44 @@ int main(int argc, char* argv[])
       //analyze the leptons
       LorentzVector lep1=phys.leptons[0];
       LorentzVector lep2=phys.leptons[1];
-      std::vector<bool> eidPass(7,false);
+      int lpid[]={phys.leptons[0].pid,phys.leptons[1].pid};
+      int lid[]={ev.en_idbits[lpid[0]],ev.en_idbits[lpid[1]]};
+      std::vector<bool> idPass(4,false);
       if(ev.cat==EE)
 	{
-	  int lpid[]={0,1};//phys.leptons[0].pid,phys.leptons[1].pid};
-	  int lid[]={ev.en_idbits[lpid[0]],ev.en_idbits[lpid[1]]};
-	  bool lpassConversion[]={hasObjectId(lid[0], EID_CONVERSIONVETO),hasObjectId(lid[1],EID_CONVERSIONVETO)};
-	  int cutBasedIdsToTest[]={EgammaCutBasedEleId::VETO, EgammaCutBasedEleId::LOOSE, EgammaCutBasedEleId::MEDIUM, EgammaCutBasedEleId::TIGHT };
-	  for(int iid=0; iid<4; iid++)
-	    {
-	      bool result=true;
-	      for(size_t ilep=0; ilep<2; ilep++)
-		{
-		  result &= EgammaCutBasedEleId::PassWP(EgammaCutBasedEleId::WorkingPoint(cutBasedIdsToTest[iid]),
-							fabs(phys.leptons[0].eta()<1.4442),
-							phys.leptons[0].pt(), phys.leptons[0].eta(),
-							ev.en_detain[lpid[ilep]],  ev.en_dphiin[lpid[ilep]], ev.en_sihih[lpid[ilep]], ev.en_hoe[lpid[ilep]],
-							ev.en_ooemoop[lpid[ilep]], phys.leptons[0].d0, phys.leptons[0].dZ,
-							0., 0., 0.,
-							!lpassConversion[ilep],0,ev.rho);
-		}
-	      eidPass[iid]=result;
-	    }
-	  eidPass[4] = (hasObjectId(lid[0], EID_VBTF2011)       && hasObjectId(lid[1],EID_VBTF2011));
+	  idPass[0] = (hasObjectId(lid[0], EID_LOOSE)    && hasObjectId(lid[1],EID_LOOSE));
+	  idPass[1] = (hasObjectId(lid[0], EID_MEDIUM)   && hasObjectId(lid[1],EID_MEDIUM));
+	  idPass[2] = (hasObjectId(lid[0], EID_TIGHT)    && hasObjectId(lid[1],EID_TIGHT));
+	  idPass[3] = (hasObjectId(lid[0], EID_VBTF2011) && hasObjectId(lid[1],EID_VBTF2011));
+	}
+      else if (ev.cat==MUMU)
+	{
+	  idPass[0] = (hasObjectId(lid[0], MID_LOOSE)    && hasObjectId(lid[1], MID_LOOSE));
+	  idPass[1] = (hasObjectId(lid[0], MID_TIGHT)   && hasObjectId(lid[1],  MID_TIGHT));
+	  idPass[2] = (hasObjectId(lid[0], MID_HIGHPT)    && hasObjectId(lid[1],MID_HIGHPT));
+	  idPass[3] = (hasObjectId(lid[0], MID_VBTF2011) && hasObjectId(lid[1], MID_VBTF2011));
 	}
 
+      /*/
+	bool lpassConversion[]={hasObjectId(lid[0], EID_CONVERSIONVETO),hasObjectId(lid[1],EID_CONVERSIONVETO)};
+	int cutBasedIdsToTest[]={EgammaCutBasedEleId::VETO, EgammaCutBasedEleId::LOOSE, EgammaCutBasedEleId::MEDIUM, EgammaCutBasedEleId::TIGHT };
+	for(int iid=0; iid<4; iid++)
+	{
+	bool result=true;
+	for(size_t ilep=0; ilep<2; ilep++)
+	{
+	result &= EgammaCutBasedEleId::PassWP(EgammaCutBasedEleId::WorkingPoint(cutBasedIdsToTest[iid]),
+	fabs(phys.leptons[0].eta()<1.4442),
+	phys.leptons[0].pt(), phys.leptons[0].eta(),
+	ev.en_detain[lpid[ilep]],  ev.en_dphiin[lpid[ilep]], ev.en_sihih[lpid[ilep]], ev.en_hoe[lpid[ilep]],
+	ev.en_ooemoop[lpid[ilep]], phys.leptons[0].d0, phys.leptons[0].dZ,
+	0., 0., 0.,
+	!lpassConversion[ilep],0,ev.rho);
+	}
+	eidPass[iid]=result;
+	}
+	eidPass[4] = (hasObjectId(lid[0], EID_VBTF2011)       && hasObjectId(lid[1],EID_VBTF2011));
+      */
       LorentzVector zll=lep1+lep2;
 
       //analyze JET/MET
@@ -511,7 +521,7 @@ int main(int argc, char* argv[])
 	//##############################################
 	if(zmass<40) continue; // this is required by the HZZ skim anyhow
 	bool passZmass(fabs(zmass-91)<15);
-	bool passId(true); if(ev.cat==EE && !eidPass[1]) passId=false;
+	bool passId(idPass[0]);
 	bool passIso(phys.leptons[0].relIsoRho(ev.rho)<0.15 && phys.leptons[1].relIsoRho(ev.rho)<0.15);
 	bool isZsideBand( (zmass>40 && zmass<70) || (zmass>110 && zmass<200));
 	bool isZsideBandPlus( (zmass>110 && zmass<200));
@@ -538,12 +548,15 @@ int main(int argc, char* argv[])
 	  
 	  if(passZmass){
 
-	    if(ev.cat==EE)
+	    if(ev.cat==EE || ev.cat==MUMU)
 	      {
-		for(size_t eidPassCtr=0; eidPassCtr<7; eidPassCtr++)
-		  if(eidPass[eidPassCtr]) 
-		    mon.fillHisto("zeeselafterid",tags_full,eidPassCtr,weight);
+		TString pre("ee");
+		if(ev.cat==MUMU) pre="mumu";
+		for(size_t idPassCtr=0; idPassCtr<4; idPassCtr++)
+		  if(idPass[idPassCtr])  
+		    mon.fillHisto("z"+pre+"selafterid",tags_full,idPassCtr,weight);
 	      }
+	    
 	    for(size_t ilep=0; ilep<2; ilep++)
 	      {
 		TString pre("mu");
@@ -577,11 +590,6 @@ int main(int argc, char* argv[])
 	      }		
 	    
 	    mon.fillHisto("eventflow",tags_full,1,iweight);
-	    mon.fillHisto("zeta"     ,tags_full,zeta   ,iweight);
-	    mon.fillHisto("zpt"      ,tags_full,zpt     ,iweight);
-	    mon.fillHisto("nvtx"     ,tags_full,ev.nvtx,iweight);
-	    mon.fillHisto("rho"      ,tags_full,ev.rho,iweight);
-	    mon.fillHisto("rho25"    ,tags_full,ev.rho25,iweight);
 	    
 	    if(passId)
 	      {
@@ -614,6 +622,14 @@ int main(int argc, char* argv[])
 			mon.fill2DHisto(pre+"nhisovspu",         tags_full, ev.ngenITpu, phys.leptons[ilep].nhIso,             iweight);
 		      }
 		  }
+		
+		mon.fillHisto("zeta"     ,tags_full,zeta   ,iweight);
+		mon.fillHisto("zpt"      ,tags_full,zpt     ,iweight);
+		mon.fillHisto("nvtx"     ,tags_full,ev.nvtx,iweight);
+		mon.fillHisto("rho"      ,tags_full,ev.rho,iweight);
+		mon.fillHisto("rho25"    ,tags_full,ev.rho25,iweight);
+		mon.fill2DHisto("rhovspu"      ,tags_full,ev.ngenITpu,ev.rho,iweight);
+		mon.fill2DHisto("rho25vspu"    ,tags_full,ev.ngenITpu,ev.rho25,iweight);
 
 		if(passIso)
 		  {
