@@ -159,14 +159,6 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	      lepId.trkValidTrackerHits = muon->globalTrack()->hitPattern().numberOfValidTrackerHits();
 	      lepId.trkValidMuonHits = muon->globalTrack()->hitPattern().numberOfValidMuonHits();
 	    }
-	  lepId.idBits=( (int(muon->muonID("GlobalMuonPromptTight")) & 0x1) )
-	    | ( (int(muon->muonID("TMLastStationLoose")) & 0x1) << 1)
-	    | ( (int(muon->muonID("TMLastStationTight")) & 0x1) << 2)
-	    | ( (int(muon->muonID("TMLastStationAngTight")) & 0x1) << 3)
-	    | ( (int(muon->muonID("TMOneStationTight")) & 0x1) << 4)
-	    | (  muon->isTrackerMuon() << 5 )
-	    | (  muon->isGlobalMuon() << 6 )
-	    | (  muon->isPFMuon() << 7 );
 
 	  //2012 categories : https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId
 	  bool isLoose(muon->isPFMuon() && (muon->isTrackerMuon()  ||  muon->isGlobalMuon() ) );
@@ -216,12 +208,20 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	    }
 	  
 	  //complete id information
-	  lepId.idBits |= isLoose << 8
-	    | isSoft << 9
-	    | isTight << 10
-	    | isHighPt << 11
-	    | isVBTF2011 << 12
-	    | isSoftVBTF2011 << 13;
+	  lepId.idBits=( (int(muon->muonID("GlobalMuonPromptTight")) & 0x1) << MID_GLOBALMUONPROMPTTIGHT )
+	    | ( (int(muon->muonID("TMLastStationLoose")) & 0x1) << MID_TMLASTSTATIONLOOSE)
+	    | ( (int(muon->muonID("TMLastStationTight")) & 0x1) << MID_TMLASTSTATIONTIGHT)
+	    | ( (int(muon->muonID("TMLastStationAngTight")) & 0x1) << MID_TMLASTSTATIONANGTIGHT)
+	    | ( (int(muon->muonID("TMOneStationTight")) & 0x1) << MID_TMONESTATIONTIGHT)
+	    | (  muon->isTrackerMuon() << MID_TRACKER )
+	    | (  muon->isGlobalMuon() << MID_GLOBAL )
+	    | (  muon->isPFMuon() << MID_PF )
+	    | isLoose << MID_LOOSE
+	    | isSoft << MID_SOFT
+	    | isTight << MID_TIGHT
+	    | isHighPt << MID_HIGHPT
+	    | isVBTF2011 << MID_VBTF2011
+	    | isSoftVBTF2011 << MID_SOFT2011;
 	  
 	  
 	  //select the muon
@@ -671,22 +671,21 @@ vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet,
         jetId.chHadFrac   = jet->chargedHadronEnergyFraction();
 	jetId.r9          = jet->n90();
 	std::vector<int> puIdFlags(puJetIdAlgo.size(),0);
-	for(size_t iid=0; iid<puJetIdAlgo.size()-1; iid++)
+	for(size_t iid=0; iid<puJetIdAlgo.size(); iid++)
 	  {
 	    PileupJetIdentifier puIdentifier = puJetIdAlgo[iid]->computeIdVariables(dynamic_cast<const reco::Jet*>(jet), 0, primVtx.get(), *hVtx.product(), true);
-	    jetId.sihih       = puIdentifier.etaW();
-	    jetId.sipip       = puIdentifier.phiW();
-	    jetId.beta        = puIdentifier.beta();
-	    jetId.betaStar    = puIdentifier.betaStar();
-	    jetId.dRMean      = puIdentifier.dRMean();
-	    jetId.ptD         = puIdentifier.ptD();
-	    jetId.ptRMS       = puIdentifier.ptRMS();
+	    if(iid==0){
+	      jetId.sihih       = puIdentifier.etaW();
+	      jetId.sipip       = puIdentifier.phiW();
+	      jetId.beta        = puIdentifier.beta();
+	      jetId.betaStar    = puIdentifier.betaStar();
+	      jetId.dRMean      = puIdentifier.dRMean();
+	      jetId.ptD         = puIdentifier.ptD();
+	      jetId.ptRMS       = puIdentifier.ptRMS();
+	    }
 	    puIdFlags[iid]    = int(puIdentifier.idFlag());
 	    jetId.mva[iid]= puIdentifier.mva();
 	  }
-	//last is the cut based identifier
-	PileupJetIdentifier cutBasedId = puJetIdAlgo[puJetIdAlgo.size()-1]->computeIdVariables(dynamic_cast<const reco::Jet*>(jet), 0, primVtx.get(), *hVtx.product(),false);
-	puIdFlags.push_back( cutBasedId.cutIdFlag() );
 		
 	//check overlaps with selected leptons
 	double minDR(1000);

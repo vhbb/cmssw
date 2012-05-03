@@ -145,10 +145,10 @@ int main(int argc, char* argv[])
     {
       TString pre=lepTypes[ilep];
       h=(TH1F *)mon.addHistogram( new TH1F( "z"+pre+pre+"selafterid", ";Id;Events", 4,0,4) );
-      h->GetXaxis()->SetBinLabel(1,"Loose");
-      h->GetXaxis()->SetBinLabel(2,"Medium");
+      h->GetXaxis()->SetBinLabel(1,ilep==1 ? "PF": "Loose");
+      h->GetXaxis()->SetBinLabel(2,ilep==1 ? "Loose":"Medium");
       h->GetXaxis()->SetBinLabel(3,"Tight");
-      h->GetXaxis()->SetBinLabel(4,"2011");
+      h->GetXaxis()->SetBinLabel(4,ilep==1 ? "High p_{T}" : "2011");
       if(pre=="e")
 	{
 	  TString reg[]={"eb","ee"};
@@ -385,7 +385,6 @@ int main(int argc, char* argv[])
       Hcutflow->Fill(3,weight*TotalWeight_minus);
       Hcutflow->Fill(4,weight*TotalWeight_plus);
 
-
       //analyze the leptons
       LorentzVector lep1=phys.leptons[0];
       LorentzVector lep2=phys.leptons[1];
@@ -401,13 +400,13 @@ int main(int argc, char* argv[])
 	}
       else if (ev.cat==MUMU)
 	{
-	  idPass[0] = (hasObjectId(lid[0], MID_LOOSE)    && hasObjectId(lid[1], MID_LOOSE));
-	  idPass[1] = (hasObjectId(lid[0], MID_TIGHT)   && hasObjectId(lid[1],  MID_TIGHT));
-	  idPass[2] = (hasObjectId(lid[0], MID_HIGHPT)    && hasObjectId(lid[1],MID_HIGHPT));
-	  idPass[3] = (hasObjectId(lid[0], MID_VBTF2011) && hasObjectId(lid[1], MID_VBTF2011));
+	  idPass[0] = (hasObjectId(lid[0], MID_PF)     && hasObjectId(lid[1], MID_PF));
+	  idPass[1] = (hasObjectId(lid[0], MID_LOOSE)  && hasObjectId(lid[1], MID_LOOSE));
+	  idPass[2] = (hasObjectId(lid[0], MID_TIGHT)  && hasObjectId(lid[1], MID_TIGHT));
+	  idPass[3] = (hasObjectId(lid[0], MID_HIGHPT) && hasObjectId(lid[1], MID_HIGHPT));
 	}
 
-      /*/
+      /*
 	bool lpassConversion[]={hasObjectId(lid[0], EID_CONVERSIONVETO),hasObjectId(lid[1],EID_CONVERSIONVETO)};
 	int cutBasedIdsToTest[]={EgammaCutBasedEleId::VETO, EgammaCutBasedEleId::LOOSE, EgammaCutBasedEleId::MEDIUM, EgammaCutBasedEleId::TIGHT };
 	for(int iid=0; iid<4; iid++)
