@@ -629,7 +629,7 @@ process.load("VHbbAnalysis.HbbAnalyzer.pfIsoDeltaBeta04_cff")
 
 process.selectedPatElectrons.cut = (
     "(ecalDrivenSeed==1) &&"                                       +
-    "pt > 15.0 && abs(eta) < 2.5 &&"                               +
+    "pt > 5.0 && abs(eta) < 2.5 &&"                               +
     "(isEE || isEB) && !isEBEEGap"                              
 )
 
