@@ -43,7 +43,7 @@
 //#include "VHbbAnalysis/VHbbDataFormats/interface/Ntupler.h"
 
 //for SimBhad: FIXME
-#include "ZSV/BAnalysis/interface/SimBHadron.h"
+//#include "VHbbAnalysis/BAnalysis/interface/SimBHadron.h"
 //btagging
 #include "VHbbAnalysis/VHbbDataFormats/interface/BTagWeight.h"
 //trigger
@@ -104,44 +104,45 @@ float resolutionBias(float eta)
 }
 
 
-typedef struct
-{
-  void set(const SimBHadron & sbhc, int i){
-    mass[i] = sbhc.mass();
-    pt[i] = sbhc.pt();
-    eta[i] = sbhc.eta();
-    phi[i] = sbhc.phi();
-    vtx_x[i] = sbhc.decPosition.x();
-    vtx_y[i] = sbhc.decPosition.y();
-    vtx_z[i] = sbhc.decPosition.z();
-    pdgId[i] = sbhc.pdgId();
-    status[i] = sbhc.status();
-  };
-  void reset(){
-    for(int i=0; i < MAXB; ++i){
-      mass[i] = -99; pt[i] = -99; eta[i] = -99; phi[i] = -99; vtx_x[i] = -99; vtx_y[i] = -99; vtx_z[i] = -99; pdgId[i] = -99; status[i] = -99;
-    }
-  };
-  float mass[MAXB];
-  float pt[MAXB];
-  float eta[MAXB];
-  float phi[MAXB];
-  float vtx_x[MAXB];
-  float vtx_y[MAXB];
-  float vtx_z[MAXB];
-  int pdgId[MAXB];
-  int status[MAXB];
-//   int quarkStatus[MAXB];
-//   int brotherStatus[MAXB];
-//   int otherId[MAXB];
-//   bool etaOk[MAXB];
-//   bool simOk[MAXB];
-//   bool trackOk[MAXB];
-//   bool cutOk[MAXB];
-//   bool cutNewOk[MAXB];
-//   bool mcMatchOk[MAXB];
-//   bool matchOk[MAXB];
-} SimBHadronInfo;
+//FIXME : need to update EDM ntuple with SimBhadron infos
+// typedef struct
+// {
+//   void set(const SimBHadron & sbhc, int i){
+//     mass[i] = sbhc.mass();
+//     pt[i] = sbhc.pt();
+//     eta[i] = sbhc.eta();
+//     phi[i] = sbhc.phi();
+//     vtx_x[i] = sbhc.decPosition.x();
+//     vtx_y[i] = sbhc.decPosition.y();
+//     vtx_z[i] = sbhc.decPosition.z();
+//     pdgId[i] = sbhc.pdgId();
+//     status[i] = sbhc.status();
+//   };
+//   void reset(){
+//     for(int i=0; i < MAXB; ++i){
+//       mass[i] = -99; pt[i] = -99; eta[i] = -99; phi[i] = -99; vtx_x[i] = -99; vtx_y[i] = -99; vtx_z[i] = -99; pdgId[i] = -99; status[i] = -99;
+//     }
+//   };
+//   float mass[MAXB];
+//   float pt[MAXB];
+//   float eta[MAXB];
+//   float phi[MAXB];
+//   float vtx_x[MAXB];
+//   float vtx_y[MAXB];
+//   float vtx_z[MAXB];
+//   int pdgId[MAXB];
+//   int status[MAXB];
+// //   int quarkStatus[MAXB];
+// //   int brotherStatus[MAXB];
+// //   int otherId[MAXB];
+// //   bool etaOk[MAXB];
+// //   bool simOk[MAXB];
+// //   bool trackOk[MAXB];
+// //   bool cutOk[MAXB];
+// //   bool cutNewOk[MAXB];
+// //   bool mcMatchOk[MAXB];
+// //   bool matchOk[MAXB];
+// } SimBHadronInfo;
 
 
 typedef struct
@@ -178,6 +179,7 @@ typedef struct
 
 typedef struct 
 {
+  int HiggsFlag;
   float mass; 
   float pt;
   float eta;
@@ -186,6 +188,24 @@ typedef struct
   float dPhi;
   float dEta;
 } HiggsInfo;
+ 
+typedef struct
+{
+  int FatHiggsFlag; 
+  float mass;
+  float pt;
+  float eta;
+  float phi;
+  float filteredmass;
+  float filteredpt; 
+  float filteredeta;
+  float filteredphi;  
+//  float dR;
+//  float dPhi;
+//  float dEta;
+} FatHiggsInfo;
+
+ 
 
 typedef struct 
 {
@@ -224,19 +244,6 @@ typedef struct
 
 
  
-typedef struct
-{
-  bool FatHiggsFlag; 
-  float mass;
-  float pt;
-  float eta;
-  float phi;
-  float filteredmass;
-  float filteredpt; 
-//  float dR;
-//  float dPhi;
-//  float dEta;
-} FatHiggsInfo;
 
 typedef struct
 {
@@ -396,6 +403,10 @@ typedef struct
     cmva[i]=j.cmva;
     numTracksSV[i] = j.vtxNTracks;
     vtxMass[i]= j.vtxMass;
+    vtxPt[i]= j.vtxP4.Pt();
+    vtxEta[i]= j.vtxP4.Eta();
+    vtxPhi[i]= j.vtxP4.Phi();
+    vtxE[i]= j.vtxP4.E();
     vtx3dL[i] = j.vtx3dL;
     vtx3deL[i] = j.vtx3deL;
     chf[i]=j.chargedHadronEFraction;
@@ -429,6 +440,9 @@ typedef struct
       }
     JECUnc[i]=j.jecunc;
     id[i]=jetId(i);
+    ptRaw[i]=j.ptRaw;
+    ptLeadTrack[i]=j.ptLeadTrack; 
+
   }
   bool jetId(int i)
   {
@@ -445,7 +459,11 @@ typedef struct
   void reset()
   {
     for(int i=0;i<MAXJ;i++) {
-      pt[i]=-99; eta[i]=-99; phi[i]=-99;e[i]=-99;csv[i]=-99; csvivf[i]=-99; cmva[i]=-99; cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; isSemiLeptMCtruth[i]=-99; isSemiLept[i]=-99;      SoftLeptpdgId[i] = -99; SoftLeptIdlooseMu[i] = -99;  SoftLeptId95[i] =  -99;   SoftLeptPt[i] = -99;  SoftLeptdR[i] = -99;   SoftLeptptRel[i] = -99; SoftLeptRelCombIso[i] = -99;  genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99;
+      pt[i]=-99; eta[i]=-99; phi[i]=-99;e[i]=-99;csv[i]=-99;
+      csvivf[i]=-99; cmva[i]=-99;
+      cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; isSemiLeptMCtruth[i]=-99; isSemiLept[i]=-99;      
+      SoftLeptpdgId[i] = -99; SoftLeptIdlooseMu[i] = -99;  SoftLeptId95[i] =  -99;   SoftLeptPt[i] = -99;  SoftLeptdR[i] = -99;   SoftLeptptRel[i] = -99; SoftLeptRelCombIso[i] = -99;  
+      genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99; ptRaw[i]=-99.; ptLeadTrack[i]=-99.;
     }
   }
   float pt[MAXJ];
@@ -478,6 +496,10 @@ typedef struct
   float genPhi[MAXJ];
   float JECUnc[MAXJ];
   float vtxMass[MAXJ];
+  float vtxPt[MAXJ];
+  float vtxEta[MAXJ];
+  float vtxPhi[MAXJ];
+  float vtxE[MAXJ];
   float vtx3dL [MAXJ];
   float vtx3deL[MAXJ];
   bool id[MAXJ];
@@ -487,6 +509,8 @@ typedef struct
     float SF_CSVLerr[MAXJ];
     float SF_CSVMerr[MAXJ];
     float SF_CSVTerr[MAXJ];  
+  float ptRaw[MAXJ];
+  float ptLeadTrack[MAXJ];
 } JetInfo;
   
 int main(int argc, char* argv[]) 
@@ -497,7 +521,8 @@ int main(int argc, char* argv[])
 
   TTree *_outTree;
   IVFInfo IVF;
-  SimBHadronInfo SimBs;
+  //FIXME
+  //  SimBHadronInfo SimBs;
   float rho,rho25;
   int nPVs;
   METInfo MET;
@@ -518,10 +543,10 @@ int main(int argc, char* argv[])
   EventInfo EVENT;
   //  JetInfo jet1,jet2, addJet1, addJet2;
   // lepton1,lepton2;
-  JetInfo hJets, aJets, fathFilterJets;
+  JetInfo hJets, aJets, fathFilterJets, aJetsFat;
   LeptonInfo vLeptons, aLeptons;
-  int naJets=0, nhJets=0, nfathFilterJets=0;
-  HiggsInfo H,SVH, SimBH; //add here the fatjet higgs
+  int naJets=0, nhJets=0, nfathFilterJets=0, naJetsFat=0;
+  HiggsInfo H,SVH; //add here the fatjet higgs
   FatHiggsInfo FatH;
   genParticleInfo genZ, genZstar, genWstar, genW,  genH, genB, genBbar; //add here the fatjet higgs
   genTopInfo genTop, genTbar;
@@ -536,6 +561,8 @@ int main(int argc, char* argv[])
   float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart,weightEleTrigEleAugPart;
   float  weightTrigMET80, weightTrigMET100,    weightTrig2CJet20 , weightTrigMET150  , weightTrigMET802CJet, weightTrigMET1002CJet, weightTrigMETLP ;
 
+  //FIXME
+  //  float SimBs_dr = -99, SimBs_dEta= -99, SimBs_dPhi = -99, SimBs_Hmass = -99, SimBs_Hpt = -99, SimBs_Heta = -99, SimBs_Hphi = -99;
   int WplusMode,WminusMode;
   int Vtype,nSvs,nSimBs,numJets,numBJets,eventFlav;
   //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
@@ -641,9 +668,9 @@ int main(int argc, char* argv[])
   TH1F * pu = new TH1F("pileup","",51,-0.5,50.5);
   _outTree = new TTree("tree", "myTree");
   
-  _outTree->Branch("H"		,  &H	            ,  "mass/F:pt/F:eta:phi/F:dR/F:dPhi/F:dEta/F");
+  _outTree->Branch("H"		,  &H	            ,  "HiggsFlag/I:mass/F:pt/F:eta:phi/F:dR/F:dPhi/F:dEta/F");
   _outTree->Branch("V"		,  &V	            ,  "mass/F:pt/F:eta:phi/F");
-  _outTree->Branch("FatH"          ,  &FatH               ,  "FatHiggsFlag/I:mass/F:pt/F:eta:phi/F:filteredmass/F:filteredpt/F");
+  _outTree->Branch("FatH"          ,  &FatH               ,  "FatHiggsFlag/I:mass/F:pt/F:eta:phi/F:filteredmass/F:filteredpt/F:filteredeta/F:filteredphi/F");
   _outTree->Branch("genZ"		,  &genZ	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
   _outTree->Branch("genZstar"		,  &genZstar	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
   _outTree->Branch("genW"		,  &genW	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
@@ -693,6 +720,10 @@ int main(int argc, char* argv[])
   _outTree->Branch("hJet_genPhi",hJets.genPhi ,"genPhi[nhJets]/F");
   _outTree->Branch("hJet_JECUnc",hJets.JECUnc ,"JECUnc[nhJets]/F");
   _outTree->Branch("hJet_vtxMass",hJets.vtxMass ,"vtxMass[nhJets]/F");
+  _outTree->Branch("hJet_vtxPt",hJets.vtxPt ,"vtxPt[nhJets]/F");
+  _outTree->Branch("hJet_vtxEta",hJets.vtxEta ,"vtxEta[nhJets]/F");
+  _outTree->Branch("hJet_vtxPhi",hJets.vtxPhi ,"vtxPhi[nhJets]/F");
+  _outTree->Branch("hJet_vtxE",hJets.vtxE ,"vtxE[nhJets]/F");
   _outTree->Branch("hJet_vtx3dL",hJets.vtx3dL ,"vtx3dL[nhJets]/F");
   _outTree->Branch("hJet_vtx3deL",hJets.vtx3deL ,"vtx3deL[nhJets]/F");
   _outTree->Branch("hJet_id",hJets.id ,"id[nhJets]/b");
@@ -702,15 +733,40 @@ int main(int argc, char* argv[])
   _outTree->Branch("hJet_SF_CSVLerr",hJets.SF_CSVLerr ,"SF_CSVLerr[nhJets]/b");
   _outTree->Branch("hJet_SF_CSVMerr",hJets.SF_CSVMerr ,"SF_CSVMerr[nhJets]/b");
   _outTree->Branch("hJet_SF_CSVTerr",hJets.SF_CSVTerr ,"SF_CSVTerr[nhJets]/b");
+  _outTree->Branch("hJet_ptRaw",hJets.ptRaw ,"ptRaw[nhJets]/F");
+  _outTree->Branch("hJet_ptLeadTrack",hJets.ptLeadTrack ,"ptLeadTrack[nhJets]/F");
 
   _outTree->Branch("fathFilterJets_pt",fathFilterJets.pt ,"pt[nfathFilterJets]/F");
   _outTree->Branch("fathFilterJets_eta",fathFilterJets.eta ,"eta[nfathFilterJets]/F");
   _outTree->Branch("fathFilterJets_phi",fathFilterJets.phi ,"phi[nfathFilterJets]/F");
   _outTree->Branch("fathFilterJets_e",fathFilterJets.e ,"e[nfathFilterJets]/F");
   _outTree->Branch("fathFilterJets_csv",fathFilterJets.csv ,"csv[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_chf",fathFilterJets.chf ,"chf[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_ptRaw",fathFilterJets.ptRaw ,"ptRaw[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_ptLeadTrack",fathFilterJets.ptLeadTrack ,"ptLeadTrack[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_flavour",fathFilterJets.flavour ,"flavour[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_isSemiLept",fathFilterJets.isSemiLept ,"isSemiLept[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_isSemiLeptMCtruth",fathFilterJets.isSemiLeptMCtruth ,"isSemiLeptMCtruth[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_genPt",fathFilterJets.genPt ,"genPt[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_genEta",fathFilterJets.genEta ,"genEta[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_genPhi",fathFilterJets.genPhi ,"genPhi[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_vtxMass",fathFilterJets.vtxMass ,"vtxMass[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_vtx3dL",fathFilterJets.vtx3dL ,"vtx3dL[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_vtx3deL",fathFilterJets.vtx3deL ,"vtx3deL[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_vtxPt",fathFilterJets.vtxPt ,"vtxPt[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_vtxEta",fathFilterJets.vtxEta ,"vtxEta[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_vtxPhi",fathFilterJets.vtxPhi ,"vtxPhi[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_vtxE",fathFilterJets.vtxE ,"vtxE[nfathFilterJets]/F");
+ 
+
+//  _outTree->Branch("fathFilterJets_pt",fathFilterJets.pt ,"pt[nfathFilterJets]/F");
+//  _outTree->Branch("fathFilterJets_eta",fathFilterJets.eta ,"eta[nfathFilterJets]/F");
+//  _outTree->Branch("fathFilterJets_phi",fathFilterJets.phi ,"phi[nfathFilterJets]/F");
+//  _outTree->Branch("fathFilterJets_e",fathFilterJets.e ,"e[nfathFilterJets]/F");
+//  _outTree->Branch("fathFilterJets_csv",fathFilterJets.csv ,"csv[nfathFilterJets]/F");
   _outTree->Branch("fathFilterJets_csvivf",fathFilterJets.csvivf ,"csvivf[nfathFilterJets]/F");
   _outTree->Branch("fathFilterJets_cmva",fathFilterJets.cmva ,"cmva[nfathFilterJets]/F");
-  _outTree->Branch("fathFilterJets_flavour",fathFilterJets.flavour ,"flavour[nfathFilterJets]/F");
+//  _outTree->Branch("fathFilterJets_flavour",fathFilterJets.flavour ,"flavour[nfathFilterJets]/F");
 
 
   _outTree->Branch("aJet_pt",aJets.pt ,"pt[naJets]/F");
@@ -753,6 +809,14 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_SF_CSVLerr",aJets.SF_CSVLerr ,"SF_CSVLerr[naJets]/b");
   _outTree->Branch("aJet_SF_CSVMerr",aJets.SF_CSVMerr ,"SF_CSVMerr[naJets]/b");
   _outTree->Branch("aJet_SF_CSVTerr",aJets.SF_CSVTerr ,"SF_CSVTerr[naJets]/b");
+
+  _outTree->Branch("naJetsFat"             ,  &naJetsFat                  ,  "naJetsFat/I");
+  _outTree->Branch("aJetFat_pt",aJetsFat.pt ,"pt[naJetsFat]/F");
+  _outTree->Branch("aJetFat_eta",aJetsFat.eta ,"eta[naJetsFat]/F");
+  _outTree->Branch("aJetFat_phi",aJetsFat.phi ,"phi[naJetsFat]/F");
+  _outTree->Branch("aJetFat_e",aJetsFat.e ,"e[naJetsFat]/F");
+  _outTree->Branch("aJetFat_csv",aJetsFat.csv ,"csv[naJetsFat]/F");
+
 
   _outTree->Branch("numJets"      ,  &numJets         ,  "numJets/I"       );                
   _outTree->Branch("numBJets"      ,  &numBJets         ,  "numBJets/I"       );                
@@ -868,19 +932,28 @@ int main(int argc, char* argv[])
   //IVF higgs candidate
   _outTree->Branch("SVH"          ,  &SVH               ,  "mass/F:pt/F:eta:phi/F:dR/F:dPhi/F:dEta/F");
 
+
+  //FIXME : need to update the EDMNtuple with BHadron infos
 //   //SimBHadron
-  _outTree->Branch("nSimBs",&nSimBs ,"nSimBs/I");
-  _outTree->Branch("SimBs_mass", &SimBs.mass,"mass[nSvs]/F");
-  _outTree->Branch("SimBs_pt", &SimBs.pt,"pt[nSvs]/F");
-  _outTree->Branch("SimBs_eta", &SimBs.eta,"eta[nSvs]/F");
-  _outTree->Branch("SimBs_phi", &SimBs.phi,"phi[nSvs]/F");
-  _outTree->Branch("SimBs_vtx_x", &SimBs.vtx_x,"vtx_x[nSvs]/F");
-  _outTree->Branch("SimBs_vtx_y", &SimBs.vtx_y,"vtx_y[nSvs]/F");
-  _outTree->Branch("SimBs_vtx_z", &SimBs.vtx_z,"vtx_z[nSvs]/F");
-  _outTree->Branch("SimBs_pdgId", &SimBs.pdgId,"pdgId[nSvs]/F");
-  _outTree->Branch("SimBs_status", &SimBs.status,"status[nSvs]/F");
+//   _outTree->Branch("nSimBs",&nSimBs ,"nSimBs/I");
+//   _outTree->Branch("SimBs_mass", &SimBs.mass,"mass[nSvs]/F");
+//   _outTree->Branch("SimBs_pt", &SimBs.pt,"pt[nSvs]/F");
+//   _outTree->Branch("SimBs_eta", &SimBs.eta,"eta[nSvs]/F");
+//   _outTree->Branch("SimBs_phi", &SimBs.phi,"phi[nSvs]/F");
+//   _outTree->Branch("SimBs_vtx_x", &SimBs.vtx_x,"vtx_x[nSvs]/F");
+//   _outTree->Branch("SimBs_vtx_y", &SimBs.vtx_y,"vtx_y[nSvs]/F");
+//   _outTree->Branch("SimBs_vtx_z", &SimBs.vtx_z,"vtx_z[nSvs]/F");
+//   _outTree->Branch("SimBs_pdgId", &SimBs.pdgId,"pdgId[nSvs]/F");
+//   _outTree->Branch("SimBs_status", &SimBs.status,"status[nSvs]/F");
 //   //SimBHadron Higgs Candidate
-  _outTree->Branch("SimBH"          ,  &SimBH               ,  "mass/F:pt/F:eta:phi/F:dR/F:dPhi/F:dEta/F");
+//   _outTree->Branch("SimBs_dr", &SimBs_dr,"SimBs_dr/F");
+//   _outTree->Branch("SimBs_dPhi", &SimBs_dPhi,"SimBs_dPhi/F");
+//   _outTree->Branch("SimBs_dEta", &SimBs_dEta,"SimBs_dEta/F");
+//   _outTree->Branch("SimBs_Hmass", &SimBs_Hmass,"SimBs_Hmass/F");
+//   _outTree->Branch("SimBs_Hpt", &SimBs_Hpt,"SimBs_Hpt/F");
+//   _outTree->Branch("SimBs_Heta", &SimBs_Heta,"SimBs_Heta/F");
+//   _outTree->Branch("SimBs_Hphi", &SimBs_Hphi,"SimBs_Hphi/F");
+
 
   _outTree->Branch("rho"		,  &rho	         ,   "rho/F");
   _outTree->Branch("rho25"		,  &rho25	         ,   "rho25/F");
@@ -984,11 +1057,12 @@ int main(int argc, char* argv[])
 	EVENT.run = ev.id().run();
 	EVENT.lumi = ev.id().luminosityBlock();
 	EVENT.event = ev.id().event();
-	EVENT.json = jsonContainsEvent (jsonVector, ev);       
+	EVENT.json = jsonContainsEvent (jsonVector, ev);
+	//FIXME : need to update EDM ntuple with BHadron infos
 // 	// simBHadrons
- 	fwlite::Handle<SimBHadronCollection> SBHC;
-	SBHC.getByLabel(ev, "bhadrons");
- 	const SimBHadronCollection sbhc = *(SBHC.product());
+// 	fwlite::Handle<SimBHadronCollection> SBHC;
+// 	SBHC.getByLabel(ev, "bhadrons");
+// 	const SimBHadronCollection sbhc = *(SBHC.product());
 	
 	const std::vector<VHbbCandidate> * candZ ;
 	const std::vector<VHbbCandidate> * candW ;
@@ -1117,16 +1191,22 @@ int main(int argc, char* argv[])
 
 	Vtype = vhCand.candidateType;
 
+        if(vhCand.H.HiggsFlag) H.HiggsFlag=1; else H.HiggsFlag=0;
+
+        if(vhCand.H.HiggsFlag){
 	H.mass = vhCand.H.p4.M();
 	H.pt = vhCand.H.p4.Pt();
 
 
 	H.eta = vhCand.H.p4.Eta();
 	H.phi = vhCand.H.p4.Phi();
+	}
 
-
-        FatH.FatHiggsFlag = vhCand.FatH.FatHiggsFlag;
-        if(vhCand.FatH.FatHiggsFlag){ FatH.mass= vhCand.FatH.p4.M(); 
+        if(vhCand.FatH.FatHiggsFlag) FatH.FatHiggsFlag =1; else FatH.FatHiggsFlag=0;
+        fathFilterJets.reset();
+        aJetsFat.reset();
+       if(vhCand.FatH.FatHiggsFlag){ 
+        FatH.mass= vhCand.FatH.p4.M(); 
         FatH.pt = vhCand.FatH.p4.Pt();
         FatH.eta = vhCand.FatH.p4.Eta();
         FatH.phi = vhCand.FatH.p4.Phi();
@@ -1136,29 +1216,40 @@ int main(int argc, char* argv[])
         for( int j=0; j < nfathFilterJets; j++ ){
         fathFilterJets.set(vhCand.FatH.jets[j],j);
         }
-            
+
         if(nfathFilterJets==2){
         FatH.filteredmass=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4).M();
-        FatH.filteredpt=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4).Pt();}
+        FatH.filteredpt=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4).Pt();
+        FatH.filteredeta=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4).Eta();
+        FatH.filteredphi=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4).Phi();
+        }
         else if(nfathFilterJets==3){
         FatH.filteredmass=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4+vhCand.FatH.jets[2].p4).M();
-        FatH.filteredpt=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4+vhCand.FatH.jets[2].p4).Pt();}
-  
+        FatH.filteredpt=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4+vhCand.FatH.jets[2].p4).Pt();
+        FatH.filteredeta=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4+vhCand.FatH.jets[2].p4).Eta();
+        FatH.filteredphi=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4+vhCand.FatH.jets[2].p4).Phi();
         }
+ 
+        naJetsFat=vhCand.additionalJetsFat.size();
+        for( int j=0; j < naJetsFat && j < MAXJ; j++ )
+          {
+            aJetsFat.set(vhCand.additionalJetsFat[j],j);
+          }
 
+ 
+        } // FatHiggsFlag
 
+        hJets.reset();
+        aJets.reset(); 
+        if(vhCand.H.HiggsFlag){    
 
-	V.mass = vhCand.V.p4.M();
-        if(isW) V.mass = vhCand.Mt(); 
-	V.pt = vhCand.V.p4.Pt();
-	V.eta = vhCand.V.p4.Eta();
-	V.phi = vhCand.V.p4.Phi();
 	nhJets=2;
 	hJets.set(vhCand.H.jets[0],0);
 	hJets.set(vhCand.H.jets[1],1);
 
 
 	aJets.reset();
+
 	naJets=vhCand.additionalJets.size();
 	numBJets=0;
 	if(vhCand.H.jets[0].csv> btagThr) numBJets++;
@@ -1175,14 +1266,22 @@ int main(int argc, char* argv[])
 	HVdPhi = fabs( deltaPhi(vhCand.H.p4.Phi(),vhCand.V.p4.Phi()) ) ;
 	HVMass = (vhCand.H.p4 + vhCand.V.p4).M() ;
 	HMETdPhi = fabs( deltaPhi(vhCand.H.p4.Phi(),vhCand.V.mets.at(0).p4.Phi()) ) ;
-	VMt = vhCand.Mt() ;
 //eltaPullAngle = vhCand.H.deltaTheta;
+
         deltaPullAngle  =  VHbbCandidateTools::getDeltaTheta(vhCand.H.jets[0],vhCand.H.jets[1]);
         deltaPullAngle2 =  VHbbCandidateTools::getDeltaTheta(vhCand.H.jets[1],vhCand.H.jets[0]);
-
-  
 	hJets.cosTheta[0]=  vhCand.H.helicities[0];
 	hJets.cosTheta[1]=  vhCand.H.helicities[1];
+        } // Higgs Flag
+
+        V.mass = vhCand.V.p4.M();
+        if(isW) V.mass = vhCand.Mt();
+        V.pt = vhCand.V.p4.Pt();
+        V.eta = vhCand.V.p4.Eta();
+        V.phi = vhCand.V.p4.Phi();
+        VMt = vhCand.Mt() ;
+
+
 // METInfo calomet;  METInfo tcmet;  METInfo pfmet;  METInfo mht;  METInfo metNoPU
 	MET.et = vhCand.V.mets.at(0).p4.Pt();
 	MET.phi = vhCand.V.mets.at(0).p4.Phi();
@@ -1272,6 +1371,8 @@ int main(int argc, char* argv[])
         TkSharing.HiggsCSVtkSharing = TkSharing.HiggsIPtkSharing = TkSharing.HiggsSVtkSharing = TkSharing.FatHiggsCSVtkSharing = TkSharing.FatHiggsIPtkSharing = TkSharing.FatHiggsSVtkSharing = false;
 
         // csv tracks
+        if(vhCand.H.HiggsFlag){
+
         if (vhCand.H.jets[0].csvNTracks > 0 && vhCand.H.jets[1].csvNTracks > 0){
           for (int t=0;t!=vhCand.H.jets[0].csvNTracks;t++){
             for (int ti=0;ti!=vhCand.H.jets[1].csvNTracks;ti++){
@@ -1304,6 +1405,8 @@ int main(int argc, char* argv[])
           }// loop tracks in first hjet
         }// if tracks in jet
 
+       } // Di-jet Higgs Flag
+   
         // tracksharing for Filtered jets:
         if(vhCand.FatH.FatHiggsFlag && nfathFilterJets > 1){
         
@@ -1363,7 +1466,7 @@ int main(int argc, char* argv[])
 	  reco::SecondaryVertex recoSv(recoVtxPv, svc[j], flightDir ,true);
 	  IVF.set( recoSv, recoPv ,j);
 	}
-	if(nSvs > 1){
+	if(nSvs > 2){
 	  TLorentzVector BCands_H1, BCands_H2, BCands_H;
 	  BCands_H1.SetPtEtaPhiM(IVF.pt[0], IVF.eta[0], IVF.phi[0], IVF.massBcand[0]);
 	  BCands_H2.SetPtEtaPhiM(IVF.pt[1], IVF.eta[1], IVF.phi[1], IVF.massBcand[1]);
@@ -1377,24 +1480,25 @@ int main(int argc, char* argv[])
 	  SVH.phi = BCands_H.Phi();
 	}
 
+	//FIXME : need to update EDM ntuple with simBhadron info
 // 	//SimBhadron
- 	SimBs.reset();
- 	nSimBs = sbhc.size();
- 	for( int j=0; j < nSimBs && j < MAXB; ++j )
- 	  SimBs.set( sbhc.at(j), j);
-	if(nSimBs > 1){
-	  TLorentzVector SimBs_H1, SimBs_H2, SimBs_H;
-	  SimBs_H1.SetPtEtaPhiM(SimBs.pt[0], SimBs.eta[0], SimBs.phi[0], SimBs.mass[0]);
-	  SimBs_H2.SetPtEtaPhiM(SimBs.pt[1], SimBs.eta[1], SimBs.phi[1], SimBs.mass[1]);
-	  SimBs_H = SimBs_H1 + SimBs_H2;
-	  SimBH.dR = deltaR(SimBs.eta[0], SimBs.phi[0], SimBs.eta[1], SimBs.phi[1] );
-	  SimBH.dPhi = deltaPhi(SimBs.phi[0], SimBs.phi[1] );
-	  SimBH.dEta = TMath::Abs(SimBs.eta[0] - SimBs.eta[1] );
-	  SimBH.mass = SimBs_H.M();
-	  SimBH.pt = SimBs_H.Pt();
-	  SimBH.eta = SimBs_H.Eta();
-	  SimBH.phi = SimBs_H.Phi();
-	}
+// 	SimBs.reset();
+// 	nSimBs = sbhc.size();
+// 	for( int j=0; j < nSimBs && j < MAXB; ++j )
+// 	  SimBs.set( sbhc.at(j), j);
+// 	if(nSimBs > 2){
+// 	  TLorentzVector SimBs_H1, SimBs_H2, SimBs_H;
+// 	  SimBs_H1.SetPtEtaPhiM(SimBs.pt[0], SimBs.eta[0], SimBs.phi[0], SimBs.mass[0]);
+// 	  SimBs_H2.SetPtEtaPhiM(SimBs.pt[1], SimBs.eta[1], SimBs.phi[1], SimBs.mass[1]);
+// 	  SimBs_H = SimBs_H1 + SimBs_H2;
+// 	  SimBs_dr = deltaR(SimBs.eta[0], SimBs.phi[0], SimBs.eta[1], SimBs.phi[1] );
+// 	  SimBs_dPhi = deltaPhi(SimBs.phi[0], SimBs.phi[1] );
+// 	  SimBs_dEta = TMath::Abs(SimBs.eta[0] - SimBs.eta[1] );
+// 	  SimBs_Hmass = SimBs_H.M();
+// 	  SimBs_Hpt = SimBs_H.Pt();
+// 	  SimBs_Heta = SimBs_H.Eta();
+// 	  SimBs_Hphi = SimBs_H.Phi();
+// 	}
 
 
 	//Loop on jets
@@ -1465,6 +1569,7 @@ int main(int argc, char* argv[])
 
             //Loop on Higgs jets
 
+          if(vhCand.H.HiggsFlag){  
 	    for(unsigned int j=0; j < vhCand.H.jets.size(); j++ ) {
 
 	    //if we use the highest pt pair, only the two higgs jet should be used to compute the SF because the other jets are excluded 
@@ -1473,6 +1578,7 @@ int main(int argc, char* argv[])
 		   btagJetInfos.push_back(btagEff.jetInfo(vhCand.H.jets[j]));
 	    }
            }
+          }// HiggsFlag
 
 	  }
 	vLeptons.reset();
@@ -1817,6 +1923,7 @@ int main(int argc, char* argv[])
 	   
 	 }
         /// Compute pull angle from AK7
+        if(vhCand.H.HiggsFlag){
         if(!fromCandidate){
           std::vector<VHbbEvent::SimpleJet> ak7wrt1(iEvent->simpleJets3);
           std::vector<VHbbEvent::SimpleJet> ak7wrt2(iEvent->simpleJets3);
@@ -1855,6 +1962,7 @@ int main(int argc, char* argv[])
               }
           }
         }
+        }//HiggsFlag
 
 	_outTree->Fill();
 
