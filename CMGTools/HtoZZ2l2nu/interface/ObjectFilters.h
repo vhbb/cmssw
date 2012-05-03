@@ -42,7 +42,7 @@ enum PhysicsChannels  { SINGLETOP_CH, TTBAR_CH, W_CH, WW_CH, Z_CH, ZZ_CH, WZ_CH,
 enum PhysicsObjects   { MET=0,JET=1,TOP=6,ELECTRON=11, MUON=13, TAU=15, GLUON=21, PHOTON=22, Z=23, W=24};
 enum DileptonChannels { UNKNOWN=0,MUMU=1,EE=2,EMU=3,ETAU=4,MUTAU=5, GAMMA=22};
 enum IsolType         { ECAL_ISO=0, HCAL_ISO, TRACKER_ISO, REL_ISO, RELRHOCORR_ISO, N_ISO, C_ISO, CPU_ISO, G_ISO, PFREL_ISO, PFRELBETCORR_ISO};
-enum ElectronIdArbitrations { EID_VBTF2011=0, EID_VETO, EID_LOOSE, EID_MEDIUM, EID_TIGHT, EID_CONVERSIONVETO, EID_EOPCUT, EID_TRIGGER2011, EID_TIGHTTRIGGER, EID_HEEPID };
+enum ElectronIdArbitrations { EID_VBTF2011=0, EID_VETO, EID_LOOSE, EID_MEDIUM, EID_TIGHT, EID_CONVERSIONVETO, EID_EOPCUT, EID_TRIGGER2011, EID_TIGHTTRIGGER, EID_HEEPID, EID_ECALDRIVEN, EID_TRACKERDRIVEN };
 enum JetIdArbitrations      { JETID_LOOSE=0,        JETID_TIGHT=1, 
 			      JETID_PHILV1_TIGHT=4, JETID_PHILV1_MEDIUM=5, JETID_PHILV1_LOOSE=6,
 			      JETID_MIN_TIGHT=8,    JETID_MIN_MEDIUM=9,    JETID_MIN_LOOSE=10,
@@ -64,7 +64,7 @@ class ObjectIdSummary
   double ensf,ensferr;
   double trkd0,trkdZ,trkpt,trketa,trkphi,trkchi2,trkValidPixelHits,trkValidTrackerHits,trkLostInnerHits;
   //muon specific
-  double trkValidMuonHits,trkMatches;
+  double trkValidMuonHits,trkMatches,innerTrackChi2,trkLayersWithMeasurement,pixelLayersWithMeasurement;
   //electron specific
   double dPhiTrack,dEtaTrack,ooemoop,fbrem,eopin;
   //common to photon and electron
@@ -142,6 +142,7 @@ const reco::GenParticle *getLeptonGenMatch(reco::CandidatePtr &lepton);
 std::vector<reco::CandidatePtr> getGoodPhotons(edm::Handle<edm::View<reco::Candidate> > &hPhoton,
 					       EGEnergyCorrector *ecorr,
 					       EcalClusterLazyTools &lazyTool,
+					       edm::Handle<EcalRecHitCollection> ebrechits,
 					       edm::Handle<reco::GsfElectronCollection> &hEle,
 					       edm::Handle<reco::ConversionCollection> &hConversions,
 					       edm::Handle<reco::TrackCollection> &hTracks,

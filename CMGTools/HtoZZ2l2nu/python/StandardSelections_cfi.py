@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-from CMGTools.External.puJetIDAlgo_cff import PhilV1, PuJetIdMinMVA, PuJetIdOptMVA
+from CMGTools.External.pujetidproducer_cfi import pileupJetIdProducer
 from CMGTools.HtoZZ2l2nu.TriggerSequences_cff import getTriggerPaths
 DoubleElectronTrigs, DoubleMuTrigs, MuEGTrigs, PhotonTrigs, SingleMuTrigs, mcTrigs = getTriggerPaths(version=2012)
 
@@ -31,62 +31,46 @@ BaseVertexSelection = cms.PSet( source = cms.InputTag("offlinePrimaryVertices"),
                                 )
 
 # base values for muon selection ----------------------------------------------
-Base2011MuonsSelection = cms.PSet( source = cms.InputTag("selectedPatMuons"), #PFlow"),
-                                   minPt = cms.double(20),
-                                   maxEta = cms.double(2.4),
-                                   requireGlobal = cms.int32(1),  #0-no requirement; 1-and; 2-or 
-                                   minValidMuonHits=cms.int32(1),
-                                   minMatchingMuonStations = cms.int32(2),
-                                   minValidTrackerHits = cms.int32(11),
-                                   minPixelHits = cms.int32(1),
-                                   maxTrackChi2 = cms.double(10),
-                                   maxRelPtUncertainty = cms.double(0.1),
-                                   maxD0=cms.double(0.02),
-                                   maxDz=cms.double(0.1),
-                                   id = cms.string(""),
-                                   maxRelIso = cms.double(999999.),#0.15),
-                                   applySoftMuonIsolationVeto=cms.bool(False),
-                                   usePFIso = cms.bool(False),
-                                   doDeltaBetaCorrection = cms.bool(False)
-                               )
-
 BaseMuonsSelection = cms.PSet( source = cms.InputTag("selectedPatMuons"), #PFlow"),
+                               rho25Neut = cms.InputTag("kt6PFJetsCentralNeutral:rho"),
                                minPt = cms.double(20),
                                maxEta = cms.double(2.4),
-                               requireGlobal = cms.int32(2),
-                               minValidMuonHits=cms.int32(0),
-                               minMatchingMuonStations = cms.int32(0),
-                               minValidTrackerHits = cms.int32(0),
-                               minPixelHits = cms.int32(0),
-                               maxTrackChi2 = cms.double(9999.),
-                               maxRelPtUncertainty = cms.double(99999.),
-                               maxD0=cms.double(1.0),
-                               maxDz=cms.double(1.0),
-                               id = cms.string(""),
-                               maxRelIso = cms.double(999999.),#0.15),
-                               applySoftMuonIsolationVeto=cms.bool(False),
-                               usePFIso = cms.bool(False),
+                               id = cms.string("loose"),
+                               vbtf2011 = cms.PSet( id = cms.string(""),
+                                                    minValidMuonHits=cms.int32(1),
+                                                    minMatchingMuonStations = cms.int32(2),
+                                                    minValidTrackerHits = cms.int32(11),
+                                                    minPixelHits = cms.int32(1),
+                                                    maxTrackChi2 = cms.double(10),
+                                                    maxRelPtUncertainty = cms.double(0.1),
+                                                    maxD0=cms.double(0.02),
+                                                    maxDz=cms.double(0.1),
+                                                    maxRelIso = cms.double(0.15),
+                                                    applySoftMuonIsolationVeto=cms.bool(False)
+                                                    ),
+                               maxRelIso = cms.double(999999.),
+                               usePFIso = cms.bool(True),
                                doDeltaBetaCorrection = cms.bool(False)
                                )
 
 # base values for loose muon selection ----------------------------------------------
-BaseLooseMuonsSelection = BaseMuonsSelection.clone( minPt = cms.double(10) )
-BaseSoftMuonsSelection  = BaseMuonsSelection.clone( minPt = cms.double(3),
-                                                    requireGlobal = cms.int32(0),
-                                                    minValidMuonHits=cms.int32(0),
-                                                    minMatchingMuonStations = cms.int32(0),
-                                                    minValidTrackerHits = cms.int32(11),
-                                                    minPixelHits = cms.int32(0),
-                                                    maxTrackChi2 = cms.double(9999.),
-                                                    maxRelPtUncertainty = cms.double(9999.),
-                                                    maxD0=cms.double(0.2),
-                                                    maxDz=cms.double(0.2),
-                                                    id = cms.string("TMLastStationAngTight"),
+BaseLooseMuonsSelection = BaseMuonsSelection.clone( minPt = cms.double(3),
+                                                    id=cms.string("soft"),
+                                                    vbtf2011 = cms.PSet( id = cms.string("TMLastStationAngTight"),
+                                                                         minValidMuonHits=cms.int32(0),
+                                                                         minMatchingMuonStations = cms.int32(0),
+                                                                         minValidTrackerHits = cms.int32(11),
+                                                                         minPixelHits = cms.int32(0),
+                                                                         maxTrackChi2 = cms.double(9999.),
+                                                                         maxRelPtUncertainty = cms.double(9999.),
+                                                                         maxD0=cms.double(0.2),
+                                                                         maxDz=cms.double(0.2),
+                                                                         maxRelIso = cms.double(999999.),
+                                                                         applySoftMuonIsolationVeto=cms.bool(True) ),
                                                     maxRelIso = cms.double(999999.),
-                                                    applySoftMuonIsolationVeto=cms.bool(True),
-                                                    usePFIso = cms.bool(False),
-                                                    doDeltaBetaCorrection = cms.bool(False) )
-                                                    
+                                                    usePFIso = cms.bool(True),
+                                                    doDeltaBetaCorrection = cms.bool(False)
+                                                    )
 
 # base values for photon selection ----------------------------------------------
 BasePhotonsSelection = cms.PSet( source = cms.InputTag("photons"),
@@ -116,6 +100,7 @@ BasePhotonsSelection = cms.PSet( source = cms.InputTag("photons"),
 
 # base values for electron selection ----------------------------------------------
 BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectrons"), #PFlow"),
+                                   id=cms.string("veto"),
                                    #cf. https://twiki.cern.ch/twiki/bin/view/CMS/RegressionSCCorrections
                                    scCorrector = cms.string("${CMSSW_BASE}/src/CMGTools/HtoZZ2l2nu/data/EleEnRegress.root"),
                                    minPt = cms.double(20),
@@ -131,9 +116,9 @@ BaseElectronsSelection = cms.PSet( source = cms.InputTag("selectedPatElectrons")
                                                         maxTrackLostHits = cms.vint32(0,  0),
                                                         applyConversionVetoFrom = cms.string("simpleEleId80relIso")
                                                         ),
-                                   maxRelIso    = cms.double(999999.),#0.1),
+                                   maxRelIso    = cms.double(999999.), #0.1),
                                    minDeltaRtoMuons = cms.double(0.1),
-                                   usePFIso = cms.bool(False),
+                                   usePFIso = cms.bool(True),
                                    doDeltaBetaCorrection = cms.bool(False)
                                    )
 
@@ -146,10 +131,7 @@ BaseJetSelection = cms.PSet( source = cms.InputTag("selectedPatJetsPFlow"),
                              minPt = cms.double(10),
                              maxEta = cms.double(5.0),
                              minDeltaRtoLepton = cms.double(0.4),
-                             puJetIds = cms.VPSet( PuJetIdMinMVA,
-                                                   PuJetIdOptMVA,
-                                                   PhilV1
-                                                   )
+                             puJetIds = pileupJetIdProducer.algos
                              )
 AssocJetSelection = BaseJetSelection.clone(source = cms.InputTag("selectedPatJetsPFlowNoPuSub") )
 

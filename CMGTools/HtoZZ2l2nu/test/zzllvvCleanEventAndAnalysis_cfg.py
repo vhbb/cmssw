@@ -41,7 +41,6 @@ process.evAnalyzer = cms.EDAnalyzer("DileptonPlusMETEventAnalyzer",
                                     Generator = BaseGeneratorSelection.clone(),
                                     Vertices = BaseVertexSelection.clone(),
                                     Photons = BasePhotonsSelection.clone(),
-                                    SoftMuons = BaseSoftMuonsSelection.clone(),
                                     LooseMuons = BaseLooseMuonsSelection.clone(),
                                     Muons = BaseMuonsSelection.clone(),
                                     LooseElectrons = BaseLooseElectronsSelection.clone(),
@@ -52,10 +51,33 @@ process.evAnalyzer = cms.EDAnalyzer("DileptonPlusMETEventAnalyzer",
                                     MET = BaseMetSelection.clone()
                                     )
 
+#rho for muon isolation
+process.load('CommonTools.ParticleFlow.ParticleSelectors.pfAllNeutralHadronsAndPhotons_cfi')
+process.pfAllNeutralHadronsAndPhotons.src=cms.InputTag("particleFlow")
+from RecoJets.JetProducers.kt4PFJets_cfi import kt4PFJets
+process.kt6PFJetsCentralNeutral = kt4PFJets.clone(  src = cms.InputTag("pfAllNeutralHadronsAndPhotons"),
+                                                    rParam = cms.double(0.6),
+                                                    doAreaFastjet = cms.bool(True),
+                                                    doRhoFastjet = cms.bool(True),
+                                                    Ghost_EtaMax = cms.double(3.1),
+                                                    Rho_EtaMax = cms.double(2.5),
+                                                    inputEtMin = cms.double(0.5)
+)
+process.rhoForIsolationSequence = cms.Sequence(process.pfAllNeutralHadronsAndPhotons*process.kt6PFJetsCentralNeutral)
+
+
+
+#MVAs for IDs
+#process.load('EGamma.EGammaAnalysisTools.electronIdMVAProducer_cfi')
+#process.mvaIDs = cms.Sequence(  process.mvaTrigV0 + process.mvaNonTrigV0 )
+
+
 #the path to execute
-process.p = cms.Path(process.ClusteredPFMetProducer+
-                     process.puWeightSequence+
-                     process.evAnalyzer)
+process.p = cms.Path( #process.mvaIDs +
+                      process.rhoForIsolationSequence +
+                      process.ClusteredPFMetProducer +
+                      process.puWeightSequence +
+                      process.evAnalyzer)
 
 
 # message logger

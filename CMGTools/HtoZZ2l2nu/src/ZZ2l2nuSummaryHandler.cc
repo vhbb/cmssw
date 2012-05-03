@@ -24,9 +24,10 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("hasTrigger",        &evSummary_.hasTrigger,        "hasTrigger/O");
 
   //vertices and average energy density
-  t_->Branch("nvtx",       &evSummary_.nvtx,       "nvtx/I");
-  t_->Branch("rho",        &evSummary_.rho,        "rho/F");
-  t_->Branch("rho25",        &evSummary_.rho25,        "rho25/F");
+  t_->Branch("nvtx",           &evSummary_.nvtx,           "nvtx/I");
+  t_->Branch("rho",            &evSummary_.rho,            "rho/F");
+  t_->Branch("rho25",          &evSummary_.rho25,          "rho25/F");
+  t_->Branch("rho25Neut", &evSummary_.rho25Neut, "rho25Neut/F");
 
   //generator level info
   t_->Branch("ngenITpu",   &evSummary_.ngenITpu,   "ngenITpu/I");
@@ -151,6 +152,9 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("mn_idbits",        evSummary_.mn_idbits,        "mn_idbits[mn]/I");
   t_->Branch("mn_nMatches",      evSummary_.mn_nMatches ,     "mn_nMatches[mn]/F");
   t_->Branch("mn_validMuonHits", evSummary_.mn_validMuonHits, "mn_validMuonHits[mn]/F");
+  t_->Branch("mn_innerTrackChi2",evSummary_.mn_innerTrackChi2,"mn_innerTrackChi2/F");
+  t_->Branch("mn_trkLayersWithMeasurement",evSummary_.mn_trkLayersWithMeasurement,"mn_trkLayersWithMeasurement/F");
+  t_->Branch("mn_pixelLayersWithMeasurement",evSummary_.mn_pixelLayersWithMeasurement,"mn_pixelLayersWithMeasurement/F");
 
   //selected CHS jets
   t_->Branch("jn",             &evSummary_.jn,            "jn/I");
@@ -169,11 +173,14 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("jn_chHadFrac",   evSummary_.jn_chHadFrac,   "jn_chHadFrac[jn]/F");
   t_->Branch("jn_genpt",       evSummary_.jn_genpt,       "jn_genpt[jn]/F");
   t_->Branch("jn_pumva",       evSummary_.jn_pumva,       "jn_pumva[jn]/F");
+  t_->Branch("jn_puminmva",    evSummary_.jn_puminmva,    "jn_puminmva[jn]/F");
   t_->Branch("jn_beta",        evSummary_.jn_beta,        "jn_beta[jn]/F");
   t_->Branch("jn_betaStar",    evSummary_.jn_betaStar,    "jn_betaStar[jn]/F");
   t_->Branch("jn_dRMean",      evSummary_.jn_dRMean,      "jn_dRMean[jn]/F");
   t_->Branch("jn_ptD",         evSummary_.jn_ptD,         "jn_ptD[jn]/F");
   t_->Branch("jn_ptRMS",       evSummary_.jn_ptRMS,       "jn_ptRMS[jn]/F");
+  t_->Branch("jn_etaW",        evSummary_.jn_etaW,        "jn_etaW[jn]/F");
+  t_->Branch("jn_phiW",        evSummary_.jn_phiW,        "jn_phiW[jn]/F");
   t_->Branch("jn_idbits",      evSummary_.jn_idbits,      "jn_idbits[jn]/I");
 
   //selected PF jets 
@@ -193,11 +200,14 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("ajn_chHadFrac",   evSummary_.ajn_chHadFrac,   "ajn_chHadFrac[ajn]/F");
   t_->Branch("ajn_genpt",       evSummary_.ajn_genpt,       "ajn_genpt[ajn]/F");
   t_->Branch("ajn_pumva",       evSummary_.ajn_pumva,       "ajn_pumva[ajn]/F");
+  t_->Branch("ajn_puminmva",    evSummary_.ajn_puminmva,    "ajn_puminmva[jn]/F");  
   t_->Branch("ajn_beta",        evSummary_.ajn_beta,        "ajn_beta[ajn]/F");
   t_->Branch("ajn_betaStar",    evSummary_.ajn_betaStar,    "ajn_betaStar[ajn]/F");
   t_->Branch("ajn_dRMean",      evSummary_.ajn_dRMean,      "ajn_dRMean[ajn]/F");
   t_->Branch("ajn_ptD",         evSummary_.ajn_ptD,         "ajn_ptD[ajn]/F");
   t_->Branch("ajn_ptRMS",       evSummary_.ajn_ptRMS,       "ajn_ptRMS[ajn]/F");
+  t_->Branch("ajn_etaW",        evSummary_.ajn_etaW,        "ajn_etaW[jn]/F");
+  t_->Branch("ajn_phiW",        evSummary_.ajn_phiW,        "ajn_phiW[jn]/F");
   t_->Branch("ajn_idbits",      evSummary_.ajn_idbits,      "ajn_idbits[ajn]/I");
 
 
@@ -287,7 +297,8 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   //vertices and average energy density
   t_->GetBranch("nvtx")->SetAddress(&evSummary_.nvtx);
   t_->GetBranch("rho")->SetAddress( &evSummary_.rho );
-  if(t_->GetBranch("rho25")) t_->GetBranch("rho25")->SetAddress( &evSummary_.rho25 );
+  t_->GetBranch("rho25")->SetAddress( &evSummary_.rho25 );
+  if(t_->GetBranch("rho25Neut")) t_->GetBranch("rho25Neut")->SetAddress(&evSummary_.rho25Neut);
 
   //generator level info
   t_->GetBranch("puweight")->SetAddress(&evSummary_.puWeight);
@@ -416,6 +427,9 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   t_->GetBranch("mn_idbits"       )->SetAddress(evSummary_.mn_idbits);
   t_->GetBranch("mn_nMatches"     )->SetAddress(evSummary_.mn_nMatches);
   t_->GetBranch("mn_validMuonHits")->SetAddress(evSummary_.mn_validMuonHits);
+  if(t_->GetBranch("mn_innerTrackChi2"))             t_->GetBranch("mn_innerTrackChi2")->SetAddress(evSummary_.mn_innerTrackChi2);
+  if(t_->GetBranch("mn_trkLayersWithMeasurement"))   t_->GetBranch("mn_trkLayersWithMeasurement")->SetAddress(evSummary_.mn_trkLayersWithMeasurement);
+  if(t_->GetBranch("mn_pixelLayersWithMeasurement")) t_->GetBranch("mn_pixelLayersWithMeasurement")->SetAddress(evSummary_.mn_pixelLayersWithMeasurement);
 
   //selected jets
   t_->GetBranch("jn")             ->SetAddress(&evSummary_.jn);
@@ -433,11 +447,14 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   t_->GetBranch("jn_chHadFrac")   ->SetAddress(evSummary_.jn_chHadFrac);
   t_->GetBranch("jn_genpt")       ->SetAddress(evSummary_.jn_genpt);
   t_->GetBranch("jn_pumva")       ->SetAddress(evSummary_.jn_pumva);
+  if(t_->GetBranch("jn_puminmva"))    t_->GetBranch("jn_puminmva")       ->SetAddress(evSummary_.jn_puminmva);
   t_->GetBranch("jn_beta")        ->SetAddress(evSummary_.jn_beta);
   t_->GetBranch("jn_betaStar")    ->SetAddress(evSummary_.jn_betaStar);
   t_->GetBranch("jn_dRMean")      ->SetAddress(evSummary_.jn_dRMean);
   t_->GetBranch("jn_ptD")         ->SetAddress(evSummary_.jn_ptD);
   t_->GetBranch("jn_ptRMS")       ->SetAddress(evSummary_.jn_ptRMS);
+  if(t_->GetBranch("jn_etaW"))  t_->GetBranch("jn_etaW")->SetAddress(evSummary_.jn_etaW);
+  if(t_->GetBranch("jn_phiW"))  t_->GetBranch("jn_phiW")->SetAddress(evSummary_.jn_phiW);
   t_->GetBranch("jn_idbits")      ->SetAddress(evSummary_.jn_idbits);
   
   t_->GetBranch("htvec_px")->SetAddress(&evSummary_.htvec_px);
@@ -460,11 +477,14 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   t_->GetBranch("ajn_chHadFrac")   ->SetAddress(evSummary_.ajn_chHadFrac);
   t_->GetBranch("ajn_genpt")       ->SetAddress(evSummary_.ajn_genpt);
   t_->GetBranch("ajn_pumva")       ->SetAddress(evSummary_.ajn_pumva);
+  if(t_->GetBranch("ajn_puminmva"))    t_->GetBranch("ajn_puminmva")       ->SetAddress(evSummary_.ajn_puminmva);  
   t_->GetBranch("ajn_beta")        ->SetAddress(evSummary_.ajn_beta);
   t_->GetBranch("ajn_betaStar")    ->SetAddress(evSummary_.ajn_betaStar);
   t_->GetBranch("ajn_dRMean")      ->SetAddress(evSummary_.ajn_dRMean);
   t_->GetBranch("ajn_ptD")         ->SetAddress(evSummary_.ajn_ptD);
   t_->GetBranch("ajn_ptRMS")       ->SetAddress(evSummary_.ajn_ptRMS);
+  if(t_->GetBranch("ajn_etaW"))  t_->GetBranch("ajn_etaW")->SetAddress(evSummary_.ajn_etaW);
+  if(t_->GetBranch("ajn_phiW"))  t_->GetBranch("ajn_phiW")->SetAddress(evSummary_.ajn_phiW);
   t_->GetBranch("ajn_idbits")      ->SetAddress(evSummary_.ajn_idbits);
 
   //primary vertex

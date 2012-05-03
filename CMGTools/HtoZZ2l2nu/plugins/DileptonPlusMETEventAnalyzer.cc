@@ -81,7 +81,7 @@ DileptonPlusMETEventAnalyzer::DileptonPlusMETEventAnalyzer(const edm::ParameterS
   try{
 
     std::string objs[]={"Generator", "Trigger", "Vertices", "Photons",
-			"Electrons", "LooseElectrons", "Muons","LooseMuons", "SoftMuons", "Dileptons", "Jets", "AssocJets", "MET" };
+			"Electrons", "LooseElectrons", "Muons","LooseMuons", "Dileptons", "Jets", "AssocJets", "MET" };
     for(size_t iobj=0; iobj<sizeof(objs)/sizeof(string); iobj++)
       objConfig_[ objs[iobj] ] = iConfig.getParameter<edm::ParameterSet>( objs[iobj] );
 
@@ -144,6 +144,9 @@ int DileptonPlusMETEventAnalyzer::addPidSummary(ObjectIdSummary &obj)
       ev.mn_idbits[ev.en]=obj.idBits;
       ev.mn_nMatches[ev.mn]=obj.trkMatches;
       ev.mn_validMuonHits[ev.mn]=obj.trkValidMuonHits;
+      ev.mn_pixelLayersWithMeasurement[ev.mn]= obj.pixelLayersWithMeasurement;
+      ev.mn_trkLayersWithMeasurement[ev.mn]= obj.trkLayersWithMeasurement;
+      ev.mn_innerTrackChi2[ev.mn]=obj.innerTrackChi2;
       index=ev.mn;
       ev.mn++;
     }
@@ -333,54 +336,38 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     ev.vtx_en = primVertex->p4().energy();
     
     // average energy density
-    edm::Handle< double > rho, rho25;
+    edm::Handle< double > rho, rho25,rho25Neut;
     event.getByLabel( objConfig_["Jets"].getParameter<edm::InputTag>("rho"),rho);
     event.getByLabel( objConfig_["Photons"].getParameter<edm::InputTag>("rho25"),rho25);
+    event.getByLabel( objConfig_["Muons"].getParameter<edm::InputTag>("rho25Neut"),rho25Neut);
     ev.rho = *rho;
     ev.rho25 = *rho25;
+    ev.rho25Neut = *rho25Neut;
 
     //
     // LEPTON SELECTION
     //
     
     //muon selection
-    Handle<View<Candidate> > hMu;
+    edm::Handle<View<Candidate> > hMu;
     event.getByLabel(objConfig_["Muons"].getParameter<edm::InputTag>("source"), hMu);
-    std::vector<ObjectIdSummary> softMuonSummary, looseMuonSummary, muonSummary;
-    std::vector<CandidatePtr> selSoftMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["SoftMuons"], softMuonSummary);
-    std::vector<CandidatePtr> selLooseMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["LooseMuons"], looseMuonSummary);
+    std::vector<ObjectIdSummary> looseMuonSummary, muonSummary;
+    std::vector<CandidatePtr> looseMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["LooseMuons"], looseMuonSummary);
     std::vector<CandidatePtr> selMuons      = getGoodMuons(hMu, primVertex, *rho, objConfig_["Muons"], muonSummary);
-
+    
     //electron selection
     Handle<View<Candidate> > hEle;
     event.getByLabel(objConfig_["Electrons"].getParameter<edm::InputTag>("source"), hEle);
     EcalClusterLazyTools lazyTool(event,iSetup,objConfig_["Photons"].getParameter<edm::InputTag>("ebrechits"),objConfig_["Photons"].getParameter<edm::InputTag>("eerechits"));
     edm::Handle<reco::ConversionCollection> hConversions;
     try{ event.getByLabel(objConfig_["Photons"].getParameter<edm::InputTag>("conversions"), hConversions); }  catch(std::exception &e){ cout << e.what() << endl; }
+    //    std::vector< edm::Handle<edm::ValueMap<float> > > electronIdMva(2);
+    // try{ event.getByLabel("mvaTrigV0",electronIdMva[0]); event.getByLabel("mvaNonTrigV0",electronIdMva[1]); } catch(std::exception &e){ cout << e.what() << endl; }
     std::vector<ObjectIdSummary> looseEleSummary, eleSummary;
-    std::vector<CandidatePtr> selLooseElectrons = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_, lazyTool, *rho, objConfig_["LooseElectrons"], iSetup, looseEleSummary);
-    std::vector<CandidatePtr> selElectrons      = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_, lazyTool, *rho, objConfig_["Electrons"], iSetup, eleSummary);
+    std::vector<CandidatePtr> looseElectrons = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_,  lazyTool, *rho, objConfig_["LooseElectrons"], iSetup, looseEleSummary);
+    std::vector<CandidatePtr> selElectrons     = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_, lazyTool, *rho, objConfig_["Electrons"], iSetup, eleSummary);
 
-    //inclusive collection of leptons to store (include the soft muon selection)
-    std::vector<CandidatePtr> selLooseLeptons           = selLooseMuons;
-    std::vector<ObjectIdSummary> selLooseLeptonsSummary = looseMuonSummary;
-    selLooseLeptons.insert       ( selLooseLeptons.end(),        selLooseElectrons.begin(),  selLooseElectrons.end());
-    selLooseLeptonsSummary.insert( selLooseLeptonsSummary.end(), looseEleSummary.begin(),    looseEleSummary.end() );
-    for(size_t ism=0; ism<selSoftMuons.size(); ism++)
-      {
-	bool keep(true);
-	for(std::vector<CandidatePtr>::iterator lmIt=selLooseMuons.begin(); lmIt != selLooseMuons.end(); lmIt++)
-	  {
-	    if(deltaR(selSoftMuons[ism]->eta(),selSoftMuons[ism]->phi(),(*lmIt)->eta(),(*lmIt)->phi())>0.1) continue;
-	    keep=false;
-	    break;
-	  }
-	if(!keep) continue;
-	selLooseLeptons.push_back(selSoftMuons[ism]);
-	selLooseLeptonsSummary.push_back(softMuonSummary[ism]);
-      }
-
-    //dilepton candidate
+    //build the dilepton candidate
     std::vector<CandidatePtr> selLeptons = selMuons;
     selLeptons.insert(selLeptons.end(), selElectrons.begin(), selElectrons.end());
     std::vector<CandidatePtr> dilepton = getDileptonCandidate(selLeptons, objConfig_["Dileptons"], iSetup);
@@ -398,6 +385,14 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
       }
 
     //save leptons
+    std::vector<CandidatePtr> selLooseLeptons           = looseMuons;
+    std::vector<ObjectIdSummary> selLooseLeptonsSummary = looseMuonSummary;
+    selLooseLeptons.insert       ( selLooseLeptons.end(),        selMuons.begin(),        selMuons.end() );
+    selLooseLeptonsSummary.insert( selLooseLeptonsSummary.end(), muonSummary.begin(),     muonSummary.end() );
+    selLooseLeptons.insert       ( selLooseLeptons.end(),        looseElectrons.begin(),  looseElectrons.end());
+    selLooseLeptonsSummary.insert( selLooseLeptonsSummary.end(), looseEleSummary.begin(), looseEleSummary.end() );
+    selLooseLeptons.insert       ( selLooseLeptons.end(),        selElectrons.begin(),    selElectrons.end());
+    selLooseLeptonsSummary.insert( selLooseLeptonsSummary.end(), eleSummary.begin(),      eleSummary.end() );
     ev.ln=0; ev.mn=0; ev.en=0;
     for(size_t ilep=0; ilep<selLooseLeptonsSummary.size(); ilep++)
       {
@@ -411,7 +406,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 		ev.l1_py       = lep.p4.py();
 		ev.l1_pz       = lep.p4.pz();
 		ev.l1_en       = lep.p4.energy();
-		ev.l1_id       = lep.id;
+		ev.l1_id       = lep.id*lep.charge;
 		ev.l1_ptErr    = getLeptonPtError(dilepton[0]); 
 		ev.l1_genid    = lep.genid;
 		ev.l1_gIso     = lep.isoVals[G_ISO]; 
@@ -441,7 +436,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 		ev.l2_py       = lep.p4.py();
 		ev.l2_pz       = lep.p4.pz();
 		ev.l2_en       = lep.p4.energy();
-		ev.l2_id       = lep.id;
+		ev.l2_id       = lep.id*lep.charge;
 		ev.l2_ptErr    = lep.p4.pt()*lep.ensferr;
 		ev.l2_genid    = lep.genid;
 		ev.l2_gIso     = lep.isoVals[G_ISO]; 
@@ -471,7 +466,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.ln_py[ev.ln]       = lep.p4.py();
 	ev.ln_pz[ev.ln]       = lep.p4.pz();
 	ev.ln_en[ev.ln]       = lep.p4.energy();
-	ev.ln_id[ev.ln]       = lep.id;
+	ev.ln_id[ev.ln]       = lep.id*lep.charge;
 	ev.ln_genid[ev.ln]    = lep.genid;
 	ev.ln_ptErr[ev.ln]    = lep.p4.pt()*lep.ensferr;
 	ev.ln_gIso[ev.ln]     = lep.isoVals[G_ISO]; 
@@ -505,9 +500,11 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     try{ event.getByLabel( objConfig_["Photons"].getParameter<edm::InputTag>("trackSource"), hTracks ); } catch(std::exception &e){}
     edm::Handle<reco::GsfElectronCollection> hGsfEle;
     try{ event.getByLabel(objConfig_["Photons"].getParameter<edm::InputTag>("gsfElectrons"),hGsfEle); }  catch(std::exception &e){}
+    edm::Handle<EcalRecHitCollection> hEBrechits;
+    try{ event.getByLabel(objConfig_["Photons"].getParameter<edm::InputTag>("ebrechits"),hEBrechits); } catch(std::exception &e){}
     ev.gn=0;
     std::vector<ObjectIdSummary> selPhotonIds;
-    std::vector<CandidatePtr> selPhotons=getGoodPhotons(hPhoton,&phocorr_,lazyTool,hGsfEle,hConversions,hTracks,hVtx_,beamSpot,*rho25,objConfig_["Photons"],iSetup,selPhotonIds);
+    std::vector<CandidatePtr> selPhotons=getGoodPhotons(hPhoton,&phocorr_,lazyTool,hEBrechits,hGsfEle,hConversions,hTracks,hVtx_,beamSpot,*rho25,objConfig_["Photons"],iSetup,selPhotonIds);
     for(size_t i=0; i<selPhotonIds.size(); i++)
       {
  	ev.g_px[ev.gn]    = selPhotonIds[i].p4.px();
@@ -561,9 +558,12 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.jn_dRMean[ev.jn]      = selJetsId[ijet].dRMean;
 	ev.jn_ptD[ev.jn]         = selJetsId[ijet].ptD;
 	ev.jn_ptRMS[ev.jn]       = selJetsId[ijet].ptRMS;
+	ev.jn_etaW[ev.jn]        = selJetsId[ijet].sihih;
+	ev.jn_phiW[ev.jn]        = selJetsId[ijet].sipip;
 	ev.jn_genpt[ev.jn]       = selJetsId[ijet].genP4.pt();
 	ev.jn_idbits[ev.jn]      = selJetsId[ijet].idBits;
-	ev.jn_pumva[ev.jn]       = selJetsId[ijet].mva[0];
+	ev.jn_puminmva[ev.ajn]   = selJetsId[ijet].mva[0];
+	ev.jn_pumva[ev.ajn]      = selJetsId[ijet].mva[1];
 	ev.jn++;
       }
     ev.htvec_px = jetSum.px();
@@ -605,7 +605,10 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.ajn_ptRMS[ev.ajn]       = selAJetsId[ijet].ptRMS;
 	ev.ajn_genpt[ev.ajn]       = selAJetsId[ijet].genP4.pt();
 	ev.ajn_idbits[ev.ajn]      = selAJetsId[ijet].idBits;
-	ev.ajn_pumva[ev.ajn]       = selAJetsId[ijet].mva[0];
+	ev.ajn_etaW[ev.jn]         = selAJetsId[ijet].sihih;
+	ev.ajn_phiW[ev.jn]         = selAJetsId[ijet].sipip;
+	ev.ajn_puminmva[ev.ajn]    = selAJetsId[ijet].mva[0];
+	ev.ajn_pumva[ev.ajn]       = selAJetsId[ijet].mva[1];
 	ev.ajn++;
       }
    
