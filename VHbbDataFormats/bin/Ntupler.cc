@@ -39,6 +39,9 @@
 #include <DataFormats/GeometrySurface/interface/Surface.h>
 #include "Math/SMatrix.h"
 
+//for LHE info
+#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
+
 //Move class definition to Ntupler.h ?
 //#include "VHbbAnalysis/VHbbDataFormats/interface/Ntupler.h"
 
@@ -549,7 +552,7 @@ int main(int argc, char* argv[])
   genTopInfo genTop, genTbar;
   TrackInfo V;
   int nvlep=0,nalep=0; 
-  
+  double lheV_pt=0; //for the Madgraph sample stitching
   TrackSharingInfo TkSharing; // track sharing info;
 
   float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, genHpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweight2011B;
@@ -663,9 +666,10 @@ int main(int argc, char* argv[])
   TH1F * pu = new TH1F("pileup","",51,-0.5,50.5);
   _outTree = new TTree("tree", "myTree");
   
-  _outTree->Branch("H"		,  &H	            ,  "HiggsFlag/I:mass/F:pt/F:eta:phi/F:dR/F:dPhi/F:dEta/F");
-  _outTree->Branch("V"		,  &V	            ,  "mass/F:pt/F:eta:phi/F");
-  _outTree->Branch("FatH"          ,  &FatH               ,  "FatHiggsFlag/I:mass/F:pt/F:eta:phi/F:filteredmass/F:filteredpt/F:filteredeta/F:filteredphi/F");
+  _outTree->Branch("H"	        	,  &H	                    ,  "HiggsFlag/I:mass/F:pt/F:eta:phi/F:dR/F:dPhi/F:dEta/F");
+  _outTree->Branch("V"		        ,  &V	                    ,  "mass/F:pt/F:eta:phi/F");
+  _outTree->Branch("FatH"               ,  &FatH                    ,  "FatHiggsFlag/I:mass/F:pt/F:eta:phi/F:filteredmass/F:filteredpt/F:filteredeta/F:filteredphi/F");
+  _outTree->Branch("lheV_pt"            ,  &lheV_pt                 ,  "lheV_pt/F");
   _outTree->Branch("genZ"		,  &genZ	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
   _outTree->Branch("genZstar"		,  &genZstar	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
   _outTree->Branch("genW"		,  &genW	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
@@ -1041,6 +1045,48 @@ int main(int argc, char* argv[])
 	countWithPU->Fill(1,PUweight);
 	countWithPU2011B->Fill(1,PUweight2011B);
       
+	//LHE Infos
+	fwlite::Handle<LHEEventProduct> evt;
+	//	bool LHEEventProduct_found = evt.getByLabel(ev,"LHEEventProduct_source__LHE");
+	evt.getByLabel(ev,"source");
+	bool lCheck=false;
+	bool lbarCheck=false;
+	bool vlCheck=false;
+	bool vlbarCheck=false;
+	int idl, idlbar, momid;
+	int c_particles=0;
+	TLorentzVector l,lbar,vl,vlbar,V_tlv;
+	if(evt.product()){
+	  const lhef::HEPEUP hepeup_ = evt->hepeup();
+	  const std::vector<lhef::HEPEUP::FiveVector> pup_ = hepeup_.PUP; // px, py, pz, E, M                                                                   
+	  momid =1 ;
+	  for(unsigned int i=0; i<pup_.size(); ++i){
+	    if(hepeup_.ISTUP[i]==1) c_particles++; // quarks and gluons come out of MG/ME as stable                                                         
+	    int id=hepeup_.IDUP[i]; //pdgId                                                                                                                                                                   
+	    if(id==11){ l.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lCheck=true;}
+	    if(id==-11){ lbar.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lbarCheck=true;}
+	    if(id==12){ vl.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); vlCheck=true;}
+	    if(id==-12){ vlbar.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); vlbarCheck=true;}
+	    
+	    if(id==13){ l.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lCheck=true;}
+	    if(id==-13){ lbar.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lbarCheck=true;}
+	    if(id==14){ vl.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); vlCheck=true;}
+	    if(id==-14){ vlbar.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); vlbarCheck=true;}
+	    
+	    if(id==15){ l.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lCheck=true;}
+	    if(id==-15){ lbar.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lbarCheck=true;}
+	    if(id==16){ vl.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); vlCheck=true;}
+	    if(id==-16){ vlbar.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); vlbarCheck=true;}
+	    
+	  }
+	} 
+	if( lCheck && lbarCheck ) V_tlv = l + lbar; // ZtoLL
+	if( vlCheck && vlbarCheck ) V_tlv = vl + vlbar; // ZtoNuNu
+	if( lCheck && vlbarCheck ) V_tlv = l + vlbar; // WToLNu
+	if( lbarCheck && vlCheck ) V_tlv = lbar + vl; // WToLNu       
+
+	lheV_pt = V_tlv.Pt();
+
 	//Write event info 
 	EVENT.run = ev.id().run();
 	EVENT.lumi = ev.id().luminosityBlock();
@@ -1455,7 +1501,7 @@ int main(int argc, char* argv[])
 // 	const ROOT::Math::SMatrix<double, 3, 3, ROOT::Math::MatRepSym<double, 3> > myFakeMatrixError(fillMatrix.begin(),fillMatrix.end());
 // 	const reco::Vertex recoVtxPv(myPv, myFakeMatrixError);
 
-        //REAL ERROR MATRIX
+//        REAL ERROR MATRIX
 	const reco::Vertex recoVtxPv(myPv, aux.pvInfo.efirstPVInPT2);
 	for( int j=0; j < nSvs && j < MAXB; ++j ) {
 	  const GlobalVector flightDir = flightDirection(recoPv,svc[j]);
