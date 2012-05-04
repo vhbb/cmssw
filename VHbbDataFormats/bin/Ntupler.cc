@@ -351,6 +351,8 @@ typedef struct
   float sumet;   
   float sig;
   float phi;
+  float px; 
+  float py; 
 } METInfo;
 
 
@@ -1324,6 +1326,8 @@ int main(int argc, char* argv[])
 	MET.phi = vhCand.V.mets.at(0).p4.Phi();
 	MET.sumet = vhCand.V.mets.at(0).sumEt;
 	MET.sig = vhCand.V.mets.at(0).metSig;
+	MET.px = vhCand.V.mets.at(0).p4.Px();
+	MET.py = vhCand.V.mets.at(0).p4.Py();
 
 
 	fakeMET.sumet = 0;
@@ -1348,39 +1352,53 @@ int main(int argc, char* argv[])
 	METnoPU.phi = iEvent->metNoPU.p4.Phi();
 	METnoPU.sumet = iEvent->metNoPU.sumEt;
 	METnoPU.sig = iEvent->metNoPU.metSig;
+	METnoPU.px = iEvent->metNoPU.p4.Px();
+	METnoPU.py = iEvent->metNoPU.p4.Py();
 	METnoPUCh.et = iEvent->metCh.p4.Pt();
 	METnoPUCh.phi = iEvent->metCh.p4.Phi();
 	METnoPUCh.sumet = iEvent->metCh.sumEt;
 	METnoPUCh.sig = iEvent->metCh.metSig;
+	METnoPUCh.px = iEvent->metCh.p4.Px();
+	METnoPUCh.py = iEvent->metCh.p4.Py();
 
 	METnoPUCh.et = iEvent->metCh.p4.Pt();
 	METnoPUCh.phi = iEvent->metCh.p4.Phi();
 	METnoPUCh.sumet = iEvent->metCh.sumEt;
 	METnoPUCh.sig = iEvent->metCh.metSig;
+	METnoPUCh.px = iEvent->metCh.p4.Px();
+	METnoPUCh.py = iEvent->metCh.p4.Py();
 
 
 	METtype1corr.et = iEvent->pfmetType1corr.p4.Pt();
 	METtype1corr.phi = iEvent->pfmetType1corr.p4.Phi();
 	METtype1corr.sumet = iEvent->pfmetType1corr.sumEt;
 	METtype1corr.sig = iEvent->pfmetType1corr.metSig;
+	METtype1corr.px = iEvent->pfmetType1corr.p4.Px();
+	METtype1corr.py = iEvent->pfmetType1corr.p4.Py();
 
 
 	METtype1p2corr.et = iEvent->pfmetType1p2corr.p4.Pt();
 	METtype1p2corr.phi = iEvent->pfmetType1p2corr.p4.Phi();
 	METtype1p2corr.sumet = iEvent->pfmetType1p2corr.sumEt;
 	METtype1p2corr.sig = iEvent->pfmetType1p2corr.metSig;
+	METtype1p2corr.px = iEvent->pfmetType1p2corr.p4.Px();
+	METtype1p2corr.py = iEvent->pfmetType1p2corr.p4.Py();
 
 
 	METnoPUtype1corr.et = iEvent->pfmetNoPUType1corr.p4.Pt();
 	METnoPUtype1corr.phi = iEvent->pfmetNoPUType1corr.p4.Phi();
 	METnoPUtype1corr.sumet = iEvent->pfmetNoPUType1corr.sumEt;
 	METnoPUtype1corr.sig = iEvent->pfmetNoPUType1corr.metSig;
+	METnoPUtype1corr.px = iEvent->pfmetNoPUType1corr.p4.Px();
+	METnoPUtype1corr.py = iEvent->pfmetNoPUType1corr.p4.Py();
 
 
 	METnoPUtype1p2corr.et = iEvent->pfmetNoPUType1p2corr.p4.Pt();
 	METnoPUtype1p2corr.phi = iEvent->pfmetNoPUType1p2corr.p4.Phi();
 	METnoPUtype1p2corr.sumet = iEvent->pfmetNoPUType1p2corr.sumEt;
 	METnoPUtype1p2corr.sig = iEvent->pfmetNoPUType1p2corr.metSig;
+	METnoPUtype1p2corr.px = iEvent->pfmetNoPUType1p2corr.p4.Px();
+	METnoPUtype1p2corr.py = iEvent->pfmetNoPUType1p2corr.p4.Py();
 
 	//	std::cout << " iEvent->metUncInfo.size() " << iEvent->metUncInfo.size() << std::endl;
 	for(size_t m=0;m<iEvent->metUncInfo.size();m++)
