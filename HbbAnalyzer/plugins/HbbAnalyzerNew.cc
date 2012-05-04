@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.67 2012/04/05 13:49:53 dlopes Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.68 2012/04/05 22:51:25 malbouis Exp $
 //
 //
 
@@ -395,9 +395,6 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   // standard jets
 
-  edm::Handle<edm::View<pat::Jet> > simplejet1Handle;
-  iEvent.getByLabel(simplejet1Label_,simplejet1Handle);
-  edm::View<pat::Jet> simplejets1 = *simplejet1Handle;
 
   edm::Handle<edm::View<pat::Jet> > simplejet2Handle;
   iEvent.getByLabel(simplejet2Label_,simplejet2Handle);
@@ -407,9 +404,6 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   iEvent.getByLabel(simplejet3Label_,simplejet3Handle);
   edm::View<pat::Jet> simplejets3 = *simplejet3Handle;
 
-  edm::Handle<edm::View<pat::Jet> > simplejet4Handle;
-  iEvent.getByLabel(simplejet4Label_,simplejet4Handle);
-  edm::View<pat::Jet> simplejets4 = *simplejet4Handle;
 
 
   edm::Handle<edm::View<pat::Electron> > electronHandle;
@@ -459,6 +453,9 @@ BTagSFContainer btagSFs;
   btagSFs.MISTAGSF_CSVT = (mistagSF_CSVT_.product());
 
 #ifdef ENABLE_SIMPLEJETS1
+  edm::Handle<edm::View<pat::Jet> > simplejet1Handle;
+  iEvent.getByLabel(simplejet1Label_,simplejet1Handle);
+  edm::View<pat::Jet> simplejets1 = *simplejet1Handle;
   for(edm::View<pat::Jet>::const_iterator jet_iter = simplejets1.begin(); jet_iter!=simplejets1.end(); ++jet_iter){
     //     if(jet_iter->pt()>50)
     //       njetscounter++;
@@ -547,6 +544,9 @@ BTagSFContainer btagSFs;
   }
 
 #ifdef ENABLE_SIMPLEJETS4
+  edm::Handle<edm::View<pat::Jet> > simplejet4Handle;
+  iEvent.getByLabel(simplejet4Label_,simplejet4Handle);
+  edm::View<pat::Jet> simplejets4 = *simplejet4Handle;
   for(edm::View<pat::Jet>::const_iterator jet_iter = simplejets4.begin(); jet_iter!=simplejets4.end(); ++jet_iter){
     //     if(jet_iter->pt()>50)
     //       njetscounter++;
