@@ -1049,21 +1049,18 @@ int main(int argc, char* argv[])
       
 	//LHE Infos
 	fwlite::Handle<LHEEventProduct> evt;
-	//	bool LHEEventProduct_found = evt.getByLabel(ev,"LHEEventProduct_source__LHE");
-	evt.getByLabel(ev,"source");
-	bool lCheck=false;
-	bool lbarCheck=false;
-	bool vlCheck=false;
-	bool vlbarCheck=false;
-	int idl, idlbar, momid;
-	int c_particles=0;
-	TLorentzVector l,lbar,vl,vlbar,V_tlv;
-	if(evt.product()){
+	if( !((evt.getBranchNameFor(ev,"source")).empty()) ){
+	  evt.getByLabel(ev,"source");
+	  bool lCheck=false;
+	  bool lbarCheck=false;
+	  bool vlCheck=false;
+	  bool vlbarCheck=false;
+	  int idl, idlbar, momid;
+	  TLorentzVector l,lbar,vl,vlbar,V_tlv;
 	  const lhef::HEPEUP hepeup_ = evt->hepeup();
 	  const std::vector<lhef::HEPEUP::FiveVector> pup_ = hepeup_.PUP; // px, py, pz, E, M                                                                   
 	  momid =1 ;
 	  for(unsigned int i=0; i<pup_.size(); ++i){
-	    if(hepeup_.ISTUP[i]==1) c_particles++; // quarks and gluons come out of MG/ME as stable                                                         
 	    int id=hepeup_.IDUP[i]; //pdgId                                                                                                                                                                   
 	    if(id==11){ l.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lCheck=true;}
 	    if(id==-11){ lbar.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lbarCheck=true;}
@@ -1081,13 +1078,12 @@ int main(int argc, char* argv[])
 	    if(id==-16){ vlbar.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); vlbarCheck=true;}
 	    
 	  }
-	} 
-	if( lCheck && lbarCheck ) V_tlv = l + lbar; // ZtoLL
-	if( vlCheck && vlbarCheck ) V_tlv = vl + vlbar; // ZtoNuNu
-	if( lCheck && vlbarCheck ) V_tlv = l + vlbar; // WToLNu
-	if( lbarCheck && vlCheck ) V_tlv = lbar + vl; // WToLNu       
-
-	lheV_pt = V_tlv.Pt();
+	  if( lCheck && lbarCheck ) V_tlv = l + lbar; // ZtoLL
+	  if( vlCheck && vlbarCheck ) V_tlv = vl + vlbar; // ZtoNuNu
+	  if( lCheck && vlbarCheck ) V_tlv = l + vlbar; // WToLNu
+	  if( lbarCheck && vlCheck ) V_tlv = lbar + vl; // WToLNu       
+	  lheV_pt = V_tlv.Pt();
+	}
 
 	//Write event info 
 	EVENT.run = ev.id().run();
