@@ -20,6 +20,9 @@
 <use   name="VHbbAnalysis/VHbbDataFormats"/>
 <use   name="JetMETCorrections/Objects"/>
 <use   name="RecoBTau/JetTagComputer"/>
+<use   name="RecoEcal/EgammaCoreTools"/>
+<use   name="TrackingTools/TransientTrack"/>
+<use   name="TrackingTools/IPTools"/>
 <use   name="root"/>
 <use name="fastjet"/>
 <library   file="*.cc" name="VHbbAnalysisHbbAnalyzerPlugins">

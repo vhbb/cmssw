@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.68 2012/04/05 22:51:25 malbouis Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.69 2012/05/04 09:14:15 arizzi Exp $
 //
 //
 
@@ -36,6 +36,11 @@ Implementation:
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include "DataFormats/Math/interface/Vector3D.h"
 #include "Math/GenVector/PxPyPzM4D.h"
+
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+#include "TrackingTools/IPTools/interface/IPTools.h"
 
 
 #include <cmath>
@@ -183,6 +188,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
 
   const Vertex &RecVtx = (*recVtxs)[VtxIn];
   const Vertex &RecVtxFirst = (*recVtxs)[0];
+  const Vertex &vertex = RecVtxFirst; //used in ele id 2012
   
   auxInfo->pvInfo.firstPVInPT2 = TVector3(RecVtxFirst.x(), RecVtxFirst.y(), RecVtxFirst.z());
   auxInfo->pvInfo.firstPVInProb = TVector3(RecVtx.x(), RecVtx.y(), RecVtx.z());
@@ -913,7 +919,7 @@ BTagSFContainer btagSFs;
   }
 
   // type 1 corr met NoPU
-  edm::Handle<edm::View<reco::MET> > pfmetNoPUType1corrHandle;
+/*  edm::Handle<edm::View<reco::MET> > pfmetNoPUType1corrHandle;
   iEvent.getByLabel("patType1CorrectedPFMetNoPU",pfmetNoPUType1corrHandle);
   edm::View<reco::MET> pfmetsNoPUType1corr = *pfmetNoPUType1corrHandle;
   if(pfmetsNoPUType1corr.size()){
@@ -937,6 +943,7 @@ BTagSFContainer btagSFs;
     if (verbose_)     std::cout <<" type 1 +2 corrected pfMET "<<     hbbInfo->pfmetNoPUType1p2corr.metSig <<" " <<     hbbInfo->pfmetNoPUType1p2corr.sumEt<<std::endl;
   }
 
+*/
 
   /*
   // MET uncertainty vector
@@ -1302,7 +1309,7 @@ BTagSFContainer btagSFs;
   }
   
   edm::Handle<edm::View<pat::MET> > metPFHandle;
-  iEvent.getByLabel("patMETsPF",metPFHandle);
+  iEvent.getByLabel("patMETs",metPFHandle);
   edm::View<pat::MET> metsPF = *metPFHandle;
   
   if(metsPF.size()){
@@ -1418,6 +1425,13 @@ BTagSFContainer btagSFs;
 
  if(verbose_)
     std::cout << " INPUT electrons "<<electrons.size()<<std::endl;
+  InputTag  reducedEBRecHitCollection(string("reducedEcalRecHitsEB"));
+  InputTag  reducedEERecHitCollection(string("reducedEcalRecHitsEE"));
+  EcalClusterLazyTools lazyTools(iEvent, iSetup, reducedEBRecHitCollection, reducedEERecHitCollection);
+  edm::ESHandle<TransientTrackBuilder> builder;
+  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", builder);
+  const TransientTrackBuilder & transientTrackBuilder= *(builder.product());
+
   for(edm::View<pat::Electron>::const_iterator elec = electrons.begin(); elec!=electrons.end(); ++elec){
     VHbbEvent::ElectronInfo ef;
     ef.p4=GENPTOLORP(elec);
@@ -1454,6 +1468,90 @@ BTagSFContainer btagSFs;
     if(elec->gsfTrack().isNonnull()) ef.innerHits = elec->gsfTrack()->trackerExpectedHitsInner().numberOfHits();   
     ef.isEB = elec->isEB();
     ef.isEE = elec->isEE();
+/* 2012 ELEID*/
+
+  const pat::Electron & ele = *elec;
+  bool validKF= false; 
+  reco::TrackRef myTrackRef = ele.closestCtfTrackRef();
+  validKF = (myTrackRef.isAvailable());
+  validKF = (myTrackRef.isNonnull());  
+
+  // Pure tracking variables
+  ef.fMVAVar_fbrem           =  ele.fbrem();
+  ef.fMVAVar_kfchi2          =  (validKF) ? myTrackRef->normalizedChi2() : 0 ;
+  ef.fMVAVar_kfhits          =  (validKF) ? myTrackRef->hitPattern().trackerLayersWithMeasurement() : -1. ; 
+  //  fMVAVar_kfhitsall          =  (validKF) ? myTrackRef->numberOfValidHits() : -1. ;   //  save also this in your ntuple as possible alternative
+  ef.fMVAVar_gsfchi2         =  ele.gsfTrack()->normalizedChi2();  
+
+  
+  // Geometrical matchings
+  ef.fMVAVar_deta            =  ele.deltaEtaSuperClusterTrackAtVtx();
+  ef.fMVAVar_dphi            =  ele.deltaPhiSuperClusterTrackAtVtx();
+  ef.fMVAVar_detacalo        =  ele.deltaEtaSeedClusterTrackAtCalo();
+  // fMVAVar_dphicalo        =  ele.deltaPhiSeedClusterTrackAtCalo();   //  save also this in your ntuple 
+
+
+  // Pure ECAL -> shower shapes
+  ef.fMVAVar_see             =  ele.sigmaIetaIeta();    //EleSigmaIEtaIEta
+  std::vector<float> vCov = lazyTools.localCovariances(*(ele.superCluster()->seed())) ;
+  if (!isnan(vCov[2])) ef.fMVAVar_spp = sqrt (vCov[2]);   //EleSigmaIPhiIPhi
+  else ef.fMVAVar_spp = 0.;    
+  // fMVAVar_sigmaIEtaIPhi = vCov[1];  //  save also this in your ntuple 
+
+  ef.fMVAVar_etawidth        =  ele.superCluster()->etaWidth();
+  ef.fMVAVar_phiwidth        =  ele.superCluster()->phiWidth();
+  ef.fMVAVar_e1x5e5x5        =  (ele.e5x5()) !=0. ? 1.-(ele.e1x5()/ele.e5x5()) : -1. ;
+  ef.fMVAVar_R9              =  lazyTools.e3x3(*(ele.superCluster()->seed())) / ele.superCluster()->rawEnergy();
+  //fMVAVar_nbrems          =  fabs(ele.numberOfBrems());    //  save also this in your ntuple 
+
+  // Energy matching
+  ef.fMVAVar_HoE             =  ele.hadronicOverEm();
+  ef.fMVAVar_EoP             =  ele.eSuperClusterOverP();
+  // fMVAVar_IoEmIoP         =  (1.0/(ele.superCluster()->energy())) - (1.0 / ele.p());  // in the future to be changed with ele.gsfTrack()->p()
+  ef.fMVAVar_IoEmIoP         =  (1.0/ele.ecalEnergy()) - (1.0 / ele.p());  // in the future to be changed with ele.gsfTrack()->p()   // 24/04/2012 changed to correctly access the   corrected supercluster energy from CMSSW_52X
+
+  ef.fMVAVar_eleEoPout       =  ele.eEleClusterOverPout();
+  ef.fMVAVar_PreShowerOverRaw=  ele.superCluster()->preshowerEnergy() / ele.superCluster()->rawEnergy();
+  // fMVAVar_EoPout          =  ele.eSeedClusterOverPout();     //  save also this in your ntuple 
+
+
+  // Spectators
+  ef.fMVAVar_eta             =  ele.superCluster()->eta();         
+  ef.fMVAVar_pt              =  ele.pt();                          
+
+  //additional for cut based
+  ef.dxy = elec->gsfTrack()->dxy(vertex.position());
+  ef.dz  = elec->gsfTrack()->dz(vertex.position());
+
+
+    //d0
+    if (ele.gsfTrack().isNonnull()) {
+      ef.fMVAVar_d0 = (-1.0)*ele.gsfTrack()->dxy(vertex.position()); 
+    } else if (ele.closestCtfTrackRef().isNonnull()) {
+      ef.fMVAVar_d0 = (-1.0)*ele.closestCtfTrackRef()->dxy(vertex.position()); 
+    } else {
+      ef.fMVAVar_d0 = -9999.0;
+    
+    //default values for IP3D
+    ef.fMVAVar_ip3d = -999.0; 
+    // fMVAVar_ip3dSig = 0.0;
+    if (ele.gsfTrack().isNonnull()) {
+      const double gsfsign   = ( (-ele.gsfTrack()->dxy(vertex.position()))   >=0 ) ? 1. : -1.;
+      
+      const reco::TransientTrack &tt = transientTrackBuilder.build(ele.gsfTrack()); 
+      const std::pair<bool,Measurement1D> &ip3dpv =  IPTools::absoluteImpactParameter3D(tt,vertex);
+      if (ip3dpv.first) {
+	double ip3d = gsfsign*ip3dpv.second.value();
+	//double ip3derr = ip3dpv.second.error();  
+	ef.fMVAVar_ip3d = ip3d; 
+	// fMVAVar_ip3dSig = ip3d/ip3derr;
+      }
+    }
+  }
+  
+
+/* end of 2012 ELEID*/
+
     //
     // fill eleids
     //    
