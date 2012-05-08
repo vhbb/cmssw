@@ -1,6 +1,12 @@
+
+
+
+
 import FWCore.ParameterSet.Config as cms
 
 from CMGTools.HtoZZ2l2nu.MVAStudyConfig_cfi import *
+
+datapileup_2012 = cms.vdouble(41716.9,191896,450369,737022,1.00096e+06,1.32034e+06,1.89428e+06,2.95479e+06,4.67273e+06,7.10017e+06,1.01539e+07,1.36306e+07,1.72447e+07,2.06769e+07,2.36257e+07,2.585e+07,2.7198e+07,2.76181e+07,2.71539e+07,2.59253e+07,2.41027e+07,2.18779e+07,1.94384e+07,1.69484e+07,1.45369e+07,1.22942e+07,1.02743e+07,8.50061e+06,6.97414e+06,5.68087e+06,4.59838e+06,3.70073e+06,2.9618e+06,2.35718e+06,1.86511e+06,1.46671e+06,1.14589e+06,889068,684787,523439,396963,298616,222786,164824,120917,87955.3,63437.5,45367.2,32170.9,22621.8,15774.6,10909,7482.26,5090.23,3435.04,2299.59,1527.33,1006.49,658.154,427.089)
 
 datapileup_2012vtx = cms.vdouble(0,0.000154703,0.00054146,0.00123762,0.00290068,0.00649752,0.0140393,0.0247525,0.0391012,0.0571627,0.0718982,0.0888382,0.0977336,0.100905,0.0969601,0.0876006,0.0756498,0.0644725,0.0478806,0.0379796,0.0268023,0.0207689,0.0133818,0.00916615,0.0054146,0.00328744,0.00216584,0.000966894,0.000734839,0.000464109,0.000232054,0.00027073,3.86757e-05,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
 
@@ -27,7 +33,7 @@ runProcess = cms.PSet(
     phiResolFileName = cms.string("${CMSSW_RELEASE_BASE}/src/CondFormats/JetMETObjects/data/Spring10_PhiResolution_AK5PF.txt"),
     etaResolFileName = cms.string("${CMSSW_RELEASE_BASE}/src/CondFormats/JetMETObjects/data/Spring10_EtaResolution_AK5PF.txt"),
     jesUncFileName = cms.string("${CMSSW_BASE}/src/CMGTools/HtoZZ2l2nu/data/GR_R_42_V23_AK5PFchs_Uncertainty.txt"),
-    datapileup = datapileup_2012vtx,
+    datapileup = datapileup_2012,
     #gammaCategories        = cms.vint32 (20,      30,      50,      75,     90,       125,  135,   999999),
     #gammaTriggerRenWeights = cms.vdouble(638.010, 152.633, 14.622,  2.029,  0.345,   1.011, 0.237, 0.   ), 
     gammaCategories        = cms.vint32 (20,      30,      50,      75,      90,      135,      999999),
