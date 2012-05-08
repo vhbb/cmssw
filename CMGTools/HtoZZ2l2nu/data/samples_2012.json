@@ -155,6 +155,67 @@
           ]
 	},
 	{
+	"tag":"ggH(200)#rightarrow ZZ",
+        "isinvisible":true,
+	"isdata":false,
+	"spimpose":true,
+	"color":"800",
+	"lwidth":2,
+	"fill":0,
+	"marker":1,
+	"data":[
+		{
+		"dtag":"MC_8TeVGGtoH200toZZto2L2Nu",
+		"dset":"",
+                "aoddir":[""],
+		"patdir":["/GluGluToHToZZTo2L2Nu_M-200_8TeV-powheg-pythia6/psilva-HZZ2l2vPAT01april2012_GluGluToHToZZTo2L2Nu_M-200_8TeV-7ba81c0aab6ea748ae0bd050e2c7b5f4/USER"],
+		"split":2,
+                "xsec":6.65,
+		"br":[0.256,0.0403896]
+		}
+	   ]
+	},
+	{
+	"tag":"ggH(400)#rightarrow ZZ",
+	"isdata":false,
+	"spimpose":true,
+	"color":"805",
+	"lwidth":2,
+	"fill":0,
+	"marker":1,
+	"data":[
+		{
+		"dtag":"MC_8TeVGGtoH400toZZto2L2Nu",
+		"dset":"",
+                "aoddir":[""],
+		"patdir":["/GluGluToHToZZTo2L2Nu_M-400_8TeV-powheg-pythia6/psilva-HZZ2l2vPAT01april2012_GluGluToHToZZTo2L2Nu_M-400_8TeV-7ba81c0aab6ea748ae0bd050e2c7b5f4/USER"],
+		"split":2,
+                "xsec":2.53,
+		"br":[0.269,0.0403896]
+		}
+	   ]
+	},
+	{
+	"tag":"ggH(600)#rightarrow ZZ",
+	"isdata":false,
+	"spimpose":true,
+	"color":"807",
+	"lwidth":2,
+	"fill":0,
+	"marker":1,
+	"data":[
+		{
+		"dtag":"MC_8TeVGGtoH600toZZto2L2Nu",
+		"dset":"",
+                "aoddir":[""],
+		"patdir":["/GluGluToHToZZTo2L2Nu_M-600_8TeV-powheg-pythia6/psilva-HZZ2l2vPAT01april2012_GluGluToHToZZTo2L2Nu_M-600_8TeV-7ba81c0aab6ea748ae0bd050e2c7b5f4/USER "],
+		"split":2,
+                "xsec":0.408,
+		"br":[0.272,0.0403896]
+		}
+	   ]
+	},
+	{
 	   "tag":"data",
 	   "isdata":true,
 	   "color":1,
