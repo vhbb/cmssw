@@ -58,6 +58,7 @@ int main(int argc, char* argv[])
   TString url=runProcess.getParameter<std::string>("input");
   TString outdir=runProcess.getParameter<std::string>("outdir");
   bool isMC = runProcess.getParameter<bool>("isMC");
+  bool runBlinded = runProcess.getParameter<bool>("runBlinded");
   int mctruthmode = runProcess.getParameter<int>("mctruthmode");
   TString dirname = runProcess.getParameter<std::string>("dirName");
   TString uncFile =  runProcess.getParameter<std::string>("jesUncFileName"); gSystem->ExpandPathName(uncFile);
@@ -109,6 +110,29 @@ int main(int argc, char* argv[])
       mon.addHistogram( new TH2F( TString("met_redMet_") + postfix + "_vspu"       , ";Vertices;red(E_{T}^{miss},clustered-E_{T}^{miss});Events", 50,0,50,50,0,500) );
     }
   TH1F* Hcutflow     = (TH1F*) mon.addHistogram(  new TH1F ("cutflow"    , "cutflow"    ,3,0,3) ) ;
+
+  //jet id efficiency
+  TString jetRegs[]={"","TK","HEin","HEout","HF"};
+  TString jetIds[]={"pf","simple","full","cut"};
+  TString jetIdWps[]={"loose","medium","tight"};
+  Double_t jetPtBins[]={0,15,20,25,30,40,50,60,70,80,100,200,300,400,500,600,700,1000};
+  Int_t nJetPtBins=sizeof(jetPtBins)/sizeof(Double_t)-1;
+  Double_t jetEtaBins[]={0,0.25,0.5,0.75,1.0,1.25,1.5,1.75,2.0,2.25,2.625,2.75,2.875,3.0,3.5,4.0,4.5,5.0};
+  Double_t nJetEtaBins=sizeof(jetEtaBins)/sizeof(Double_t)-1;
+  for (int ieta=0; ieta<5; ieta++)
+    {
+      mon.addHistogram( new TH1F( jetRegs[ieta]+"jetbalance", ";Jet p_{T} / Boson p_{T};Events", nJetPtBins,jetPtBins) );
+      for (int iid=0; iid<4; iid++)
+	{
+	  for(int iwp=0; iwp<3; iwp++)
+	    {
+	      mon.addHistogram( new TH1F( jetRegs[ieta]+"jetpt_"+jetIds[iid]+jetIdWps[iwp], ";Jet p_{T} [GeV/c];Jets", 100,0,1000) );
+	      if(ieta==0)  mon.addHistogram( new TH1F( "jeteta_"+jetIds[iid]+jetIdWps[iwp], ";Jet |#eta|;Jets", nJetEtaBins, jetEtaBins) );
+	      if(iwp==0 && (iid==1 || iid==2)) mon.addHistogram( new TH1F( jetRegs[ieta]+"jetmva_"+jetIds[iid], ";PU Jet MVA;Jets", 50,-1,1) );
+	    }
+	}
+    }
+	     
 
   //open the file and get events tree
   TFile *file = TFile::Open(url);
@@ -196,8 +220,19 @@ int main(int argc, char* argv[])
 	{
 	  gamma=phys.leptons[0]+phys.leptons[1];
 	  if(fabs(gamma.mass()-91)>15) continue;
-	  if(ev.cat==MUMU) dilCats.push_back("mumu");
-	  if(ev.cat==EE)   dilCats.push_back("ee");
+	  if(ev.cat==MUMU)
+	    {
+	      if( !hasObjectId(ev.mn_idbits[phys.leptons[0].pid],MID_LOOSE) || !hasObjectId(ev.mn_idbits[phys.leptons[1].pid],MID_LOOSE) ) continue;
+	      if( phys.leptons[0].pfRelIsoDbeta()>0.12 || phys.leptons[1].pfRelIsoDbeta()>0.12 ) continue;
+	      dilCats.push_back("mumu");
+	    }
+	  else if(ev.cat==EE) 
+	    {
+	      if( !hasObjectId(ev.en_idbits[phys.leptons[0].pid],EID_LOOSE) || !hasObjectId(ev.en_idbits[phys.leptons[1].pid],EID_LOOSE) ) continue;
+	      if( phys.leptons[0].ePFRelIsoCorrected2012(ev.rho)>0.15 || phys.leptons[1].ePFRelIsoCorrected2012(ev.rho)>0.15 ) continue;
+	      dilCats.push_back("ee");
+	    }
+	  else continue;
 	  dilCats.push_back("ll");
 	  triggerThr=gammaEvHandler.findTriggerCategoryFor( gamma.pt() );
 	  if(triggerThr<0) continue;
@@ -209,6 +244,9 @@ int main(int argc, char* argv[])
       double mindphijmet(9999.);
       std::vector<LorentzVector> jetsP4;
       std::vector<double> genJetsPt;
+      LorentzVector recoilJet(0,0,0,0);
+      double recoilJetMva(-1);
+      int recoilJetIdBits(0);
       LorentzVector rawClusteredMet(gamma); 
       rawClusteredMet *= -1;
       for(size_t ijet=0; ijet<phys.jets.size(); ijet++)
@@ -226,6 +264,13 @@ int main(int argc, char* argv[])
 	    {
 	      if(fabs(ijetP4.eta())<2.5) nbtags += (phys.jets[ijet].btag1>2.0);
 	      njets30++;
+	    }
+	  
+	  if( fabs(deltaPhi(ijetP4.phi(),gamma.phi())) >2 ) 
+	    {
+	      recoilJet=ijetP4;
+	      recoilJetMva=phys.jets[ijet].pumva;
+	      recoilJetIdBits=phys.jets[ijet].pid;
 	    }
 	}
       TString subcat("eq"); subcat+=njets30; subcat+= "jets";
@@ -263,7 +308,7 @@ int main(int argc, char* argv[])
       bool passMultiplicityVetoes (isGammaEvent ? (phys.leptons.size()==0 && ev.ln==0 && phys.gammas.size()==1) : (ev.ln==0) );
       bool passKinematics         (gamma.pt()>55);
       bool passEB                 (!isGammaEvent || fabs(gamma.eta())<1.4442);
-      bool passR9                 (!isGammaEvent || r9<1.0);
+      bool passR9                 (true);//!isGammaEvent || r9<1.0);
       bool passBveto              (nbtags==0);
       bool passMinDphiJmet        (mindphijmet>0.5);
       
@@ -274,7 +319,6 @@ int main(int argc, char* argv[])
 	{
 	  LorentzVector iboson(isGammaEvent ? gammaEvHandler.massiveGamma(dilCats[idc]) : gamma);
 	  float zmass=iboson.mass();
-	  //Float_t rawMt( METUtils::transverseMass(iboson,metP4,true) );
 	  Float_t mt( METUtils::transverseMass(iboson,zvvs[0],true) );
 
 	  TString ctf=dilCats[idc];
@@ -309,8 +353,53 @@ int main(int argc, char* argv[])
 		}
 
 	      if(hasTrkVeto) continue;
+	      
+	      //jet id efficiency
+	      if(recoilJet.pt()>0 && njets30==1)
+		{
+		  double balance = recoilJet.pt()/gamma.pt();
+		  bool passBalanceCut(balance>0.5 && balance<1.5);
+		  std::vector<TString> etaRegs(2,"");
+		  if(fabs(recoilJet.eta())<2.5)       etaRegs[1]="TK";
+		  else if(fabs(recoilJet.eta())<2.75) etaRegs[1]="HEin";
+		  else if(fabs(recoilJet.eta())<3)    etaRegs[1]="HEout";
+		  else                                etaRegs[1]="HF";
+		  std::map<TString, std::vector<bool> > passIds;
+		  passIds["pf"]    .push_back( hasObjectId(recoilJetIdBits,JETID_LOOSE) );
+		  passIds["pf"]    .push_back( hasObjectId(recoilJetIdBits,JETID_TIGHT) );
+		  passIds["pf"]    .push_back( hasObjectId(recoilJetIdBits,JETID_TIGHT) );
+		  passIds["simple"].push_back( hasObjectId(recoilJetIdBits,JETID_MIN_LOOSE) );
+		  passIds["simple"].push_back( hasObjectId(recoilJetIdBits,JETID_MIN_MEDIUM) );
+		  passIds["simple"].push_back( hasObjectId(recoilJetIdBits,JETID_MIN_TIGHT) );
+		  passIds["full"]  .push_back( hasObjectId(recoilJetIdBits,JETID_OPT_LOOSE) );
+		  passIds["full"]  .push_back( hasObjectId(recoilJetIdBits,JETID_OPT_MEDIUM) );
+		  passIds["full"]  .push_back( hasObjectId(recoilJetIdBits,JETID_OPT_TIGHT) );
+		  passIds["cut"]   .push_back( hasObjectId(recoilJetIdBits,JETID_CUTBASED_LOOSE) );
+		  passIds["cut"]   .push_back( hasObjectId(recoilJetIdBits,JETID_CUTBASED_MEDIUM) );
+		  passIds["cut"]   .push_back( hasObjectId(recoilJetIdBits,JETID_CUTBASED_TIGHT) );
+		  for (int ieta=0; ieta<5; ieta++)
+		    {		  
+		      mon.fillHisto(jetRegs[ieta]+"jetbalance",ctf, balance,iweight);
+		      if(!passBalanceCut) continue;
+		      for(std::map<TString, std::vector<bool> >::iterator it=passIds.begin(); it != passIds.end(); it++)
+			{
+			  mon.fillHisto(jetRegs[ieta]+"jetmva_"+it->first,ctf,recoilJetMva,iweight);
+			  for(int iwp=0; iwp<3; iwp++)
+			    {			
+			      if(!((it->second)[iwp])) continue;
+			      {
+				mon.fillHisto(jetRegs[ieta]+"jetpt_"+it->first+jetIdWps[iwp],ctf,recoilJet.pt(),iweight,true);
+				mon.fillHisto(jetRegs[ieta]+"jeteta_"+it->first+jetIdWps[iwp],ctf,fabs(recoilJet.eta()),iweight,true);
+			      }
+			    }
+			}
+		    }
+		}
+	      
+
 	      if(zvvs[0].pt()>70) mon.fillHisto("mindphijmet_"+subCatsToFill[isc],ctf, mindphijmet,iweight);	      
 	      if(passMinDphiJmet) continue;
+	      if(runBlinded && !isMC && evSummaryHandler.hasSpoilerAlert(!isMC,ctf)) continue;
 	      mon.fillHisto("met_rawmet_"+subCatsToFill[isc],ctf, rawZvv.pt(),iweight);
 	      mon.fillHisto("metoverqt_"+subCatsToFill[isc],ctf, zvvs[0].pt()/gamma.pt(),iweight);
 	      mon.fillHisto("met_met_"+subCatsToFill[isc],ctf, zvvs[0].pt(),iweight);
@@ -324,14 +413,6 @@ int main(int argc, char* argv[])
 	      mon.fillHisto("met_redMetL_"+subCatsToFill[isc],ctf, redMetTs[0],iweight);
 	      mon.fillHisto("mt_"+subCatsToFill[isc],ctf,mt,iweight);
 	    }
-	  
-	  // 	  if(njets30<1 && metP4.pt()>100)
-	  // 	    cout << isGammaEvent << " " << passMultiplicityVetoes << " " << mctruthmode << " "
-	  // 		 << " g=(" << gamma.pt() << "," << gamma.eta() << ") "
-	  // 		 << " MET=" << metP4.pt() << " Ng=" << ev.gn << " Nj=" << ev.jn 
-	  // 		 << " Nl=" << ev.ln << " Nl=" << phys.leptons.size()
-	  // 	        // << " l1=" << phys.leptons[0].pt() << " l2=" << phys.leptons[1].pt() 
-	  // 		 << endl;
 	}
     }
 

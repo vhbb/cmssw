@@ -79,8 +79,11 @@ process.kt6PFJets = kt4PFJets.clone( rParam = cms.double(0.6),
                                      )
 process.kt6PFJetsForIso = process.kt6PFJets.clone( Rho_EtaMax = cms.double(2.5),
                                                    Ghost_EtaMax = cms.double(2.5) )
-
-process.kt6PFJetsCentralNeutral = process.kt6PFJets.clone( src = cms.InputTag("pfAllNeutralHadronsAndPhotons"),
+process.pfOnlyNeutrals = cms.EDFilter("PdgIdPFCandidateSelector",
+                                      src = cms.InputTag("particleFlow"),
+                                      pdgId = cms.vint32(22,111,130,310,2112)
+                                      )
+process.kt6PFJetsCentralNeutral = process.kt6PFJets.clone( src = cms.InputTag("pfOnlyNeutrals"),
                                                            Ghost_EtaMax = cms.double(3.1),
                                                            Rho_EtaMax = cms.double(2.5),
                                                            inputEtMin = cms.double(0.5)
@@ -230,7 +233,8 @@ process.endCounter = cms.EDProducer("EventCountProducer")
 #pat sequence
 process.patSequence = cms.Sequence( process.startCounter
                                     + process.HEEPId
-                                    + process.patTriggerDefaultSequence + process.kt6PFJets + process.kt6PFJetsForIso + process.kt6PFJetsCentralNeutral
+                                    + process.patTriggerDefaultSequence + process.kt6PFJets 
+                                    + process.kt6PFJetsForIso + process.pfOnlyNeutrals + process.kt6PFJetsCentralNeutral
                                     + getattr(process,"patPF2PATSequence"+postfixes[0])
                                     + getattr(process,"patPF2PATSequence"+postfixes[1])
                                     + process.stdMuonSeq + process.stdElectronSeq + process.stdPhotonSeq

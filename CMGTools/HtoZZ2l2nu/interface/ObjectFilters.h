@@ -44,10 +44,10 @@ enum DileptonChannels { UNKNOWN=0,MUMU=1,EE=2,EMU=3,ETAU=4,MUTAU=5, GAMMA=22};
 enum IsolType         { ECAL_ISO=0, HCAL_ISO, TRACKER_ISO, REL_ISO, RELRHOCORR_ISO, N_ISO, C_ISO, CPU_ISO, G_ISO, PFREL_ISO, PFRELBETCORR_ISO};
 enum ElectronIdArbitrations { EID_VBTF2011=0, EID_VETO, EID_LOOSE, EID_MEDIUM, EID_TIGHT, EID_CONVERSIONVETO, EID_EOPCUT, EID_TRIGGER2011, EID_TIGHTTRIGGER, EID_HEEPID, EID_ECALDRIVEN, EID_TRACKERDRIVEN };
 enum MuonIdArbitrations     { MID_GLOBALMUONPROMPTTIGHT, MID_TMLASTSTATIONLOOSE, MID_TMLASTSTATIONTIGHT, MID_TMLASTSTATIONANGTIGHT, MID_TMONESTATIONTIGHT, MID_TRACKER, MID_GLOBAL, MID_PF, MID_LOOSE, MID_SOFT, MID_TIGHT, MID_HIGHPT, MID_VBTF2011, MID_SOFT2011 };
-enum JetIdArbitrations      { JETID_LOOSE=0,        JETID_TIGHT=1, 
-			      JETID_PHILV1_TIGHT=4, JETID_PHILV1_MEDIUM=5, JETID_PHILV1_LOOSE=6,
-			      JETID_MIN_TIGHT=8,    JETID_MIN_MEDIUM=9,    JETID_MIN_LOOSE=10,
-			      JETID_OPT_TIGHT=12,   JETID_OPT_MEDIUM=13,   JETID_OPT_LOOSE=14};
+enum JetIdArbitrations      { JETID_LOOSE=0,           JETID_TIGHT=1, 
+			      JETID_MIN_TIGHT=4,       JETID_MIN_MEDIUM=5,       JETID_MIN_LOOSE=6,
+			      JETID_OPT_TIGHT=8,       JETID_OPT_MEDIUM=9,       JETID_OPT_LOOSE=10,
+			      JETID_CUTBASED_TIGHT=12, JETID_CUTBASED_MEDIUM=13, JETID_CUTBASED_LOOSE=14};
 
 class ObjectIdSummary
 {
@@ -63,13 +63,14 @@ class ObjectIdSummary
   int idBits;
   double isoVals[15], mva[5];
   double ensf,ensferr;
-  double trkd0,trkdZ,trkpt,trketa,trkphi,trkchi2,trkValidPixelHits,trkValidTrackerHits,trkLostInnerHits;
+  double trkd0,trkdZ,trkip3d,trkip3dsig,trkpt,trketa,trkphi,trkchi2,trkValidPixelHits,trkValidTrackerHits,trkLostInnerHits;
   //muon specific
-  double trkValidMuonHits,trkMatches,innerTrackChi2,trkLayersWithMeasurement,pixelLayersWithMeasurement;
+  double trkValidMuonHits,trkMatches,trkMatchedStations,innerTrackChi2,trkLayersWithMeasurement,pixelLayersWithMeasurement;
   //electron specific
   double dPhiTrack,dEtaTrack,ooemoop,fbrem,eopin;
+  double dEtaCalo, dPhiCalo, kfchi2, kfhits, kfhitsall, sihip, nbrems, etawidth, phiwidth, e1x5e5x5, preShowerOverRaw, eopout;
   //common to photon and electron
-  double hoe,sihih,sipip,sce,sceta,scphi,e2x5max,e1x5,e5x5,h2te,h2tebc,r9;
+  double hoe,hoebc,sihih,sipip,sce,sceta,scphi,e2x5max,e1x5,e5x5,h2te,h2tebc,r9;
   //common to electron, photon, muon and jet
   double aeff;
   //jet specific
@@ -84,13 +85,13 @@ std::vector<reco::VertexRef> getGoodVertices(edm::Handle<reco::VertexCollection>
 float getVertexMomentumFlux(const reco::Vertex *vtx, float minWeight=0.5);
 
 template<class T>
-std::pair<bool,Measurement1D> getImpactParameter(const T &trk, reco::Vertex *vtx, const edm::EventSetup &iSetup, bool is3d=true)
+std::pair<bool,Measurement1D> getImpactParameter(const T &trkRef, reco::VertexRef vtx, const edm::EventSetup &iSetup, bool is3d=true)
 {
   edm::ESHandle<TransientTrackBuilder> trackBuilder;
   iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", trackBuilder);
-  reco::TransientTrack tt = trackBuilder->build(trk);
-  if(is3d) return IPTools::absoluteImpactParameter3D(tt, *vtx);
-  else     return IPTools::absoluteTransverseImpactParameter(tt, *vtx);
+  reco::TransientTrack tt = trackBuilder->build(trkRef.get());
+  if(is3d) return IPTools::absoluteImpactParameter3D(tt, *(vtx.get()));
+  else     return IPTools::absoluteTransverseImpactParameter(tt, *(vtx.get()));
 }
   
 template<class T>
@@ -116,6 +117,7 @@ std::vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candida
 					     const reco::VertexRef &primVertex, 
 					     const double& rho, 
 					     const edm::ParameterSet &iConfig,
+					     const edm::EventSetup & iSetup,
 					     std::vector<ObjectIdSummary> &selMuonIds);
 std::vector<reco::CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &hEle, 
 						 edm::Handle<edm::View<reco::Candidate> > &hMu, 

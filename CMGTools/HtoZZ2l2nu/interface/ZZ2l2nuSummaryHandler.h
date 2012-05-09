@@ -42,29 +42,30 @@ struct ZZ2l2nuSummary_t
   Float_t l1_px  ,l1_py  ,l1_pz  ,l1_en, l1_ptErr, l1_ecalIso, l1_hcalIso, l1_trkIso, l1_gIso, l1_chIso, l1_puchIso, l1_nhIso; 
   Int_t l1_id, l1_genid, l1_pid;
   Float_t l1_ensf, l1_ensferr;
-  Float_t l1_d0, l1_dZ, l1_trkpt,l1_trketa,l1_trkphi,l1_trkchi2,l1_trkValidPixelHits,l1_trkValidTrackerHits,l1_trkLostInnerHits;
+  Float_t l1_d0, l1_dZ, l1_ip3d, l1_ip3dsig, l1_trkpt,l1_trketa,l1_trkphi,l1_trkchi2,l1_trkValidPixelHits,l1_trkValidTrackerHits,l1_trkLostInnerHits;
   
   Float_t l2_px  ,l2_py  ,l2_pz  ,l2_en, l2_ptErr, l2_ecalIso, l2_hcalIso, l2_trkIso, l2_gIso, l2_chIso, l2_puchIso, l2_nhIso; 
   Int_t l2_id, l2_genid, l2_pid;
   Float_t l2_ensf, l2_ensferr;
-  Float_t l2_d0, l2_dZ, l2_trkpt,l2_trketa,l2_trkphi,l2_trkchi2,l2_trkValidPixelHits,l2_trkValidTrackerHits,l2_trkLostInnerHits;
+  Float_t l2_d0, l2_dZ, l2_ip3d, l2_ip3dsig, l2_trkpt,l2_trketa,l2_trkphi,l2_trkchi2,l2_trkValidPixelHits,l2_trkValidTrackerHits,l2_trkLostInnerHits;
 
   //other leptons
   Int_t ln;
   Float_t ln_px[MAXPARTICLES],ln_py[MAXPARTICLES],ln_pz[MAXPARTICLES],ln_en[MAXPARTICLES], ln_ptErr[MAXPARTICLES];
   Float_t ln_ensf[MAXPARTICLES], ln_ensferr[MAXPARTICLES];
   Float_t ln_ecalIso[MAXPARTICLES], ln_hcalIso[MAXPARTICLES], ln_trkIso[MAXPARTICLES], ln_gIso[MAXPARTICLES],  ln_chIso[MAXPARTICLES], ln_puchIso[MAXPARTICLES], ln_nhIso[MAXPARTICLES]; 
-  Float_t ln_d0[MAXPARTICLES],ln_dZ[MAXPARTICLES],ln_trkpt[MAXPARTICLES],ln_trketa[MAXPARTICLES],ln_trkphi[MAXPARTICLES],ln_trkchi2[MAXPARTICLES],ln_trkValidPixelHits[MAXPARTICLES],ln_trkValidTrackerHits[MAXPARTICLES],ln_trkLostInnerHits[MAXPARTICLES];
+  Float_t ln_d0[MAXPARTICLES],ln_dZ[MAXPARTICLES], ln_ip3d[MAXPARTICLES], ln_ip3dsig[MAXPARTICLES], ln_trkpt[MAXPARTICLES],ln_trketa[MAXPARTICLES],ln_trkphi[MAXPARTICLES],ln_trkchi2[MAXPARTICLES],ln_trkValidPixelHits[MAXPARTICLES],ln_trkValidTrackerHits[MAXPARTICLES],ln_trkLostInnerHits[MAXPARTICLES];
   Int_t ln_id[MAXPARTICLES], ln_genid[MAXPARTICLES], ln_pid[MAXPARTICLES];
 
   //lepton id variables
   Int_t en,en_idbits[MAXPARTICLES];
-  Float_t en_hoe[MAXPARTICLES],en_dphiin[MAXPARTICLES],en_detain[MAXPARTICLES],en_sihih[MAXPARTICLES],en_sipip[MAXPARTICLES],en_r9[MAXPARTICLES];
+  Float_t en_hoe[MAXPARTICLES],en_hoebc[MAXPARTICLES],en_dphiin[MAXPARTICLES],en_detain[MAXPARTICLES],en_sihih[MAXPARTICLES],en_sipip[MAXPARTICLES],en_r9[MAXPARTICLES];
   Float_t en_sce[MAXPARTICLES],en_sceta[MAXPARTICLES],en_scphi[MAXPARTICLES],en_e2x5max[MAXPARTICLES],en_e1x5[MAXPARTICLES],en_e5x5[MAXPARTICLES];
   Float_t en_h2te[MAXPARTICLES],en_h2tebc[MAXPARTICLES],en_ooemoop[MAXPARTICLES],en_fbrem[MAXPARTICLES],en_eopin[MAXPARTICLES];
-  
+  Float_t en_dEtaCalo[MAXPARTICLES], en_dPhiCalo[MAXPARTICLES], en_kfchi2[MAXPARTICLES], en_kfhits[MAXPARTICLES], en_kfhitsall[MAXPARTICLES], en_sihip[MAXPARTICLES], en_nbrems[MAXPARTICLES], en_etawidth[MAXPARTICLES], en_phiwidth[MAXPARTICLES], en_e1x5e5x5[MAXPARTICLES], en_preShowerOverRaw[MAXPARTICLES], en_eopout[MAXPARTICLES];
+
   Int_t mn,mn_idbits[MAXPARTICLES];
-  Float_t mn_nMatches[MAXPARTICLES],mn_validMuonHits[MAXPARTICLES],mn_innerTrackChi2[MAXPARTICLES],mn_trkLayersWithMeasurement[MAXPARTICLES],mn_pixelLayersWithMeasurement[MAXPARTICLES];
+  Float_t mn_nMatches[MAXPARTICLES],mn_nMatchedStations[MAXPARTICLES],mn_validMuonHits[MAXPARTICLES],mn_innerTrackChi2[MAXPARTICLES],mn_trkLayersWithMeasurement[MAXPARTICLES],mn_pixelLayersWithMeasurement[MAXPARTICLES];
 
   //jets
   Int_t jn;
@@ -99,7 +100,7 @@ struct ZZ2l2nuSummary_t
 
   //gamma candidate (iso1=ecalIso, iso2=hcalIso, iso3=trkIso - have to modify these names in the future)
   Int_t gn;
-  Float_t g_px[MAXPARTICLES], g_py[MAXPARTICLES]  , g_pz[MAXPARTICLES]  , g_en[MAXPARTICLES], g_iso1[MAXPARTICLES], g_iso2[MAXPARTICLES], g_iso3[MAXPARTICLES], g_sihih[MAXPARTICLES], g_r9[MAXPARTICLES], g_hoe[MAXPARTICLES], g_sipip[MAXPARTICLES];
+  Float_t g_px[MAXPARTICLES], g_py[MAXPARTICLES]  , g_pz[MAXPARTICLES]  , g_en[MAXPARTICLES], g_iso1[MAXPARTICLES], g_iso2[MAXPARTICLES], g_iso3[MAXPARTICLES], g_sihih[MAXPARTICLES], g_r9[MAXPARTICLES], g_hoe[MAXPARTICLES], g_htoe[MAXPARTICLES], g_sipip[MAXPARTICLES];
   Float_t g_corren[MAXPARTICLES], g_correnerr[MAXPARTICLES];
   Int_t g_idbits[MAXPARTICLES];
 
@@ -132,7 +133,13 @@ class ZZ2l2nuSummaryHandler{
     if(t_) t_->GetEntry(ientry); 
   }
 
-  bool hasSpoilerAlert(bool isData);
+  bool hasSpoilerAlert(bool isData,TString category="");
+  inline bool hasSpoilerAlert(bool isData,std::vector<TString> &categories)
+  {
+    bool flag(true);
+    for(size_t i=0; i<categories.size(); i++) flag &= hasSpoilerAlert(isData,categories[i]);
+    return flag;
+  }
 
   int getEntries() { return (t_ ? t_->GetEntriesFast() : 0); }
 

@@ -224,16 +224,19 @@
                 {
 	         "dtag":"Data_DoubleElectron2012A",
 		 "dset":"/DoubleElectron/Run2012A-PromptReco-v1/AOD",
+		 "patdir":["/castor/cern.ch/user/w/wangjian/test0503/pattest/wangjian/DoubleElectron/HZZ2l2vPAT_0503/0e0eed680a2f3fd2c04fa07a59d6ca8f"],
                  "split":2
                 },
                 {
 	         "dtag":"Data_DoubleMu2012A",
+		 "patdir":["/castor/cern.ch/user/w/wangjian/test0503/pattest/wangjian/DoubleMu/HZZ2l2vPAT_0504/0e0eed680a2f3fd2c04fa07a59d6ca8f"],
 		 "dset":"/DoubleMu/Run2012A-PromptReco-v1/AOD",
                  "split":2
                 },
                 {
                  "dtag":"Data_MuEG2012A",
                  "dset":"/MuEG/Run2012A-PromptReco-v1/AOD",
+		 "patdir":["/castor/cern.ch/user/w/wangjian/test0503/pattest/wangjian/MuEG/HZZ2l2vPAT_0504/0e0eed680a2f3fd2c04fa07a59d6ca8f"],
                  "split":2
                 }
 	    ]

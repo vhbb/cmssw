@@ -65,7 +65,7 @@ runLocalAnalysisOverSamples.py -e run2011Analysis -j data/samples.json -o test/r
 runLocalAnalysisOverSamples.py -e run2011Analysis -j data/samplesNoHWW.json -d /store/cmst3/user/psilva/12_03_31_HZZ2l2v_ntuples -o test/results -c test/runAnalysis_cfg.py.templ
 
 #2012
-runLocalAnalysisOverSamples.py -e runEffStudy -j data/samples_2012.json -o test/results -d /store/cmst3/user/psilva/12_04_25_HZZ2l2v_ntuples -c test/runAnalysis_cfg.py.templ -p "@runSystematics=True"
+runLocalAnalysisOverSamples.py -e runEffStudy -j data/samples_2012.json -o test/results -d /store/cmst3/user/querten/12_05_08_HZZ2l2v_ntuples -c test/runAnalysis_cfg.py.templ -s 8nh 
 
 #
 # z+jets replacement
@@ -76,7 +76,6 @@ haddOverSamples.py -j data/photon-samples.json -d /store/cmst3/user/psilva/12_03
 
 
 ## generate unweigthed distributions
-
 runLocalAnalysisOverSamples.py -e runGammaPlusJetsMETtemplates -j data/photon-samples.json -d /store/cmst3/user/psilva/12_04_09_HZZ2l2v_ntuples -o ~/work/gamma/  -c test/runAnalysis_cfg.py.templ -s 8nh
 
 runPlotter --iLumi 4616 --inDir ~/work/gamma/ --outDir ~/work/gamma/plots --json data/photon-samples.json

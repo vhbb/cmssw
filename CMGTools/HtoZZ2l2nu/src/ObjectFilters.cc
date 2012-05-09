@@ -12,37 +12,64 @@ using namespace reco;
 //
 ObjectIdSummary::ObjectIdSummary()
 {
-  p4=LorentzVector(0,0,0,0); genP4=p4;
-  id=0; genid=0; genflav=0;
-  charge=0;
+  p4=LorentzVector(0,0,0,0); id=0;    charge=0;
+  genP4=p4;                  genid=0; genflav=0;
   idBits=0;
   for(size_t i=0; i<15; i++) isoVals[i]=0;
   for(size_t i=0; i<5; i++)  mva[i]=0; 
-  ensf=0;ensferr=0;
-  trkd0=0;trkdZ=0;trkpt=0;trketa=0;trkphi=0;trkchi2=0;trkValidPixelHits=0;trkValidTrackerHits=0;trkLostInnerHits=0;
-  trkValidMuonHits=0;trkMatches=0;innerTrackChi2=0;trkLayersWithMeasurement=0;pixelLayersWithMeasurement=0;
-  dPhiTrack=0;dEtaTrack=0;ooemoop=0;fbrem=0;eopin=0;
-  hoe=0;sihih=0;sipip=0;sce=0;sceta=0;scphi=0;e2x5max=0;e1x5=0;e5x5=0;h2te=0;h2tebc=0;r9=0;
+  ensf=0;                       ensferr=0;
+  trkd0=0;                      trkdZ=0;             trkip3d=0;
+  trkip3dsig=0;                 trkpt=0;             trketa=0; 
+  trkphi=0;                     trkchi2=0;           trkValidPixelHits=0;
+  trkValidTrackerHits=0;        trkLostInnerHits=0;  trkValidMuonHits=0;
+  trkMatches=0;                 innerTrackChi2=0;    trkLayersWithMeasurement=0;
+  trkMatchedStations=0;         pixelLayersWithMeasurement=0;
+  dPhiTrack=0;                   dEtaTrack=0;         ooemoop=0;
+  fbrem=0;                       eopin=0;             hoe=0;
+  hoebc=0;                       sihih=0;             sipip=0;
+  sce=0;                         sceta=0;             scphi=0;
+  e2x5max=0;                     e1x5=0;              e5x5=0;
+  h2te=0;                        h2tebc=0;            r9=0;
+  dEtaCalo=0;                    dPhiCalo=0;          kfchi2=0;
+  kfhits=0;                      kfhitsall=0;         sihip=0;
+  nbrems=0;                      etawidth=0;          phiwidth=0;
+  e1x5e5x5=0;                    preShowerOverRaw=0;  eopout=0;
   aeff=0;
-  neutHadFrac=0;neutEmFrac=0;chHadFrac=0;tche=0; csv=0; jp=0;beta=0;betaStar=0;dRMean=0;ptD=0;ptRMS=0;
+  neutHadFrac=0;                 neutEmFrac=0;        chHadFrac=0;
+  tche=0;                        csv=0;               jp=0;
+  beta=0;                        betaStar=0;          dRMean=0;
+  ptD=0;                         ptRMS=0;
 }
 
 //
 ObjectIdSummary::ObjectIdSummary(ObjectIdSummary const&other)
 {
-  p4=other.p4; genP4=other.genP4;
-  id=other.id; genid=other.genid; genflav=other.genflav;
-  charge=other.charge;
+  p4=other.p4;           id=other.id;       charge=other.charge;
+  genP4=other.genP4;     genid=other.genid; genflav=other.genflav;
   idBits=other.idBits;
   for(size_t i=0; i<15; i++) isoVals[i]=other.isoVals[i];
   for(size_t i=0; i<5; i++)  mva[i]=other.mva[i]; 
   ensf=other.ensf;ensferr=other.ensferr;
-  trkd0=other.trkd0;trkdZ=other.trkdZ;trkpt=other.trkpt;trketa=other.trketa;trkphi=other.trkphi;trkchi2=other.trkchi2;trkValidPixelHits=other.trkValidPixelHits;trkValidTrackerHits=other.trkValidTrackerHits;trkLostInnerHits=other.trkLostInnerHits;
-  trkValidMuonHits=other.trkValidMuonHits;trkMatches=other.trkMatches;innerTrackChi2=other.innerTrackChi2;trkLayersWithMeasurement=other.trkLayersWithMeasurement;pixelLayersWithMeasurement=other.pixelLayersWithMeasurement;
-  dPhiTrack=other.dPhiTrack;dEtaTrack=other.dEtaTrack;ooemoop=other.ooemoop;fbrem=other.fbrem;eopin=other.eopin;
-  hoe=other.hoe;sihih=other.sihih;sipip=other.sipip;sce=other.sce;sceta=other.sceta;scphi=other.scphi;e2x5max=other.e2x5max;e1x5=other.e1x5;e5x5=other.e5x5;h2te=other.h2te;h2tebc=other.h2tebc;r9=other.r9;
+  trkd0=other.trkd0; trkdZ=other.trkdZ;                    trkip3d=other.trkip3d;                                        trkip3dsig=other.trkip3dsig;
+  trkpt=other.trkpt; trketa=other.trketa;                  trkphi=other.trkphi;                                          trkchi2=other.trkchi2;
+  trkValidPixelHits=other.trkValidPixelHits;               trkValidTrackerHits=other.trkValidTrackerHits;                trkLostInnerHits=other.trkLostInnerHits;
+  trkValidMuonHits=other.trkValidMuonHits;                 trkMatches=other.trkMatches;                                  innerTrackChi2=other.innerTrackChi2;
+  trkLayersWithMeasurement=other.trkLayersWithMeasurement; pixelLayersWithMeasurement=other.pixelLayersWithMeasurement;  trkMatchedStations=other.trkMatchedStations;
+  dPhiTrack=other.dPhiTrack;                               dEtaTrack=other.dEtaTrack;                                    ooemoop=other.ooemoop;
+  fbrem=other.fbrem;                                       eopin=other.eopin;                                            hoe=other.hoe;
+  hoebc=other.hoebc;                                       sihih=other.sihih;                                            sipip=other.sipip;
+  sce=other.sce;                                           sceta=other.sceta;                                            scphi=other.scphi;
+  e2x5max=other.e2x5max;                                   e1x5=other.e1x5;                                              e5x5=other.e5x5;
+  h2te=other.h2te;                                         h2tebc=other.h2tebc;                                          r9=other.r9;
+  dEtaCalo=other.dEtaCalo;                                 dPhiCalo=other.dPhiCalo;                                      kfchi2=other.kfchi2;
+  kfhits=other.kfhits;                                     kfhitsall=other.kfhitsall;                                    sihip=other.sihip;
+  nbrems=other.nbrems;                                     etawidth=other.etawidth;                                      phiwidth=other.phiwidth;
+  e1x5e5x5=other.e1x5e5x5;                                 preShowerOverRaw=other.preShowerOverRaw;                      eopout=other.eopout;
   aeff=other.aeff;
-  neutHadFrac=other.neutHadFrac;neutEmFrac=other.neutEmFrac;chHadFrac=other.chHadFrac;tche=other.tche; csv=other.csv; jp=other.jp;beta=other.beta;betaStar=other.betaStar;dRMean=other.dRMean;ptD=other.ptD;ptRMS=other.ptRMS;
+  neutHadFrac=other.neutHadFrac;                           neutEmFrac=other.neutEmFrac;                                  chHadFrac=other.chHadFrac;
+  tche=other.tche;                                         csv=other.csv;                                                jp=other.jp;
+  beta=other.beta;                                         betaStar=other.betaStar;                                      dRMean=other.dRMean;
+  ptD=other.ptD;                                           ptRMS=other.ptRMS;
 }
 
 
@@ -106,6 +133,7 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 					const reco::VertexRef &primVertex,
 					const double& rho, 
 					const edm::ParameterSet &iConfig,
+					const edm::EventSetup & iSetup,
 					std::vector<ObjectIdSummary> &selMuonIds)
 {
     vector<reco::CandidatePtr> selMuons;
@@ -127,6 +155,8 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	  const pat::Muon *muon = dynamic_cast<const pat::Muon *>( muonPtr.get() );
 	  if(!muon->isTrackerMuon()) continue;  
 	  
+	  std::pair<bool,Measurement1D> ip3dRes =getImpactParameter<reco::TrackRef>(muon->innerTrack(), primVertex, iSetup, true);
+
 	  ObjectIdSummary lepId;
 	  lepId.p4 = LorentzVector(muon->px(),muon->py(),muon->pz(),muon->energy());
 	  lepId.id=13;
@@ -135,21 +165,24 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	  lepId.genflav = lepId.genid;
 	  if(genLep) lepId.genP4 = LorentzVector(genLep->px(),genLep->py(),genLep->pz(),genLep->energy());
 	  lepId.charge=muon->charge();
-	  lepId.ensf = 1.0;
-	  lepId.ensferr=fabs(muon->innerTrack()->ptError()/muon->innerTrack()->pt());
-	  std::vector<double> isoVals=getLeptonIso( muonPtr, muon->pt(), rho );
+	  lepId.ensf                  = 1.0;
+	  lepId.ensferr               = fabs(muon->innerTrack()->ptError()/muon->innerTrack()->pt());
+	  std::vector<double> isoVals = getLeptonIso( muonPtr, muon->pt(), rho );
 	  for(size_t iiso=0; iiso<isoVals.size(); iiso++) lepId.isoVals[iiso] = isoVals[iiso]; 
-	  lepId.trkd0=fabs(muon->innerTrack()->dxy(primVertex->position())); //muon->dB(pat::Muon::PV2D);
-	  lepId.trkdZ = fabs(muon->innerTrack()->dz(primVertex->position()));
-	  lepId.trkchi2 = muon->innerTrack()->normalizedChi2();	  
-	  lepId.innerTrackChi2=lepId.trkchi2;
+	  lepId.trkd0                      = fabs(muon->innerTrack()->dxy(primVertex->position())); //muon->dB(pat::Muon::PV2D);
+	  lepId.trkdZ                      = fabs(muon->innerTrack()->dz(primVertex->position()));
+	  lepId.trkip3d                    = ip3dRes.second.value();
+	  lepId.trkip3dsig                 = ip3dRes.second.significance();
+	  lepId.trkchi2                    = muon->innerTrack()->normalizedChi2();	  
+	  lepId.innerTrackChi2             = lepId.trkchi2;
 	  lepId.pixelLayersWithMeasurement = muon->innerTrack()->hitPattern().pixelLayersWithMeasurement();
 	  lepId.trkValidPixelHits          = muon->innerTrack()->hitPattern().numberOfValidPixelHits();
 	  lepId.trkValidTrackerHits        = muon->innerTrack()->hitPattern().numberOfValidTrackerHits();
 	  lepId.trkLayersWithMeasurement   = muon->track()->hitPattern().trackerLayersWithMeasurement();
 	  lepId.trkLostInnerHits           = muon->innerTrack()->trackerExpectedHitsInner().numberOfLostHits();
-	  lepId.trkValidMuonHits = 0;
-	  lepId.trkMatches = muon->numberOfMatchedStations();
+	  lepId.trkValidMuonHits           = 0;
+	  lepId.trkMatches                 = muon->numberOfMatches();
+	  lepId.trkMatchedStations         = muon->numberOfMatchedStations();
 	  
 	  bool isGlobal = muon->isGlobalMuon();
 	  if(isGlobal)
@@ -194,7 +227,7 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	     || lepId.trkValidPixelHits < vbtf2011.getParameter<int>("minPixelHits") 
 	     || lepId.trkValidTrackerHits < vbtf2011.getParameter<int>("minValidTrackerHits") )        isVBTF2011=false; 
 	  if(lepId.trkValidMuonHits < vbtf2011.getParameter<int>("minValidMuonHits")
-	     || muon->numberOfMatches() < vbtf2011.getParameter<int>("minMatchingMuonStations") )              isVBTF2011=false;
+	     || lepId.trkMatches < vbtf2011.getParameter<int>("minMatchingMuonStations") )              isVBTF2011=false;
 	  if(!vbtf2011.getParameter<bool>("applySoftMuonIsolationVeto"))
 	    {
 	      if(!muon->isGlobalMuon() || !muon->isTrackerMuon()) isVBTF2011=false;
@@ -222,8 +255,7 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	    | isHighPt << MID_HIGHPT
 	    | isVBTF2011 << MID_VBTF2011
 	    | isSoftVBTF2011 << MID_SOFT2011;
-	  
-	  
+
 	  //select the muon
 	  if( lepId.p4.pt()<minPt || fabs(lepId.p4.eta())>maxEta) continue; 
 	  if(!id.empty())
@@ -304,6 +336,13 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 	if(ele->gsfTrack().isNull()) continue;
 	if(ele->superCluster().isNull()) continue;
 
+	std::pair<bool,Measurement1D> ip3dRes =getImpactParameter<reco::GsfTrackRef>(ele->gsfTrack(), primVtx, iSetup, true);
+
+	bool validKF(false);
+	reco::TrackRef myTrackRef = ele->closestCtfTrackRef();
+	validKF = (myTrackRef.isAvailable());
+	validKF = (myTrackRef.isNonnull());  
+
 	//build a summary of this object
 	ObjectIdSummary lepId;
 	lepId.p4 = LorentzVector(ele->px(),ele->py(),ele->pz(),ele->energy());
@@ -324,6 +363,7 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 	std::vector<double> isoVals=getLeptonIso( elePtr, lepId.p4.pt(), rho);
 	for(size_t iiso=0; iiso<isoVals.size(); iiso++)	lepId.isoVals[iiso] = isoVals[iiso];
 	lepId.hoe               = ele->hadronicOverEm();
+	lepId.hoebc             = ele->hcalOverEcalBc();
 	lepId.dPhiTrack         = ele->deltaPhiSuperClusterTrackAtVtx();
 	lepId.dEtaTrack         = ele->deltaEtaSuperClusterTrackAtVtx();
 	vector<float> cov       = lazyTool.localCovariances(*ele->superCluster()->seed());
@@ -350,7 +390,23 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 	lepId.fbrem             = ele->fbrem();
 	lepId.r9                = lazyTool.e3x3(*ele->superCluster()->seed())/ele->superCluster()->rawEnergy();
 	lepId.aeff              = EgammaCutBasedEleId::GetEffectiveArea(ele->eta());  
-	
+	lepId.eopin             = ele->eSuperClusterOverP(); 
+	lepId.trkip3d           = ip3dRes.second.value();
+	lepId.trkip3dsig        = ip3dRes.second.significance();
+	lepId.eopout            =  ele->eEleClusterOverPout();
+	lepId.preShowerOverRaw  =  ele->superCluster()->preshowerEnergy() / ele->superCluster()->rawEnergy();
+	lepId.etawidth          =  ele->superCluster()->etaWidth();
+	lepId.phiwidth          =  ele->superCluster()->phiWidth();
+	lepId.e1x5e5x5          =  (ele->e5x5()) !=0. ? 1.-(ele->e1x5()/ele->e5x5()) : -1. ; 
+	lepId.dEtaCalo          = ele->deltaEtaSeedClusterTrackAtCalo();
+	lepId.dPhiCalo          = ele->deltaPhiSeedClusterTrackAtCalo();
+	lepId.sihip             = cov[1];
+	lepId.nbrems            = fabs(ele->numberOfBrems());
+	lepId.kfchi2            = (validKF) ? myTrackRef->normalizedChi2() : 0 ;
+	lepId.kfhits            =  (validKF) ? myTrackRef->hitPattern().trackerLayersWithMeasurement() : -1. ;  
+	lepId.kfhitsall         =  (validKF) ? myTrackRef->numberOfValidHits() : -1. ; 
+  
+
 	//2011 VBTF like id
 	bool isEE(ele->isEE());	
 	bool hasConversionTag(lepId.trkLostInnerHits>maxTrackLostHits[isEE]);
@@ -790,14 +846,14 @@ vector<CandidatePtr> getGoodPhotons(edm::Handle<edm::View<reco::Candidate> > &hP
     for(size_t iPhoton=0; iPhoton< hPhoton.product()->size(); ++iPhoton)
       {
 	//get photon candidates
-	//const reco::Photon *pho = dynamic_cast<const reco::Photon *>( hPhoton->ptrAt(iPhoton).get() );
-	const pat::Photon *pho = dynamic_cast<const pat::Photon *>( hPhoton->ptrAt(iPhoton).get() );
+	const reco::Photon *pho = dynamic_cast<const reco::Photon *>( hPhoton->ptrAt(iPhoton).get() );
+	//const pat::Photon *pho = dynamic_cast<const pat::Photon *>( hPhoton->ptrAt(iPhoton).get() );
 	if(pho==0) continue;
 	
 	ObjectIdSummary phoId;
 	phoId.p4 = LorentzVector(pho->px(),pho->py(),pho->pz(),pho->energy());
 	phoId.id=22;
-	const reco::Candidate *genPho = pho->genPhoton();
+	const reco::Candidate *genPho = 0; //pho->genPhoton();
         phoId.genid   = genPho ? genPho->pdgId() : -9999;
         phoId.genflav = phoId.genid;
 	if(genPho) phoId.genP4 = LorentzVector(genPho->px(),genPho->py(),genPho->pz(),genPho->energy());
@@ -817,9 +873,10 @@ vector<CandidatePtr> getGoodPhotons(edm::Handle<edm::View<reco::Candidate> > &hP
 	phoId.ensf              = enSF.first;
 	phoId.ensferr           = enSF.second;
 	phoId.hoe               = pho->hadronicOverEm();
+	phoId.hoebc             = pho->hadTowOverEm();
 	vector<float> cov       = lazyTool.localCovariances(*pho->superCluster()->seed());
 	phoId.sihih             = pho->sigmaIetaIeta();
-	phoId.sipip             = sqrt(cov[2]);
+	phoId.sipip             = !isnan(cov[2]) ? sqrt(cov[2]) : 0.;
 	phoId.sce               = pho->superCluster()->energy();
 	phoId.sceta             = pho->superCluster()->eta();
 	phoId.scphi             = pho->superCluster()->phi();
@@ -1026,7 +1083,7 @@ pair<string,double> getHighestPhotonTrigThreshold(edm::Handle<edm::TriggerResult
 							    const edm::TriggerNames &triggerNames,
 							    vector<string> &gammaTriggers)
 {
-  double maxthr(0);
+  int maxthr(0);
   string selTrigger("");
   int ntrigs = triggerBitsH->size();
   for(int itrig=0; itrig<ntrigs; itrig++)
@@ -1039,7 +1096,6 @@ pair<string,double> getHighestPhotonTrigThreshold(edm::Handle<edm::TriggerResult
       //now check if trigger is to be kept                                                                                                                                                                                                                                              
       string trigName = triggerNames.triggerName(itrig);
       if( trigName.find("Photon") == string::npos ) continue;
-      
       bool keepTrigger(false);
       for(vector<string>::iterator tIt = gammaTriggers.begin(); tIt != gammaTriggers.end(); tIt++)
 	{
@@ -1048,15 +1104,16 @@ pair<string,double> getHighestPhotonTrigThreshold(edm::Handle<edm::TriggerResult
             break;
 	}
       if(!keepTrigger) continue;
-      
+     
       //get the trigger threshold
       TString fireTrigger(trigName);
       TObjArray *tkns=fireTrigger.Tokenize("_");
       if(tkns->GetEntriesFast()<2) continue;
       TString phoName=((TObjString *)tkns->At(1))->GetString();
+     
       phoName.ReplaceAll("Photon","");
       Int_t thr=phoName.Atoi();
-      
+     
       if(thr<maxthr) continue;
       maxthr=thr;
       selTrigger=trigName;

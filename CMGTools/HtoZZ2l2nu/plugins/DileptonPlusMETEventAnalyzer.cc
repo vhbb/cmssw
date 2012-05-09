@@ -120,6 +120,7 @@ int DileptonPlusMETEventAnalyzer::addPidSummary(ObjectIdSummary &obj)
     {
       ev.en_idbits[ev.en]=obj.idBits;
       ev.en_hoe[ev.en]=obj.hoe;
+      ev.en_hoebc[ev.en]=obj.hoebc;
       ev.en_dphiin[ev.en]=obj.dPhiTrack;
       ev.en_detain[ev.en]=obj.dEtaTrack;
       ev.en_sihih[ev.en]=obj.sihih;
@@ -136,17 +137,30 @@ int DileptonPlusMETEventAnalyzer::addPidSummary(ObjectIdSummary &obj)
       ev.en_ooemoop[ev.en]=obj.ooemoop;
       ev.en_fbrem[ev.en]=obj.fbrem;
       ev.en_eopin[ev.en]=obj.eopin;
+      ev.en_dEtaCalo[ev.en]=obj.dEtaCalo;
+      ev.en_dPhiCalo[ev.en]=obj.dPhiCalo;
+      ev.en_kfchi2[ev.en]=obj.kfchi2;
+      ev.en_kfhits[ev.en]=obj.kfhits;
+      ev.en_kfhitsall[ev.en]=obj.kfhitsall;
+      ev.en_sihip[ev.en]=obj.sihip;
+      ev.en_nbrems[ev.en]=obj.nbrems;
+      ev.en_etawidth[ev.en]=obj.etawidth;
+      ev.en_phiwidth[ev.en]=obj.phiwidth;
+      ev.en_e1x5e5x5[ev.en]=obj.e1x5e5x5;
+      ev.en_preShowerOverRaw[ev.en]=obj.preShowerOverRaw;
+      ev.en_eopout[ev.en]=obj.eopout;
       index=ev.en;
       ev.en++;
     }
   else if(fabs(obj.id)==13)
     {
-      ev.mn_idbits[ev.en]=obj.idBits;
-      ev.mn_nMatches[ev.mn]=obj.trkMatches;
-      ev.mn_validMuonHits[ev.mn]=obj.trkValidMuonHits;
-      ev.mn_pixelLayersWithMeasurement[ev.mn]= obj.pixelLayersWithMeasurement;
-      ev.mn_trkLayersWithMeasurement[ev.mn]= obj.trkLayersWithMeasurement;
-      ev.mn_innerTrackChi2[ev.mn]=obj.innerTrackChi2;
+      ev.mn_idbits[ev.mn]                     = obj.idBits;
+      ev.mn_nMatches[ev.mn]                   = obj.trkMatches; 
+      ev.mn_nMatchedStations[ev.mn]           = obj.trkMatchedStations;
+      ev.mn_validMuonHits[ev.mn]              = obj.trkValidMuonHits;
+      ev.mn_pixelLayersWithMeasurement[ev.mn] = obj.pixelLayersWithMeasurement;
+      ev.mn_trkLayersWithMeasurement[ev.mn]   = obj.trkLayersWithMeasurement;
+      ev.mn_innerTrackChi2[ev.mn]             = obj.innerTrackChi2;
       index=ev.mn;
       ev.mn++;
     }
@@ -352,8 +366,8 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     edm::Handle<View<Candidate> > hMu;
     event.getByLabel(objConfig_["Muons"].getParameter<edm::InputTag>("source"), hMu);
     std::vector<ObjectIdSummary> looseMuonSummary, muonSummary;
-    std::vector<CandidatePtr> looseMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["LooseMuons"], looseMuonSummary);
-    std::vector<CandidatePtr> selMuons      = getGoodMuons(hMu, primVertex, *rho, objConfig_["Muons"], muonSummary);
+    std::vector<CandidatePtr> looseMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["LooseMuons"], iSetup, looseMuonSummary);
+    std::vector<CandidatePtr> selMuons      = getGoodMuons(hMu, primVertex, *rho, objConfig_["Muons"], iSetup, muonSummary);
     
     //electron selection
     Handle<View<Candidate> > hEle;
@@ -418,15 +432,17 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 		ev.l1_trkIso   = lep.isoVals[TRACKER_ISO];
 		ev.l1_d0       = lep.trkd0;
 		ev.l1_dZ       = lep.trkdZ;
+		ev.l1_ip3d     = lep.trkip3d;
+		ev.l1_ip3dsig  = lep.trkip3dsig;
 		ev.l1_trkpt    = lep.trkpt;
-		ev.l1_trketa    = lep.trketa;
-		ev.l1_trkphi    = lep.trkphi;
-		ev.l1_trkchi2    = lep.trkchi2;
-		ev.l1_trkValidPixelHits   = lep.trkValidPixelHits;
-		ev.l1_trkValidTrackerHits   = lep.trkValidTrackerHits;
-		ev.l1_trkLostInnerHits   = lep.trkLostInnerHits;
-		ev.l1_ensf = lep.ensf;
-		ev.l1_ensferr = lep.ensferr;
+		ev.l1_trketa   = lep.trketa;
+		ev.l1_trkphi   = lep.trkphi;
+		ev.l1_trkchi2  = lep.trkchi2;
+		ev.l1_trkValidPixelHits    = lep.trkValidPixelHits;
+		ev.l1_trkValidTrackerHits  = lep.trkValidTrackerHits;
+		ev.l1_trkLostInnerHits     = lep.trkLostInnerHits;
+		ev.l1_ensf     = lep.ensf;
+		ev.l1_ensferr  = lep.ensferr;
 		ev.l1_pid      = addPidSummary( lep );
 		leptonRank=1;
 	      }
@@ -448,16 +464,18 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 		ev.l2_trkIso   = lep.isoVals[TRACKER_ISO];
 		ev.l2_d0       = lep.trkd0;
 		ev.l2_dZ       = lep.trkdZ;
+		ev.l2_ip3d     = lep.trkip3d;
+		ev.l2_ip3dsig  = lep.trkip3dsig;
 		ev.l2_trkpt    = lep.trkpt;
-		ev.l2_trketa    = lep.trketa;
-		ev.l2_trkphi    = lep.trkphi;
-		ev.l2_trkchi2    = lep.trkchi2;
+		ev.l2_trketa   = lep.trketa;
+		ev.l2_trkphi   = lep.trkphi;
+		ev.l2_trkchi2  = lep.trkchi2;
 		ev.l2_trkValidPixelHits   = lep.trkValidPixelHits;
-		ev.l2_trkValidTrackerHits   = lep.trkValidTrackerHits;
-		ev.l2_trkLostInnerHits   = lep.trkLostInnerHits;
-		ev.l2_ensf = lep.ensf;
-		ev.l2_ensferr = lep.ensferr;
-		ev.l2_pid      = addPidSummary( lep );
+		ev.l2_trkValidTrackerHits = lep.trkValidTrackerHits;
+		ev.l2_trkLostInnerHits    = lep.trkLostInnerHits;
+		ev.l2_ensf                = lep.ensf;
+		ev.l2_ensferr             = lep.ensferr;
+		ev.l2_pid                 = addPidSummary( lep );
 		leptonRank=2; 
 	      } 
 	  }
@@ -478,15 +496,17 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.ln_trkIso[ev.ln]   = lep.isoVals[TRACKER_ISO];
 	ev.ln_d0[ev.ln]       = lep.trkd0;
 	ev.ln_dZ[ev.ln]       = lep.trkdZ;
+	ev.ln_ip3d[ev.ln]     = lep.trkip3d;
+	ev.ln_ip3dsig[ev.ln]  = lep.trkip3dsig;
 	ev.ln_trkpt[ev.ln]    = lep.trkpt;
-	ev.ln_trketa[ev.ln]    = lep.trketa;
-	ev.ln_trkphi[ev.ln]    = lep.trkphi;
-	ev.ln_trkchi2[ev.ln]    = lep.trkchi2;
+	ev.ln_trketa[ev.ln]   = lep.trketa;
+	ev.ln_trkphi[ev.ln]   = lep.trkphi;
+	ev.ln_trkchi2[ev.ln]  = lep.trkchi2;
 	ev.ln_trkValidPixelHits[ev.ln]   = lep.trkValidPixelHits;
-	ev.ln_trkValidTrackerHits[ev.ln]   = lep.trkValidTrackerHits;
-	ev.ln_trkLostInnerHits[ev.ln]   = lep.trkLostInnerHits;
-	ev.ln_ensf[ev.ln] = lep.ensf;
-	ev.ln_ensferr[ev.ln] = lep.ensferr;
+	ev.ln_trkValidTrackerHits[ev.ln] = lep.trkValidTrackerHits;
+	ev.ln_trkLostInnerHits[ev.ln]    = lep.trkLostInnerHits;
+	ev.ln_ensf[ev.ln]     = lep.ensf;
+	ev.ln_ensferr[ev.ln]  = lep.ensferr;
 	ev.ln_pid[ev.ln]      = addPidSummary(lep);
 	ev.ln++;
       }
@@ -512,6 +532,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.g_pz[ev.gn]    = selPhotonIds[i].p4.pz();
 	ev.g_en[ev.gn]    = selPhotonIds[i].p4.energy();
 	ev.g_hoe[ev.gn]   = selPhotonIds[i].hoe;
+	ev.g_htoe[ev.gn]  = selPhotonIds[i].hoebc;
 	ev.g_sihih[ev.gn] = selPhotonIds[i].sihih;
 	ev.g_sipip[ev.gn] = selPhotonIds[i].sipip;
 	ev.g_iso1[ev.gn]  = selPhotonIds[i].isoVals[TRACKER_ISO];
@@ -523,7 +544,10 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.g_idbits[ev.gn] = selPhotonIds[i].idBits;
 	ev.gn++;
       }
-    if(ev.cat==UNKNOWN && selPhotons.size() && triggerBits["gamma"]==true) ev.cat=GAMMA+1000*photonTrig.second;
+    if(ev.cat==UNKNOWN && selPhotons.size())
+      {
+	if(!event.isRealData() || triggerBits["gamma"]!=true)  ev.cat=GAMMA+1000*photonTrig.second;
+      }
 
     //quit if no gamma or dilepton candidate
     if(ev.cat==UNKNOWN) return;
@@ -562,8 +586,9 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.jn_phiW[ev.jn]        = selJetsId[ijet].sipip;
 	ev.jn_genpt[ev.jn]       = selJetsId[ijet].genP4.pt();
 	ev.jn_idbits[ev.jn]      = selJetsId[ijet].idBits;
-	ev.jn_puminmva[ev.ajn]   = selJetsId[ijet].mva[0];
-	ev.jn_pumva[ev.ajn]      = selJetsId[ijet].mva[1];
+	ev.jn_puminmva[ev.jn]    = selJetsId[ijet].mva[0];
+	ev.jn_pumva[ev.jn]       = selJetsId[ijet].mva[1];
+	ev.jn_rawsf[ev.jn]       = selJetsId[ijet].ensf;
 	ev.jn++;
       }
     ev.htvec_px = jetSum.px();
@@ -605,10 +630,11 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.ajn_ptRMS[ev.ajn]       = selAJetsId[ijet].ptRMS;
 	ev.ajn_genpt[ev.ajn]       = selAJetsId[ijet].genP4.pt();
 	ev.ajn_idbits[ev.ajn]      = selAJetsId[ijet].idBits;
-	ev.ajn_etaW[ev.jn]         = selAJetsId[ijet].sihih;
-	ev.ajn_phiW[ev.jn]         = selAJetsId[ijet].sipip;
+	ev.ajn_etaW[ev.ajn]        = selAJetsId[ijet].sihih;
+	ev.ajn_phiW[ev.ajn]        = selAJetsId[ijet].sipip;
 	ev.ajn_puminmva[ev.ajn]    = selAJetsId[ijet].mva[0];
 	ev.ajn_pumva[ev.ajn]       = selAJetsId[ijet].mva[1];
+	ev.ajn_rawsf[ev.ajn]       = selAJetsId[ijet].ensf;
 	ev.ajn++;
       }
    

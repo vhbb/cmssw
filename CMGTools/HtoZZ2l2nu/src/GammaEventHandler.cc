@@ -4,8 +4,8 @@ using namespace std;
 
 //
 GammaEventHandler::GammaEventHandler(const edm::ParameterSet &runProcess)
-  : weightMode_(NOWEIGHTS),
-    isGoodEvent_(false)
+  : isGoodEvent_(false),
+    weightMode_(NOWEIGHTS)
 {
   //trigger thresholds to consider
   bool isMC = runProcess.getParameter<bool>("isMC");
@@ -79,6 +79,8 @@ bool GammaEventHandler::isGood(PhysicsEvent_t &phys)
   triggerThr_ = (phys.cat-22)/1000;
   if(triggerThr_==0) return isGoodEvent_;
 
+  cout << phys.cat << " "<< triggerThr_ << endl;
+
   //check which category this event belongs to (use the trigger)
   int eventTriggerCat(-1);
   for(size_t icat=0; icat<gammaCats_.size()-1; icat++)
@@ -86,10 +88,12 @@ bool GammaEventHandler::isGood(PhysicsEvent_t &phys)
       if(triggerThr_<gammaCats_[icat])    break;
       eventTriggerCat=icat;   
     }
+  cout <<"\t --->" << eventTriggerCat << endl;
   if(eventTriggerCat<0) return isGoodEvent_;
   triggerPrescaleWeight_ = gammaTriggerRenWeights_[eventTriggerCat];
-
   photonCategory_="photon";  photonCategory_ += triggerThr_; 
+
+  cout << "\t\t---->"<< photonCategory_ << endl;
   //all done here
   isGoodEvent_=true;
   return isGoodEvent_;

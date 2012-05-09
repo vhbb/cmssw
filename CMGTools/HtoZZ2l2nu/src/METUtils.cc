@@ -1,8 +1,8 @@
 /*
  *  See header file for a description of this class.
  *
- *  $Date: 2012/04/03 19:56:04 $
- *  $Revision: 1.10 $
+ *  $Date: 2012/04/12 06:26:45 $
+ *  $Revision: 1.11 $
  *  \author G. Cerminara & D. Trocino & P. Silva & L. Quertenmont
  */
 
@@ -440,7 +440,7 @@ LorentzVector redMET(RedMetType Type, const LorentzVector& theLepton1, double si
     
    double InvPerr2;
   
-   double N, S, C, m;
+   double N(0), S(0), C(0), m(0);
    if(fabs(Eta) < 0.5 ) {
      N = 3.96859;
      S = 0.18348;
