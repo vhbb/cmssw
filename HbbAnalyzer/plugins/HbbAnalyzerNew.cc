@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.69 2012/05/04 09:14:15 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.70 2012/05/07 10:07:54 arizzi Exp $
 //
 //
 
@@ -204,6 +204,11 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   iEvent.getByLabel(edm::InputTag("kt6PFJets25", "rho"),rho25Handle);   
   auxInfo->puInfo.rho25 = *rho25Handle;
  
+  edm::Handle<double> rhoNeutralHandle;
+  iEvent.getByLabel(edm::InputTag("kt6PFJetsCentralNeutral", "rho"),rhoNeutralHandle);   
+  auxInfo->puInfo.rhoNeutral = *rhoNeutralHandle;
+
+
   edm::Handle<std::vector< PileupSummaryInfo> > puHandle;
 
   if (runOnMC_){
@@ -1368,6 +1373,8 @@ BTagSFContainer btagSFs;
 
       mf.nValidTracker = p1.numberOfValidTrackerHits(); 
       mf.nValidPixel = p1.numberOfValidPixelHits(); 
+      mf.nValidLayers = p1.trackerLayersWithMeasurement();
+      mf.isPF = mu->isPFMuon();
 
 
 
@@ -1570,6 +1577,8 @@ BTagSFContainer btagSFs;
     ef.id80r=elec->electronID("eidVBTFRel80");
     ef.id70 =elec->electronID("eidVBTFCom70");
     ef.id70r=elec->electronID("eidVBTFRel70");
+    ef.mvaOut=elec->electronID("mvaNonTrigV0");
+    ef.mvaOutTrig=elec->electronID("mvaTrigV0");
 
     //Electron trigger matching
     for (int itrig = 0; itrig != ntrigs; ++itrig){

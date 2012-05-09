@@ -91,7 +91,7 @@ class VHbbEvent{
   public:
     MuonInfo(): charge(-99),tIso(-99), eIso(-99), hIso(-99),pfChaIso(-99),pfChaPUIso(99), pfPhoIso(-99), pfNeuIso(-99),
       acop(-99), ipDb(-99), ipErrDb(-99), zPVPt(-99),zPVProb(-99), chi2(-99), globChi2(-99),
-      cat(-99), nValidTracker(-99), nValidPixel(-99), nMatches(-99),nHits(-99), nPixelHits(-99), globNHits(-99),validMuStations(-99),emEnergy(-99), hadEnergy(-99),
+      cat(-99), nValidTracker(-99), nValidPixel(-99), nMatches(-99),nHits(-99), nPixelHits(-99), globNHits(-99),validMuStations(-99),emEnergy(-99), hadEnergy(-99),nValidLayers(-99),isPF(-99),
       mcId(-99), mcMomId(-99), mcgMomId(-99){}
   public:
     TLorentzVector p4;
@@ -101,6 +101,7 @@ class VHbbEvent{
     float emEnergy, hadEnergy;
     TLorentzVector mcFourMomentum;
     int mcId, mcMomId, mcgMomId;
+    int isPF,nValidLayers;
     std::vector< int > hltMatchedBits;
   };
 
@@ -116,7 +117,7 @@ class VHbbEvent{
       mcId(-99), mcMomId(-99), mcgMomId (-99),
       dxy(-99), dz(-99),
      //MVA ELEID 2012 input vars (keep same names to make life easier in integrating with MVA evaluation code
-      fMVAVar_EoP(-99), fMVAVar_HoE(-99), fMVAVar_IoEmIoP(-99), fMVAVar_PreShowerOverRaw(-99), fMVAVar_R9(-99), fMVAVar_d0(-99), fMVAVar_deta(-99), fMVAVar_detacalo(-99), fMVAVar_dphi(-99), fMVAVar_e1x5e5x5(-99), fMVAVar_eleEoPout(-99), fMVAVar_eta(-99), fMVAVar_etawidth(-99), fMVAVar_fbrem(-99), fMVAVar_gsfchi2(-99), fMVAVar_ip3d(-99), fMVAVar_kfchi2(-99), fMVAVar_kfhits(-99), fMVAVar_phiwidth(-99), fMVAVar_pt(-99), fMVAVar_see(-99), fMVAVar_spp(-99)
+      fMVAVar_EoP(-99), fMVAVar_HoE(-99), fMVAVar_IoEmIoP(-99), fMVAVar_PreShowerOverRaw(-99), fMVAVar_R9(-99), fMVAVar_d0(-99), fMVAVar_deta(-99), fMVAVar_detacalo(-99), fMVAVar_dphi(-99), fMVAVar_e1x5e5x5(-99), fMVAVar_eleEoPout(-99), fMVAVar_eta(-99), fMVAVar_etawidth(-99), fMVAVar_fbrem(-99), fMVAVar_gsfchi2(-99), fMVAVar_ip3d(-99), fMVAVar_kfchi2(-99), fMVAVar_kfhits(-99), fMVAVar_phiwidth(-99), fMVAVar_pt(-99), fMVAVar_see(-99), fMVAVar_spp(-99), mvaOut(-99),mvaOutTrig(-99)
 {}
   public:
     TLorentzVector p4;
@@ -128,7 +129,7 @@ class VHbbEvent{
     bool isEB,isEE;
     float       ipDb, ipErrDb, dxy,dz;
     float  id95,id85,id80,id70,id95r, id85r,id80r, id70r;
-    float fMVAVar_EoP, fMVAVar_HoE, fMVAVar_IoEmIoP, fMVAVar_PreShowerOverRaw, fMVAVar_R9, fMVAVar_d0, fMVAVar_deta, fMVAVar_detacalo, fMVAVar_dphi, fMVAVar_e1x5e5x5, fMVAVar_eleEoPout, fMVAVar_eta, fMVAVar_etawidth, fMVAVar_fbrem, fMVAVar_gsfchi2, fMVAVar_ip3d, fMVAVar_kfchi2, fMVAVar_kfhits, fMVAVar_phiwidth, fMVAVar_pt, fMVAVar_see, fMVAVar_spp;
+    float fMVAVar_EoP, fMVAVar_HoE, fMVAVar_IoEmIoP, fMVAVar_PreShowerOverRaw, fMVAVar_R9, fMVAVar_d0, fMVAVar_deta, fMVAVar_detacalo, fMVAVar_dphi, fMVAVar_e1x5e5x5, fMVAVar_eleEoPout, fMVAVar_eta, fMVAVar_etawidth, fMVAVar_fbrem, fMVAVar_gsfchi2, fMVAVar_ip3d, fMVAVar_kfchi2, fMVAVar_kfhits, fMVAVar_phiwidth, fMVAVar_pt, fMVAVar_see, fMVAVar_spp, mvaOut,mvaOutTrig;
     TLorentzVector mcFourMomentum;
     int mcId, mcMomId, mcgMomId;
     std::vector< int > hltMatchedBits;
