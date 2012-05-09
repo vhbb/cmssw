@@ -552,7 +552,7 @@ int main(int argc, char* argv[])
   genTopInfo genTop, genTbar;
   TrackInfo V;
   int nvlep=0,nalep=0; 
-  double lheV_pt=0; //for the Madgraph sample stitching
+  float lheV_pt=0; //for the Madgraph sample stitching
   TrackSharingInfo TkSharing; // track sharing info;
 
   float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, genHpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweight2011B;
@@ -1047,19 +1047,22 @@ int main(int argc, char* argv[])
       
 	//LHE Infos
 	fwlite::Handle<LHEEventProduct> evt;
+
+	//	std::cout << "Label for lhe = " << evt.getBranchNameFor(ev,"source") << std::endl;
 	if( !((evt.getBranchNameFor(ev,"source")).empty()) ){
 	  evt.getByLabel(ev,"source");
+	  //std::cout << "LHEEventProduct found!" << std::endl;
 	  bool lCheck=false;
 	  bool lbarCheck=false;
 	  bool vlCheck=false;
 	  bool vlbarCheck=false;
-	  int idl, idlbar, momid;
+	  int idl, idlbar;
 	  TLorentzVector l,lbar,vl,vlbar,V_tlv;
 	  const lhef::HEPEUP hepeup_ = evt->hepeup();
-	  const std::vector<lhef::HEPEUP::FiveVector> pup_ = hepeup_.PUP; // px, py, pz, E, M                                                                   
-	  momid =1 ;
+	  const std::vector<lhef::HEPEUP::FiveVector> pup_ = hepeup_.PUP; // px, py, pz, E, M
 	  for(unsigned int i=0; i<pup_.size(); ++i){
-	    int id=hepeup_.IDUP[i]; //pdgId                                                                                                                                                                   
+	    int id=hepeup_.IDUP[i]; //pdgId
+	    
 	    if(id==11){ l.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lCheck=true;}
 	    if(id==-11){ lbar.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lbarCheck=true;}
 	    if(id==12){ vl.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); vlCheck=true;}
@@ -1082,6 +1085,8 @@ int main(int argc, char* argv[])
 	  if( lbarCheck && vlCheck ) V_tlv = lbar + vl; // WToLNu       
 	  lheV_pt = V_tlv.Pt();
 	}
+
+	//std::cout << "lhe V pt = " << lheV_pt << std::endl;
 
 	//Write event info 
 	EVENT.run = ev.id().run();
