@@ -242,7 +242,7 @@ int main(int argc, char* argv[])
       LorentzVector metP4(phys.met[0]);
       int nbtags(0),njets30(0),njets15(0);
       double mindphijmet(9999.);
-      std::vector<LorentzVector> jetsP4;
+      PhysicsObjectJetCollection jetsP4;
       std::vector<double> genJetsPt;
       LorentzVector recoilJet(0,0,0,0);
       double recoilJetMva(-1);
@@ -284,8 +284,8 @@ int main(int argc, char* argv[])
       LorentzVector rawRedMet(METUtils::redMET(METUtils::INDEPENDENTLYMINIMIZED, gamma, 0, nullP4, 0, rawClusteredMet, rawZvv,true));
       LorentzVectorCollection zvvs,redMets,min3Mets;
       std::vector<Float_t>  redMetLs,redMetTs;
-      std::vector<LorentzVectorCollection> jets;
-      METUtils::computeVariation(jetsP4, genJetsPt, rawZvv, jets, zvvs, &jecUnc);
+      std::vector<PhysicsObjectJetCollection> jets;
+      METUtils::computeVariation(jetsP4, rawZvv, jets, zvvs, &jecUnc);
       for(size_t ivars=0; ivars<zvvs.size(); ivars++)
 	{
           LorentzVector clusteredMetP4(gamma); clusteredMetP4 *= -1;
@@ -399,7 +399,7 @@ int main(int argc, char* argv[])
 
 	      if(zvvs[0].pt()>70) mon.fillHisto("mindphijmet_"+subCatsToFill[isc],ctf, mindphijmet,iweight);	      
 	      if(passMinDphiJmet) continue;
-	      if(runBlinded && !isMC && evSummaryHandler.hasSpoilerAlert(!isMC,ctf)) continue;
+	      if(runBlinded && !isMC && evSummaryHandler.hasSpoilerAlert(!isMC)) continue;
 	      mon.fillHisto("met_rawmet_"+subCatsToFill[isc],ctf, rawZvv.pt(),iweight);
 	      mon.fillHisto("metoverqt_"+subCatsToFill[isc],ctf, zvvs[0].pt()/gamma.pt(),iweight);
 	      mon.fillHisto("met_met_"+subCatsToFill[isc],ctf, zvvs[0].pt(),iweight);

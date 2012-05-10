@@ -763,11 +763,11 @@ int main(int argc, char* argv[])
       std::vector<double> genJetsPt;
       for(size_t ijet=0; ijet<phys.jets.size(); ijet++)      genJetsPt.push_back( phys.jets[ijet].genPt );
       LorentzVectorCollection zvvs;
-      std::vector<LorentzVectorCollection> Jets;
-      if(/*runSystematics*/ true) METUtils::computeVariation(jetsP4, genJetsPt, redMetP4, Jets, zvvs,&jecUnc);
+      std::vector<PhysicsObjectJetCollection> Jets;
+      if(/*runSystematics*/ true) METUtils::computeVariation(phys.jets, redMetP4, Jets, zvvs,&jecUnc);
 
       zvvs.insert(zvvs.begin(),redMetP4);
-      Jets.insert(Jets.begin(),jetsP4);
+      Jets.insert(Jets.begin(),phys.jets);
       //std::vector<Float_t>  mts;
       //for(size_t ivar=0; ivar<(runSystematics?3:1); ivar++){
       //    Float_t imt     = METUtils::transverseMass(zll,zvvs[ivar],true);
@@ -782,16 +782,16 @@ int main(int argc, char* argv[])
       }
       //Same for PFMEt
       LorentzVectorCollection MetPF;
-      std::vector<LorentzVectorCollection> Jets1;
-      if(/*runSystematics*/ true) METUtils::computeVariation(jetsP4, genJetsPt, phys.met[0], Jets1, MetPF,&jecUnc);
+      std::vector<PhysicsObjectJetCollection> Jets1;
+      if(/*runSystematics*/ true) METUtils::computeVariation(phys.jets, phys.met[0], Jets1, MetPF,&jecUnc);
       MetPF.insert(MetPF.begin(),phys.met[0]);
-      Jets1.insert(Jets1.begin(),jetsP4);
+      Jets1.insert(Jets1.begin(),phys.jets);
       //Same for METD0
       LorentzVectorCollection MetD0;
-      std::vector<LorentzVectorCollection> Jets2;
-      if(/*runSystematics*/ true) METUtils::computeVariation(jetsP4, genJetsPt, redMetD0P4, Jets2, MetD0,&jecUnc);
+      std::vector<PhysicsObjectJetCollection> Jets2;
+      if(/*runSystematics*/ true) METUtils::computeVariation(phys.jets, redMetD0P4, Jets2, MetD0,&jecUnc);
       MetD0.insert(MetD0.begin(),redMetD0P4);
-      Jets2.insert(Jets2.begin(),jetsP4);
+      Jets2.insert(Jets2.begin(),phys.jets);
 
       //JER with association
       //vector<double> GenJet;

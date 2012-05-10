@@ -65,7 +65,7 @@ runLocalAnalysisOverSamples.py -e run2011Analysis -j data/samples.json -o test/r
 runLocalAnalysisOverSamples.py -e run2011Analysis -j data/samplesNoHWW.json -d /store/cmst3/user/psilva/12_03_31_HZZ2l2v_ntuples -o test/results -c test/runAnalysis_cfg.py.templ
 
 #2012
-runLocalAnalysisOverSamples.py -e runEffStudy -j data/samples_2012.json -o test/results -d /store/cmst3/user/querten/12_05_08_HZZ2l2v_ntuples -c test/runAnalysis_cfg.py.templ -s 8nh 
+runLocalAnalysisOverSamples.py -e runEffStudy -j data/samples_2012.json -o test/results -d /store/cmst3/user/psilva/12_06_09_HZZ2l2v_ntuples -c test/runAnalysis_cfg.py.templ -s 8nh 
 
 #
 # z+jets replacement

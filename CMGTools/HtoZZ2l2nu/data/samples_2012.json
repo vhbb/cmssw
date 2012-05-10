@@ -61,6 +61,26 @@
           ]
         },
 	{
+         "tag":"Single top",
+         "isdata":false,
+         "color":"824",
+         "lcolor":1,
+         "data":[
+                {
+                "dtag":"MC_SingleTbar_tW",
+                "dset":"",
+                "split":1,
+                "xsec":11.1773
+                },
+                {
+                "dtag":"MC_SingleT_tW",
+                "dset":"",
+                "split":1,
+                "xsec":11.1773
+                }
+          ]
+        },
+	{
 	"tag":"QCD",
         "isdata":false,
 	"color":"400",
@@ -222,19 +242,19 @@
            "marker":20,
            "data":[
                 {
-	         "dtag":"Data_DoubleElectron2012A",
+	         "dtag":"Data_DoubleElectron2012A-28Apr",
 		 "dset":"/DoubleElectron/Run2012A-PromptReco-v1/AOD",
 		 "patdir":["/castor/cern.ch/user/w/wangjian/test0503/pattest/wangjian/DoubleElectron/HZZ2l2vPAT_0503/0e0eed680a2f3fd2c04fa07a59d6ca8f"],
                  "split":2
                 },
                 {
-	         "dtag":"Data_DoubleMu2012A",
+	         "dtag":"Data_DoubleMu2012A-28Apr",
 		 "patdir":["/castor/cern.ch/user/w/wangjian/test0503/pattest/wangjian/DoubleMu/HZZ2l2vPAT_0504/0e0eed680a2f3fd2c04fa07a59d6ca8f"],
 		 "dset":"/DoubleMu/Run2012A-PromptReco-v1/AOD",
                  "split":2
                 },
                 {
-                 "dtag":"Data_MuEG2012A",
+                 "dtag":"Data_MuEG2012A-28Apr",
                  "dset":"/MuEG/Run2012A-PromptReco-v1/AOD",
 		 "patdir":["/castor/cern.ch/user/w/wangjian/test0503/pattest/wangjian/MuEG/HZZ2l2vPAT_0504/0e0eed680a2f3fd2c04fa07a59d6ca8f"],
                  "split":2

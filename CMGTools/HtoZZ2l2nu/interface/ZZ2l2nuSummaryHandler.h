@@ -33,7 +33,7 @@ struct ZZ2l2nuSummary_t
   Float_t rho,rho25,rho25Neut;
 
   //gen level 
-  Int_t nvtx, ngenITpu,ngenOOTpu,ngenOOTpum1;
+  Int_t nvtx, ngenITpu,ngenOOTpu,ngenOOTpum1, ngenTruepu;
   Float_t puWeight, hptWeights[5];
   Float_t pthat,genWeight, qscale, x1,x2;
   Int_t id1,id2;

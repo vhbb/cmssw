@@ -783,13 +783,11 @@ int main(int argc, char* argv[])
       //count jets and b-tags
       int njets(0),njetsinc(0);
       int nbtags(0), nbtags_tchel(0),   nbtags_tche2(0),  nbtags_csvl(0);
-      LorentzVectorCollection jetsP4;
-      std::vector<double> genJetsPt;
+      PhysicsObjectJetCollection jetsP4;
       int nheavyjets(0), nlightsjets(0);
       for(size_t ijet=0; ijet<phys.jets.size(); ijet++){
           jetsP4.push_back( phys.jets[ijet] );
-	  genJetsPt.push_back( phys.jets[ijet].genPt );
-          njetsinc++;
+	  njetsinc++;
           if(fabs(phys.jets[ijet].eta())<2.5){
               njets++;
               bool passTCHEL(phys.jets[ijet].btag1>1.7);
@@ -841,9 +839,9 @@ int main(int argc, char* argv[])
       LorentzVector rACMetP4   = METUtils::redMET(METUtils::INDEPENDENTLYMINIMIZED, lep1, 0, lep2, 0, assocMetP4         , clusteredMetP4     , isGammaEvent);
       LorentzVector r3MetP4    = METUtils::redMET(METUtils::INDEPENDENTLYMINIMIZED, lep1, 0, lep2, 0, assocMetP4         , clusteredMetP4, zvv, isGammaEvent);
       LorentzVector rmAMetP4   = METUtils::redMET(METUtils::INDEPENDENTLYMINIMIZED, lep1, 0, lep2, 0, min(zvv,assocMetP4), clusteredMetP4, zvv, isGammaEvent);
-      LorentzVector redMetP4   = METUtils::redMET(METUtils::INDEPENDENTLYMINIMIZED, lep1, 0, lep2, 0, jetsP4             , zvv                , isGammaEvent, &redMetInfo);
+      LorentzVector redMetP4   = METUtils::redMET(METUtils::INDEPENDENTLYMINIMIZED, lep1, 0, lep2, 0, clusteredMetP4     , zvv                , isGammaEvent, &redMetInfo);
       double redMet = redMetP4.pt();   double redMetL = redMetInfo.redMET_l; double redMetT = redMetInfo.redMET_t;
-      LorentzVector redMetD0P4 = METUtils::redMET(METUtils::D0, lep1, 0, lep2, 0, jetsP4             , zvv                , isGammaEvent); 
+      LorentzVector redMetD0P4 = METUtils::redMET(METUtils::D0, lep1, 0, lep2, 0, clusteredMetP4             , zvv                , isGammaEvent); 
       //Float_t projMet              =  isGammaEvent ? 0 : METUtils::projectedMET(phys.leptons[0], phys.leptons[1], zvv).pt();
 
       //met control
@@ -1344,16 +1342,19 @@ int main(int argc, char* argv[])
 
          //computation for systematics
          LorentzVectorCollection metVars, redMetVars;
-         std::vector<LorentzVectorCollection> jetVars;
+         std::vector<PhysicsObjectJetCollection> jetVars;
          std::vector<int> eventCategoryVars;
          std::vector<Float_t>  mtVars;
          if(runSystematics){
-	   METUtils::computeVariation(jetsP4,genJetsPt,phys.met[0],jetVars, metVars,&jecUnc);
+	   METUtils::computeVariation(jetsP4,phys.met[0],jetVars, metVars,&jecUnc);
               for(size_t ivar=0; ivar<3; ivar++){
                 eventCategoryVars.push_back( eventCategoryInst.Get(phys, &(jetVars[ivar])) );
               
+		LorentzVector clusteredMetP4(zll); clusteredMetP4 *= -1;
+		for(size_t ijet=0; ijet<jetVars[ivar].size(); ijet++) clusteredMetP4 -= jetVars[ivar][ijet];
+
                  METUtils::stRedMET temp_redMetInfo;
-                 LorentzVector temp_redMetP4 = METUtils::redMET(METUtils::INDEPENDENTLYMINIMIZED, lep1, 0, lep2, 0, jetVars[ivar], metVars[ivar], isGammaEvent, &temp_redMetInfo);
+		 LorentzVector temp_redMetP4 = METUtils::redMET(METUtils::INDEPENDENTLYMINIMIZED, lep1, 0, lep2, 0, clusteredMetP4, metVars[ivar], isGammaEvent, &temp_redMetInfo);
                  redMetVars.push_back(temp_redMetP4);
               
                  Float_t imt     = METUtils::transverseMass(zll,metVars[ivar],true);

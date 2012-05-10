@@ -336,13 +336,13 @@ int main(int argc, char* argv[])
 	}
 
       //analyze JET/MET
-      LorentzVectorCollection jetsP4;
-      std::vector<double> genJetsPt;
-      for(size_t ijet=0; ijet<phys.jets.size(); ijet++)
-	{
-	  jetsP4.push_back( phys.jets[ijet] );
-	  genJetsPt.push_back( phys.jets[ijet].genPt);
-	}
+      PhysicsObjectJetCollection jetsP4=phys.jets;
+//       std::vector<double> genJetsPt;
+//       for(size_t ijet=0; ijet<phys.jets.size(); ijet++)
+// 	{
+// 	  jetsP4.push_back( phys.jets[ijet] );
+// 	  genJetsPt.push_back( phys.jets[ijet].genPt);
+// 	}
       //base raw METs
       LorentzVector rawZvv(phys.met[0]);
       LorentzVector rawClusteredMet(zll);            rawClusteredMet *= -1;
@@ -353,8 +353,8 @@ int main(int argc, char* argv[])
       //prepare variations (first variation is the baseline, corrected for JER) 
       LorentzVectorCollection zvvs,redMets;
       std::vector<Float_t>  mts,mt3s,redMetLs,redMetTs;
-      std::vector<LorentzVectorCollection> jets;
-      METUtils::computeVariation(jetsP4, genJetsPt, rawZvv, jets, zvvs, &jecUnc);
+      std::vector<PhysicsObjectJetCollection> jets;
+      METUtils::computeVariation(jetsP4, rawZvv, jets, zvvs, &jecUnc);
       for(size_t ivars=0; ivars<zvvs.size(); ivars++)
 	{
 	  LorentzVector clusteredMetP4(zll); clusteredMetP4 *= -1;
@@ -371,7 +371,7 @@ int main(int argc, char* argv[])
 	Float_t zmass=zll.mass();
 	Float_t zpt=zll.pt();
 	Float_t zeta=zll.eta();
-	LorentzVectorCollection &origJetsP4=jets[0];            
+	PhysicsObjectJetCollection&origJetsP4=jets[0];            
 	LorentzVector zvv    = zvvs[0];
 	LorentzVector redMet = redMets[0];
 	Float_t redMetL      = redMetLs[0];

@@ -197,15 +197,16 @@ void DileptonPlusMETEventAnalyzer::saveMCtruth(const edm::Event &event, const ed
     {
       for(std::vector<PileupSummaryInfo>::const_iterator it = puInfoH->begin(); it != puInfoH->end(); it++)
 	{
-	  if(it->getBunchCrossing()==0) { npuIT += it->getPU_NumInteractions(); truePU = it->getTrueNumInteractions()/3.; }
+	  if(it->getBunchCrossing()==0) { npuIT += it->getPU_NumInteractions(); truePU = it->getTrueNumInteractions(); }
 	  else                          npuOOT += it->getPU_NumInteractions();
 	  if(it->getBunchCrossing()<0)  npuOOTm1 += it->getPU_NumInteractions();
-
+	  
 	}
     }
   ev.ngenITpu=npuIT;
   ev.ngenOOTpu=npuOOT;
   ev.ngenOOTpum1=npuOOTm1;
+  ev.ngenTruepu=truePU;
   controlHistos_.fillHisto("pileup","all",ev.ngenITpu);
   controlHistos_.fillHisto("pileuptrue","all",truePU);
 

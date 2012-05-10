@@ -32,25 +32,35 @@ class PhysicsObject_Lepton : public LorentzVector
     ecalIso(ecalIso_), hcalIso(hcalIso_), trkIso(trkIso_), gIso(gIso_), chIso(chIso_), puchIso(puchIso_), nhIso(nhIso_),
     pid(pid_) { }
 
-    Float_t relIso()              { return (ecalIso+hcalIso+trkIso)/pt(); }
-    Float_t relIsoRho(double rho) { return (TMath::Max(ecalIso+hcalIso-0.3*0.3*3.1415*rho,0.)+trkIso)/pt(); }
-    Float_t pfRelIsoDbeta()       { return (TMath::Max(nhIso+gIso-0.5*puchIso,0.)+chIso)/pt(); }
-    Float_t pfRelIso()            { return (nhIso+gIso+chIso)/pt(); }
-    Float_t ePFRelIsoCorrected2012(double rho)   
-    {   
-      //cf. https://twiki.cern.ch/twiki/bin/view/CMS/EgammaEARhoCorrection   
-      Float_t aeff(0.19);   
-      if(fabs(eta())>2.4)        aeff=0.52;   
-      else if(fabs(eta())>2.3)   aeff=0.44;   
-      else if(fabs(eta())>2.2)   aeff=0.27;   
-      else if(fabs(eta())>2.0)   aeff=0.21;   
-      else if(fabs(eta())>1.479) aeff=0.12;   
-      else if(fabs(eta())>1.0)   aeff=0.25;   
-     
-      return (chIso+TMath::Max(gIso+nhIso-rho*aeff,0.))/pt();   
-    } 
-
-    
+    Float_t relIso()                              { return (ecalIso+hcalIso+trkIso)/pt(); }
+    Float_t relIsoRho(double rho,double cone=0.3) { return (TMath::Max(ecalIso+hcalIso-pow(cone,2)*3.1415*rho,0.)+trkIso)/pt(); }
+    Float_t pfRelIsoDbeta()                       { return (TMath::Max(nhIso+gIso-0.5*puchIso,0.)+chIso)/pt(); }
+    Float_t pfRelIso()                            { return (nhIso+gIso+chIso)/pt(); }
+    Float_t relTkIso()                            { return trkIso/pt(); }
+    Float_t ePFRelIsoCorrected2012(double rho)
+    {
+      //cf. https://twiki.cern.ch/twiki/bin/view/CMS/EgammaEARhoCorrection
+      Float_t aeff(0.19);
+      if(fabs(eta())>2.4)        aeff=0.52;
+      else if(fabs(eta())>2.3)   aeff=0.44;
+      else if(fabs(eta())>2.2)   aeff=0.27;
+      else if(fabs(eta())>2.0)   aeff=0.21;
+      else if(fabs(eta())>1.479) aeff=0.12;
+      else if(fabs(eta())>1.0)   aeff=0.25;
+      
+      return (chIso+TMath::Max(gIso+nhIso-rho*aeff,0.))/pt();
+    }
+    Float_t muPFRelIsoCorrected2012(double rho)
+    {
+      //cf. page 9 https://indico.cern.ch/getFile.py/access?contribId=1&resId=0&materialId=slides&confId=188494
+      Float_t aeff(0.674);
+      if(fabs(eta())>2.3)        aeff=0.660;
+      else if(fabs(eta())>2.2)   aeff=0.821;
+      else if(fabs(eta())>2.0)   aeff=0.515;
+      else if(fabs(eta())>1.5)   aeff=0.442;
+      else if(fabs(eta())>1.0)   aeff=0.565;      
+      return (chIso+TMath::Max(gIso+nhIso-rho*aeff,0.))/pt();
+    }
     void setTrackInfo(Float_t d0_, Float_t dZ_, Float_t trkpt_, Float_t trketa_, Float_t trkphi_, Float_t trkchi2_, Float_t trkValidPixelHits_, Float_t trkValidTrackerHits_, Float_t trkLostInnerHits_)
     {
       d0=d0_; dZ=dZ_;
@@ -76,13 +86,14 @@ public :
       genPt=0;
       pumva=-9999.;
     }
+    void setGenFlavor(Int_t flavid_){ flavid=flavid_;}
     void setGenPt(float val) { if(val<0 || val>1000) genPt=0; else genPt=val; }
     void setPUmva(float val) { pumva=val; }
     void setShapeVariables(float beta_,  float betaStar_, float dRMean_, float ptD_, float ptRMS_)
     {
       beta=beta_; betaStar=betaStar_; dRMean=dRMean_; ptD=ptD_; ptRMS=ptRMS_;
     }
-    Int_t genid;
+    Int_t genid,flavid;
     Float_t beta,betaStar,dRMean,ptD,ptRMS;
     Float_t btag1, btag2, btag3, neutHadFrac, neutEmFrac, chHadFrac, genPt,pumva;
     Int_t pid;

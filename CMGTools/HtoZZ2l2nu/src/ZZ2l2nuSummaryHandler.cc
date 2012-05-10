@@ -33,6 +33,7 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("ngenITpu",   &evSummary_.ngenITpu,   "ngenITpu/I");
   t_->Branch("ngenOOTpu",  &evSummary_.ngenOOTpu,  "ngenOOTpu/I");
   t_->Branch("ngenOOTpum1",  &evSummary_.ngenOOTpum1,  "ngenOOTpum1/I");
+  t_->Branch("ngenTruepu",  &evSummary_.ngenTruepu,  "ngenTruepu/I");
   t_->Branch("puweight",     &evSummary_.puWeight,     "puweight/F");
   t_->Branch("hptWeights", evSummary_.hptWeights,  "hptWeights[5]/F");
   t_->Branch("pthat",      &evSummary_.pthat,      "pthat/F");
@@ -326,6 +327,7 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   t_->GetBranch("ngenITpu")->SetAddress(&evSummary_.ngenITpu);
   t_->GetBranch("ngenOOTpu")->SetAddress(&evSummary_.ngenOOTpu);
   t_->GetBranch("ngenOOTpum1")->SetAddress(&evSummary_.ngenOOTpum1);
+  if(t_->GetBranch("ngenTruepu")) t_->GetBranch("ngenTruepu")->SetAddress(&evSummary_.ngenTruepu);
   t_->GetBranch("pthat")->SetAddress(&evSummary_.pthat);
   t_->GetBranch("genWeight")->SetAddress(&evSummary_.genWeight);
   t_->GetBranch("qscale")->SetAddress(&evSummary_.qscale);
