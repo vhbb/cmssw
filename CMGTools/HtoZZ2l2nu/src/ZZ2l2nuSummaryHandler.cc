@@ -63,6 +63,8 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("l1_ensferr",             &evSummary_.l1_ensferr,             "l1_ensferr/F");
   t_->Branch("l1_d0",                  &evSummary_.l1_d0,                  "l1_d0/F");
   t_->Branch("l1_dZ",                  &evSummary_.l1_dZ,                  "l1_dZ/F");
+  t_->Branch("l1_ip3d",                &evSummary_.l1_ip3d,                "l1_ip3d/F");
+  t_->Branch("l1_ip3dsig",             &evSummary_.l1_ip3dsig,             "l1_ip3dsig/F");
   t_->Branch("l1_trkpt",               &evSummary_.l1_trkpt,               "l1_trkpt/F");
   t_->Branch("l1_trketa",              &evSummary_.l1_trketa,              "l1_trketa/F");
   t_->Branch("l1_trkphi",              &evSummary_.l1_trkphi,              "l1_trkphi/F");
@@ -90,6 +92,8 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("l2_ensferr",             &evSummary_.l2_ensferr,             "l2_ensferr/F");
   t_->Branch("l2_d0",                  &evSummary_.l2_d0,                  "l2_d0/F");
   t_->Branch("l2_dZ",                  &evSummary_.l2_dZ,                  "l2_dZ/F");
+  t_->Branch("l2_ip3d",                &evSummary_.l2_ip3d,                "l2_ip3d/F");
+  t_->Branch("l2_ip3dsig",             &evSummary_.l2_ip3dsig,             "l2_ip3dsig/F");
   t_->Branch("l2_trkpt",               &evSummary_.l2_trkpt,               "l2_trkpt/F");
   t_->Branch("l2_trketa",              &evSummary_.l2_trketa,              "l2_trketa/F");
   t_->Branch("l2_trkphi",              &evSummary_.l2_trkphi,              "l2_trkphi/F");
@@ -119,6 +123,8 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("ln_ensferr",             evSummary_.ln_ensferr,             "ln_ensferr[ln]/F");
   t_->Branch("ln_d0",                  evSummary_.ln_d0,                  "ln_d0[ln]/F");
   t_->Branch("ln_dZ",                  evSummary_.ln_dZ,                  "ln_dZ[ln]/F");
+  t_->Branch("ln_ip3d",                evSummary_.ln_ip3d,                "ln_ip3d[ln]/F");
+  t_->Branch("ln_ip3dsig",             evSummary_.ln_ip3dsig,             "ln_ip3dsig[ln]/F");
   t_->Branch("ln_trkpt",               evSummary_.ln_trkpt,               "ln_trkpt[ln]/F");
   t_->Branch("ln_trketa",              evSummary_.ln_trketa,              "ln_trketa[ln]/F");
   t_->Branch("ln_trkphi",              evSummary_.ln_trkphi,              "ln_trkphi[ln]/F");
@@ -131,6 +137,7 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("en",         &evSummary_.en,         "en/I");
   t_->Branch("en_idbits",  evSummary_.en_idbits,   "en_idbits[en]/I");
   t_->Branch("en_hoe",     evSummary_.en_hoe ,     "en_hoe[en]/F");
+  t_->Branch("en_hoebc",     evSummary_.en_hoebc ,     "en_hoebc[en]/F");
   t_->Branch("en_dphiin",  evSummary_.en_dphiin ,  "en_dphiin[en]/F");
   t_->Branch("en_detain",  evSummary_.en_detain ,  "en_detain[en]/F");
   t_->Branch("en_sihih",   evSummary_.en_sihih ,   "en_sihih[en]/F");
@@ -147,10 +154,23 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("en_ooemoop", evSummary_.en_ooemoop,  "en_ooemoop[en]/F");
   t_->Branch("en_fbrem",   evSummary_.en_fbrem,    "en_fbrem[en]/F");
   t_->Branch("en_eopin",   evSummary_.en_eopin,    "en_eopin[en]/F");
+  t_->Branch("en_dEtaCalo",   evSummary_.en_dEtaCalo,    "en_dEtaCalo[en]/F");
+  t_->Branch("en_dPhiCalo",   evSummary_.en_dPhiCalo,    "en_dPhiCalo[en]/F");
+  t_->Branch("en_kfchi2",   evSummary_.en_kfchi2,    "en_kfchi2[en]/F");
+  t_->Branch("en_kfhits",   evSummary_.en_kfhits,    "en_kfhits[en]/F");
+  t_->Branch("en_kfhitsall",   evSummary_.en_kfhitsall,    "en_kfhitsall[en]/F");
+  t_->Branch("en_sihip",   evSummary_.en_sihip,    "en_sihip[en]/F");
+  t_->Branch("en_nbrems",   evSummary_.en_nbrems,    "en_nbrems[en]/F");
+  t_->Branch("en_etawidth",   evSummary_.en_etawidth,    "en_etawidth[en]/F");
+  t_->Branch("en_phiwidth",   evSummary_.en_phiwidth,    "en_phiwidth[en]/F");
+  t_->Branch("en_e1x5e5x5",   evSummary_.en_e1x5e5x5,    "en_e1x5e5x5[en]/F");
+  t_->Branch("en_preShowerOverRaw",   evSummary_.en_preShowerOverRaw,    "en_preShowerOverRaw[en]/F");
+  t_->Branch("en_eopout",   evSummary_.en_eopout,    "en_eopout[en]/F");
 
   t_->Branch("mn",               &evSummary_.mn,              "mn/I");
   t_->Branch("mn_idbits",        evSummary_.mn_idbits,        "mn_idbits[mn]/I");
   t_->Branch("mn_nMatches",      evSummary_.mn_nMatches ,     "mn_nMatches[mn]/F");
+  t_->Branch("mn_nMatchedStations", evSummary_.mn_nMatchedStations ,     "mn_nMatchedStations[mn]/F");
   t_->Branch("mn_validMuonHits", evSummary_.mn_validMuonHits, "mn_validMuonHits[mn]/F");
   t_->Branch("mn_innerTrackChi2",evSummary_.mn_innerTrackChi2,"mn_innerTrackChi2[mn]/F");
   t_->Branch("mn_trkLayersWithMeasurement",evSummary_.mn_trkLayersWithMeasurement,"mn_trkLayersWithMeasurement[mn]/F");
@@ -255,6 +275,7 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("g_sipip",     evSummary_.g_sipip,     "g_sipip[gn]/F");
   t_->Branch("g_r9",        evSummary_.g_r9,        "g_r9[gn]/F");
   t_->Branch("g_hoe",       evSummary_.g_hoe,       "g_hoe[gn]/F");
+  t_->Branch("g_htoe",      evSummary_.g_htoe,      "g_htoe[gn]/F");
   t_->Branch("g_corren",    evSummary_.g_corren,    "g_corren[gn]/F");
   t_->Branch("g_correnerr", evSummary_.g_correnerr, "g_correnerr[gn]/F");
   t_->Branch("g_idbits",    evSummary_.g_idbits,    "g_idbits[gn]/I");
@@ -406,6 +427,7 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   t_->GetBranch("en"              )->SetAddress(&evSummary_.en);
   t_->GetBranch("en_idbits"       )->SetAddress(evSummary_.en_idbits);
   t_->GetBranch("en_hoe"          )->SetAddress(evSummary_.en_hoe);
+  if(t_->GetBranch("en_hoebc")    ) t_->GetBranch("en_hoebc")->SetAddress(evSummary_.en_hoebc);
   t_->GetBranch("en_dphiin"       )->SetAddress(evSummary_.en_dphiin);
   t_->GetBranch("en_detain"       )->SetAddress(evSummary_.en_detain);
   t_->GetBranch("en_sihih"        )->SetAddress(evSummary_.en_sihih);
@@ -422,9 +444,22 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   t_->GetBranch("en_ooemoop"      )->SetAddress(evSummary_.en_ooemoop);
   t_->GetBranch("en_fbrem"        )->SetAddress(evSummary_.en_fbrem);
   t_->GetBranch("en_eopin"        )->SetAddress(evSummary_.en_eopin);
+  t_->GetBranch("en_dEtaCalo"     )->SetAddress(evSummary_.en_dEtaCalo);
+  t_->GetBranch("en_dPhiCalo"     )->SetAddress(evSummary_.en_dPhiCalo);
+  t_->GetBranch("en_kfchi2"       )->SetAddress(evSummary_.en_kfchi2);
+  t_->GetBranch("en_kfhits"       )->SetAddress(evSummary_.en_kfhits);
+  t_->GetBranch("en_kfhitsall"    )->SetAddress(evSummary_.en_kfhitsall);
+  t_->GetBranch("en_sihip"        )->SetAddress(evSummary_.en_sihip);
+  t_->GetBranch("en_nbrems"       )->SetAddress(evSummary_.en_nbrems);
+  t_->GetBranch("en_etawidth"     )->SetAddress(evSummary_.en_etawidth);
+  t_->GetBranch("en_phiwidth"     )->SetAddress(evSummary_.en_phiwidth);
+  t_->GetBranch("en_e1x5e5x5"     )->SetAddress(evSummary_.en_e1x5e5x5);
+  t_->GetBranch("en_preShowerOverRaw")->SetAddress(evSummary_.en_preShowerOverRaw);
+  t_->GetBranch("en_eopout"        )->SetAddress(evSummary_.en_eopout);
   t_->GetBranch("mn"              )->SetAddress(&evSummary_.mn);
   t_->GetBranch("mn_idbits"       )->SetAddress(evSummary_.mn_idbits);
   t_->GetBranch("mn_nMatches"     )->SetAddress(evSummary_.mn_nMatches);
+  t_->GetBranch("mn_nMatchedStations")->SetAddress(evSummary_.mn_nMatchedStations);
   t_->GetBranch("mn_validMuonHits")->SetAddress(evSummary_.mn_validMuonHits);
   if(t_->GetBranch("mn_innerTrackChi2"))             t_->GetBranch("mn_innerTrackChi2")->SetAddress(evSummary_.mn_innerTrackChi2);
   if(t_->GetBranch("mn_trkLayersWithMeasurement"))   t_->GetBranch("mn_trkLayersWithMeasurement")->SetAddress(evSummary_.mn_trkLayersWithMeasurement);
@@ -454,7 +489,7 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   t_->GetBranch("jn_ptRMS")       ->SetAddress(evSummary_.jn_ptRMS);
   if(t_->GetBranch("jn_etaW"))  t_->GetBranch("jn_etaW")->SetAddress(evSummary_.jn_etaW);
   if(t_->GetBranch("jn_phiW"))  t_->GetBranch("jn_phiW")->SetAddress(evSummary_.jn_phiW);
-  t_->GetBranch("jn_idbits")      ->SetAddress(evSummary_.jn_idbits);
+  t_->GetBranch("jn_idbits")->SetAddress(evSummary_.jn_idbits);
   
   t_->GetBranch("htvec_px")->SetAddress(&evSummary_.htvec_px);
   t_->GetBranch("htvec_py")->SetAddress(&evSummary_.htvec_py);
@@ -523,6 +558,7 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   t_->GetBranch("g_sipip")     ->SetAddress(evSummary_.g_sipip);
   t_->GetBranch("g_r9")        ->SetAddress(evSummary_.g_r9);
   t_->GetBranch("g_hoe")       ->SetAddress(evSummary_.g_hoe);
+  if(t_->GetBranch("g_htoe"))  t_->GetBranch("g_htoe")->SetAddress(evSummary_.g_htoe);
   t_->GetBranch("g_corren")    ->SetAddress(evSummary_.g_corren);
   t_->GetBranch("g_correnerr") ->SetAddress(evSummary_.g_correnerr);
   t_->GetBranch("g_idbits")    ->SetAddress(evSummary_.g_idbits);
@@ -563,7 +599,29 @@ void ZZ2l2nuSummaryHandler::fillTree()
   if(t_) t_->Fill();
 }
 
+/*
 //
+bool ZZ2l2nuSummaryHandler::hasSpoilerAlert(bool isData,TString category)
+{
+  if(!isData) return false;
+  if(evSummary_.cat!=1 && evSummary_.cat!=2)return false; //make sure that we clean only EE or MUMU events
+
+  //VBF category
+  if(category.Contains("vbf") && evSummary_.met_pt[0]>70) return false;
+
+  //Inclusive category: compute the invariant mass
+  LorentzVector l1(evSummary_.l1_px,evSummary_.l1_py,evSummary_.l1_pz,evSummary_.l1_en);
+  LorentzVector l2(evSummary_.l2_px,evSummary_.l2_py,evSummary_.l2_pz,evSummary_.l2_en);
+  LorentzVector visible(l1+l2);
+  LorentzVector invisible(evSummary_.met_pt[0]*cos(evSummary_.met_phi[0]),evSummary_.met_pt[0]*sin(evSummary_.met_phi[0]),0,evSummary_.met_pt[0]);
+  LorentzVector sum=visible+invisible;
+  Double_t tMass = TMath::Power(TMath::Sqrt(TMath::Power(visible.pt(),2)+pow(visible.mass(),2))+TMath::Sqrt(TMath::Power(invisible.pt(),2)+pow(visible.mass(),2)),2);
+  tMass-=TMath::Power(sum.pt(),2);
+  return (TMath::Sqrt(tMass)>250);
+}
+*/
+
+
 bool ZZ2l2nuSummaryHandler::hasSpoilerAlert(bool isData)
 {
   if(!isData) return false;
