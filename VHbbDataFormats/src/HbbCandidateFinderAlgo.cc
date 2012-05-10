@@ -547,20 +547,43 @@ For both W -> mu nu and Z -> mu mu, we adopt the standard VBTF muon selection de
     pT(mu) > 20 GeV 
   */
   //  for (std::vector<VHbbEvent::MuonInfo>::const_iterator it = muons.begin(); it!= muons.end(); ++it){
+
+/* New iso:
+
+Alternatively, for analysis using rho correction, Effective Areas are also provided using following prescription:
+Correction to be done as PFIsoCorr = PF(PFNoPU) – Max ((PF(Nh+Ph) - ρ’EACombined),0.0)) where ρ’=max(ρ,0.0) and with a 0.5 GeV threshold on neutrals
+Rho is neutral rho, defined in full tracker acceptance, with a 0.5 GeV threshold on neutrals. This can be taken, starting from 50X, from the event directly (double_kt6PFJetsCentralNeutral_rho_RECO.obj) For its exact definition see [2].
+Values of Effective Areas EACombined are provided in this link, page 9 (see PF Combined Column, DeltaR >0/4 )
+[2] kt6PFJetsCentralNeutral = kt6PFJets.clone( src = cms.InputTag("pfAllNeutralHadronsAndPhotons"), Ghost_EtaMax = cms.double(3.1), Rho_EtaMax = cms.double(2.5), inputEtMin = cms.double(0.5) )
+
+Effective area, last column matters for us:
+           |                   PF Neutral                  |                  PF  Photons                 |                PF  Combined                 |
+     Muon Eta       |    DR < 0.30       |    DR < 0.40      |    DR < 0.30       |    DR < 0.40      |    DR < 0.30       |    DR < 0.40       |
+0.0 < |eta| < 1.0  | 0.107 +/- 0.010 | 0.166 +/- 0.013 | 0.274 +/- 0.017 | 0.504 +/- 0.020 | 0.382 +/- 0.034 | 0.674 +/- 0.020 |
+1.0 < |eta| < 1.5  | 0.141 +/- 0.016 | 0.259 +/- 0.023 | 0.161 +/- 0.019 | 0.306 +/- 0.027 | 0.317 +/- 0.045 | 0.565 +/- 0.027 |
+1.5 < |eta| < 2.0  | 0.159 +/- 0.017 | 0.247 +/- 0.025 | 0.079 +/- 0.015 | 0.198 +/- 0.026 | 0.242 +/- 0.040 | 0.442 +/- 0.026 |
+2.0 < |eta| < 2.2  | 0.102 +/- 0.022 | 0.220 +/- 0.036 | 0.168 +/- 0.035 | 0.287 +/- 0.048 | 0.326 +/- 0.076 | 0.515 +/- 0.048 |
+2.2 < |eta| < 2.3  | 0.096 +/- 0.030 | 0.340 +/- 0.072 | 0.359 +/- 0.072 | 0.525 +/- 0.074 | 0.462 +/- 0.159 | 0.821 +/- 0.074 |
+2.3 < |eta| < 2.4  | 0.104 +/- 0.036 | 0.216 +/- 0.056 | 0.294 +/- 0.064 | 0.488 +/- 0.083 | 0.372 +/- 0.141 | 0.660 +/- 0.083 |
+
+*/
+
   for (unsigned int it = 0; it < muons.size();  ++it){
     if (
+        muons[it].isPF &&
 	muons[it]. globChi2<10 &&
 	muons[it].nPixelHits>= 1 &&
         muons[it].globNHits != 0 &&
-	muons[it].nHits > 10 &&
+	muons[it].nValidLayers > 5 &&
+//	muons[it].nHits > 10 &&
         //tracker
-	(muons[it].cat & 0x1) && 
+//	(muons[it].cat & 0x1) && 
 	//global
 	(muons[it].cat & 0x2) && 
 	muons[it].nMatches >=2 &&
 	muons[it].ipDb<.2 &&
 	//	(muons[it].hIso+muons[it].eIso+muons[it].tIso)/muons[it].p4.Pt()<.15 &&
-	(muons[it].pfChaIso+muons[it].pfPhoIso+muons[it].pfNeuIso)/muons[it].p4.Pt()<.15  &&
+	(muons[it].pfChaPUIso+muons[it].pfPhoIso+muons[it].pfNeuIso)/muons[it].p4.Pt()<.15  &&
 	fabs(muons[it].p4.Eta())<2.4 &&
 	muons[it].p4.Pt()>20 ) {
       out.push_back(muons[it]);
@@ -596,7 +619,7 @@ We adopt the standard cut-based selection from VBTF described in detail here.
   for (unsigned int  it = 0; it< electrons.size(); ++it){
     if (
 	// fake
-	(fabs(electrons[it].id95 - 7)) < 0.1  &&
+//	(fabs(electrons[it].id95 - 7)) < 0.1  &&
 	fabs(electrons[it].p4.Eta()) < 2.5 &&
 //Remove this workaround as now we have the proper flags
 //	!( fabs(electrons[it].p4.Eta()) < 1.57 && fabs(electrons[it].p4.Eta()) > 1.44) &&

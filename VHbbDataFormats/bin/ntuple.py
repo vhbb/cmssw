@@ -7,7 +7,7 @@ process = cms.Process("FWLitePlots")
 #fileNames   = cms.vstring('file:2l2bMetEdmNtuples.root'),         ## mandatory
 process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(
-"../../HbbAnalyzer/test/PAT.edm.root"
+"/afs/cern.ch/work/a/arizzi/hbb/fresh/CMSSW_5_2_4_patch4/src/PAT1.edm.root"
 
 
 ),
@@ -108,7 +108,7 @@ process.Analyzer = cms.PSet(
         "HLT_LooseIsoPFTau35_Trk20_MET75_v.*" #38
         
    ),
-    isMC =     cms.bool(True),
+    isMC =     cms.bool(False),
     verbose = cms.bool(False),
     readFromCandidates = cms.bool(False),
     jetPtThresholdZ = cms.double(20),

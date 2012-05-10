@@ -54,10 +54,10 @@
 #include <sstream>
 #include <string>
 
-#define MAXJ 30
-#define MAXL 10
-#define MAXB 10
-#define MAXT 60
+#define MAXJ 130
+#define MAXL 110
+#define MAXB 110
+#define MAXT 160
 #define nMetUnc 24 
 //eleEnDown/Up, muEn, tauEn, JES, JER, Unclustered for type1 MET [0-11] and than type1p2 MET [12-23]
 
@@ -1000,15 +1000,15 @@ int main(int argc, char* argv[])
     // loop the events
       
       fwlite::Event ev(inFile);
+      fwlite::Handle< VHbbEventAuxInfo > vhbbAuxHandle; 
       for(ev.toBegin(); !ev.atEnd() ; ++ev, ++ievt)
         {
           if (ievt <= skipEvents_) continue;
           if (maxEvents_ >= 0){
               if (ievt > maxEvents_ + skipEvents_) break;
-          };
-
-      fwlite::Handle< VHbbEventAuxInfo > vhbbAuxHandle; 
-      vhbbAuxHandle.getByLabel(ev,"HbbAnalyzerNew");
+          }
+      const char * lab = "HbbAnalyzerNew";
+      vhbbAuxHandle.getByLabel(ev,lab,0,0);
       const VHbbEventAuxInfo & aux = *vhbbAuxHandle.product();
 
       if(EVENT.run < runMin_ && runMin_ > 0) continue;
