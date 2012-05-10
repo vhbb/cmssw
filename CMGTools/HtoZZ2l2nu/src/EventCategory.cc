@@ -1,8 +1,8 @@
 /*
  *  See header file for a description of this class.
  *
- *  $Date: 2012/04/07 13:19:56 $
- *  $Revision: 1.10 $
+ *  $Date: 2012/05/01 10:47:47 $
+ *  $Revision: 1.13 $
  *  \author L. Quertenmont
  */
 
@@ -41,35 +41,23 @@ EventCategory::EventCategory(int mode_){
 EventCategory::~EventCategory(){}
 
 //
-int EventCategory::Get(const PhysicsEvent_t& phys, LorentzVectorCollection* variedJetsP4)
+int EventCategory::Get(const PhysicsEvent_t& phys, PhysicsObjectJetCollection* JetsP4)
 {
+  if(!JetsP4){
+     printf("NoJetCollection given to EventCategory::Get\n");
+     exit(0);
+  }
+
+
+
   bool isGamma(phys.cat>3);
   
-  NJetsCentral  = 0;
   NJets = 0;
-  PhysicsObjectJetCollection jets = phys.ajets;
-
- 
-  //check jet variation
-//  if(variedJetsP4!=0)
-//  {
-//      if(variedJetsP4->size()!= jets.size()){
-//	  cout << "[EventCategory][Get] jet variation passed with different size: reverting to standard collection" << endl;
-//	  variedJetsP4=0;
-//      }
-//  }
+  PhysicsObjectJetCollection jets = *JetsP4;
   
   for(size_t ijet=0; ijet<jets.size(); ijet++){
-      float jpt=jets[ijet].pt();
-      float jeta=jets[ijet].eta();
-//    if(variedJetsP4!=0){
-//	  jpt=(*variedJetsP4)[ijet].pt();
-//	  jeta=(*variedJetsP4)[ijet].eta();
-//    }
-      
-      if(jpt<=30)continue;
+      if(jets[ijet].pt()<=30)continue;
       NJets++;
-      if(fabs(jeta)<=2.5){NJetsCentral++;}
   }
 
   bool isVBF = false;
@@ -77,11 +65,6 @@ int EventCategory::Get(const PhysicsEvent_t& phys, LorentzVectorCollection* vari
       LorentzVector VBFSyst = jets[0] + jets[1];
       double j1eta=jets[0].eta() ;
       double j2eta=jets[1].eta();
-//      if(variedJetsP4!=0){
-//	  VBFSyst=(*variedJetsP4)[0]+(*variedJetsP4)[1];
-//	  j1eta=(*variedJetsP4)[0].eta();
-//	  j2eta=(*variedJetsP4)[1].eta();
-//      }
       double dEta = fabs(j1eta-j2eta);
       
       int NCentralJet = 0;  int NCentralLepton = 0;  int NBJets = 0;
@@ -91,13 +74,9 @@ int EventCategory::Get(const PhysicsEvent_t& phys, LorentzVectorCollection* vari
       for(size_t ijet=2; ijet<jets.size(); ijet++){
 	  float jpt=jets[ijet].pt();
           float jeta=jets[ijet].eta();
-	  if(variedJetsP4!=0){
-		jpt=(*variedJetsP4)[ijet].pt();
-		jeta=(*variedJetsP4)[ijet].eta();
-	    }
-	    if(jpt<30)continue; 
-	    if(jeta>MinEta && jeta<MaxEta) NCentralJet++;  
-	    if(jets[ijet].btag1>2.0) NBJets++;
+          if(jpt<30)continue; 
+          if(jeta>MinEta && jeta<MaxEta) NCentralJet++;  
+          if(jets[ijet].btag1>2.0) NBJets++;
       }
       
       if(!isGamma){
@@ -108,7 +87,6 @@ int EventCategory::Get(const PhysicsEvent_t& phys, LorentzVectorCollection* vari
       }
       isVBF = (dEta>4.0) && (VBFSyst.M()>500) && (NCentralJet==0) && (NBJets==0) && (NCentralLepton==2);
     }
-
 
 
   switch(mode){
