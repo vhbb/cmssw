@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.70 2012/05/07 10:07:54 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.71 2012/05/09 15:55:32 arizzi Exp $
 //
 //
 
@@ -1341,7 +1341,7 @@ BTagSFContainer btagSFs;
     mf.eIso=mu->ecalIso();
     mf.hIso=mu->hcalIso();
     mf.pfChaIso=mu->chargedHadronIso();
-    mf.pfChaPUIso=mu->userIso(5);
+    mf.pfChaPUIso=mu->puChargedHadronIso(); //userIso(5);
     mf.pfPhoIso=mu->photonIso();
     mf.pfNeuIso=mu->neutralHadronIso(); 
     Geom::Phi<double> deltaphi(mu->phi()-atan2(mf.p4.Px(), mf.p4.Py()));
@@ -1450,7 +1450,7 @@ BTagSFContainer btagSFs;
     ef.eIso=elec->ecalIso();
     ef.hIso=elec->hcalIso();
     ef.pfChaIso=elec->chargedHadronIso();
-    ef.pfChaPUIso=elec->userIso(5);
+    ef.pfChaPUIso=elec->puChargedHadronIso();//userIso(5);
     ef.pfPhoIso=elec->photonIso();
     ef.pfNeuIso=elec->neutralHadronIso();
 
