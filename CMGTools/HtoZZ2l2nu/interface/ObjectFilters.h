@@ -130,9 +130,9 @@ std::vector<reco::CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Can
 						 const edm::ParameterSet &iConfig,
 						 const edm::EventSetup & iSetup,
 						 std::vector<ObjectIdSummary> &selElectronIds);
-std::vector<reco::CandidatePtr> getDileptonCandidate(std::vector<reco::CandidatePtr> &selLeptons,  const edm::ParameterSet &iConfig,  const edm::EventSetup &iSetup);
+std::vector<int> getDileptonCandidate(std::vector<reco::CandidatePtr> &selLeptons,  const edm::ParameterSet &iConfig,  const edm::EventSetup &iSetup);
 int getLeptonId(reco::CandidatePtr &lepton);
-int getDileptonId(std::vector<reco::CandidatePtr> &dilepton);
+int getDileptonId(reco::CandidatePtr &l1,reco::CandidatePtr &l2);
 double getLeptonPtError(reco::CandidatePtr &lepton);
 std::vector<double> getLeptonIso(reco::CandidatePtr &lepton, float minRelNorm=20, float rho=0);
 const reco::GenParticle *getLeptonGenMatch(reco::CandidatePtr &lepton);

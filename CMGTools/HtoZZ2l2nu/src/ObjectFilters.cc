@@ -608,16 +608,16 @@ vector<double> getLeptonIso(reco::CandidatePtr &lepton,float minRelNorm, float r
 
 
 //
-vector<CandidatePtr> getDileptonCandidate(vector<CandidatePtr> &selLeptons,  const edm::ParameterSet &iConfig, const edm::EventSetup &iSetup)
+std::vector<int> getDileptonCandidate(vector<CandidatePtr> &selLeptons,  const edm::ParameterSet &iConfig, const edm::EventSetup &iSetup)
 {
-  vector<CandidatePtr> selDilepton;
+  vector<int> selDilepton;
   
   try{
     
     //config parameters
     double minDileptonMass = iConfig.getParameter<double>("minDileptonMass");
     double maxDileptonMass = iConfig.getParameter<double>("maxDileptonMass");
-
+    double leadSumPt(0);
     for(size_t ilep=0; ilep<selLeptons.size(); ilep++)
       {
 	reco::CandidatePtr lep1Ptr = selLeptons[ilep];
@@ -636,16 +636,16 @@ vector<CandidatePtr> getDileptonCandidate(vector<CandidatePtr> &selLeptons,  con
 	    double candsumpt=lep1Ptr->pt()+lep2Ptr->pt();
 	    
 	    //if a candidate is already available take this if leading in sum pT
-	    if(selDilepton.size()==2) 
+	    if(selDilepton.size()>0)
 	      {
-		double sumpt=selDilepton[0]->pt()+selDilepton[1]->pt();
-		if(sumpt>candsumpt) continue;
+		if(candsumpt<leadSumPt) continue;
 		selDilepton.clear();
 	      }
 	    
 	    //save ordered by pt
-	    selDilepton.push_back(lep1Ptr->pt() > lep2Ptr->pt() ? lep1Ptr : lep2Ptr);
-	    selDilepton.push_back(lep1Ptr->pt() > lep2Ptr->pt() ? lep2Ptr : lep1Ptr);
+	    leadSumPt=candsumpt;
+	    selDilepton.push_back(lep1Ptr->pt() > lep2Ptr->pt() ? ilep : jlep );
+	    selDilepton.push_back(lep1Ptr->pt() > lep2Ptr->pt() ? jlep : ilep );
 	  }
       }
   }
@@ -659,12 +659,10 @@ vector<CandidatePtr> getDileptonCandidate(vector<CandidatePtr> &selLeptons,  con
 
 
 //
-int getDileptonId(std::vector<CandidatePtr> &selDilepton)
+int getDileptonId(CandidatePtr &l1,CandidatePtr &l2)
 {
-  if(selDilepton.size()!=2) return UNKNOWN;
-  
-  int id1=fabs(getLeptonId(selDilepton[0]));
-  int id2=fabs(getLeptonId(selDilepton[1]));
+  int id1=fabs(getLeptonId(l1));
+  int id2=fabs(getLeptonId(l2));
   if( id1==MUON     && id2==MUON)     return MUMU;
   if( id1==ELECTRON && id2==ELECTRON) return EE;
   if( ( id1==MUON && id2==ELECTRON) || ( id1==ELECTRON && id2==MUON)  ) return EMU;

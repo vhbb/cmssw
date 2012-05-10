@@ -36,19 +36,6 @@
  
 using namespace std;
 
-int muonIdLevel(int id, float chi2,float muonHits, float muonMatches, float d0, float dZ, float pixelHits, float trkLayers)
-{
-  if(!hasObjectId(id,MID_PF) || !hasObjectId(id,MID_GLOBAL))    return -1;
-  if(chi2>10)                     return 1;
-  if(muonHits==0)                 return 2;
-  if(muonMatches<=1)              return 3;
-  if(fabs(d0)>0.2)                return 4;
-  if(fabs(dZ)>0.5)                return 5;
-  if(pixelHits==0)                return 6;
-  if(trkLayers<=5)                return 7;
-  return 8;
-}
-
 TString getJetRegion(float eta)
 {
   TString reg("TK");
@@ -126,19 +113,21 @@ int main(int argc, char* argv[])
   mon.addHistogram( new TH1F( "thirdleptonmt", ";M_{T} [GeV/c^{2}];Events", 50,0,200) );
 
   //lepton control
+  Double_t effptAxis[]={0,10,20,30,40,50,75,100,150,200,500};
+  const size_t nEffptAxis=sizeof(effptAxis)/sizeof(Double_t)-1;
   for(size_t ilep=0; ilep<2; ilep++)
     {
       TString lepStr(ilep==0? "mu" :"e");
-      mon.addHistogram(new TH1F(lepStr+"genpt",   ";p_{T} [GeV/c];Leptons",50,0,250) );
+      mon.addHistogram(new TH1F(lepStr+"genpt",   ";p_{T} [GeV/c];Leptons",nEffptAxis,effptAxis) );
       mon.addHistogram(new TH1F(lepStr+"geneta",   ";#eta;Leptons",50,-5,5) );
       mon.addHistogram(new TH1F(lepStr+"genpu",   ";Pileup;Leptons",50,0,50) );
       for(int iid=0; iid<4; iid++)
 	{
 	  TString idctr(""); idctr+=iid;
-	  mon.addHistogram(new TH1F(lepStr+idctr+"pt",   ";p_{T} [GeV/c];Leptons",50,0,250) );
+	  mon.addHistogram(new TH1F(lepStr+idctr+"pt",   ";p_{T} [GeV/c];Leptons",nEffptAxis,effptAxis) );
 	  mon.addHistogram(new TH1F(lepStr+idctr+"eta",   ";#eta;Leptons",50,-5,5) );
 	  mon.addHistogram(new TH1F(lepStr+idctr+"pu",   ";Pileup;Leptons",50,0,50) );
-	  mon.addHistogram(new TH1F(lepStr+idctr+"isopt",   ";p_{T} [GeV/c];Leptons",50,0,250) );
+	  mon.addHistogram(new TH1F(lepStr+idctr+"isopt",   ";p_{T} [GeV/c];Leptons",nEffptAxis,effptAxis) );
 	  mon.addHistogram(new TH1F(lepStr+idctr+"isoeta",   ";#eta;Leptons",50,-5,5) );
 	  mon.addHistogram(new TH1F(lepStr+idctr+"isopu",   ";Pileup;Leptons",50,0,50) );
 	}
@@ -291,19 +280,7 @@ int main(int argc, char* argv[])
   }
   while(mcPileupDistribution.size()<dataPileupDistribution.size())  mcPileupDistribution.push_back(0.0);
   while(mcPileupDistribution.size()>dataPileupDistribution.size())dataPileupDistribution.push_back(0.0);
-  /*
-  std::vector<float> mcPileupDistribution(dataPileupDistribution.size(),0);
-  if(isMC)
-    {
-      for( int iev=evStart; iev<evEnd; iev++)
-   	{
-  	  evSummaryHandler.getEntry(iev);
-  	  int nvtx=evSummaryHandler.evSummary_.nvtx;
-   	  if(nvtx>int(mcPileupDistribution.size()-1)) continue;
-   	  mcPileupDistribution[nvtx] += 1;
-	}
-    }
-  */
+
   gROOT->cd();  //THIS LINE IS NEEDED TO MAKE SURE THAT HISTOGRAM INTERNALLY PRODUCED IN LumiReWeighting ARE NOT DESTROYED WHEN CLOSING THE FILE
   edm::LumiReWeighting *LumiWeights=0;
   reweight::PoissonMeanShifter *PShiftUp=0, *PShiftDown=0;
@@ -364,7 +341,7 @@ int main(int argc, char* argv[])
       Hcutflow->Fill(2,weight);
       Hcutflow->Fill(3,weight*TotalWeight_minus);
       Hcutflow->Fill(4,weight*TotalWeight_plus);
-      cout << weight << endl;
+
       //
       // LEPTON ANALYSIS
       //
@@ -422,17 +399,17 @@ int main(int argc, char* argv[])
 	    {
 	      if(matchid!=0)
 		{
-		  mon.fillHisto(lepStr+"genpt",tags_full, genP4.pt(), weight);
+		  mon.fillHisto(lepStr+"genpt",tags_full, genP4.pt(), weight,true);
 		  mon.fillHisto(lepStr+"geneta",tags_full,genP4.eta(), weight);
 		  mon.fillHisto(lepStr+"genpu",tags_full,ev.ngenITpu, weight);
 		  for(size_t iid=0; iid<passIds.size(); iid++)
 		    {
 		      TString idStr(lepStr);  idStr += passIds[iid];
-		      mon.fillHisto(idStr+"pt",tags_full, genP4.pt(), weight);
+		      mon.fillHisto(idStr+"pt",tags_full, genP4.pt(), weight,true);
 		      mon.fillHisto(idStr+"eta",tags_full,genP4.eta(), weight);
 		      mon.fillHisto(idStr+"pu",tags_full,ev.ngenITpu, weight);
 		      if(!passIsos[ passIds[iid] ]) continue;
-		      mon.fillHisto(idStr+"isopt",tags_full, genP4.pt(), weight);
+		      mon.fillHisto(idStr+"isopt",tags_full, genP4.pt(), weight,true);
 		      mon.fillHisto(idStr+"isoeta",tags_full,genP4.eta(), weight);
 		      mon.fillHisto(idStr+"isopu",tags_full,ev.ngenITpu, weight);
 		    }

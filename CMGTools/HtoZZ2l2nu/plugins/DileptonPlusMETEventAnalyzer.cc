@@ -99,8 +99,8 @@ DileptonPlusMETEventAnalyzer::DileptonPlusMETEventAnalyzer(const edm::ParameterS
     TH1 *h = controlHistos_.getHisto("cutflow");
     for(size_t istep=0; istep<nselFilters; istep++) h->GetXaxis()->SetBinLabel(istep+1,selFilters[istep]);
 
-    controlHistos_.addHistogram("pileup", ";Pileup; Events",50,-0.5,49.5);
-    controlHistos_.addHistogram("pileuptrue", ";True pileup; Events",50,-0.5,49.5);
+    controlHistos_.addHistogram("pileup", ";Pileup; Events",100,-0.5,99.5);
+    controlHistos_.addHistogram("pileuptrue", ";True pileup; Events",100,-0.5,99.5);
   }
   catch(std::exception &e){
     cout << e.what() << endl;
@@ -366,8 +366,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     //muon selection
     edm::Handle<View<Candidate> > hMu;
     event.getByLabel(objConfig_["Muons"].getParameter<edm::InputTag>("source"), hMu);
-    std::vector<ObjectIdSummary> looseMuonSummary, muonSummary;
-    std::vector<CandidatePtr> looseMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["LooseMuons"], iSetup, looseMuonSummary);
+    std::vector<ObjectIdSummary> muonSummary;
     std::vector<CandidatePtr> selMuons      = getGoodMuons(hMu, primVertex, *rho, objConfig_["Muons"], iSetup, muonSummary);
     
     //electron selection
@@ -376,142 +375,151 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     EcalClusterLazyTools lazyTool(event,iSetup,objConfig_["Photons"].getParameter<edm::InputTag>("ebrechits"),objConfig_["Photons"].getParameter<edm::InputTag>("eerechits"));
     edm::Handle<reco::ConversionCollection> hConversions;
     try{ event.getByLabel(objConfig_["Photons"].getParameter<edm::InputTag>("conversions"), hConversions); }  catch(std::exception &e){ cout << e.what() << endl; }
-    //    std::vector< edm::Handle<edm::ValueMap<float> > > electronIdMva(2);
-    // try{ event.getByLabel("mvaTrigV0",electronIdMva[0]); event.getByLabel("mvaNonTrigV0",electronIdMva[1]); } catch(std::exception &e){ cout << e.what() << endl; }
-    std::vector<ObjectIdSummary> looseEleSummary, eleSummary;
-    std::vector<CandidatePtr> looseElectrons = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_,  lazyTool, *rho, objConfig_["LooseElectrons"], iSetup, looseEleSummary);
-    std::vector<CandidatePtr> selElectrons     = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_, lazyTool, *rho, objConfig_["Electrons"], iSetup, eleSummary);
+    std::vector<ObjectIdSummary> eleSummary;
+    std::vector<CandidatePtr> selElectrons   = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_, lazyTool, *rho, objConfig_["Electrons"], iSetup, eleSummary);
 
     //build the dilepton candidate
+    ev.cat = UNKNOWN;
     std::vector<CandidatePtr> selLeptons = selMuons;
     selLeptons.insert(selLeptons.end(), selElectrons.begin(), selElectrons.end());
-    std::vector<CandidatePtr> dilepton = getDileptonCandidate(selLeptons, objConfig_["Dileptons"], iSetup);
-    ev.cat = getDileptonId(dilepton);
-    if(dilepton.size()==2)
+    std::vector<ObjectIdSummary> selLeptonsSummary = muonSummary;
+    selLeptonsSummary.insert(selLeptonsSummary.end(), eleSummary.begin(), eleSummary.end());
+    std::vector<int> dileptonIdx = getDileptonCandidate(selLeptons, objConfig_["Dileptons"], iSetup);
+    if(dileptonIdx.size()==2)
       {
+	int l1idx(dileptonIdx[0]), l2idx(dileptonIdx[1]);
+	ev.cat = getDileptonId(selLeptons[l1idx],selLeptons[l2idx]);
+	
 	//require trigger for each event category
 	if(event.isRealData())
 	  {
-	    if(ev.cat==EE   && triggerBits["ee"]==false)    return;
+	    if(ev.cat==EE   && triggerBits["ee"]==false)   return;
 	    if(ev.cat==MUMU && triggerBits["mumu"]==false) return;
 	    if(ev.cat==EMU  && (triggerBits["emu"]==false || triggerBits["ee"]==true || triggerBits["mumu"]==true))  return;
 	  }
 	ev.hasTrigger=true;
-      }
+	
+	//leading lepton
+	ev.l1_px                   = selLeptonsSummary[l1idx].p4.px();
+	ev.l1_py                   = selLeptonsSummary[l1idx].p4.py();
+	ev.l1_pz                   = selLeptonsSummary[l1idx].p4.pz();
+	ev.l1_en                   = selLeptonsSummary[l1idx].p4.energy();
+	ev.l1_id                   = selLeptonsSummary[l1idx].id*selLeptonsSummary[l1idx].charge;
+	ev.l1_ptErr                = selLeptonsSummary[l1idx].p4.pt()*selLeptonsSummary[l1idx].ensferr;
+	ev.l1_genid                = selLeptonsSummary[l1idx].genid;
+	ev.l1_gIso                 = selLeptonsSummary[l1idx].isoVals[G_ISO]; 
+	ev.l1_nhIso                = selLeptonsSummary[l1idx].isoVals[N_ISO]; 
+	ev.l1_chIso                = selLeptonsSummary[l1idx].isoVals[C_ISO];
+	ev.l1_puchIso              = selLeptonsSummary[l1idx].isoVals[CPU_ISO];
+	ev.l1_ecalIso              = selLeptonsSummary[l1idx].isoVals[ECAL_ISO]; 
+	ev.l1_hcalIso              = selLeptonsSummary[l1idx].isoVals[HCAL_ISO]; 
+	ev.l1_trkIso               = selLeptonsSummary[l1idx].isoVals[TRACKER_ISO];
+	ev.l1_d0                   = selLeptonsSummary[l1idx].trkd0;
+	ev.l1_dZ                   = selLeptonsSummary[l1idx].trkdZ;
+	ev.l1_ip3d                 = selLeptonsSummary[l1idx].trkip3d;
+	ev.l1_ip3dsig              = selLeptonsSummary[l1idx].trkip3dsig;
+	ev.l1_trkpt                = selLeptonsSummary[l1idx].trkpt;
+	ev.l1_trketa               = selLeptonsSummary[l1idx].trketa;
+	ev.l1_trkphi               = selLeptonsSummary[l1idx].trkphi;
+	ev.l1_trkchi2              = selLeptonsSummary[l1idx].trkchi2;
+	ev.l1_trkValidPixelHits    = selLeptonsSummary[l1idx].trkValidPixelHits;
+	ev.l1_trkValidTrackerHits  = selLeptonsSummary[l1idx].trkValidTrackerHits;
+	ev.l1_trkLostInnerHits     = selLeptonsSummary[l1idx].trkLostInnerHits;
+	ev.l1_ensf                 = selLeptonsSummary[l1idx].ensf;
+	ev.l1_ensferr              = selLeptonsSummary[l1idx].ensferr;
+	ev.l1_pid                  = addPidSummary(selLeptonsSummary[l1idx]);
 
-    //save leptons
-    std::vector<CandidatePtr> selLooseLeptons           = looseMuons;
-    std::vector<ObjectIdSummary> selLooseLeptonsSummary = looseMuonSummary;
-    selLooseLeptons.insert       ( selLooseLeptons.end(),        selMuons.begin(),        selMuons.end() );
-    selLooseLeptonsSummary.insert( selLooseLeptonsSummary.end(), muonSummary.begin(),     muonSummary.end() );
-    selLooseLeptons.insert       ( selLooseLeptons.end(),        looseElectrons.begin(),  looseElectrons.end());
-    selLooseLeptonsSummary.insert( selLooseLeptonsSummary.end(), looseEleSummary.begin(), looseEleSummary.end() );
-    selLooseLeptons.insert       ( selLooseLeptons.end(),        selElectrons.begin(),    selElectrons.end());
-    selLooseLeptonsSummary.insert( selLooseLeptonsSummary.end(), eleSummary.begin(),      eleSummary.end() );
+	//trailer lepton
+	ev.l2_px                   = selLeptonsSummary[l2idx].p4.px();
+	ev.l2_py                   = selLeptonsSummary[l2idx].p4.py();
+	ev.l2_pz                   = selLeptonsSummary[l2idx].p4.pz();
+	ev.l2_en                   = selLeptonsSummary[l2idx].p4.energy();
+	ev.l2_id                   = selLeptonsSummary[l2idx].id*selLeptonsSummary[l2idx].charge;
+	ev.l2_ptErr                = selLeptonsSummary[l2idx].p4.pt()*selLeptonsSummary[l2idx].ensferr;
+	ev.l2_genid                = selLeptonsSummary[l2idx].genid;
+	ev.l2_gIso                 = selLeptonsSummary[l2idx].isoVals[G_ISO]; 
+	ev.l2_nhIso                = selLeptonsSummary[l2idx].isoVals[N_ISO]; 
+	ev.l2_chIso                = selLeptonsSummary[l2idx].isoVals[C_ISO];
+	ev.l2_puchIso              = selLeptonsSummary[l2idx].isoVals[CPU_ISO];
+	ev.l2_ecalIso              = selLeptonsSummary[l2idx].isoVals[ECAL_ISO]; 
+	ev.l2_hcalIso              = selLeptonsSummary[l2idx].isoVals[HCAL_ISO]; 
+	ev.l2_trkIso               = selLeptonsSummary[l2idx].isoVals[TRACKER_ISO];
+	ev.l2_d0                   = selLeptonsSummary[l2idx].trkd0;
+	ev.l2_dZ                   = selLeptonsSummary[l2idx].trkdZ;
+	ev.l2_ip3d                 = selLeptonsSummary[l2idx].trkip3d;
+	ev.l2_ip3dsig              = selLeptonsSummary[l2idx].trkip3dsig;
+	ev.l2_trkpt                = selLeptonsSummary[l2idx].trkpt;
+	ev.l2_trketa               = selLeptonsSummary[l2idx].trketa;
+	ev.l2_trkphi               = selLeptonsSummary[l2idx].trkphi;
+	ev.l2_trkchi2              = selLeptonsSummary[l2idx].trkchi2;
+	ev.l2_trkValidPixelHits    = selLeptonsSummary[l2idx].trkValidPixelHits;
+	ev.l2_trkValidTrackerHits  = selLeptonsSummary[l2idx].trkValidTrackerHits;
+	ev.l2_trkLostInnerHits     = selLeptonsSummary[l2idx].trkLostInnerHits;
+	ev.l2_ensf                 = selLeptonsSummary[l2idx].ensf;
+	ev.l2_ensferr              = selLeptonsSummary[l2idx].ensferr;
+	ev.l2_pid                  = addPidSummary( selLeptonsSummary[l2idx] );
+      }
+    
+    //save extra leptons (including softer ones)
     ev.ln=0; ev.mn=0; ev.en=0;
+    std::vector<ObjectIdSummary> looseMuonSummary;
+    std::vector<CandidatePtr>    looseMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["LooseMuons"], iSetup, looseMuonSummary);
+    std::vector<ObjectIdSummary> looseEleSummary;
+    std::vector<CandidatePtr>    looseElectrons = getGoodElectrons(hEle, hMu, hVtx_, *beamSpot, hConversions, &ecorr_,  lazyTool, *rho, objConfig_["LooseElectrons"], iSetup, looseEleSummary);
+    std::vector<ObjectIdSummary> selLooseLeptonsSummary = selLeptonsSummary;
+    selLooseLeptonsSummary.insert( selLooseLeptonsSummary.end(), looseMuonSummary.begin(), looseMuonSummary.end() );
+    selLooseLeptonsSummary.insert( selLooseLeptonsSummary.end(), looseEleSummary.begin(),  looseEleSummary.end() );
+    std::vector<CandidatePtr>     selLooseLeptons = selLeptons;
+    selLooseLeptons.insert( selLooseLeptons.end(), looseMuons.begin(),     looseMuons.end() );
+    selLooseLeptons.insert( selLooseLeptons.end(), looseElectrons.begin(), looseElectrons.end() );
+    std::set<const reco::Candidate *> savedLeptons; 
     for(size_t ilep=0; ilep<selLooseLeptonsSummary.size(); ilep++)
       {
-	int leptonRank(3);
 	ObjectIdSummary &lep=selLooseLeptonsSummary[ilep];
-	if(dilepton.size()==2 )
+	const reco::Candidate *lepCand=selLooseLeptons[ilep].get();
+
+	//check if objects are not repeated...
+	bool veto(savedLeptons.find(lepCand)!=savedLeptons.end());
+	for(size_t idilLep=0; idilLep<dileptonIdx.size(); idilLep++)
 	  {
-	    if(deltaR(lep.p4.eta(),lep.p4.phi(),dilepton[0]->eta(),dilepton[0]->phi())<0.1) 
-	      {
-		ev.l1_px       = lep.p4.px();
-		ev.l1_py       = lep.p4.py();
-		ev.l1_pz       = lep.p4.pz();
-		ev.l1_en       = lep.p4.energy();
-		ev.l1_id       = lep.id*lep.charge;
-		ev.l1_ptErr    = getLeptonPtError(dilepton[0]); 
-		ev.l1_genid    = lep.genid;
-		ev.l1_gIso     = lep.isoVals[G_ISO]; 
-		ev.l1_nhIso    = lep.isoVals[N_ISO]; 
-		ev.l1_chIso    = lep.isoVals[C_ISO];
-		ev.l1_puchIso  = lep.isoVals[CPU_ISO];
-		ev.l1_ecalIso  = lep.isoVals[ECAL_ISO]; 
-		ev.l1_hcalIso  = lep.isoVals[HCAL_ISO]; 
-		ev.l1_trkIso   = lep.isoVals[TRACKER_ISO];
-		ev.l1_d0       = lep.trkd0;
-		ev.l1_dZ       = lep.trkdZ;
-		ev.l1_ip3d     = lep.trkip3d;
-		ev.l1_ip3dsig  = lep.trkip3dsig;
-		ev.l1_trkpt    = lep.trkpt;
-		ev.l1_trketa   = lep.trketa;
-		ev.l1_trkphi   = lep.trkphi;
-		ev.l1_trkchi2  = lep.trkchi2;
-		ev.l1_trkValidPixelHits    = lep.trkValidPixelHits;
-		ev.l1_trkValidTrackerHits  = lep.trkValidTrackerHits;
-		ev.l1_trkLostInnerHits     = lep.trkLostInnerHits;
-		ev.l1_ensf     = lep.ensf;
-		ev.l1_ensferr  = lep.ensferr;
-		ev.l1_pid      = addPidSummary( lep );
-		leptonRank=1;
-	      }
-	    if(deltaR(lep.p4.eta(),lep.p4.phi(),dilepton[1]->eta(),dilepton[1]->phi())<0.1) 
-	      {
-		ev.l2_px       = lep.p4.px();
-		ev.l2_py       = lep.p4.py();
-		ev.l2_pz       = lep.p4.pz();
-		ev.l2_en       = lep.p4.energy();
-		ev.l2_id       = lep.id*lep.charge;
-		ev.l2_ptErr    = lep.p4.pt()*lep.ensferr;
-		ev.l2_genid    = lep.genid;
-		ev.l2_gIso     = lep.isoVals[G_ISO]; 
-		ev.l2_nhIso    = lep.isoVals[N_ISO]; 
-		ev.l2_chIso    = lep.isoVals[C_ISO];
-		ev.l2_puchIso  = lep.isoVals[CPU_ISO];
-		ev.l2_ecalIso  = lep.isoVals[ECAL_ISO]; 
-		ev.l2_hcalIso  = lep.isoVals[HCAL_ISO]; 
-		ev.l2_trkIso   = lep.isoVals[TRACKER_ISO];
-		ev.l2_d0       = lep.trkd0;
-		ev.l2_dZ       = lep.trkdZ;
-		ev.l2_ip3d     = lep.trkip3d;
-		ev.l2_ip3dsig  = lep.trkip3dsig;
-		ev.l2_trkpt    = lep.trkpt;
-		ev.l2_trketa   = lep.trketa;
-		ev.l2_trkphi   = lep.trkphi;
-		ev.l2_trkchi2  = lep.trkchi2;
-		ev.l2_trkValidPixelHits   = lep.trkValidPixelHits;
-		ev.l2_trkValidTrackerHits = lep.trkValidTrackerHits;
-		ev.l2_trkLostInnerHits    = lep.trkLostInnerHits;
-		ev.l2_ensf                = lep.ensf;
-		ev.l2_ensferr             = lep.ensferr;
-		ev.l2_pid                 = addPidSummary( lep );
-		leptonRank=2; 
-	      } 
+	    if( deltaR(selLeptonsSummary[dileptonIdx[idilLep]].p4,lep.p4)<0.1 ) continue;
+	    veto=true;
 	  }
-	if(leptonRank!=3) continue;
-	ev.ln_px[ev.ln]       = lep.p4.px();
-	ev.ln_py[ev.ln]       = lep.p4.py();
-	ev.ln_pz[ev.ln]       = lep.p4.pz();
-	ev.ln_en[ev.ln]       = lep.p4.energy();
-	ev.ln_id[ev.ln]       = lep.id*lep.charge;
-	ev.ln_genid[ev.ln]    = lep.genid;
-	ev.ln_ptErr[ev.ln]    = lep.p4.pt()*lep.ensferr;
-	ev.ln_gIso[ev.ln]     = lep.isoVals[G_ISO]; 
-	ev.ln_nhIso[ev.ln]    = lep.isoVals[N_ISO]; 
-	ev.ln_chIso[ev.ln]    = lep.isoVals[C_ISO];
-	ev.ln_puchIso[ev.ln]  = lep.isoVals[CPU_ISO];
-	ev.ln_ecalIso[ev.ln]  = lep.isoVals[ECAL_ISO]; 
-	ev.ln_hcalIso[ev.ln]  = lep.isoVals[HCAL_ISO]; 
-	ev.ln_trkIso[ev.ln]   = lep.isoVals[TRACKER_ISO];
-	ev.ln_d0[ev.ln]       = lep.trkd0;
-	ev.ln_dZ[ev.ln]       = lep.trkdZ;
-	ev.ln_ip3d[ev.ln]     = lep.trkip3d;
-	ev.ln_ip3dsig[ev.ln]  = lep.trkip3dsig;
-	ev.ln_trkpt[ev.ln]    = lep.trkpt;
-	ev.ln_trketa[ev.ln]   = lep.trketa;
-	ev.ln_trkphi[ev.ln]   = lep.trkphi;
-	ev.ln_trkchi2[ev.ln]  = lep.trkchi2;
+	if(veto) continue;
+	savedLeptons.insert(lepCand);
+	
+	//save it
+	ev.ln_px[ev.ln]                  = lep.p4.px();
+	ev.ln_py[ev.ln]                  = lep.p4.py();
+	ev.ln_pz[ev.ln]                  = lep.p4.pz();
+	ev.ln_en[ev.ln]                  = lep.p4.energy();
+	ev.ln_id[ev.ln]                  = lep.id*lep.charge;
+	ev.ln_genid[ev.ln]               = lep.genid;
+	ev.ln_ptErr[ev.ln]               = lep.p4.pt()*lep.ensferr;
+	ev.ln_gIso[ev.ln]                = lep.isoVals[G_ISO]; 
+	ev.ln_nhIso[ev.ln]               = lep.isoVals[N_ISO]; 
+	ev.ln_chIso[ev.ln]               = lep.isoVals[C_ISO];
+	ev.ln_puchIso[ev.ln]             = lep.isoVals[CPU_ISO];
+	ev.ln_ecalIso[ev.ln]             = lep.isoVals[ECAL_ISO]; 
+	ev.ln_hcalIso[ev.ln]             = lep.isoVals[HCAL_ISO]; 
+	ev.ln_trkIso[ev.ln]              = lep.isoVals[TRACKER_ISO];
+	ev.ln_d0[ev.ln]                  = lep.trkd0;
+	ev.ln_dZ[ev.ln]                  = lep.trkdZ;
+	ev.ln_ip3d[ev.ln]                = lep.trkip3d;
+	ev.ln_ip3dsig[ev.ln]             = lep.trkip3dsig;
+	ev.ln_trkpt[ev.ln]               = lep.trkpt;
+	ev.ln_trketa[ev.ln]              = lep.trketa;
+	ev.ln_trkphi[ev.ln]              = lep.trkphi;
+	ev.ln_trkchi2[ev.ln]             = lep.trkchi2;
 	ev.ln_trkValidPixelHits[ev.ln]   = lep.trkValidPixelHits;
 	ev.ln_trkValidTrackerHits[ev.ln] = lep.trkValidTrackerHits;
 	ev.ln_trkLostInnerHits[ev.ln]    = lep.trkLostInnerHits;
-	ev.ln_ensf[ev.ln]     = lep.ensf;
-	ev.ln_ensferr[ev.ln]  = lep.ensferr;
-	ev.ln_pid[ev.ln]      = addPidSummary(lep);
+	ev.ln_ensf[ev.ln]                = lep.ensf;
+	ev.ln_ensferr[ev.ln]             = lep.ensferr;
+	ev.ln_pid[ev.ln]                 = addPidSummary(lep);
 	ev.ln++;
       }
-
+    
     //
     // PHOTON SELECTION
     //
@@ -528,21 +536,21 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     std::vector<CandidatePtr> selPhotons=getGoodPhotons(hPhoton,&phocorr_,lazyTool,hEBrechits,hGsfEle,hConversions,hTracks,hVtx_,beamSpot,*rho25,objConfig_["Photons"],iSetup,selPhotonIds);
     for(size_t i=0; i<selPhotonIds.size(); i++)
       {
- 	ev.g_px[ev.gn]    = selPhotonIds[i].p4.px();
-	ev.g_py[ev.gn]    = selPhotonIds[i].p4.py();
-	ev.g_pz[ev.gn]    = selPhotonIds[i].p4.pz();
-	ev.g_en[ev.gn]    = selPhotonIds[i].p4.energy();
-	ev.g_hoe[ev.gn]   = selPhotonIds[i].hoe;
-	ev.g_htoe[ev.gn]  = selPhotonIds[i].hoebc;
-	ev.g_sihih[ev.gn] = selPhotonIds[i].sihih;
-	ev.g_sipip[ev.gn] = selPhotonIds[i].sipip;
-	ev.g_iso1[ev.gn]  = selPhotonIds[i].isoVals[TRACKER_ISO];
-	ev.g_iso2[ev.gn]  = selPhotonIds[i].isoVals[ECAL_ISO];
-	ev.g_iso3[ev.gn]  = selPhotonIds[i].isoVals[HCAL_ISO];
-	ev.g_r9[ev.gn]    = selPhotonIds[i].r9;
-	ev.g_corren[ev.gn] = selPhotonIds[i].ensf;
+ 	ev.g_px[ev.gn]        = selPhotonIds[i].p4.px();
+	ev.g_py[ev.gn]        = selPhotonIds[i].p4.py();
+	ev.g_pz[ev.gn]        = selPhotonIds[i].p4.pz();
+	ev.g_en[ev.gn]        = selPhotonIds[i].p4.energy();
+	ev.g_hoe[ev.gn]       = selPhotonIds[i].hoe;
+	ev.g_htoe[ev.gn]      = selPhotonIds[i].hoebc;
+	ev.g_sihih[ev.gn]     = selPhotonIds[i].sihih;
+	ev.g_sipip[ev.gn]     = selPhotonIds[i].sipip;
+	ev.g_iso1[ev.gn]      = selPhotonIds[i].isoVals[TRACKER_ISO];
+	ev.g_iso2[ev.gn]      = selPhotonIds[i].isoVals[ECAL_ISO];
+	ev.g_iso3[ev.gn]      = selPhotonIds[i].isoVals[HCAL_ISO];
+	ev.g_r9[ev.gn]        = selPhotonIds[i].r9;
+	ev.g_corren[ev.gn]    = selPhotonIds[i].ensf;
 	ev.g_correnerr[ev.gn] =  selPhotonIds[i].ensferr;
-	ev.g_idbits[ev.gn] = selPhotonIds[i].idBits;
+	ev.g_idbits[ev.gn]    = selPhotonIds[i].idBits;
 	ev.gn++;
       }
     if(ev.cat==UNKNOWN && selPhotons.size())

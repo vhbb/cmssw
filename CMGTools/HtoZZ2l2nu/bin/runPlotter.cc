@@ -33,6 +33,7 @@ int cutIndex=-1;
 string cutIndexStr="";
 double iLumi = 2007;
 double iEcm=8;
+bool showChi2 = false;
 bool do2D  = true;
 bool do1D  = true;
 bool doTex = true;
@@ -614,6 +615,20 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
      canvasIsFilled=true;
    }
 
+   //compare data and MC
+   if(showChi2 && data && mc && data->Integral()>0 && mc->Integral()>0)
+     {
+       TPaveText *pave = new TPaveText(0.5,0.65,1.0,0.95,"NDC");
+       pave->SetBorderSize(0);
+       pave->SetFillStyle(0);
+       pave->SetTextAlign(32);
+       pave->SetTextFont(42);
+       char buf[100];
+       sprintf(buf,"#chi^{2}/ndof : %3.3f", data->Chi2Test(mc,"WWCHI2/NDF") );
+       pave->AddText(buf);
+       pave->Draw();
+     }
+
    TPaveText* T = new TPaveText(0.1,0.995,0.84,0.95, "NDC");
    T->SetFillColor(0);
    T->SetFillStyle(0);  T->SetLineColor(0);
@@ -860,13 +875,12 @@ int main(int argc, char* argv[]){
         printf("--json    --> containing list of process (and associated style) to process to process\n");
         printf("--only    --> processing only the objects containing the following argument in their name\n");
         printf("--index   --> will do the projection on that index for histos of type cutIndex\n");
-
-
-        printf("--no1D   --> Skip processing of 1D objects\n");
-        printf("--no2D   --> Skip processing of 2D objects\n");
-        printf("--noTex  --> Do not create latex table (when possible)\n");
-        printf("--noRoot --> Do not make a summary .root file\n");
-        printf("--noPlot --> Do not creates plot files (useful to speedup processing)\n");
+        printf("--chi2    --> show the data/MC chi^2\n");
+        printf("--no1D    --> Skip processing of 1D objects\n");
+        printf("--no2D    --> Skip processing of 2D objects\n");
+        printf("--noTex   --> Do not create latex table (when possible)\n");
+        printf("--noRoot  --> Do not make a summary .root file\n");
+        printf("--noPlot  --> Do not creates plot files (useful to speedup processing)\n");
 	printf("--plotExt --> extension to save\n");
 	printf("--cutflow --> name of the histogram with the original number of events (cutflow by default)\n");
         printf("--splitCanvas --> (only for 2D plots) save all the samples in separated pltos\n");
@@ -877,14 +891,14 @@ int main(int argc, char* argv[]){
 
      if(arg.find("--iLumi"  )!=string::npos && i+1<argc){ sscanf(argv[i+1],"%lf",&iLumi); i++; printf("Lumi = %f\n", iLumi); }
      if(arg.find("--iEcm"  )!=string::npos && i+1<argc){ sscanf(argv[i+1],"%lf",&iEcm); i++; printf("Ecm = %f TeV\n", iEcm); }
-
+     
      if(arg.find("--inDir"  )!=string::npos && i+1<argc){ inDir    = argv[i+1];  i++;  printf("inDir = %s\n", inDir.c_str());  }
      if(arg.find("--outDir" )!=string::npos && i+1<argc){ outDir   = argv[i+1];  i++;  printf("outDir = %s\n", outDir.c_str());  }
      if(arg.find("--outFile")!=string::npos && i+1<argc){ outFile  = argv[i+1];  i++; printf("output file = %s\n", outFile.c_str()); }
      if(arg.find("--json"   )!=string::npos && i+1<argc){ jsonFile = argv[i+1];  i++;  }
      if(arg.find("--only"   )!=string::npos && i+1<argc){ objectSearchKey = argv[i+1]; i++;    }
      if(arg.find("--index"  )!=string::npos && i+1<argc){ sscanf(argv[i+1],"%i",&cutIndex); i++; onlyCutIndex=(cutIndex>=0); printf("index = %i\n", cutIndex);  }
-
+     if(arg.find("--chi2"  )!=string::npos){ showChi2 = true;    }
      if(arg.find("--no2D"  )!=string::npos){ do2D = false;    }
      if(arg.find("--no1D"  )!=string::npos){ do1D = false;    }
      if(arg.find("--noTex" )!=string::npos){ doTex= false;    }
