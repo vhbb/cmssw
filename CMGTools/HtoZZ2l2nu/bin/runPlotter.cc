@@ -188,9 +188,9 @@ void GetInitialNumberOfEvents(JSONWrapper::Object& Root, std::string RootDir, Na
          if(cnorm==1 && isMC)printf("is there a problem with %s ? cnorm = %f\n",(Samples[j])["dtag"].toString().c_str(), cnorm);          
          if(!isMC)PUCentralnnorm = 1;
 
-   	  double VBFMCRescale = tmphist->GetBinContent(6) / tmphist->GetBinContent(2);
-          //printf("VBFMCRescale for sample %s is %f\n", (Samples[j])["dtag"].toString().c_str(), VBFMCRescale );
-          cnorm *= VBFMCRescale;
+	 double VBFMCRescale = tmphist->GetXaxis()->GetNbins()>5 ? tmphist->GetBinContent(6) / tmphist->GetBinContent(2) : 1.0;
+	 //printf("VBFMCRescale for sample %s is %f\n", (Samples[j])["dtag"].toString().c_str(), VBFMCRescale );
+	 cnorm *= VBFMCRescale;
 
          initialNumberOfEvents[(Samples[j])["dtag"].toString()] = cnorm / PUCentralnnorm;
 
@@ -518,7 +518,6 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 
          if(HistoProperties.name.find("puup"  )!=string::npos){Weight *= PURescale_up  [(Samples[j])["dtag"].toString()];}
          if(HistoProperties.name.find("pudown")!=string::npos){Weight *= PURescale_down[(Samples[j])["dtag"].toString()];}
-
          if(HistoProperties.name.find("optim_cut")!=string::npos){Weight=1.0;}
 
          int split = 1; 

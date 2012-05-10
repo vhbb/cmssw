@@ -341,7 +341,7 @@ int main(int argc, char* argv[])
       }
       if(isMC && mctruthmode==1 && !isDYToLL(ev.mccat) ) continue;
       if(isMC && mctruthmode==2 && !isDYToTauTau(ev.mccat) ) continue;
-      int eventSubCat  = eventCategoryInst.Get(phys);
+      int eventSubCat  = eventCategoryInst.Get(phys,&phys.ajets);
       TString tag_subcat = eventCategoryInst.GetLabel(eventSubCat);
       
       //prepare the tag's vectors for histo filling
@@ -364,7 +364,7 @@ int main(int argc, char* argv[])
       Hcutflow->Fill(2,weight);
       Hcutflow->Fill(3,weight*TotalWeight_minus);
       Hcutflow->Fill(4,weight*TotalWeight_plus);
-      
+      cout << weight << endl;
       //
       // LEPTON ANALYSIS
       //
