@@ -133,13 +133,15 @@ class ZZ2l2nuSummaryHandler{
     if(t_) t_->GetEntry(ientry); 
   }
 
-  bool hasSpoilerAlert(bool isData,TString category="");
+/*  bool hasSpoilerAlert(bool isData,TString category="");
   inline bool hasSpoilerAlert(bool isData,std::vector<TString> &categories)
   {
     bool flag(true);
     for(size_t i=0; i<categories.size(); i++) flag &= hasSpoilerAlert(isData,categories[i]);
     return flag;
   }
+*/
+  bool hasSpoilerAlert(bool isData);
 
   int getEntries() { return (t_ ? t_->GetEntriesFast() : 0); }
 

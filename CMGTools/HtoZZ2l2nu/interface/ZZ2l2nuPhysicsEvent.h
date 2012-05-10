@@ -36,6 +36,20 @@ class PhysicsObject_Lepton : public LorentzVector
     Float_t relIsoRho(double rho) { return (TMath::Max(ecalIso+hcalIso-0.3*0.3*3.1415*rho,0.)+trkIso)/pt(); }
     Float_t pfRelIsoDbeta()       { return (TMath::Max(nhIso+gIso-0.5*puchIso,0.)+chIso)/pt(); }
     Float_t pfRelIso()            { return (nhIso+gIso+chIso)/pt(); }
+    Float_t ePFRelIsoCorrected2012(double rho)   
+    {   
+      //cf. https://twiki.cern.ch/twiki/bin/view/CMS/EgammaEARhoCorrection   
+      Float_t aeff(0.19);   
+      if(fabs(eta())>2.4)        aeff=0.52;   
+      else if(fabs(eta())>2.3)   aeff=0.44;   
+      else if(fabs(eta())>2.2)   aeff=0.27;   
+      else if(fabs(eta())>2.0)   aeff=0.21;   
+      else if(fabs(eta())>1.479) aeff=0.12;   
+      else if(fabs(eta())>1.0)   aeff=0.25;   
+     
+      return (chIso+TMath::Max(gIso+nhIso-rho*aeff,0.))/pt();   
+    } 
+
     
     void setTrackInfo(Float_t d0_, Float_t dZ_, Float_t trkpt_, Float_t trketa_, Float_t trkphi_, Float_t trkchi2_, Float_t trkValidPixelHits_, Float_t trkValidTrackerHits_, Float_t trkLostInnerHits_)
     {
