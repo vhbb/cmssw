@@ -82,7 +82,7 @@ TObject* GetObjectFromPath(TDirectory* File, std::string Path, bool GetACopy=fal
 //      printf("BUG: %s\n",Path.c_str());
       return NULL;
    }else{
-     TObject* TMP = File->Get(Path.c_str());
+      TObject* TMP = File->Get(Path.c_str());
 //      if(!TMP)printf("BUG: %s\n",Path.c_str());
 
       if(GetACopy){
@@ -180,11 +180,17 @@ void GetInitialNumberOfEvents(JSONWrapper::Object& Root, std::string RootDir, Na
          PURescale_up  [(Samples[j])["dtag"].toString()] = PUUpnorm;
          //if(isMC)printf("PU Renormalization %25s Shift Down --> %6.2f  Central = %6.2f  Up Down --> %6.2f\n",(Samples[j])["dtag"].toString().c_str(),PUDownnorm, PUCentralnnorm, PUUpnorm);	
 
+
          double cnorm = 1.0;
          if(tmphist)cnorm = tmphist->GetBinContent(1);
          if(cnorm<=0 || !isMC)cnorm = 1.0;         
          if(cnorm==1 && isMC)printf("is there a problem with %s ? cnorm = %f\n",(Samples[j])["dtag"].toString().c_str(), cnorm);          
          if(!isMC)PUCentralnnorm = 1;
+
+   	  double VBFMCRescale = tmphist->GetBinContent(6) / tmphist->GetBinContent(2);
+          //printf("VBFMCRescale for sample %s is %f\n", (Samples[j])["dtag"].toString().c_str(), VBFMCRescale );
+          cnorm *= VBFMCRescale;
+
          initialNumberOfEvents[(Samples[j])["dtag"].toString()] = cnorm / PUCentralnnorm;
 
          delete tmphist;
@@ -287,7 +293,7 @@ void Draw2DHistogramSplitCanvas(JSONWrapper::Object& Root, std::string RootDir, 
    T->SetFillColor(0);
    T->SetFillStyle(0);  T->SetLineColor(0);
    T->SetTextAlign(32);
-  char Buffer[1024]; sprintf(Buffer, "CMS preliminary, #sqrt{s}=7 TeV, #int L=%.1f fb^{-1}", iLumi/1000);
+  char Buffer[1024]; sprintf(Buffer, "CMS preliminary, #sqrt{s}=8 TeV, #int L=%.1f fb^{-1}", iLumi/1000);
    T->AddText(Buffer);
 
    std::vector<JSONWrapper::Object> Process = Root["proc"].daughters();
@@ -381,7 +387,7 @@ void Draw2DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    T->SetFillColor(0);
    T->SetFillStyle(0);  T->SetLineColor(0);
    T->SetTextAlign(32);
-  char Buffer[1024]; sprintf(Buffer, "CMS preliminary, #sqrt{s}=7 TeV, #int L=%.1f fb^{-1}", iLumi/1000);
+  char Buffer[1024]; sprintf(Buffer, "CMS preliminary, #sqrt{s}=8 TeV, #int L=%.1f fb^{-1}", iLumi/1000);
    T->AddText(Buffer);
 
    std::vector<JSONWrapper::Object> Process = Root["proc"].daughters();
@@ -612,7 +618,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    T->SetFillColor(0);
    T->SetFillStyle(0);  T->SetLineColor(0);
    T->SetTextAlign(22);
-   char Buffer[1024]; sprintf(Buffer, "CMS preliminary, #sqrt{s}=7 TeV, #scale[0.5]{#int} L=%.1f fb^{-1}", iLumi/1000);
+   char Buffer[1024]; sprintf(Buffer, "CMS preliminary, #sqrt{s}=8 TeV, #scale[0.5]{#int} L=%.1f fb^{-1}", iLumi/1000);
    T->AddText(Buffer);
    T->Draw("same");
 
