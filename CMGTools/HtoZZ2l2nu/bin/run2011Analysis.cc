@@ -379,22 +379,21 @@ int main(int argc, char* argv[])
       //analyze the leptons
       //require 2012 ID and isolation
       bool pass2012IdAndIso(true);
-      for(size_t ilep=0; ilep<2; ilep++)
-	{
+      for(size_t ilep=0; ilep<2; ilep++){
 	  int lpid=phys.leptons[ilep].pid;
-	  if(fabs(phys.leptons[ilep].id)==13)
-	    {
+	  if(fabs(phys.leptons[ilep].id)==13){
 	      float relIso = phys.leptons[ilep].muPFRelIsoCorrected2012(ev.rho25Neut);
 	      pass2012IdAndIso &= hasObjectId(ev.mn_idbits[lpid], MID_TIGHT);
 	      pass2012IdAndIso &= (relIso<0.2);
-	    }
-	  else
-	    {
+	  }else{
 	      float relIso = phys.leptons[ilep].ePFRelIsoCorrected2012(ev.rho);
 	      pass2012IdAndIso &= hasObjectId(ev.en_idbits[lpid], EID_MEDIUM);
 	      pass2012IdAndIso &= (relIso<0.15);
-	    }
-	}
+	 }
+      }
+      if(!pass2012IdAndIso)continue;
+ 
+
       LorentzVector lep1=phys.leptons[0];
       LorentzVector lep2=phys.leptons[1];
       LorentzVector zllraw=lep1+lep2;
