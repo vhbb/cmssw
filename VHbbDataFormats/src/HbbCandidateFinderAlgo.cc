@@ -619,7 +619,38 @@ We adopt the standard cut-based selection from VBTF described in detail here.
   for (unsigned int  it = 0; it< electrons.size(); ++it){
     if (
 	// fake
+/*   "(isEE || isEB) && !isEBEEGap &&"
+  " (chargedHadronIso + neutralHadronIso + photonIso)/pt <0.10 &&"
+   "dB < 0.02 && "  #dB is computed wrt PV but is transverse only, no info about dZ(vertex) 
+   "( "
+   "(isEE && ("
+   "abs(deltaEtaSuperClusterTrackAtVtx) < 0.005 &&  abs(deltaPhiSuperClusterTrackAtVtx) < 0.02 && sigmaIetaIeta < 0.03 && hadronicOverEm < 0.10 &&  abs(1./ecalEnergy*(1.-eSuperClusterOverP)) < 0.05 "
+   ")) || " 
+    "(isEB && (  "
+    "abs(deltaEtaSuperClusterTrackAtVtx) < 0.004 &&  abs(deltaPhiSuperClusterTrackAtVtx) < 0.03 && sigmaIetaIeta < 0.01 && hadronicOverEm < 0.12 && abs(1./ecalEnergy*(1.-eSuperClusterOverP)) < 0.05"
+    "))"
+#or use mvaNonTrigV0 and mvaTrigV0
+    ")" */
 //	(fabs(electrons[it].id95 - 7)) < 0.1  &&
+//2012 cut based ELE ID
+        fabs(electrons[it].dxy) < 0.02  &&
+        fabs(electrons[it].dz) < 0.1  &&
+        ((electrons[it].isEE  &&
+        fabs(electrons[it].Deta) < 0.005 &&
+        fabs(electrons[it].Dphi) < 0.02 &&
+        electrons[it].sihih < 0.03  &&
+        electrons[it].HoE < 0.10  &&
+        fabs(electrons[it].fMVAVar_IoEmIoP) < 0.05  
+	) || 
+        (electrons[it].isEB &&
+       fabs(electrons[it].Deta) < 0.004 &&
+        fabs(electrons[it].Dphi) < 0.03 &&
+        electrons[it].sihih < 0.01  &&
+        electrons[it].HoE < 0.12  &&
+        fabs(electrons[it].fMVAVar_IoEmIoP) < 0.05 
+         )
+        ) &&
+
 	fabs(electrons[it].p4.Eta()) < 2.5 &&
 //Remove this workaround as now we have the proper flags
 //	!( fabs(electrons[it].p4.Eta()) < 1.57 && fabs(electrons[it].p4.Eta()) > 1.44) &&

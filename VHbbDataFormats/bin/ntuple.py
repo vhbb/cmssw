@@ -7,8 +7,8 @@ process = cms.Process("FWLitePlots")
 #fileNames   = cms.vstring('file:2l2bMetEdmNtuples.root'),         ## mandatory
 process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(
-"/afs/cern.ch/work/a/arizzi/hbb/fresh/CMSSW_5_2_4_patch4/src/PAT1.edm.root"
-
+"root://cmsdcache//pnfs/pi.infn.it/data/cms/store/user/tboccali/WH_WToLNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_ProcV1_WH_WToLNu_HToBB_M-120/14fe2b624ddea84f5c39709f51bf546f/PAT.edm_51_1_3LJ.root"
+#/pnfs/pi.infn.it/data/cms/store/user/tboccali/ZH_ZToNuNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_ProcV1_ZH_ZToNuNu_HToBB_M-120/14fe2b624ddea84f5c39709f51bf546f/PAT.edm_51_1_ukR.root
 
 ),
 
@@ -34,7 +34,7 @@ process.fwliteInput = cms.PSet(
 #process.fwliteInput.lumisToProcess.extend(lumiList)
 
 
-channel =  "DYpt100"
+channel =  "WH120"
 import os
 dirnameOld = "//pnfs/pi.infn.it/data/cms/store/user/bortigno/DoubleMu/HBB_EDMNtupleV3_ProcV1_may/07fb60889166b64f474d8d0aa162db69/"
 
