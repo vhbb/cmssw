@@ -380,6 +380,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 
     //build the dilepton candidate
     ev.cat = UNKNOWN;
+    ev.ln=0; ev.mn=0; ev.en=0;
     std::vector<CandidatePtr> selLeptons = selMuons;
     selLeptons.insert(selLeptons.end(), selElectrons.begin(), selElectrons.end());
     std::vector<ObjectIdSummary> selLeptonsSummary = muonSummary;
@@ -461,7 +462,6 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
       }
     
     //save extra leptons (including softer ones)
-    ev.ln=0; ev.mn=0; ev.en=0;
     std::vector<ObjectIdSummary> looseMuonSummary;
     std::vector<CandidatePtr>    looseMuons = getGoodMuons(hMu, primVertex, *rho, objConfig_["LooseMuons"], iSetup, looseMuonSummary);
     std::vector<ObjectIdSummary> looseEleSummary;
@@ -472,21 +472,25 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     std::vector<CandidatePtr>     selLooseLeptons = selLeptons;
     selLooseLeptons.insert( selLooseLeptons.end(), looseMuons.begin(),     looseMuons.end() );
     selLooseLeptons.insert( selLooseLeptons.end(), looseElectrons.begin(), looseElectrons.end() );
-    std::set<const reco::Candidate *> savedLeptons; 
+    std::vector<LorentzVector> savedLeptonsP4;
+    if(dileptonIdx.size()>0) 
+      {
+	savedLeptonsP4.push_back( selLeptonsSummary[dileptonIdx[0]].p4 ); 
+	savedLeptonsP4.push_back( selLeptonsSummary[dileptonIdx[1]].p4 ); 
+      }
     for(size_t ilep=0; ilep<selLooseLeptonsSummary.size(); ilep++)
       {
 	ObjectIdSummary &lep=selLooseLeptonsSummary[ilep];
-	const reco::Candidate *lepCand=selLooseLeptons[ilep].get();
 
 	//check if objects are not repeated...
-	bool veto(savedLeptons.find(lepCand)!=savedLeptons.end());
-	for(size_t idilLep=0; idilLep<dileptonIdx.size(); idilLep++)
+	bool veto(false);
+	for(size_t isavLep=0; isavLep<savedLeptonsP4.size(); isavLep++)
 	  {
-	    if( deltaR(selLeptonsSummary[dileptonIdx[idilLep]].p4,lep.p4)<0.1 ) continue;
+	    if( deltaR( savedLeptonsP4[isavLep],lep.p4)>0.1 ) continue;
 	    veto=true;
 	  }
 	if(veto) continue;
-	savedLeptons.insert(lepCand);
+	savedLeptonsP4.push_back(lep.p4);
 	
 	//save it
 	ev.ln_px[ev.ln]                  = lep.p4.px();
@@ -519,7 +523,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.ln_pid[ev.ln]                 = addPidSummary(lep);
 	ev.ln++;
       }
-    
+
     //
     // PHOTON SELECTION
     //

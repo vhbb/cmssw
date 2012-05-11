@@ -65,6 +65,8 @@ runLocalAnalysisOverSamples.py -e run2011Analysis -j data/samples.json -o test/r
 runLocalAnalysisOverSamples.py -e run2011Analysis -j data/samplesNoHWW.json -d /store/cmst3/user/psilva/12_03_31_HZZ2l2v_ntuples -o test/results -c test/runAnalysis_cfg.py.templ
 
 #2012
+runOverSamples.py -j $CMSSW_BASE/src/CMGTools/HtoZZ2l2nu/data/samples_2012.json -n 1 -s 8nh -d patdir -p "-cfg=$CMSSW_BASE/src/CMGTools/HtoZZ2l2nu/test/zzllvvCleanEventAndAnalysis_cfg.py -castor=/store/cmst3/user/psilva/12_05_11_HZZ2l2v_ntuples/split" -t MC_DY
+runOverSamples.py -j $CMSSW_BASE/src/CMGTools/HtoZZ2l2nu/data/samples_2012.json -n 1 -s 8nh -d patdir -p "-cfg=$CMSSW_BASE/src/CMGTools/HtoZZ2l2nu/test/zzllvvCleanEventAndAnalysis_cfg.py -castor=/store/cmst3/user/psilva/12_05_11_HZZ2l2v_ntuples/split" -t Data_
 runLocalAnalysisOverSamples.py -e runEffStudy -j data/samples_2012.json -o test/results -d /store/cmst3/user/psilva/12_06_09_HZZ2l2v_ntuples -c test/runAnalysis_cfg.py.templ -s 8nh 
 
 #

@@ -587,8 +587,8 @@ void ZZ2l2nuSummaryHandler::resetStruct()
 {
   evSummary_.nmcparticles=0;
   evSummary_.run=0;    evSummary_.lumi=0;   evSummary_.event=0;  evSummary_.cat=0;
-  evSummary_.l1_px=0;  evSummary_.l1_py=0;  evSummary_.l1_pz=0;  evSummary_.l1_en=0;
-  evSummary_.l2_px=0;  evSummary_.l2_py=0;  evSummary_.l2_pz=0;  evSummary_.l2_en=0;
+  evSummary_.l1_px=0;  evSummary_.l1_py=0;  evSummary_.l1_pz=0;  evSummary_.l1_en=0; evSummary_.l1_id=0;
+  evSummary_.l2_px=0;  evSummary_.l2_py=0;  evSummary_.l2_pz=0;  evSummary_.l2_en=0; evSummary_.l2_id=0;
   evSummary_.ln=0;     evSummary_.mn=0;     evSummary_.en=0;
   evSummary_.jn=0;     evSummary_.ajn=0;
   evSummary_.gn=0;
