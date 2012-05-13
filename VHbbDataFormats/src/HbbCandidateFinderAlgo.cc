@@ -91,7 +91,7 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
      if(!overlap) noOverlap.push_back(event->simpleJets2[j]);
      else 
      {
-        std::cout << "jet removed in cleaning" << std::endl;
+    //    std::cout << "jet removed in cleaning" << std::endl;
      }   
   }
 
