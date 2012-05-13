@@ -618,7 +618,7 @@ float pfCorrIso = (muons[it].pfChaPUIso+ std::max(muons[it].pfPhoIso+muons[it].p
 	muons[it].nMatches >=2 &&
 	muons[it].ipDb<.2 &&
 	//	(muons[it].hIso+muons[it].eIso+muons[it].tIso)/muons[it].p4.Pt()<.15 &&
-        pfCorrIso < 0.10 &&
+        pfCorrIso < 0.12 &&
 	fabs(muons[it].p4.Eta())<2.4 &&
 	muons[it].p4.Pt()>20 ) {
       out.push_back(muons[it]);
@@ -668,14 +668,15 @@ float rhoN = std::max(aux.puInfo.rhoNeutral,minrho);
 float eta=electrons[it].p4.Eta();
 float areagamma=0.5;
 float areaNH=0.5;
+float areaComb=0.5;
+if(fabs(eta) <= 1.0 ) {areagamma=0.081; areaNH=0.024; areaComb=0.10;}
+if(fabs(eta) > 1.0 &&  fabs(eta) <= 1.479 ) {areagamma=0.084; areaNH=0.037; areaComb=0.12;}
+if(fabs(eta) > 1.479 &&  fabs(eta) <= 2.0 ) {areagamma=0.048; areaNH=0.037; areaComb=0.085;}
+if(fabs(eta) > 2.0 &&  fabs(eta) <= 2.2 ) {areagamma=0.089; areaNH=0.023; areaComb=0.11;}
+if(fabs(eta) > 2.2 &&  fabs(eta) <= 2.3 ) {areagamma=0.092; areaNH=0.023; areaComb=0.12;}
+if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areagamma=0.097; areaNH=0.021; areaComb=0.12;}
+if(fabs(eta) > 2.4  ) {areagamma=0.11; areaNH=0.021; areaComb=0.13;}
 
-if( fabs(eta) <= 1.0 ) {areagamma=0.081; areaNH=0.024;}
-if(fabs(eta) > 1.0 &&  fabs(eta) <= 1.479 ) {areagamma=0.084; areaNH=0.037;}
-if(fabs(eta) > 1.479 &&  fabs(eta) <= 2.0 ) {areagamma=0.048; areaNH=0.037;}
-if(fabs(eta) > 2.0 &&  fabs(eta) <= 2.2 ) {areagamma=0.089; areaNH=0.023;}
-if(fabs(eta) > 2.2 &&  fabs(eta) <= 2.3 ) {areagamma=0.092; areaNH=0.023;}
-if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areagamma=0.097; areaNH=0.021;}
-if(fabs(eta) > 2.4  ) {areagamma=0.11; areaNH=0.021;}
 
 float pfCorrIso = (electrons[it].pfChaPUIso+ std::max(electrons[it].pfPhoIso-rhoN*areagamma,mincor )+std::max(electrons[it].pfNeuIso-rhoN*areaNH,mincor))/electrons[it].p4.Pt();
 
