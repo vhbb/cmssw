@@ -77,6 +77,24 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   //
 
   VHbbCandidateTools selector(verbose_);
+  std::vector<VHbbEvent::SimpleJet> noOverlap;
+  for(size_t j=0; j< event->simpleJets2.size(); j++)
+  {
+     float overlap=false;
+     for(size_t i=0; i< mu.size(); i++) {
+       if(deltaR(mu[i].p4.Eta(),mu[i].p4.Phi(),event->simpleJets2[j].p4.Eta(),event->simpleJets2[j].p4.Phi()) < 0.5) overlap=true; 
+     }
+     for(size_t i=0; i< ele.size(); i++) {
+       if(deltaR(ele[i].p4.Eta(),ele[i].p4.Phi(),event->simpleJets2[j].p4.Eta(),event->simpleJets2[j].p4.Phi()) < 0.5) overlap=true; 
+     }
+   
+     if(!overlap) noOverlap.push_back(event->simpleJets2[j]);
+     else 
+     {
+    //    std::cout << "jet removed in cleaning" << std::endl;
+     }   
+  }
+
 
   VHbbEvent::SimpleJet j1,j2;
   std::vector<VHbbEvent::SimpleJet> addJets;
