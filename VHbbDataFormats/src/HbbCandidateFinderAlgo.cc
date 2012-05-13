@@ -91,7 +91,7 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
      if(!overlap) noOverlap.push_back(event->simpleJets2[j]);
      else 
      {
-    //    std::cout << "jet removed in cleaning" << std::endl;
+        std::cout << "jet removed in cleaning" << std::endl;
      }   
   }
 
@@ -100,9 +100,9 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   std::vector<VHbbEvent::SimpleJet> addJets;
   bool foundJets;
   if (useHighestPtHiggs_ == false){
-    foundJets = findDiJets(event->simpleJets2,j1,j2,addJets) ;
+    foundJets = findDiJets(noOverlap,j1,j2,addJets) ;
   }else{
-    foundJets= findDiJetsHighestPt(event->simpleJets2,j1,j2,addJets) ;
+    foundJets= findDiJetsHighestPt(noOverlap,j1,j2,addJets) ;
   }
 
   if (verbose_){
