@@ -284,7 +284,7 @@ struct  LeptonInfo
     eta[j]=i.p4.Eta();
     phi[j]=i.p4.Phi();
     aodCombRelIso[j]=(i.hIso+i.eIso+i.tIso)/i.p4.Pt();
-    pfCombRelIso[j]=(i.pfChaIso+i.pfPhoIso+i.pfNeuIso)/i.p4.Pt();
+    pfCombRelIso[j]=(i.pfChaPUIso+i.pfPhoIso+i.pfNeuIso)/i.p4.Pt();
     photonIso[j]=i.pfPhoIso;
     neutralHadIso[j]=i.pfNeuIso;
     chargedHadIso[j]=i.pfChaIso;
@@ -1141,15 +1141,15 @@ int main(int argc, char* argv[])
 	      iEvent = vhbbHandle.product();
             }  
 
-	    algoZ->run(iEvent,*candZlocal);
-	    algoW->run(iEvent,*candWlocal);
+	    algoZ->run(iEvent,*candZlocal,aux);
+	    algoW->run(iEvent,*candWlocal,aux);
 
 	    if(candZlocal->size() == 0 or candZlocal->at(0).H.jets.size() < 2)  //recover low pt 
               {
 		 candZlocal->clear();
 		 candWlocal->clear();
-                 algoRecoverLowPt->run(iEvent,*candZlocal);
-                 algoRecoverLowPt->run(iEvent,*candWlocal);
+                 algoRecoverLowPt->run(iEvent,*candZlocal,aux);
+                 algoRecoverLowPt->run(iEvent,*candWlocal,aux);
               }
 
 	    candZ= candZlocal; 

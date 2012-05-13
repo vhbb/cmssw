@@ -108,7 +108,7 @@ process.Analyzer = cms.PSet(
         "HLT_LooseIsoPFTau35_Trk20_MET75_v.*" #38
         
    ),
-    isMC =     cms.bool(False),
+    isMC =     cms.bool(True),
     verbose = cms.bool(False),
     readFromCandidates = cms.bool(False),
     jetPtThresholdZ = cms.double(20),

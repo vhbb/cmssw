@@ -3,6 +3,7 @@
 
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidate.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEventAuxInfo.h"
 
 class HbbCandidateFinderAlgo {
  public:
@@ -10,7 +11,7 @@ class HbbCandidateFinderAlgo {
   explicit HbbCandidateFinderAlgo(bool verbose, float jetPt, bool useH): verbose_(verbose), jetPtThreshold(jetPt),useHighestPtHiggs_(useH) {}
 
 
-  void run (const VHbbEvent*, std::vector<VHbbCandidate>  &);
+  void run (const VHbbEvent*, std::vector<VHbbCandidate>  &,const VHbbEventAuxInfo & aux);
 
  VHbbCandidate changeHiggs(bool useHighestPtHiggs , const VHbbCandidate & old);
 
@@ -23,8 +24,8 @@ static  bool jetID(const VHbbEvent::SimpleJet & );
 
  protected:
   
-  void findMuons (const std::vector<VHbbEvent::MuonInfo>& muons, std::vector<VHbbEvent::MuonInfo>& out, std::vector<unsigned int>&);
-  void findElectrons(const std::vector<VHbbEvent::ElectronInfo>& electrons, std::vector<VHbbEvent::ElectronInfo>& out,std::vector<unsigned int>&);
+  void findMuons (const std::vector<VHbbEvent::MuonInfo>& muons, std::vector<VHbbEvent::MuonInfo>& out, std::vector<unsigned int>&,const VHbbEventAuxInfo & aux);
+  void findElectrons(const std::vector<VHbbEvent::ElectronInfo>& electrons, std::vector<VHbbEvent::ElectronInfo>& out,std::vector<unsigned int>&,const VHbbEventAuxInfo & aux);
   void findMET(const VHbbEvent::METInfo& met, std::vector<VHbbEvent::METInfo>& out);
   
  private:

@@ -1,5 +1,7 @@
 #include "VHbbAnalysis/VHbbDataFormats/interface/HbbCandidateFinderAlgo.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidateTools.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEventAuxInfo.h"
+
 #include "DataFormats/Math/interface/deltaR.h"
 #include <algorithm>
 
@@ -55,7 +57,21 @@ VHbbCandidate HbbCandidateFinderAlgo::changeHiggs(bool useHighestPtHiggs , const
 
 
 
-void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandidate>  & candidates){
+void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandidate>  & candidates,const VHbbEventAuxInfo & aux){
+  //
+  // search for leptons
+  //
+  std::vector<VHbbEvent::MuonInfo> mu;
+  std::vector<VHbbEvent::ElectronInfo> ele;
+//  std::vector<VHbbEvent::MuonInfo> mu;
+  std::vector<unsigned int> muPos;
+  findMuons(event->muInfo,mu, muPos,aux);
+//  std::vector<VHbbEvent::ElectronInfo> ele;
+  std::vector<unsigned int> elePos;
+  findElectrons(event->eleInfo,ele, elePos,aux);
+
+//FIXME: cleaning here
+
   //
   // first find the jets
   //
@@ -77,8 +93,6 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   
 //  if (foundJets == false) return;
 
-  std::vector<VHbbEvent::MuonInfo> mu;
-  std::vector<VHbbEvent::ElectronInfo> ele;
 
   bool foundHardJets;
   VHbbEvent::HardJet fatj1;
@@ -89,15 +103,6 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   if (foundJets == false && foundHardJets == false) return;
 
 
-  //
-  // search for leptons
-  //
-//  std::vector<VHbbEvent::MuonInfo> mu;
-  std::vector<unsigned int> muPos;
-  findMuons(event->muInfo,mu, muPos);
-//  std::vector<VHbbEvent::ElectronInfo> ele;
-  std::vector<unsigned int> elePos;
-  findElectrons(event->eleInfo,ele, elePos);
   
   std::vector<VHbbEvent::METInfo> met;
   findMET(event->pfmet, met);
@@ -529,7 +534,7 @@ bool HbbCandidateFinderAlgo::findFatJet (const std::vector<VHbbEvent::HardJet>& 
 }
 
 
-void HbbCandidateFinderAlgo::findMuons(const std::vector<VHbbEvent::MuonInfo>& muons, std::vector<VHbbEvent::MuonInfo>& out, std::vector<unsigned int>& positions){
+void HbbCandidateFinderAlgo::findMuons(const std::vector<VHbbEvent::MuonInfo>& muons, std::vector<VHbbEvent::MuonInfo>& out, std::vector<unsigned int>& positions,const  VHbbEventAuxInfo & aux){
   /* Use:
 For both W -> mu nu and Z -> mu mu, we adopt the standard VBTF muon selection described in VbtfWmunuBaselineSelection. The explicit cuts are reproduced here:
 
@@ -569,6 +574,18 @@ Effective area, last column matters for us:
 */
 
   for (unsigned int it = 0; it < muons.size();  ++it){
+float mincor=0.0;
+float minrho=0.0;
+float rhoN = std::max(aux.puInfo.rhoNeutral,minrho);
+float eta=muons[it].p4.Eta();
+float area=0.5;
+if(fabs(eta)>0.0 && fabs(eta) <= 1.0) {area=0.674;}
+if(fabs(eta)>1.0 && fabs(eta) <= 1.5) {area=0.565;}
+if(fabs(eta)>1.5 && fabs(eta) <= 2.0) {area=0.442;}
+if(fabs(eta)>2.0 && fabs(eta) <= 2.2) {area=0.515;}
+if(fabs(eta)>2.2 && fabs(eta) <= 2.3) {area=0.821;}
+if(fabs(eta)>2.3 && fabs(eta) <= 2.4) {area=0.660;}
+float pfCorrIso = (muons[it].pfChaPUIso+ std::max(muons[it].pfPhoIso+muons[it].pfNeuIso-rhoN*area,mincor))/muons[it].p4.Pt();
     if (
         muons[it].isPF &&
 	muons[it]. globChi2<10 &&
@@ -583,7 +600,7 @@ Effective area, last column matters for us:
 	muons[it].nMatches >=2 &&
 	muons[it].ipDb<.2 &&
 	//	(muons[it].hIso+muons[it].eIso+muons[it].tIso)/muons[it].p4.Pt()<.15 &&
-	(muons[it].pfChaPUIso+muons[it].pfPhoIso+muons[it].pfNeuIso)/muons[it].p4.Pt()<.15  &&
+        pfCorrIso < 0.10 &&
 	fabs(muons[it].p4.Eta())<2.4 &&
 	muons[it].p4.Pt()>20 ) {
       out.push_back(muons[it]);
@@ -598,8 +615,8 @@ Effective area, last column matters for us:
 }
 
 
-void HbbCandidateFinderAlgo::findElectrons(const std::vector<VHbbEvent::ElectronInfo>& electrons, std::vector<VHbbEvent::ElectronInfo>& out,  std::vector<unsigned int>& positions){
-  /*
+void HbbCandidateFinderAlgo::findElectrons(const std::vector<VHbbEvent::ElectronInfo>& electrons, std::vector<VHbbEvent::ElectronInfo>& out,  std::vector<unsigned int>& positions,const  VHbbEventAuxInfo & aux){
+ /*
 We adopt the standard cut-based selection from VBTF described in detail here.
 
     Z -> ee
@@ -614,7 +631,6 @@ We adopt the standard cut-based selection from VBTF described in detail here.
         |eta|<2.5, excluding the gap 1.44 < |eta| < 1.57
         pT(e) > 30 
   */
-
   //  for (std::vector<VHbbEvent::ElectronInfo>::const_iterator it = electrons.begin(); it!= electrons.end(); ++it){
   for (unsigned int  it = 0; it< electrons.size(); ++it){
     if (
@@ -656,6 +672,16 @@ We adopt the standard cut-based selection from VBTF described in detail here.
 //	!( fabs(electrons[it].p4.Eta()) < 1.57 && fabs(electrons[it].p4.Eta()) > 1.44) &&
 	electrons[it].p4.Pt()>20 //  I use the minimum ok for both Z and W
 	){
+/*      std::cout << "dxy .dz .isEE  .Deta  .Dphi  .sihih  .HoE  .fMVAVar_IoEmIoP  .isEB " <<std::endl;
+      std::cout << fabs(electrons[it].dxy)  << " " <<  fabs(electrons[it].dz) << " " << electrons[it].isEE << " " << 
+       fabs(electrons[it].Deta) 
+<< " " << fabs(electrons[it].Dphi)
+<< " " <<electrons[it].sihih
+<< " " <<electrons[it].HoE
+<< " " <<fabs(electrons[it].fMVAVar_IoEmIoP)
+<< " " <<electrons[it].isEB << std::endl;
+*/
+
       out.push_back(electrons[it]);
       positions.push_back(it);
     }  
