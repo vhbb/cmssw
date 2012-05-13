@@ -276,7 +276,7 @@ struct  LeptonInfo
      }
   }
 
-  template <class Input> void set(const Input & i, int j,int t)
+  template <class Input> void set(const Input & i, int j,int t,const VHbbEventAuxInfo & aux)
   {
     type[j]=t;
     pt[j]=i.p4.Pt(); 
@@ -296,9 +296,9 @@ struct  LeptonInfo
     genEta[j]=i.mcFourMomentum.Eta();
     genPhi[j]=i.mcFourMomentum.Phi();
    }
-         setSpecific(i,j);
+         setSpecific(i,j,aux);
   }
-  template <class Input> void setSpecific(const Input & i, int j)
+  template <class Input> void setSpecific(const Input & i, int j,const VHbbEventAuxInfo & aux)
   {
   }      
  
@@ -327,20 +327,67 @@ struct  LeptonInfo
   float vbtf[MAXL];
   float id80NoIso[MAXL];
   float charge[MAXL];
+  float pfCorrIso[MAXL];
+  float id2012tight[MAXL];
+  float idMVAnotrig[MAXL];
+  float idMVAtrig[MAXL];
 
 };
   
-template <> void LeptonInfo::setSpecific<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j){
+template <> void LeptonInfo::setSpecific<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j,const VHbbEventAuxInfo & aux){
   id80[j]=i.id80;
   id95[j]=i.id95;
   id80NoIso[j]=(i.innerHits ==0 && !(fabs(i.convDist)<0.02 && fabs(i.convDcot)<0.02) &&
 ((i.isEB && i.sihih<0.01 && fabs(i.Dphi)<0.06 && fabs(i.Deta)<0.004) || (i.isEE && i.sihih<0.03 && fabs(i.Dphi)<0.03  && fabs(i.Deta)<0.007)));
+
+float mincor=0.0;
+float minrho=0.0;
+float rhoN = std::max(aux.puInfo.rhoNeutral,minrho);
+float eta=i.p4.Eta();
+float areagamma=0.5;
+float areaNH=0.5;
+float areaComb=0.5;
+if(fabs(eta) <= 1.0 ) {areagamma=0.081; areaNH=0.024; areaComb=0.10;}
+if(fabs(eta) > 1.0 &&  fabs(eta) <= 1.479 ) {areagamma=0.084; areaNH=0.037; areaComb=0.12;}
+if(fabs(eta) > 1.479 &&  fabs(eta) <= 2.0 ) {areagamma=0.048; areaNH=0.037; areaComb=0.085;}
+if(fabs(eta) > 2.0 &&  fabs(eta) <= 2.2 ) {areagamma=0.089; areaNH=0.023; areaComb=0.11;}
+if(fabs(eta) > 2.2 &&  fabs(eta) <= 2.3 ) {areagamma=0.092; areaNH=0.023; areaComb=0.12;}
+if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areagamma=0.097; areaNH=0.021; areaComb=0.12;}
+if(fabs(eta) > 2.4  ) {areagamma=0.11; areaNH=0.021; areaComb=0.13;}
+
+
+pfCorrIso[j] = (i.pfChaPUIso+ std::max(i.pfPhoIso-rhoN*areagamma,mincor )+std::max(i.pfNeuIso-rhoN*areaNH,mincor))/i.p4.Pt();
+
+id2012tight[j] = fabs(i.dxy) < 0.02  &&fabs(i.dz) < 0.1  &&(
+(i.isEE  &&fabs(i.Deta) < 0.005 &&fabs(i.Dphi) < 0.02 &&i.sihih < 0.03  &&i.HoE < 0.10  &&fabs(i.fMVAVar_IoEmIoP) < 0.05
+) ||
+(i.isEB  &&fabs(i.Deta) < 0.004 &&fabs(i.Dphi) < 0.03 &&i.sihih < 0.01  &&i.HoE < 0.12  &&fabs(i.fMVAVar_IoEmIoP) < 0.05
+ ));
+
+ idMVAnotrig[j]=i.mvaOut;
+ idMVAtrig[j]=i.mvaOutTrig;
+
+
 }
-template <> void LeptonInfo::setSpecific<VHbbEvent::MuonInfo>(const VHbbEvent::MuonInfo & i, int j){
+template <> void LeptonInfo::setSpecific<VHbbEvent::MuonInfo>(const VHbbEvent::MuonInfo & i, int j,const VHbbEventAuxInfo & aux){
   dxy[j]=i.ipDb;
   dz[j]=i.zPVPt;
   vbtf[j]=( i.globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 && i.nHits > 10 && i.cat & 0x1 && i.cat & 0x2 && i.nMatches >=2 && i.ipDb<.2 &&
         (i.pfChaIso+i.pfPhoIso+i.pfNeuIso)/i.p4.Pt()<.15  && fabs(i.p4.Eta())<2.4 && i.p4.Pt()>20 ) ;
+float mincor=0.0;
+float minrho=0.0;
+float rhoN = std::max(aux.puInfo.rhoNeutral,minrho);
+float eta=i.p4.Eta();
+float area=0.5;
+if(fabs(eta)>0.0 && fabs(eta) <= 1.0) {area=0.674;}
+if(fabs(eta)>1.0 && fabs(eta) <= 1.5) {area=0.565;}
+if(fabs(eta)>1.5 && fabs(eta) <= 2.0) {area=0.442;}
+if(fabs(eta)>2.0 && fabs(eta) <= 2.2) {area=0.515;}
+if(fabs(eta)>2.2 && fabs(eta) <= 2.3) {area=0.821;}
+if(fabs(eta)>2.3 && fabs(eta) <= 2.4) {area=0.660;}
+pfCorrIso[j] = (i.pfChaPUIso+ std::max(i.pfPhoIso+i.pfNeuIso-rhoN*area,mincor))/i.p4.Pt();
+id2012tight[j]= i.isPF && i. globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 && i.nValidLayers > 5 &&         (i.cat & 0x2) && i.nMatches >=2 && i.ipDb<.2;
+
 
 }
 
@@ -523,7 +570,7 @@ int main(int argc, char* argv[])
   TTree *_outTree;
   IVFInfo IVF;
   SimBHadronInfo SimBs;
-  float rho,rho25;
+  float rho,rho25,rhoN;
   int nPVs;
   METInfo MET;
   METInfo fakeMET;
@@ -888,6 +935,10 @@ int main(int argc, char* argv[])
   _outTree->Branch("vLepton_genEta",vLeptons.genEta ,"genEta[nvlep]");
   _outTree->Branch("vLepton_genPhi",vLeptons.genPhi ,"genPhi[nvlep]/F");
   _outTree->Branch("vLepton_charge",vLeptons.charge ,"charge[nvlep]/F");
+  _outTree->Branch("vLepton_pfCorrIso",vLeptons.pfCorrIso,"pfCorrIso[nvlep]/F");
+  _outTree->Branch("vLepton_id2012tight",vLeptons.id2012tight,"id2012tight[nvlep]/F");
+  _outTree->Branch("vLepton_idMVAnotrig",vLeptons.idMVAnotrig,"idMVAnotrig[nvlep]/F");
+  _outTree->Branch("vLepton_idMVAtrig",vLeptons.idMVAtrig,"idMVAtrig[nvlep]/F");
  
   _outTree->Branch("aLepton_mass",aLeptons.mass ,"mass[nalep]/F");
   _outTree->Branch("aLepton_pt",aLeptons.pt ,"pt[nalep]/F");
@@ -949,6 +1000,7 @@ int main(int argc, char* argv[])
 
   _outTree->Branch("rho"		,  &rho	         ,   "rho/F");
   _outTree->Branch("rho25"		,  &rho25	         ,   "rho25/F");
+  _outTree->Branch("rhoN"		,  &rhoN	         ,   "rhoN/F");
   _outTree->Branch("nPVs"		,  &nPVs	         ,   "nPVs/I");
   _outTree->Branch("METnoPU"		,  &METnoPU	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("METnoPUCh"		,  &METnoPUCh	         ,   "et/F:sumet:sig/F:phi/F");
@@ -1393,6 +1445,7 @@ int main(int argc, char* argv[])
 
         rho = aux.puInfo.rho;
         rho25 = aux.puInfo.rho25;
+        rhoN = aux.puInfo.rhoNeutral;
         nPVs=aux.pvInfo.nVertices; 
  
         if(!fromCandidate) {
@@ -1633,8 +1686,8 @@ int main(int argc, char* argv[])
 	size_t firstAddMu=0;
 	size_t firstAddEle=0;
 	if(Vtype == VHbbCandidate::Zmumu ){
-	  vLeptons.set(vhCand.V.muons[0],0,13); 
-	  vLeptons.set(vhCand.V.muons[1],1,13);
+	  vLeptons.set(vhCand.V.muons[0],0,13,aux); 
+	  vLeptons.set(vhCand.V.muons[1],1,13,aux);
 	  float cweightID = triggerWeight.scaleMuID(vLeptons.pt[0],vLeptons.eta[0]) * triggerWeight.scaleMuID(vLeptons.pt[1],vLeptons.eta[1]) ;
 	  float weightTrig1 = triggerWeight.scaleMuIsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
 	  float weightTrig2 = triggerWeight.scaleMuIsoHLT(vLeptons.pt[1],vLeptons.eta[1]);
@@ -1644,8 +1697,8 @@ int main(int argc, char* argv[])
 	  firstAddMu=2;
 	}
 	if( Vtype == VHbbCandidate::Zee ){
-	  vLeptons.set(vhCand.V.electrons[0],0,11);
-	  vLeptons.set(vhCand.V.electrons[1],1,11);
+	  vLeptons.set(vhCand.V.electrons[0],0,11,aux);
+	  vLeptons.set(vhCand.V.electrons[1],1,11,aux);
 	  nvlep=2;
 	  firstAddEle=2;
 	  std::vector<float> pt,eta;
@@ -1662,7 +1715,7 @@ int main(int argc, char* argv[])
 	}
 	if(Vtype == VHbbCandidate::Wmun ){
 	  leptonForTop=vhCand.V.muons[0].p4;
-	  vLeptons.set(vhCand.V.muons[0],0,13); 
+	  vLeptons.set(vhCand.V.muons[0],0,13,aux); 
 	  float cweightID = triggerWeight.scaleMuID(vLeptons.pt[0],vLeptons.eta[0]);
 	  float weightTrig1 = triggerWeight.scaleMuIsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
 	  float cweightTrig = weightTrig1;
@@ -1674,7 +1727,7 @@ int main(int argc, char* argv[])
 	}
 	if( Vtype == VHbbCandidate::Wen ){
 	  leptonForTop=vhCand.V.electrons[0].p4;
-	  vLeptons.set(vhCand.V.electrons[0],0,11);
+	  vLeptons.set(vhCand.V.electrons[0],0,11,aux);
 	  nvlep=1;
 	  firstAddEle=1;
 	  weightTrigMay = triggerWeight.scaleSingleEleMay(vLeptons.pt[0],vLeptons.eta[0]);
@@ -1730,20 +1783,20 @@ int main(int argc, char* argv[])
 	nalep=0;
 	if(fromCandidate)
           {
-            for(size_t j=firstAddMu;j< vhCand.V.muons.size();j++) aLeptons.set(vhCand.V.muons[j],nalep++,13);
-            for(size_t j=firstAddEle;j< vhCand.V.electrons.size();j++) aLeptons.set(vhCand.V.electrons[j],nalep++,11);
+            for(size_t j=firstAddMu;j< vhCand.V.muons.size();j++) aLeptons.set(vhCand.V.muons[j],nalep++,13,aux);
+            for(size_t j=firstAddEle;j< vhCand.V.electrons.size();j++) aLeptons.set(vhCand.V.electrons[j],nalep++,11,aux);
           }
 	else
           {
 	    for(size_t j=0;j< iEvent->muInfo.size();j++)
 	      { 
                 if((j!= vhCand.V.firstLepton && j!= vhCand.V.secondLepton) || ((Vtype != VHbbCandidate::Wmun ) && (Vtype != VHbbCandidate::Zmumu )) )
-		  aLeptons.set(iEvent->muInfo[j],nalep++,13);
+		  aLeptons.set(iEvent->muInfo[j],nalep++,13,aux);
 	      }
 	    for(size_t j=0;j< iEvent->eleInfo.size();j++)
 	      { 
                 if((j!= vhCand.V.firstLepton && j!= vhCand.V.secondLepton) || ((Vtype != VHbbCandidate::Wen ) && (Vtype != VHbbCandidate::Zee )))
-		  aLeptons.set(iEvent->eleInfo[j],nalep++,11);
+		  aLeptons.set(iEvent->eleInfo[j],nalep++,11,aux);
 	      }
 
           }

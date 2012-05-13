@@ -8,7 +8,7 @@ import re
 
 process = cms.Process("FWLitePlots")
 
-baseAddFiles = "/gpfs/gpfsddn/cms/user/arizzi/V11_bis/CMSSW_4_2_8_patch3/src/VHbbAnalysis/VHbbDataFormats/bin/" 
+baseAddFiles = "/gpfs/gpfsddn/cms/user/arizzi/Hbb/V30/CMSSW_5_2_4_patch4/src/VHbbAnalysis/VHbbDataFormats/bin"
 
 f = open(os.environ.get("FILETOPROCESS"))
 lines = f.readlines()
@@ -18,15 +18,11 @@ f.close()
 process.fwliteInput = cms.PSet(
     lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange()),
     fileNames   = cms.vstring(),
-  PUmcfileName2011B= cms.string(baseAddFiles+"PU1D2011B.root"),
-    PUdatafileName2011B = cms.string(baseAddFiles+"Cert_175832-178078_7TeV_PromptReco_Collisons11_JSON.pileupTruth_v2.root"),
-    PUmcfileName = cms.string(baseAddFiles+"ttbarPU_36bins.root"),
-    PUdatafileName = cms.string(baseAddFiles+"Pileup_2011_to_173692_LPLumiScale_68mb_36bins.root"),
-    Weight3DfileName = cms.string(baseAddFiles+"Weight3D_Fall.root"),
-    runMin  = cms.int32(-1),
-    runMax  = cms.int32(178478),
- 
+    PUmcfileName = cms.string(baseAddFiles+"ttbarPU.root"),
+    PUdatafileName = cms.string(baseAddFiles+"Pileup_2011_to_173692_LPLumiScale_68mb_51bins.root"),
     maxEvents   = cms.int32(-1),                             ## optional
+    runMin  = cms.int32(-1),
+    runMax  = cms.int32(-1),
     outputEvery = cms.uint32(0),                            ## optional
     skipEvents   = cms.int32(0),                             ## optional
     )
@@ -34,7 +30,7 @@ process.fwliteInput = cms.PSet(
 
 channel =  re.sub(".txt","",os.environ.get("FILETOPROCESS"))
 
-JSONfile = '/gpfs/gpfsddn/cms/user/arizzi/V11_bis/CMSSW_4_2_8_patch3/src/VHbbAnalysis/VHbbDataFormats/bin/final.json'
+JSONfile = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-193336_8TeV_PromptReco_Collisions12_JSON.txt'
 lumiList = LumiList.LumiList (filename = JSONfile).getCMSSWString().split(',')
 process.fwliteInput.lumisToProcess.extend(lumiList)
 
@@ -86,7 +82,18 @@ process.Analyzer = cms.PSet(
         "HLT_IsoMu17_eta2p1_DiCentralJet30_v.*", #24
         "HLT_IsoMu17_eta2p1_DiCentralPFJet25_PFMHT15_v.*", #25
         "HLT_Ele30_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_DiCentralJet30_PFMHT25_v.*", #26
-        "HLT_Ele27_WP80_DiCentralPFJet25_PFMHT15_v.*" #27 
+        "HLT_Ele27_WP80_DiCentralPFJet25_PFMHT15_v.*", #27 
+         "HLT_IsoPFTau35_Trk20_v.*", #28
+         "HLT_IsoPFTau35_Trk20_MET45_v.*", #29
+         "HLT_IsoPFTau35_Trk20_MET60_v.*", #30
+         "HLT_IsoPFTau45_Trk20_MET60_v.*", #31
+         "HLT_IsoPFTau35_Trk20_MET70_v.*", #32
+         "HLT_MediumIsoPFTau35_Trk20_v.*", #33
+         "HLT_MediumIsoPFTau35_Trk20_MET60_v.*", #34
+         "HLT_MediumIsoPFTau35_Trk20_MET70_v.*", #35
+         "HLT_LooseIsoPFTau35_Trk20_v.*", #36
+         "HLT_LooseIsoPFTau35_Trk20_MET70_v.*", #37
+         "HLT_LooseIsoPFTau35_Trk20_MET75_v.*" #38
 
   ),
     isMC =     cms.bool(False),
@@ -105,9 +112,6 @@ process.Analyzer = cms.PSet(
     idEle95FileName = cms.string(baseAddFiles+"PFElectronToWP95.root"),
     hltJetEle1FileName = cms.string(baseAddFiles+"TriggerEfficiency_JetNo30_Jet25.root"),
     hltJetEle2FileName = cms.string(baseAddFiles+"TriggerEfficiency_Jet30.root"),
-hltEle1AugFileName = cms.string(baseAddFiles+"Ele17Aug5PromptRecoV6.root"),
-hltEle2AugFileName = cms.string(baseAddFiles+"Ele8NotEle17Aug5PromptRecoV6.root"),
-
     recoEleFileName = cms.string(baseAddFiles+"EleReco.root"),
     hltSingleEleMayFileName = cms.string(baseAddFiles+"TriggerEfficiency_Electrons_May10.root"),
     hltSingleEleV4FileName = cms.string(baseAddFiles+"TriggerEfficiency_Electrons_PromptV4.root"),
