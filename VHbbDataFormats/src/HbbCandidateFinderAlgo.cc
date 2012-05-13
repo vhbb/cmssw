@@ -650,8 +650,38 @@ We adopt the standard cut-based selection from VBTF described in detail here.
         pT(e) > 30 
   */
   //  for (std::vector<VHbbEvent::ElectronInfo>::const_iterator it = electrons.begin(); it!= electrons.end(); ++it){
+/*
+      isocorr = chargediso + max(PFIso(&gamma;) - rho * Aeff(&gamma), 0.) +  max(PFIso(NH) - rho * Aeff(NH), 0.) 
+0<abs(eta)<1.0   Aeff(NH) = 0.024 +/- 0.001      Aeff(γ) = 0.081 +/- 0.001       Aeff(γ+NH) = 0.10 +/- 0.002
+1.0<abs(eta)<1.479       Aeff(NH) = 0.037 +/- 0.001      Aeff(γ) = 0.084 +/- 0.003       Aeff(γ+NH) = 0.12 +/- 0.003
+1.479<abs(eta)<2.0       Aeff(NH) = 0.037 +/- 0.001      Aeff(γ) = 0.048 +/- 0.001       Aeff(γ+NH) = 0.085 +/- 0.002
+2.0<abs(eta)<2.2         Aeff(NH) = 0.023 +/- 0.001      Aeff(γ) = 0.089 +/- 0.002       Aeff(γ+NH) = 0.11 +/- 0.003
+2.2<abs(eta)<2.3         Aeff(NH) = 0.023 +/- 0.002      Aeff(γ) = 0.092 +/- 0.004       Aeff(γ+NH) = 0.12 +/- 0.004
+2.3<abs(eta)<2.4         Aeff(NH) = 0.021 +/- 0.002      Aeff(γ) = 0.097 +/- 0.004       Aeff(γ+NH) = 0.12 +/- 0.005
+2.4< abs(eta)<123213     Aeff(NH) = 0.021 +/- 0.003      Aeff(γ) = 0.11 +/- 0.004        Aeff(γ+NH) = 0.13 +/- 0.006
+
+*/
   for (unsigned int  it = 0; it< electrons.size(); ++it){
+float mincor=0.0;
+float minrho=0.0;
+float rhoN = std::max(aux.puInfo.rhoNeutral,minrho);
+float eta=electrons[it].p4.Eta();
+float areagamma=0.5;
+float areaNH=0.5;
+
+if( fabs(eta) <= 1.0 ) {areagamma=0.081; areaNH=0.024;}
+if(fabs(eta) > 1.0 &&  fabs(eta) <= 1.479 ) {areagamma=0.084; areaNH=0.037;}
+if(fabs(eta) > 1.479 &&  fabs(eta) <= 2.0 ) {areagamma=0.048; areaNH=0.037;}
+if(fabs(eta) > 2.0 &&  fabs(eta) <= 2.2 ) {areagamma=0.089; areaNH=0.023;}
+if(fabs(eta) > 2.2 &&  fabs(eta) <= 2.3 ) {areagamma=0.092; areaNH=0.023;}
+if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areagamma=0.097; areaNH=0.021;}
+if(fabs(eta) > 2.4  ) {areagamma=0.11; areaNH=0.021;}
+
+float pfCorrIso = (electrons[it].pfChaPUIso+ std::max(electrons[it].pfPhoIso-rhoN*areagamma,mincor )+std::max(electrons[it].pfNeuIso-rhoN*areaNH,mincor))/electrons[it].p4.Pt();
+
+
     if (
+
 	// fake
 /*   "(isEE || isEB) && !isEBEEGap &&"
   " (chargedHadronIso + neutralHadronIso + photonIso)/pt <0.10 &&"
@@ -684,7 +714,7 @@ We adopt the standard cut-based selection from VBTF described in detail here.
         fabs(electrons[it].fMVAVar_IoEmIoP) < 0.05 
          )
         ) &&
-
+        pfCorrIso < 0.1 &&
 	fabs(electrons[it].p4.Eta()) < 2.5 &&
 //Remove this workaround as now we have the proper flags
 //	!( fabs(electrons[it].p4.Eta()) < 1.57 && fabs(electrons[it].p4.Eta()) > 1.44) &&
