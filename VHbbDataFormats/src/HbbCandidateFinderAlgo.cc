@@ -603,7 +603,7 @@ if(fabs(eta)>1.5 && fabs(eta) <= 2.0) {area=0.442;}
 if(fabs(eta)>2.0 && fabs(eta) <= 2.2) {area=0.515;}
 if(fabs(eta)>2.2 && fabs(eta) <= 2.3) {area=0.821;}
 if(fabs(eta)>2.3 && fabs(eta) <= 2.4) {area=0.660;}
-float pfCorrIso = (muons[it].pfChaPUIso+ std::max(muons[it].pfPhoIso+muons[it].pfNeuIso-rhoN*area,mincor))/muons[it].p4.Pt();
+float pfCorrIso = (muons[it].pfChaIso+ std::max(muons[it].pfPhoIso+muons[it].pfNeuIso-rhoN*area,mincor))/muons[it].p4.Pt();
     if (
         muons[it].isPF &&
 	muons[it]. globChi2<10 &&
@@ -678,7 +678,7 @@ if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areagamma=0.097; areaNH=0.021; areaCo
 if(fabs(eta) > 2.4  ) {areagamma=0.11; areaNH=0.021; areaComb=0.13;}
 
 
-float pfCorrIso = (electrons[it].pfChaPUIso+ std::max(electrons[it].pfPhoIso-rhoN*areagamma,mincor )+std::max(electrons[it].pfNeuIso-rhoN*areaNH,mincor))/electrons[it].p4.Pt();
+float pfCorrIso = (electrons[it].pfChaIso+ std::max(electrons[it].pfPhoIso-rhoN*areagamma,mincor )+std::max(electrons[it].pfNeuIso-rhoN*areaNH,mincor))/electrons[it].p4.Pt();
 
 
     if (

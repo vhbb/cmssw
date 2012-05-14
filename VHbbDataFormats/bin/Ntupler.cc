@@ -272,7 +272,9 @@ struct  LeptonInfo
     for(int i =0; i < MAXL;i++){ 
      mass[i]=-99; pt[i]=-99; eta[i]=-99; phi[i]=-99; aodCombRelIso[i]=-99; pfCombRelIso[i]=-99; photonIso[i]=-99; neutralHadIso[i]=-99; chargedHadIso[i]=-99; chargedPUIso[i]=-99; particleIso[i]=-99; dxy[i]=-99; dz[i]=-99; type[i]=-99;  genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99;  
      id80[i]=-99; id95[i]=-99; vbtf[i]=-99; id80NoIso[i]=-99;
-     charge[i]=-99; 
+     charge[i]=-99;
+     pfCorrIso[i]=-99.; id2012tight[i]=-99; idMVAnotrig[i]=-99; idMVAtrig[i]=-99;
+ 
      }
   }
 
@@ -284,7 +286,7 @@ struct  LeptonInfo
     eta[j]=i.p4.Eta();
     phi[j]=i.p4.Phi();
     aodCombRelIso[j]=(i.hIso+i.eIso+i.tIso)/i.p4.Pt();
-    pfCombRelIso[j]=(i.pfChaPUIso+i.pfPhoIso+i.pfNeuIso)/i.p4.Pt();
+    pfCombRelIso[j]=(i.pfChaIso+i.pfPhoIso+i.pfNeuIso)/i.p4.Pt();
     photonIso[j]=i.pfPhoIso;
     neutralHadIso[j]=i.pfNeuIso;
     chargedHadIso[j]=i.pfChaIso;
@@ -356,7 +358,7 @@ if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areagamma=0.097; areaNH=0.021; areaCo
 if(fabs(eta) > 2.4  ) {areagamma=0.11; areaNH=0.021; areaComb=0.13;}
 
 
-pfCorrIso[j] = (i.pfChaPUIso+ std::max(i.pfPhoIso-rhoN*areagamma,mincor )+std::max(i.pfNeuIso-rhoN*areaNH,mincor))/i.p4.Pt();
+pfCorrIso[j] = (i.pfChaIso+ std::max(i.pfPhoIso-rhoN*areagamma,mincor )+std::max(i.pfNeuIso-rhoN*areaNH,mincor))/i.p4.Pt();
 
 id2012tight[j] = fabs(i.dxy) < 0.02  &&fabs(i.dz) < 0.1  &&(
 (i.isEE  &&fabs(i.Deta) < 0.005 &&fabs(i.Dphi) < 0.02 &&i.sihih < 0.03  &&i.HoE < 0.10  &&fabs(i.fMVAVar_IoEmIoP) < 0.05
@@ -385,7 +387,7 @@ if(fabs(eta)>1.5 && fabs(eta) <= 2.0) {area=0.442;}
 if(fabs(eta)>2.0 && fabs(eta) <= 2.2) {area=0.515;}
 if(fabs(eta)>2.2 && fabs(eta) <= 2.3) {area=0.821;}
 if(fabs(eta)>2.3 && fabs(eta) <= 2.4) {area=0.660;}
-pfCorrIso[j] = (i.pfChaPUIso+ std::max(i.pfPhoIso+i.pfNeuIso-rhoN*area,mincor))/i.p4.Pt();
+pfCorrIso[j] = (i.pfChaIso+ std::max(i.pfPhoIso+i.pfNeuIso-rhoN*area,mincor))/i.p4.Pt();
 id2012tight[j]= i.isPF && i. globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 && i.nValidLayers > 5 &&         (i.cat & 0x2) && i.nMatches >=2 && i.ipDb<.2;
 
 
@@ -962,6 +964,10 @@ int main(int argc, char* argv[])
   _outTree->Branch("aLepton_genEta",aLeptons.genEta ,"genEta[nalep]");
   _outTree->Branch("aLepton_genPhi",aLeptons.genPhi ,"genPhi[nalep]/F");
   _outTree->Branch("aLepton_charge",aLeptons.charge ,"charge[nalep]/F");
+  _outTree->Branch("aLepton_pfCorrIso",aLeptons.pfCorrIso,"pfCorrIso[nalep]/F");
+  _outTree->Branch("aLepton_id2012tight",aLeptons.id2012tight,"id2012tight[nalep]/F");
+  _outTree->Branch("aLepton_idMVAnotrig",aLeptons.idMVAnotrig,"idMVAnotrig[nalep]/F");
+  _outTree->Branch("aLepton_idMVAtrig",aLeptons.idMVAtrig,"idMVAtrig[nalep]/F");
 
   _outTree->Branch("top"		,  &top	         ,   "mass/F:pt/F:wMass/F");
   _outTree->Branch("WplusMode"		,  &WplusMode	 ,   "WplusMode/I");
@@ -1298,8 +1304,15 @@ int main(int argc, char* argv[])
        if(vhCand.FatH.FatHiggsFlag){ 
         FatH.mass= vhCand.FatH.p4.M(); 
         FatH.pt = vhCand.FatH.p4.Pt();
-        FatH.eta = vhCand.FatH.p4.Eta();
+        if(FatH.pt!=0)
+        {
+           FatH.eta = vhCand.FatH.p4.Eta();
+        }
+        else { 
+         FatH.eta = -99.;
+        }
         FatH.phi = vhCand.FatH.p4.Phi();
+
         
 //        if(vhCand.FatH.FatHiggsFlag)  vhCand.FatH.subjetsSize; 
         nfathFilterJets=vhCand.FatH.subjetsSize;  
