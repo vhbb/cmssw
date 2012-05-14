@@ -611,7 +611,9 @@ int main(int argc, char* argv[])
   float  weightTrigMET80, weightTrigMET100,    weightTrig2CJet20 , weightTrigMET150  , weightTrigMET802CJet, weightTrigMET1002CJet, weightTrigMETLP ;
 
   int WplusMode,WminusMode;
-  int Vtype,nSvs,nSimBs,numJets,numBJets,eventFlav;
+  int Vtype,nSvs=0;
+  int nSimBs=0;
+  int numJets,numBJets,eventFlav;
   //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
   bool triggerFlags[500],hbhe,ecalFlag,totalKinematics,  cschaloFlag,  hcallaserFlag,   trackingfailureFlag ;
 
@@ -1068,6 +1070,10 @@ int main(int argc, char* argv[])
       const char * lab = "HbbAnalyzerNew";
       vhbbAuxHandle.getByLabel(ev,lab,0,0);
       const VHbbEventAuxInfo & aux = *vhbbAuxHandle.product();
+      EVENT.run = ev.id().run();
+      EVENT.lumi = ev.id().luminosityBlock();
+      EVENT.event = ev.id().event();
+      EVENT.json = jsonContainsEvent (jsonVector, ev);
 
       if(EVENT.run < runMin_ && runMin_ > 0) continue;
       if(EVENT.run > runMax_ && runMax_ > 0) continue;
@@ -1147,10 +1153,6 @@ int main(int argc, char* argv[])
 	//std::cout << "lhe V pt = " << lheV_pt << std::endl;
 
 	//Write event info 
-	EVENT.run = ev.id().run();
-	EVENT.lumi = ev.id().luminosityBlock();
-	EVENT.event = ev.id().event();
-	EVENT.json = jsonContainsEvent (jsonVector, ev);
  	
 	// simBHadrons
 	const SimBHadronCollection *sbhc;
