@@ -16,10 +16,13 @@ bool HbbCandidateFinder::filter( edm::Event& iEvent, const edm::EventSetup& iEve
   
   std::auto_ptr<std::vector<VHbbCandidate> >  vHbbCandidates( new std::vector<VHbbCandidate>  );
 
+  
+  edm::Handle<VHbbEventAuxInfo>  vHbbEventAux;
+  //  iEvent.getByLabel(vhbbevent_, vHbbEvent);
+  iEvent.getByType(vHbbEventAux);
   edm::Handle<VHbbEvent>  vHbbEvent;
   //  iEvent.getByLabel(vhbbevent_, vHbbEvent);
   iEvent.getByType(vHbbEvent);
-  
 
   //
   // start searching for candidates
@@ -28,7 +31,7 @@ bool HbbCandidateFinder::filter( edm::Event& iEvent, const edm::EventSetup& iEve
   //  hbbCandidateFinderAlgo(vHbbCandidates, vHbbEvent-> result());
   // do nothing for a test
   
-  algo_->run(vHbbEvent.product(),(*vHbbCandidates));
+  algo_->run(vHbbEvent.product(),(*vHbbCandidates),*vHbbEventAux.product());
   
   
   if (verbose_)
