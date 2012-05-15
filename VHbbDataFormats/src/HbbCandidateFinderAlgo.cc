@@ -679,6 +679,14 @@ if(fabs(eta) > 2.4  ) {areagamma=0.11; areaNH=0.021; areaComb=0.13;}
 
 
 float pfCorrIso = (electrons[it].pfChaIso+ std::max(electrons[it].pfPhoIso-rhoN*areagamma,mincor )+std::max(electrons[it].pfNeuIso-rhoN*areaNH,mincor))/electrons[it].p4.Pt();
+float iso=pfCorrIso;
+float id=electrons[it].mvaOutTrig;
+bool wp70=((fabs(eta) < 0.8 && id>0.977 && iso < 0.093) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.956 && iso < 0.095) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.966 && iso < 0.171));
+bool wp80=((fabs(eta) < 0.8 && id>0.913 && iso < 0.105) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.964 && iso < 0.178) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.899 && iso < 0.150));
+bool wp85=((fabs(eta) < 0.8 && id>0.929 && iso < 0.135) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.931 && iso < 0.159) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.805 && iso < 0.155));
+bool wp90=((fabs(eta) < 0.8 && id>0.877 && iso < 0.177) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.794 && iso < 0.180) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.846 && iso < 0.244));
+bool wp95=((fabs(eta) < 0.8 && id>0.858 && iso < 0.253) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.425 && iso < 0.225) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.759 && iso < 0.308));
+bool wpHWW=((fabs(eta) < 0.8 && id>0.94 && iso < 0.15) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.85 && iso < 0.15) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.92 && iso < 0.15));
 
 
     if (
@@ -697,8 +705,9 @@ float pfCorrIso = (electrons[it].pfChaIso+ std::max(electrons[it].pfPhoIso-rhoN*
 #or use mvaNonTrigV0 and mvaTrigV0
     ")" */
 //	(fabs(electrons[it].id95 - 7)) < 0.1  &&
+        wp95 &&
 //2012 cut based ELE ID
-        fabs(electrons[it].dxy) < 0.02  &&
+  /*      fabs(electrons[it].dxy) < 0.02  &&
         fabs(electrons[it].dz) < 0.1  &&
         ((electrons[it].isEE  &&
         fabs(electrons[it].Deta) < 0.005 &&
@@ -717,6 +726,7 @@ float pfCorrIso = (electrons[it].pfChaIso+ std::max(electrons[it].pfPhoIso-rhoN*
         ) &&
         pfCorrIso < 0.1 &&
 	fabs(electrons[it].p4.Eta()) < 2.5 &&
+*/
 //Remove this workaround as now we have the proper flags
 //	!( fabs(electrons[it].p4.Eta()) < 1.57 && fabs(electrons[it].p4.Eta()) > 1.44) &&
 	electrons[it].p4.Pt()>20 //  I use the minimum ok for both Z and W

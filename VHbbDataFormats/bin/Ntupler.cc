@@ -272,7 +272,7 @@ struct  LeptonInfo
     for(int i =0; i < MAXL;i++){ 
      mass[i]=-99; pt[i]=-99; eta[i]=-99; phi[i]=-99; aodCombRelIso[i]=-99; pfCombRelIso[i]=-99; photonIso[i]=-99; neutralHadIso[i]=-99; chargedHadIso[i]=-99; chargedPUIso[i]=-99; particleIso[i]=-99; dxy[i]=-99; dz[i]=-99; type[i]=-99;  genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99;  
      id80[i]=-99; id95[i]=-99; vbtf[i]=-99; id80NoIso[i]=-99;
-     charge[i]=-99;
+     charge[i]=-99;wp70[i]=-99; wp80[i]=-99;wp85[i]=-99;wp90[i]=-99;wp95[i]=-99;wpHWW[i]=-99;
      pfCorrIso[i]=-99.; id2012tight[i]=-99; idMVAnotrig[i]=-99; idMVAtrig[i]=-99;
  
      }
@@ -333,7 +333,12 @@ struct  LeptonInfo
   float id2012tight[MAXL];
   float idMVAnotrig[MAXL];
   float idMVAtrig[MAXL];
-
+  float wp70[MAXL]; 
+  float wp80[MAXL]; 
+  float wp85[MAXL]; 
+  float wp90[MAXL]; 
+  float wp95[MAXL]; 
+  float wpHWW[MAXL]; 
 };
   
 template <> void LeptonInfo::setSpecific<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j,const VHbbEventAuxInfo & aux){
@@ -365,6 +370,14 @@ id2012tight[j] = fabs(i.dxy) < 0.02  &&fabs(i.dz) < 0.1  &&(
 ) ||
 (i.isEB  &&fabs(i.Deta) < 0.004 &&fabs(i.Dphi) < 0.03 &&i.sihih < 0.01  &&i.HoE < 0.12  &&fabs(i.fMVAVar_IoEmIoP) < 0.05
  ));
+float id=i.mvaOutTrig;
+float iso=pfCorrIso[j];
+wp70[j]=((fabs(eta) < 0.8 && id>0.977 && iso < 0.093) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.956 && iso < 0.095) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.966 && iso < 0.171));
+wp80[j]=((fabs(eta) < 0.8 && id>0.913 && iso < 0.105) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.964 && iso < 0.178) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.899 && iso < 0.150));
+wp85[j]=((fabs(eta) < 0.8 && id>0.929 && iso < 0.135) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.931 && iso < 0.159) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.805 && iso < 0.155));
+wp90[j]=((fabs(eta) < 0.8 && id>0.877 && iso < 0.177) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.794 && iso < 0.180) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.846 && iso < 0.244));
+wp95[j]=((fabs(eta) < 0.8 && id>0.858 && iso < 0.253) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.425 && iso < 0.225) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.759 && iso < 0.308));
+wpHWW[j]=((fabs(eta) < 0.8 && id>0.94 && iso < 0.15) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.85 && iso < 0.15) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.92 && iso < 0.15));
 
  idMVAnotrig[j]=i.mvaOut;
  idMVAtrig[j]=i.mvaOutTrig;
@@ -1055,7 +1068,7 @@ int main(int argc, char* argv[])
   for(unsigned int iFile=0; iFile<inputFiles_.size(); ++iFile) {
     std::cout << iFile << std::endl;
     TFile* inFile = TFile::Open(inputFiles_[iFile].c_str());
-    if(inFile==0) continue;
+    if(inFile==0) { std::cout << "FAILED " << inputFiles_[iFile] << std::endl; continue; }
 
     // loop the events
       
