@@ -10,13 +10,16 @@ from ROOT import TFile, TGraph, TCanvas, TF1, TH1
 #default values
 shapeBased='1'
 shapeName='mt_shapes'
-inUrl='$CMSSW_BASE/src/CMGTools/HtoZZ2l2nu/test/plotter2011.root'
+inUrl='$CMSSW_BASE/src/CMGTools/HtoZZ2l2nu/test/plotter2012.root'
 CWD=os.getcwd()
 phase=-1
-jsonUrl='$CMSSW_BASE/src/CMGTools/HtoZZ2l2nu/data/samples.json'
+jsonUrl='$CMSSW_BASE/src/CMGTools/HtoZZ2l2nu/data/samples_2012.json'
 CMSSW_BASE=os.environ.get('CMSSW_BASE')
-LandSArg=''
- 
+#LandSArg=' --subNRB --indexvbf 78 '
+LandSArg=' --indexvbf 78 '
+LandSArg+=' --bins eq0jets,eq1jets,geq2jets,vbf'
+
+cutList='' 
 def help() :
    print '\n\033[92m optimize.py \033[0m \n'
    print ' -p phase (no default value is assigned)'
@@ -24,8 +27,8 @@ def help() :
    print '\t 2 --> check the logs to find the optimal selection point'
    print '\t      from the ouptut of the logs you can search for the optimal points yourself ;)'
    print '\t      and edit phase3 of this script with your optimal points (note: change this to be given as input)'
-   print '\t 3 --> after you have written by hand the best signal point for your signal key points'
-   print '\t      run the full limit computation including systematics'
+   print '\t 3 --> you are prompted to choose the best cuts for the selection: the limits will be comptued for the list of cuts'
+   print '\t       if -f LIST.txt is given the LIST of cuts passed will be used instead'
    print '\t 4 --> once all the final limit jobs have been run, use this phase to build the brazilian flag plot'
    print ' -m mode (default='+shapeBased+')'
    print '\t 0 --> cut and count based analysis'
@@ -40,7 +43,7 @@ def help() :
 #parse the options
 try:
    # retrive command line options
-   shortopts  = "p:m:i:s:j:o:h?"
+   shortopts  = "p:f:m:i:s:j:o:h?"
    opts, args = getopt.getopt( sys.argv[1:], shortopts )
 except getopt.GetoptError:
    # print help information and exit:
@@ -58,6 +61,7 @@ for o,a in opts:
    elif o in('-o'): CWD=a
    elif o in('-j'): jsonUrl=a
    elif o in('-s'): shapeName=a
+   elif o in('-f'): cutList=a
       
 if(phase<0 or len(CMSSW_BASE)==0):
    help()
@@ -85,12 +89,11 @@ cuts1   = file.Get('WW#rightarrow 2l2#nu/optim_cut1_met')
 cuts2   = file.Get('WW#rightarrow 2l2#nu/optim_cut1_mtmin') 
 cuts3   = file.Get('WW#rightarrow 2l2#nu/optim_cut1_mtmax') 
 
-#MASS = [200,300,400,500,600]
-#SUBMASS = [200,300,400,500,600]
-MASS = [200,250, 300,350, 400,450, 500,550, 600]
-SUBMASS = [200,250, 300,350, 400,450, 500,550, 600]
+MASS = [200,400,600]
+SUBMASS = [200,400,600]
+#MASS = [200,250, 300,350, 400,450, 500,550, 600]
+#SUBMASS = [200,250, 300,350, 400,450, 500,550, 600]
 #SUBMASS = [200, 225, 250, 275, 300, 325, 350, 375, 400, 425, 450, 475, 500, 525, 550, 575, 600, 625, 650];
-
 
 ######################################################################
 
@@ -111,13 +114,13 @@ if( phase == 1 ):
       SCRIPT = open(OUT+'script_'+str(i)+'.sh',"w")
       SCRIPT.writelines('echo "TESTING SELECTION : ' + str(i).rjust(5) + ' --> met>' + str(cuts1.GetBinContent(i)).rjust(5) + ' ' + str(cuts2.GetBinContent(i)).rjust(5) + '<mt<'+str(cuts3.GetBinContent(i)).rjust(5)+'";\n')
       SCRIPT.writelines('cd ' + CMSSW_BASE + '/src;\n')
-      SCRIPT.writelines("export SCRAM_ARCH=slc5_amd64_gcc434;\n")
+      SCRIPT.writelines("export SCRAM_ARCH=slc5_amd64_gcc462;\n")
       SCRIPT.writelines("eval `scram r -sh`;\n")
       SCRIPT.writelines('cd /tmp/;\n')
       for m in MASS:
          shapeBasedOpt=''
          if(shapeBased=='1') : shapeBasedOpt='--shape'
-         SCRIPT.writelines("runLandS --m " + str(m) + " --histo " + shapeName  + " --in " + inUrl + " " + shapeBasedOpt + " --index " + str(i) + " --json " + jsonUrl +" " + LandSArg + " ;\n")
+         SCRIPT.writelines("runLandS --m " + str(m) + " --histo " + shapeName  + " --in " + inUrl + " " + shapeBasedOpt + " --index " + str(i) + " --json " + jsonUrl +" --fast " + LandSArg + " ;\n")
          if(shapeBased=='1'):
             SCRIPT.writelines('cat H' +str(m)+'_shape_'+str(i)+'/combined/*.log | grep BAND &> ' +OUT+str(m)+'_'+str(i)+'.log;\n')
          else:
@@ -179,35 +182,46 @@ elif(phase == 3 ):
    Gtmin = ROOT.TGraph(len(SUBMASS));
    Gtmax = ROOT.TGraph(len(SUBMASS));
 
- 
-   fileName = OUT+"/OPTIM_"
-   if(shapeBased=='1'):
-      fileName+='SHAPE'
-   else:
-      fileName+='COUNT'
-   fileName+=".txt"
+
+   if(cutList=='') :
+      fileName = OUT+"/OPTIM_"
+      if(shapeBased=='1'):
+         fileName+='SHAPE'
+      else:
+         fileName+='COUNT'
+      fileName+=".txt"
       
-   mi=0
-   for m in MASS:
+      mi=0
+      for m in MASS:
 
-      #if you want to display more than 3 options edit -m3 field
-      cut_lines=commands.getstatusoutput("cat " + fileName + " | grep 'mH="+str(m)+"' -m10")[1].split('\n')
-      print 'mH='+str(m)+'\tOption \tR \tmin MET\tMT range' 
-      ictr=1
-      for c in cut_lines:
-         print '\t #'+ str(ictr) + '\t' + c.split()[2] + '\t' + c.split()[4] + '\t(' + c.split()[5] + '-' + c.split()[6]+ ')'
-         ictr+=1
-      print "Which option you want to keep?"
-      opt = int(raw_input(">"))-1
+         #if you want to display more than 3 options edit -m3 field
+         cut_lines=commands.getstatusoutput("cat " + fileName + " | grep 'mH="+str(m)+"' -m10")[1].split('\n')
+         print 'mH='+str(m)+'\tOption \tR \tmin MET\tMT range' 
+         ictr=1
+         for c in cut_lines:
+            print '\t #'+ str(ictr) + '\t' + c.split()[2] + '\t' + c.split()[4] + '\t(' + c.split()[5] + '-' + c.split()[6]+ ')'
+            ictr+=1
+         print "Which option you want to keep?"
+         opt = int(raw_input(">"))-1
 
-      #save cut chosen
-      metCut=float(cut_lines[opt].split()[4])
-      mtMinCut=float(cut_lines[opt].split()[5])
-      mtMaxCut=float(cut_lines[opt].split()[6])
-      Gmet .SetPoint(mi, m, metCut);
-      Gtmin.SetPoint(mi, m, mtMinCut);
-      Gtmax.SetPoint(mi, m, mtMaxCut);
-      mi+=1
+         #save cut chosen
+         metCut=float(cut_lines[opt].split()[4])
+         mtMinCut=float(cut_lines[opt].split()[5])
+         mtMaxCut=float(cut_lines[opt].split()[6])
+         Gmet .SetPoint(mi, m, metCut);
+         Gtmin.SetPoint(mi, m, mtMinCut);
+         Gtmax.SetPoint(mi, m, mtMaxCut);
+         mi+=1
+   else :
+      mi=0
+      f= open(cutList,'r')
+      for line in f :
+         vals=line.split(' ')
+         Gmet .SetPoint(mi, float(vals[0]), float(vals[1]));
+         Gtmin.SetPoint(mi, float(vals[0]), float(vals[2]));
+         Gtmax.SetPoint(mi, float(vals[0]), float(vals[3]));
+         mi+=1
+      f.close()
 
    #display cuts chosen
    c1 = ROOT.TCanvas("c1", "c1",900,300);
@@ -253,21 +267,26 @@ elif(phase == 3 ):
 	
    print 'YES'
    list = open(OUT+'list.txt',"w")
+   listcuts = open(OUT+'cuts.txt',"w")
    for m in SUBMASS:
         index = findCutIndex(Gmet.Eval(m,0,"S"), cuts1, Gtmin.Eval(m,0,"S"), cuts2,  Gtmax.Eval(m,0,"S"), cuts3);
         SCRIPT = open(OUT+'/script_mass_'+str(m)+'.sh',"w")
         SCRIPT.writelines('cd ' + CMSSW_BASE + ';\n')
-        SCRIPT.writelines("export SCRAM_ARCH=slc5_amd64_gcc434;\n")
+        SCRIPT.writelines("export SCRAM_ARCH=slc5_amd64_gcc462;\n")
         SCRIPT.writelines("eval `scram r -sh`;\n")
         SCRIPT.writelines('cd ' + CWD + ';\n')
         shapeBasedOpt=''
         if(shapeBased=='1') : shapeBasedOpt='--shape'
 	SCRIPT.writelines("runLandS --m " + str(m) + " --histo " + shapeName + " --in " + inUrl + " --syst " + shapeBasedOpt + " --index " + str(index) + " --json " + jsonUrl + " " + LandSArg + " ;\n")
 	SCRIPT.close()
-	os.system("bsub -q 8nh 'sh " + OUT+"script_mass_"+str(m)+".sh'")
+#	os.system("bsub -q 8nh 'sh " + OUT+"script_mass_"+str(m)+".sh'")
+        os.system("bsub -q 2nd 'sh " + OUT+"script_mass_"+str(m)+".sh'")
 	if(shapeBased=='1'):   list.writelines('H'+str(m)+'_shape_'+str(index)+'\n'); 
 	else:                  list.writelines('H'+str(m)+'_count_'+str(index)+'\n');
+        #listcuts.writelines(str(m)+' & ' + str(Gmet.Eval(m,0,"S")) + '<met & ' + str(Gtmin.Eval(m,0,"S"))+'<mt<'+ str(Gtmax.Eval(m,0,"S")) +'\n');
+        listcuts.writelines(str(m)+' ' + str(Gmet.Eval(m,0,"S")) + ' ' + str(Gtmin.Eval(m,0,"S"))+' '+ str(Gtmax.Eval(m,0,"S")) +'\n');
    list.close();
+   listcuts.close();
 
 ######################################################################
 
