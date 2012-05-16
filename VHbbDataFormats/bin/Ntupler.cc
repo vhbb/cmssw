@@ -505,6 +505,11 @@ typedef struct
     id[i]=jetId(i);
     ptRaw[i]=j.ptRaw;
     ptLeadTrack[i]=j.ptLeadTrack; 
+    puJetIdL[i]=j.puJetIdL; 
+    puJetIdM[i]=j.puJetIdM; 
+    puJetIdT[i]=j.puJetIdT; 
+    puJetIdMva[i]=j.puJetIdMva; 
+     
 
   }
   bool jetId(int i)
@@ -526,7 +531,7 @@ typedef struct
       csvivf[i]=-99; cmva[i]=-99;
       cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; isSemiLeptMCtruth[i]=-99; isSemiLept[i]=-99;      
       SoftLeptpdgId[i] = -99; SoftLeptIdlooseMu[i] = -99;  SoftLeptId95[i] =  -99;   SoftLeptPt[i] = -99;  SoftLeptdR[i] = -99;   SoftLeptptRel[i] = -99; SoftLeptRelCombIso[i] = -99;  
-      genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99; ptRaw[i]=-99.; ptLeadTrack[i]=-99.;
+      genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99; ptRaw[i]=-99.; ptLeadTrack[i]=-99.; puJetIdL[i]=-99; puJetIdM[i]=-99; puJetIdT[i]=-99; puJetIdMva[i]=-99;
     }
   }
   float pt[MAXJ];
@@ -574,6 +579,11 @@ typedef struct
     float SF_CSVTerr[MAXJ];  
   float ptRaw[MAXJ];
   float ptLeadTrack[MAXJ];
+  float puJetIdL[MAXJ];
+  float puJetIdM[MAXJ];
+  float puJetIdT[MAXJ];
+  float puJetIdMva[MAXJ];
+
 } JetInfo;
   
 int main(int argc, char* argv[]) 
@@ -701,8 +711,8 @@ int main(int argc, char* argv[])
 
 
   bool isMC_( ana.getParameter<bool>("isMC") );  
-  TriggerReader trigger(isMC_);
-  TriggerReader patFilters(false);
+    TriggerReader trigger(isMC_);
+   TriggerReader patFilters(false);
 
   edm::LumiReWeighting   lumiWeights;
   edm::Lumi3DReWeighting   lumiWeights2011B;
@@ -798,6 +808,10 @@ int main(int argc, char* argv[])
   _outTree->Branch("hJet_SF_CSVTerr",hJets.SF_CSVTerr ,"SF_CSVTerr[nhJets]/b");
   _outTree->Branch("hJet_ptRaw",hJets.ptRaw ,"ptRaw[nhJets]/F");
   _outTree->Branch("hJet_ptLeadTrack",hJets.ptLeadTrack ,"ptLeadTrack[nhJets]/F");
+  _outTree->Branch("hJet_puJetIdL",hJets.puJetIdL ,"puJetIdL[nhJets]/F");
+  _outTree->Branch("hJet_puJetIdM",hJets.puJetIdM ,"puJetIdM[nhJets]/F");
+  _outTree->Branch("hJet_puJetIdT",hJets.puJetIdT ,"puJetIdT[nhJets]/F");
+  _outTree->Branch("hJet_puJetIdMva",hJets.puJetIdMva ,"puJetIdMva[nhJets]/F");
 
   _outTree->Branch("fathFilterJets_pt",fathFilterJets.pt ,"pt[nfathFilterJets]/F");
   _outTree->Branch("fathFilterJets_eta",fathFilterJets.eta ,"eta[nfathFilterJets]/F");
@@ -857,6 +871,10 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_SoftLeptdR", aJets.SoftLeptdR , "SoftLeptdR[naJets]/F");
   _outTree->Branch("aJet_SoftLeptptRel", aJets.SoftLeptptRel , "SoftLeptptRel[naJets]/F");
   _outTree->Branch("aJet_SoftLeptRelCombIso", aJets.SoftLeptRelCombIso , "SoftLeptRelCombIso[naJets]/F");
+  _outTree->Branch("aJet_puJetIdL", aJets.puJetIdL , "puJetIdL[naJets]/F");
+  _outTree->Branch("aJet_puJetIdM", aJets.puJetIdM , "puJetIdM[naJets]/F");
+  _outTree->Branch("aJet_puJetIdT", aJets.puJetIdT , "puJetIdT[naJets]/F");
+  _outTree->Branch("aJet_puJetIdMva", aJets.puJetIdMva , "puJetIdMva[naJets]/F");
 
   _outTree->Branch("aJet_genPt",aJets.genPt ,"genPt[naJets]/F");
   _outTree->Branch("aJet_genEta",aJets.genEta ,"genEta[naJets]/F");
@@ -1193,9 +1211,9 @@ int main(int argc, char* argv[])
 	  {
 	    candZlocal->clear();
 	    candWlocal->clear();
-	    fwlite::Handle< VHbbEvent > vhbbHandle; 
+	    fwlite::Handle< VHbbEvent > vhbbHandle;
 	    vhbbHandle.getByLabel(ev,"HbbAnalyzerNew");
-            modifiedEvent = *vhbbHandle.product();
+	    modifiedEvent = *vhbbHandle.product();
             if(isMC_)
             {
             iEvent= &modifiedEvent;
@@ -1216,6 +1234,7 @@ int main(int argc, char* argv[])
 
 	    algoZ->run(iEvent,*candZlocal,aux);
 	    algoW->run(iEvent,*candWlocal,aux);
+
 
 	    if(candZlocal->size() == 0 or candZlocal->at(0).H.jets.size() < 2)  //recover low pt 
               {

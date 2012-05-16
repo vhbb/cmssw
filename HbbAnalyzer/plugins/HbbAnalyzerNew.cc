@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.71 2012/05/09 15:55:32 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.72 2012/05/10 09:29:41 arizzi Exp $
 //
 //
 
@@ -42,6 +42,9 @@ Implementation:
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/IPTools/interface/IPTools.h"
 
+#include "CMGTools/External/interface/PileupJetIdentifier.h"
+#include "CMGTools/External/interface/PileupJetIdAlgo.h"
+//#include "CMGTools/External/interface/PileupJetIdProducer.h"
 
 #include <cmath>
 
@@ -561,11 +564,13 @@ BTagSFContainer btagSFs;
   for(edm::View<pat::Jet>::const_iterator jet_iter = simplejets4.begin(); jet_iter!=simplejets4.end(); ++jet_iter){
     //     if(jet_iter->pt()>50)
     //       njetscounter++;
-    VHbbEvent::SimpleJet sj;
+  
+   VHbbEvent::SimpleJet sj;
     //    std::cout <<" sj4"<<std::endl;
     fillSimpleJet(sj,jet_iter);
     //    if(!runOnMC_)  
     setJecUnc(sj,jecUnc);
+   
 
 
     Particle::LorentzVector p4Jet = jet_iter->p4();
@@ -601,12 +606,49 @@ BTagSFContainer btagSFs;
   }
 #endif //ENABLE SIMPLEJETS4
 
-  
+
   for(edm::View<pat::Jet>::const_iterator jet_iter = simplejets2.begin(); jet_iter!=simplejets2.end(); ++jet_iter){
     
+
+
     VHbbEvent::SimpleJet sj;
     //    std::cout <<" sj2"<<std::endl;
-    fillSimpleJet(sj,jet_iter);    
+    fillSimpleJet(sj,jet_iter);  
+
+    ///###########          PU JET ID #################
+   // add puId...
+    edm::Handle<edm::ValueMap<float> > puJetIdMVA;
+    iEvent.getByLabel("puJetMva","fullDiscriminant", puJetIdMVA);
+
+    edm::Handle<edm::ValueMap<int> > puJetIdFlag;
+    iEvent.getByLabel("puJetMva", "fullId", puJetIdFlag);
+
+    //    cout  << " pt " << jet_iter->pt() << " eta " << jet_iter->eta() << std::endl;
+    unsigned int idx = jet_iter - simplejets2.begin();
+
+
+
+    sj.puJetIdMva   = (*puJetIdMVA)[simplejets2.refAt(idx)];
+    int    idflag = (*puJetIdFlag)[simplejets2.refAt(idx)];
+  
+    
+    //     cout << " PU JetID MVA " << mva; 
+    if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kLoose )) {
+      //cout << " pass loose wp";
+      sj.puJetIdL =1;
+	}
+    if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kMedium )) {
+      //    cout << " pass medium wp";
+      sj.puJetIdM =1;
+    }
+    if( PileupJetIdentifier::passJetId( idflag, PileupJetIdentifier::kTight )) {
+      //    cout << " pass tight wp";
+      sj.puJetIdT =1;
+    }
+    //    cout << endl;
+    //  #############  END OF PU JET ID ######################
+
+  
     //  if(!runOnMC_)  
  setJecUnc(sj,jecUnc);
     /*    sj.flavour = jet_iter->partonFlavour();
@@ -629,7 +671,8 @@ BTagSFContainer btagSFs;
     sj.SF_CSVLerr=0;
     sj.SF_CSVMerr=0;
     sj.SF_CSVTerr=0;
-
+   
+ 
     //
     // addtaginfo for csv
     //
@@ -1930,6 +1973,9 @@ void HbbAnalyzerNew ::fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Je
     sj.SF_CSVLerr=0;
     sj.SF_CSVMerr=0;
     sj.SF_CSVTerr=0;
+
+    
+
 
     
     if (jet_iter->isPFJet() == true) {

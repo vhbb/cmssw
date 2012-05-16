@@ -16,7 +16,8 @@ class VHbbEvent{
       vtxMass(-99), vtx3dL(-99), vtx3deL(-99), vtxNTracks(-99), vtxProb(-99),
       ntracks(-99), charge(-99),jecunc(-99),
       chargedHadronEFraction(-99), neutralHadronEFraction(-99), chargedEmEFraction(-99), neutralEmEFraction(-99),nConstituents(-99), ptRaw(-99), ptLeadTrack(-99), jetArea(-99),
-      bestMCid(-99), bestMCmomid(-99){}
+      bestMCid(-99), bestMCmomid(-99),
+      puJetIdL(-99), puJetIdM(-99), puJetIdT(-99), puJetIdMva(-99) {}
   public:
     double Pt() {return p4.Pt();}
     int flavour, isSemiLept, isSemiLeptMCtruth, SoftLeptpdgId , SoftLeptIdlooseMu, SoftLeptId95;
@@ -64,6 +65,8 @@ class VHbbEvent{
     float SF_CSVLerr;
     float SF_CSVMerr;
     float SF_CSVTerr; 
+    // puJet Id
+    float  puJetIdL, puJetIdM, puJetIdT, puJetIdMva;
     
   };
 
