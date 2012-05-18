@@ -16,9 +16,6 @@ process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
 ## Source
 process.source = cms.Source("PoolSource",
-    eventsToProcess  = cms.untracked.VEventRange(
-   "193575:341:265013258","193575:342:266066853","193575:345:267820655"
-    ),
     fileNames = cms.untracked.vstring(
 "/store/data/Run2012A/DoubleElectron/AOD/PromptReco-v1/000/193/575/D8D5A7EC-EF99-E111-AB1D-003048D2BE12.root",
 #"/store/data/Run2012A/MuHad/AOD/PromptReco-v1/000/193/556/5E52D114-BA99-E111-AF69-5404A63886C1.root"
