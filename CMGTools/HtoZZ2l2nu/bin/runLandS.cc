@@ -86,7 +86,7 @@ int findBinFor(TFile* inF, Float_t minMet, Float_t minMt, Float_t maxMt);
 Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin,JSONWrapper::Object &Root);
 void showShape(const Shape_t &shape, TString SaveName);
 void getYieldsFromShape(TString dirurl, std::vector<TString> ch, const map<TString, Shape_t> &allShapes, TString shName);
-void estimateNonResonantBackground(std::vector<TString> &selCh,TString ctrlCh,const map<TString, Shape_t> &allShapes, TString shape);
+//void estimateNonResonantBackground(std::vector<TString> &selCh,TString ctrlCh,const map<TString, Shape_t> &allShapes, TString shape);
 
 
 void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& ch, std::vector<TString>& systs, std::vector<TH1*>& hshapes,  bool runSystematics, bool shape);
@@ -101,6 +101,7 @@ bool MCclosureTest = false;
 
 bool mergeWWandZZ = true;
 bool skipWW = true;
+std::vector<TString> Channels;
 std::vector<TString> AnalysisBins;
 bool fast = false;
 bool skipGGH = false;
@@ -108,6 +109,7 @@ bool skipQQH = false;
 bool subDY = false;
 TString DYFile ="";
 TString inFileUrl(""),jsonFile(""), histo("");
+
 
 int indexvbf = -1;
 int indexcut   = -1;
@@ -173,10 +175,13 @@ int main(int argc, char* argv[])
     else if(arg.find("--histo")   !=string::npos && i+1<argc)  { histo     = argv[i+1];  i++;  printf("histo = %s\n", histo.Data()); }
     else if(arg.find("--m")       !=string::npos && i+1<argc)  { sscanf(argv[i+1],"%i",&mass ); i++; printf("mass = %i\n", mass);}
     else if(arg.find("--bins")    !=string::npos && i+1<argc)  { char* pch = strtok(argv[i+1],",");printf("bins are : ");while (pch!=NULL){printf(" %s ",pch); AnalysisBins.push_back(pch);  pch = strtok(NULL,",");}printf("\n"); i++; }
+    else if(arg.find("--channels")!=string::npos && i+1<argc)  { char* pch = strtok(argv[i+1],",");printf("channels are : ");while (pch!=NULL){printf(" %s ",pch); Channels.push_back(pch);  pch = strtok(NULL,",");}printf("\n"); i++; }
     else if(arg.find("--fast")    !=string::npos) { fast=true; printf("fast = True\n");}
   }
   if(jsonFile.IsNull() || inFileUrl.IsNull() || histo.IsNull() || indexcut == -1 || mass==-1) { printHelp(); return -1; }
   if(AnalysisBins.size()==0)AnalysisBins.push_back("");
+  if(Channels.size()==0){Channels.push_back("ee");Channels.push_back("mumu");}
+
 
 
   //prepare the output directory
@@ -228,95 +233,10 @@ int main(int argc, char* argv[])
 //
 void getYieldsFromShape(TString dirurl, std::vector<TString> ch, const map<TString, Shape_t> &allShapes, TString shName)
 {
-  fstream cutflow(dirurl+"/Yields.tex",ios::out | ios::trunc);
-
-  //table header
-  const size_t nch=ch.size();
-  cutflow <<"\\begin{table}[htp]" << endl
-       << "\\begin{center}" << endl
-       << "\\caption{Event yields expected for background and signal processes and observed in data.}" << endl
-       <<"\\label{tab:table}" << endl;
-  TString colfmt = "l";  for(size_t b=0; b<AnalysisBins.size(); b++) for(size_t ich=0; ich<nch; ich++) colfmt += "c";
-  TString colname("");
-
-  for(size_t b=0; b<AnalysisBins.size(); b++){
-  for(size_t ich=0; ich<nch; ich++) {
-    TString icol(AnalysisBins[b]+"-"+ch[ich]); 
-    icol.ReplaceAll("mu","\\mu"); icol.ReplaceAll("_"," ");
-    colname = colname + "& " + "$" + icol + "$";
-  }}
-  cutflow << "\\begin{tabular}{" << colfmt << "} \\hline\\hline" << endl
-       << "Process " << colname << " \\\\ \\hline" << flush;
-
-  //backgrounds
-  size_t nbckg=allShapes.find(ch[0]+AnalysisBins[0]+shName)->second.bckg.size();
-  for(size_t ibckg=0; ibckg<nbckg; ibckg++){
-      TH1 *h=allShapes.find(ch[0]+AnalysisBins[0]+shName)->second.bckg[ibckg];
-      TString procTitle(h->GetTitle()); procTitle.ReplaceAll("#","\\");
-      cutflow << endl << "$" << procTitle << "$" << " ";
-      for(size_t b=0; b<AnalysisBins.size(); b++){
-      for(size_t ich=0; ich<nch; ich++){
-	  h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.bckg[ibckg];
-	  Double_t valerr;
-	  Double_t val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
-          if(val<1E-6){val=0.0; valerr=0.0;}
-	  cutflow << " & " << toLatexRounded(val,valerr);
-	}}
-      cutflow << "\\\\";
-    }
-  cutflow << "\\hline" << flush;
-  
-  //total bckg
-  cutflow << endl << "$SM Backgrounds$ ";
-  for(size_t b=0; b<AnalysisBins.size(); b++){
-  for(size_t ich=0; ich<nch; ich++){
-      TH1 *h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.totalBckg;
-      Double_t valerr;
-      Double_t val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
-      if(val<1E-6){val=0.0; valerr=0.0;}
-      cutflow << " & " << toLatexRounded(val,valerr);
-  }}
-  cutflow << "\\\\\\hline" << flush;
-
-  //signal
-  size_t nsig=allShapes.find(ch[0]+AnalysisBins[0]+shName)->second.signal.size();
-  for(size_t isig=0; isig<nsig; isig++){
-      TH1 *h=allShapes.find(ch[0]+AnalysisBins[0]+shName)->second.signal[isig];
-      TString procTitle(h->GetTitle()); procTitle.ReplaceAll("#","\\");
-      cutflow << endl << "$" << procTitle << "$" << " ";
-      for(size_t b=0; b<AnalysisBins.size(); b++){
-      for(size_t ich=0; ich<nch; ich++){
-          h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.signal[isig];
-          Double_t valerr;
-          Double_t val = h->IntegralAndError(1,h->GetXaxis()->GetNbins(),valerr);
-          if(val<1E-6){val=0.0; valerr=0.0;}
-          cutflow << " & " << toLatexRounded(val,valerr);
-        }}
-      cutflow << "\\\\";
-    }
-  cutflow << "\\hline" << flush;
-  //data
-  cutflow << endl << "$data$ ";
-  for(size_t b=0; b<AnalysisBins.size(); b++){
-  for(size_t ich=0; ich<nch; ich++){
-      TH1 *h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.data;
-      cutflow << " & " << int(h->Integral());
-    }}
-  cutflow << "\\\\\\hline" << flush;
-  // end table
-  cutflow << "\\hline" << endl
-       << "\\end{tabular}" << endl
-       << "\\end{center}" << endl
-       << "\\end{table}" << endl;
-  cutflow.close();
-
-
-/////////////////////////////////////////
-
-  FILE* pFile = fopen((dirurl+"/Yields2.tex").Data(),"w");
+  FILE* pFile = fopen((dirurl+"/Yields.tex").Data(),"w");
   fprintf(pFile,"\\begin{sidewaystable}[htp]\n\\begin{center}\n\\caption{Event yields expected for background and signal processes and observed in data.}\n\\label{tab:table}\n");
 
-  string Ccol   = "\\begin{tabular}{|l|";
+  string Ccol   = "\\begin{tabular}{|c|";
   string Cname  = "channel";
   string Cval   = "";
 
@@ -326,8 +246,8 @@ void getYieldsFromShape(TString dirurl, std::vector<TString> ch, const map<TStri
   TH1* h;
   Double_t valerr, val, syst;
   for(size_t b=0; b<AnalysisBins.size(); b++){
-  for(size_t ich=0; ich<nch; ich++) {
-    TString icol(AnalysisBins[b]+"-"+ch[ich]);
+  for(size_t ich=0; ich<ch.size(); ich++) {
+    TString icol(ch[ich]+"-"+AnalysisBins[b]);
     icol.ReplaceAll("mu","\\mu"); icol.ReplaceAll("_"," ");
     Cval = "$ "+icol+" $";
 
@@ -399,7 +319,7 @@ void getYieldsFromShape(TString dirurl, std::vector<TString> ch, const map<TStri
 
 }
 
-
+/*
 //
 void estimateNonResonantBackground(std::vector<TString> &selCh,TString ctrlCh,const map<TString, Shape_t> &allShapes, TString shape)
 {
@@ -496,6 +416,7 @@ void estimateNonResonantBackground(std::vector<TString> &selCh,TString ctrlCh,co
        << "\\end{table}" << endl;
 
 } 
+*/
 
 //
 
@@ -532,7 +453,7 @@ int findBinFor(TFile* inF, Float_t minMet, Float_t minMt, Float_t maxMt)
 //
 Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin, JSONWrapper::Object &Root)
 {
-  Shape_t shape; shape.totalBckg=0;
+  Shape_t shape; shape.totalBckg=NULL;shape.data=NULL;
 
   //iterate over the processes required
   std::vector<JSONWrapper::Object> Process = Root["proc"].daughters();
@@ -554,6 +475,7 @@ Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin, 
       int marker(20);     if(Process[i].isTag("marker") ) marker = (int)Process[i]["marker"].toDouble();
   
       TH1* syst = (TH1*)pdir->Get("optim_systs");
+      if(syst==NULL){syst=new TH1F("optim_systs","optim_systs",1,0,1);syst->GetXaxis()->SetBinLabel(1,"");}
       for(int ivar = 1; ivar<=syst->GetNbinsX();ivar++){
 	 TH1D* hshape   = NULL;
 
@@ -623,8 +545,14 @@ Shape_t getShapeFromFile(TFile* inF, TString ch, TString shapeName, int cutBin, 
     }
 
   if(MCclosureTest){
-     shape.data->Reset();
-     shape.data->Add(shape.totalBckg, 1);
+     if(shape.totalBckg){
+        if(!shape.data){
+           shape.data=(TH1F*)shape.totalBckg->Clone("data"); shape.data->SetDirectory(0); shape.data->SetTitle("data");
+        }else{
+           shape.data->Reset();
+           shape.data->Add(shape.totalBckg, 1);
+        }
+     }
   }
 
   //all done
@@ -905,8 +833,8 @@ DataCardInputs convertHistosForLimits(Int_t mass,TString histo,TString url,TStri
 
 
   //define vector for search
-  std::vector<TString> selCh;
-  selCh.push_back("ee"); selCh.push_back("mumu");
+  std::vector<TString>& selCh = Channels;
+//  selCh.push_back("ee"); selCh.push_back("mumu");
 
   //non-resonant background estimation
   //estimateNonResonantBackground(selCh,"emu",allShapes,"nonresbckg_ctrl");
@@ -984,7 +912,7 @@ DataCardInputs convertHistosForLimits(Int_t mass,TString histo,TString url,TStri
         //remove backgrounds with rate=0 (but keep at least one background)
         std::map<RateKey_t, Double_t>::iterator it = dci.rates.find(RateKey_t(proc,chbin));
         if(it==dci.rates.end()){
-           printf("proc=%s not found --> THIS SHOULD NEVER HAPPENS.  PLEASE CHECK THE COD\n",proc.Data());
+           printf("proc=%s not found --> THIS SHOULD NEVER HAPPENS.  PLEASE CHECK THE CODE\n",proc.Data());
         }else{
            if(it->second>0){  nNonNullBckg++;
            }else if(ibckg<nbckg-1 || nNonNullBckg>0){dci.rates.erase(dci.rates.find(RateKey_t(proc,chbin)));
@@ -1117,7 +1045,6 @@ void convertHistosForLimits_core(DataCardInputs& dci, TString& proc, TString& ch
          hshape->SetName(proc); 
          if(proc=="data")  hshape->SetName("data_obs");
          hshape->Write();
-
 
          if(hshape->Integral()>0){
             hshape->SetName(proc+syst);
@@ -1252,6 +1179,7 @@ void doBackgroundSubtraction(TString dirurl, std::vector<TString>& selCh,TString
         Double_t val = NonResonant->IntegralAndError(1,NonResonant->GetXaxis()->GetNbins(),valerr);
         Double_t systError = val*NonResonnantSyst;
         NonResonant->SetBinError(0,systError);//save syst error in underflow bin that is always empty
+        if(val<1E-6){val=0.0; valerr=0.0; systError=-1;}
         Lyield += string(" &") + toLatexRounded(val,valerr,systError);
         Cval   += string(" &") + toLatexRounded(val,valerr,systError);
 
@@ -1273,6 +1201,7 @@ void doBackgroundSubtraction(TString dirurl, std::vector<TString>& selCh,TString
         for(size_t i=0; i<shapeChan_SI.bckg.size(); i++){shapeChan_SI.totalBckg->Add(shapeChan_SI.bckg[i]);}
 
         val = MCNRB->IntegralAndError(1,MCNRB->GetXaxis()->GetNbins(),valerr);
+          if(val<1E-6){val=0.0; valerr=0.0;}
         LyieldMC += string(" &") + toLatexRounded(val,valerr);
         Cval     += string(" &") + toLatexRounded(val,valerr);
 
@@ -1364,6 +1293,7 @@ void doDYReplacement(TString dirurl, std::vector<TString>& selCh,TString ctrlCh,
            Cval   += string(" &") + buffer;
 
            Double_t valerr, val = shapeChan_SI.bckg[ibckg]->IntegralAndError(1,shapeChan_SI.bckg[ibckg]->GetXaxis()->GetNbins(),valerr);
+           if(val<1E-6){val=0.0; valerr=0.0;}
            string MCTruth = toLatexRounded(val,valerr);
   
            //replace DY histogram by G+Jets data
@@ -1385,6 +1315,7 @@ void doDYReplacement(TString dirurl, std::vector<TString>& selCh,TString ctrlCh,
            val  = shapeChan_SI.bckg[ibckg]->IntegralAndError(1,shapeChan_SI.bckg[ibckg]->GetXaxis()->GetNbins(),valerr);
            double systError = GammaJetSyst * val;
            shapeChan_SI.bckg[ibckg]->SetBinError(0,systError);//save syst error in underflow bin that is always empty
+           if(val<1E-6){val=0.0; valerr=0.0; systError=-1;}
            Cval+= string(" &") + toLatexRounded(val,valerr,systError) +" & " + MCTruth;
 
            //erase Systematic relatated to DY background
