@@ -538,7 +538,7 @@ process.out.outputCommands = cms.untracked.vstring(
        'keep patTriggerObjects_patTrigger_*_*',
        'keep patTriggerFilters_patTrigger_*_*',
        'keep patTriggerPaths_patTrigger_*_*',
-
+       'keep *_patTriggerEvent_*_*'
         )
 
 
