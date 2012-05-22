@@ -27,8 +27,10 @@ struct ZZ2l2nuSummary_t
   enum JetInfo { TCHE, TCHP, SSVHE, SSVHP };
 
   Int_t run,lumi,event;
+  Float_t curAvgInstLumi,curIntegLumi;
   Int_t cat, mccat;
   Bool_t hasTrigger;
+  Int_t triggerType;
 
   Float_t rho,rho25,rho25Neut;
 

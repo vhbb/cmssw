@@ -43,6 +43,8 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 
+#include "DataFormats/Luminosity/interface/LumiSummary.h"
+
 using namespace std;
 using namespace edm;
 using namespace reco;
@@ -53,6 +55,7 @@ class DileptonPlusMETEventAnalyzer : public edm::EDAnalyzer
 public:
   DileptonPlusMETEventAnalyzer(const edm::ParameterSet &iConfig);
   virtual void analyze( const edm::Event &iEvent, const edm::EventSetup &iSetup) ;
+  void beginLuminosityBlock(const edm::LuminosityBlock &iLumi, const edm::EventSetup & iSetup );
   void endLuminosityBlock(const edm::LuminosityBlock & iLumi, const edm::EventSetup & iSetup);
   
 private:
@@ -70,13 +73,16 @@ private:
   //regression corrector for electrons/photons
   EGEnergyCorrector phocorr_,ecorr_;
 
+  float curAvgInstLumi_, curIntegLumi_;
+
 };
 
 using namespace std;
 
 //
 DileptonPlusMETEventAnalyzer::DileptonPlusMETEventAnalyzer(const edm::ParameterSet &iConfig)
-  : controlHistos_( iConfig.getParameter<std::string>("dtag") )
+  : controlHistos_( iConfig.getParameter<std::string>("dtag") ),
+    curAvgInstLumi_(0), curIntegLumi_(0)
 {
   try{
 
@@ -100,6 +106,8 @@ DileptonPlusMETEventAnalyzer::DileptonPlusMETEventAnalyzer(const edm::ParameterS
     for(size_t istep=0; istep<nselFilters; istep++) h->GetXaxis()->SetBinLabel(istep+1,selFilters[istep]);
 
     controlHistos_.addHistogram("pileup", ";Pileup; Events",100,-0.5,99.5);
+    controlHistos_.addHistogram("integlumi", ";Integrated luminosity ; Events",100,0,1e5);
+    controlHistos_.addHistogram("instlumi", ";Max average inst. luminosity; Events",100,0,1e5);
     controlHistos_.addHistogram("pileuptrue", ";True pileup; Events",100,-0.5,99.5);
   }
   catch(std::exception &e){
@@ -310,6 +318,9 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     ev.run    = event.id().run();
     ev.lumi   = event.luminosityBlock();
     ev.event  = event.id().event();
+    ev.curAvgInstLumi=curAvgInstLumi_;
+    ev.curIntegLumi=curIntegLumi_;
+
     saveMCtruth(event, iSetup );    
     
     //
@@ -392,14 +403,20 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.cat = getDileptonId(selLeptons[l1idx],selLeptons[l2idx]);
 	
 	//require trigger for each event category
+	ev.triggerType=0;
 	if(event.isRealData())
 	  {
 	    if(ev.cat==EE   && triggerBits["ee"]==false)   return;
-	    if(ev.cat==MUMU && triggerBits["mumu"]==false) return;
+	    if(ev.cat==MUMU && triggerBits["singleMu"]==false && triggerBits["mumu"]==false) return;  
 	    if(ev.cat==EMU  && (triggerBits["emu"]==false || triggerBits["ee"]==true || triggerBits["mumu"]==true))  return;
+	    
+	    ev.triggerType = (triggerBits["ee"] << 0 ) |
+	      (triggerBits["mumu"] << 1 ) |
+	      (triggerBits["emu"] << 2 ) |
+	      (triggerBits["singleMu"] << 3 );
 	  }
 	ev.hasTrigger=true;
-	
+
 	//leading lepton
 	ev.l1_px                   = selLeptonsSummary[l1idx].p4.px();
 	ev.l1_py                   = selLeptonsSummary[l1idx].p4.py();
@@ -696,6 +713,18 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
   }
 
 
+}
+
+//
+void DileptonPlusMETEventAnalyzer::beginLuminosityBlock(const edm::LuminosityBlock&lumi, const edm::EventSetup & setup ) 
+{
+  edm::Handle<LumiSummary> l;
+  lumi.getByLabel("lumiProducer", l); 
+  if (!l.isValid())  return;
+  curAvgInstLumi_ = l->avgInsDelLumi();
+  curIntegLumi_   = l->intgDelLumi();
+  controlHistos_.fillHisto("instlumi","all",curAvgInstLumi_);
+  controlHistos_.fillHisto("integlumi","all",curIntegLumi_);
 }
 
 //

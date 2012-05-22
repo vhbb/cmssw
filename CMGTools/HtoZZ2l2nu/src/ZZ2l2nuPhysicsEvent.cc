@@ -9,6 +9,9 @@ PhysicsEvent_t getPhysicsEventFrom(ZZ2l2nuSummary_t &ev)
 {
   
   PhysicsEvent_t phys;
+  phys.run=ev.run;
+  phys.event=ev.event;
+  phys.lumi=ev.lumi;
   phys.puWeight=ev.puWeight;
   phys.cat = ev.cat;
   phys.nvtx = ev.nvtx;

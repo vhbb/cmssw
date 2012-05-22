@@ -42,10 +42,10 @@ if(runOnMC) :
 # PRESELECTION #
 ################
 from CMGTools.HtoZZ2l2nu.PreselectionSequences_cff import addPreselectionSequences
-#from CMGTools.HtoZZ2l2nu.PreselectionSequences_cff import addLumifilter
+from CMGTools.HtoZZ2l2nu.PreselectionSequences_cff import addLumifilter
 if(not runOnMC ):
     addPreselectionSequences(process)
-    #addLumifilter(process,'')
+    addLumifilter(process,'/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions12/8TeV/Prompt/Cert_190456-194076_8TeV_PromptReco_Collisions12_JSON.txt')
 
 from CMGTools.HtoZZ2l2nu.SkimSequences_cff import addDileptonSkim, addPhotonSkim
 addDileptonSkim(process)
@@ -255,11 +255,15 @@ process.e = cms.EndPath( process.endCounter*process.out )
 # SCHEDULE THE EXECUTION OF THE PATHS #
 #######################################
 if(not runStd) :
-    configureOutput(process,selPaths=['patOnlyPath'])
+    configureOutput(process,selPaths=['patOnlyPath'],outFile=outFile)
     if(runOnMC) : process.schedule = cms.Schedule( process.genLevelPath, process.patOnlyPath, process.e )
     else        : process.schedule = cms.Schedule( process.genLevelPath, process.patOnlyPath, process.e )
 else :
-    configureOutput(process,selPaths=['llPath','photonPath'])
+    configureOutput(process,selPaths=['llPath','photonPath'],outFile=outFile)
     if(runOnMC) : process.schedule = cms.Schedule( process.genLevelPath, process.llPath, process.photonPath, process.e )
     else        : process.schedule = cms.Schedule( process.llPath, process.photonPath, process.e )
 
+
+print '******************'
+print process.out.fileName
+print '*******************'

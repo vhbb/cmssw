@@ -93,7 +93,7 @@ vector<reco::VertexRef> getGoodVertices( edm::Handle<reco::VertexCollection> &hV
 	reco::VertexRef vtxRef(hVtx,iVtx);
 	
 	bool isReal = !(vtxRef->isFake());
-	if(!isReal) continue;
+	if(!isReal)  continue;
 	
 	double z = vtxRef->z();
 	double rho = vtxRef->position().Rho();
@@ -153,10 +153,7 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	{
 	  reco::CandidatePtr muonPtr = hMu->ptrAt(iMuon);
 	  const pat::Muon *muon = dynamic_cast<const pat::Muon *>( muonPtr.get() );
-	  if(!muon->isTrackerMuon()) continue;  
 	  
-	  std::pair<bool,Measurement1D> ip3dRes =getImpactParameter<reco::TrackRef>(muon->innerTrack(), primVertex, iSetup, true);
-
 	  ObjectIdSummary lepId;
 	  lepId.p4 = LorentzVector(muon->px(),muon->py(),muon->pz(),muon->energy());
 	  lepId.id=13;
@@ -165,21 +162,26 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	  lepId.genflav = lepId.genid;
 	  if(genLep) lepId.genP4 = LorentzVector(genLep->px(),genLep->py(),genLep->pz(),genLep->energy());
 	  lepId.charge=muon->charge();
-	  lepId.ensf                  = 1.0;
-	  lepId.ensferr               = fabs(muon->innerTrack()->ptError()/muon->innerTrack()->pt());
 	  std::vector<double> isoVals = getLeptonIso( muonPtr, muon->pt(), rho );
 	  for(size_t iiso=0; iiso<isoVals.size(); iiso++) lepId.isoVals[iiso] = isoVals[iiso]; 
-	  lepId.trkd0                      = fabs(muon->innerTrack()->dxy(primVertex->position())); //muon->dB(pat::Muon::PV2D);
-	  lepId.trkdZ                      = fabs(muon->innerTrack()->dz(primVertex->position()));
-	  lepId.trkip3d                    = ip3dRes.second.value();
-	  lepId.trkip3dsig                 = ip3dRes.second.significance();
-	  lepId.trkchi2                    = muon->innerTrack()->normalizedChi2();	  
-	  lepId.innerTrackChi2             = lepId.trkchi2;
-	  lepId.pixelLayersWithMeasurement = muon->innerTrack()->hitPattern().pixelLayersWithMeasurement();
-	  lepId.trkValidPixelHits          = muon->innerTrack()->hitPattern().numberOfValidPixelHits();
-	  lepId.trkValidTrackerHits        = muon->innerTrack()->hitPattern().numberOfValidTrackerHits();
-	  lepId.trkLayersWithMeasurement   = muon->track()->hitPattern().trackerLayersWithMeasurement();
-	  lepId.trkLostInnerHits           = muon->innerTrack()->trackerExpectedHitsInner().numberOfLostHits();
+	  bool isTracker = muon->isTrackerMuon();
+	  if(isTracker)
+	    {
+	      lepId.ensf                  = 1.0;
+	      lepId.ensferr               = fabs(muon->innerTrack()->ptError()/muon->innerTrack()->pt());
+	      lepId.trkd0                      = fabs(muon->innerTrack()->dxy(primVertex->position())); //muon->dB(pat::Muon::PV2D);
+	      lepId.trkdZ                      = fabs(muon->innerTrack()->dz(primVertex->position()));
+	      std::pair<bool,Measurement1D> ip3dRes=getImpactParameter<reco::TrackRef>(muon->innerTrack(), primVertex, iSetup, true);
+	      lepId.trkip3d                    = ip3dRes.second.value();
+	      lepId.trkip3dsig                 = ip3dRes.second.significance();
+	      lepId.trkchi2                    = muon->innerTrack()->normalizedChi2();	  
+	      lepId.innerTrackChi2             = lepId.trkchi2;
+	      lepId.pixelLayersWithMeasurement = muon->innerTrack()->hitPattern().pixelLayersWithMeasurement();
+	      lepId.trkValidPixelHits          = muon->innerTrack()->hitPattern().numberOfValidPixelHits();
+	      lepId.trkValidTrackerHits        = muon->innerTrack()->hitPattern().numberOfValidTrackerHits();
+	      lepId.trkLayersWithMeasurement   = muon->track()->hitPattern().trackerLayersWithMeasurement();
+	      lepId.trkLostInnerHits           = muon->innerTrack()->trackerExpectedHitsInner().numberOfLostHits();
+	    }
 	  lepId.trkValidMuonHits           = 0;
 	  lepId.trkMatches                 = muon->numberOfMatches();
 	  lepId.trkMatchedStations         = muon->numberOfMatchedStations();
@@ -194,7 +196,7 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	    }
 
 	  //2012 categories : https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideMuonId
-	  bool isLoose(muon->isPFMuon() && (muon->isTrackerMuon()  ||  muon->isGlobalMuon() ) );
+	  bool isLoose(muon->isPFMuon() && (isTracker || isGlobal));
 	  bool isSoft(muon->muonID("TMOneStationTight") 
 		      && lepId.trkLayersWithMeasurement>5
 		      && lepId.pixelLayersWithMeasurement>1
@@ -202,16 +204,16 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 		      && fabs(lepId.trkd0)<3.
 		      && fabs(lepId.trkdZ)<30.);
 	  bool isTight(muon->isPFMuon() 
-		       && muon->isGlobalMuon() 
+		       && isGlobal
 		       && lepId.trkchi2<10.
 		       && lepId.trkValidMuonHits>0
-		       && lepId.trkMatches>1
+		       && lepId.trkMatchedStations>1
 		       && fabs(lepId.trkd0)<0.2
 		       && fabs(lepId.trkdZ)<0.5
 		       && lepId.trkValidPixelHits>0
 		       && lepId.trkLayersWithMeasurement>5);
-	  bool isHighPt(muon->isGlobalMuon() 
-			&& lepId.trkMatches>1
+	  bool isHighPt(isGlobal
+			&& lepId.trkMatchedStations>1
 			&& lepId.trkValidMuonHits>0
 			&& fabs(lepId.trkd0)<0.2
 			&& fabs(lepId.trkdZ)<0.5
@@ -230,12 +232,12 @@ vector<reco::CandidatePtr> getGoodMuons(edm::Handle<edm::View<reco::Candidate> >
 	     || lepId.trkMatches < vbtf2011.getParameter<int>("minMatchingMuonStations") )              isVBTF2011=false;
 	  if(!vbtf2011.getParameter<bool>("applySoftMuonIsolationVeto"))
 	    {
-	      if(!muon->isGlobalMuon() || !muon->isTrackerMuon()) isVBTF2011=false;
+	      if(!isGlobal || !isTracker) isVBTF2011=false;
 	      if(lepId.isoVals[RELRHOCORR_ISO] > maxRelIso)       isVBTF2011=false;
 	    }
 	  else
 	    {
-	      if(!muon->isTrackerMuon())      isVBTF2011=false;
+	      if(!isTracker)      isVBTF2011=false;
 	      if(muon->pt()>20 && lepId.isoVals[RELRHOCORR_ISO]<0.1) isVBTF2011=false;
 	      isSoftVBTF2011 = isVBTF2011;
 	    }
@@ -351,6 +353,7 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
         lepId.genid   = genLep ? genLep->pdgId() : -9999;
         lepId.genflav = lepId.genid;
 	if(genLep) lepId.genP4 = LorentzVector(genLep->px(),genLep->py(),genLep->pz(),genLep->energy());
+	else        lepId.genP4=LorentzVector(0,0,0,0);
 	lepId.charge=ele->charge();
 	std::pair<double,double> enSF(1.0,0);
 	if(ecorr) 
@@ -437,6 +440,19 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 							    0., 0., 0.,
 							    !passconversionveto, uint(lepId.trkLostInnerHits),
 							    rho);
+// 	    if(!hasCutBasedIds[iid] && lepId.genP4.pt()>0 && lepId.p4.pt()<30 && iid==2)
+// 	      {
+// 		int flag=EgammaCutBasedEleId::TestWP(EgammaCutBasedEleId::WorkingPoint(cutBasedIdsToTest[iid]),
+// 						     ele->isEB(),
+// 						     ele->pt(),ele->eta(),
+// 						     lepId.dEtaTrack, lepId.dPhiTrack, lepId.sihih, lepId.hoe,
+// 						     lepId.ooemoop, lepId.trkd0, lepId.trkdZ,
+// 						     0., 0., 0.,
+// 						     !passconversionveto, uint(lepId.trkLostInnerHits),
+// 						     rho);
+// 		cout << lepId.genP4.pt() << " " << lepId.p4.pt() << endl;
+// 		EgammaCutBasedEleId::PrintDebug(flag);
+// 	      }
 	  }
 	int triggerCutsToTest[] = {EgammaCutBasedEleId::TRIGGERTIGHT,EgammaCutBasedEleId::TRIGGERWP70};
 	bool passTriggerCut[]   = {false,                            false};

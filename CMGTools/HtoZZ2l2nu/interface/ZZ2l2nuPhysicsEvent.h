@@ -65,7 +65,7 @@ class PhysicsObject_Lepton : public LorentzVector
     {
       d0=d0_; dZ=dZ_;
       trkpt=trkpt_; trketa=trketa_; trkphi=trkphi_; trkchi2=trkchi2_;
-      trkValidPixelHits=trkValidPixelHits_; trkValidTrackerHits=trkValidTrackerHits_;trkLostInnerHits=trkValidTrackerHits_;
+      trkValidPixelHits=trkValidPixelHits_; trkValidTrackerHits=trkValidTrackerHits_;trkLostInnerHits=trkLostInnerHits_;
     }
     void setEnergyCorrections(Float_t ensf_, Float_t ensferr_) { ensf=ensf_; ensferr=ensferr_; }
  
@@ -134,6 +134,7 @@ typedef std::vector<PhysicsObject_Gamma>  PhysicsObjectGammaCollection;
 //
 struct PhysicsEvent_t
 {
+  int run,event,lumi;
   float puWeight;
   int cat;
   int nvtx;

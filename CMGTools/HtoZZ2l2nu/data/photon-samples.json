@@ -277,14 +277,16 @@
 	"data":[
                 {
                   "dtag":"Data_Photon2011A",
-                  "dset":"",
-                  "patdir":[""],
+                  "dset":"/Photon/Run2011A-PromptReco-v1/AOD",
+		  "aoddir":["path=/Photon/Run2011A-PromptReco-v1/AOD"],
+                  "patdir":["/store/cmst3/user/psilva/Data2011/Photon/2011A"],
 		  "split":2
 		},
                 {
                   "dtag":"Data_Photon2011B",
-                  "dset":"",
-                  "patdir":[""],
+                  "dset":"/Photon/Run2011B-PromptReco-v1/AOD",
+		  "aoddir":["path=/Photon/Run2011B-PromptReco-v1/AOD"],
+                  "patdir":["/store/cmst3/user/psilva/Data2011/Photon/2011B"],
  		  "split":2
 		}
 	   ]

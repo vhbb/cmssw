@@ -19,10 +19,14 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("run",        &evSummary_.run,        "run/I");
   t_->Branch("lumi",       &evSummary_.lumi,       "lumi/I");
   t_->Branch("event",      &evSummary_.event,      "event/I");
-  t_->Branch("cat",        &evSummary_.cat,        "cat/I");
-  t_->Branch("mccat",        &evSummary_.mccat,        "mccat/I");
-  t_->Branch("hasTrigger",        &evSummary_.hasTrigger,        "hasTrigger/O");
+  t_->Branch("curAvgInstLumi",      &evSummary_.curAvgInstLumi,      "curAvgInstLumi/F");
+  t_->Branch("curIntegLumi",      &evSummary_.curIntegLumi,      "curIntegLumi/F");
 
+  t_->Branch("cat",          &evSummary_.cat,          "cat/I");
+  t_->Branch("mccat",        &evSummary_.mccat,        "mccat/I");
+  t_->Branch("hasTrigger",   &evSummary_.hasTrigger,   "hasTrigger/O");
+  t_->Branch("triggerType",  &evSummary_.triggerType,  "triggerType/I");
+  
   //vertices and average energy density
   t_->Branch("nvtx",           &evSummary_.nvtx,           "nvtx/I");
   t_->Branch("rho",            &evSummary_.rho,            "rho/F");
@@ -309,12 +313,15 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   t_->GetBranch("run")->SetAddress(&evSummary_.run);
   t_->GetBranch("lumi")->SetAddress(&evSummary_.lumi);
   t_->GetBranch("event")->SetAddress(&evSummary_.event);
+  if(t_->GetBranch("curAvgInstLumi")) t_->GetBranch("curAvgInstLumi")->SetAddress(&evSummary_.curAvgInstLumi);
+  if(t_->GetBranch("curIntegLumi"))   t_->GetBranch("curIntegLumi")->SetAddress(&evSummary_.curIntegLumi);
   t_->GetBranch("cat")->SetAddress(&evSummary_.cat);
   t_->GetBranch("mccat")->SetAddress(&evSummary_.mccat);
 
   //trigger bit
   t_->GetBranch("hasTrigger")->SetAddress(&evSummary_.hasTrigger);
-
+  if(t_->GetBranch("triggerType")) t_->GetBranch("triggerType")->SetAddress(&evSummary_.triggerType);
+  
   //vertices and average energy density
   t_->GetBranch("nvtx")->SetAddress(&evSummary_.nvtx);
   t_->GetBranch("rho")->SetAddress( &evSummary_.rho );

@@ -26,7 +26,7 @@ def getTriggerPaths(version=2012) :
                 'HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v'
                 ]
         
-        SingleMu = []
+        SingleMu = ['HLT_IsoMu24_eta2p1_v']
         
         Photon = ['HLT_Photon22_R9Id90_HE10_Iso40_EBOnly_v',
                   'HLT_Photon36_R9Id90_HE10_Iso40_EBOnly_v',                  

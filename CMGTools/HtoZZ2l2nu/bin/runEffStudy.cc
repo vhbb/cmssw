@@ -1,6 +1,5 @@
 #include <iostream>
 #include <boost/shared_ptr.hpp>
-#include "Math/GenVector/Boost.h"
 
 #include "EGamma/EGammaAnalysisTools/interface/EGammaCutBasedEleId.h"
 
@@ -160,6 +159,10 @@ int main(int argc, char* argv[])
       mon.addHistogram(new TH1F(lepStr+"losthits",         ";Lost hits;Leptons",4,0,4) );
       mon.addHistogram(new TH1F(lepStr+"reliso",           ";RelIso;Leptons",50,0,2) );
       mon.addHistogram(new TH1F(lepStr+"reliso2011",        ";RelIso(#rho);Leptons",50,0,2) );
+      mon.addHistogram(new TH1F(lepStr+"truereliso",           ";RelIso;Leptons",50,0,2) );
+      mon.addHistogram(new TH1F(lepStr+"truereliso2011",        ";RelIso(#rho);Leptons",50,0,2) );
+      mon.addHistogram(new TH1F(lepStr+"fakereliso",           ";RelIso;Fake leptons",50,0,2) );
+      mon.addHistogram(new TH1F(lepStr+"fakereliso2011",        ";RelIso(#rho);Fake leptons",50,0,2) );
     }
   
   mon.addHistogram( new TH1F( "nvtx",";Vertices;Events",50,0,50) ); 
@@ -169,8 +172,8 @@ int main(int argc, char* argv[])
   TString jetTypes[]={"pf","pfchs"};
   TString jetRegs[]={"TK","HEin","HEout","HF"};
   TString btagAlgos[]={"TCHE","CSV","JP"};
-  Double_t btagAlgoMin[]={-5,-0.5,0};
-  Double_t btagAlgoMax[]={15,1.5,5};
+  Double_t btagAlgoMin[]={-5,0,0};
+  Double_t btagAlgoMax[]={15,1.,3};
   for(size_t i=0; i<2; i++)
     {
       for(size_t ireg=0; ireg<4; ireg++)
@@ -184,9 +187,9 @@ int main(int argc, char* argv[])
 	}
       for(size_t ibtag=0; ibtag<3; ibtag++)
 	{
-	  mon.addHistogram( new TH1F(btagAlgos[ibtag]+"b"+jetTypes[i]+"jetstags",     ";b tags;Events",100,btagAlgoMin[ibtag],btagAlgoMax[ibtag]) );
-	  mon.addHistogram( new TH1F(btagAlgos[ibtag]+"other"+jetTypes[i]+"jetstags", ";udscg tags;Events",100,btagAlgoMin[ibtag],btagAlgoMax[ibtag]) );
-	  mon.addHistogram( new TH1F(btagAlgos[ibtag]+jetTypes[i]+"jetstags",         ";"+btagAlgos[ibtag]+";Events",100,btagAlgoMin[ibtag],btagAlgoMax[ibtag]) );
+	  mon.addHistogram( new TH1F(btagAlgos[ibtag]+"b"+jetTypes[i]+"jetstags",     ";b tags;Events",50,btagAlgoMin[ibtag],btagAlgoMax[ibtag]) );
+	  mon.addHistogram( new TH1F(btagAlgos[ibtag]+"other"+jetTypes[i]+"jetstags", ";udscg tags;Events",50,btagAlgoMin[ibtag],btagAlgoMax[ibtag]) );
+	  mon.addHistogram( new TH1F(btagAlgos[ibtag]+jetTypes[i]+"jetstags",         ";"+btagAlgos[ibtag]+";Events",50,btagAlgoMin[ibtag],btagAlgoMax[ibtag]) );
 	  mon.addHistogram( new TH1F("n"+jetTypes[i]+"jetsbtags"+btagAlgos[ibtag],    ";b-tag multiplicity ("+btagAlgos[ibtag] +");Events",5,0,5) );
 	}
       
@@ -198,39 +201,12 @@ int main(int argc, char* argv[])
       mon.addHistogram( new TH2F("n"+jetTypes[i]+"jetspuidmediumvspu",";Pileup interactions;Jet multiplicity (p_{T}>30 GeV/c);Events",50,0,50,5,0,5) );  
     }
 
-
-  //   mon.addHistogram( new TH1F("njets"       , ";Jet multiplicity (p_{T}>30 GeV/c);Events",5,0,5) );
-  //   int jetids[]  ={JETID_LOOSE, JETID_TIGHT,JETID_CUTBASED_LOOSE, JETID_CUTBASED_MEDIUM, JETID_MIN_LOOSE, JETID_MIN_MEDIUM, JETID_OPT_LOOSE, JETID_OPT_MEDIUM};
-  //   for(size_t ijetid=0; ijetid<sizeof(jetids)/sizeof(int); ijetid++)
-  //     {
-  //       char buf[15];
-  //       sprintf(buf,"njets%d",jetids[ijetid]);
-  //       mon.addHistogram( new TH1F(TString(buf), ";Jet multiplicity (p_{T}>30 GeV/c);Events",5,0,5) );
-  //       mon.addHistogram( new TH1F(TString(buf)+"lowpu", ";Jet multiplicity (p_{T}>30 GeV/c);Events",5,0,5) );
-  //       mon.addHistogram( new TH1F(TString(buf)+"cenpu", ";Jet multiplicity (p_{T}>30 GeV/c);Events",5,0,5) );
-  //       mon.addHistogram( new TH1F(TString(buf)+"highpu", ";Jet multiplicity (p_{T}>30 GeV/c);Events",5,0,5) );
-  
-  //       char buf2[100];
-  //       sprintf(buf2,"met_clusteredmet%d",jetids[ijetid]);
-  //       mon.addHistogram( new TH1F( buf2  , ";clustered E_{T}^{miss};Events", 50,0,500) );
-  //       mon.addHistogram( new TH2F( TString(buf2)+"_vspu" , ";Pileup events; clustered E_{T}^{miss};Events",50,0,50,50,0,500) );
-  //     }
-  
-  //   mon.addHistogram( new TH1F ("nbtags", ";b-tag multiplicity; Events", 5,0,5) );  
-  //   for(size_t ibin=1; ibin<=5; ibin++){
-  //     TString label("");
-  //     if(ibin==5) label +="#geq";
-  //     else        label +="=";
-  //     label += (ibin-1);
-  //     mon.getHisto("njets")->GetXaxis()->SetBinLabel(ibin,label);
-  //     mon.getHisto("nbtags")->GetXaxis()->SetBinLabel(ibin,label);
-  //   }
-  //   mon.addHistogram( new TH1F( "met_met"  , ";E_{T}^{miss};Events", 50,0,500) );
-  //   mon.addHistogram( new TH1F( "met_min3Met"  , ";min(E_{T}^{miss},assoc-E_{T}^{miss},clustered-E_{T}^{miss});Events", 50,0,500) );
-  //   mon.addHistogram( new TH1F( "met_redMet"  , ";red(E_{T}^{miss},clustered-E_{T}^{miss});Events", 50,0,500) );
-  //   mon.addHistogram( new TH1F( "met_redMetL"  , ";red(E_{T}^{miss},clustered-E_{T}^{miss}) - longi.;Events", 50,-250,250) );
-  //   mon.addHistogram( new TH1F( "met_redMetT"  , ";red(E_{T}^{miss},clustered-E_{T}^{miss}) - perp.;Events", 50,-250,250) );
-  //   mon.addHistogram( new TH1F( "mt"  , ";M_{T};Events", 100,0,1000) );
+  mon.addHistogram( new TH1F( "met_met"  , ";E_{T}^{miss};Events", 50,0,500) );
+  mon.addHistogram( new TH1F( "met_min3Met"  , ";min(E_{T}^{miss},assoc-E_{T}^{miss},clustered-E_{T}^{miss});Events", 50,0,500) );
+  mon.addHistogram( new TH1F( "met_redMet"  , ";red(E_{T}^{miss},clustered-E_{T}^{miss});Events", 50,0,500) );
+  mon.addHistogram( new TH1F( "met_redMetL"  , ";red(E_{T}^{miss},clustered-E_{T}^{miss}) - longi.;Events", 50,-250,250) );
+  mon.addHistogram( new TH1F( "met_redMetT"  , ";red(E_{T}^{miss},clustered-E_{T}^{miss}) - perp.;Events", 50,-250,250) );
+  mon.addHistogram( new TH1F( "mt"  , ";M_{T};Events", 100,0,1000) );
   
   //##############################################
   //######## GET READY FOR THE EVENT LOOP ########
@@ -273,7 +249,8 @@ int main(int argc, char* argv[])
   std::vector<float> dataPileupDistribution; for(unsigned int i=0;i<dataPileupDistributionDouble.size();i++){dataPileupDistribution.push_back(dataPileupDistributionDouble[i]);}
   std::vector<float> mcPileupDistribution;
   if(isMC){
-    TH1F* histo = (TH1F *) file->Get("evAnalyzer/h2zz/pileup");
+    //    TH1F* histo = (TH1F *) file->Get("evAnalyzer/h2zz/pileup");
+    TH1F* histo = (TH1F *) file->Get("evAnalyzer/h2zz/pileuptrue");
     if(!histo)std::cout<<"pileup histogram is null!!!\n";
     for(int i=1;i<=histo->GetNbinsX();i++){mcPileupDistribution.push_back(histo->GetBinContent(i));}
     delete histo;
@@ -333,7 +310,8 @@ int main(int argc, char* argv[])
 //         weight = LumiWeights->weight(ev.nvtx);
 //         TotalWeight_plus = PShiftUp->ShiftWeight(ev.nvtx);
 //         TotalWeight_minus = PShiftDown->ShiftWeight(ev.nvtx);
-        weight = LumiWeights->weight(ev.ngenITpu);
+//        weight = LumiWeights->weight(ev.ngenITpu);
+        weight = LumiWeights->weight(ev.ngenTruepu);
         TotalWeight_plus = PShiftUp->ShiftWeight(ev.ngenITpu);
         TotalWeight_minus = PShiftDown->ShiftWeight(ev.ngenITpu);
       }
@@ -372,45 +350,67 @@ int main(int argc, char* argv[])
 	  int lpid=phys.leptons[ilep].pid;
 	  float relIso2011    = phys.leptons[ilep].relIsoRho(ev.rho);
 	  float relIso = (lepStr=="mu") ? 
-	    phys.leptons[ilep].muPFRelIsoCorrected2012(ev.rho25Neut):
+	    phys.leptons[ilep].pfRelIsoDbeta(): //muPFRelIsoCorrected2012(ev.rho25Neut):
 	    phys.leptons[ilep].ePFRelIsoCorrected2012(ev.rho);
 	  std::vector<int> passIds;
 	  std::map<int,bool> passIsos;
-	  bool hasGoodId(false);
+	  bool hasGoodId(false), isIso(false);
 	  if(fabs(phys.leptons[ilep].id)==13)
 	    {
-	      if( hasObjectId(ev.mn_idbits[lpid], MID_LOOSE) )    { passIds.push_back(0); passIsos[0]=(relIso<0.2); }
-	      if( hasObjectId(ev.mn_idbits[lpid], MID_TIGHT) )    { passIds.push_back(1); passIsos[1]=(relIso<0.2); hasGoodId=true; }
+	      if( hasObjectId(ev.mn_idbits[lpid], MID_LOOSE) )    { passIds.push_back(0); passIsos[0]=(relIso<0.2); hasGoodId=true; isIso=passIsos[0]; }
+	      if( hasObjectId(ev.mn_idbits[lpid], MID_TIGHT) )    { passIds.push_back(1); passIsos[1]=(relIso<0.2); }
 	      if( hasObjectId(ev.mn_idbits[lpid], MID_VBTF2011) ) { passIds.push_back(2); passIsos[2]=(relIso2011<0.15); }
 	      if( hasObjectId(ev.mn_idbits[lpid], MID_SOFT) )     { passIds.push_back(3); passIsos[3]=true;}
 	    }
 	  else
 	    {
-	      if(hasObjectId(ev.en_idbits[lpid], EID_LOOSE))      { passIds.push_back(0); passIsos[0]=(relIso<0.15); }
-	      if(hasObjectId(ev.en_idbits[lpid], EID_MEDIUM))     { passIds.push_back(1); passIsos[1]=(relIso<0.15); hasGoodId=true; }
-	      if(hasObjectId(ev.en_idbits[lpid], EID_VBTF2011))   { passIds.push_back(2); passIsos[2]=(relIso2011<0.10);}
-	      if(hasObjectId(ev.en_idbits[lpid], EID_VETO))       { passIds.push_back(3); passIsos[3]=(relIso<0.15); }
+	      int wps[]={EgammaCutBasedEleId::LOOSE,EgammaCutBasedEleId::MEDIUM, EID_VBTF2011, EgammaCutBasedEleId::VETO};
+	      for(int iwp=0; iwp<4; iwp++)
+		{
+		  if(iwp==2 && hasObjectId(ev.en_idbits[lpid], EID_VBTF2011)) { passIds.push_back(2); passIsos[2]=(relIso2011<0.10);}
+		  else
+		    {
+		      bool passWp = EgammaCutBasedEleId::PassWP(EgammaCutBasedEleId::WorkingPoint(wps[iwp]),
+								(fabs(phys.leptons[ilep].eta())<1.4442),
+								phys.leptons[ilep].pt(), phys.leptons[ilep].eta(),
+								ev.en_detain[lpid],  ev.en_dphiin[lpid], ev.en_sihih[lpid], ev.en_hoe[lpid],
+								ev.en_ooemoop[lpid], phys.leptons[ilep].d0, phys.leptons[ilep].dZ,
+								0., 0., 0.,
+								!hasObjectId(ev.en_idbits[lpid], EID_CONVERSIONVETO),0,ev.rho);
+		      if(passWp) { 
+			passIds.push_back(iwp); 
+			passIsos[iwp]=(relIso<0.15);
+			if(wps[iwp]==EgammaCutBasedEleId::MEDIUM) 
+			  {
+			    hasGoodId=true;
+			    isIso=passIsos[iwp];
+			  }
+		      }
+		    }
+		}
 	    }
-	  if(!hasGoodId)        passIdAndIso=false;
-	  else if(!passIsos[1]) passIdAndIso=false;     
-
+	  if(!hasGoodId)  passIdAndIso=false;
+	  else if(!isIso) passIdAndIso=false;     
+	  
 	  //fill control histograms (constrained to the Z mass)
 	  if(passZmass)
 	    {
+	      float recopt=phys.leptons[ilep].pt();
+	      float recoeta=phys.leptons[ilep].eta();
 	      if(matchid!=0)
 		{
 		  mon.fillHisto(lepStr+"genpt",tags_full, genP4.pt(), weight,true);
-		  mon.fillHisto(lepStr+"geneta",tags_full,genP4.eta(), weight);
+		  mon.fillHisto(lepStr+"geneta",tags_full, genP4.eta(), weight);
 		  mon.fillHisto(lepStr+"genpu",tags_full,ev.ngenITpu, weight);
 		  for(size_t iid=0; iid<passIds.size(); iid++)
 		    {
 		      TString idStr(lepStr);  idStr += passIds[iid];
 		      mon.fillHisto(idStr+"pt",tags_full, genP4.pt(), weight,true);
-		      mon.fillHisto(idStr+"eta",tags_full,genP4.eta(), weight);
+		      mon.fillHisto(idStr+"eta",tags_full, genP4.eta(), weight);
 		      mon.fillHisto(idStr+"pu",tags_full,ev.ngenITpu, weight);
 		      if(!passIsos[ passIds[iid] ]) continue;
-		      mon.fillHisto(idStr+"isopt",tags_full, genP4.pt(), weight,true);
-		      mon.fillHisto(idStr+"isoeta",tags_full,genP4.eta(), weight);
+		      mon.fillHisto(idStr+"isopt",tags_full,  genP4.pt(), weight,true);
+		      mon.fillHisto(idStr+"isoeta",tags_full, genP4.eta(), weight);
 		      mon.fillHisto(idStr+"isopu",tags_full,ev.ngenITpu, weight);
 		    }
 		}
@@ -419,7 +419,7 @@ int main(int argc, char* argv[])
 	      mon.fillHisto(lepStr+"dZ",              tags_full,fabs(phys.leptons[ilep].dZ),weight);
 	      mon.fillHisto(lepStr+"trkchi2",         tags_full,fabs(phys.leptons[ilep].trkchi2),weight);
 	      mon.fillHisto(lepStr+"trkvalidpixel",   tags_full,fabs(phys.leptons[ilep].trkValidPixelHits),weight);
-	      mon.fillHisto(lepStr+"trkvalidtracker", tags_full,fabs(phys.leptons[ilep].trkLostInnerHits),weight);
+	      mon.fillHisto(lepStr+"trkvalidtracker", tags_full,fabs(phys.leptons[ilep].trkValidTrackerHits),weight);
 	      mon.fillHisto(lepStr+"losthits",        tags_full,fabs(phys.leptons[ilep].trkLostInnerHits),weight);
 
 	      if(lepStr=="e")
@@ -446,6 +446,9 @@ int main(int argc, char* argv[])
 		{
 		  mon.fillHisto(lepStr+"reliso",     tags_full, relIso,   weight);
 		  mon.fillHisto(lepStr+"reliso2011", tags_full, relIso2011, weight);
+		  TString lepType(matchid!=0 ? "true":"fake");
+		  mon.fillHisto(lepStr+lepType+"reliso",     tags_full, relIso,   weight);
+		  mon.fillHisto(lepStr+lepType+"reliso2011", tags_full, relIso2011, weight);
 		}
 	    }
 	}
@@ -595,7 +598,6 @@ int main(int argc, char* argv[])
       double redMetL=redMetOut.redMET_l;
       double redMetT=redMetOut.redMET_t;
       double mT=METUtils::transverseMass(zll,zvvsCHS[0],true);
-      
 
       for(size_t ibtagalgo=0; ibtagalgo<3; ibtagalgo++)
 	{
@@ -642,6 +644,15 @@ int main(int argc, char* argv[])
 	  
 
 	}
+      bool mustBlind = (!isMC && runBlinded && evSummaryHandler.hasSpoilerAlert(!isMC));
+      if(runBlinded && mustBlind) continue;
+      mon.fillHisto("met_met"  , tags_full, zvvs[0].pt(),weight);
+      //      mon.fillHisto("met_min3Met", tags_full,,weight);
+      mon.fillHisto("met_redMet"  ,tags_full,aRedMet.pt(),weight);
+      mon.fillHisto("met_redMetL"  ,tags_full,aRedMetL,weight);
+      mon.fillHisto("met_redMetT"  , tags_full,aRedMetT,weight);
+      mon.fillHisto("mt"  , tags_full,aMT,weight);
+
 
       /*
       
