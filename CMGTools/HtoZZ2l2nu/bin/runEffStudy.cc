@@ -68,6 +68,7 @@ int main(int argc, char* argv[])
   bool isMC = runProcess.getParameter<bool>("isMC");
   bool runBlinded = runProcess.getParameter<bool>("runBlinded"); 
   int mctruthmode=runProcess.getParameter<int>("mctruthmode");
+  bool isSingleMuPD(!isMC && url.Contains("SingleMu"));
   
   TString outTxtUrl= outUrl + "/" + gSystem->BaseName(url) + ".txt";
   FILE* outTxtFile = NULL;
@@ -297,6 +298,17 @@ int main(int argc, char* argv[])
       if(isMC && mctruthmode==2 && !isDYToTauTau(ev.mccat) ) continue;
       int eventSubCat  = eventCategoryInst.Get(phys,&phys.ajets);
       TString tag_subcat = eventCategoryInst.GetLabel(eventSubCat);
+
+      //veto triggers for single mu
+      bool hasEEtrigger = ev.triggerType & 0x1;
+      bool hasMMtrigger = (ev.triggerType >> 1 ) & 0x1;
+      bool hasEMtrigger = (ev.triggerType >> 2 ) & 0x1;
+      bool hasMtrigger  = (ev.triggerType >> 3 ) & 0x1;
+      if(isSingleMuPD)
+	{
+	  if(!hasMtrigger) continue;
+	  if(hasMtrigger && (hasEEtrigger || hasMMtrigger || hasEMtrigger)) continue;
+	}
       
       //prepare the tag's vectors for histo filling
       std::vector<TString> tags_full(1,"all");
