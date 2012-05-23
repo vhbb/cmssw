@@ -678,7 +678,14 @@ if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areagamma=0.097; areaNH=0.021; areaCo
 if(fabs(eta) > 2.4  ) {areagamma=0.11; areaNH=0.021; areaComb=0.13;}
 
 
-float pfCorrIso = (electrons[it].pfChaIso+ std::max(electrons[it].pfPhoIso-rhoN*areagamma,mincor )+std::max(electrons[it].pfNeuIso-rhoN*areaNH,mincor))/electrons[it].p4.Pt();
+//Correct electron photon double count
+float pho=electrons[it].pfPhoIso;
+if(electrons[it].innerHits>0) 
+{ 
+ pho-=electrons[it].pfPhoIsoDoubleCounted;
+}
+
+float pfCorrIso = (electrons[it].pfChaIso+ std::max(pho-rhoN*areagamma,mincor )+std::max(electrons[it].pfNeuIso-rhoN*areaNH,mincor))/electrons[it].p4.Pt();
 float iso=pfCorrIso;
 float id=electrons[it].mvaOutTrig;
 bool wp70=((fabs(eta) < 0.8 && id>0.977 && iso < 0.093) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.956 && iso < 0.095) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.966 && iso < 0.171));

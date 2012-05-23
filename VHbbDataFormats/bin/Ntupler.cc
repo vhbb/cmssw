@@ -273,7 +273,7 @@ struct  LeptonInfo
      mass[i]=-99; pt[i]=-99; eta[i]=-99; phi[i]=-99; aodCombRelIso[i]=-99; pfCombRelIso[i]=-99; photonIso[i]=-99; neutralHadIso[i]=-99; chargedHadIso[i]=-99; chargedPUIso[i]=-99; particleIso[i]=-99; dxy[i]=-99; dz[i]=-99; type[i]=-99;  genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99;  
      id80[i]=-99; id95[i]=-99; vbtf[i]=-99; id80NoIso[i]=-99;
      charge[i]=-99;wp70[i]=-99; wp80[i]=-99;wp85[i]=-99;wp90[i]=-99;wp95[i]=-99;wpHWW[i]=-99;
-     pfCorrIso[i]=-99.; id2012tight[i]=-99; idMVAnotrig[i]=-99; idMVAtrig[i]=-99;
+     pfCorrIso[i]=-99.; id2012tight[i]=-99; idMVAnotrig[i]=-99; idMVAtrig[i]=-99;innerHits[i]=-99.;
  
      }
   }
@@ -338,15 +338,18 @@ struct  LeptonInfo
   float wp85[MAXL]; 
   float wp90[MAXL]; 
   float wp95[MAXL]; 
-  float wpHWW[MAXL]; 
+  float wpHWW[MAXL];
+  float innerHits[MAXL]; 
+  float photonIsoDoubleCount[MAXL];
 };
   
 template <> void LeptonInfo::setSpecific<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j,const VHbbEventAuxInfo & aux){
+  photonIsoDoubleCount[j]=i.pfPhoIsoDoubleCounted;
   id80[j]=i.id80;
   id95[j]=i.id95;
   id80NoIso[j]=(i.innerHits ==0 && !(fabs(i.convDist)<0.02 && fabs(i.convDcot)<0.02) &&
 ((i.isEB && i.sihih<0.01 && fabs(i.Dphi)<0.06 && fabs(i.Deta)<0.004) || (i.isEE && i.sihih<0.03 && fabs(i.Dphi)<0.03  && fabs(i.Deta)<0.007)));
-
+  innerHits[j]=i.innerHits;
 float mincor=0.0;
 float minrho=0.0;
 float rhoN = std::max(aux.puInfo.rhoNeutral,minrho);
@@ -362,8 +365,13 @@ if(fabs(eta) > 2.2 &&  fabs(eta) <= 2.3 ) {areagamma=0.092; areaNH=0.023; areaCo
 if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areagamma=0.097; areaNH=0.021; areaComb=0.12;}
 if(fabs(eta) > 2.4  ) {areagamma=0.11; areaNH=0.021; areaComb=0.13;}
 
+float pho=i.pfPhoIso;
+if(i.innerHits>0)
+{
+ pho-=i.pfPhoIsoDoubleCounted;
+}
 
-pfCorrIso[j] = (i.pfChaIso+ std::max(i.pfPhoIso-rhoN*areagamma,mincor )+std::max(i.pfNeuIso-rhoN*areaNH,mincor))/i.p4.Pt();
+pfCorrIso[j] = (i.pfChaIso+ std::max(pho-rhoN*areagamma,mincor )+std::max(i.pfNeuIso-rhoN*areaNH,mincor))/i.p4.Pt();
 
 id2012tight[j] = fabs(i.dxy) < 0.02  &&fabs(i.dz) < 0.1  &&(
 (i.isEE  &&fabs(i.Deta) < 0.005 &&fabs(i.Dphi) < 0.02 &&i.sihih < 0.03  &&i.HoE < 0.10  &&fabs(i.fMVAVar_IoEmIoP) < 0.05
@@ -974,7 +982,14 @@ int main(int argc, char* argv[])
   _outTree->Branch("vLepton_id2012tight",vLeptons.id2012tight,"id2012tight[nvlep]/F");
   _outTree->Branch("vLepton_idMVAnotrig",vLeptons.idMVAnotrig,"idMVAnotrig[nvlep]/F");
   _outTree->Branch("vLepton_idMVAtrig",vLeptons.idMVAtrig,"idMVAtrig[nvlep]/F");
- 
+  _outTree->Branch("vLepton_innerHits",vLeptons.innerHits,"innerHits[nvlep]/F");
+  _outTree->Branch("vLepton_photonIsoDoubleCount",vLeptons.photonIsoDoubleCount,"photonIsoDoubleCount[nvlep]/F");
+  _outTree->Branch("vLepton_wp95",vLeptons.wp95,"wp95[nvlep]/F");
+  _outTree->Branch("vLepton_wp90",vLeptons.wp90,"wp90[nvlep]/F");
+  _outTree->Branch("vLepton_wp85",vLeptons.wp85,"wp85[nvlep]/F");
+  _outTree->Branch("vLepton_wp80",vLeptons.wp80,"wp80[nvlep]/F");
+  _outTree->Branch("vLepton_wp70",vLeptons.wp70,"wp70[nvlep]/F");
+
   _outTree->Branch("aLepton_mass",aLeptons.mass ,"mass[nalep]/F");
   _outTree->Branch("aLepton_pt",aLeptons.pt ,"pt[nalep]/F");
   _outTree->Branch("aLepton_eta",aLeptons.eta ,"eta[nalep]");
@@ -1001,6 +1016,14 @@ int main(int argc, char* argv[])
   _outTree->Branch("aLepton_id2012tight",aLeptons.id2012tight,"id2012tight[nalep]/F");
   _outTree->Branch("aLepton_idMVAnotrig",aLeptons.idMVAnotrig,"idMVAnotrig[nalep]/F");
   _outTree->Branch("aLepton_idMVAtrig",aLeptons.idMVAtrig,"idMVAtrig[nalep]/F");
+  _outTree->Branch("aLepton_innerHits",aLeptons.innerHits,"innerHits[nalep]/F");
+  _outTree->Branch("aLepton_photonIsoDoubleCount",aLeptons.photonIsoDoubleCount,"photonIsoDoubleCount[nalep]/F");
+  _outTree->Branch("aLepton_wp95",aLeptons.wp95,"wp95[nalep]/F");
+  _outTree->Branch("aLepton_wp90",aLeptons.wp90,"wp90[nalep]/F");
+  _outTree->Branch("aLepton_wp85",aLeptons.wp85,"wp85[nalep]/F");
+  _outTree->Branch("aLepton_wp80",aLeptons.wp80,"wp80[nalep]/F");
+  _outTree->Branch("aLepton_wp70",aLeptons.wp70,"wp70[nalep]/F");
+
 
   _outTree->Branch("top"		,  &top	         ,   "mass/F:pt/F:wMass/F");
   _outTree->Branch("WplusMode"		,  &WplusMode	 ,   "WplusMode/I");
