@@ -104,7 +104,7 @@ TCutG* GetErrorBand(string name, int N, double* Mass, double* Low, double* High)
 
 
 
-void plotLimit(TString inputs=""){
+void plotLimit(TString outputName="Limit", TString inputs="", TString legendName="ee and #mu#mu channels"){
   gStyle->SetCanvasBorderMode(0);
   gStyle->SetCanvasColor(kWhite);
   gStyle->SetFrameBorderMode(0);
@@ -188,7 +188,7 @@ void plotLimit(TString inputs=""){
    double* MassAxisExp= new double[N];
 
 
-   FILE* pFileSum = fopen("LimitSummary","w");
+   FILE* pFileSum = fopen((outputName+"_LimitSummary").Data(),"w");
 
    int NExp = 0;
    for(int i=0;i<N;i++){
@@ -240,11 +240,11 @@ void plotLimit(TString inputs=""){
    MG->Draw("same");
 
    char LumiLabel[1024];
-   sprintf(LumiLabel,"CMS preliminary,  #sqrt{s}=8 TeV, #int L=%6.1ffb^{-1}",2.0);
-   TPaveText *pave = new TPaveText(0.5,0.96,0.94,0.99,"NDC");
+   sprintf(LumiLabel,"CMS preliminary,  #sqrt{s}=7 TeV, #int L=%6.1ffb^{-1}   -   %20s",5.035,legendName.Data());
+   TPaveText *pave = new TPaveText(0.1,0.96,0.94,0.99,"NDC");
    pave->SetBorderSize(0);
    pave->SetFillStyle(0);
-   pave->SetTextAlign(32);
+   pave->SetTextAlign(12);
    pave->SetTextFont(42);
    TObjArray* tokens = (TString(LumiLabel)).Tokenize("\\\\");
    int nt = tokens->GetEntries();
@@ -254,6 +254,9 @@ void plotLimit(TString inputs=""){
    }
    pave->Draw("same");
 
+   TLine* SMLine = new TLine(MG->GetXaxis()->GetXmin(),1.0,MG->GetXaxis()->GetXmax(),1.0);
+   SMLine->Draw("same");
+
    TLegend* LEG = new TLegend(0.15,0.80,0.40,0.93);
    LEG->SetHeader("");
    LEG->SetFillColor(0);
@@ -261,12 +264,12 @@ void plotLimit(TString inputs=""){
    LEG->AddEntry(TGObsLimit  , "Observed"  ,"P");
    LEG->AddEntry(TGExpLimit  , "Expected"  ,"L");
 //   LEG->Draw();
-   c1->SetGridx(true);
-   c1->SetGridy(true);
+   //c1->SetGridx(true);
+//   c1->SetGridy(true);
    c1->SetLogy(true);
-   c1->SaveAs("Limit.png");
-   c1->SaveAs("Limit.C");
-   c1->SaveAs("Limit.pdf");
+   c1->SaveAs(outputName+"_Limit.png");
+   c1->SaveAs(outputName+"_Limit.C");
+   c1->SaveAs(outputName+"_Limit.pdf");
    delete c1;
 
 
