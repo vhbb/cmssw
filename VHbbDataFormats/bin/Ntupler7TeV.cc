@@ -41,6 +41,9 @@
 
 //for LHE info
 #include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/LHERunInfoProduct.h"
+//pdf reweighting
+
 
 //Move class definition to Ntupler.h ?
 //#include "VHbbAnalysis/VHbbDataFormats/interface/Ntupler.h"
@@ -95,6 +98,21 @@ bool jsonContainsEvent (const std::vector< edm::LuminosityBlockRange > &jsonVec,
   return jsonVec.end() != iter;
 
 }
+
+
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+namespace LHAPDF {
+  void initPDFSet(int nset, int setid, int member=0);
+  int numberPDF(int nset);
+  void usePDFMember(int nset, int member);
+  double xfx(int nset, double x, double Q, int fl);
+  double getXmin(int nset, int member);
+  double getXmax(int nset, int member);
+  double getQ2min(int nset, int member);
+  double getQ2max(int nset, int member);
+  void extrapolate(bool extrapolate=true);
+}
+
 
 float resolutionBias(float eta)
 {
@@ -553,6 +571,7 @@ int main(int argc, char* argv[])
   TrackInfo V;
   int nvlep=0,nalep=0; 
   float lheV_pt=0; //for the Madgraph sample stitching
+  float PDFweight=1.; // for pdf reweighting (only madgraph)
   TrackSharingInfo TkSharing; // track sharing info;
 
   float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, genHpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweight2011B;
@@ -580,6 +599,10 @@ int main(int argc, char* argv[])
   gSystem->Load("libFWCoreFWLite");
   gSystem->Load("libDataFormatsFWLite");
   AutoLibraryLoader::enable();
+
+  //init the PDF set. Need to check for each sample beacuse pdfset and pdfmember info missing in AODSIM. (for Madgraph always (1,10042,0) :  mctqe6l) 
+  //  LHAPDF::initPDFSet(1,_pdfset, _pdfmember);
+  LHAPDF::initPDFSet(1, 10042, 0);
   
   // parse arguments
   if ( argc < 2 ) {
@@ -670,6 +693,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("V"		        ,  &V	                    ,  "mass/F:pt/F:eta:phi/F");
   _outTree->Branch("FatH"               ,  &FatH                    ,  "FatHiggsFlag/I:mass/F:pt/F:eta:phi/F:filteredmass/F:filteredpt/F:filteredeta/F:filteredphi/F");
   _outTree->Branch("lheV_pt"            ,  &lheV_pt                 ,  "lheV_pt/F");
+  _outTree->Branch("PDFweight"          ,  &PDFweight               ,  "PDFweight/F");
   _outTree->Branch("genZ"		,  &genZ	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
   _outTree->Branch("genZstar"		,  &genZstar	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
   _outTree->Branch("genW"		,  &genW	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
@@ -1000,6 +1024,7 @@ int main(int argc, char* argv[])
 
     // loop the events
       
+    fwlite::Run run(inFile);
       fwlite::Event ev(inFile);
       for(ev.toBegin(); !ev.atEnd() ; ++ev, ++ievt)
         {
@@ -1046,12 +1071,14 @@ int main(int argc, char* argv[])
 	countWithPU->Fill(1,PUweight);
 	countWithPU2011B->Fill(1,PUweight2011B);
       
+
 	//LHE Infos
 	fwlite::Handle<LHEEventProduct> evt;
 
 	//	std::cout << "Label for lhe = " << evt.getBranchNameFor(ev,"source") << std::endl;
 	if( !((evt.getBranchNameFor(ev,"source")).empty()) ){
 	  evt.getByLabel(ev,"source");
+
 	  //std::cout << "LHEEventProduct found!" << std::endl;
 	  bool lCheck=false;
 	  bool lbarCheck=false;
@@ -1060,10 +1087,46 @@ int main(int argc, char* argv[])
 	  int idl, idlbar;
 	  TLorentzVector l,lbar,vl,vlbar,V_tlv;
 	  const lhef::HEPEUP hepeup_ = evt->hepeup();	 
+	  double _origECMS = 7000; // energy in GeV
+	  double _newECMS = 8000; // energy in GeV
+	  float Q = hepeup_.SCALUP;
+	  int id1        = hepeup_.IDUP[0];
+	  double x1      = fabs(hepeup_.PUP[0][2]/(_origECMS/2));
+	  double x1prime = fabs(hepeup_.PUP[0][2]/(_newECMS/2));
+	  int id2        = hepeup_.IDUP[1];
+	  double x2      = fabs(hepeup_.PUP[1][2]/(_origECMS/2));
+	  double x2prime = fabs(hepeup_.PUP[1][2]/(_newECMS/2));
+// 	  std::cout << "*******LHECOMWeightProducer*******\n" <<
+// 	    " Q  : " << Q << "\n" <<
+// 	    " id1: " << id1 << "\n" <<
+// 	    " x1 : " << x1  << "\n" <<
+// 	    " x1': " << x1prime << "\n" <<
+// 	    " id2: " << id2 << "\n" <<
+// 	    " x2 : " << x2  << "\n" <<
+// 	    " x2': " << x2prime << std::endl;
+	  //gluon is 0 in the LHAPDF numberin
+	  if (id1 == 21)
+	    id1 = 0;
+	  if (id2 == 21)
+	    id2 = 0;
+	  int _pdfmember = 0;
+	  LHAPDF::usePDFMember(1,_pdfmember);
+	  double oldpdf1 = LHAPDF::xfx(1, x1, Q, id1)/x1;
+	  double oldpdf2 = LHAPDF::xfx(1, x2, Q, id2)/x2;
+	  double newpdf1 = LHAPDF::xfx(1, x1prime, Q, id1)/x1prime;
+	  double newpdf2 = LHAPDF::xfx(1, x2prime, Q, id2)/x2prime;
+	  PDFweight = (newpdf1/oldpdf1)*(newpdf2/oldpdf2);
+
+// 	  std::cout <<	  "     xfx1 : " << oldpdf1 << "\n" <<
+// 	    "     xfx2 : " << oldpdf2 << "\n" <<
+// 	    "     xfx1': " << newpdf1 << "\n" <<
+// 	    "     xfx2': " << newpdf2 << "\n" <<
+// 	    "     weight:" << (newpdf1/oldpdf1)*(newpdf2/oldpdf2) << std::endl;
+
 	  const std::vector<lhef::HEPEUP::FiveVector> pup_ = hepeup_.PUP; // px, py, pz, E, M
 	  for(unsigned int i=0; i<pup_.size(); ++i){
 	    int id=hepeup_.IDUP[i]; //pdgId
-	    
+	      
 	    if(id==11){ l.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lCheck=true;}
 	    if(id==-11){ lbar.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lbarCheck=true;}
 	    if(id==12){ vl.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); vlCheck=true;}
