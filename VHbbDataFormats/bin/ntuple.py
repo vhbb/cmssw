@@ -20,11 +20,10 @@ process.fwliteInput = cms.PSet(
 
 ),
 
-
-    PUmcfileName = cms.string("ttbarPU_35bins_fall11.root"),
+    PUmcfileName = cms.string("Summer2012PU.root"),
     PUmcfileName2011B= cms.string("Fall11_Generated.root"),
     PUdatafileName2011B = cms.string("Cert_175832-180252_PromptReco_JSON.pileupTruth_v2_finebin.root"),
-    PUdatafileName = cms.string("Pileup_2011_to_173692_LPLumiScale_68mb_35bins.root"),
+    PUdatafileName = cms.string("MyDataPileupHistogram.root"),
     Weight3DfileName = cms.string(""),
     maxEvents   = cms.int32(-1),                             ## optional
     runMin  = cms.int32(-1),

@@ -1136,7 +1136,22 @@ int main(int argc, char* argv[])
 
 
 
+/*
+Handle<std::vector< PileupSummaryInfo > >  PupInfo;
+event.getByLabel(edm::InputTag("addPileupInfo"), PupInfo);
+std::vector<PileupSummaryInfo>::const_iterator PVI;
+float Tnpv = -1;
+for(PVI = PupInfo->begin(); PVI != PupInfo->end(); ++PVI) {
+   int BX = PVI->getBunchCrossing();
+   if(BX == 0) { 
+     Tnpv = PVI->getTrueNumInteractions();
+     continue;
+   }
 
+}
+double MyWeight = LumiWeights_.weight( Tnpv );
+  double MyWeight = LumiWeights_.weight( (*iEventB) );
+*/
 
 
       PUweight=1.;
