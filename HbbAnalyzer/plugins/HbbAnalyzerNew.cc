@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.73 2012/05/16 15:13:51 degrutto Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.74 2012/05/17 10:58:34 arizzi Exp $
 //
 //
 
@@ -221,6 +221,7 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
       std::vector< PileupSummaryInfo> pu = (*puHandle); 
       for (std::vector<PileupSummaryInfo>::const_iterator it= pu.begin(); it!=pu.end(); ++it){
 	 int bx = (*it).getBunchCrossing();
+         if(bx == 0) { auxInfo->puInfo.truePU = (*it).getTrueNumInteractions();}
 	unsigned int num = (*it).getPU_NumInteractions();
 	//	std::cout <<" PU PUSHING "<<bx<<" " <<num<<std::endl;
 	auxInfo->puInfo.pus[bx]  =num;
@@ -1361,7 +1362,7 @@ BTagSFContainer btagSFs;
   }
   
   edm::Handle<edm::View<pat::MET> > metPFHandle;
-  iEvent.getByLabel("patMETs",metPFHandle);
+  iEvent.getByLabel("patMETsPFlow",metPFHandle);
   edm::View<pat::MET> metsPF = *metPFHandle;
   
   if(metsPF.size()){
@@ -1503,9 +1504,6 @@ BTagSFContainer btagSFs;
 
 /* Check if there are photons sharing the super cluster*/
     for(size_t k=0;k<photonsForIso.size();k++) {
-   // std::cout << "PHO: eta " <<   photonsForIso[k].eta()  << " phi " <<  photonsForIso[k].phi() <<  " pt " <<  photonsForIso[k].pt() << " " <<  ef.pfPhoIso<< " refs " <<
-   //photonsForIso[k].superClusterRef().key() << " vs " << elec->superCluster().key() <<     std::endl; 
-   //std::cout << "dR , asym " <<  deltaR(elec->eta(),elec->phi(),photonsForIso[k].eta(),photonsForIso[k].phi())  << " "  << abs(photonsForIso[k].pt()-elec->pt())/(photonsForIso[k].pt()+elec->pt()) << std::endl;
        if(deltaR(elec->eta(),elec->phi(),photonsForIso[k].eta(),photonsForIso[k].phi()) < 0.05 && abs(photonsForIso[k].pt()-elec->pt())/(photonsForIso[k].pt()+elec->pt()) < 0.05 ) {
           std::cout << "Double counting of supercluster!" << std::endl;
 	  ef.pfPhoIsoDoubleCounted+=photonsForIso[k].pt(); 
@@ -1531,7 +1529,10 @@ BTagSFContainer btagSFs;
     ef.HoE = elec->hadronicOverEm();
     ef.convDist = elec->convDist();
     ef.convDcot = elec->convDcot();
-    if(elec->gsfTrack().isNonnull()) ef.innerHits = elec->gsfTrack()->trackerExpectedHitsInner().numberOfHits();   
+    if(elec->gsfTrack().isNonnull()) 
+    {
+     ef.innerHits = elec->gsfTrack()->trackerExpectedHitsInner().numberOfHits();   
+    }
     ef.isEB = elec->isEB();
     ef.isEE = elec->isEE();
 /* 2012 ELEID*/
