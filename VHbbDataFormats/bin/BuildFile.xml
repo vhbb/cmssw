@@ -12,6 +12,7 @@
 <use   name="PhysicsTools/Utilities"/>
 <use   name="PhysicsTools/SelectorUtils"/>
 <use   name="RecoBTag/SecondaryVertex"/>
+<use   name="lhapdf"/>
 <environment>
   <bin  file="make_histos.cxx"></bin>
   <bin  file="TMVAClassification.cxx"></bin>
