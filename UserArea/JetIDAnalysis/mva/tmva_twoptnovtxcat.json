@@ -1,9 +1,0 @@
-{ 
-  "methods"    : [ "BDT" ],
-  "subcategories" : [ 
-	[  
-	[ "jetPt >= 10. && jetPt<20. ","pt10"],
-	[ "jetPt >= 20.","pt20"]
-        ]            
-        ]
-}
