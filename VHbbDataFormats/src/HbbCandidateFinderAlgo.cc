@@ -127,7 +127,9 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
 
   
   std::vector<VHbbEvent::METInfo> met;
-  findMET(event->pfmet, met);
+
+  //  findMET(event->pfmet, met);    
+   findMET(event->pfmetType1corr, met);
 
   if (verbose_){
     std::cout <<" Electrons: "<< ele.size()<<std::endl;
