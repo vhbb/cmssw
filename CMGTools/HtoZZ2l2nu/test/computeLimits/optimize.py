@@ -16,7 +16,7 @@ phase=-1
 jsonUrl='$CMSSW_BASE/src/CMGTools/HtoZZ2l2nu/data/samples_2012.json'
 CMSSW_BASE=os.environ.get('CMSSW_BASE')
 LandSArg=' --indexvbf 78 '
-LandSArg+=' --bins eq0jets,eq1jets,geq2jets,vbf'
+LandSArg+=' --bins eq0jets,eq1jets,geq2jets,vbf --prefix 8'
 
 cutList='' 
 def help() :
