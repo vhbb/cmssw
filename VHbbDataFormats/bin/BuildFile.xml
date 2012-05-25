@@ -19,5 +19,6 @@
   <bin  file="make_tree.cxx"></bin>
   <bin  file="Ntupler.cc"></bin>
   <bin  file="Ntupler7TeV.cc"></bin>
+  <bin  file="VHbbTnP.cc"></bin>
   <bin  file="Updater.cc"></bin>
 </environment>
