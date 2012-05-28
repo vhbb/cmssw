@@ -9,7 +9,7 @@ process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(
 
 
-"file:../../HbbAnalyzer/test/PAT.edm.root"
+#"file:../../HbbAnalyzer/test/PAT.edm.root"
 ###"dcache:///pnfs/cms/WAX/11/store/user/lpchbb/msegala/WH_WToLNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_May2012Prod_2/e63abc9239312b3f728ddbd5ef32b303/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm_11_1_oQQ.root" ,
 ##    "../../HbbAnalyzer/test/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm.root",
 #"dcache:///cmsdcache//pnfs/pi.infn.it/data/cms/store/user/tboccali/WH_WToLNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_ProcV1_WH_WToLNu_HToBB_M-120/14fe2b624ddea84f5c39709f51bf546f/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm_51_1_3LJ.root"
@@ -34,19 +34,21 @@ process.fwliteInput = cms.PSet(
     )
 
 # get JSON file 
-JSONfile = 'Cert_190456-193557_8TeV_PromptReco_Collisions12_JSON.txt'
+JSONfile = 'Cert_190456-194479_8TeV_PromptReco_Collisions12_JSON.txt'
 lumiList = LumiList.LumiList (filename = JSONfile).getCMSSWString().split(',')
 
 #Uncomment to run with JSON
 process.fwliteInput.lumisToProcess.extend(lumiList)
 
 
-channel =  "DoubleMu2012A"
+channel =  "SM2012BLOCALTEST"
 import os
 #dirnameOld = "//pnfs/pi.infn.it/data/cms/store/user/bortigno/DoubleMu/HBB_EDMNtupleV3_ProcV1_may/07fb60889166b64f474d8d0aa162db69/"
-dirnameOld = "//pnfs/cms/WAX/11/store/user/degrutto/testDoubleMuRun2012A/"
-
-
+#dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/METRun2011APromptV1EdmV31"
+#dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/METRun2011APromptV1EdmV31/degrutto/MET/HBB_EDMNtupleV31_May2012Prod/f3f16f0a8d4ba1fd82b25c3d99de1c78/"
+#dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/METRun2011BPromptV1EdmV31/degrutto/MET/HBB_EDMNtupleV31_May2012Prod/f3f16f0a8d4ba1fd82b25c3d99de1c78/"
+#dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/SingleMuRun2012APromptV1EdmV31/degrutto/SingleMu/HBB_EDMNtupleV31_May2012Prod/f3f16f0a8d4ba1fd82b25c3d99de1c78/"
+dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/SingleMuRun2012BPromptV1EdmV31/degrutto/SingleMu/HBB_EDMNtupleV31_May2012Prod/f3f16f0a8d4ba1fd82b25c3d99de1c78/"
 
 
 #for i in range(len(channels)):
@@ -54,10 +56,10 @@ dirnameOld = "//pnfs/cms/WAX/11/store/user/degrutto/testDoubleMuRun2012A/"
 
 dirname =  dirnameOld 
 dirlist = os.listdir(dirname)
-#basenamelist = os.listdir(dirname + "/")
-#for basename in basenamelist:
-#   process.fwliteInput.fileNames.append("dcache:/" + dirname + "/" + basename)
-#print "Number of files to process is %s" %(len(process.fwliteInput.fileNames)) 
+basenamelist = os.listdir(dirname + "/")
+for basename in basenamelist:
+   process.fwliteInput.fileNames.append("dcache:/" + dirname + "/" + basename)
+print "Number of files to process is %s" %(len(process.fwliteInput.fileNames)) 
     
     
 
@@ -114,10 +116,11 @@ process.Analyzer = cms.PSet(
         "HLT_LooseIsoPFTau35_Trk20_v.*", #36
         "HLT_LooseIsoPFTau35_Trk20_MET70_v.*", #37
         "HLT_LooseIsoPFTau35_Trk20_MET75_v.*", #38
-        "HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseFiltered_v*", #39
+        "HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned_v*", #39
         "HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80*", #40
-        "HLT_DiCentralPFJet30_PFMET80_BTagCSV07", #41
-        "HLT_PFMET150_v.*", #42
+        "HLT_DiCentralPFJet30_PFMET80_BTagCSV07*", #41
+        "HLT_PFMET150_v*", #42
+        "HLT_L1ETM40_v*", #43
    ),
     isMC =     cms.bool(False),
     verbose = cms.bool(False),
