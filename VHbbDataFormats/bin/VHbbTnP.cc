@@ -227,7 +227,7 @@ int main(int argc, char* argv[])
 {
   gROOT->Reset();
 
-  cout << "Start of main" << endl;
+  //  if (verbose_) cout << "Start of main" << endl;
 
   float rhoN;
   int nPVs;
@@ -272,17 +272,56 @@ int main(int argc, char* argv[])
 
   std::vector<std::string> inputFiles_( in.getParameter<std::vector<std::string> >("fileNames") );
 
+  std::string PUmcfileName_ = in.getParameter<std::string> ("PUmcfileName") ;
+  std::string PUmcfileName2011B_ = in.getParameter<std::string> ("PUmcfileName2011B") ;
+
+  std::string PUdatafileName_ = in.getParameter<std::string> ("PUdatafileName") ;
+  std::string PUdatafileName2011B_ = in.getParameter<std::string> ("PUdatafileName2011B") ;
+  std::string Weight3DfileName_ = in.getParameter<std::string> ("Weight3DfileName") ;
+
   bool isMC_( ana.getParameter<bool>("isMC") );  
 
+  float lumiWeight;
+
+  edm::LumiReWeighting   lumiWeights;
+  edm::Lumi3DReWeighting   lumiWeights2011B;
+  if(isMC_)
+    {
+      lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
+
+      lumiWeights2011B = edm::Lumi3DReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
+      if(Weight3DfileName_!="")
+	{ lumiWeights2011B.weight3D_init(Weight3DfileName_.c_str()); }
+      else
+	{
+	  lumiWeights2011B.weight3D_init(1.0); // generate the weights the fisrt time;
+	}
+
+    }
+
+
   TFile *_outFile	= new TFile(outputFile_.c_str(), "recreate");	
+  TDirectory *muTrigDir = _outFile->mkdir("muTrigDir");
+  TDirectory *muWCandDir =  _outFile->mkdir("muWCandDir");
+  TDirectory *muRecoDir = _outFile->mkdir("muRecoDir");
+  TDirectory * eleTrigDir = _outFile->mkdir("eleTrigDir");
+  TDirectory *eleRecoDir = _outFile->mkdir("eleRecoDir");
+
+  int eventNumber, runNumber, lb;
 
   float muTrigTree_tag_pt, muTrigTree_tag_eta, muTrigTree_probe_pt, muTrigTree_probe_eta, muTrigTree_mass, muTrigTree_tag_phi, muTrigTree_probe_phi;
   int muTrigTree_probe_passingIsoMu24L1, muTrigTree_probe_passingIsoMu24L2, muTrigTree_probe_passingIsoMu24L3, muTrigTree_probe_passingIsoMu24Iso;
   int muTrigTree_probe_passingMu40L1, muTrigTree_probe_passingMu40L2, muTrigTree_probe_passingMu40L3;
   int muTrigTree_probe_passingDiMuL1, muTrigTree_probe_passingDiMuL20, muTrigTree_probe_passingDiMuL210, muTrigTree_probe_passingDiMu8, muTrigTree_probe_passingDiMu17, muTrigTree_probe_passingDiMuDz;
   int muTrigTree_probe_passingDiMuTkL1, muTrigTree_probe_passingDiMuTkL2, muTrigTree_probe_passingDiMuTk17, muTrigTree_probe_passingDiMuTk8, muTrigTree_probe_passingDiMuTkDz;
+  int muTrigTree_probe_passingDiMuL110, muTrigTree_probe_passingDiMuTkL110, muTrigTree_probe_passingDiMu17Dz, muTrigTree_probe_passingDiMuTk17Dz;
   int muTrigTree_probe_passingIsoMu20Iso;
-  TTree *muTrigTree = new TTree("muTrigTree","muTrigTree");
+  float muTrigTree_probe_WCandPt; int muTrigTree_probe_passingWCandPt; 
+  int muTrigTree_event_Mu17_Mu8, muTrigTree_event_Mu17_TkMu8;
+  int muTrigTree_probe_passingIsoMu24ORMu40, muTrigTree_probe_passingMu40ANDNOTIsoMu24, muTrigTree_probe_passingIsoMu20ANDNOTIsoMu24;
+  int muTrigTree_probe_passingIsoMu20ANDNOTIsoMu24ANDNOTMu40, muTrigTree_probe_passingIsoMu24ORMu40ORIsoMu20;
+  int muTrigTree_probe_passingDiMuTk17ANDNOTeventMu17Mu8, muTrigTree_probe_passingDiMuTk8ANDNOTeventMu17Mu8, muTrigTree_probe_passingDiMuTkDzANDNOTeventMu17Mu8;
+  TTree *muTrigTree = new TTree("muTrigTree","muTrigTree"); muTrigTree->SetDirectory(muTrigDir);
   muTrigTree->Branch("tag_pt"            ,  &muTrigTree_tag_pt                 ,  "tag_pt/F");
   muTrigTree->Branch("tag_eta"            ,  &muTrigTree_tag_eta                 ,  "tag_eta/F");
   muTrigTree->Branch("tag_phi"            ,  &muTrigTree_tag_phi                 ,  "tag_phi/F");
@@ -308,13 +347,42 @@ int main(int argc, char* argv[])
   muTrigTree->Branch("probe_passingDiMuTk8", &muTrigTree_probe_passingDiMuTk8, "probe_passingDiMuTk8/I");
   muTrigTree->Branch("probe_passingDiMuTkDz", &muTrigTree_probe_passingDiMuTkDz, "probe_passingDiMuTkDz/I");
   muTrigTree->Branch("probe_passingIsoMu20Iso", &muTrigTree_probe_passingIsoMu20Iso, "probe_passingIsoMu20Iso/I");
+  muTrigTree->Branch("probe_passingDiMuL110", &muTrigTree_probe_passingDiMuL110, "probe_passingDiMuL110/I");
+  muTrigTree->Branch("probe_passingDiMuTkL110", &muTrigTree_probe_passingDiMuTkL110, "probe_passingDiMuTkL110/I");
+  muTrigTree->Branch("probe_passingDiMu17Dz", &muTrigTree_probe_passingDiMu17Dz, "probe_passingDiMu17Dz/I");
+  muTrigTree->Branch("probe_passingDiMuTk17Dz", &muTrigTree_probe_passingDiMuTk17Dz, "probe_passingDiMuTk17Dz/I");
+
+
+
+  muTrigTree->Branch("probe_passingIsoMu24ORMu40", &muTrigTree_probe_passingIsoMu24ORMu40, "probe_passingIsoMu24ORMu40/I");
+  muTrigTree->Branch("probe_passingMu40ANDNOTIsoMu24", &muTrigTree_probe_passingMu40ANDNOTIsoMu24, "probe_passingMu40ANDNOTIsoMu24/I");
+  muTrigTree->Branch("probe_passingIsoMu20ANDNOTIsoMu24", &muTrigTree_probe_passingIsoMu20ANDNOTIsoMu24, "probe_passingIsoMu20ANDNOTIsoMu24/I");
+  muTrigTree->Branch("probe_passingIsoMu20ANDNOTIsoMu24ANDNOTMu40", &muTrigTree_probe_passingIsoMu20ANDNOTIsoMu24ANDNOTMu40, "probe_passingIsoMu20ANDNOTIsoMu24ANDNOTMu40/I");
+  muTrigTree->Branch("probe_passingIsoMu24ORMu40ORIsoMu20", &muTrigTree_probe_passingIsoMu24ORMu40ORIsoMu20, "probe_passingIsoMu24ORMu40ORIsoMu20/I");
+
+  muTrigTree->Branch("probe_WCandPt", &muTrigTree_probe_WCandPt, "probe_WCandPt/F");
+  muTrigTree->Branch("probe_passingWCandPt", &muTrigTree_probe_passingWCandPt, "probe_passingWCandPt/I");
+
+  muTrigTree->Branch("event_Mu17_Mu8", &muTrigTree_event_Mu17_Mu8, "event_Mu17_Mu8/I");
+  muTrigTree->Branch("event_Mu17_TkMu8", &muTrigTree_event_Mu17_TkMu8, "event_Mu17_TkMu8/I");
+
+  muTrigTree->Branch("probe_passingDiMuTk17ANDNOTeventMu17Mu8", &muTrigTree_probe_passingDiMuTk17ANDNOTeventMu17Mu8, "probe_passingDiMuTk17ANDNOTeventMu17Mu8/I");
+ muTrigTree->Branch("probe_passingDiMuTk8ANDNOTeventMu17Mu8", &muTrigTree_probe_passingDiMuTk8ANDNOTeventMu17Mu8, "probe_passingDiMuTk8ANDNOTeventMu17Mu8/I");
+ muTrigTree->Branch("probe_passingDiMuTkDzANDNOTeventMu17Mu8", &muTrigTree_probe_passingDiMuTkDzANDNOTeventMu17Mu8, "probe_passingDiMuTkDzANDNOTeventMu17Mu8/I");
+
+
   muTrigTree->Branch("mass", &muTrigTree_mass, "mass/F");
   muTrigTree->Branch("nPVs", &nPVs, "nPVs/I");
+  muTrigTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
+  muTrigTree->Branch("runNumber", &runNumber, "runNumber/I");
+  muTrigTree->Branch("lb", &lb, "lb/I");
+  muTrigTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
+
 
   float muWCandTree_tag_pt, muWCandTree_tag_eta, muWCandTree_probe_pt, muWCandTree_tag_phi, muWCandTree_probe_phi;
   float muWCandTree_probe_met, muWCandTree_probe_metPhi;
   int muWCandTree_probe_passingWCandPt;
-  TTree *muWCandTree = new TTree("muWCandTree","muWCandTree");
+  TTree *muWCandTree = new TTree("muWCandTree","muWCandTree"); muWCandTree->SetDirectory(muWCandDir);
   muWCandTree->Branch("tag_pt"            ,  &muWCandTree_tag_pt                 ,  "tag_pt/F");
   muWCandTree->Branch("tag_eta"            ,  &muWCandTree_tag_eta                 ,  "tag_eta/F");
   muWCandTree->Branch("tag_phi"            ,  &muWCandTree_tag_phi                 ,  "tag_phi/F");
@@ -324,6 +392,10 @@ int main(int argc, char* argv[])
   muWCandTree->Branch("probe_metPhi"            ,  &muWCandTree_probe_metPhi                 ,  "probe_metPhi/F");
   muWCandTree->Branch("probe_passingWCandPt", &muWCandTree_probe_passingWCandPt, "probe_passingWCandPt/I");
   muWCandTree->Branch("nPVs", &nPVs, "nPVs/I");
+  muWCandTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
+  muWCandTree->Branch("runNumber", &runNumber, "runNumber/I");
+  muWCandTree->Branch("lb", &lb, "lb/I");
+  muWCandTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
 
 
 
@@ -331,7 +403,7 @@ int main(int argc, char* argv[])
 
   float muRecoTree_tag_pt, muRecoTree_tag_eta, muRecoTree_probe_pt, muRecoTree_probe_eta, muRecoTree_mass, muRecoTree_tag_phi, muRecoTree_probe_phi;
   int muRecoTree_probe_tightNoIso, muRecoTree_probe_tightIso;
-  TTree *muRecoTree = new TTree("muRecoTree","muRecoTree");
+  TTree *muRecoTree = new TTree("muRecoTree","muRecoTree"); muRecoTree->SetDirectory(muRecoDir);
   muRecoTree->Branch("tag_pt"            ,  &muRecoTree_tag_pt                 ,  "tag_pt/F");
   muRecoTree->Branch("tag_eta"            ,  &muRecoTree_tag_eta                 ,  "tag_eta/F");
   muRecoTree->Branch("tag_phi"            ,  &muRecoTree_tag_phi                 ,  "tag_phi/F");
@@ -342,11 +414,17 @@ int main(int argc, char* argv[])
   muRecoTree->Branch("probe_tightIso"            ,  &muRecoTree_probe_tightIso                 ,  "probe_tightIso/I");
   muRecoTree->Branch("mass", &muRecoTree_mass, "mass/F");
   muRecoTree->Branch("nPVs", &nPVs, "nPVs/I");
+  muRecoTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
+  muRecoTree->Branch("runNumber", &runNumber, "runNumber/I");
+  muRecoTree->Branch("lb", &lb, "lb/I");
+  muRecoTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
+
 
   float eleTrigTree_tag_pt, eleTrigTree_tag_eta, eleTrigTree_probe_pt, eleTrigTree_probe_eta, eleTrigTree_mass, eleTrigTree_tag_phi, eleTrigTree_probe_phi;
   int eleTrigTree_probe_passingEle27L1, eleTrigTree_probe_passingEle27HLT;
   int eleTrigTree_probe_passingDiEle17, eleTrigTree_probe_passingDiEle8, eleTrigTree_probe_passingDiEleDz;
-  TTree *eleTrigTree = new TTree("eleTrigTree","eleTrigTree");
+  int eleTrigTree_probe_wp70, eleTrigTree_probe_wp80, eleTrigTree_probe_wp85, eleTrigTree_probe_wp90, eleTrigTree_probe_wp95;
+  TTree *eleTrigTree = new TTree("eleTrigTree","eleTrigTree"); eleTrigTree->SetDirectory(eleTrigDir);
   eleTrigTree->Branch("tag_pt"            ,  &eleTrigTree_tag_pt                 ,  "tag_pt/F");
   eleTrigTree->Branch("tag_eta"            ,  &eleTrigTree_tag_eta                 ,  "tag_eta/F");
   eleTrigTree->Branch("tag_phi"            ,  &eleTrigTree_tag_phi                 ,  "tag_phi/F");
@@ -358,12 +436,23 @@ int main(int argc, char* argv[])
   eleTrigTree->Branch("probe_passingDiEle17", &eleTrigTree_probe_passingDiEle17, "probe_passingDiEle17/I");
   eleTrigTree->Branch("probe_passingDiEle8", &eleTrigTree_probe_passingDiEle8, "probe_passingDiEle8/I");
   eleTrigTree->Branch("probe_passingDiEleDz", &eleTrigTree_probe_passingDiEleDz, "probe_passingDiEleDz/I");
+  eleTrigTree->Branch("probe_wp70"            ,  &eleTrigTree_probe_wp70                 ,  "probe_wp70/I");
+  eleTrigTree->Branch("probe_wp80"            ,  &eleTrigTree_probe_wp80                 ,  "probe_wp80/I");
+  eleTrigTree->Branch("probe_wp85"            ,  &eleTrigTree_probe_wp85                 ,  "probe_wp85/I");
+  eleTrigTree->Branch("probe_wp90"            ,  &eleTrigTree_probe_wp90                 ,  "probe_wp90/I");
+  eleTrigTree->Branch("probe_wp95"            ,  &eleTrigTree_probe_wp95                 ,  "probe_wp95/I");
   eleTrigTree->Branch("mass", &eleTrigTree_mass, "mass/F");
   eleTrigTree->Branch("nPVs", &nPVs, "nPVs/I");
+  eleTrigTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
+  eleTrigTree->Branch("runNumber", &runNumber, "runNumber/I");
+  eleTrigTree->Branch("lb", &lb, "lb/I");
+  eleTrigTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
+
+
 
   float eleRecoTree_tag_pt, eleRecoTree_tag_eta, eleRecoTree_probe_pt, eleRecoTree_probe_eta, eleRecoTree_mass, eleRecoTree_tag_phi, eleRecoTree_probe_phi;
   int eleRecoTree_probe_wp70, eleRecoTree_probe_wp80, eleRecoTree_probe_wp85, eleRecoTree_probe_wp90, eleRecoTree_probe_wp95;
-  TTree *eleRecoTree = new TTree("eleRecoTree","eleRecoTree");
+  TTree *eleRecoTree = new TTree("eleRecoTree","eleRecoTree"); eleRecoTree->SetDirectory(eleRecoDir);
   eleRecoTree->Branch("tag_pt"            ,  &eleRecoTree_tag_pt                 ,  "tag_pt/F");
   eleRecoTree->Branch("tag_eta"            ,  &eleRecoTree_tag_eta                 ,  "tag_eta/F");
   eleRecoTree->Branch("tag_phi"            ,  &eleRecoTree_tag_phi                 ,  "tag_phi/F");
@@ -377,6 +466,11 @@ int main(int argc, char* argv[])
   eleRecoTree->Branch("probe_wp95"            ,  &eleRecoTree_probe_wp95                 ,  "probe_wp95/I");
   eleRecoTree->Branch("mass", &eleRecoTree_mass, "mass/F");
   eleRecoTree->Branch("nPVs", &nPVs, "nPVs/I");
+  eleRecoTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
+  eleRecoTree->Branch("runNumber", &runNumber, "runNumber/I");
+  eleRecoTree->Branch("lb", &lb, "lb/I");
+  eleRecoTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
+
 
   int ievt=0;
   int totalcount=0;
@@ -389,6 +483,7 @@ int main(int argc, char* argv[])
     std::cout << iFile << std::endl;
     TFile* inFile = TFile::Open(inputFiles_[iFile].c_str());
     if(inFile==0) { std::cout << "FAILED " << inputFiles_[iFile] << std::endl; continue; }
+
 
     // loop the events
       
@@ -406,6 +501,32 @@ int main(int argc, char* argv[])
 
       if(int(ev.id().run()) < runMin_ && runMin_ > 0) continue;
       if(int(ev.id().run()) > runMax_ && runMax_ > 0) continue;
+
+      if (ievt%1000==0) cout << " Entry=" << ievt << " event=" << ev.id().event() << " run=" << ev.id().run() << " lb=" << ev.id().luminosityBlock() << endl;
+
+      lumiWeight = 1.;
+      if(isMC_){
+ 
+	// PU weights // Run2011A
+	std::map<int, unsigned int>::const_iterator puit = aux.puInfo.pus.find(0);
+	int npu =puit->second ;
+	//	PUweight =  lumiWeights.weight( npu );        
+	//	pu->Fill(puit->second);
+	std::map<int, unsigned int>::const_iterator puit0 =  aux.puInfo.pus.find(0);
+	std::map<int, unsigned int>::const_iterator puitm1 = aux.puInfo.pus.find(-1);
+	std::map<int, unsigned int>::const_iterator puitp1 = aux.puInfo.pus.find(+1);
+	//	PU0=puit0->second;
+	//	PUp1=puitp1->second;
+	//	PUm1=puitm1->second;
+	//	input3DPU->Fill(PUm1,PU0,PUp1);  
+	lumiWeight = lumiWeights2011B.weight3D( puitm1->second, puit0->second,puitp1->second); 
+
+      }
+
+
+      runNumber = ev.id().run();
+      eventNumber = ev.id().event();
+      lb = ev.id().luminosityBlock();
 
       VHbbEvent modifiedEvent;;
       const VHbbEvent *  iEvent =0;
@@ -466,6 +587,7 @@ int main(int argc, char* argv[])
         std::vector<TLorentzVector> mu40L2;
         std::vector<TLorentzVector> mu40L3;
 
+        std::vector<TLorentzVector> diMuL110;
 	std::vector<TLorentzVector> diMuL1;
 	std::vector<TLorentzVector> diMuL20;
 	std::vector<TLorentzVector> diMuL210;
@@ -473,6 +595,7 @@ int main(int argc, char* argv[])
 	std::vector<TLorentzVector> diMu17;
 	std::vector<TLorentzVector> diMuDz;
 
+        std::vector<TLorentzVector> diMuTkL110;
         std::vector<TLorentzVector> diMuTkL1;
         std::vector<TLorentzVector> diMuTkL2;
         std::vector<TLorentzVector> diMuTk17;
@@ -502,7 +625,7 @@ int main(int argc, char* argv[])
 	    for ( TriggerFilterRefVector::const_iterator trigFilterRef  = trigFilterRefs.begin(); trigFilterRef != trigFilterRefs.end(); ++trigFilterRef ) {
 	      std::string label = (*trigFilterRef)->label();
 	      if (label == mu24nameL1) {
-		cout << label << endl;
+		if (verbose_) cout << label << endl;
 		const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
 		for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -510,7 +633,7 @@ int main(int argc, char* argv[])
 		}
 	      }
 	      if (label == mu24nameL2) {
-		cout << label << endl;
+		if (verbose_) cout << label << endl;
 		const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
 		for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -518,7 +641,7 @@ int main(int argc, char* argv[])
 		}
 	      }
 	      if (label == mu24nameL3) {
-		cout << label << endl;
+		if (verbose_) cout << label << endl;
 		const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
 		for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -526,7 +649,7 @@ int main(int argc, char* argv[])
 		}
 	      }
 	      if (label == mu24nameIso) {
-		cout << label << endl;
+		if (verbose_) cout << label << endl;
 		const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
 		for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -540,7 +663,7 @@ int main(int argc, char* argv[])
             for ( TriggerFilterRefVector::const_iterator trigFilterRef  = trigFilterRefs.begin(); trigFilterRef != trigFilterRefs.end(); ++trigFilterRef ) {
 	      std::string label = (*trigFilterRef)->label();
               if (label == mu40nameL1) {
-                cout << label << endl;
+                if (verbose_) cout << label << endl;
 		const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
 		for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -548,7 +671,7 @@ int main(int argc, char* argv[])
                 }
               }
               if (label == mu40nameL2) {
-		cout << label << endl;
+		if (verbose_) cout << label << endl;
                 const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
                 for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -556,7 +679,7 @@ int main(int argc, char* argv[])
                 }
               }
               if (label == mu40nameL3) {
-		cout << label << endl;
+		if (verbose_) cout << label << endl;
                 const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
 		for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -566,19 +689,21 @@ int main(int argc, char* argv[])
             }
 	  }
           if (name.size() >= diMuName.size() && name.compare(0,diMuName.size(),diMuName) == 0) {
+            muTrigTree_event_Mu17_Mu8 =(*trigPathRef)->wasAccept();
             const TriggerFilterRefVector trigFilterRefs( triggerEvent->pathFilters(name) );
             for ( TriggerFilterRefVector::const_iterator trigFilterRef  = trigFilterRefs.begin(); trigFilterRef != trigFilterRefs.end(); ++trigFilterRef ) {
 	      std::string label = (*trigFilterRef)->label();
               if (label == diMuNameL1) {
-		cout << label << endl;
+		if (verbose_) cout << label << endl;
 		const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
                 for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
                   diMuL1.push_back(GENPTOLORP(*trigObjRef));
+		  if ((*trigObjRef)->pt() >= 10.) diMuL110.push_back(GENPTOLORP(*trigObjRef));
 		}
               }
 	      if (label == diMuNameL20) {
-		cout << label << endl;
+		if (verbose_) cout << label << endl;
                 const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
 		for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -586,7 +711,7 @@ int main(int argc, char* argv[])
                 }
 	      }
               if (label == diMuNameL210) {
-                cout << label << endl;
+                if (verbose_) cout << label << endl;
                 const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
                 for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -594,7 +719,7 @@ int main(int argc, char* argv[])
                 }
               }
               if (label == diMuName8) {
-                cout << label << endl;
+                if (verbose_) cout << label << endl;
 		const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
                 for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -602,7 +727,7 @@ int main(int argc, char* argv[])
                 }
               }
               if (label == diMuName17) {
-                cout << label << endl;
+                if (verbose_) cout << label << endl;
 		const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
                 for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -610,7 +735,7 @@ int main(int argc, char* argv[])
 		}
 	      }
               if (label == diMuNameDz) {
-                cout << label << endl;
+                if (verbose_) cout << label << endl;
 		const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
                 for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -620,19 +745,21 @@ int main(int argc, char* argv[])
             }
           }
           if (name.size() >= diMuTkName.size() && name.compare(0,diMuTkName.size(),diMuTkName) == 0) {
+            muTrigTree_event_Mu17_TkMu8 =(*trigPathRef)->wasAccept();
             const TriggerFilterRefVector trigFilterRefs( triggerEvent->pathFilters(name) );
             for ( TriggerFilterRefVector::const_iterator trigFilterRef  = trigFilterRefs.begin(); trigFilterRef != trigFilterRefs.end(); ++trigFilterRef ) {
 	      std::string label = (*trigFilterRef)->label();
               if (label == diMuTkNameL1) {
-                cout << label << endl;
+                if (verbose_) cout << label << endl;
                 const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
                 for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
                   diMuTkL1.push_back(GENPTOLORP(*trigObjRef));
+                  if ((*trigObjRef)->pt() >= 10.) diMuTkL110.push_back(GENPTOLORP(*trigObjRef));
                 }
               }
               if (label == diMuTkNameL2) {
-		cout << label << endl;
+		if (verbose_) cout << label << endl;
                 const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
 		for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -640,7 +767,7 @@ int main(int argc, char* argv[])
                 }
               }
               if (label == diMuTkName8) {
-                cout << label << endl;
+                if (verbose_) cout << label << endl;
                 const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
                 for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -648,7 +775,7 @@ int main(int argc, char* argv[])
                 }
               }
               if (label == diMuTkName17) {
-                cout << label << endl;
+                if (verbose_) cout << label << endl;
                 const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
                 for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -656,7 +783,7 @@ int main(int argc, char* argv[])
                 }
               }
               if (label == diMuTkNameDz) {
-                cout << label << endl;
+                if (verbose_) cout << label << endl;
                 const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
                 for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -670,7 +797,7 @@ int main(int argc, char* argv[])
             for ( TriggerFilterRefVector::const_iterator trigFilterRef  = trigFilterRefs.begin(); trigFilterRef != trigFilterRefs.end(); ++trigFilterRef ) {
 	      std::string label = (*trigFilterRef)->label();
               if (label == mu20nameIso) {
-		cout << label << endl;
+		if (verbose_) cout << label << endl;
                 const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
                 for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -678,7 +805,7 @@ int main(int argc, char* argv[])
 		}
               }
               if (label == mu20nameWCand) {
-                cout << label << endl;
+                if (verbose_) cout << label << endl;
                 const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
                 for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -692,7 +819,7 @@ int main(int argc, char* argv[])
             for ( TriggerFilterRefVector::const_iterator trigFilterRef  = trigFilterRefs.begin(); trigFilterRef != trigFilterRefs.end(); ++trigFilterRef ) {
 	      std::string label = (*trigFilterRef)->label();
               if (label == ele27nameL1) {
-                cout << label << endl;
+                if (verbose_) cout << label << endl;
                 const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
                 for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -700,7 +827,7 @@ int main(int argc, char* argv[])
                 }
               }
               if (label == ele27nameHLT) {
-		cout << label << endl;
+		if (verbose_) cout << label << endl;
                 const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
 		for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -714,7 +841,7 @@ int main(int argc, char* argv[])
             for ( TriggerFilterRefVector::const_iterator trigFilterRef  = trigFilterRefs.begin(); trigFilterRef != trigFilterRefs.end(); ++trigFilterRef ) {
 	      std::string label = (*trigFilterRef)->label();
 	      if (label == diEleName8) {
-		cout << label << endl;
+		if (verbose_) cout << label << endl;
 		const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
 		for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -722,7 +849,7 @@ int main(int argc, char* argv[])
 		}
 	      }
 	      if (label == diEleName17) {
-		cout << label << endl;
+		if (verbose_) cout << label << endl;
 		const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
 		for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -730,7 +857,7 @@ int main(int argc, char* argv[])
 		}
 	      }
 	      if (label == diEleNameDz) {
-		cout << label << endl;
+		if (verbose_) cout << label << endl;
 		const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
 		for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
@@ -744,7 +871,7 @@ int main(int argc, char* argv[])
         nPVs=aux.pvInfo.nVertices;
 	rhoN = aux.puInfo.rhoNeutral;
 
-	cout << iEvent->muInfo.size() << " " << iEvent->eleInfo.size() << endl;
+	if (verbose_) cout << iEvent->muInfo.size() << " " << iEvent->eleInfo.size() << endl;
 
 	std::vector<unsigned int> potentialMuTags;
 
@@ -755,7 +882,7 @@ int main(int argc, char* argv[])
 	  }
 	}
 
-	cout << " potentialMuTags.size()=" << potentialMuTags.size() << endl;
+	if (verbose_) cout << " potentialMuTags.size()=" << potentialMuTags.size() << endl;
 
 	if (potentialMuTags.size()>0) {
 	  unsigned int tagNumber = potentialMuTags[rand->Integer(potentialMuTags.size())];
@@ -774,10 +901,10 @@ int main(int argc, char* argv[])
 	  for (size_t i=0 ; i < mu24Iso.size(); i++) {
 	    if (iEvent->muInfo[tagNumber].p4.DeltaR(mu24Iso[i]) < trigMatchCut) {
 	      matched = true;
-	      cout << "   Matches trigger " << mu24Iso[i].Pt() << " " << mu24Iso[i].Eta() << " " << mu24Iso[i].Phi() << endl;
+	      if (verbose_) cout << "   Matches trigger " << mu24Iso[i].Pt() << " " << mu24Iso[i].Eta() << " " << mu24Iso[i].Phi() << endl;
 	    }
 	  }
-	  if (!matched) cout << "   Has no match!" << endl;
+	  if (!matched) if (verbose_) cout << "   Has no match!" << endl;
 	  if (matched) {
 	    std::vector<unsigned int> potentialHLTProbes;
 	    for(size_t m=0;m<iEvent->muInfo.size();m++) {
@@ -812,6 +939,9 @@ int main(int argc, char* argv[])
               muTrigTree_probe_passingDiMuTk17 = 0;
               muTrigTree_probe_passingDiMuTkDz = 0;
               muTrigTree_probe_passingIsoMu20Iso = 0;
+	      muTrigTree_probe_passingWCandPt = 0;
+	      muTrigTree_probe_passingDiMuTkL110 = 0;
+              muTrigTree_probe_passingDiMuL110 = 0;
 	      muTrigTree_mass = (iEvent->muInfo[probeNumber].p4 + iEvent->muInfo[tagNumber].p4).M();
 
               for (size_t i=0 ; i < mu24L1.size(); i++) {
@@ -838,6 +968,9 @@ int main(int argc, char* argv[])
 	      for (size_t i=0 ; i < diMuL1.size(); i++) {
                 if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuL1[i]) < L1MatchCut) muTrigTree_probe_passingDiMuL1 = 1;
               }
+              for (size_t i=0 ; i < diMuL110.size(); i++) {
+                if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuL110[i]) < L1MatchCut) muTrigTree_probe_passingDiMuL110 = 1;
+              }
               for (size_t i=0 ; i < diMuL20.size(); i++) {
                 if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuL20[i]) < trigMatchCut) muTrigTree_probe_passingDiMuL20 = 1;
 	      }
@@ -856,6 +989,9 @@ int main(int argc, char* argv[])
               for (size_t i=0 ; i < diMuTkL1.size(); i++) {
                 if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuTkL1[i]) < L1MatchCut) muTrigTree_probe_passingDiMuTkL1 = 1;
               }
+              for (size_t i=0 ; i < diMuTkL110.size(); i++) {
+                if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuTkL110[i]) < L1MatchCut) muTrigTree_probe_passingDiMuTkL110 = 1;
+              }
               for (size_t i=0 ; i < diMuTkL2.size(); i++) {
                 if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuTkL2[i]) < trigMatchCut) muTrigTree_probe_passingDiMuTkL2 = 1;
               }
@@ -870,6 +1006,25 @@ int main(int argc, char* argv[])
               }
               for (size_t i=0 ; i < mu20Iso.size(); i++) {
                 if (iEvent->muInfo[probeNumber].p4.DeltaR(mu20Iso[i]) < trigMatchCut) muTrigTree_probe_passingIsoMu20Iso = 1;
+              }
+
+	      muTrigTree_probe_passingIsoMu24ORMu40 = (int)(muTrigTree_probe_passingIsoMu24Iso||muTrigTree_probe_passingMu40L3);
+              muTrigTree_probe_passingMu40ANDNOTIsoMu24 = (int)(muTrigTree_probe_passingMu40L3&&!muTrigTree_probe_passingIsoMu24Iso);
+              muTrigTree_probe_passingIsoMu20ANDNOTIsoMu24 = (int)(muTrigTree_probe_passingIsoMu20Iso&&!muTrigTree_probe_passingIsoMu24Iso);
+              muTrigTree_probe_passingIsoMu20ANDNOTIsoMu24ANDNOTMu40 = (int)(muTrigTree_probe_passingIsoMu20Iso&&(!muTrigTree_probe_passingIsoMu24Iso)&&(!muTrigTree_probe_passingMu40L3));
+              muTrigTree_probe_passingIsoMu24ORMu40ORIsoMu20 = (int)(muTrigTree_probe_passingIsoMu24Iso||muTrigTree_probe_passingMu40L3||muTrigTree_probe_passingIsoMu20Iso);
+	      muTrigTree_probe_passingDiMuTk17ANDNOTeventMu17Mu8 = (int)(muTrigTree_probe_passingDiMuTk17&&!muTrigTree_event_Mu17_Mu8);
+              muTrigTree_probe_passingDiMuTk8ANDNOTeventMu17Mu8 = (int)(muTrigTree_probe_passingDiMuTk8&&!muTrigTree_event_Mu17_Mu8);
+              muTrigTree_probe_passingDiMuTkDzANDNOTeventMu17Mu8 = (int)(muTrigTree_probe_passingDiMuTkDz&&!muTrigTree_event_Mu17_Mu8);
+
+	      muTrigTree_probe_passingDiMu17Dz = muTrigTree_probe_passingDiMu17 && muTrigTree_probe_passingDiMuDz;
+	      muTrigTree_probe_passingDiMuTk17Dz = muTrigTree_probe_passingDiMuTk17&& muTrigTree_probe_passingDiMuTkDz;
+
+              TLorentzVector WCand = iEvent->pfmet.p4 + iEvent->muInfo[probeNumber].p4;
+
+              muTrigTree_probe_WCandPt= WCand.Pt();
+              for (size_t i=0 ; i < mu20WCand.size(); i++) {
+		if (iEvent->muInfo[probeNumber].p4.DeltaR(mu20WCand[i]) < trigMatchCut) muTrigTree_probe_passingWCandPt = 1;
               }
 
 	      muTrigTree->Fill(); // Only if trigger-matched tag and a probe
@@ -918,13 +1073,13 @@ int main(int argc, char* argv[])
         std::vector<unsigned int> potentialEleTags;
 
         for(size_t m=0;m<iEvent->eleInfo.size();m++) {
-          if (ElectronWP(iEvent->eleInfo[m],rhoN,95) && iEvent->eleInfo[m].p4.Pt() > 20.) {
+          if (ElectronWP(iEvent->eleInfo[m],rhoN,80) && iEvent->eleInfo[m].p4.Pt() > 20.) {
 	    if (verbose_) std::cout << "FOUND identified Ele " << iEvent->eleInfo[m].p4.Pt() << " " << iEvent->eleInfo[m].p4.Eta() << " " << iEvent->eleInfo[m].p4.Phi() << endl;
             potentialEleTags.push_back(m);
           }
         }
 
-        cout << " potentialEleTags.size()=" << potentialEleTags.size() << endl;
+        if (verbose_) cout << " potentialEleTags.size()=" << potentialEleTags.size() << endl;
 
         if (potentialEleTags.size()>0) {
           unsigned int tagNumber = potentialEleTags[rand->Integer(potentialEleTags.size())];
@@ -940,10 +1095,10 @@ int main(int argc, char* argv[])
           for (size_t i=0 ; i < ele27HLT.size(); i++) {
             if (iEvent->eleInfo[tagNumber].p4.DeltaR(ele27HLT[i]) < trigMatchCut) {
               matched = true;
-              cout << "   Matches trigger " << ele27HLT[i].Pt() << " " << ele27HLT[i].Eta() << " " << ele27HLT[i].Phi() << endl;
+              if (verbose_) cout << "   Matches trigger " << ele27HLT[i].Pt() << " " << ele27HLT[i].Eta() << " " << ele27HLT[i].Phi() << endl;
             }
           }
-          if (!matched) cout << "   Has no match!" << endl;
+          if (!matched) if (verbose_) cout << "   Has no match!" << endl;
           if (matched) {
 	    std::vector<unsigned int> potentialHLTProbes;
             for(size_t m=0;m<iEvent->eleInfo.size();m++) {
@@ -959,6 +1114,11 @@ int main(int argc, char* argv[])
               eleTrigTree_probe_pt= iEvent->eleInfo[probeNumber].p4.Pt();
               eleTrigTree_probe_eta = iEvent->eleInfo[probeNumber].p4.Eta();
               eleTrigTree_probe_phi = iEvent->eleInfo[probeNumber].p4.Phi();
+              eleTrigTree_probe_wp70 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,70);
+              eleTrigTree_probe_wp80 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,80);
+              eleTrigTree_probe_wp85 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,85);
+              eleTrigTree_probe_wp90 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,90);
+              eleTrigTree_probe_wp95 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,95);
 	      eleTrigTree_probe_passingEle27L1 = 0;
 	      eleTrigTree_probe_passingEle27HLT = 0;
 	      eleTrigTree_probe_passingDiEle17 = 0;
@@ -1023,7 +1183,6 @@ int main(int argc, char* argv[])
 	*/
 
 	// Trigger name debugging
-	/*
 	std::vector<std::string> interestingNames;
 	//	interestingNames.push_back("HLT_IsoMu20_eta2p1_WCandPt80");
 	//	interestingNames.push_back("HLT_IsoMu24_eta2p1_CentralPFJet30_CentralPFJet25_PFMET20");
@@ -1071,7 +1230,6 @@ int main(int argc, char* argv[])
 	} 
 	}
 	}
-	*/
 
 
 	} // closed event loop
@@ -1088,11 +1246,11 @@ int main(int argc, char* argv[])
     
     
   _outFile->cd();
-  muTrigTree->Write();    
-  muRecoTree->Write();
-  muWCandTree->Write();
-  eleTrigTree->Write();
-  eleRecoTree->Write();
+  muTrigDir->cd();  muTrigTree->Write();
+  muWCandDir->cd();  muWCandTree->Write();
+  muRecoDir->cd();  muRecoTree->Write();
+  eleTrigDir->cd();  eleTrigTree->Write();
+  eleRecoDir->cd();  eleRecoTree->Write();
   _outFile->Write();
   _outFile->Close();
   return 0;

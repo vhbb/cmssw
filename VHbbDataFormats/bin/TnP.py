@@ -2,6 +2,15 @@ import FWCore.PythonUtilities.LumiList as LumiList
 import FWCore.ParameterSet.Types as CfgTypes
 import FWCore.ParameterSet.Config as cms
 
+from os import listdir
+#inDir = "/pnfs/cms/WAX/11/store/user/lpchbb/sethzenz/SingleElectron_2012A_PromptRecoV1_May24"
+#inDir = "/pnfs/cms/WAX/11/store/user/lpchbb/sethzenz/SingleMu_2012A_PromptRecoV1_May22"
+inDir = "/pnfs/cms/WAX/11/store/user/lpchbb/dlopes/DYJetsInclusiveSummer2012/dlopes/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/HBB_EDMNtupleV31_May12Prod/1fd339922321fbf65e30ef4ea6c8b302/"
+#inDir = "/pnfs/cms/WAX/11/store/user/lpchbb/degrutto/SingleMuRun2012BPromptV1EdmV31/degrutto/SingleMu/HBB_EDMNtupleV31_May2012Prod/f3f16f0a8d4ba1fd82b25c3d99de1c78"
+fileList = ["%s/%s" % (inDir.replace("/pnfs","dcap://cmsdca.fnal.gov:22125/pnfs/fnal.gov/usr"),file) for file in listdir(inDir)][0:3]
+nEvt = 1000
+verbose = False
+
 process = cms.Process("FWLitePlots")
 #process.load('Configuration.StandardSequences.Services_cff')
 
@@ -14,16 +23,21 @@ process.fwliteInput = cms.PSet(
 
     #"dcap://cmsdca.fnal.gov:22125/pnfs/fnal.gov/usr/cms/WAX/11/store/user/lpchbb/sethzenz/SingleMu_2012A_PromptRecoV1_May22/PAT.edm_1_2_lN2.root"
 #    "dcap://cmsdca.fnal.gov:22125/pnfs/fnal.gov/usr/cms/WAX/11/store/user/lpchbb/sethzenz/SingleElectron_2012A_PromptRecoV1_May22/PAT.edm_56_1_crI.root"
-    "dcap://cmsdca.fnal.gov:22125/pnfs/fnal.gov/usr/cms/WAX/11/store/user/lpchbb/sethzenz/SingleElectron_2012A_PromptRecoV1_May22/PAT.edm_121_1_Zhx.root"
+#    "dcap://cmsdca.fnal.gov:22125/pnfs/fnal.gov/usr/cms/WAX/11/store/user/lpchbb/sethzenz/SingleElectron_2012A_PromptRecoV1_May22/PAT.edm_121_1_Zhx.root"
+    fileList
 ),
 
 
-    PUmcfileName = cms.string("ttbarPU_35bins_fall11.root"),
-    PUmcfileName2011B= cms.string("Fall11_Generated.root"),
-    PUdatafileName2011B = cms.string("Cert_175832-180252_PromptReco_JSON.pileupTruth_v2_finebin.root"),
-    PUdatafileName = cms.string("Pileup_2011_to_173692_LPLumiScale_68mb_35bins.root"),
+#    PUmcfileName = cms.string("ttbarPU_35bins_fall11.root"),
+#    PUmcfileName2011B= cms.string("Fall11_Generated.root"),
+    PUdatafileName = cms.string("MyDataPileupHistogramObserved.root"),
+    PUmcfileName = cms.string("Summer12MCObserved.root"),
+    PUdatafileName2011B = cms.string("MyDataPileupHistogramObserved.root"),
+    PUmcfileName2011B = cms.string("Summer12MCObserved.root"),
+#    PUdatafileName2011B = cms.string("Cert_175832-180252_PromptReco_JSON.pileupTruth_v2_finebin.root"),
+#    PUdatafileName = cms.string("Pileup_2011_to_173692_LPLumiScale_68mb_35bins.root"),
     Weight3DfileName = cms.string(""),
-    maxEvents   = cms.int32(10000),                             ## optional
+    maxEvents   = cms.int32(nEvt),                             ## optional
     runMin  = cms.int32(-1),
     runMax  = cms.int32(-1),
     skipEvents   = cms.int32(0),                             ## optional
@@ -113,8 +127,8 @@ process.Analyzer = cms.PSet(
         "HLT_LooseIsoPFTau35_Trk20_MET75_v.*" #38
         
    ),
-    isMC =     cms.bool(False),
-    verbose = cms.bool(False),
+    isMC =     cms.bool(True),
+    verbose = cms.bool(verbose),
     readFromCandidates = cms.bool(False),
     jetPtThresholdZ = cms.double(20),
     jetPtThresholdW = cms.double(20),
