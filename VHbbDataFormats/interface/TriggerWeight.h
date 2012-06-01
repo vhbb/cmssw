@@ -10,7 +10,6 @@
 #include <TFile.h>
 #include <TTree.h>
 #include <iostream>
-
 class TriggerWeight
 {
 public:  
@@ -31,6 +30,17 @@ public:
    tscaleSingleEleMay=openFile(ana,"hltSingleEleMayFileName");
    tscaleSingleEleV4=openFile(ana,"hltSingleEleV4FileName");
    tscaleHLTmuOr30=openFile(ana,"hltMuOr30FileName");
+
+   tscaleSingleEle2012Awp95=openFile(ana,"hltSingleEle2012Awp95");
+   tscaleSingleEle2012Awp80=openFile(ana,"hltSingleEle2012Awp80");
+   tscaleSingleMuon2012A=openFile(ana,"hltSingleMuon2012A");
+   tscaleDoubleEle2012A_leg8=openFile(ana,"hltDoubleEle2012A_leg8");
+   tscaleDoubleEle2012A_leg17=openFile(ana,"hltDoubleEle2012A_leg17");
+   tscaleDoubleMuon2012A_leg8=openFile(ana,"hltDoubleMuon2012A_leg8");
+   tscaleDoubleMuon2012A_leg17=openFile(ana,"hltDoubleMuon2012A_leg17");
+
+   tscaleMuPlusWCandPt2012A_legMu=openFile(ana,"hltMuPlusWCandPt2012A_legMu");  
+   tscaleMuPlusWCandPt2012A_legW=openFile(ana,"hltMuPlusWCandPt2012A_legW");  
 
    if(tscaleHLTmu == 0 || tscaleIDmu == 0) 
     {
@@ -246,6 +256,36 @@ float scaleMuOr30IsoHLT(float pt1, float eta1)
 }
 
 
+float doubleEle2012A( float pt1, float eta1, float pt2, float eta2)
+{
+ float eff1_17 = efficiencyFromPtEta(pt1,eta1,tscaleDoubleEle2012A_leg17).first;
+ float eff2_17 = efficiencyFromPtEta(pt2,eta2,tscaleDoubleEle2012A_leg17).first;
+ float eff1_8 = efficiencyFromPtEta(pt1,eta1,tscaleDoubleEle2012A_leg8).first;
+ float eff2_8 = efficiencyFromPtEta(pt2,eta2,tscaleDoubleEle2012A_leg8).first;
+ 
+ return eff1_17 * eff2_8 + eff2_17 * eff1_8 - eff1_17*eff2_17;
+
+}
+float doubleMuon2012A( float pt1, float eta1, float pt2, float eta2)
+{
+ float eff1_17 = efficiencyFromPtEta(pt1,eta1,tscaleDoubleMuon2012A_leg17).first;
+ float eff2_17 = efficiencyFromPtEta(pt2,eta2,tscaleDoubleMuon2012A_leg17).first;
+ float eff1_8 = efficiencyFromPtEta(pt1,eta1,tscaleDoubleMuon2012A_leg8).first;
+ float eff2_8 = efficiencyFromPtEta(pt2,eta2,tscaleDoubleMuon2012A_leg8).first;
+
+ return eff1_17 * eff2_8 + eff2_17 * eff1_8 - eff1_17*eff2_17;
+
+}
+
+
+
+float muPlusWCandPt2012A_legW( float pt, float eta){    return efficiencyFromPtEta(pt,eta,tscaleMuPlusWCandPt2012A_legW).first;}
+float muPlusWCandPt2012A_legMu( float pt, float eta){    return efficiencyFromPtEta(pt,eta,tscaleMuPlusWCandPt2012A_legMu).first;}
+float singleEle2012Awp80( float pt, float eta){    return efficiencyFromPtEta(pt,eta,tscaleSingleEle2012Awp80).first;}
+float singleEle2012Awp95( float pt, float eta){    return efficiencyFromPtEta(pt,eta,tscaleSingleEle2012Awp95).first;}
+float singleMuon2012A( float pt, float eta){    return efficiencyFromPtEta(pt,eta,tscaleSingleMuon2012A).first;}
+
+
 private:
   TTree * tscaleHLTele1;
   TTree * tscaleHLTele2;
@@ -255,6 +295,16 @@ private:
   TTree * tscaleID95Ele;
   TTree * tscaleRecoEle;
   TTree * tscaleHLTmuOr30;
+
+  TTree * tscaleSingleEle2012Awp95;
+  TTree * tscaleSingleEle2012Awp80;
+  TTree * tscaleSingleMuon2012A;
+  TTree * tscaleDoubleEle2012A_leg8;
+  TTree * tscaleDoubleEle2012A_leg17;
+  TTree * tscaleDoubleMuon2012A_leg8;
+  TTree * tscaleDoubleMuon2012A_leg17;
+  TTree * tscaleMuPlusWCandPt2012A_legMu;
+  TTree * tscaleMuPlusWCandPt2012A_legW;
 
 //  TTree * tscalePFMHTele;
   TTree * tscaleSingleEleMay;

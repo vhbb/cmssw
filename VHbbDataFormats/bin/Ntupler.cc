@@ -635,11 +635,13 @@ int main(int argc, char* argv[])
   float lheV_pt=0; //for the Madgraph sample stitching
   TrackSharingInfo TkSharing; // track sharing info;
 
-  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, genHpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweight2011B;
+  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, genHpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweight2011B,PUweight1DObs;
   float PU0,PUp1,PUm1;
 
   float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart,weightEleTrigEleAugPart;
   float  weightTrigMET80, weightTrigMET100,    weightTrig2CJet20 , weightTrigMET150  , weightTrigMET802CJet, weightTrigMET1002CJet, weightTrigMETLP ;
+
+  float weightTrig2012A, weightTrig2012ADiMuon, weightTrig2012ADiEle, weightTrig2012ASingleMuon, weightTrig2012AMuonPlusWCandPt, weightTrig2012ASingleEle;  
 
   int WplusMode,WminusMode;
   int Vtype,nSvs=0;
@@ -723,10 +725,12 @@ int main(int argc, char* argv[])
    TriggerReader patFilters(false);
 
   edm::LumiReWeighting   lumiWeights;
+  edm::LumiReWeighting   lumiWeights1DObs;
   edm::Lumi3DReWeighting   lumiWeights2011B;
   if(isMC_)
     {
         	   lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
+        	   lumiWeights1DObs = edm::LumiReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
 
 		   lumiWeights2011B = edm::Lumi3DReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
                    if(Weight3DfileName_!="")
@@ -926,6 +930,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("weightEleTrigElePart"        , &weightEleTrigElePart          ,  "weightEleTrigElePart/F");
   _outTree->Branch("weightEleTrigEleAugPart"        , &weightEleTrigEleAugPart          ,  "weightEleTrigEleAugPart/F");
 
+
   _outTree->Branch("weightTrigMET80"        , &weightTrigMET80          , "weightTrigMET80/F");
   _outTree->Branch("weightTrigMET100"        , &weightTrigMET100          , "weightTrigMET100/F");
   _outTree->Branch("weightTrig2CJet20"        , &weightTrig2CJet20          , "weightTrig2CJet20/F");
@@ -933,6 +938,13 @@ int main(int argc, char* argv[])
   _outTree->Branch("weightTrigMET802CJet"        , &weightTrigMET802CJet          , "weightTrigMET802CJet/F");
   _outTree->Branch("weightTrigMET1002CJet"        , &weightTrigMET1002CJet          , "weightTrigMET1002CJet/F");
   _outTree->Branch("weightTrigMETLP"        , &weightTrigMETLP          , "weightTrigMETLP/F");
+
+  _outTree->Branch("weightTrig2012A", &weightTrig2012A,"weightTrig2012A/F");
+  _outTree->Branch("weightTrig2012ADiMuon", &weightTrig2012ADiMuon,"weightTrig2012ADiMuon/F");
+  _outTree->Branch("weightTrig2012ADiEle", &weightTrig2012ADiEle,"weightTrig2012ADiEle/F");
+  _outTree->Branch("weightTrig2012ASingleMuon", &weightTrig2012ASingleMuon,"weightTrig2012ASingleMuon/F");
+  _outTree->Branch("weightTrig2012ASingleEle", &weightTrig2012ASingleEle,"weightTrig2012ASingleEle/F");
+  _outTree->Branch("weightTrig2012AMuonPlusWCandPt", &weightTrig2012AMuonPlusWCandPt,"weightTrig2012AMuonPlusWCandPt/F");
 
 
   _outTree->Branch("deltaPullAngleAK7", &deltaPullAngleAK7  ,  "deltaPullAngleAK7/F");
@@ -942,6 +954,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("PUp1",       &PUp1  ,  "PUp1/F");
   _outTree->Branch("PUweight",       &PUweight  ,  "PUweight/F");
   _outTree->Branch("PUweight2011B",       &PUweight2011B  ,  "PUweight2011B/F");
+  _outTree->Branch("PUweight1DObs",       &PUweight1DObs  ,  "PUweight1DObs/F");
   _outTree->Branch("eventFlav",       &eventFlav  ,  "eventFlav/I");
  
 
@@ -1156,12 +1169,13 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 
       PUweight=1.;
       PUweight2011B=1.;
+      PUweight1DObs=1.;
  	  if(isMC_){
  
  	  // PU weights // Run2011A
 	  std::map<int, unsigned int>::const_iterator puit = aux.puInfo.pus.find(0);
           int npu =puit->second ;
-	  PUweight =  lumiWeights.weight( npu );        
+	  PUweight =  lumiWeights.weight( (int) aux.puInfo.truePU ); //use new method with "true PU"        
 	  pu->Fill(puit->second);
 	  // PU weight Run2011B
 	  // PU weight Run2011B
@@ -1173,6 +1187,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
           PUm1=puitm1->second;
           input3DPU->Fill(PUm1,PU0,PUp1);	  
 	  PUweight2011B = lumiWeights2011B.weight3D( puitm1->second, puit0->second,puitp1->second); 
+	  PUweight1DObs = lumiWeights1DObs.weight( npu); 
 
 	}
 	countWithPU->Fill(1,PUweight);
@@ -1777,7 +1792,15 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	  float weightTrig1 = triggerWeight.scaleMuIsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
 	  float weightTrig2 = triggerWeight.scaleMuIsoHLT(vLeptons.pt[1],vLeptons.eta[1]);
 	  float cweightTrig = weightTrig1 + weightTrig2 - weightTrig1*weightTrig2;
-	  weightTrig = cweightID * cweightTrig;
+	  //2011
+          weightTrig = cweightID * cweightTrig;
+
+	  weightTrig2012ADiMuon = triggerWeight.doubleMuon2012A(vLeptons.pt[0],vLeptons.eta[0],vLeptons.pt[1],vLeptons.eta[1]);
+          float weightTrig2012ASingleMuonMu1 = triggerWeight.singleMuon2012A(vLeptons.pt[0],vLeptons.eta[0]);         
+          float weightTrig2012ASingleMuonMu2 = triggerWeight.singleMuon2012A(vLeptons.pt[1],vLeptons.eta[1]);         
+          weightTrig2012ASingleMuon = weightTrig2012ASingleMuonMu1+weightTrig2012ASingleMuonMu2-weightTrig2012ASingleMuonMu1*weightTrig2012ASingleMuonMu2;
+          weightTrig2012A = weightTrig2012ASingleMuon * cweightID; // FIXME: should use 2012 SF for MuID
+ 
 	  nvlep=2;
 	  firstAddMu=2;
 	}
@@ -1795,6 +1818,11 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	  weightEleTrigEleAugPart = triggerWeight.scaleDoubleEle17Ele8Aug(pt,eta); 
 	  weightTrig = (weightEleTrigElePart*1.14+weightEleTrigEleAugPart*0.98 )/2.12 * weightEleRecoAndId;
  
+          weightTrig2012ADiEle = triggerWeight.doubleEle2012A(vLeptons.pt[0],vLeptons.eta[0],vLeptons.pt[1],vLeptons.eta[1]);
+          float weightTrig2012ASingleEle1 = triggerWeight.singleEle2012Awp95(vLeptons.pt[0],vLeptons.eta[0]);
+          float weightTrig2012ASingleEle2 = triggerWeight.singleEle2012Awp95(vLeptons.pt[1],vLeptons.eta[1]);
+          weightTrig2012ASingleEle = weightTrig2012ASingleEle1+weightTrig2012ASingleEle2-weightTrig2012ASingleEle1*weightTrig2012ASingleEle2;
+          weightTrig2012A = weightTrig2012ADiEle * weightEleRecoAndId; // FIXME: should use 2012 SF for Ele Reco and ID
                  
 
 	}
@@ -1807,6 +1835,11 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	  weightTrig = cweightID * cweightTrig;
           float weightTrig1OrMu30 = triggerWeight.scaleMuOr30IsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
           weightTrigOrMu30 = cweightID*weightTrig1OrMu30;
+          weightTrig2012ASingleMuon = triggerWeight.singleMuon2012A(vLeptons.pt[0],vLeptons.eta[0]);
+          weightTrig2012AMuonPlusWCandPt = weightTrig2012ASingleMuon + 
+                                           triggerWeight.muPlusWCandPt2012A_legMu(vLeptons.pt[0],vLeptons.eta[0])*triggerWeight.muPlusWCandPt2012A_legW(vhCand.V.p4.Pt(),0);
+          weightTrig2012A = cweightID * weightTrig2012ASingleMuon; // FIXME: should use 2012 SF for mu ID          
+
 	  nvlep=1;
 	  firstAddMu=1;
 	}
@@ -1826,6 +1859,11 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	  weightTrigV4*=weightEleTrigJetMETPart;
 //	  weightTrig = weightTrigMay * 0.187 + weightTrigV4 * (1.-0.187); //FIXME: use proper lumi if we reload 2.fb
 	  weightTrig = (weightTrigMay * 0.215 + weightTrigV4 * 1.915)/ 2.13; //FIXME: use proper lumi if we reload 2.fb
+	 
+          weightTrig2012ASingleEle = triggerWeight.singleEle2012Awp80(vLeptons.pt[0],vLeptons.eta[0]);
+          weightTrig2012A = weightEleRecoAndId * weightTrig2012ASingleEle; // FIXME: should use 2012 SF for ele reco and ID
+
+
 	}
 
  if(isMC_)
