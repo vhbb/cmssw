@@ -309,6 +309,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 
     ZZ2l2nuSummary_t &ev = summaryHandler_.getEvent();
 
+
     //pfmet
     Handle<View<Candidate> > hMET;
     event.getByLabel(objConfig_["MET"].getParameter<edm::InputTag>("source"), hMET);
@@ -342,6 +343,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	if(triggerPaths[it]!="gamma") continue;
 	photonTrig = getHighestPhotonTrigThreshold( triggerBitsH, triggerNames , itriggers);
       }
+    if(triggerBits["singleMu"]==true && triggerBits["mumu"]==true) triggerBits["singleMu"]=false;   //veto overlaps: single muon triggers should be used exclusively 
 	    
     //
     // vertex and beam spot
@@ -408,7 +410,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	  {
 	    if(ev.cat==EE   && triggerBits["ee"]==false)   return;
 	    if(ev.cat==MUMU && triggerBits["singleMu"]==false && triggerBits["mumu"]==false) return;  
-	    if(ev.cat==EMU  && (triggerBits["emu"]==false || triggerBits["ee"]==true || triggerBits["mumu"]==true))  return;
+	    if(ev.cat==EMU  && triggerBits["emu"]==false)  return;
 	    
 	    ev.triggerType = (triggerBits["ee"] << 0 ) |
 	      (triggerBits["mumu"] << 1 ) |
@@ -604,6 +606,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.jn_btag1[ev.jn]       = selJetsId[ijet].tche;
 	ev.jn_btag2[ev.jn]       = selJetsId[ijet].csv;
 	ev.jn_btag3[ev.jn]       = selJetsId[ijet].jp;
+	ev.jn_btag4[ev.jn]       = selJetsId[ijet].tchp;
 	ev.jn_neutHadFrac[ev.jn] = selJetsId[ijet].neutHadFrac;
 	ev.jn_neutEmFrac[ev.jn]  = selJetsId[ijet].neutEmFrac;
 	ev.jn_chHadFrac[ev.jn]   = selJetsId[ijet].chHadFrac;
@@ -650,6 +653,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
 	ev.ajn_btag1[ev.ajn]       = selAJetsId[ijet].tche;
 	ev.ajn_btag2[ev.ajn]       = selAJetsId[ijet].csv;
 	ev.ajn_btag3[ev.ajn]       = selAJetsId[ijet].jp;
+	ev.ajn_btag4[ev.ajn]       = selAJetsId[ijet].tchp;
 	ev.ajn_neutHadFrac[ev.ajn] = selAJetsId[ijet].neutHadFrac;
 	ev.ajn_neutEmFrac[ev.ajn]  = selAJetsId[ijet].neutEmFrac;
 	ev.ajn_chHadFrac[ev.ajn]   = selAJetsId[ijet].chHadFrac;
@@ -671,6 +675,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     //
     // MET SELECTION
     //
+    ev.nmet=0;
     std::vector<edm::InputTag> clusteredMetSources = objConfig_["MET"].getParameter<std::vector<edm::InputTag> >("hzzmetSources");
     ev.nmet=clusteredMetSources.size()+1;
 
@@ -707,6 +712,7 @@ void DileptonPlusMETEventAnalyzer::analyze(const edm::Event &event, const edm::E
     }
 
     // finish event summary
+    ev.nmeasurements=0;
     summaryHandler_.fillTree();
   }catch(std::exception &e){
     std::cout << "[DileptonPlusMETEventAnalyzer][analyze] failed with " << e.what() << std::endl;

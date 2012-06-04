@@ -455,7 +455,6 @@ int main(int argc, char* argv[])
 	if(ivar==6)                        iweight *=TotalWeight_minus;       //pu down
 	if(ivar<=10 && ivar>=7 && isMC_GG) iweight *=ev.hptWeights[ivar-6];   //ren/fact scales
 
-
 	Float_t zmassraw=zllraw.mass();
 	Float_t zmass=zll.mass();
 	Float_t zpt=zll.pt();

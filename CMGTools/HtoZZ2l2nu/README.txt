@@ -2,6 +2,15 @@
 # installation
 # Note: LandS has to be compiled on it's own cf. https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideLandS
 #
+
+# 44x
+export SCRAM_ARCH=slc5_amd64_gcc462
+scramv1 project CMSSW CMSSW_5_2_3_patch2
+cd CMSSW_5_2_3_patch2/src/
+cvs co -r CMSSW_5x -p UserCode/CMG/CMGTools/HtoZZ2l2nu/TAGS_44x.txt | sh
+scramv1 b
+
+# 55x
 export SCRAM_ARCH=slc5_amd64_gcc462
 scramv1 project CMSSW CMSSW_5_2_3_patch2
 cd CMSSW_5_2_3_patch2/src/
@@ -19,7 +28,7 @@ sh DUPLICATEDFILESFOUND
 #
 # create pat-tuples
 #
-runOverSamples.py -j $CMSSW_BASE/src/CMGTools/HtoZZ2l2nu/data/samples_2012.json -R "tmp>5000" -n 5 -d aoddir -p "-castor=patdir -cfg=$CMSSW_BASE/src/CMGTools/HtoZZ2l2nu/test/zzllvvPattuple_data_cfg.py" -t Data -s 8nh
+runOverSamples.py -j $CMSSW_BASE/src/CMGTools/HtoZZ2l2nu/data/samples_2012.json -R "tmp>5000" -n 1 -d aoddir -p "-castor=patdir -cfg=$CMSSW_BASE/src/CMGTools/HtoZZ2l2nu/test/zzllvvPattuple_data_cfg.py" -t Data -s 8nh
 
 #
 # create ntuples

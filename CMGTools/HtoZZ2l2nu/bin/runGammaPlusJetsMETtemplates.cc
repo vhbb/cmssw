@@ -65,11 +65,62 @@ int main(int argc, char* argv[])
   JetCorrectionUncertainty jecUnc(uncFile.Data());
 
   TRandom2 rndGen;
-  EventCategory eventClassifComp;
+  //  EventCategory eventClassifComp;
+  EventCategory eventClassifComp(3);
   GammaEventHandler gammaEvHandler(runProcess);  
 
   //book histograms
   SmartSelectionMonitor mon;
+
+  std::vector<double> optim_Cuts1_met;
+  std::vector<double> optim_Cuts1_mtmin;
+  std::vector<double> optim_Cuts1_mtmax;
+  for(double met=65;met<160;met+=5.0){
+    if(met>90 && int(met)%10!=0)continue;
+    if(met>120 && int(met)%20!=0)continue;
+    for(double mtmin_=150;mtmin_<500;mtmin_+=25){
+      double mtmin = mtmin_;
+      if(mtmin<=150)mtmin=0;
+      if(mtmin>350 && int(mtmin)%50!=0)continue;
+      for(double mtmax=mtmin+100;mtmax<mtmin+350;mtmax+=25){
+	if(mtmax>=mtmin+325)mtmax=3000;
+	if(mtmin==0 && mtmax!=3000)continue;
+	if(mtmin>350 && int(mtmax)%50!=0)continue;
+	if(mtmax-mtmin>200 && int(mtmax)%50!=0)continue;
+	optim_Cuts1_met    .push_back(met);
+	optim_Cuts1_mtmin  .push_back(mtmin);
+	optim_Cuts1_mtmax  .push_back(mtmax);
+      }
+    }
+  }
+  optim_Cuts1_met.push_back( 70); optim_Cuts1_mtmin.push_back(229); optim_Cuts1_mtmax.push_back(258);
+  optim_Cuts1_met.push_back( 77); optim_Cuts1_mtmin.push_back(245); optim_Cuts1_mtmax.push_back(293);
+  optim_Cuts1_met.push_back( 84); optim_Cuts1_mtmin.push_back(260); optim_Cuts1_mtmax.push_back(328);
+  optim_Cuts1_met.push_back( 91); optim_Cuts1_mtmin.push_back(276); optim_Cuts1_mtmax.push_back(364);
+  optim_Cuts1_met.push_back( 98); optim_Cuts1_mtmin.push_back(292); optim_Cuts1_mtmax.push_back(399);
+  optim_Cuts1_met.push_back(105); optim_Cuts1_mtmin.push_back(308); optim_Cuts1_mtmax.push_back(434);
+  optim_Cuts1_met.push_back(112); optim_Cuts1_mtmin.push_back(323); optim_Cuts1_mtmax.push_back(470);
+  optim_Cuts1_met.push_back(119); optim_Cuts1_mtmin.push_back(339); optim_Cuts1_mtmax.push_back(505);
+  optim_Cuts1_met.push_back(126); optim_Cuts1_mtmin.push_back(355); optim_Cuts1_mtmax.push_back(540);
+  optim_Cuts1_met.push_back(133); optim_Cuts1_mtmin.push_back(370); optim_Cuts1_mtmax.push_back(576);
+  optim_Cuts1_met.push_back(140); optim_Cuts1_mtmin.push_back(386); optim_Cuts1_mtmax.push_back(611);
+  optim_Cuts1_met.push_back(147); optim_Cuts1_mtmin.push_back(402); optim_Cuts1_mtmax.push_back(646);
+  optim_Cuts1_met.push_back(154); optim_Cuts1_mtmin.push_back(417); optim_Cuts1_mtmax.push_back(682);
+  optim_Cuts1_met.push_back(161); optim_Cuts1_mtmin.push_back(433); optim_Cuts1_mtmax.push_back(717);
+  optim_Cuts1_met.push_back(168); optim_Cuts1_mtmin.push_back(449); optim_Cuts1_mtmax.push_back(752);
+  optim_Cuts1_met.push_back(0);   optim_Cuts1_mtmin.push_back(0); optim_Cuts1_mtmax.push_back(0);
+
+  const size_t nOptimCuts=optim_Cuts1_met.size();
+  TH1F* Hoptim_cuts1_met     =  (TH1F*) mon.addHistogram( new TH1F ("optim_cut1_met"    , ";cut index;met"    ,nOptimCuts,0,nOptimCuts) ) ;
+  TH1F* Hoptim_cuts1_mtmin   =  (TH1F*) mon.addHistogram( new TH1F ("optim_cut1_mtmin"  , ";cut index;mtmin"  ,nOptimCuts,0,nOptimCuts) ) ;
+  TH1F* Hoptim_cuts1_mtmax   =  (TH1F*) mon.addHistogram( new TH1F ("optim_cut1_mtmax"  , ";cut index;mtmax"  ,nOptimCuts,0,nOptimCuts) ) ;
+  for(unsigned int index=0;index<nOptimCuts;index++){
+    Hoptim_cuts1_met    ->Fill(index, optim_Cuts1_met[index]);    
+    Hoptim_cuts1_mtmin  ->Fill(index, optim_Cuts1_mtmin[index]);
+    Hoptim_cuts1_mtmax  ->Fill(index, optim_Cuts1_mtmax[index]);
+  }
+
+
   mon.addHistogram( new TH1F ("njets",     ";Jet multiplicity (p_{T}>30 GeV/c);Events",5,0,5) );
   mon.addHistogram( new TH1F ("nsoftjets", ";Jet multiplicity (p_{T}>15 GeV/c);Events",5,0,5) );
   mon.addHistogram( new TH1F ("nbtags",    ";b-tag multiplicity; Events", 5,0,5) );
@@ -82,18 +133,16 @@ int main(int argc, char* argv[])
     mon.getHisto("nbtags")->GetXaxis()->SetBinLabel(ibin,label);
   }
   
-  TString subCats[]={"eq0softjets","eq0hardjets","eq0jets","eq1jets","eq2jets","geq3jets",""};
+  TString subCats[]={"eq0softjets","eq0hardjets","eq0jets","eq1jets","eq2jets","geq3jets","vbf"};
   const size_t nSubCats=sizeof(subCats)/sizeof(TString);
   for(size_t isc=0; isc<nSubCats; isc++)
     {
       TString postfix(subCats[isc]);
       mon.addHistogram( new TH1F ("r9_"+postfix, ";R9;Events", 100,0.8,1) );
       mon.addHistogram( new TH1F ("sietaieta_"+postfix, ";#sigma i#eta i#eta;Events", 100,0,0.03) );
-      mon.addHistogram( new TH1F( "mindphijmet_"+postfix, ";min #Delta#phi(jet,E_{T}^{miss});Events",40,0,4) );
       mon.addHistogram( new TH1F ("trkveto_"+postfix, ";Track veto;Events", 2,0,2) );
      
       mon.addHistogram( new TH1D( "qt_"+postfix,        ";p_{T}^{#gamma} [GeV/c];Events / (2.5 GeV/c)", 100,0,500) );
-      mon.addHistogram( new TH1D( "metoverqt_"+postfix, ";E_{T}^{miss}/p_{T}^{#gamma} [GeV/c];Events", 100,0,3) );
       mon.addHistogram( new TH1D( "eta_"+postfix,       ";#eta;Events", 50,0,2.6) );  
       mon.addHistogram( new TH1F( "nvtx_"+postfix, ";Vertices;Events", 30,0,30) );  
       mon.addHistogram( new TH1F( "mt_"+postfix  , ";M_{T};Events", 100,0,1000) );
@@ -104,35 +153,27 @@ int main(int argc, char* argv[])
       mon.addHistogram( new TH1F( "met_redMet_"+postfix  , ";red(E_{T}^{miss},clustered-E_{T}^{miss});Events", 50,0,500) );
       mon.addHistogram( new TH1F( "met_redMetL_"+postfix  , ";red(E_{T}^{miss},clustered-E_{T}^{miss}) - longi.;Events", 50,-250,250) );
       mon.addHistogram( new TH1F( "met_redMetT_"+postfix  , ";red(E_{T}^{miss},clustered-E_{T}^{miss}) - perp.;Events", 50,-250,250) );
-      mon.addHistogram( new TH1F( "zmass_"+postfix, ";M^{ll};Events", 15,76,106) );
+      mon.addHistogram( new TH1F( "zmass_"+postfix, ";M^{ll};Events", 60,76,106) );
       mon.addHistogram( new TH2F( TString("met_met_") + postfix + "_vspu"       , ";Vertices;E_{T}^{miss};Events", 50,0,50,50,0,500) );
       mon.addHistogram( new TH2F( TString("met_min3Met_") + postfix + "_vspu"       , ";Vertices;min(E_{T}^{miss},assoc-E_{T}^{miss},clustered-E_{T}^{miss});Events", 50,0,50,50,0,500) );
       mon.addHistogram( new TH2F( TString("met_redMet_") + postfix + "_vspu"       , ";Vertices;red(E_{T}^{miss},clustered-E_{T}^{miss});Events", 50,0,50,50,0,500) );
-    }
-  TH1F* Hcutflow     = (TH1F*) mon.addHistogram(  new TH1F ("cutflow"    , "cutflow"    ,3,0,3) ) ;
 
-  //jet id efficiency
-  TString jetRegs[]={"","TK","HEin","HEout","HF"};
-  TString jetIds[]={"pf","simple","full","cut"};
-  TString jetIdWps[]={"loose","medium","tight"};
-  Double_t jetPtBins[]={0,15,20,25,30,40,50,60,70,80,100,200,300,400,500,600,700,1000};
-  Int_t nJetPtBins=sizeof(jetPtBins)/sizeof(Double_t)-1;
-  Double_t jetEtaBins[]={0,0.25,0.5,0.75,1.0,1.25,1.5,1.75,2.0,2.25,2.625,2.75,2.875,3.0,3.5,4.0,4.5,5.0};
-  Double_t nJetEtaBins=sizeof(jetEtaBins)/sizeof(Double_t)-1;
-  for (int ieta=0; ieta<5; ieta++)
-    {
-      mon.addHistogram( new TH1F( jetRegs[ieta]+"jetbalance", ";Jet p_{T} / Boson p_{T};Events", nJetPtBins,jetPtBins) );
-      for (int iid=0; iid<4; iid++)
-	{
-	  for(int iwp=0; iwp<3; iwp++)
-	    {
-	      mon.addHistogram( new TH1F( jetRegs[ieta]+"jetpt_"+jetIds[iid]+jetIdWps[iwp], ";Jet p_{T} [GeV/c];Jets", 100,0,1000) );
-	      if(ieta==0)  mon.addHistogram( new TH1F( "jeteta_"+jetIds[iid]+jetIdWps[iwp], ";Jet |#eta|;Jets", nJetEtaBins, jetEtaBins) );
-	      if(iwp==0 && (iid==1 || iid==2)) mon.addHistogram( new TH1F( jetRegs[ieta]+"jetmva_"+jetIds[iid], ";PU Jet MVA;Jets", 50,-1,1) );
-	    }
-	}
+
+      mon.addHistogram( new TH1F( "mindphijmet_"+postfix, ";min #Delta#phi(jet,E_{T}^{miss});Events",40,0,4) );
+      mon.addHistogram( new TH1D( "metoverqt_"+postfix, ";E_{T}^{miss}/q_{T};Events", 25,0,2.5) );
+
+      mon.addHistogram( new TH2F ("mt_shapes_"+postfix, ";cut index;M_{T} [GeV/c^{2}];",nOptimCuts,0,nOptimCuts, 32,150,950) );  
+      mon.addHistogram( new TH2F ("mt_redMet_shapes_"+postfix,";cut index;M_{T} [GeV/c^{2}];",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(), 32,150,950) );
+      mon.addHistogram( new TH2F ("met_shapes_"+postfix,";cut index;E_{T}^{miss} [GeV/c^{2}];",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(), 100,0,500) );
+      mon.addHistogram( new TH2F ("redMet_shapes_"+postfix,";cut index;red E_{T}^{miss} [GeV/c^{2}];",optim_Cuts1_met.size(),0,optim_Cuts1_met.size(),100,0,500));
     }
-	     
+
+  mon.addHistogram( new TH1F( "vbfmass", ";M(jet_{1},jet_{2});Events", 40,0,2000) );
+  mon.addHistogram( new TH1F( "vbfdphi", ";#delta #phi(jet_{1},jet_{2});Events", 0,-3.14,3.14) );
+  TH1F* Hcutflow     = (TH1F*) mon.addHistogram(  new TH1F ("cutflow"    , "cutflow"    ,6,0,6) ) ;
+  
+  
+
 
   //open the file and get events tree
   TFile *file = TFile::Open(url);
@@ -185,6 +226,7 @@ int main(int argc, char* argv[])
       ZZ2l2nuSummary_t &ev = evSummaryHandler.getEvent();
       PhysicsEvent_t phys  = getPhysicsEventFrom(ev);
       bool isGammaEvent    = gammaEvHandler.isGood(phys);
+      bool mustBlind = (!isMC && !isGammaEvent && runBlinded && evSummaryHandler.hasSpoilerAlert(!isMC));
 
       if(duplicatesChecker.isDuplicate(ev.run,ev.lumi, ev.event))
 	{
@@ -220,19 +262,8 @@ int main(int argc, char* argv[])
 	{
 	  gamma=phys.leptons[0]+phys.leptons[1];
 	  if(fabs(gamma.mass()-91)>15) continue;
-	  if(ev.cat==MUMU)
-	    {
-	      if( !hasObjectId(ev.mn_idbits[phys.leptons[0].pid],MID_LOOSE) || !hasObjectId(ev.mn_idbits[phys.leptons[1].pid],MID_LOOSE) ) continue;
-	      if( phys.leptons[0].pfRelIsoDbeta()>0.12 || phys.leptons[1].pfRelIsoDbeta()>0.12 ) continue;
-	      dilCats.push_back("mumu");
-	    }
-	  else if(ev.cat==EE) 
-	    {
-	      if( !hasObjectId(ev.en_idbits[phys.leptons[0].pid],EID_LOOSE) || !hasObjectId(ev.en_idbits[phys.leptons[1].pid],EID_LOOSE) ) continue;
-	      if( phys.leptons[0].ePFRelIsoCorrected2012(ev.rho)>0.15 || phys.leptons[1].ePFRelIsoCorrected2012(ev.rho)>0.15 ) continue;
-	      dilCats.push_back("ee");
-	    }
-	  else continue;
+	  if(ev.cat==MUMU) dilCats.push_back("mumu");
+	  if(ev.cat==EE)   dilCats.push_back("ee");
 	  dilCats.push_back("ll");
 	  triggerThr=gammaEvHandler.findTriggerCategoryFor( gamma.pt() );
 	  if(triggerThr<0) continue;
@@ -244,37 +275,27 @@ int main(int argc, char* argv[])
       double mindphijmet(9999.);
       PhysicsObjectJetCollection jetsP4;
       std::vector<double> genJetsPt;
-      LorentzVector recoilJet(0,0,0,0);
-      double recoilJetMva(-1);
-      int recoilJetIdBits(0);
       LorentzVector rawClusteredMet(gamma); 
       rawClusteredMet *= -1;
-      for(size_t ijet=0; ijet<phys.jets.size(); ijet++)
+      for(size_t ijet=0; ijet<phys.ajets.size(); ijet++)
         {
-	  LorentzVector ijetP4=phys.jets[ijet];
-	  if(ijetP4.pt()<15 || fabs(ijetP4.eta())>5) continue;
+	  LorentzVector ijetP4=phys.ajets[ijet];
+	  //	  if(ijetP4.pt()<15 || fabs(ijetP4.eta())>5) continue;
+	  if(ijetP4.pt()<15) continue;
 	  if(isGammaEvent && deltaR(ijetP4,gamma)<0.4) continue;
 	  njets15++;
 	  jetsP4.push_back(ijetP4);
-	  genJetsPt.push_back(phys.jets[ijet].genPt);
+	  genJetsPt.push_back(phys.ajets[ijet].genPt);
 	  rawClusteredMet -= ijetP4;
 	  double idphijmet=fabs(deltaPhi(metP4.phi(),ijetP4.phi()));
 	  mindphijmet=min(idphijmet,mindphijmet);
-	  if(ijetP4.pt()>30)
-	    {
-	      if(fabs(ijetP4.eta())<2.5) nbtags += (phys.jets[ijet].btag1>2.0);
-	      njets30++;
-	    }
-	  
-	  if( fabs(deltaPhi(ijetP4.phi(),gamma.phi())) >2 ) 
-	    {
-	      recoilJet=ijetP4;
-	      recoilJetMva=phys.jets[ijet].pumva;
-	      recoilJetIdBits=phys.jets[ijet].pid;
-	    }
+	  if(ijetP4.pt()>20 && fabs(ijetP4.eta())<2.5) nbtags += (phys.ajets[ijet].btag2>0.244);
+	  if(ijetP4.pt()>30)  njets30++;
 	}
       TString subcat("eq"); subcat+=njets30; subcat+= "jets";
       if(njets30>=3) subcat="geq3jets";
+      int evType=eventClassifComp.Get(phys,&jetsP4);
+      if(evType==EventCategory::VBF) subcat="vbf";
 
 
       //
@@ -303,15 +324,22 @@ int main(int argc, char* argv[])
       //if(!isMC && isGammaEvent) { weight = gammaEvHandler.getTriggerPrescaleWeight(); }
       Hcutflow->Fill(1,1);
       Hcutflow->Fill(2,weight);
-      
+      Hcutflow->Fill(3,weight);
+      Hcutflow->Fill(4,weight);
+      Hcutflow->Fill(5,1);
+
       //select event
       bool passMultiplicityVetoes (isGammaEvent ? (phys.leptons.size()==0 && ev.ln==0 && phys.gammas.size()==1) : (ev.ln==0) );
       bool passKinematics         (gamma.pt()>55);
       bool passEB                 (!isGammaEvent || fabs(gamma.eta())<1.4442);
-      bool passR9                 (true);//!isGammaEvent || r9<1.0);
+      bool passR9                 (!isGammaEvent || r9<1.0);
+      bool passR9tight            (true);//!isGammaEvent || r9>0.9); 
       bool passBveto              (nbtags==0);
       bool passMinDphiJmet        (mindphijmet>0.5);
-      
+      bool passSMZZpreSel(njets30==0 && passBveto && passMinDphiJmet);  
+      bool passSMZZredMet(redMets[0].pt()>50);
+      bool passSMZZbalance(zvvs[0].pt()/gamma.pt() > 0.4 && zvvs[0].pt()/gamma.pt() < 1.8);
+
       //control plots
       std::map<TString, float> qtWeights;
       if(isGammaEvent) qtWeights = gammaEvHandler.getWeights(phys,subcat);
@@ -319,8 +347,9 @@ int main(int argc, char* argv[])
 	{
 	  LorentzVector iboson(isGammaEvent ? gammaEvHandler.massiveGamma(dilCats[idc]) : gamma);
 	  float zmass=iboson.mass();
+	  //Float_t rawMt( METUtils::transverseMass(iboson,metP4,true) );
 	  Float_t mt( METUtils::transverseMass(iboson,zvvs[0],true) );
-
+	  
 	  TString ctf=dilCats[idc];
 	  float iweight=weight;
 	  if(isGammaEvent) iweight*=qtWeights[dilCats[idc]];
@@ -328,23 +357,31 @@ int main(int argc, char* argv[])
 	  if(!passEB || !passR9 || isConv) continue;
 	  if(!passKinematics) continue;
 
-	  mon.fillHisto("eta_"+subcat,ctf, fabs(gamma.eta()),iweight);
-	  mon.fillHisto("qt_"+subcat,ctf, gamma.pt(),iweight);
-	  mon.fillHisto("nvtx_"+subcat,ctf, ev.nvtx,iweight);
-	  mon.fillHisto("zmass_"+subcat,ctf, zmass,iweight);
-
-	  mon.fillHisto("nbtags",ctf, nbtags,iweight);
-	  if(!passBveto) continue;
-	  
-	  mon.fillHisto("njets",ctf, njets30,iweight);
-	  mon.fillHisto("nsoftjets",ctf, njets15,iweight);
-
 	  std::vector<TString> subCatsToFill;
 	  subCatsToFill.push_back(subcat);
+	  if(subcat=="eq0jets")
+	    {
+	      if(njets15==0) subCatsToFill.push_back("eq0softjets");
+	      else           subCatsToFill.push_back("eq0hardjets");
+	    }
 	  subCatsToFill.push_back("");
-	  if(njets30==0) subCatsToFill.push_back(njets15==0 ? "eq0softjets" : "eq0hardjets");
+	  
 	  for(size_t isc=0; isc<subCatsToFill.size(); isc++)
 	    {	 
+	      mon.fillHisto("eta_"+subCatsToFill[isc],ctf, fabs(gamma.eta()),iweight);
+	      mon.fillHisto("qt_"+subCatsToFill[isc],ctf, gamma.pt(),iweight);
+	      mon.fillHisto("nvtx_"+subCatsToFill[isc],ctf, ev.nvtx,iweight);
+	      mon.fillHisto("zmass_"+subCatsToFill[isc],ctf, zmass,iweight);
+	      
+	      if(isc==1) mon.fillHisto("nbtags",ctf, nbtags,iweight);
+
+	      if(!passBveto) continue;
+	      if(isc==1)
+		{
+		  mon.fillHisto("njets",ctf, njets30,iweight);
+		  mon.fillHisto("nsoftjets",ctf, njets15,iweight);
+		}
+
 	      if(isGammaEvent)  
 		{
 		  mon.fillHisto("r9_"+subCatsToFill[isc],ctf, r9,iweight);
@@ -352,66 +389,54 @@ int main(int argc, char* argv[])
 		  mon.fillHisto("trkveto_"+subCatsToFill[isc],ctf, hasTrkVeto,iweight);
 		}
 
-	      if(hasTrkVeto) continue;
-	      
-	      //jet id efficiency
-	      if(recoilJet.pt()>0 && njets30==1)
+	      if(hasTrkVeto || !passR9tight) continue;
+	      if(zvvs[0].pt()>50) mon.fillHisto("mindphijmet_"+subCatsToFill[isc],ctf, mindphijmet,iweight);	      
+	      if(passMinDphiJmet && !mustBlind)
 		{
-		  double balance = recoilJet.pt()/gamma.pt();
-		  bool passBalanceCut(balance>0.5 && balance<1.5);
-		  std::vector<TString> etaRegs(2,"");
-		  if(fabs(recoilJet.eta())<2.5)       etaRegs[1]="TK";
-		  else if(fabs(recoilJet.eta())<2.75) etaRegs[1]="HEin";
-		  else if(fabs(recoilJet.eta())<3)    etaRegs[1]="HEout";
-		  else                                etaRegs[1]="HF";
-		  std::map<TString, std::vector<bool> > passIds;
-		  passIds["pf"]    .push_back( hasObjectId(recoilJetIdBits,JETID_LOOSE) );
-		  passIds["pf"]    .push_back( hasObjectId(recoilJetIdBits,JETID_TIGHT) );
-		  passIds["pf"]    .push_back( hasObjectId(recoilJetIdBits,JETID_TIGHT) );
-		  passIds["simple"].push_back( hasObjectId(recoilJetIdBits,JETID_MIN_LOOSE) );
-		  passIds["simple"].push_back( hasObjectId(recoilJetIdBits,JETID_MIN_MEDIUM) );
-		  passIds["simple"].push_back( hasObjectId(recoilJetIdBits,JETID_MIN_TIGHT) );
-		  passIds["full"]  .push_back( hasObjectId(recoilJetIdBits,JETID_OPT_LOOSE) );
-		  passIds["full"]  .push_back( hasObjectId(recoilJetIdBits,JETID_OPT_MEDIUM) );
-		  passIds["full"]  .push_back( hasObjectId(recoilJetIdBits,JETID_OPT_TIGHT) );
-		  passIds["cut"]   .push_back( hasObjectId(recoilJetIdBits,JETID_CUTBASED_LOOSE) );
-		  passIds["cut"]   .push_back( hasObjectId(recoilJetIdBits,JETID_CUTBASED_MEDIUM) );
-		  passIds["cut"]   .push_back( hasObjectId(recoilJetIdBits,JETID_CUTBASED_TIGHT) );
-		  for (int ieta=0; ieta<5; ieta++)
-		    {		  
-		      mon.fillHisto(jetRegs[ieta]+"jetbalance",ctf, balance,iweight);
-		      if(!passBalanceCut) continue;
-		      for(std::map<TString, std::vector<bool> >::iterator it=passIds.begin(); it != passIds.end(); it++)
+		  mon.fillHisto("met_rawmet_"+subCatsToFill[isc],ctf, rawZvv.pt(),iweight);
+		  mon.fillHisto("metoverqt_"+subCatsToFill[isc],ctf, zvvs[0].pt()/gamma.pt(),iweight);
+		  mon.fillHisto("met_met_"+subCatsToFill[isc],ctf, zvvs[0].pt(),iweight);
+		  mon.fillHisto("met_met_"+subCatsToFill[isc]+"_vspu",ctf, ev.nvtx,zvvs[0].pt(),iweight);
+		  mon.fillHisto("met_min3Met_"+subCatsToFill[isc],ctf, min3Mets[0].pt(),iweight);
+		  mon.fillHisto("met_min3Met_"+subCatsToFill[isc]+"_vspu",ctf, ev.nvtx,min3Mets[0].pt(),iweight);
+		  mon.fillHisto("met_rawRedMet_"+subCatsToFill[isc],ctf, rawRedMet.pt(),iweight);
+		  mon.fillHisto("met_redMet_"+subCatsToFill[isc],ctf, redMets[0].pt(),iweight);
+		  mon.fillHisto("met_redMet_"+subCatsToFill[isc]+"_vspu",ctf, ev.nvtx,redMets[0].pt(),iweight);
+		  mon.fillHisto("met_redMetT_"+subCatsToFill[isc],ctf, redMetLs[0],iweight);
+		  mon.fillHisto("met_redMetL_"+subCatsToFill[isc],ctf, redMetTs[0],iweight);
+		  mon.fillHisto("mt_"+subCatsToFill[isc],ctf,mt,iweight);
+		}
+	      
+	      if(passSMZZpreSel)
+		{
+		  if(passSMZZredMet) mon.fillHisto("metoverqt_"+subCatsToFill[isc],"ZZ"+ctf, zvvs[0].pt()/gamma.pt(),iweight);
+		  if(passSMZZbalance)
+		    {
+		      mon.fillHisto("met_met_"+subCatsToFill[isc],"ZZ"+ctf, zvvs[0].pt(),iweight);
+		      mon.fillHisto("met_redMet_"+subCatsToFill[isc],"ZZ"+ctf, redMets[0].pt(),iweight);
+		      if(passSMZZredMet)
 			{
-			  mon.fillHisto(jetRegs[ieta]+"jetmva_"+it->first,ctf,recoilJetMva,iweight);
-			  for(int iwp=0; iwp<3; iwp++)
-			    {			
-			      if(!((it->second)[iwp])) continue;
-			      {
-				mon.fillHisto(jetRegs[ieta]+"jetpt_"+it->first+jetIdWps[iwp],ctf,recoilJet.pt(),iweight,true);
-				mon.fillHisto(jetRegs[ieta]+"jeteta_"+it->first+jetIdWps[iwp],ctf,fabs(recoilJet.eta()),iweight,true);
-			      }
-			    }
+			  mon.fillHisto("met_redMetT_"+subCatsToFill[isc],"ZZ"+ctf, redMetLs[0],iweight);
+			  mon.fillHisto("met_redMetL_"+subCatsToFill[isc],"ZZ"+ctf, redMetTs[0],iweight);
 			}
 		    }
 		}
-	      
+	      if(subCatsToFill[isc]=="vbf")
+		{
+		  LorentzVector VBFSyst=jetsP4[0]+jetsP4[1];
+		  mon.fillHisto("vbfmass",ctf,VBFSyst.mass(),iweight);
+		  mon.fillHisto("vbdphi",ctf,deltaPhi(jetsP4[0].phi(),jetsP4[1].phi()));
+		}
 
-	      if(zvvs[0].pt()>70) mon.fillHisto("mindphijmet_"+subCatsToFill[isc],ctf, mindphijmet,iweight);	      
-	      if(passMinDphiJmet) continue;
-	      if(runBlinded && !isMC && evSummaryHandler.hasSpoilerAlert(!isMC)) continue;
-	      mon.fillHisto("met_rawmet_"+subCatsToFill[isc],ctf, rawZvv.pt(),iweight);
-	      mon.fillHisto("metoverqt_"+subCatsToFill[isc],ctf, zvvs[0].pt()/gamma.pt(),iweight);
-	      mon.fillHisto("met_met_"+subCatsToFill[isc],ctf, zvvs[0].pt(),iweight);
-	      mon.fillHisto("met_met_"+subCatsToFill[isc]+"_vspu",ctf, ev.nvtx,zvvs[0].pt(),iweight);
-	      mon.fillHisto("met_min3Met_"+subCatsToFill[isc],ctf, min3Mets[0].pt(),iweight);
-	      mon.fillHisto("met_min3Met_"+subCatsToFill[isc]+"_vspu",ctf, ev.nvtx,min3Mets[0].pt(),iweight);
-	      mon.fillHisto("met_rawRedMet_"+subCatsToFill[isc],ctf, rawRedMet.pt(),iweight);
-	      mon.fillHisto("met_redMet_"+subCatsToFill[isc],ctf, redMets[0].pt(),iweight);
-	      mon.fillHisto("met_redMet_"+subCatsToFill[isc]+"_vspu",ctf, ev.nvtx,redMets[0].pt(),iweight);
-	      mon.fillHisto("met_redMetT_"+subCatsToFill[isc],ctf, redMetLs[0],iweight);
-	      mon.fillHisto("met_redMetL_"+subCatsToFill[isc],ctf, redMetTs[0],iweight);
-	      mon.fillHisto("mt_"+subCatsToFill[isc],ctf,mt,iweight);
+	      for(unsigned int index=0;index<nOptimCuts;index++){
+		if (mt>optim_Cuts1_mtmin[index] && mt<optim_Cuts1_mtmax[index])
+		  {
+		    mon.fillHisto(TString("met_shapes")+subCatsToFill[isc],ctf,index, zvvs[0].pt(),iweight);
+		    mon.fillHisto(TString("redMet_shapes")+subCatsToFill[isc],ctf,index, redMets[0].pt(),iweight);
+		    if(zvvs[0].pt()>optim_Cuts1_met[index])    mon.fill2DHisto("mt_shapes_"+subCatsToFill[isc],ctf,index, mt,iweight);
+		    if(redMets[0].pt()>optim_Cuts1_met[index]) mon.fillHisto(TString("mt_redMet_shapes")+subCatsToFill[isc],ctf,index, mt,iweight);
+		  }
+	      }
 	    }
 	}
     }

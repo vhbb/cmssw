@@ -193,6 +193,7 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("jn_btag1",       evSummary_.jn_btag1,       "jn_btag1[jn]/F");
   t_->Branch("jn_btag2",       evSummary_.jn_btag2,       "jn_btag2[jn]/F");
   t_->Branch("jn_btag3",       evSummary_.jn_btag3,       "jn_btag3[jn]/F");
+  t_->Branch("jn_btag4",       evSummary_.jn_btag4,       "jn_btag4[jn]/F");
   t_->Branch("jn_neutHadFrac", evSummary_.jn_neutHadFrac, "jn_neutHadFrac[jn]/F");
   t_->Branch("jn_neutEmFrac",  evSummary_.jn_neutEmFrac,  "jn_neutEmFrac[jn]/F");
   t_->Branch("jn_chHadFrac",   evSummary_.jn_chHadFrac,   "jn_chHadFrac[jn]/F");
@@ -220,6 +221,7 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("ajn_btag1",       evSummary_.ajn_btag1,       "ajn_btag1[ajn]/F");
   t_->Branch("ajn_btag2",       evSummary_.ajn_btag2,       "ajn_btag2[ajn]/F");
   t_->Branch("ajn_btag3",       evSummary_.ajn_btag3,       "ajn_btag3[ajn]/F");
+  t_->Branch("ajn_btag4",       evSummary_.ajn_btag4,       "ajn_btag4[ajn]/F");
   t_->Branch("ajn_neutHadFrac", evSummary_.ajn_neutHadFrac, "ajn_neutHadFrac[ajn]/F");
   t_->Branch("ajn_neutEmFrac",  evSummary_.ajn_neutEmFrac,  "ajn_neutEmFrac[ajn]/F");
   t_->Branch("ajn_chHadFrac",   evSummary_.ajn_chHadFrac,   "ajn_chHadFrac[ajn]/F");
@@ -299,6 +301,8 @@ bool ZZ2l2nuSummaryHandler::initTree(TTree *t, bool needsToRecreate)
   t_->Branch("mc_en", evSummary_.mc_en, "mc_en[nmcparticles]/F");
   t_->Branch("mc_id", evSummary_.mc_id, "mc_id[nmcparticles]/I");
 
+  t_->Branch("nmeasurements", &evSummary_.nmeasurements, "nmeasurements/I");
+  t_->Branch("measurements", evSummary_.measurements, "measurements[nmeasurements]/I");
 
   return true;
 }
@@ -485,6 +489,7 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   t_->GetBranch("jn_btag1")       ->SetAddress(evSummary_.jn_btag1);
   t_->GetBranch("jn_btag2")       ->SetAddress(evSummary_.jn_btag2);
   t_->GetBranch("jn_btag3")       ->SetAddress(evSummary_.jn_btag3);
+  if(t_->GetBranch("jn_btag4")) t_->GetBranch("jn_btag4")->SetAddress(evSummary_.jn_btag4);
   t_->GetBranch("jn_neutHadFrac") ->SetAddress(evSummary_.jn_neutHadFrac);
   t_->GetBranch("jn_neutEmFrac")  ->SetAddress(evSummary_.jn_neutEmFrac);
   t_->GetBranch("jn_chHadFrac")   ->SetAddress(evSummary_.jn_chHadFrac);
@@ -515,6 +520,7 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   t_->GetBranch("ajn_btag1")       ->SetAddress(evSummary_.ajn_btag1);
   t_->GetBranch("ajn_btag2")       ->SetAddress(evSummary_.ajn_btag2);
   t_->GetBranch("ajn_btag3")       ->SetAddress(evSummary_.ajn_btag3);
+  if(t_->GetBranch("ajn_btag4"))  t_->GetBranch("ajn_btag4")       ->SetAddress(evSummary_.ajn_btag4);
   t_->GetBranch("ajn_neutHadFrac") ->SetAddress(evSummary_.ajn_neutHadFrac);
   t_->GetBranch("ajn_neutEmFrac")  ->SetAddress(evSummary_.ajn_neutEmFrac);
   t_->GetBranch("ajn_chHadFrac")   ->SetAddress(evSummary_.ajn_chHadFrac);
@@ -585,6 +591,10 @@ bool ZZ2l2nuSummaryHandler::attachToTree(TTree *t, bool full)
   t_->GetBranch("mc_pz")        ->SetAddress(evSummary_.mc_pz);
   t_->GetBranch("mc_en")        ->SetAddress(evSummary_.mc_en);
   t_->GetBranch("mc_id")        ->SetAddress(evSummary_.mc_id);
+
+  //additional measurements you may want to add  
+  if( t_->GetBranch("nmeasurements") )  t_->GetBranch("nmeasurements")->SetAddress(&evSummary_.nmeasurements);
+  if( t_->GetBranch("measurements") )   t_->GetBranch("measurements")->SetAddress(evSummary_.measurements);
   
   return true;
 }

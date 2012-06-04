@@ -4,8 +4,7 @@ using namespace std;
 
 //
 GammaEventHandler::GammaEventHandler(const edm::ParameterSet &runProcess)
-  : isGoodEvent_(false),
-    weightMode_(NOWEIGHTS)
+  : isGoodEvent_(false)
 {
   //trigger thresholds to consider
   bool isMC = runProcess.getParameter<bool>("isMC");
@@ -14,52 +13,51 @@ GammaEventHandler::GammaEventHandler(const edm::ParameterSet &runProcess)
   else      gammaTriggerRenWeights_.resize(gammaCats_.size(),1.0);
  
   //open file and retrieve weights + mass shapes
-  TString gammaPtWeightsFile =  runProcess.getParameter<std::string>("weightsFile");   gSystem->ExpandPathName(gammaPtWeightsFile);
-  fwgt_=TFile::Open(gammaPtWeightsFile);
-  if(fwgt_)
+  std::vector<string> weightsFiles =  runProcess.getParameter<std::vector<std::string> >("weightsFile");  
+  for(std::vector<string>::iterator it = weightsFiles.begin();  it != weightsFiles.end(); it++)
     {
-      TString wgtName("");
-      if(gammaPtWeightsFile.Contains("eta"))        { wgtName="qtvseta"; weightMode_=PTANDETA; }
-      else if(gammaPtWeightsFile.Contains("nvtx"))  { wgtName="qtvsnvtx"; weightMode_=PTANDNVTX; }
-      else                                          { wgtName="qt"; weightMode_=PT; }
-      
+      TString gammaPtWeightsFile(*it); 
+      gSystem->ExpandPathName(gammaPtWeightsFile);
+      fwgt_=TFile::Open(gammaPtWeightsFile);
+      if(fwgt_==0 || fwgt_->IsZombie()) return;
+      cout << gammaPtWeightsFile << endl;
+      TString cats[]   =  {"eq0jets","eq1jets","eq2jets","geq3jets","vbf"};
+      TString dilCats[] = {"ee","mumu","ll"};
       TString wgtType( isMC ? "mcwgts" : "datawgts");
-
-      if(wgtName!="")
+      TString wgtName(gammaPtWeightsFile.Contains("nvtx")? "nvtx":"qt");
+      for(size_t ic=0; ic<sizeof(cats)/sizeof(TString); ic++)
 	{
-	  TString cats[]   =  {"eq0jets","eq1jets","eq2jets","geq3jets"};
-	  TString dilCats[] = {"ee","mumu","ll"};
-	  for(size_t ic=0; ic<sizeof(cats)/sizeof(TString); ic++)
+	  for(size_t id=0; id<sizeof(dilCats)/sizeof(TString); id++)
 	    {
-	      for(size_t id=0; id<sizeof(dilCats)/sizeof(TString); id++)
+	      //event weights
+	      TString key = dilCats[id] + "_" + wgtName + "_" + cats[ic] + "_" + wgtType;
+	      TH1 *h = (TH1 *) fwgt_->Get(key);
+	      if(h!=0)
 		{
-		  //event weights
-		  TString key = dilCats[id] + "_" + wgtName + "_" + cats[ic] + "_" + wgtType;
-		  TH1 *h = (TH1 *) fwgt_->Get(key);
-		  if(h!=0)
-		    {
-		      key = dilCats[id] + "_" + cats[ic];
-		      wgtsH_[key] = h;
-		      wgtsH_[key]->SetDirectory(0);
-		    }
-
-		  //mass shape
-		  key = dilCats[id]; key += (isMC ? "_mczmass_" : "_datazmass_"); key += cats[ic];
-		  h = (TH1 *) fwgt_->Get(key);
-		  if(h!=0)
-		    {
-		      key = dilCats[id] + "_" + cats[ic];
-		      zmassH_[key]= h;
-		      zmassH_[key]->SetDirectory(0);
-		    }
+		  key = dilCats[id] + "_"+wgtName+"_" + cats[ic];
+		  TGraph *iwgtgr=new TGraph(h);
+		  iwgtgr->SetName(key);
+		  wgtsH_[key] = iwgtgr;
+		}
+	
+	      //mass shape 
+	      key = dilCats[id];
+	      if(zmassH_.find(key)!=zmassH_.end()) continue;
+	      key += (isMC ? "_mczmass" : "_datazmass");
+	      h = (TH1 *) fwgt_->Get(key);
+	      if(h!=0)
+		{
+		  key = dilCats[id];
+		  zmassH_[key]= h;
+		  zmassH_[key]->SetDirectory(0);
 		}
 	    }
 	}
+
       fwgt_->Close();
     }
   
-  if(wgtsH_.size()) 
-    std::cout << "[GammaEventHandler] gamma spectrum will be reweighted using distributions found @ "  << gammaPtWeightsFile << " weight mode is: " << weightMode_ << std::endl;
+  if(wgtsH_.size()) std::cout << "[GammaEventHandler] gamma spectrum will be reweighted using distributions found in "  << weightsFiles.size() << " files" << std::endl;
 }
 
 
@@ -79,8 +77,6 @@ bool GammaEventHandler::isGood(PhysicsEvent_t &phys)
   triggerThr_ = (phys.cat-22)/1000;
   if(triggerThr_==0) return isGoodEvent_;
 
-  cout << phys.cat << " "<< triggerThr_ << endl;
-
   //check which category this event belongs to (use the trigger)
   int eventTriggerCat(-1);
   for(size_t icat=0; icat<gammaCats_.size()-1; icat++)
@@ -88,12 +84,11 @@ bool GammaEventHandler::isGood(PhysicsEvent_t &phys)
       if(triggerThr_<gammaCats_[icat])    break;
       eventTriggerCat=icat;   
     }
-  cout <<"\t --->" << eventTriggerCat << endl;
   if(eventTriggerCat<0) return isGoodEvent_;
   triggerPrescaleWeight_ = gammaTriggerRenWeights_[eventTriggerCat];
-  photonCategory_="photon";  photonCategory_ += triggerThr_; 
 
-  cout << "\t\t---->"<< photonCategory_ << endl;
+  photonCategory_="photon";  photonCategory_ += triggerThr_; 
+  
   //all done here
   isGoodEvent_=true;
   return isGoodEvent_;
@@ -107,10 +102,8 @@ std::map<TString,float> GammaEventHandler::getWeights(PhysicsEvent_t &phys, TStr
   TString dilCats[]={"ee","mumu","ll"};
   for(size_t id=0; id<sizeof(dilCats)/sizeof(TString); id++)
     {
-      //the key to search for
-      TString key = dilCats[id] + "_" + evCategoryLabel;
-      
-      //generate a massive gamma (0 if in non-weighting mode)
+      //generate a mass
+      TString key = dilCats[id];
       float mass(0);
       if(zmassH_.find(key)!=zmassH_.end())
 	{
@@ -120,29 +113,28 @@ std::map<TString,float> GammaEventHandler::getWeights(PhysicsEvent_t &phys, TStr
 	}
       massiveGamma_[dilCats[id]]=LorentzVector(gamma.px(),gamma.py(),gamma.pz(),sqrt(pow(mass,2)+pow(gamma.energy(),2)));
       
-      //get event weight (will be 0 by default if we're running in weighting mode)
-      float weight(wgtsH_.size() ? 0.0 : 1.0);
-      if(wgtsH_.find(key) != wgtsH_.end()) 
+      //get event weight 
+      float weight(1.0);
+      if(wgtsH_.size())
 	{
-	  TH1 *theH = wgtsH_[key];
-	  for(int ibin=1; ibin<=theH->GetXaxis()->GetNbins(); ibin++)
+	  key = dilCats[id] + "_qt_" + evCategoryLabel;
+	  if(wgtsH_.find(key) != wgtsH_.end()) 
 	    {
-	      if(gamma.pt()<theH->GetXaxis()->GetBinLowEdge(ibin) ) break; 
-	      if(weightMode_==PT)              weight = theH->GetBinContent(ibin);
-	      else if(weightMode_==PTANDETA)   weight = theH->GetBinContent(ibin,theH->GetYaxis()->FindBin(fabs(gamma.eta())));
-	      else if(weightMode_==PTANDNVTX)
-		{
-		  for(int jbin=1; jbin<=theH->GetYaxis()->GetNbins(); jbin++)
-		    {
-		      if(phys.nvtx<theH->GetYaxis()->GetBinLowEdge(jbin)) break;
-		      weight = theH->GetBinContent(ibin,jbin);
-		    }
-		}
+	      TGraph *iwgtgr = wgtsH_[key];
+	      weight *= iwgtgr->Eval(gamma.pt());
 	    }
+
+	  key = dilCats[id] + "_nvtx_" + evCategoryLabel;
+	  if(wgtsH_.find(key) != wgtsH_.end()) 
+	    {
+	      TGraph *iwgtgr = wgtsH_[key];
+	      weight *= iwgtgr->Eval(phys.nvtx);
+	    }
+
 	}
       evWeights_[dilCats[id]]=weight;
     }
-
+  
   return evWeights_;
 }
 

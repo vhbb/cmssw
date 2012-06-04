@@ -60,15 +60,21 @@ int main(int argc, char* argv[])
 
   // configure the process
   const edm::ParameterSet &runProcess = edm::readPSetsFrom(argv[1])->getParameter<edm::ParameterSet>("runProcess");
-  TString url=runProcess.getParameter<std::string>("input");
-  TString outdir=runProcess.getParameter<std::string>("outdir");
-  TString outUrl( outdir );
-  gSystem->Exec("mkdir -p " + outUrl);
 
   bool isMC = runProcess.getParameter<bool>("isMC");
   bool runBlinded = runProcess.getParameter<bool>("runBlinded"); 
   int mctruthmode=runProcess.getParameter<int>("mctruthmode");
-  bool isSingleMuPD(!isMC && url.Contains("SingleMu"));
+
+  TString url=runProcess.getParameter<std::string>("input");
+  TString outdir=runProcess.getParameter<std::string>("outdir");
+  TString outUrl( outdir );
+  gSystem->Exec("mkdir -p " + outUrl);
+  int fType(0);
+  if(url.Contains("DoubleEle")) fType=EE;
+  if(url.Contains("DoubleMu"))  fType=MUMU;
+  if(url.Contains("MuEG"))      fType=EMU;
+  if(url.Contains("SingleMu"))  fType=MUMU;
+  bool isSingleMuPD(!isMC && url.Contains("SingleMu"));  
   
   TString outTxtUrl= outUrl + "/" + gSystem->BaseName(url) + ".txt";
   FILE* outTxtFile = NULL;
@@ -95,33 +101,33 @@ int main(int argc, char* argv[])
     }
 
   // this is disabled for the moment
-  //   double HiggsMass=0; string VBFString = ""; string GGString("");
-  //   bool isMC_GG  = isMC && ( string(url.Data()).find("GG" )  != string::npos);
-  //   bool isMC_VBF = isMC && ( string(url.Data()).find("VBF")  != string::npos);
-  //   std::vector<TGraph *> hWeightsGrVec;
-  //   if(isMC_GG){
-  //     size_t GGStringpos =  string(url.Data()).find("GG");
-  //     string StringMass = string(url.Data()).substr(GGStringpos+5,3);  sscanf(StringMass.c_str(),"%lf",&HiggsMass);
-  //     GGString = string(url.Data()).substr(GGStringpos);
-  //     TString hqtWeightsFileURL = runProcess.getParameter<std::string>("hqtWeightsFile"); gSystem->ExpandPathName(hqtWeightsFileURL);
-  //     TFile *fin=TFile::Open(hqtWeightsFileURL);
-  //     if(fin){
-  //       cout << "HpT weights (and uncertainties) will be applied from: " << hqtWeightsFileURL << endl;
-  //         for(int ivar=0; ivar<5; ivar++){
-  //           double ren=HiggsMass; if(ivar==ZZ2l2nuSummary_t::hKfactor_renDown)  ren/=2; if(ivar==ZZ2l2nuSummary_t::hKfactor_renUp)  ren *= 2;
-  //           double fac=HiggsMass; if(ivar==ZZ2l2nuSummary_t::hKfactor_factDown) fac/=2; if(ivar==ZZ2l2nuSummary_t::hKfactor_factUp) fac *= 2;
-  //           char buf[100]; sprintf(buf,"kfactors_mh%3.0f_ren%3.0f_fac%3.0f",HiggsMass,ren,fac);
-  //           TGraph *gr= (TGraph *) fin->Get(buf);
-  //           if(gr) hWeightsGrVec.push_back((TGraph *)gr->Clone());
-  //         }
-  //         fin->Close();
-  //         delete fin;
-  //     }
-  //   }else if(isMC_VBF){
-  //     size_t VBFStringpos =  string(url.Data()).find("VBF");
-  //     string StringMass = string(url.Data()).substr(VBFStringpos+6,3);  sscanf(StringMass.c_str(),"%lf",&HiggsMass);
-  //     VBFString = string(url.Data()).substr(VBFStringpos);
-  //}
+  double HiggsMass=0; string VBFString = ""; string GGString("");
+  bool isMC_GG  = isMC && ( string(url.Data()).find("GG" )  != string::npos);
+  bool isMC_VBF = isMC && ( string(url.Data()).find("VBF")  != string::npos);
+  std::vector<TGraph *> hWeightsGrVec;
+  if(isMC_GG){
+    size_t GGStringpos =  string(url.Data()).find("GG");
+    string StringMass = string(url.Data()).substr(GGStringpos+5,3);  sscanf(StringMass.c_str(),"%lf",&HiggsMass);
+    GGString = string(url.Data()).substr(GGStringpos);
+    TString hqtWeightsFileURL = runProcess.getParameter<std::string>("hqtWeightsFile"); gSystem->ExpandPathName(hqtWeightsFileURL);
+    TFile *fin=TFile::Open(hqtWeightsFileURL);
+    if(fin){
+      cout << "HpT weights (and uncertainties) will be applied from: " << hqtWeightsFileURL << endl;
+      for(int ivar=0; ivar<5; ivar++){
+	double ren=HiggsMass; if(ivar==ZZ2l2nuSummary_t::hKfactor_renDown)  ren/=2; if(ivar==ZZ2l2nuSummary_t::hKfactor_renUp)  ren *= 2;
+	double fac=HiggsMass; if(ivar==ZZ2l2nuSummary_t::hKfactor_factDown) fac/=2; if(ivar==ZZ2l2nuSummary_t::hKfactor_factUp) fac *= 2;
+	char buf[100]; sprintf(buf,"kfactors_mh%3.0f_ren%3.0f_fac%3.0f",HiggsMass,ren,fac);
+	TGraph *gr= (TGraph *) fin->Get(buf);
+	if(gr) hWeightsGrVec.push_back((TGraph *)gr->Clone());
+      }
+      fin->Close();
+      delete fin;
+    }
+  }else if(isMC_VBF){
+    size_t VBFStringpos =  string(url.Data()).find("VBF");
+    string StringMass = string(url.Data()).substr(VBFStringpos+6,3);  sscanf(StringMass.c_str(),"%lf",&HiggsMass);
+    VBFString = string(url.Data()).substr(VBFStringpos);
+  }
 
 
 
@@ -143,6 +149,8 @@ int main(int argc, char* argv[])
   mon.addHistogram( new TH1F( "leadeta", ";#eta^{l};Events", 50,-2.6,2.6) );
   mon.addHistogram( new TH1F( "trailerpt", ";p_{T}^{l};Events", 50,0,500) );
   mon.addHistogram( new TH1F( "trailereta", ";#eta^{l};Events", 50,-2.6,2.6) );
+  mon.addHistogram( new TH1F( "deltaleptonpt", ";|p_{T}^{1}-p_{T}^{2}|;Events", 50,0,250) );
+  mon.addHistogram( new TH1F( "deltazpt", ";p_{T}^{ll}-E_{T}^{miss};Events", 50,-250,250) );
   mon.addHistogram( new TH1F( "zpt", ";p_{T}^{ll};Events", 50,0,500) );
   mon.addHistogram( new TH1F( "zeta", ";#eta^{ll};Events", 50,-10,10) );
   mon.addHistogram( new TH1F( "zmass", ";M^{ll};Events", 100,40,250) );
@@ -257,7 +265,7 @@ int main(int argc, char* argv[])
       mon.addHistogram( new TH1F(jetTypes[i]+"jeteta"       , ";|#eta|;Events",25,0,5) );
       mon.addHistogram( new TH2F("n"+jetTypes[i]+"jetsvspu",          ";Pileup interactions;Jet multiplicity (p_{T}>30 GeV/c);Events",50,0,50,5,0,5) );
       mon.addHistogram( new TH2F("n"+jetTypes[i]+"jetstightvspu",     ";Pileup interactions;Jet multiplicity (p_{T}>30 GeV/c);Events",50,0,50,5,0,5) );
-      TH1 *h=mon.addHistogram( new TH1F("n"+jetTypes[i]+"jetstight",  ";Jet multiplicity (p_{T}>30 GeV/c);Events",5,0,5) );
+      TH1 *h=mon.addHistogram( new TH1F("n"+jetTypes[i]+"jets",  ";Jet multiplicity (p_{T}>30 GeV/c);Events",5,0,5) );
       for(int ibin=1; ibin<=h->GetXaxis()->GetNbins(); ibin++)
 	{
 	  TString label("");
@@ -400,9 +408,10 @@ int main(int argc, char* argv[])
   std::vector<double> dataPileupDistributionDouble = runProcess.getParameter< std::vector<double> >("datapileup");
   std::vector<float> dataPileupDistribution; for(unsigned int i=0;i<dataPileupDistributionDouble.size();i++){dataPileupDistribution.push_back(dataPileupDistributionDouble[i]);}
   std::vector<float> mcPileupDistribution;
+  bool needsPUfix( url.Contains("toZZto2L") );
   if(isMC){
     TString puDist("evAnalyzer/h2zz/pileuptrue");
-    if(url.Contains("toZZto2L")) puDist="evAnalyzer/h2zz/pileup";
+    if(needsPUfix) puDist="evAnalyzer/h2zz/pileup";
     TH1F* histo = (TH1F *) file->Get(puDist);
     if(!histo)std::cout<<"pileup histogram is null!!!\n";
     for(int i=1;i<=histo->GetNbinsX();i++){mcPileupDistribution.push_back(histo->GetBinContent(i));}
@@ -452,15 +461,24 @@ int main(int argc, char* argv[])
       if(isMC && mctruthmode==1 && !isDYToLL(ev.mccat) ) continue;
       if(isMC && mctruthmode==2 && !isDYToTauTau(ev.mccat) ) continue;
 
-      //veto triggers for single mu
+      //require compatibilitiy of the event with the PD
       bool hasEEtrigger = ev.triggerType & 0x1;
       bool hasMMtrigger = (ev.triggerType >> 1 ) & 0x1;
       bool hasEMtrigger = (ev.triggerType >> 2 ) & 0x1;
       bool hasMtrigger  = (ev.triggerType >> 3 ) & 0x1;
-      if(isSingleMuPD)
+      if(!isMC)
 	{
-	  if(!hasMtrigger) continue;
-	  if(hasMtrigger && (hasEEtrigger || hasMMtrigger || hasEMtrigger)) continue;
+	  if(ev.cat!=fType) continue;
+
+	  if(ev.cat==EE   && !hasEEtrigger) continue;
+	  if(ev.cat==MUMU && !(hasMMtrigger||hasMtrigger) ) continue;
+	  if(ev.cat==EMU  && !hasEMtrigger) continue;
+
+	  //this is a safety veto for the single mu PD
+	  if(isSingleMuPD) {
+	    if(!hasMtrigger) continue;
+	    if(hasMtrigger && hasMMtrigger) continue;
+	  }
 	}
       
       //prepare the tag's vectors for histo filling
@@ -468,12 +486,19 @@ int main(int argc, char* argv[])
       
       //pileup weight
       float weight = 1.0;
+      float signalWeight=1.0;
       double TotalWeight_plus = 1.0;
       double TotalWeight_minus = 1.0;
       if(isMC){
-        weight = LumiWeights->weight(ev.ngenTruepu);
-        TotalWeight_plus = PShiftUp->ShiftWeight(ev.ngenITpu);
-        TotalWeight_minus = PShiftDown->ShiftWeight(ev.ngenITpu);
+        weight            = LumiWeights->weight(needsPUfix ? ev.ngenITpu : ev.ngenTruepu);
+        TotalWeight_plus  = PShiftUp->ShiftWeight(needsPUfix ? ev.ngenITpu : ev.ngenTruepu);
+        TotalWeight_minus = PShiftDown->ShiftWeight(needsPUfix ? ev.ngenITpu : ev.ngenTruepu);
+	if(isMC_VBF){ signalWeight = weightVBF(VBFString,HiggsMass, phys.genhiggs[0].mass() );  weight*=signalWeight; }
+        if(isMC_GG) {
+          for(size_t iwgt=0; iwgt<hWeightsGrVec.size(); iwgt++) 
+	    ev.hptWeights[iwgt] = hWeightsGrVec[iwgt]->Eval(phys.genhiggs[0].pt());
+	  weight *= ev.hptWeights[0];
+	}
       }
       Hcutflow->Fill(1,1);
       Hcutflow->Fill(2,weight);
@@ -652,7 +677,6 @@ int main(int argc, char* argv[])
 	      mon.fillHisto("trailereta"  ,   tags_full, trailerLep.eta()   ,weight);
 	      mon.fillHisto("trailerpt"   ,   tags_full, trailerLep.pt()    ,weight);
 	      
-
 	      //
 	      // 3rd LEPTON ANALYSIS
 	      //
@@ -691,7 +715,7 @@ int main(int argc, char* argv[])
 		  
 		  //std PF
 		  PhysicsObjectJetCollection aJets=variedAJets[0];
-		  PhysicsObjectJetCollection aTightJets;
+		  PhysicsObjectJetCollection aGoodIdJets;
 		  LorentzVector aClusteredMetP4(zll); aClusteredMetP4 *= -1;
 		  int nAJetsLoose(0), nAJetsTight(0), nAJetsPUIdLoose(0), nAJetsPUIdMedium(0);
 		  int nABtags[3]={0,0,0};
@@ -699,7 +723,7 @@ int main(int argc, char* argv[])
 		  PhysicsObjectJetCollection recoilJets;
 		  for(size_t ijet=0; ijet<aJets.size(); ijet++) 
 		    {
-		      if(aJets[ijet].pt()>20)
+		      if(aJets[ijet].pt()>30)
 			{
 			  float idphijmet( fabs(deltaPhi(aJets[ijet].phi(),zvvs[0].phi()) ) );
 			  if(idphijmet<mindphijmet)  mindphijmet=idphijmet;
@@ -707,15 +731,15 @@ int main(int argc, char* argv[])
 		      aClusteredMetP4 -= aJets[ijet];	  
 		      if(fabs(deltaPhi(aJets[ijet].phi(),zll.phi()))>2) recoilJets.push_back( aJets[ijet] );
 		      
-		      bool isTight    =hasObjectId(aJets[ijet].pid,JETID_TIGHT);
-		      if(isTight) 
+		      bool isGoodJet    =hasObjectId(aJets[ijet].pid,JETID_LOOSE);//TIGHT);
+		      if(isGoodJet)
 			{
-			  aTightJets.push_back(aJets[ijet]);
+			  aGoodIdJets.push_back(aJets[ijet]);
 			  mon.fillHisto("pfjetpt",  tags_full, aJets[ijet].pt(),weight);
 			  mon.fillHisto("pfjeteta",  tags_full, fabs(aJets[ijet].eta()),weight);
 			}
 		      
-		      if(aJets[ijet].pt()<20) continue;
+		      if(aJets[ijet].pt()<30) continue;
 		      if(fabs(aJets[ijet].eta())<2.5) 
 			{
 			  nABtags[0] += (aJets[ijet].btag1>2.0);
@@ -734,7 +758,7 @@ int main(int argc, char* argv[])
 			}
 		      if(aJets[ijet].pt()<30 ) continue;
 		      nAJetsLoose      += hasObjectId(aJets[ijet].pid,JETID_LOOSE);
-		      nAJetsTight      += isTight;
+		      nAJetsTight      += hasObjectId(aJets[ijet].pid,JETID_TIGHT);
 		      nAJetsPUIdLoose  += hasObjectId(aJets[ijet].pid,JETID_OPT_LOOSE);
 		      nAJetsPUIdMedium += hasObjectId(aJets[ijet].pid,JETID_OPT_MEDIUM);
 		      
@@ -783,11 +807,11 @@ int main(int argc, char* argv[])
 			}
             
 		      //sub-divide for tight jets
-		      int eventSubCat  = eventCategoryInst.Get(phys,&aTightJets);
+		      int eventSubCat  = eventCategoryInst.Get(phys,&aGoodIdJets);
 		      TString tag_subcat = eventCategoryInst.GetLabel(eventSubCat);
 		      tags_full.push_back(tag_cat+tag_subcat);
 		      if(tag_subcat!="vbf") tags_full.push_back(tag_cat + "novbf");
-		      mon.fillHisto("npfjetstight",     tags_full, nAJetsTight,weight);
+		      mon.fillHisto("npfjets",     tags_full, nAJetsLoose,weight);
 
 
 		      passDphijmet=(mindphijmet>0.5); 
@@ -803,7 +827,7 @@ int main(int argc, char* argv[])
 			  if(runBlinded && (mustBlind || hasVbfBlinding) ) continue;
 			  
 			  if(zvvs[0].pt()>70) mon.fillHisto("eventflow",tags_full,6,weight);
-			  
+	  
 			  METUtils::stRedMET aRedMetOut; 
 			  LorentzVector aRedMet=METUtils::redMET(METUtils::INDEPENDENTLYMINIMIZED, lep1, 0, lep2, 0, aClusteredMetP4, zvvs[0],false,&aRedMetOut);
 			  double aRedMetL=aRedMetOut.redMET_l;
@@ -812,7 +836,9 @@ int main(int argc, char* argv[])
 			  
 			  LorentzVector assocMetP4(phys.met[1]);
 			  LorentzVector min3Met( min(zvvs[0], min(assocMetP4,aClusteredMetP4)) );
-			  
+
+			  mon.fillHisto("deltaleptonpt",tags_full, leadingLep.pt()-trailerLep.pt()    ,weight);
+			  mon.fillHisto("deltazpt",tags_full, zll.pt()-zvvs[0].pt(),weight);
 			  mon.fillHisto("balance",tags_full, zvvs[0].pt()/zll.pt(),weight);
 			  mon.fillHisto("met_met",tags_full,zvvs[0].pt(),weight);
 			  mon.fillHisto("met_met_vspu",tags_full,ev.ngenITpu,zvvs[0].pt(),weight);
@@ -849,7 +875,7 @@ int main(int argc, char* argv[])
         float iweight = weight;                                               //nominal
         if(ivar==5)                        iweight *=TotalWeight_plus;        //pu up
         if(ivar==6)                        iweight *=TotalWeight_minus;       //pu down
-        //if(ivar<=10 && ivar>=7 && isMC_GG) iweight *=ev.hptWeights[ivar-6];   //ren/fact scales   
+        if(ivar<=10 && ivar>=7 && isMC_GG) iweight *=ev.hptWeights[ivar-6]/ev.hptWeights[0];   //ren/fact scales   
 
 	//recompute MET/MT if JES/JER was varied
 	LorentzVector zvv    = zvvs[ivar>4?0:ivar];
@@ -859,7 +885,7 @@ int main(int argc, char* argv[])
 	for(size_t ijet=0; ijet<varJets.size(); ijet++) 
 	  {
 	    clusteredMetP4 -= varJets[ijet];
-	    if(!hasObjectId(varJets[ijet].pid,JETID_TIGHT)) continue;
+	    if(!hasObjectId(varJets[ijet].pid,JETID_LOOSE)) continue;
 	    tightVarJets.push_back( varJets[ijet] );
 	  }
 	float mt = METUtils::transverseMass(zll,zvv,true);

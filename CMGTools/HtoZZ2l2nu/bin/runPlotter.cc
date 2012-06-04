@@ -33,6 +33,7 @@ int cutIndex=-1;
 string cutIndexStr="";
 double iLumi = 2007;
 double iEcm=8;
+bool noLog=false;
 bool showChi2 = false;
 bool do2D  = true;
 bool do1D  = true;
@@ -295,7 +296,9 @@ void Draw2DHistogramSplitCanvas(JSONWrapper::Object& Root, std::string RootDir, 
    T->SetFillColor(0);
    T->SetFillStyle(0);  T->SetLineColor(0);
    T->SetTextAlign(32);
-   char Buffer[1024]; sprintf(Buffer, "CMS preliminary, #sqrt{s}=%.1f TeV, #scale[0.5]{#int} L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   char Buffer[1024]; 
+   if(iEcm>0) sprintf(Buffer, "CMS preliminary, #sqrt{s}=%.1f TeV, #scale[0.5]{#int} L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   else       sprintf(Buffer, "CMS simulation");
    T->AddText(Buffer);
 
    std::vector<JSONWrapper::Object> Process = Root["proc"].daughters();
@@ -304,7 +307,7 @@ void Draw2DHistogramSplitCanvas(JSONWrapper::Object& Root, std::string RootDir, 
       if(Process[i]["isinvisible"].toBool())continue;
 
       TCanvas* c1 = new TCanvas("c1","c1",500,500);
-      c1->SetLogz(true);
+      if(!noLog) c1->SetLogz(true);
 
       TH1* hist = NULL;
       std::vector<JSONWrapper::Object> Samples = (Process[i])["data"].daughters();
@@ -389,7 +392,9 @@ void Draw2DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    T->SetFillColor(0);
    T->SetFillStyle(0);  T->SetLineColor(0);
    T->SetTextAlign(32);
-   char Buffer[1024]; sprintf(Buffer, "CMS preliminary, #sqrt{s}=%.1f TeV, #scale[0.5]{#int} L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   char Buffer[1024]; 
+   if(iEcm>0) sprintf(Buffer, "CMS preliminary, #sqrt{s}=%.1f TeV, #scale[0.5]{#int} L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   else       sprintf(Buffer, "CMS simulation");
    T->AddText(Buffer);
 
    std::vector<JSONWrapper::Object> Process = Root["proc"].daughters();
@@ -409,7 +414,7 @@ void Draw2DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
       if(Process[i]["isinvisible"].toBool())continue;
 
       TVirtualPad* pad = c1->cd(i+1);
-      pad->SetLogz(true);
+      if(!noLog) pad->SetLogz(true);
       pad->SetTopMargin(0.0); pad->SetBottomMargin(0.10);  pad->SetRightMargin(0.20);
 
       TH1* hist = NULL;
@@ -491,7 +496,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    TPad* t1 = new TPad("t1","t1", 0.0, 0.20, 1.0, 1.0);
    t1->Draw();
    t1->cd();
-   t1->SetLogy(true);
+   if(!noLog) t1->SetLogy(true);
 
    TLegend* legA  = new TLegend(0.845,0.2,0.99,0.99, "NDC"); 
    //   TLegend* legA  = new TLegend(0.51,0.93,0.67,0.75, "NDC"); 
@@ -500,6 +505,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    TH1*     mc   = NULL;
    std::vector<TH1 *> spimpose;
    std::vector<TString> spimposeOpts;
+   std::vector<float> spimposeNorms;
    TH1*     data = NULL;
    std::vector<TObject*> ObjectToDelete;
 
@@ -569,7 +575,7 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
       fixExtremities(hist,true,true);
       hist->SetTitle("");
       hist->SetStats(kFALSE);
-      hist->SetMinimum(1E-2);
+      hist->SetMinimum(1E-1);
       //hist->SetMaximum(1E6);
       hist->SetMaximum(hist->GetBinContent(hist->GetMaximumBin())*1.10);
       ObjectToDelete.push_back(hist);
@@ -584,6 +590,9 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
 	{
 	  //legB->AddEntry(hist, Process[i]["tag"].c_str(), "L");
 	  legA->AddEntry(hist, Process[i]["tag"].c_str(), Process[i]["isdata"].toBool() ? "P" : "L" );
+	  float normFactor(-1);
+	  if(Process[i].isTag("normto")) normFactor=Process[i]["normto"].toDouble();
+	  spimposeNorms.push_back( normFactor );
 	  spimposeOpts.push_back( Process[i]["isdata"].toBool() ? "e1" : "hist" );
 	  spimpose.push_back(hist);
 	}
@@ -615,6 +624,8 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    }
    for(size_t ip=0; ip<spimpose.size(); ip++){
      TString opt=spimposeOpts[ip];
+     float normTo=spimposeNorms[ip];
+     if(normTo>0) spimpose[ip]->Scale(normTo/spimpose[ip]->Integral());
      spimpose[ip]->Draw(opt + (canvasIsFilled ? "same": "") );
      canvasIsFilled=true;
    }
@@ -637,7 +648,9 @@ void Draw1DHistogram(JSONWrapper::Object& Root, std::string RootDir, NameAndType
    T->SetFillColor(0);
    T->SetFillStyle(0);  T->SetLineColor(0);
    T->SetTextAlign(22);
-   char Buffer[1024]; sprintf(Buffer, "CMS preliminary, #sqrt{s}=%.1f TeV, #scale[0.5]{#int} L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   char Buffer[1024];
+   if(iEcm>0) sprintf(Buffer, "CMS preliminary, #sqrt{s}=%.1f TeV, #scale[0.5]{#int} L=%.1f fb^{-1}", iEcm, iLumi/1000);
+   else       sprintf(Buffer, "CMS simulation");
    T->AddText(Buffer);
    T->Draw("same");
 
@@ -710,15 +723,15 @@ std::string toLatexRounded(double value, double error){
    if(power<=-3)     {power=power+3;
    }else if(power>=2){power=power-2;
    }else             {power=0;}       
-
+   
    value = value / pow(10,power);
    error = error / pow(10,power);
    int ValueFloating = 1+std::max(-1*log10(error),0.0);
    int ErrorFloating = ValueFloating;
-
+   
    char tmpchar[255];
    if(power!=0){
-      sprintf(tmpchar,"$(%.*f\\pm%.*f)\\times 10^{%g}$",ValueFloating,value,ErrorFloating,error,power);
+     sprintf(tmpchar,"$(%.*f\\pm%.*f)\\times 10^{%g}$",ValueFloating,value,ErrorFloating,error,power);
    }else{
       sprintf(tmpchar,"$%.*f\\pm%.*f$",ValueFloating,value,ErrorFloating,error);
    }
@@ -818,27 +831,28 @@ void ConvertToTex(JSONWrapper::Object& Root, std::string RootDir, NameAndType Hi
       if((!Process[i].isTag("spimpose") || !Process[i]["spimpose"].toBool()) && !Process[i]["isdata"].toBool()){
          //Add to Stack
          if(!stack){stack = (TH1*)hist->Clone("Stack");}else{stack->Add(hist,1.0);}
-
+	 
          char numberastext[2048]; numberastext[0] = '\0';
          for(int b=1;b<=hist->GetXaxis()->GetNbins();b++){sprintf(numberastext,"%s & %s",numberastext, toLatexRounded(hist->GetBinContent(b), hist->GetBinError(b)).c_str());}
          fprintf(pFile, "%s %s \\\\\n",CleanTag.c_str(), numberastext);         
-       }else{
-          //Add to Canvas   
-          if(stack){
-            char numberastext[2048]; numberastext[0] = '\0';
-            for(int b=1;b<=hist->GetXaxis()->GetNbins();b++){sprintf(numberastext,"%s & %s",numberastext, toLatexRounded(stack->GetBinContent(b), stack->GetBinError(b)).c_str());}
-            fprintf(pFile, "%s %s \\\\\n\\hline\n","Total expected", numberastext);
-             ObjectToDelete.push_back(stack);
-             stack=NULL;
-          }
-
-          if(Process[i]["isdata"].toBool()){fprintf(pFile,"\\hline\n");}
-
-          char numberastext[2048]; numberastext[0] = '\0';
-          for(int b=1;b<=hist->GetXaxis()->GetNbins();b++){sprintf(numberastext,"%s & %s",numberastext, toLatexRounded(hist->GetBinContent(b), hist->GetBinError(b)).c_str());}
-          fprintf(pFile, "%s %s \\\\\n",CleanTag.c_str(), numberastext);
-       }
-
+      }else{
+	
+	//Add to Canvas   
+	if(stack){
+	  char numberastext[2048]; numberastext[0] = '\0';
+	  for(int b=1;b<=hist->GetXaxis()->GetNbins();b++){sprintf(numberastext,"%s & %s",numberastext, toLatexRounded(stack->GetBinContent(b), stack->GetBinError(b)).c_str());}
+	  fprintf(pFile, "%s %s \\\\\n\\hline\n","Total expected", numberastext);
+	  ObjectToDelete.push_back(stack);
+	  stack=NULL;
+	}
+	
+	if(Process[i]["isdata"].toBool()){fprintf(pFile,"\\hline\n");}
+	
+	char numberastext[2048]; numberastext[0] = '\0';
+	for(int b=1;b<=hist->GetXaxis()->GetNbins();b++){sprintf(numberastext,"%s & %f",numberastext, hist->GetBinContent(b));}
+	fprintf(pFile, "%s %s \\\\\n",CleanTag.c_str(), numberastext);
+      }
+      
    }
 
    if(pFile){
@@ -879,12 +893,22 @@ int main(int argc, char* argv[]){
         printf("--json    --> containing list of process (and associated style) to process to process\n");
         printf("--only    --> processing only the objects containing the following argument in their name\n");
         printf("--index   --> will do the projection on that index for histos of type cutIndex\n");
+<<<<<<< runPlotter.cc
+        printf("--chi2    --> show the data/MC chi^2\n");
+        printf("--nolog    --> no log scale please\n");
+        printf("--no1D    --> Skip processing of 1D objects\n");
+        printf("--no2D    --> Skip processing of 2D objects\n");
+        printf("--noTex   --> Do not create latex table (when possible)\n");
+        printf("--noRoot  --> Do not make a summary .root file\n");
+        printf("--noPlot  --> Do not creates plot files (useful to speedup processing)\n");
+=======
         printf("--chi2    --> show the data/MC chi^2\n"); 
         printf("--no1D   --> Skip processing of 1D objects\n");
         printf("--no2D   --> Skip processing of 2D objects\n");
         printf("--noTex  --> Do not create latex table (when possible)\n");
         printf("--noRoot --> Do not make a summary .root file\n");
         printf("--noPlot --> Do not creates plot files (useful to speedup processing)\n");
+>>>>>>> 1.44.2.6
 	printf("--plotExt --> extension to save\n");
 	printf("--cutflow --> name of the histogram with the original number of events (cutflow by default)\n");
         printf("--splitCanvas --> (only for 2D plots) save all the samples in separated pltos\n");
@@ -903,6 +927,7 @@ int main(int argc, char* argv[]){
      if(arg.find("--only"   )!=string::npos && i+1<argc){ objectSearchKey = argv[i+1]; i++;    }
      if(arg.find("--index"  )!=string::npos && i+1<argc){ sscanf(argv[i+1],"%i",&cutIndex); i++; onlyCutIndex=(cutIndex>=0); printf("index = %i\n", cutIndex);  }
      if(arg.find("--chi2"  )!=string::npos){ showChi2 = true;    }
+     if(arg.find("--noLog"  )!=string::npos){ noLog = true;    }
      if(arg.find("--no2D"  )!=string::npos){ do2D = false;    }
      if(arg.find("--no1D"  )!=string::npos){ do1D = false;    }
      if(arg.find("--noTex" )!=string::npos){ doTex= false;    }
@@ -941,8 +966,15 @@ int main(int argc, char* argv[]){
        if(ictr%TreeStep==0){printf(".");fflush(stdout);}
        if(objectSearchKey != "" && it->name.find(objectSearchKey)==std::string::npos)continue;
        system(("echo \"" + it->name + "\" >> " + csvFile).c_str());
+<<<<<<< runPlotter.cc
+       if(doTex 
+	  && (it->name.find("evtflow")!=std::string::npos || it->name.find("eventflow")!=std::string::npos)
+	  && it->name.find("optim_eventflow")==std::string::npos)
+	 {    ConvertToTex(Root,inDir,*it); }
+=======
 
        if(doTex && it->name.find("eventflow")!=std::string::npos && it->name.find("optim_eventflow")==std::string::npos){    ConvertToTex(Root,inDir,*it); }
+>>>>>>> 1.44.2.6
        if(doPlot && do2D  && !it->type){                      if(!splitCanvas){Draw2DHistogram(Root,inDir,*it); }else{Draw2DHistogramSplitCanvas(Root,inDir,*it);}}
        if(doPlot && do1D  &&  it->type){                                       Draw1DHistogram(Root,inDir,*it); }
 

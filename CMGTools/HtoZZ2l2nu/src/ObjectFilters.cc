@@ -36,7 +36,7 @@ ObjectIdSummary::ObjectIdSummary()
   e1x5e5x5=0;                    preShowerOverRaw=0;  eopout=0;
   aeff=0;
   neutHadFrac=0;                 neutEmFrac=0;        chHadFrac=0;
-  tche=0;                        csv=0;               jp=0;
+  tche=0;                        csv=0;               jp=0;       tchp=0;
   beta=0;                        betaStar=0;          dRMean=0;
   ptD=0;                         ptRMS=0;
 }
@@ -68,6 +68,7 @@ ObjectIdSummary::ObjectIdSummary(ObjectIdSummary const&other)
   aeff=other.aeff;
   neutHadFrac=other.neutHadFrac;                           neutEmFrac=other.neutEmFrac;                                  chHadFrac=other.chHadFrac;
   tche=other.tche;                                         csv=other.csv;                                                jp=other.jp;
+  tchp=other.tchp;
   beta=other.beta;                                         betaStar=other.betaStar;                                      dRMean=other.dRMean;
   ptD=other.ptD;                                           ptRMS=other.ptRMS;
 }
@@ -358,7 +359,9 @@ vector<CandidatePtr> getGoodElectrons(edm::Handle<edm::View<reco::Candidate> > &
 	std::pair<double,double> enSF(1.0,0);
 	if(ecorr) 
 	  {
-	    enSF=ecorr->CorrectedEnergyWithError(*ele,*hVtx,lazyTool,iSetup);
+	    //FIXME : 52X
+	    enSF=ecorr->CorrectedEnergyWithError(dynamic_cast<const reco::GsfElectron &>(*ele),lazyTool);
+	    //	    enSF=ecorr->CorrectedEnergyWithError(*ele,*hVtx,lazyTool,iSetup);
 	    enSF.first = enSF.first/ele->energy();  enSF.second = enSF.second/ele->energy();
 	  }
 	lepId.ensf              = enSF.first;
@@ -734,6 +737,7 @@ vector<CandidatePtr> getGoodJets(edm::Handle<edm::View<reco::Candidate> > &hJet,
 	jetId.ensf = jet->jecFactor("Uncorrected");
 	jetId.ensferr=0;
 	jetId.tche=jet->bDiscriminator("trackCountingHighEffBJetTags");
+	jetId.tchp=jet->bDiscriminator("trackCountingHighPurBJetTags");
 	jetId.csv=jet->bDiscriminator("combinedSecondaryVertexBJetTags");
 	jetId.jp=jet->bDiscriminator("jetProbabilityBJetTags");
 	jetId.neutHadFrac = jet->neutralHadronEnergyFraction();
@@ -881,13 +885,16 @@ vector<CandidatePtr> getGoodPhotons(edm::Handle<edm::View<reco::Candidate> > &hP
 		gSystem->ExpandPathName(path);
 		phocorr->Initialize(iSetup,path.Data());
 	      }
-	    enSF=phocorr->CorrectedEnergyWithError(*pho,*hVtx,lazyTool,iSetup);
+	    //FIXME : 52X 
+	    enSF=phocorr->CorrectedEnergyWithError(*pho);
+	    //	    enSF=phocorr->CorrectedEnergyWithError(*pho,*hVtx,lazyTool,iSetup);
 	    enSF.first = enSF.first/pho->energy();  enSF.second = enSF.second/pho->energy();
 	  }
 	phoId.ensf              = enSF.first;
 	phoId.ensferr           = enSF.second;
 	phoId.hoe               = pho->hadronicOverEm();
-	phoId.hoebc             = pho->hadTowOverEm();
+	//FIXME : 52X 
+	//phoId.hoebc             = pho->hadTowOverEm();
 	vector<float> cov       = lazyTool.localCovariances(*pho->superCluster()->seed());
 	phoId.sihih             = pho->sigmaIetaIeta();
 	phoId.sipip             = !isnan(cov[2]) ? sqrt(cov[2]) : 0.;
@@ -898,7 +905,8 @@ vector<CandidatePtr> getGoodPhotons(edm::Handle<edm::View<reco::Candidate> > &hP
 	phoId.e1x5              = pho->e1x5();
 	phoId.e5x5              = pho->e5x5();
 	phoId.h2te              = pho->hadronicDepth2OverEm();
-	phoId.h2tebc            = pho->hadTowDepth2OverEm();
+	//FIXME : 52X 
+	//phoId.h2tebc            = pho->hadTowDepth2OverEm();
 	phoId.r9                = pho->r9();
 	phoId.aeff              = EgammaCutBasedEleId::GetEffectiveArea(pho->eta());  
 	phoId.isoVals[TRACKER_ISO]=pho->trkSumPtHollowConeDR04();

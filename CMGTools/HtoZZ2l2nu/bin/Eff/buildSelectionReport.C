@@ -113,17 +113,17 @@ void buildSelectionReport(TString url="plotter.root")
   //
   TCanvas *c= new TCanvas("cbtag","cbtag",1200,600);
   c->Divide(2,1);
-  TString algos[]={"TCHE","JP","CSV","CSV"};
-  Double_t btagCuts[]={2.0,   0.275, 0.244, 0.679};
+  TString algos[]={"TCHE","JP","CSV"};
+  Double_t btagCuts[]={2.0,   0.275, 0.244};
   TString procsToIntegrate[]={"t#bar{t}","Single top",
 			      "Z#rightarrow ll", "Z#rightarrow #tau#tau", "W#rightarrow l#nu",
 			      "ZZ","WW#rightarrow 2l2#nu","WZ#rightarrow 3l#nu"};
   Bool_t measureAgainstSignal[]={true,true,
 				 false,false,false,
 				 false,false,false};
-  TString signal("ggH(600)#rightarrow ZZ");
+  TString signal("ggH(200)#rightarrow ZZ");
   const size_t nProcsToIntegrate=sizeof(procsToIntegrate)/sizeof(TString);
-  for(int ialgo=0; ialgo<4; ialgo++)
+  for(int ialgo=0; ialgo<3; ialgo++)
     {
       Double_t totalBckg(0), totalBckgErr(0);
 

@@ -20,6 +20,8 @@ typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<double> > LorentzVector;
 
 #define MAXPARTICLES 50
 #define MAXMCPARTICLES 250
+#define MAXMEASUREMENTS 20
+
 struct ZZ2l2nuSummary_t
 {
   enum HiggsPtWeights{ hKfactor, hKfactor_renUp, hKfactor_renDown, hKfactor_factUp, hKfactor_factDown };
@@ -73,7 +75,7 @@ struct ZZ2l2nuSummary_t
   Int_t jn;
   Float_t jn_rawsf[MAXPARTICLES];
   Float_t jn_px[MAXPARTICLES],    jn_py[MAXPARTICLES],      jn_pz[MAXPARTICLES],          jn_en[MAXPARTICLES];
-  Float_t jn_btag1[MAXPARTICLES], jn_btag2[MAXPARTICLES],   jn_btag3[MAXPARTICLES], jn_neutHadFrac[MAXPARTICLES], jn_neutEmFrac[MAXPARTICLES], jn_chHadFrac[MAXPARTICLES];
+  Float_t jn_btag1[MAXPARTICLES], jn_btag2[MAXPARTICLES],   jn_btag3[MAXPARTICLES], jn_btag4[MAXPARTICLES], jn_neutHadFrac[MAXPARTICLES], jn_neutEmFrac[MAXPARTICLES], jn_chHadFrac[MAXPARTICLES];
   Int_t   jn_genid[MAXPARTICLES], jn_genflav[MAXPARTICLES];
   Float_t jn_genpt[MAXPARTICLES], jn_pumva[MAXPARTICLES], jn_puminmva[MAXPARTICLES];
   Float_t jn_beta[MAXPARTICLES],  jn_betaStar[MAXPARTICLES], jn_dRMean[MAXPARTICLES], jn_ptD[MAXPARTICLES], jn_ptRMS[MAXPARTICLES],jn_etaW[MAXPARTICLES],jn_phiW[MAXPARTICLES];
@@ -84,7 +86,7 @@ struct ZZ2l2nuSummary_t
   Int_t ajn;
   Float_t ajn_rawsf[MAXPARTICLES];
   Float_t ajn_px[MAXPARTICLES],    ajn_py[MAXPARTICLES],      ajn_pz[MAXPARTICLES],    ajn_en[MAXPARTICLES]; 
-  Float_t ajn_btag1[MAXPARTICLES], ajn_btag2[MAXPARTICLES],   ajn_btag3[MAXPARTICLES], ajn_neutHadFrac[MAXPARTICLES], ajn_neutEmFrac[MAXPARTICLES], ajn_chHadFrac[MAXPARTICLES];
+  Float_t ajn_btag1[MAXPARTICLES], ajn_btag2[MAXPARTICLES],   ajn_btag3[MAXPARTICLES], ajn_btag4[MAXPARTICLES], ajn_neutHadFrac[MAXPARTICLES], ajn_neutEmFrac[MAXPARTICLES], ajn_chHadFrac[MAXPARTICLES];
   Int_t   ajn_genid[MAXPARTICLES], ajn_genflav[MAXPARTICLES];
   Float_t ajn_genpt[MAXPARTICLES], ajn_pumva[MAXPARTICLES], ajn_puminmva[MAXPARTICLES];
   Float_t ajn_beta[MAXPARTICLES],  ajn_betaStar[MAXPARTICLES], ajn_dRMean[MAXPARTICLES], ajn_ptD[MAXPARTICLES], ajn_ptRMS[MAXPARTICLES], ajn_etaW[MAXPARTICLES],ajn_phiW[MAXPARTICLES];
@@ -105,12 +107,15 @@ struct ZZ2l2nuSummary_t
   Float_t g_px[MAXPARTICLES], g_py[MAXPARTICLES]  , g_pz[MAXPARTICLES]  , g_en[MAXPARTICLES], g_iso1[MAXPARTICLES], g_iso2[MAXPARTICLES], g_iso3[MAXPARTICLES], g_sihih[MAXPARTICLES], g_r9[MAXPARTICLES], g_hoe[MAXPARTICLES], g_htoe[MAXPARTICLES], g_sipip[MAXPARTICLES];
   Float_t g_corren[MAXPARTICLES], g_correnerr[MAXPARTICLES];
   Int_t g_idbits[MAXPARTICLES];
-
   
   //gen level event
   Float_t h_px, h_py, h_pz, h_en;
   Int_t nmcparticles;
   Float_t mc_px[MAXMCPARTICLES],mc_py[MAXMCPARTICLES],mc_pz[MAXMCPARTICLES],mc_en[MAXMCPARTICLES]; Int_t mc_id[MAXMCPARTICLES];
+
+  //additional measurements you may want to add
+  Int_t nmeasurements;
+  Float_t measurements[MAXMEASUREMENTS];
 };
 
 class ZZ2l2nuSummaryHandler{

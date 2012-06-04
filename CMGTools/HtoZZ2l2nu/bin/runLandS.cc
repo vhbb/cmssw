@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <boost/shared_ptr.hpp>
 #include "Math/GenVector/Boost.h"
@@ -250,12 +251,13 @@ void getYieldsFromShape(std::vector<TString> ch, const map<TString, Shape_t> &al
        h=allShapes.find(ch[ich]+AnalysisBins[b]+shName)->second.signal[isig];
        TString procTitle(h->GetTitle()); procTitle.ReplaceAll("#","\\");
 
-       if(!procTitle.Contains(massStr))continue;
-            if(procTitle.Contains("ggH") && procTitle.Contains("ZZ"))procTitle = "ggH("+massStr+")";
+       if(massStr=="0" && procTitle!="ZZ") continue;
+       else if(!procTitle.Contains(massStr))continue;
+       if(procTitle.Contains("ggH") && procTitle.Contains("ZZ"))procTitle = "ggH("+massStr+")";
        else if(procTitle.Contains("qqH") && procTitle.Contains("ZZ"))procTitle = "qqH("+massStr+")";
        else if(procTitle.Contains("ggH") && procTitle.Contains("WW"))procTitle = "ggH("+massStr+")WW";
        else if(procTitle.Contains("qqH") && procTitle.Contains("WW"))procTitle = "qqH("+massStr+")WW";
-
+       
        if(b==0&&ich==0)Ccol  += "c|";
        if(b==0&&ich==0)Cname += "&$" + procTitle+"$";
 
@@ -775,7 +777,7 @@ DataCardInputs convertHistosForLimits(Int_t mass,TString histo,TString url,TStri
 
   //init globalVariables
   TString massStr(""); massStr += mass;
-//  std::set<TString> allCh,allProcs;
+  //  std::set<TString> allCh,allProcs;
   std::vector<TString> allCh,allProcs;
 
   //open input file
@@ -809,7 +811,7 @@ DataCardInputs convertHistosForLimits(Int_t mass,TString histo,TString url,TStri
 
   //define vector for search
   std::vector<TString>& selCh = Channels;
-//  selCh.push_back("ee"); selCh.push_back("mumu");
+  //  selCh.push_back("ee"); selCh.push_back("mumu");
 
   //non-resonant background estimation
   //estimateNonResonantBackground(selCh,"emu",allShapes,"nonresbckg_ctrl");
@@ -822,8 +824,7 @@ DataCardInputs convertHistosForLimits(Int_t mass,TString histo,TString url,TStri
 
   //replace WZ by its estimate from 3rd Lepton SB
   if(subWZ)doWZSubtraction(selCh,"emu",allShapes,histo,histo+"_3rdLepton");
-
-
+  
   //print event yields from the mt shapes
   if(runSystematics)getYieldsFromShape(selCh,allShapes,histo);
 
@@ -857,8 +858,9 @@ DataCardInputs convertHistosForLimits(Int_t mass,TString histo,TString url,TStri
         }
 
         TString proc(h->GetTitle());
-	if(!proc.Contains(massStr))continue;
-	     if(proc.Contains("ggH") && proc.Contains("ZZ"))proc = "ggHZZ";
+	if(massStr=="0" && proc!="ZZ") continue;
+	else if(!proc.Contains(massStr))continue;
+	if(proc.Contains("ggH") && proc.Contains("ZZ"))proc = "ggHZZ";
         else if(proc.Contains("qqH") && proc.Contains("ZZ"))proc = "qqHZZ";
         else if(proc.Contains("ggH") && proc.Contains("WW"))proc = "ggHWW";
         else if(proc.Contains("qqH") && proc.Contains("WW"))proc = "qqHWW";

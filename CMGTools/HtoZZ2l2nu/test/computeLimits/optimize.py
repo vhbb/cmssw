@@ -88,8 +88,10 @@ cuts1   = file.Get('WW#rightarrow 2l2#nu/optim_cut1_met')
 cuts2   = file.Get('WW#rightarrow 2l2#nu/optim_cut1_mtmin') 
 cuts3   = file.Get('WW#rightarrow 2l2#nu/optim_cut1_mtmax') 
 
-MASS = [200,400,600]
-SUBMASS = [200,400,600]
+MASS=[0]
+SUBMASS=[0]
+#MASS = [200,400,600]
+#SUBMASS = [200,400,600]
 #MASS = [200,250, 300,350, 400,450, 500,550, 600]
 #SUBMASS = [200,250, 300,350, 400,450, 500,550, 600]
 #SUBMASS = [200, 225, 250, 275, 300, 325, 350, 375, 400, 425, 450, 475, 500, 525, 550, 575, 600, 625, 650];

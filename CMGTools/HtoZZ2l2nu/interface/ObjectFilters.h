@@ -74,7 +74,7 @@ class ObjectIdSummary
   //common to electron, photon, muon and jet
   double aeff;
   //jet specific
-  double neutHadFrac,neutEmFrac,chHadFrac,tche, csv, jp,beta,betaStar,dRMean,ptD,ptRMS;
+  double neutHadFrac,neutEmFrac,chHadFrac,tche, tchp, csv, jp,beta,betaStar,dRMean,ptD,ptRMS;
 };
 
 
