@@ -571,6 +571,8 @@ int main(int argc, char* argv[])
   TrackInfo V;
   int nvlep=0,nalep=0; 
   float lheV_pt=0; //for the Madgraph sample stitching
+  float lheHT=0; //for the Madgraph sample stitching
+  float lheNj=0; //for the Madgraph sample stitching
   float PDFweight=1.; // for pdf reweighting (only madgraph)
   TrackSharingInfo TkSharing; // track sharing info;
 
@@ -693,6 +695,8 @@ int main(int argc, char* argv[])
   _outTree->Branch("V"		        ,  &V	                    ,  "mass/F:pt/F:eta:phi/F");
   _outTree->Branch("FatH"               ,  &FatH                    ,  "FatHiggsFlag/I:mass/F:pt/F:eta:phi/F:filteredmass/F:filteredpt/F:filteredeta/F:filteredphi/F");
   _outTree->Branch("lheV_pt"            ,  &lheV_pt                 ,  "lheV_pt/F");
+  _outTree->Branch("lheHT"            ,  &lheHT                 ,  "lheHT/F");
+  _outTree->Branch("lheNj"            ,  &lheNj                 ,  "lheNj/F");
   _outTree->Branch("PDFweight"          ,  &PDFweight               ,  "PDFweight/F");
   _outTree->Branch("genZ"		,  &genZ	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
   _outTree->Branch("genZstar"		,  &genZstar	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
@@ -1126,7 +1130,12 @@ int main(int argc, char* argv[])
 	  const std::vector<lhef::HEPEUP::FiveVector> pup_ = hepeup_.PUP; // px, py, pz, E, M
 	  for(unsigned int i=0; i<pup_.size(); ++i){
 	    int id=hepeup_.IDUP[i]; //pdgId
-	      
+	    int status = hepeup_.ISTUP[i];
+	    if(status == 1 && ( TMath::Abs(id) >= 0 || TMath::Abs(id) < 6 ) ){
+	      lheHT += hepeup_.PUP[i][3];
+	      lheNj++; 
+	    }	     
+ 
 	    if(id==11){ l.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lCheck=true;}
 	    if(id==-11){ lbar.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lbarCheck=true;}
 	    if(id==12){ vl.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); vlCheck=true;}
