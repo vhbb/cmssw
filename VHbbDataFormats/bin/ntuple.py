@@ -126,6 +126,8 @@ process.Analyzer = cms.PSet(
         "HLT_IsoMu20_eta2p1_WCandPt80_v.*", #46
         "HLT_IsoMu20_WCandPt80_v.*", #47
         "HLT_Mu17_TkMu8_v.*", #48
+        "HLT_DiCentralPFJet30_PFMET80_v*", #49
+        
    ),
     isMC =     cms.bool(False),
     verbose = cms.bool(False),
