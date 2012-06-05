@@ -797,6 +797,27 @@ bool wpHWW=((fabs(eta) < 0.8 && id>0.94 && iso < 0.15) ||  (fabs(eta) >= 0.8 && 
     ")" */
 //	(fabs(electrons[it].id95 - 7)) < 0.1  &&
         wp95 &&
+	 (
+         (electrons[it].isEE  &&
+        //fabs(electrons[it].Deta) < 0.009 &&
+        //fabs(electrons[it].Dphi) < 0.1 &&
+        electrons[it].sihih < 0.03  &&
+        electrons[it].HoE < 0.10  &&
+        electrons[it].innerHits == 0  &&
+        (electrons[it].tIso/electrons[it].p4.Pt()) < 0.2 && 
+        (electrons[it].eIso/electrons[it].p4.Pt()) < 0.2 &&
+        (electrons[it].hIso/electrons[it].p4.Pt()) < 0.2) 
+	    || 
+        (electrons[it].isEB &&
+        //fabs(electrons[it].Deta) < 0.007 &&
+        //fabs(electrons[it].Dphi) < 0.015 &&
+        electrons[it].sihih < 0.01  &&
+        electrons[it].HoE < 0.12  &&
+        electrons[it].innerHits == 0  &&
+        (electrons[it].tIso/electrons[it].p4.Pt()) < 0.2 && 
+        (electrons[it].eIso/electrons[it].p4.Pt()) < 0.2 &&
+        (electrons[it].hIso/electrons[it].p4.Pt()) < 0.2) 
+        ) && 
 //2012 cut based ELE ID
   /*      fabs(electrons[it].dxy) < 0.02  &&
         fabs(electrons[it].dz) < 0.1  &&
