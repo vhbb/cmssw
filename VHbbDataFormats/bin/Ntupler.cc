@@ -1209,6 +1209,8 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	  bool vlCheck=false;
 	  bool vlbarCheck=false;
 	  int idl, idlbar;
+	  lheHT=0.;
+	  lheNj=0;
 	  TLorentzVector l,lbar,vl,vlbar,V_tlv;
 	  const lhef::HEPEUP hepeup_ = evt->hepeup();
 	  const std::vector<lhef::HEPEUP::FiveVector> pup_ = hepeup_.PUP; // px, py, pz, E, M

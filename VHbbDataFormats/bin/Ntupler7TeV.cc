@@ -1127,6 +1127,8 @@ int main(int argc, char* argv[])
 // 	    "     xfx2': " << newpdf2 << "\n" <<
 // 	    "     weight:" << (newpdf1/oldpdf1)*(newpdf2/oldpdf2) << std::endl;
 
+	  lheHT=0.;
+	  lheNj=0;
 	  const std::vector<lhef::HEPEUP::FiveVector> pup_ = hepeup_.PUP; // px, py, pz, E, M
 	  for(unsigned int i=0; i<pup_.size(); ++i){
 	    int id=hepeup_.IDUP[i]; //pdgId
