@@ -695,11 +695,12 @@ float pfCorrIso = (muons[it].pfChaIso+ std::max(muons[it].pfPhoIso+muons[it].pfN
 	muons[it].nValidLayers > 5 &&
 //	muons[it].nHits > 10 &&
         //tracker
-//	(muons[it].cat & 0x1) && 
+//	(muons[it].cat & 0x2) && 
 	//global
-	(muons[it].cat & 0x2) && 
+	(muons[it].cat & 0x1) && 
 	muons[it].nMatches >=2 &&
 	muons[it].ipDb<.2 &&
+	muons[it].zPVPt<0.5 &&
 	//	(muons[it].hIso+muons[it].eIso+muons[it].tIso)/muons[it].p4.Pt()<.15 &&
         pfCorrIso < 0.12 &&
 	fabs(muons[it].p4.Eta())<2.4 &&
