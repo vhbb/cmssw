@@ -37,7 +37,9 @@ public:
    tscaleDoubleEle2012A_leg8=openFile(ana,"hltDoubleEle2012A_leg8");
    tscaleDoubleEle2012A_leg17=openFile(ana,"hltDoubleEle2012A_leg17");
    tscaleDoubleMuon2012A_leg8=openFile(ana,"hltDoubleMuon2012A_leg8");
-   tscaleDoubleMuon2012A_leg17=openFile(ana,"hltDoubleMuon2012A_leg17");
+
+   tscaleDoubleMuon2012A_dZ=openFile(ana,"hltDoubleMuon2012A_dZ");
+   tscaleDoubleEle2012A_dZ=openFile(ana,"hltDoubleEle2012A_dZ");
 
    tscaleMuPlusWCandPt2012A_legMu=openFile(ana,"hltMuPlusWCandPt2012A_legMu");  
    tscaleMuPlusWCandPt2012A_legW=openFile(ana,"hltMuPlusWCandPt2012A_legW");  
@@ -262,8 +264,9 @@ float doubleEle2012A( float pt1, float eta1, float pt2, float eta2)
  float eff2_17 = efficiencyFromPtEta(pt2,eta2,tscaleDoubleEle2012A_leg17).first;
  float eff1_8 = efficiencyFromPtEta(pt1,eta1,tscaleDoubleEle2012A_leg8).first;
  float eff2_8 = efficiencyFromPtEta(pt2,eta2,tscaleDoubleEle2012A_leg8).first;
+ float eff_dz = efficiencyFromPtEta(eta1,eta2,tscaleDoubleEle2012A_dZ).first;  // despite the name pt,eta is actually eta1,eta2
  
- return eff1_17 * eff2_8 + eff2_17 * eff1_8 - eff1_17*eff2_17;
+ return (eff1_17 * eff2_8 + eff2_17 * eff1_8 - eff1_17*eff2_17)*eff_dz;
 
 }
 float doubleMuon2012A( float pt1, float eta1, float pt2, float eta2)
@@ -272,8 +275,9 @@ float doubleMuon2012A( float pt1, float eta1, float pt2, float eta2)
  float eff2_17 = efficiencyFromPtEta(pt2,eta2,tscaleDoubleMuon2012A_leg17).first;
  float eff1_8 = efficiencyFromPtEta(pt1,eta1,tscaleDoubleMuon2012A_leg8).first;
  float eff2_8 = efficiencyFromPtEta(pt2,eta2,tscaleDoubleMuon2012A_leg8).first;
+ float eff_dz = efficiencyFromPtEta(eta1,eta2,tscaleDoubleMuon2012A_dZ).first;  // despite the name pt,eta is actually eta1,eta2
 
- return eff1_17 * eff2_8 + eff2_17 * eff1_8 - eff1_17*eff2_17;
+ return (eff1_17 * eff2_8 + eff2_17 * eff1_8 - eff1_17*eff2_17)*eff_dz;
 
 }
 
@@ -305,7 +309,8 @@ private:
   TTree * tscaleDoubleMuon2012A_leg17;
   TTree * tscaleMuPlusWCandPt2012A_legMu;
   TTree * tscaleMuPlusWCandPt2012A_legW;
-
+  TTree * tscaleDoubleEle2012A_dZ;
+  TTree * tscaleDoubleMuon2012A_dZ;
 //  TTree * tscalePFMHTele;
   TTree * tscaleSingleEleMay;
   TTree * tscaleSingleEleV4;
