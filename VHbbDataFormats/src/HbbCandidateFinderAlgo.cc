@@ -120,7 +120,8 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   VHbbEvent::HardJet fatj1;
   std::vector<VHbbEvent::SimpleJet> subJetsout;
   std::vector<VHbbEvent::SimpleJet> addJetsFat;
-  foundHardJets= findFatJet(event->hardJets,event->subJets,event->filterJets,fatj1,subJetsout, event->simpleJets2, addJetsFat, mu, ele) ;
+  // foundHardJets= findFatJet(event->hardJets,event->subJets,event->filterJets,fatj1,subJetsout, event->simpleJets2, addJetsFat, mu, ele) ;
+  foundHardJets= findFatJet(event->hardJets,event->subJets,event->filterJets,fatj1,subJetsout, event->simpleJets2, addJetsFat, event->muInfo, event->eleInfo) ;
 
   if (foundJets == false && foundHardJets == false) return;
 
