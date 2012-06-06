@@ -1,3 +1,7 @@
+import FWCore.PythonUtilities.LumiList as LumiList
+import FWCore.ParameterSet.Config as cms
+import FWCore.ParameterSet.Types as CfgTypes
+
 import FWCore.ParameterSet.Config as cms
 import os
 import re
@@ -13,6 +17,7 @@ f.close()
 #fileNames   = cms.vstring('file:2l2bMetEdmNtuples.root'),         ## mandatory
 process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(),
+    lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange()),
     PUmcfileName2011B= cms.string(baseAddFiles+"Summer12MCObserved.root"),
     PUdatafileName2011B = cms.string(baseAddFiles+"MyDataPileupHistogramObserved.root"),
     PUmcfileName = cms.string(baseAddFiles+"Summer12MCTrue.root"),
@@ -27,7 +32,12 @@ process.fwliteInput = cms.PSet(
     )
 
 
+JSONfile = '/gpfs/gpfsddn/cms/user/arizzi/Hbb/V32/CMSSW_5_2_5/src/VHbbAnalysis/VHbbDataFormats/bin/Cert_190456-195016_8TeV_PromptReco_Collisions12_JSON_v3.txt'
+lumiList = LumiList.LumiList (filename = JSONfile).getCMSSWString().split(',')
+process.fwliteInput.lumisToProcess.extend(lumiList)
+
 channel =  re.sub(".txt","",os.environ.get("FILETOPROCESS"))
+
 
 
 for l in lines :
