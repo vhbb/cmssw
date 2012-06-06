@@ -160,7 +160,7 @@ id2012tight[j]= i.isPF && i. globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0
 */
 
 // Copied from electron selection and setSpecific
-bool ElectronWP(const VHbbEvent::ElectronInfo &i,float rho,int wp) {
+float ElectronIso(const VHbbEvent::ElectronInfo &i,float rho) {
   float mincor=0.0;
   float minrho=0.0;
   float rhoN = std::max(rho,minrho);
@@ -176,10 +176,46 @@ bool ElectronWP(const VHbbEvent::ElectronInfo &i,float rho,int wp) {
   if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areagamma=0.097; areaNH=0.021; areaComb=0.12;}
   if(fabs(eta) > 2.4  ) {areagamma=0.11; areaNH=0.021; areaComb=0.13;}
 
+  //Correct electron photon double count
+  float pho=i.pfPhoIso;
+  if(i.innerHits>0) 
+    { 
+      pho-=i.pfPhoIsoDoubleCounted;
+    }
+  
+  float pfCorrIso = (i.pfChaIso+ std::max(pho-rhoN*areagamma,mincor )+std::max(i.pfNeuIso-rhoN*areaNH,mincor))/i.p4.Pt();
+  return pfCorrIso;
+}
 
-  float pfCorrIso = (i.pfChaIso+ std::max(i.pfPhoIso-rhoN*areagamma,mincor )+std::max(i.pfNeuIso-rhoN*areaNH,mincor))/i.p4.Pt();
-  float iso=pfCorrIso;
+bool ElectronPresel(const VHbbEvent::ElectronInfo &i) {
+  bool presel =   ((i.isEE  &&
+                    //fabs(i.Deta) < 0.009 &&
+                    //fabs(i.Dphi) < 0.1 &&
+                    i.sihih < 0.03  &&
+                    i.HoE < 0.10  &&
+                    i.innerHits == 0  &&
+                    (i.tIso/i.p4.Pt()) < 0.2 &&
+                    (i.eIso/i.p4.Pt()) < 0.2 &&
+                    (i.hIso/i.p4.Pt()) < 0.2)
+                   ||
+                   (i.isEB &&
+                    //fabs(i.Deta) < 0.007 &&
+                    //fabs(i.Dphi) < 0.015 &&
+                    i.sihih < 0.01  &&
+                    i.HoE < 0.12  &&
+                    i.innerHits == 0  &&
+                    (i.tIso/i.p4.Pt()) < 0.2 &&
+                    (i.eIso/i.p4.Pt()) < 0.2 &&
+                    (i.hIso/i.p4.Pt()) < 0.2)
+                   );
+  return presel;
+}
+
+bool ElectronWP(const VHbbEvent::ElectronInfo &i,float rho,int wp, bool requireIso = true) {
+
+  float iso=ElectronIso(i,rho);
   float id=i.mvaOutTrig;
+  float eta=i.p4.Eta();
   bool wp70=((fabs(eta) < 0.8 && id>0.977 && iso < 0.093) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.956 && iso < 0.095) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.966 && iso < 0.171));
   bool wp80=((fabs(eta) < 0.8 && id>0.913 && iso < 0.105) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.964 && iso < 0.178) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.899 && iso < 0.150));
   bool wp85=((fabs(eta) < 0.8 && id>0.929 && iso < 0.135) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.931 && iso < 0.159) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.805 && iso < 0.155));
@@ -187,17 +223,27 @@ bool ElectronWP(const VHbbEvent::ElectronInfo &i,float rho,int wp) {
   bool wp95=((fabs(eta) < 0.8 && id>0.858 && iso < 0.253) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.425 && iso < 0.225) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.759 && iso < 0.308));
   bool wpHWW=((fabs(eta) < 0.8 && id>0.94 && iso < 0.15) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.85 && iso < 0.15) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.92 && iso < 0.15));
 
-  if (wp == 70) return wp70;
-  if (wp == 80) return wp80;
-  if (wp == 85) return wp85;
-  if (wp == 90) return wp90;
-  if (wp == 95) return wp95;
+  bool presel = ElectronPresel(i);
 
-  return 0;
+  if (!requireIso) {
+    wp70=((fabs(eta) < 0.8 && id>0.977) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.956) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.966));
+    wp80=((fabs(eta) < 0.8 && id>0.913) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.964) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.899));
+    wp85=((fabs(eta) < 0.8 && id>0.929) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.931) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.805));
+    wp90=((fabs(eta) < 0.8 && id>0.877) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.794) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.846));
+    wp95=((fabs(eta) < 0.8 && id>0.858) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.425) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.759));
+    wpHWW=((fabs(eta) < 0.8 && id>0.94) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.85) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.92));
+  }
+
+  if (wp == 70) return (presel&&wp70);
+  if (wp == 80) return (presel&&wp80);
+  if (wp == 85) return (presel&&wp85);
+  if (wp == 90) return (presel&&wp90);
+  if (wp == 95) return (presel&&wp95);
+  return (presel&&wpHWW);  // use HWW as default
 }
 
 // Copied from muon selection and LeptonInfo::setSpecific
-bool muonId2012Tight(const VHbbEvent::MuonInfo & i, float rho, bool requireiso = true) {
+float muon2012PfCorrIso(const VHbbEvent::MuonInfo & i, float rho) {
   float mincor=0.0;
   float minrho=0.0;
   float rhoN = std::max(rho,minrho);
@@ -210,9 +256,14 @@ bool muonId2012Tight(const VHbbEvent::MuonInfo & i, float rho, bool requireiso =
   if(fabs(eta)>2.2 && fabs(eta) <= 2.3) {area=0.821;}
   if(fabs(eta)>2.3 && fabs(eta) <= 2.4) {area=0.660;}
   float pfCorrIso = (i.pfChaIso+ std::max(i.pfPhoIso+i.pfNeuIso-rhoN*area,mincor))/i.p4.Pt();
-  return (i.isPF && i. globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 && i.nValidLayers > 5 &&         (i.cat & 0x2) && i.nMatches >=2 && i.ipDb<.2 
-	  && fabs(eta) < 2.4 && i.p4.Pt() > 20. &&
-	  (i.cat & 0x1) && (!requireiso || pfCorrIso < 0.12)); // Added by SCZ from selection
+  return pfCorrIso;
+}
+
+bool muonId2012Tight(const VHbbEvent::MuonInfo & i, float rho, bool requireiso = true) {
+  float pfCorrIso = muon2012PfCorrIso(i,rho);
+  return (i.isPF && i. globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 && i.nValidLayers > 5 &&         (i.cat & 0x1) && i.nMatches >=2 && i.ipDb<.2 
+	  && fabs(i.p4.Eta()) < 2.4 && i.p4.Pt() > 20. &&
+	  i.zPVPt < 0.5 && (!requireiso || pfCorrIso < 0.12)); // Added by SCZ from selection
 }
 
 typedef struct
@@ -304,8 +355,10 @@ int main(int argc, char* argv[])
   TDirectory *muTrigDir = _outFile->mkdir("muTrigDir");
   TDirectory *muWCandDir =  _outFile->mkdir("muWCandDir");
   TDirectory *muRecoDir = _outFile->mkdir("muRecoDir");
+  TDirectory *muRecoIsoDir = _outFile->mkdir("muRecoIsoDir");
   TDirectory * eleTrigDir = _outFile->mkdir("eleTrigDir");
   TDirectory *eleRecoDir = _outFile->mkdir("eleRecoDir");
+  TDirectory *eleRecoIsoDir = _outFile->mkdir("eleRecoIsoDir");
 
   int eventNumber, runNumber, lb;
 
@@ -316,11 +369,16 @@ int main(int argc, char* argv[])
   int muTrigTree_probe_passingDiMuTkL1, muTrigTree_probe_passingDiMuTkL2, muTrigTree_probe_passingDiMuTk17, muTrigTree_probe_passingDiMuTk8, muTrigTree_probe_passingDiMuTkDz;
   int muTrigTree_probe_passingDiMuL110, muTrigTree_probe_passingDiMuTkL110, muTrigTree_probe_passingDiMu17Dz, muTrigTree_probe_passingDiMuTk17Dz;
   int muTrigTree_probe_passingIsoMu20Iso;
+  int muTrigTree_probe_passingDiMuL13p5;
+  int muTrigTree_probe_passingDiMuL110_match3, muTrigTree_probe_passingDiMuL13p5_match3, muTrigTree_probe_passingDiMuL1_match3;
+  int muTrigTree_probe_passingDiMuL110_match5, muTrigTree_probe_passingDiMuL13p5_match5, muTrigTree_probe_passingDiMuL1_match5;
+  int muTrigTree_probe_passingDiMuL110_matchinf, muTrigTree_probe_passingDiMuL13p5_matchinf, muTrigTree_probe_passingDiMuL1_matchinf;
   float muTrigTree_probe_WCandPt; int muTrigTree_probe_passingWCandPt; 
   int muTrigTree_event_Mu17_Mu8, muTrigTree_event_Mu17_TkMu8;
   int muTrigTree_probe_passingIsoMu24ORMu40, muTrigTree_probe_passingMu40ANDNOTIsoMu24, muTrigTree_probe_passingIsoMu20ANDNOTIsoMu24;
   int muTrigTree_probe_passingIsoMu20ANDNOTIsoMu24ANDNOTMu40, muTrigTree_probe_passingIsoMu24ORMu40ORIsoMu20;
   int muTrigTree_probe_passingDiMuTk17ANDNOTeventMu17Mu8, muTrigTree_probe_passingDiMuTk8ANDNOTeventMu17Mu8, muTrigTree_probe_passingDiMuTkDzANDNOTeventMu17Mu8;
+  float muTrigTree_dR;
   TTree *muTrigTree = new TTree("muTrigTree","muTrigTree"); muTrigTree->SetDirectory(muTrigDir);
   muTrigTree->Branch("tag_pt"            ,  &muTrigTree_tag_pt                 ,  "tag_pt/F");
   muTrigTree->Branch("tag_eta"            ,  &muTrigTree_tag_eta                 ,  "tag_eta/F");
@@ -335,7 +393,6 @@ int main(int argc, char* argv[])
   muTrigTree->Branch("probe_passingMu40L1", &muTrigTree_probe_passingMu40L1, "probe_passingMu40L1/I");
   muTrigTree->Branch("probe_passingMu40L2", &muTrigTree_probe_passingMu40L2, "probe_passingMu40L2/I");
   muTrigTree->Branch("probe_passingMu40L3", &muTrigTree_probe_passingMu40L3, "probe_passingMu40L3/I");
-  muTrigTree->Branch("probe_passingDiMuL1", &muTrigTree_probe_passingDiMuL1, "probe_passingDiMuL1/I");
   muTrigTree->Branch("probe_passingDiMuL20", &muTrigTree_probe_passingDiMuL20, "probe_passingDiMuL20/I");
   muTrigTree->Branch("probe_passingDiMuL210", &muTrigTree_probe_passingDiMuL210, "probe_passingDiMuL210/I");
   muTrigTree->Branch("probe_passingDiMu8", &muTrigTree_probe_passingDiMu8, "probe_passingDiMu8/I");
@@ -347,7 +404,24 @@ int main(int argc, char* argv[])
   muTrigTree->Branch("probe_passingDiMuTk8", &muTrigTree_probe_passingDiMuTk8, "probe_passingDiMuTk8/I");
   muTrigTree->Branch("probe_passingDiMuTkDz", &muTrigTree_probe_passingDiMuTkDz, "probe_passingDiMuTkDz/I");
   muTrigTree->Branch("probe_passingIsoMu20Iso", &muTrigTree_probe_passingIsoMu20Iso, "probe_passingIsoMu20Iso/I");
+
   muTrigTree->Branch("probe_passingDiMuL110", &muTrigTree_probe_passingDiMuL110, "probe_passingDiMuL110/I");
+  muTrigTree->Branch("probe_passingDiMuL13p5", &muTrigTree_probe_passingDiMuL13p5, "probe_passingDiMuL13p5/I");
+  muTrigTree->Branch("probe_passingDiMuL1", &muTrigTree_probe_passingDiMuL1, "probe_passingDiMuL1/I");
+
+  muTrigTree->Branch("probe_passingDiMuL110_match3", &muTrigTree_probe_passingDiMuL110_match3, "probe_passingDiMuL110_match3/I");
+  muTrigTree->Branch("probe_passingDiMuL13p5_match3", &muTrigTree_probe_passingDiMuL13p5_match3, "probe_passingDiMuL13p5_match3/I");
+  muTrigTree->Branch("probe_passingDiMuL1_match3", &muTrigTree_probe_passingDiMuL1_match3, "probe_passingDiMuL1_match3/I");
+
+  muTrigTree->Branch("probe_passingDiMuL110_match5", &muTrigTree_probe_passingDiMuL110_match5, "probe_passingDiMuL110_match5/I");
+  muTrigTree->Branch("probe_passingDiMuL13p5_match5", &muTrigTree_probe_passingDiMuL13p5_match5, "probe_passingDiMuL13p5_match5/I");
+  muTrigTree->Branch("probe_passingDiMuL1_match5", &muTrigTree_probe_passingDiMuL1_match5, "probe_passingDiMuL1_match5/I");
+
+  muTrigTree->Branch("probe_passingDiMuL110_matchinf", &muTrigTree_probe_passingDiMuL110_matchinf, "probe_passingDiMuL110_matchinf/I");
+  muTrigTree->Branch("probe_passingDiMuL13p5_matchinf", &muTrigTree_probe_passingDiMuL13p5_matchinf, "probe_passingDiMuL13p5_matchinf/I");
+  muTrigTree->Branch("probe_passingDiMuL1_matchinf", &muTrigTree_probe_passingDiMuL1_matchinf, "probe_passingDiMuL1_matchinf/I");
+
+
   muTrigTree->Branch("probe_passingDiMuTkL110", &muTrigTree_probe_passingDiMuTkL110, "probe_passingDiMuTkL110/I");
   muTrigTree->Branch("probe_passingDiMu17Dz", &muTrigTree_probe_passingDiMu17Dz, "probe_passingDiMu17Dz/I");
   muTrigTree->Branch("probe_passingDiMuTk17Dz", &muTrigTree_probe_passingDiMuTk17Dz, "probe_passingDiMuTk17Dz/I");
@@ -370,7 +444,7 @@ int main(int argc, char* argv[])
  muTrigTree->Branch("probe_passingDiMuTk8ANDNOTeventMu17Mu8", &muTrigTree_probe_passingDiMuTk8ANDNOTeventMu17Mu8, "probe_passingDiMuTk8ANDNOTeventMu17Mu8/I");
  muTrigTree->Branch("probe_passingDiMuTkDzANDNOTeventMu17Mu8", &muTrigTree_probe_passingDiMuTkDzANDNOTeventMu17Mu8, "probe_passingDiMuTkDzANDNOTeventMu17Mu8/I");
 
-
+ muTrigTree->Branch("dR", &muTrigTree_dR, "dR/F");
   muTrigTree->Branch("mass", &muTrigTree_mass, "mass/F");
   muTrigTree->Branch("nPVs", &nPVs, "nPVs/I");
   muTrigTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
@@ -398,11 +472,16 @@ int main(int argc, char* argv[])
   muWCandTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
 
 
+  //  return (i.isPF && i. globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 && i.nValidLayers > 5 &&         (i.cat & 0x1) && i.nMatches >=2 && i.ipDb<.2
+  //          && fabs(eta) < 2.4 && i.p4.Pt() > 20. &&
+  //          /* (i.cat & 0x1) && */ (!requireiso || pfCorrIso < 0.12)); // Added by SCZ from selection
+  // muon2012PfCorrIso
 
-  // (muons[it].cat & 0x2)
-
-  float muRecoTree_tag_pt, muRecoTree_tag_eta, muRecoTree_probe_pt, muRecoTree_probe_eta, muRecoTree_mass, muRecoTree_tag_phi, muRecoTree_probe_phi;
-  int muRecoTree_probe_tightNoIso, muRecoTree_probe_tightIso;
+  float muRecoTree_tag_pt, muRecoTree_tag_eta, muRecoTree_probe_pt, muRecoTree_probe_eta, muRecoTree_mass, muRecoTree_tag_phi, muRecoTree_probe_phi, muRecoTree_dR;
+  int muRecoTree_probe_tightNoIso, muRecoTree_probe_tightIso, muRecoTree_probe_nearTightNoIso, muRecoTree_probe_nearTightIso;
+  float muRecoTree_probe_Iso, muRecoTree_probe_ipDb, muRecoTree_probe_globChi2, muRecoTree_probe_zPVPt;
+  int muRecoTree_probe_isPF, muRecoTree_probe_tracker, muRecoTree_probe_nPixelHits, muRecoTree_probe_nValidLayers, muRecoTree_probe_nMatches;
+  int muRecoTree_probe_passingIsoMu24L3, muRecoTree_probe_passingIsoMu24Iso;
   TTree *muRecoTree = new TTree("muRecoTree","muRecoTree"); muRecoTree->SetDirectory(muRecoDir);
   muRecoTree->Branch("tag_pt"            ,  &muRecoTree_tag_pt                 ,  "tag_pt/F");
   muRecoTree->Branch("tag_eta"            ,  &muRecoTree_tag_eta                 ,  "tag_eta/F");
@@ -412,6 +491,20 @@ int main(int argc, char* argv[])
   muRecoTree->Branch("probe_phi"            ,  &muRecoTree_probe_phi                 ,  "probe_phi/F");
   muRecoTree->Branch("probe_tightNoIso"            ,  &muRecoTree_probe_tightNoIso                 ,  "probe_tightNoIso/I");
   muRecoTree->Branch("probe_tightIso"            ,  &muRecoTree_probe_tightIso                 ,  "probe_tightIso/I");
+  muRecoTree->Branch("probe_nearTightNoIso"            ,  &muRecoTree_probe_nearTightNoIso                 ,  "probe_nearTightNoIso/I");
+  muRecoTree->Branch("probe_nearTightIso"            ,  &muRecoTree_probe_nearTightIso                 ,  "probe_nearTightIso/I");
+  muRecoTree->Branch("probe_Iso"            ,  &muRecoTree_probe_Iso                 ,  "probe_Iso/F");
+  muRecoTree->Branch("probe_ipDb"            ,  &muRecoTree_probe_ipDb                 ,  "probe_ipDb/F");
+  muRecoTree->Branch("probe_zPVPt"            ,  &muRecoTree_probe_zPVPt                 ,  "probe_zPVPt/F");
+  muRecoTree->Branch("probe_globChi2"            ,  &muRecoTree_probe_globChi2                 ,  "probe_globChi2/F");
+  muRecoTree->Branch("probe_isPF"            ,  &muRecoTree_probe_isPF                 ,  "probe_isPF/I");
+  muRecoTree->Branch("probe_tracker"            ,  &muRecoTree_probe_tracker                 ,  "probe_tracker/I");
+  muRecoTree->Branch("probe_nPixelHits"            ,  &muRecoTree_probe_nPixelHits                 ,  "probe_nPixelHits/I");
+  muRecoTree->Branch("probe_nValidLayers"            ,  &muRecoTree_probe_nValidLayers                 ,  "probe_nValidLayers/I");
+  muRecoTree->Branch("probe_nMatches"            ,  &muRecoTree_probe_nMatches                 ,  "probe_nMatches/I");
+  muRecoTree->Branch("probe_passingIsoMu24L3", &muRecoTree_probe_passingIsoMu24L3, "probe_passingIsoMu24L3/I");
+  muRecoTree->Branch("probe_passingIsoMu24Iso", &muRecoTree_probe_passingIsoMu24Iso, "probe_passingIsoMu24Iso/I");
+  muRecoTree->Branch("dR", &muRecoTree_dR, "dR/F");
   muRecoTree->Branch("mass", &muRecoTree_mass, "mass/F");
   muRecoTree->Branch("nPVs", &nPVs, "nPVs/I");
   muRecoTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
@@ -419,11 +512,47 @@ int main(int argc, char* argv[])
   muRecoTree->Branch("lb", &lb, "lb/I");
   muRecoTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
 
+  float muRecoIsoTree_tag_pt, muRecoIsoTree_tag_eta, muRecoIsoTree_probe_pt, muRecoIsoTree_probe_eta, muRecoIsoTree_mass, muRecoIsoTree_tag_phi, muRecoIsoTree_probe_phi, muRecoIsoTree_dR;
+  int muRecoIsoTree_probe_tightNoIso, muRecoIsoTree_probe_tightIso, muRecoIsoTree_probe_nearTightNoIso, muRecoIsoTree_probe_nearTightIso;
+  float muRecoIsoTree_probe_Iso, muRecoIsoTree_probe_ipDb, muRecoIsoTree_probe_globChi2, muRecoIsoTree_probe_zPVPt;
+  int muRecoIsoTree_probe_isPF, muRecoIsoTree_probe_tracker, muRecoIsoTree_probe_nPixelHits, muRecoIsoTree_probe_nValidLayers, muRecoIsoTree_probe_nMatches;
+  int muRecoIsoTree_probe_passingIsoMu24L3, muRecoIsoTree_probe_passingIsoMu24Iso;
+  TTree *muRecoIsoTree = new TTree("muRecoIsoTree","muRecoIsoTree"); muRecoIsoTree->SetDirectory(muRecoIsoDir);
+  muRecoIsoTree->Branch("tag_pt"            ,  &muRecoIsoTree_tag_pt                 ,  "tag_pt/F");
+  muRecoIsoTree->Branch("tag_eta"            ,  &muRecoIsoTree_tag_eta                 ,  "tag_eta/F");
+  muRecoIsoTree->Branch("tag_phi"            ,  &muRecoIsoTree_tag_phi                 ,  "tag_phi/F");
+  muRecoIsoTree->Branch("probe_pt"            ,  &muRecoIsoTree_probe_pt                 ,  "probe_pt/F");
+  muRecoIsoTree->Branch("probe_eta"            ,  &muRecoIsoTree_probe_eta                 ,  "probe_eta/F");
+  muRecoIsoTree->Branch("probe_phi"            ,  &muRecoIsoTree_probe_phi                 ,  "probe_phi/F");
+  muRecoIsoTree->Branch("probe_tightNoIso"            ,  &muRecoIsoTree_probe_tightNoIso                 ,  "probe_tightNoIso/I");
+  muRecoIsoTree->Branch("probe_tightIso"            ,  &muRecoIsoTree_probe_tightIso                 ,  "probe_tightIso/I");
+  muRecoIsoTree->Branch("probe_nearTightNoIso"            ,  &muRecoIsoTree_probe_nearTightNoIso                 ,  "probe_nearTightNoIso/I");
+  muRecoIsoTree->Branch("probe_nearTightIso"            ,  &muRecoIsoTree_probe_nearTightIso                 ,  "probe_nearTightIso/I");
+  muRecoIsoTree->Branch("probe_Iso"            ,  &muRecoIsoTree_probe_Iso                 ,  "probe_Iso/F");
+  muRecoIsoTree->Branch("probe_ipDb"            ,  &muRecoIsoTree_probe_ipDb                 ,  "probe_ipDb/F");
+  muRecoIsoTree->Branch("probe_zPVPt"            ,  &muRecoIsoTree_probe_zPVPt                 ,  "probe_zPVPt/F");
+  muRecoIsoTree->Branch("probe_globChi2"            ,  &muRecoIsoTree_probe_globChi2                 ,  "probe_globChi2/F");
+  muRecoIsoTree->Branch("probe_isPF"            ,  &muRecoIsoTree_probe_isPF                 ,  "probe_isPF/I");
+  muRecoIsoTree->Branch("probe_tracker"            ,  &muRecoIsoTree_probe_tracker                 ,  "probe_tracker/I");
+  muRecoIsoTree->Branch("probe_nPixelHits"            ,  &muRecoIsoTree_probe_nPixelHits                 ,  "probe_nPixelHits/I");
+  muRecoIsoTree->Branch("probe_nValidLayers"            ,  &muRecoIsoTree_probe_nValidLayers                 ,  "probe_nValidLayers/I");
+  muRecoIsoTree->Branch("probe_nMatches"            ,  &muRecoIsoTree_probe_nMatches                 ,  "probe_nMatches/I");
+  muRecoIsoTree->Branch("probe_passingIsoMu24L3", &muRecoIsoTree_probe_passingIsoMu24L3, "probe_passingIsoMu24L3/I");
+  muRecoIsoTree->Branch("probe_passingIsoMu24Iso", &muRecoIsoTree_probe_passingIsoMu24Iso, "probe_passingIsoMu24Iso/I");
+  muRecoIsoTree->Branch("dR", &muRecoIsoTree_dR, "dR/F");
+  muRecoIsoTree->Branch("mass", &muRecoIsoTree_mass, "mass/F");
+  muRecoIsoTree->Branch("nPVs", &nPVs, "nPVs/I");
+  muRecoIsoTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
+  muRecoIsoTree->Branch("runNumber", &runNumber, "runNumber/I");
+  muRecoIsoTree->Branch("lb", &lb, "lb/I");
+  muRecoIsoTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
 
-  float eleTrigTree_tag_pt, eleTrigTree_tag_eta, eleTrigTree_probe_pt, eleTrigTree_probe_eta, eleTrigTree_mass, eleTrigTree_tag_phi, eleTrigTree_probe_phi;
+
+  float eleTrigTree_tag_pt, eleTrigTree_tag_eta, eleTrigTree_probe_pt, eleTrigTree_probe_eta, eleTrigTree_mass, eleTrigTree_tag_phi, eleTrigTree_probe_phi, eleTrigTree_dR;
   int eleTrigTree_probe_passingEle27L1, eleTrigTree_probe_passingEle27HLT;
   int eleTrigTree_probe_passingDiEle17, eleTrigTree_probe_passingDiEle8, eleTrigTree_probe_passingDiEleDz;
   int eleTrigTree_probe_wp70, eleTrigTree_probe_wp80, eleTrigTree_probe_wp85, eleTrigTree_probe_wp90, eleTrigTree_probe_wp95;
+  int eleTrigTree_probe_wpHWW;
   TTree *eleTrigTree = new TTree("eleTrigTree","eleTrigTree"); eleTrigTree->SetDirectory(eleTrigDir);
   eleTrigTree->Branch("tag_pt"            ,  &eleTrigTree_tag_pt                 ,  "tag_pt/F");
   eleTrigTree->Branch("tag_eta"            ,  &eleTrigTree_tag_eta                 ,  "tag_eta/F");
@@ -441,6 +570,8 @@ int main(int argc, char* argv[])
   eleTrigTree->Branch("probe_wp85"            ,  &eleTrigTree_probe_wp85                 ,  "probe_wp85/I");
   eleTrigTree->Branch("probe_wp90"            ,  &eleTrigTree_probe_wp90                 ,  "probe_wp90/I");
   eleTrigTree->Branch("probe_wp95"            ,  &eleTrigTree_probe_wp95                 ,  "probe_wp95/I");
+  eleTrigTree->Branch("probe_wpHWW"            ,  &eleTrigTree_probe_wpHWW                 ,  "probe_wpHWW/I");
+  eleTrigTree->Branch("dR", &eleTrigTree_dR, "dR/F");
   eleTrigTree->Branch("mass", &eleTrigTree_mass, "mass/F");
   eleTrigTree->Branch("nPVs", &nPVs, "nPVs/I");
   eleTrigTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
@@ -450,8 +581,14 @@ int main(int argc, char* argv[])
 
 
 
-  float eleRecoTree_tag_pt, eleRecoTree_tag_eta, eleRecoTree_probe_pt, eleRecoTree_probe_eta, eleRecoTree_mass, eleRecoTree_tag_phi, eleRecoTree_probe_phi;
+  float eleRecoTree_tag_pt, eleRecoTree_tag_eta, eleRecoTree_probe_pt, eleRecoTree_probe_eta, eleRecoTree_mass, eleRecoTree_tag_phi, eleRecoTree_probe_phi, eleRecoTree_dR;
   int eleRecoTree_probe_wp70, eleRecoTree_probe_wp80, eleRecoTree_probe_wp85, eleRecoTree_probe_wp90, eleRecoTree_probe_wp95;
+  int eleRecoTree_probe_nearWp70, eleRecoTree_probe_nearWp80, eleRecoTree_probe_nearWp85, eleRecoTree_probe_nearWp90, eleRecoTree_probe_nearWp95;
+  int eleRecoTree_probe_wp70noIso, eleRecoTree_probe_wp80noIso, eleRecoTree_probe_wp85noIso, eleRecoTree_probe_wp90noIso, eleRecoTree_probe_wp95noIso;
+  int eleRecoTree_probe_passingEle27HLT;
+  int eleRecoTree_probe_wpHWW, eleRecoTree_probe_nearWpHWW, eleRecoTree_probe_wpHWWnoIso;
+  float eleRecoTree_probe_iso, eleRecoTree_probe_id;
+  int eleRecoTree_probe_presel;
   TTree *eleRecoTree = new TTree("eleRecoTree","eleRecoTree"); eleRecoTree->SetDirectory(eleRecoDir);
   eleRecoTree->Branch("tag_pt"            ,  &eleRecoTree_tag_pt                 ,  "tag_pt/F");
   eleRecoTree->Branch("tag_eta"            ,  &eleRecoTree_tag_eta                 ,  "tag_eta/F");
@@ -459,11 +596,29 @@ int main(int argc, char* argv[])
   eleRecoTree->Branch("probe_pt"            ,  &eleRecoTree_probe_pt                 ,  "probe_pt/F");
   eleRecoTree->Branch("probe_eta"            ,  &eleRecoTree_probe_eta                 ,  "probe_eta/F");
   eleRecoTree->Branch("probe_phi"            ,  &eleRecoTree_probe_phi                 ,  "probe_phi/F");
+  eleRecoTree->Branch("probe_presel"            ,  &eleRecoTree_probe_presel                 ,  "probe_presel/I");
   eleRecoTree->Branch("probe_wp70"            ,  &eleRecoTree_probe_wp70                 ,  "probe_wp70/I");
   eleRecoTree->Branch("probe_wp80"            ,  &eleRecoTree_probe_wp80                 ,  "probe_wp80/I");
   eleRecoTree->Branch("probe_wp85"            ,  &eleRecoTree_probe_wp85                 ,  "probe_wp85/I");
   eleRecoTree->Branch("probe_wp90"            ,  &eleRecoTree_probe_wp90                 ,  "probe_wp90/I");
   eleRecoTree->Branch("probe_wp95"            ,  &eleRecoTree_probe_wp95                 ,  "probe_wp95/I");
+  eleRecoTree->Branch("probe_wpHWW"            ,  &eleRecoTree_probe_wpHWW                 ,  "probe_wpHWW/I");
+  eleRecoTree->Branch("probe_nearWp70"            ,  &eleRecoTree_probe_nearWp70                 ,  "probe_nearWp70/I");
+  eleRecoTree->Branch("probe_nearWp80"            ,  &eleRecoTree_probe_nearWp80                 ,  "probe_nearWp80/I");
+  eleRecoTree->Branch("probe_nearWp85"            ,  &eleRecoTree_probe_nearWp85                 ,  "probe_nearWp85/I");
+  eleRecoTree->Branch("probe_nearWp90"            ,  &eleRecoTree_probe_nearWp90                 ,  "probe_nearWp90/I");
+  eleRecoTree->Branch("probe_nearWp95"            ,  &eleRecoTree_probe_nearWp95                 ,  "probe_nearWp95/I");
+  eleRecoTree->Branch("probe_nearWpHWW"            ,  &eleRecoTree_probe_nearWpHWW                 ,  "probe_nearWpHWW/I");
+  eleRecoTree->Branch("probe_wp70noIso"            ,  &eleRecoTree_probe_wp70noIso                 ,  "probe_wp70noIso/I");
+  eleRecoTree->Branch("probe_wp80noIso"            ,  &eleRecoTree_probe_wp80noIso                 ,  "probe_wp80noIso/I");
+  eleRecoTree->Branch("probe_wp85noIso"            ,  &eleRecoTree_probe_wp85noIso                 ,  "probe_wp85noIso/I");
+  eleRecoTree->Branch("probe_wp90noIso"            ,  &eleRecoTree_probe_wp90noIso                 ,  "probe_wp90noIso/I");
+  eleRecoTree->Branch("probe_wp95noIso"            ,  &eleRecoTree_probe_wp95noIso                 ,  "probe_wp95noIso/I");
+  eleRecoTree->Branch("probe_wpHWWnoIso"            ,  &eleRecoTree_probe_wpHWWnoIso                 ,  "probe_wpHWWnoIso/I");
+  eleRecoTree->Branch("probe_passingEle27HLT", &eleRecoTree_probe_passingEle27HLT, "probe_passingEle27HLT/I");
+  eleRecoTree->Branch("probe_iso"            ,  &eleRecoTree_probe_iso                 ,  "probe_iso/F");
+  eleRecoTree->Branch("probe_id"            ,  &eleRecoTree_probe_id                 ,  "probe_id/F");
+  eleRecoTree->Branch("dR", &eleRecoTree_dR, "dR/F");
   eleRecoTree->Branch("mass", &eleRecoTree_mass, "mass/F");
   eleRecoTree->Branch("nPVs", &nPVs, "nPVs/I");
   eleRecoTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
@@ -471,6 +626,48 @@ int main(int argc, char* argv[])
   eleRecoTree->Branch("lb", &lb, "lb/I");
   eleRecoTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
 
+  float eleRecoIsoTree_tag_pt, eleRecoIsoTree_tag_eta, eleRecoIsoTree_probe_pt, eleRecoIsoTree_probe_eta, eleRecoIsoTree_mass, eleRecoIsoTree_tag_phi, eleRecoIsoTree_probe_phi, eleRecoIsoTree_dR;
+  int eleRecoIsoTree_probe_wp70, eleRecoIsoTree_probe_wp80, eleRecoIsoTree_probe_wp85, eleRecoIsoTree_probe_wp90, eleRecoIsoTree_probe_wp95;
+  int eleRecoIsoTree_probe_nearWp70, eleRecoIsoTree_probe_nearWp80, eleRecoIsoTree_probe_nearWp85, eleRecoIsoTree_probe_nearWp90, eleRecoIsoTree_probe_nearWp95;
+  int eleRecoIsoTree_probe_wp70noIso, eleRecoIsoTree_probe_wp80noIso, eleRecoIsoTree_probe_wp85noIso, eleRecoIsoTree_probe_wp90noIso, eleRecoIsoTree_probe_wp95noIso;
+  int eleRecoIsoTree_probe_passingEle27HLT;
+  int eleRecoIsoTree_probe_wpHWW, eleRecoIsoTree_probe_nearWpHWW, eleRecoIsoTree_probe_wpHWWnoIso;
+  float eleRecoIsoTree_probe_iso, eleRecoIsoTree_probe_id;
+  TTree *eleRecoIsoTree = new TTree("eleRecoIsoTree","eleRecoIsoTree"); eleRecoIsoTree->SetDirectory(eleRecoIsoDir);
+  eleRecoIsoTree->Branch("tag_pt"            ,  &eleRecoIsoTree_tag_pt                 ,  "tag_pt/F");
+  eleRecoIsoTree->Branch("tag_eta"            ,  &eleRecoIsoTree_tag_eta                 ,  "tag_eta/F");
+  eleRecoIsoTree->Branch("tag_phi"            ,  &eleRecoIsoTree_tag_phi                 ,  "tag_phi/F");
+  eleRecoIsoTree->Branch("probe_pt"            ,  &eleRecoIsoTree_probe_pt                 ,  "probe_pt/F");
+  eleRecoIsoTree->Branch("probe_eta"            ,  &eleRecoIsoTree_probe_eta                 ,  "probe_eta/F");
+  eleRecoIsoTree->Branch("probe_phi"            ,  &eleRecoIsoTree_probe_phi                 ,  "probe_phi/F");
+  eleRecoIsoTree->Branch("probe_wp70"            ,  &eleRecoIsoTree_probe_wp70                 ,  "probe_wp70/I");
+  eleRecoIsoTree->Branch("probe_wp80"            ,  &eleRecoIsoTree_probe_wp80                 ,  "probe_wp80/I");
+  eleRecoIsoTree->Branch("probe_wp85"            ,  &eleRecoIsoTree_probe_wp85                 ,  "probe_wp85/I");
+  eleRecoIsoTree->Branch("probe_wp90"            ,  &eleRecoIsoTree_probe_wp90                 ,  "probe_wp90/I");
+  eleRecoIsoTree->Branch("probe_wp95"            ,  &eleRecoIsoTree_probe_wp95                 ,  "probe_wp95/I");
+  eleRecoIsoTree->Branch("probe_wpHWW"            ,  &eleRecoIsoTree_probe_wpHWW                 ,  "probe_wpHWW/I");
+  eleRecoIsoTree->Branch("probe_nearWp70"            ,  &eleRecoIsoTree_probe_nearWp70                 ,  "probe_nearWp70/I");
+  eleRecoIsoTree->Branch("probe_nearWp80"            ,  &eleRecoIsoTree_probe_nearWp80                 ,  "probe_nearWp80/I");
+  eleRecoIsoTree->Branch("probe_nearWp85"            ,  &eleRecoIsoTree_probe_nearWp85                 ,  "probe_nearWp85/I");
+  eleRecoIsoTree->Branch("probe_nearWp90"            ,  &eleRecoIsoTree_probe_nearWp90                 ,  "probe_nearWp90/I");
+  eleRecoIsoTree->Branch("probe_nearWp95"            ,  &eleRecoIsoTree_probe_nearWp95                 ,  "probe_nearWp95/I");
+  eleRecoIsoTree->Branch("probe_nearWpHWW"            ,  &eleRecoIsoTree_probe_nearWpHWW                 ,  "probe_nearWpHWW/I");
+  eleRecoIsoTree->Branch("probe_wp70noIso"            ,  &eleRecoIsoTree_probe_wp70noIso                 ,  "probe_wp70noIso/I");
+  eleRecoIsoTree->Branch("probe_wp80noIso"            ,  &eleRecoIsoTree_probe_wp80noIso                 ,  "probe_wp80noIso/I");
+  eleRecoIsoTree->Branch("probe_wp85noIso"            ,  &eleRecoIsoTree_probe_wp85noIso                 ,  "probe_wp85noIso/I");
+  eleRecoIsoTree->Branch("probe_wp90noIso"            ,  &eleRecoIsoTree_probe_wp90noIso                 ,  "probe_wp90noIso/I");
+  eleRecoIsoTree->Branch("probe_wp95noIso"            ,  &eleRecoIsoTree_probe_wp95noIso                 ,  "probe_wp95noIso/I");
+  eleRecoIsoTree->Branch("probe_wpHWWnoIso"            ,  &eleRecoIsoTree_probe_wpHWWnoIso                 ,  "probe_wpHWWnoIso/I");
+  eleRecoIsoTree->Branch("probe_passingEle27HLT", &eleRecoIsoTree_probe_passingEle27HLT, "probe_passingEle27HLT/I");
+  eleRecoIsoTree->Branch("probe_iso"            ,  &eleRecoIsoTree_probe_iso                 ,  "probe_iso/F");
+  eleRecoIsoTree->Branch("probe_id"            ,  &eleRecoIsoTree_probe_id                 ,  "probe_id/F");
+  eleRecoIsoTree->Branch("dR", &eleRecoIsoTree_dR, "dR/F");
+  eleRecoIsoTree->Branch("mass", &eleRecoIsoTree_mass, "mass/F");
+  eleRecoIsoTree->Branch("nPVs", &nPVs, "nPVs/I");
+  eleRecoIsoTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
+  eleRecoIsoTree->Branch("runNumber", &runNumber, "runNumber/I");
+  eleRecoIsoTree->Branch("lb", &lb, "lb/I");
+  eleRecoIsoTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
 
   int ievt=0;
   int totalcount=0;
@@ -539,6 +736,8 @@ int main(int argc, char* argv[])
 
 	float trigMatchCut = 0.1;
 	float L1MatchCut = 0.2;
+	float recoNearMatchCut = 0.1;
+
         std::string mu24name = "HLT_IsoMu24_eta2p1_v";
 	std::string mu24nameL1 = "hltL1sMu16Eta2p1";
 	std::string mu24nameL2 = "hltL2fL1sMu16Eta2p1L1f0L2Filtered16Q";
@@ -557,6 +756,7 @@ int main(int argc, char* argv[])
         std::string diMuName8 = "hltL3pfL1DoubleMu10MuOpenL1f0L2pf0L3PreFiltered8";
         std::string diMuName17 = "hltL3fL1DoubleMu10MuOpenL1f0L2f10L3Filtered17";
         std::string diMuNameDz = "hltDiMuonMu17Mu8DzFiltered0p2";
+
 
         std::string diMuTkName = "HLT_Mu17_TkMu8_v";
         std::string diMuTkNameL1 = "hltL1sL1DoubleMu10MuOpen";
@@ -578,6 +778,29 @@ int main(int argc, char* argv[])
 	std::string diEleName8 = "hltEle17TightIdLooseIsoEle8TightIdLooseIsoTrackIsoDoubleFilter";
 	std::string diEleNameDz = "hltEle17TightIdLooseIsoEle8TightIdLooseIsoTrackIsoDZ";
 
+        if (runNumber>= 193834) {
+          mu40name = "HLT_Mu40_v";
+          mu40nameL1 = "hltL1sMu16";
+          mu40nameL2 = "hltL2fL1sMu16L1f0L2Filtered16Q";
+          mu40nameL3 = "hltL3fL1sMu16L1f0L2f16QL3Filtered40Q";
+
+          mu24name = "HLT_IsoMu24_v";
+          mu24nameL1 = "hltL1sMu16";
+          mu24nameL2 = "hltL2fL1sMu16L1f0L2Filtered16Q";
+          mu24nameL3 = "hltL3fL1sMu16L1f0L2f16QL3Filtered24Q";
+          mu24nameIso ="hltL3crIsoL1sMu16L1f0L2f16QL3f24QL3crIsoRhoFiltered0p15";
+
+	  mu20nameIso = "hltL3crIsoL1sMu16Eta2p1L1f0L2f16QL3f20L3crIsoRhoFiltered0p15"; // n.b. eta restriction not lifted until later, see run 194270 below
+        }
+
+
+	if (runNumber >= 194270) {
+	  mu20name = "HLT_IsoMu20_WCandPt80_v";
+	  mu20nameIso = "hltL3crIsoL1sMu16L1f0L2f16QL3f20QL3crIsoRhoFiltered0p15";
+	  mu20nameWCand = "hlt2IsoMu20PFMHTPt80";
+	}
+
+
 	std::vector<TLorentzVector> mu24L1;
 	std::vector<TLorentzVector> mu24L2;
 	std::vector<TLorentzVector> mu24L3;
@@ -588,6 +811,7 @@ int main(int argc, char* argv[])
         std::vector<TLorentzVector> mu40L3;
 
         std::vector<TLorentzVector> diMuL110;
+	std::vector<TLorentzVector> diMuL13p5;
 	std::vector<TLorentzVector> diMuL1;
 	std::vector<TLorentzVector> diMuL20;
 	std::vector<TLorentzVector> diMuL210;
@@ -699,7 +923,8 @@ int main(int argc, char* argv[])
                 for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
 		  if (verbose_) std::cout << "  pushing back " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
                   diMuL1.push_back(GENPTOLORP(*trigObjRef));
-		  if ((*trigObjRef)->pt() >= 10.) diMuL110.push_back(GENPTOLORP(*trigObjRef));
+		  if ((*trigObjRef)->pt() > 9.999999) diMuL110.push_back(GENPTOLORP(*trigObjRef));
+		  if ((*trigObjRef)->pt() > 3.499999) diMuL13p5.push_back(GENPTOLORP(*trigObjRef));
 		}
               }
 	      if (label == diMuNameL20) {
@@ -890,9 +1115,6 @@ int main(int argc, char* argv[])
 	  muTrigTree_tag_pt = iEvent->muInfo[tagNumber].p4.Pt();
           muTrigTree_tag_eta = iEvent->muInfo[tagNumber].p4.Eta();
           muTrigTree_tag_phi = iEvent->muInfo[tagNumber].p4.Phi();
-          muRecoTree_tag_pt = iEvent->muInfo[tagNumber].p4.Pt();
-          muRecoTree_tag_eta = iEvent->muInfo[tagNumber].p4.Eta();
-          muRecoTree_tag_phi = iEvent->muInfo[tagNumber].p4.Phi();
           muWCandTree_tag_pt = iEvent->muInfo[tagNumber].p4.Pt();
           muWCandTree_tag_eta = iEvent->muInfo[tagNumber].p4.Eta();
           muWCandTree_tag_phi = iEvent->muInfo[tagNumber].p4.Phi();
@@ -941,8 +1163,27 @@ int main(int argc, char* argv[])
               muTrigTree_probe_passingIsoMu20Iso = 0;
 	      muTrigTree_probe_passingWCandPt = 0;
 	      muTrigTree_probe_passingDiMuTkL110 = 0;
+
               muTrigTree_probe_passingDiMuL110 = 0;
+              muTrigTree_probe_passingDiMuL13p5 = 0;
+              muTrigTree_probe_passingDiMuL1 = 0;
+
+              muTrigTree_probe_passingDiMuL110_match3 = 0;
+              muTrigTree_probe_passingDiMuL13p5_match3 = 0;
+              muTrigTree_probe_passingDiMuL1_match3 = 0;
+
+              muTrigTree_probe_passingDiMuL110_match5 = 0;
+              muTrigTree_probe_passingDiMuL13p5_match5 = 0;
+              muTrigTree_probe_passingDiMuL1_match5 = 0;
+
+              muTrigTree_probe_passingDiMuL110_matchinf = 0;
+              muTrigTree_probe_passingDiMuL13p5_matchinf = 0;
+              muTrigTree_probe_passingDiMuL1_matchinf = 0;
+
+
 	      muTrigTree_mass = (iEvent->muInfo[probeNumber].p4 + iEvent->muInfo[tagNumber].p4).M();
+              muTrigTree_dR = iEvent->muInfo[probeNumber].p4.DeltaR(iEvent->muInfo[tagNumber].p4);
+
 
               for (size_t i=0 ; i < mu24L1.size(); i++) {
                 if (iEvent->muInfo[probeNumber].p4.DeltaR(mu24L1[i]) < L1MatchCut) muTrigTree_probe_passingIsoMu24L1 = 1;
@@ -971,6 +1212,39 @@ int main(int argc, char* argv[])
               for (size_t i=0 ; i < diMuL110.size(); i++) {
                 if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuL110[i]) < L1MatchCut) muTrigTree_probe_passingDiMuL110 = 1;
               }
+              for (size_t i=0 ; i < diMuL13p5.size(); i++) {
+                if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuL13p5[i]) < L1MatchCut) muTrigTree_probe_passingDiMuL13p5 = 1;
+              }
+
+              for (size_t i=0 ; i < diMuL1.size(); i++) {
+		if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuL1[i]) < 0.3) muTrigTree_probe_passingDiMuL1_match3 = 1;
+              }
+              for (size_t i=0 ; i < diMuL110.size(); i++) {
+                if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuL110[i]) < 0.3) muTrigTree_probe_passingDiMuL110_match3 = 1;
+              }
+              for (size_t i=0 ; i < diMuL13p5.size(); i++) {
+                if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuL13p5[i]) < 0.3) muTrigTree_probe_passingDiMuL13p5_match3 = 1;
+              }
+              for (size_t i=0 ; i < diMuL1.size(); i++) {
+                if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuL1[i]) < 0.5) muTrigTree_probe_passingDiMuL1_match5 = 1;
+              }
+              for (size_t i=0 ; i < diMuL110.size(); i++) {
+                if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuL110[i]) < 0.5) muTrigTree_probe_passingDiMuL110_match5 = 1;
+              }
+              for (size_t i=0 ; i < diMuL13p5.size(); i++) {
+                if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuL13p5[i]) < 0.5) muTrigTree_probe_passingDiMuL13p5_match5 = 1;
+              }
+
+              for (size_t i=0 ; i < diMuL1.size(); i++) {
+                if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuL1[i]) < 999999.) muTrigTree_probe_passingDiMuL1_matchinf = 1;
+              }
+              for (size_t i=0 ; i < diMuL110.size(); i++) {
+                if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuL110[i]) < 999999.) muTrigTree_probe_passingDiMuL110_matchinf = 1;
+              }
+              for (size_t i=0 ; i < diMuL13p5.size(); i++) {
+                if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuL13p5[i]) < 999999.) muTrigTree_probe_passingDiMuL13p5_matchinf = 1;
+              }
+
               for (size_t i=0 ; i < diMuL20.size(); i++) {
                 if (iEvent->muInfo[probeNumber].p4.DeltaR(diMuL20[i]) < trigMatchCut) muTrigTree_probe_passingDiMuL20 = 1;
 	      }
@@ -1044,14 +1318,143 @@ int main(int argc, char* argv[])
 	      muWCandTree->Fill();
 
 	    }
+	  }
+	} // potential MuTags;
+            
+	std::vector<unsigned int> potentialMuRecoIsoTags;
+	
+	for(size_t m=0;m<iEvent->muInfo.size();m++) {
+	  if (muonId2012Tight(iEvent->muInfo[m],rhoN,false) && iEvent->muInfo[m].p4.Pt() > 20. && fabs(iEvent->muInfo[m].p4.Eta()) < 2.4) {
+	    if (verbose_) std::cout << "FOUND RecoIso tag Mu " << iEvent->muInfo[m].p4.Pt() << " " << iEvent->muInfo[m].p4.Eta() << " " << iEvent->muInfo[m].p4.Phi() << endl;
+	    potentialMuRecoIsoTags.push_back(m);
+	  }
+	}
+        
+	if (verbose_) cout << " potentialMuRecoIsoTags.size()=" << potentialMuRecoIsoTags.size() << endl;
+        
+	if (potentialMuRecoIsoTags.size()>0) {
+	  unsigned int tagNumber = potentialMuRecoIsoTags[rand->Integer(potentialMuRecoIsoTags.size())];
+	  if (verbose_) std::cout << " Picked RecoIso Tag Mu " << iEvent->muInfo[tagNumber].p4.Pt() << " " << iEvent->muInfo[tagNumber].p4.Eta() << " " << iEvent->muInfo[tagNumber].p4.Phi() << endl;
+	  muRecoIsoTree_tag_pt = iEvent->muInfo[tagNumber].p4.Pt();
+	  muRecoIsoTree_tag_eta = iEvent->muInfo[tagNumber].p4.Eta();
+	  muRecoIsoTree_tag_phi = iEvent->muInfo[tagNumber].p4.Phi();
+          
+	  bool matched = false;
+	  for (size_t i=0 ; i < mu24Iso.size(); i++) {
+	    if (iEvent->muInfo[tagNumber].p4.DeltaR(mu24Iso[i]) < trigMatchCut) {
+	      matched = true;
+	      if (verbose_) cout << "   Matches trigger " << mu24Iso[i].Pt() << " " << mu24Iso[i].Eta() << " " << mu24Iso[i].Phi() << endl;
+	    }
+	  }
+	  if (!matched) if (verbose_) cout << "   Has no match!" << endl;
+	  if (!muonId2012Tight(iEvent->muInfo[tagNumber],rhoN,false) && verbose_) {
+	    cout << "Does not pass tightNoIso cuts";
+	  }
+	  if (matched&&muonId2012Tight(iEvent->muInfo[tagNumber],rhoN)) {
+	    
+	    std::vector<unsigned int> potentialRecoIsoProbes;
+	    for(size_t m=0;m<iEvent->muInfo.size();m++) {
+	      if (m == tagNumber) continue;
+	      float mass = (iEvent->muInfo[m].p4 + iEvent->muInfo[tagNumber].p4).M();
+	      if (muonId2012Tight(iEvent->muInfo[m],rhoN,false) && iEvent->muInfo[m].p4.Pt() > 20. && fabs(iEvent->muInfo[m].p4.Eta()) < 2.4
+		  && (iEvent->muInfo[m].charge + iEvent->muInfo[tagNumber].charge) == 0 && (mass > 50. && mass < 200.)) {
+		potentialRecoIsoProbes.push_back(m);
+		if (verbose_) {
+		  cout << "  Found a potential RecoIso probe: " <<  iEvent->muInfo[m].p4.Pt() << " " << iEvent->muInfo[m].p4.Eta() << " " << iEvent->muInfo[m].p4.Phi() << endl;
+		  cout << "  Inv mass: " << mass << " Tight: " << muonId2012Tight(iEvent->muInfo[m],rhoN,false) << " TightIso: " << muonId2012Tight(iEvent->muInfo[m],rhoN) 
+		       << " Iso: " << muon2012PfCorrIso(iEvent->muInfo[m],rhoN) << endl;
+		}
+	      }
+	    }
+	    if (potentialRecoIsoProbes.size()>0) {
+	      unsigned int probeNumber = potentialRecoIsoProbes[rand->Integer(potentialRecoIsoProbes.size())];
+	      muRecoIsoTree_probe_pt= iEvent->muInfo[probeNumber].p4.Pt();
+	      muRecoIsoTree_probe_eta = iEvent->muInfo[probeNumber].p4.Eta();
+	      muRecoIsoTree_probe_phi = iEvent->muInfo[probeNumber].p4.Phi();
+	      muRecoIsoTree_probe_tightNoIso = muonId2012Tight(iEvent->muInfo[probeNumber],rhoN,false);
+	      muRecoIsoTree_probe_tightIso = muonId2012Tight(iEvent->muInfo[probeNumber],rhoN);
+	      muRecoIsoTree_mass = (iEvent->muInfo[probeNumber].p4 + iEvent->muInfo[tagNumber].p4).M();
+	      muRecoIsoTree_dR = iEvent->muInfo[probeNumber].p4.DeltaR(iEvent->muInfo[tagNumber].p4);
+              
+              
+	      muRecoIsoTree_probe_nearTightNoIso = 0;
+	      muRecoIsoTree_probe_nearTightIso = 0;
+	      for (size_t m=0;m<iEvent->muInfo.size();m++) {
+		if (m == tagNumber || iEvent->muInfo[probeNumber].p4.DeltaR(iEvent->muInfo[m].p4) > recoNearMatchCut) continue;
+		if (muonId2012Tight(iEvent->muInfo[m],rhoN,false)) muRecoIsoTree_probe_nearTightNoIso = 1;
+		if (muonId2012Tight(iEvent->muInfo[m],rhoN)) muRecoIsoTree_probe_nearTightIso = 1;
+	      }
+              
+	      muRecoIsoTree_probe_Iso = muon2012PfCorrIso(iEvent->muInfo[probeNumber],rhoN);
+	      muRecoIsoTree_probe_ipDb = iEvent->muInfo[probeNumber].ipDb;
+	      muRecoIsoTree_probe_zPVPt = iEvent->muInfo[probeNumber].zPVPt;
+	      muRecoIsoTree_probe_globChi2 = iEvent->muInfo[probeNumber].globChi2;
+	      muRecoIsoTree_probe_isPF= iEvent->muInfo[probeNumber].isPF;
+	      muRecoIsoTree_probe_tracker= (iEvent->muInfo[probeNumber].cat & 0x2);
+	      muRecoIsoTree_probe_nPixelHits= iEvent->muInfo[probeNumber].nPixelHits;
+	      muRecoIsoTree_probe_nValidLayers= iEvent->muInfo[probeNumber].nValidLayers;
+	      muRecoIsoTree_probe_nMatches= iEvent->muInfo[probeNumber].nMatches;
+              
+	      muRecoIsoTree_probe_passingIsoMu24Iso = 0;
+	      muRecoIsoTree_probe_passingIsoMu24L3 = 0;
+	      for (size_t i=0 ; i < mu24L3.size(); i++) {
+		if (iEvent->muInfo[probeNumber].p4.DeltaR(mu24L3[i]) < trigMatchCut) muRecoIsoTree_probe_passingIsoMu24L3 = 1;
+	      }
+	      for (size_t i=0 ; i < mu24Iso.size(); i++) {
+		if (iEvent->muInfo[probeNumber].p4.DeltaR(mu24Iso[i]) < trigMatchCut) muRecoIsoTree_probe_passingIsoMu24Iso = 1;
+	      }
+              
+	      muRecoIsoTree->Fill(); // Only if trigger-matched tag and a probe
+              
+	    } // potential RecoIso probe size > 0
+            
+	  } // trigger-matched tag
+	} // potential tag size > 0
+        
+	
+        std::vector<unsigned int> potentialMuRecoTags;
+	
+        for(size_t m=0;m<iEvent->muInfo.size();m++) {
+          if ((iEvent->muInfo[m].cat & 0x1) && iEvent->muInfo[m].p4.Pt() > 20. && fabs(iEvent->muInfo[m].p4.Eta()) < 2.4) {
+            if (verbose_) std::cout << "FOUND reco tag Mu " << iEvent->muInfo[m].p4.Pt() << " " << iEvent->muInfo[m].p4.Eta() << " " << iEvent->muInfo[m].p4.Phi() << endl;
+            potentialMuRecoTags.push_back(m);
+          }
+        }
+
+        if (verbose_) cout << " potentialMuRecoTags.size()=" << potentialMuRecoTags.size() << endl;
+
+        if (potentialMuRecoTags.size()>0) {
+          unsigned int tagNumber = potentialMuRecoTags[rand->Integer(potentialMuRecoTags.size())];
+          if (verbose_) std::cout << " Picked reco Tag Mu " << iEvent->muInfo[tagNumber].p4.Pt() << " " << iEvent->muInfo[tagNumber].p4.Eta() << " " << iEvent->muInfo[tagNumber].p4.Phi() << endl;
+          muRecoTree_tag_pt = iEvent->muInfo[tagNumber].p4.Pt();
+          muRecoTree_tag_eta = iEvent->muInfo[tagNumber].p4.Eta();
+          muRecoTree_tag_phi = iEvent->muInfo[tagNumber].p4.Phi();
+
+          bool matched = false;
+          for (size_t i=0 ; i < mu24Iso.size(); i++) {
+            if (iEvent->muInfo[tagNumber].p4.DeltaR(mu24Iso[i]) < trigMatchCut) {
+              matched = true;
+              if (verbose_) cout << "   Matches trigger " << mu24Iso[i].Pt() << " " << mu24Iso[i].Eta() << " " << mu24Iso[i].Phi() << endl;
+            }
+          }
+          if (!matched) if (verbose_) cout << "   Has no match!" << endl;
+	  if (!muonId2012Tight(iEvent->muInfo[tagNumber],rhoN) && verbose_) {
+	    cout << "Does not pass tight cuts";
+	  }
+          if (matched&&muonId2012Tight(iEvent->muInfo[tagNumber],rhoN,false)) {
 
 	    std::vector<unsigned int> potentialRecoProbes;
             for(size_t m=0;m<iEvent->muInfo.size();m++) {
               if (m == tagNumber) continue;
               float mass = (iEvent->muInfo[m].p4 + iEvent->muInfo[tagNumber].p4).M();
-              if ((iEvent->muInfo[m].cat & 0x2) && iEvent->muInfo[m].p4.Pt() > 20. && fabs(iEvent->muInfo[m].p4.Eta()) < 2.4
+              if ((iEvent->muInfo[m].cat & 0x1) && iEvent->muInfo[m].p4.Pt() > 20. && fabs(iEvent->muInfo[m].p4.Eta()) < 2.4
 		  && (iEvent->muInfo[m].charge + iEvent->muInfo[tagNumber].charge) == 0 && (mass > 50. && mass < 200.)) {
 		potentialRecoProbes.push_back(m);
+		if (verbose_) {
+		  cout << "  Found a potential reco probe: " <<  iEvent->muInfo[m].p4.Pt() << " " << iEvent->muInfo[m].p4.Eta() << " " << iEvent->muInfo[m].p4.Phi() << endl;
+		  cout << "  Inv mass: " << mass << " Tight: " << muonId2012Tight(iEvent->muInfo[m],rhoN,false) << " TightIso: " << muonId2012Tight(iEvent->muInfo[m],rhoN) 
+		       << " Iso: " << muon2012PfCorrIso(iEvent->muInfo[m],rhoN) << endl;
+		}
               }
             }
             if (potentialRecoProbes.size()>0) {
@@ -1062,13 +1465,44 @@ int main(int argc, char* argv[])
 	      muRecoTree_probe_tightNoIso = muonId2012Tight(iEvent->muInfo[probeNumber],rhoN,false);
               muRecoTree_probe_tightIso = muonId2012Tight(iEvent->muInfo[probeNumber],rhoN);
               muRecoTree_mass = (iEvent->muInfo[probeNumber].p4 + iEvent->muInfo[tagNumber].p4).M();
-	      
+              muRecoTree_dR = iEvent->muInfo[probeNumber].p4.DeltaR(iEvent->muInfo[tagNumber].p4);
+
+
+	      muRecoTree_probe_nearTightNoIso = 0;
+	      muRecoTree_probe_nearTightIso = 0;
+	      for (size_t m=0;m<iEvent->muInfo.size();m++) {
+		if (m == tagNumber || iEvent->muInfo[probeNumber].p4.DeltaR(iEvent->muInfo[m].p4) > recoNearMatchCut) continue;
+		if (muonId2012Tight(iEvent->muInfo[m],rhoN,false)) muRecoTree_probe_nearTightNoIso = 1;
+                if (muonId2012Tight(iEvent->muInfo[m],rhoN)) muRecoTree_probe_nearTightIso = 1;
+	      }
+
+	      muRecoTree_probe_Iso = muon2012PfCorrIso(iEvent->muInfo[probeNumber],rhoN);
+	      muRecoTree_probe_ipDb = iEvent->muInfo[probeNumber].ipDb;
+              muRecoTree_probe_zPVPt = iEvent->muInfo[probeNumber].zPVPt;
+	      muRecoTree_probe_globChi2 = iEvent->muInfo[probeNumber].globChi2;
+	      muRecoTree_probe_isPF= iEvent->muInfo[probeNumber].isPF;
+              muRecoTree_probe_tracker= (iEvent->muInfo[probeNumber].cat & 0x2);
+              muRecoTree_probe_nPixelHits= iEvent->muInfo[probeNumber].nPixelHits;
+              muRecoTree_probe_nValidLayers= iEvent->muInfo[probeNumber].nValidLayers;
+              muRecoTree_probe_nMatches= iEvent->muInfo[probeNumber].nMatches;
+
+	      muRecoTree_probe_passingIsoMu24Iso = 0;
+	      muRecoTree_probe_passingIsoMu24L3 = 0;
+              for (size_t i=0 ; i < mu24L3.size(); i++) {
+                if (iEvent->muInfo[probeNumber].p4.DeltaR(mu24L3[i]) < trigMatchCut) muRecoTree_probe_passingIsoMu24L3 = 1;
+              }
+              for (size_t i=0 ; i < mu24Iso.size(); i++) {
+                if (iEvent->muInfo[probeNumber].p4.DeltaR(mu24Iso[i]) < trigMatchCut) muRecoTree_probe_passingIsoMu24Iso = 1;
+              }
+
 	      muRecoTree->Fill(); // Only if trigger-matched tag and a probe
 
 	    } // potential Reco probe size > 0
 
 	  } // trigger-matched tag
 	} // potential tag size > 0
+            
+            
 
         std::vector<unsigned int> potentialEleTags;
 
@@ -1087,9 +1521,6 @@ int main(int argc, char* argv[])
           eleTrigTree_tag_pt = iEvent->eleInfo[tagNumber].p4.Pt();
           eleTrigTree_tag_eta = iEvent->eleInfo[tagNumber].p4.Eta();
           eleTrigTree_tag_phi = iEvent->eleInfo[tagNumber].p4.Phi();
-          eleRecoTree_tag_pt = iEvent->eleInfo[tagNumber].p4.Pt();
-          eleRecoTree_tag_eta = iEvent->eleInfo[tagNumber].p4.Eta();
-          eleRecoTree_tag_phi = iEvent->eleInfo[tagNumber].p4.Phi();
 
           bool matched = false;
           for (size_t i=0 ; i < ele27HLT.size(); i++) {
@@ -1114,6 +1545,7 @@ int main(int argc, char* argv[])
               eleTrigTree_probe_pt= iEvent->eleInfo[probeNumber].p4.Pt();
               eleTrigTree_probe_eta = iEvent->eleInfo[probeNumber].p4.Eta();
               eleTrigTree_probe_phi = iEvent->eleInfo[probeNumber].p4.Phi();
+              eleTrigTree_probe_wpHWW = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,0);
               eleTrigTree_probe_wp70 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,70);
               eleTrigTree_probe_wp80 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,80);
               eleTrigTree_probe_wp85 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,85);
@@ -1125,6 +1557,8 @@ int main(int argc, char* argv[])
 	      eleTrigTree_probe_passingDiEle8 = 0;
 	      eleTrigTree_probe_passingDiEleDz = 0;
 	      eleTrigTree_mass = (iEvent->eleInfo[probeNumber].p4 + iEvent->eleInfo[tagNumber].p4).M();
+              eleTrigTree_dR = iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->eleInfo[tagNumber].p4);
+
 	      
 	      for (size_t i=0 ; i < ele27L1.size(); i++) {
 		if (iEvent->eleInfo[probeNumber].p4.DeltaR(ele27L1[i]) < L1MatchCut) eleTrigTree_probe_passingEle27L1 = 1;
@@ -1145,7 +1579,39 @@ int main(int argc, char* argv[])
 	      eleTrigTree->Fill();
 
 	    } // HLT probes > 0
+	  }
+	} // potential ele tags 
 
+        std::vector<unsigned int> potentialEleRecoTags;
+
+        for(size_t m=0;m<iEvent->eleInfo.size();m++) {
+          if (iEvent->eleInfo[m].p4.Pt() > 20. && fabs(iEvent->eleInfo[m].p4.Eta()) < 2.5) {
+            if (verbose_) std::cout << "FOUND reco tag Ele " << iEvent->eleInfo[m].p4.Pt() << " " << iEvent->eleInfo[m].p4.Eta() << " " << iEvent->eleInfo[m].p4.Phi() << endl;
+            potentialEleRecoTags.push_back(m);
+          }
+        }
+
+        if (verbose_) cout << " potentialEleRecoTags.size()=" << potentialEleRecoTags.size() << endl;
+
+        if (potentialEleRecoTags.size()>0) {
+          unsigned int tagNumber = potentialEleRecoTags[rand->Integer(potentialEleRecoTags.size())];
+          if (verbose_) std::cout << " Picked reco Tag Ele " << iEvent->eleInfo[tagNumber].p4.Pt() << " " << iEvent->eleInfo[tagNumber].p4.Eta() << " " << iEvent->eleInfo[tagNumber].p4.Phi() << endl;
+          eleRecoTree_tag_pt = iEvent->eleInfo[tagNumber].p4.Pt();
+          eleRecoTree_tag_eta = iEvent->eleInfo[tagNumber].p4.Eta();
+          eleRecoTree_tag_phi = iEvent->eleInfo[tagNumber].p4.Phi();
+
+          bool matched = false;
+          for (size_t i=0 ; i < ele27HLT.size(); i++) {
+            if (iEvent->eleInfo[tagNumber].p4.DeltaR(ele27HLT[i]) < trigMatchCut) {
+              matched = true;
+              if (verbose_) cout << "   Matches trigger " << ele27HLT[i].Pt() << " " << ele27HLT[i].Eta() << " " << ele27HLT[i].Phi() << endl;
+            }
+          }
+          if (!matched) if (verbose_) cout << "   Has no match!" << endl;
+	  if (!ElectronWP(iEvent->eleInfo[tagNumber],rhoN,80,false)&&verbose_) {
+	    cout << "  Does not pass WP80 (no Iso) cuts" << endl;
+	  }
+          if (matched&&ElectronWP(iEvent->eleInfo[tagNumber],rhoN,80,false)) {
 	    std::vector<unsigned int> potentialRecoProbes;
             for(size_t m=0;m<iEvent->eleInfo.size();m++) {
               if (m == tagNumber) continue;
@@ -1157,15 +1623,48 @@ int main(int argc, char* argv[])
             }
             if (potentialRecoProbes.size()>0) {
               unsigned int probeNumber = potentialRecoProbes[rand->Integer(potentialRecoProbes.size())];
+	      eleRecoTree_probe_presel = ElectronPresel(iEvent->eleInfo[probeNumber]);
               eleRecoTree_probe_pt= iEvent->eleInfo[probeNumber].p4.Pt();
               eleRecoTree_probe_eta = iEvent->eleInfo[probeNumber].p4.Eta();
               eleRecoTree_probe_phi = iEvent->eleInfo[probeNumber].p4.Phi();
+              eleRecoTree_probe_wpHWW = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,0);
 	      eleRecoTree_probe_wp70 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,70);
 	      eleRecoTree_probe_wp80 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,80);
 	      eleRecoTree_probe_wp85 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,85);
 	      eleRecoTree_probe_wp90 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,90);
 	      eleRecoTree_probe_wp95 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,95);
+              eleRecoTree_probe_wpHWWnoIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,0,false);
+              eleRecoTree_probe_wp70noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,70,false);
+              eleRecoTree_probe_wp80noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,80,false);
+              eleRecoTree_probe_wp85noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,85,false);
+              eleRecoTree_probe_wp90noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,90,false);
+              eleRecoTree_probe_wp95noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,95,false);
               eleRecoTree_mass = (iEvent->eleInfo[probeNumber].p4 + iEvent->eleInfo[tagNumber].p4).M();
+              eleRecoTree_dR = iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->eleInfo[tagNumber].p4);
+	      eleRecoTree_probe_iso = ElectronIso(iEvent->eleInfo[tagNumber],rhoN);
+	      eleRecoTree_probe_id = iEvent->eleInfo[tagNumber].mvaOutTrig;
+
+	      eleRecoTree_probe_nearWpHWW = 0;
+	      eleRecoTree_probe_nearWp70 = 0;
+              eleRecoTree_probe_nearWp80 = 0;
+              eleRecoTree_probe_nearWp85 = 0;
+              eleRecoTree_probe_nearWp90 = 0;
+              eleRecoTree_probe_nearWp95 = 0;
+	      for (size_t m=0;m<iEvent->eleInfo.size();m++) {
+                if (m == tagNumber || iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->eleInfo[m].p4) > recoNearMatchCut) continue;
+                if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,0)) eleRecoTree_probe_nearWpHWW = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,70)) eleRecoTree_probe_nearWp70 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,80)) eleRecoTree_probe_nearWp80 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,85)) eleRecoTree_probe_nearWp85 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,90)) eleRecoTree_probe_nearWp90 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,95)) eleRecoTree_probe_nearWp95 = 1;
+              }
+
+	      eleRecoTree_probe_passingEle27HLT = 0;
+              for (size_t i=0 ; i < ele27HLT.size(); i++) {
+                if (iEvent->eleInfo[probeNumber].p4.DeltaR(ele27HLT[i]) < trigMatchCut) eleRecoTree_probe_passingEle27HLT = 1;
+              }
+
 
               eleRecoTree->Fill(); // Only if trigger-matched tag and a probe
 
@@ -1173,6 +1672,99 @@ int main(int argc, char* argv[])
 
 	  } // matched ele tag
 	} // potential ele tag
+
+            
+	std::vector<unsigned int> potentialEleRecoIsoTags;
+	
+	for(size_t m=0;m<iEvent->eleInfo.size();m++) {
+	  if (ElectronPresel(iEvent->eleInfo[m]) && iEvent->eleInfo[m].p4.Pt() > 20. && fabs(iEvent->eleInfo[m].p4.Eta()) < 2.5) {
+	    if (verbose_) std::cout << "FOUND RecoIso tag Ele " << iEvent->eleInfo[m].p4.Pt() << " " << iEvent->eleInfo[m].p4.Eta() << " " << iEvent->eleInfo[m].p4.Phi() << endl;
+	    potentialEleRecoIsoTags.push_back(m);
+	  }
+	}
+        
+	if (verbose_) cout << " potentialEleRecoIsoTags.size()=" << potentialEleRecoIsoTags.size() << endl;
+        
+	if (potentialEleRecoIsoTags.size()>0) {
+	  unsigned int tagNumber = potentialEleRecoIsoTags[rand->Integer(potentialEleRecoIsoTags.size())];
+	  if (verbose_) std::cout << " Picked RecoIso Tag Ele " << iEvent->eleInfo[tagNumber].p4.Pt() << " " << iEvent->eleInfo[tagNumber].p4.Eta() << " " << iEvent->eleInfo[tagNumber].p4.Phi() << endl;
+	  eleRecoIsoTree_tag_pt = iEvent->eleInfo[tagNumber].p4.Pt();
+	  eleRecoIsoTree_tag_eta = iEvent->eleInfo[tagNumber].p4.Eta();
+	  eleRecoIsoTree_tag_phi = iEvent->eleInfo[tagNumber].p4.Phi();
+          
+	  bool matched = false;
+	  for (size_t i=0 ; i < ele27HLT.size(); i++) {
+	    if (iEvent->eleInfo[tagNumber].p4.DeltaR(ele27HLT[i]) < trigMatchCut) {
+	      matched = true;
+	      if (verbose_) cout << "   Matches trigger " << ele27HLT[i].Pt() << " " << ele27HLT[i].Eta() << " " << ele27HLT[i].Phi() << endl;
+	    }
+	  }
+	  if (!matched) if (verbose_) cout << "   Has no match!" << endl;
+	  if (!ElectronWP(iEvent->eleInfo[tagNumber],rhoN,80)&&verbose_) {
+	    cout << "  Does not pass WP80 cuts" << endl;
+	  }
+	  if (matched&&ElectronWP(iEvent->eleInfo[tagNumber],rhoN,80)) {
+	    std::vector<unsigned int> potentialRecoIsoProbes;
+	    for(size_t m=0;m<iEvent->eleInfo.size();m++) {
+	      if (m == tagNumber) continue;
+	      float mass = (iEvent->eleInfo[m].p4 + iEvent->eleInfo[tagNumber].p4).M();
+	      if ((ElectronPresel(iEvent->eleInfo[m]) && iEvent->eleInfo[m].p4.Pt() > 20. && fabs(iEvent->eleInfo[m].p4.Eta()) < 2.5)
+		  && (iEvent->eleInfo[m].charge + iEvent->eleInfo[tagNumber].charge) == 0 && (mass > 50. && mass < 200.)) {
+		potentialRecoIsoProbes.push_back(m);
+	      }
+	    }
+	    if (potentialRecoIsoProbes.size()>0) {
+	      unsigned int probeNumber = potentialRecoIsoProbes[rand->Integer(potentialRecoIsoProbes.size())];
+	      eleRecoIsoTree_probe_pt= iEvent->eleInfo[probeNumber].p4.Pt();
+	      eleRecoIsoTree_probe_eta = iEvent->eleInfo[probeNumber].p4.Eta();
+	      eleRecoIsoTree_probe_phi = iEvent->eleInfo[probeNumber].p4.Phi();
+	      eleRecoIsoTree_probe_wpHWW = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,0);
+	      eleRecoIsoTree_probe_wp70 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,70);
+	      eleRecoIsoTree_probe_wp80 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,80);
+	      eleRecoIsoTree_probe_wp85 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,85);
+	      eleRecoIsoTree_probe_wp90 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,90);
+	      eleRecoIsoTree_probe_wp95 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,95);
+	      eleRecoIsoTree_probe_wpHWWnoIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,0,false);
+	      eleRecoIsoTree_probe_wp70noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,70,false);
+	      eleRecoIsoTree_probe_wp80noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,80,false);
+	      eleRecoIsoTree_probe_wp85noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,85,false);
+	      eleRecoIsoTree_probe_wp90noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,90,false);
+	      eleRecoIsoTree_probe_wp95noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,95,false);
+	      eleRecoIsoTree_mass = (iEvent->eleInfo[probeNumber].p4 + iEvent->eleInfo[tagNumber].p4).M();
+	      eleRecoIsoTree_dR = iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->eleInfo[tagNumber].p4);
+	      eleRecoIsoTree_probe_iso = ElectronIso(iEvent->eleInfo[tagNumber],rhoN);
+	      eleRecoIsoTree_probe_id = iEvent->eleInfo[tagNumber].mvaOutTrig;
+
+              
+	      eleRecoIsoTree_probe_nearWpHWW = 0;
+	      eleRecoIsoTree_probe_nearWp70 = 0;
+	      eleRecoIsoTree_probe_nearWp80 = 0;
+	      eleRecoIsoTree_probe_nearWp85 = 0;
+	      eleRecoIsoTree_probe_nearWp90 = 0;
+	      eleRecoIsoTree_probe_nearWp95 = 0;
+	      for (size_t m=0;m<iEvent->eleInfo.size();m++) {
+		if (m == tagNumber || iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->eleInfo[m].p4) > recoNearMatchCut) continue;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,0)) eleRecoIsoTree_probe_nearWpHWW = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,70)) eleRecoIsoTree_probe_nearWp70 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,80)) eleRecoIsoTree_probe_nearWp80 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,85)) eleRecoIsoTree_probe_nearWp85 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,90)) eleRecoIsoTree_probe_nearWp90 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,95)) eleRecoIsoTree_probe_nearWp95 = 1;
+	      }
+              
+	      eleRecoIsoTree_probe_passingEle27HLT = 0;
+	      for (size_t i=0 ; i < ele27HLT.size(); i++) {
+		if (iEvent->eleInfo[probeNumber].p4.DeltaR(ele27HLT[i]) < trigMatchCut) eleRecoIsoTree_probe_passingEle27HLT = 1;
+	      }
+              
+              
+	      eleRecoIsoTree->Fill(); // Only if trigger-matched tag and a probe
+              
+	    } // potential RecoIso probe size > 0
+            
+	  } // matched ele tag
+	} // potential ele tag
+        
 
 	/*
         for(size_t m=0;m<iEvent->eleInfo.size();m++) {
@@ -1182,56 +1774,62 @@ int main(int argc, char* argv[])
 	cout << "PFMET: " << iEvent->pfmet.p4.Et() << endl;
 	*/
 
-	// Trigger name debugging
-	std::vector<std::string> interestingNames;
-	//	interestingNames.push_back("HLT_IsoMu20_eta2p1_WCandPt80");
-	//	interestingNames.push_back("HLT_IsoMu24_eta2p1_CentralPFJet30_CentralPFJet25_PFMET20");
-	//	interestingNames.push_back("HLT_Ele27_WP80_WCandPt80");
-	//	interestingNames.push_back("HLT_Ele27_WP80_CentralPFJet30_CentralPFJet25_PFMET20");
-	interestingNames.push_back("HLT_IsoMu24_eta2p1_v");
-	interestingNames.push_back("HLT_Mu40_eta2p1_v");
-	interestingNames.push_back("HLT_Mu17_Mu8_v");
-	interestingNames.push_back("HLT_Mu17_TkMu8_v");
-	interestingNames.push_back("HLT_IsoMu20_eta2p1_WCandPt80_v");
-	interestingNames.push_back("HLT_Ele27_WP80_v");
-	interestingNames.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+	if (verbose_) {
+	  // Trigger name debugging
+	  std::vector<std::string> interestingNames;
+	  //	interestingNames.push_back("HLT_IsoMu20_eta2p1_WCandPt80");
+	  //	interestingNames.push_back("HLT_IsoMu24_eta2p1_CentralPFJet30_CentralPFJet25_PFMET20");
+	  //	interestingNames.push_back("HLT_Ele27_WP80_WCandPt80");
+	  //	interestingNames.push_back("HLT_Ele27_WP80_CentralPFJet30_CentralPFJet25_PFMET20");
+	  interestingNames.push_back("HLT_IsoMu24_eta2p1_v");
+	  interestingNames.push_back("HLT_Mu40_eta2p1_v");
+	  interestingNames.push_back("HLT_Mu17_Mu8_v");
+	  interestingNames.push_back("HLT_Mu17_TkMu8_v");
+	  interestingNames.push_back("HLT_IsoMu20_eta2p1_WCandPt80_v");
+	  interestingNames.push_back("HLT_Ele27_WP80_v");
+	  interestingNames.push_back("HLT_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v");
+          interestingNames.push_back("HLT_IsoMu24_v");
+          interestingNames.push_back("HLT_Mu40_v");
+          interestingNames.push_back("HLT_IsoMu20_WCandPt80_v");
 
-	//	const TriggerPathRefVector trigPathRefs (triggerEvent->pathRefs() );
-
-	for ( TriggerPathRefVector::const_iterator trigPathRef  = trigPathRefs.begin(); trigPathRef != trigPathRefs.end(); ++trigPathRef ) {
-	std::string name = (*trigPathRef)->name();
-	bool interesting = false;
-	std::string interestingName;
-	for (std::vector<std::string>::iterator intName = interestingNames.begin() ; intName != interestingNames.end() ; intName++) {
-	if (name.compare(0,intName->size(),*intName) == 0) {
-        interesting = true;
-        interestingName = *intName;
+	  
+	  //	const TriggerPathRefVector trigPathRefs (triggerEvent->pathRefs() );
+	  
+	  for ( TriggerPathRefVector::const_iterator trigPathRef  = trigPathRefs.begin(); trigPathRef != trigPathRefs.end(); ++trigPathRef ) {
+	    std::string name = (*trigPathRef)->name();
+	    bool interesting = false;
+	    std::string interestingName;
+	    for (std::vector<std::string>::iterator intName = interestingNames.begin() ; intName != interestingNames.end() ; intName++) {
+	      if (name.compare(0,intName->size(),*intName) == 0) {
+		interesting = true;
+		interestingName = *intName;
+	      }
+	    }
+	    if (interesting) {
+	      std::cout << name << " " << (*trigPathRef)->wasRun() << " " << (*trigPathRef)->wasAccept() << std::endl;
+	      const TriggerFilterRefVector trigFilterRefs( triggerEvent->pathFilters(name) );
+	      for ( TriggerFilterRefVector::const_iterator trigFilterRef  = trigFilterRefs.begin(); trigFilterRef != trigFilterRefs.end(); ++trigFilterRef ) {
+		std::string label = (*trigFilterRef)->label();
+		std::cout << "  " << label << " " << (*trigFilterRef)->status() << std::endl;
+		//      std::cout << "Looking for muon label " << muonLabels[interestingName] << " (and label is " << label << ")" << std::endl;
+		//      if (muonLabels.count(name) && label == muonLabels[interestingName]) {
+		//        std::cout << "Found label " << muonLabels[interestingName] << "(and label is "<< label << ")" << std::endl;
+		//        const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
+		//        for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
+		//          trigMuons[interestingName].push_back(GENPTOLORP(*trigObjRef));
+		//          std::cout << "   Pushing muon back to " << interestingName << std::endl;
+		//        }
+		//      }
+		const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
+		for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
+		  std::cout << "    " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
+		}
+	      } 
+	    }
+	  }
 	}
-	}
-	if (interesting) {
-	if (verbose_) std::cout << name << " " << (*trigPathRef)->wasRun() << " " << (*trigPathRef)->wasAccept() << std::endl;
-	const TriggerFilterRefVector trigFilterRefs( triggerEvent->pathFilters(name) );
-	for ( TriggerFilterRefVector::const_iterator trigFilterRef  = trigFilterRefs.begin(); trigFilterRef != trigFilterRefs.end(); ++trigFilterRef ) {
-        std::string label = (*trigFilterRef)->label();
-        if (verbose_) std::cout << "  " << label << " " << (*trigFilterRef)->status() << std::endl;
-	//      if (verbose_) std::cout << "Looking for muon label " << muonLabels[interestingName] << " (and label is " << label << ")" << std::endl;
-	//      if (muonLabels.count(name) && label == muonLabels[interestingName]) {
-	//        if (verbose_) std::cout << "Found label " << muonLabels[interestingName] << "(and label is "<< label << ")" << std::endl;
-	//        const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
-	//        for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
-	//          trigMuons[interestingName].push_back(GENPTOLORP(*trigObjRef));
-	//          if (verbose_) std::cout << "   Pushing muon back to " << interestingName << std::endl;
-	//        }
-	//      }
-        const TriggerObjectRefVector trigObjRefs(triggerEvent->filterObjects( label ));
-        for ( TriggerObjectRefVector::const_iterator trigObjRef = trigObjRefs.begin() ; trigObjRef != trigObjRefs.end() ; trigObjRef++) {
-	if (verbose_) std::cout << "    " << (*trigObjRef)->pt() << " " << (*trigObjRef)->eta() << " " << (*trigObjRef)->phi() << std::endl;
-        }
-	} 
-	}
-	}
-
-
+	  
+	  
 	} // closed event loop
 
     std::cout << "closing the file: " << inputFiles_[iFile] << std::endl;
@@ -1249,8 +1847,10 @@ int main(int argc, char* argv[])
   muTrigDir->cd();  muTrigTree->Write();
   muWCandDir->cd();  muWCandTree->Write();
   muRecoDir->cd();  muRecoTree->Write();
+  muRecoIsoDir->cd() ; muRecoIsoTree->Write();  
   eleTrigDir->cd();  eleTrigTree->Write();
   eleRecoDir->cd();  eleRecoTree->Write();
+    eleRecoIsoDir->cd() ; eleRecoIsoTree->Write();  
   _outFile->Write();
   _outFile->Close();
   return 0;
