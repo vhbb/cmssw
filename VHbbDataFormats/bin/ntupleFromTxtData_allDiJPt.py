@@ -134,6 +134,9 @@ process.Analyzer = cms.PSet(
     hltDoubleMuon2012A_leg17 = cms.string(baseAddFiles+"triggerRootFiles/DoubleMu17.TrigEff.2012A.root"),
     hltMuPlusWCandPt2012A_legMu = cms.string(baseAddFiles+"triggerRootFiles/SingleMu20Not24Or40.TrigEff.2012A.root"),
     hltMuPlusWCandPt2012A_legW = cms.string(baseAddFiles+"triggerRootFiles/WCandPt.TrigEff.2012A.root"),
+    hltDoubleMuon2012A_dZ = cms.string(baseAddFiles+"triggerRootFiles/DoubleMuDz.TrigEff.2012AB.root"),
+    hltDoubleEle2012A_dZ = cms.string(baseAddFiles+"triggerRootFiles/DoubleEleDz.TrigEff.2012AB.root"),
+
     jecFolder = cms.string(baseAddFiles+"jec"),
     btagEffFileName = cms.string(baseAddFiles+"btag_generic.txt")
     )

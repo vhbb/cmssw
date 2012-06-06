@@ -334,6 +334,7 @@ struct  LeptonInfo
   float id2012tight[MAXL];
   float idMVAnotrig[MAXL];
   float idMVAtrig[MAXL];
+  float idMVApresel[MAXL];
   float wp70[MAXL]; 
   float wp80[MAXL]; 
   float wp85[MAXL]; 
@@ -414,7 +415,7 @@ wpHWW[j]=((fabs(eta) < 0.8 && id>0.94 && iso < 0.15) ||  (fabs(eta) >= 0.8 && fa
 
  idMVAnotrig[j]=i.mvaOut;
  idMVAtrig[j]=i.mvaOutTrig;
-
+ idMVApresel[j]=mvaPreSel;
 
 }
 template <> void LeptonInfo::setSpecific<VHbbEvent::MuonInfo>(const VHbbEvent::MuonInfo & i, int j,const VHbbEventAuxInfo & aux){
@@ -1032,6 +1033,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("vLepton_id2012tight",vLeptons.id2012tight,"id2012tight[nvlep]/F");
   _outTree->Branch("vLepton_idMVAnotrig",vLeptons.idMVAnotrig,"idMVAnotrig[nvlep]/F");
   _outTree->Branch("vLepton_idMVAtrig",vLeptons.idMVAtrig,"idMVAtrig[nvlep]/F");
+  _outTree->Branch("vLepton_idMVApresel",vLeptons.idMVApresel,"idMVApresel[nvlep]/F");
   _outTree->Branch("vLepton_innerHits",vLeptons.innerHits,"innerHits[nvlep]/F");
   _outTree->Branch("vLepton_photonIsoDoubleCount",vLeptons.photonIsoDoubleCount,"photonIsoDoubleCount[nvlep]/F");
   _outTree->Branch("vLepton_wpHWW",vLeptons.wpHWW,"wpHWW[nvlep]/F");
@@ -1067,6 +1069,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("aLepton_id2012tight",aLeptons.id2012tight,"id2012tight[nalep]/F");
   _outTree->Branch("aLepton_idMVAnotrig",aLeptons.idMVAnotrig,"idMVAnotrig[nalep]/F");
   _outTree->Branch("aLepton_idMVAtrig",aLeptons.idMVAtrig,"idMVAtrig[nalep]/F");
+  _outTree->Branch("aLepton_idMVApresel",aLeptons.idMVApresel,"idMVApresel[nalep]/F");
   _outTree->Branch("aLepton_innerHits",aLeptons.innerHits,"innerHits[nalep]/F");
   _outTree->Branch("aLepton_photonIsoDoubleCount",aLeptons.photonIsoDoubleCount,"photonIsoDoubleCount[nalep]/F");
   _outTree->Branch("aLepton_wpHWW",aLeptons.wpHWW,"wpHWW[nalep]/F");
