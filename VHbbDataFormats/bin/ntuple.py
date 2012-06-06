@@ -164,6 +164,7 @@ process.Analyzer = cms.PSet(
     hltMuPlusWCandPt2012A_legW = cms.string("triggerRootFiles/WCandPt.TrigEff.2012A.root"),
     hltDoubleMuon2012A_dZ = cms.string("triggerRootFiles/DoubleMuDz.TrigEff.2012A.root"),
     hltDoubleEle2012A_dZ = cms.string("triggerRootFiles/DoubleEleDz.TrigEff.2012A.root"),
+    jecFolder = cms.string("jec"),
     btagEffFileName = cms.string("btag_generic.txt")
     )
 
