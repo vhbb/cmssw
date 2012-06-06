@@ -4,7 +4,7 @@ import re
 
 process = cms.Process("FWLitePlots")
 
-baseAddFiles = "/gpfs/gpfsddn/cms/user/arizzi/Hbb/V30/CMSSW_5_2_4_patch4/src/VHbbAnalysis/VHbbDataFormats/bin/" 
+baseAddFiles = "/gpfs/gpfsddn/cms/user/arizzi/Hbb/V32/CMSSW_5_2_5/src/VHbbAnalysis/VHbbDataFormats/bin/" 
 
 f = open(os.environ.get("FILETOPROCESS"))
 lines = f.readlines()
@@ -13,11 +13,12 @@ f.close()
 #fileNames   = cms.vstring('file:2l2bMetEdmNtuples.root'),         ## mandatory
 process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(),
-    PUmcfileName2011B= cms.string(baseAddFiles+"Fall11_Generated.root"),
-    PUdatafileName2011B = cms.string(baseAddFiles+"Cert_175832-180252_PromptReco_JSON.pileupTruth_v2_finebin.root"),
-    PUmcfileName = cms.string(baseAddFiles+"ttbarPU_35bins_fall11.root"),
-    PUdatafileName = cms.string(baseAddFiles+"Pileup_2011_to_173692_LPLumiScale_68mb_35bins.root"),
-    Weight3DfileName = cms.string(baseAddFiles+"Weight3D_Fall.root"),
+    PUmcfileName2011B= cms.string(baseAddFiles+"Summer12MCObserved.root"),
+    PUdatafileName2011B = cms.string(baseAddFiles+"MyDataPileupHistogramObserved.root"),
+    PUmcfileName = cms.string(baseAddFiles+"Summer12MCTrue.root"),
+    PUdatafileName = cms.string(baseAddFiles+"Summer12DataTrue.root"),
+#    Weight3DfileName = cms.string(baseAddFiles+"Weight3D_Summer12.root"),
+    Weight3DfileName = cms.string(""),
     runMin  = cms.int32(-1),
     runMax  = cms.int32(-1),
     maxEvents   = cms.int32(-1),                             ## optional
@@ -69,29 +70,35 @@ process.Analyzer = cms.PSet(
         "HLT_Ele17_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_CentralJet30_CentralJet25_PFMHT15_v.*", #17
         "HLT_Ele22_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_CentralJet30_CentralJet25_PFMHT20_v.*", #18
         "HLT_Ele27_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_CentralJet30_CentralJet25_PFMHT20_v.*", #19
-        "HLT_Mu30_v.*", #20 
+        "HLT_Mu30_v.*", #20
         "HLT_Mu40_v.*", #21
         "HLT_Mu40_eta2p1_v.*", #22
         "HLT_IsoMu24_eta2p1_v.*", #23
         "HLT_IsoMu17_eta2p1_DiCentralJet30_v.*", #24
         "HLT_IsoMu17_eta2p1_DiCentralPFJet25_PFMHT15_v.*", #25
         "HLT_Ele30_CaloIdVT_CaloIsoT_TrkIdT_TrkIsoT_DiCentralJet30_PFMHT25_v.*", #26
-        "HLT_Ele27_WP80_DiCentralPFJet25_PFMHT15_v.*", #27 
-         "HLT_IsoPFTau35_Trk20_v.*", #28
-         "HLT_IsoPFTau35_Trk20_MET45_v.*", #29
-         "HLT_IsoPFTau35_Trk20_MET60_v.*", #30
-         "HLT_IsoPFTau45_Trk20_MET60_v.*", #31
-         "HLT_IsoPFTau35_Trk20_MET70_v.*", #32
-         "HLT_MediumIsoPFTau35_Trk20_v.*", #33
-         "HLT_MediumIsoPFTau35_Trk20_MET60_v.*", #34
-         "HLT_MediumIsoPFTau35_Trk20_MET70_v.*", #35
-         "HLT_LooseIsoPFTau35_Trk20_v.*", #36
-         "HLT_LooseIsoPFTau35_Trk20_MET70_v.*", #37
-         "HLT_LooseIsoPFTau35_Trk20_MET75_v.*", #38
-         "HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseFiltered_v*", #39
+        "HLT_Ele27_WP80_DiCentralPFJet25_PFMHT15_v.*", #27
+        "HLT_IsoPFTau35_Trk20_v.*", #28
+        "HLT_IsoPFTau35_Trk20_MET45_v.*", #29
+        "HLT_IsoPFTau35_Trk20_MET60_v.*", #30
+        "HLT_IsoPFTau45_Trk20_MET60_v.*", #31
+        "HLT_IsoPFTau35_Trk20_MET70_v.*", #32
+        "HLT_MediumIsoPFTau35_Trk20_v.*", #33
+        "HLT_MediumIsoPFTau35_Trk20_MET60_v.*", #34
+        "HLT_MediumIsoPFTau35_Trk20_MET70_v.*", #35
+        "HLT_LooseIsoPFTau35_Trk20_v.*", #36
+        "HLT_LooseIsoPFTau35_Trk20_MET70_v.*", #37
+        "HLT_LooseIsoPFTau35_Trk20_MET75_v.*", #38
+        "HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned_v*", #39
         "HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80*", #40
-        "HLT_DiCentralPFJet30_PFMET80_BTagCSV07", #41
-        "HLT_PFMET150_v.*", #42
+        "HLT_DiCentralPFJet30_PFMET80_BTagCSV07*", #41
+        "HLT_PFMET150_v*", #42
+        "HLT_L1ETM40_v*", #43
+        "HLT_Ele27_WP80_v.*", #44
+        "HLT_Ele27_WP80_WCandPt80_v.*", #45
+        "HLT_IsoMu20_eta2p1_WCandPt80_v.*", #46
+        "HLT_IsoMu20_WCandPt80_v.*", #47
+        "HLT_Mu17_TkMu8_v.*", #48
 
 
   ),
@@ -118,6 +125,16 @@ process.Analyzer = cms.PSet(
     hltSingleEleV4FileName = cms.string(baseAddFiles+"TriggerEfficiency_Electrons_PromptV4Aug05PromptV6.root"),
     idEleFileName = cms.string(baseAddFiles+"ScaleFactor_PFElectrons_DataMontecarlo.root"),
     hltMuOr30FileName =  cms.string(baseAddFiles+"ScaleFactor_muonEffsIsoToHLTMu30NotIso_efficiency.root"),
+    hltSingleEle2012Awp95 = cms.string(baseAddFiles+"triggerRootFiles/SingleEle.TrigEff.wp95.2012A.root"),
+    hltSingleEle2012Awp80 = cms.string(baseAddFiles+"triggerRootFiles/SingleEle.TrigEff.wp80.2012A.root"),
+    hltSingleMuon2012A = cms.string(baseAddFiles+"triggerRootFiles/SingleMu24OR40.TrigEff.2012A.root"),
+    hltDoubleEle2012A_leg8 = cms.string(baseAddFiles+"triggerRootFiles/DoubleEle8.TrigEff.wp95.2012A.root"),
+    hltDoubleEle2012A_leg17 = cms.string(baseAddFiles+"triggerRootFiles/DoubleEle17.TrigEff.wp95.2012A.root"),
+    hltDoubleMuon2012A_leg8 = cms.string(baseAddFiles+"triggerRootFiles/DoubleMu8.TrigEff.2012A.root"),
+    hltDoubleMuon2012A_leg17 = cms.string(baseAddFiles+"triggerRootFiles/DoubleMu17.TrigEff.2012A.root"),
+    hltMuPlusWCandPt2012A_legMu = cms.string(baseAddFiles+"triggerRootFiles/SingleMu20Not24Or40.TrigEff.2012A.root"),
+    hltMuPlusWCandPt2012A_legW = cms.string(baseAddFiles+"triggerRootFiles/WCandPt.TrigEff.2012A.root"),
+
     btagEffFileName = cms.string(baseAddFiles+"btag_generic.txt")
     )
 

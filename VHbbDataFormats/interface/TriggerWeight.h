@@ -258,6 +258,26 @@ float scaleMuOr30IsoHLT(float pt1, float eta1)
 }
 
 
+//For 2012A HLT_DiCentralPFJet30_PFMHT80, valid for pfMET > 110 GeV:
+
+double scaleDiJet30MHT80_2012A(double x)
+{
+ if(x<110) return 0;
+ return   (1e0 - exp(-0.0161*(x)));
+}
+//For 2012B HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned, valid for pfMET > 120 GeV:
+double scaleSumpT100MET100_2012B(double x)
+{
+ if(x<120) return 0;
+ return  (1e0 - exp(-0.0130*(x)));
+}
+//For 2012A+B HLT_PFMET150, valid for pfMET > 150 GeV:
+double scalePFMET150_2012AB(double x)
+{
+ if(x<150) return 0;
+ return  (1e0 - exp(-0.0671*(x-142.7)));
+}
+
 float doubleEle2012A( float pt1, float eta1, float pt2, float eta2)
 {
  float eff1_17 = efficiencyFromPtEta(pt1,eta1,tscaleDoubleEle2012A_leg17).first;

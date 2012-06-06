@@ -378,7 +378,31 @@ id2012tight[j] = fabs(i.dxy) < 0.02  &&fabs(i.dz) < 0.1  &&(
 ) ||
 (i.isEB  &&fabs(i.Deta) < 0.004 &&fabs(i.Dphi) < 0.03 &&i.sihih < 0.01  &&i.HoE < 0.12  &&fabs(i.fMVAVar_IoEmIoP) < 0.05
  ));
+
+bool  mvaPreSel = (
+    (i.isEE  &&
+   //fabs(electrons[it].Deta) < 0.009 &&
+   //fabs(electrons[it].Dphi) < 0.1 &&
+   i.sihih < 0.03  &&
+   i.HoE < 0.10  &&
+   i.innerHits == 0  &&
+   i.tIso/i.p4.Pt() < 0.2 && 
+   i.eIso/i.p4.Pt() < 0.2 &&
+   i.hIso/i.p4.Pt() < 0.2) 
+     || 
+   (i.isEB &&
+   //fabs(electrons[it].Deta) < 0.007 &&
+   //fabs(electrons[it].Dphi) < 0.015 &&
+   i.sihih < 0.01  &&
+   i.HoE < 0.12  &&
+   i.innerHits == 0  &&
+   i.tIso/i.p4.Pt() < 0.2 && 
+   i.eIso/i.p4.Pt() < 0.2 &&
+   i.hIso/i.p4.Pt() < 0.2) 
+    );
+
 float id=i.mvaOutTrig;
+if(!mvaPreSel) id=0;
 float iso=pfCorrIso[j];
 wp70[j]=((fabs(eta) < 0.8 && id>0.977 && iso < 0.093) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.956 && iso < 0.095) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.966 && iso < 0.171));
 wp80[j]=((fabs(eta) < 0.8 && id>0.913 && iso < 0.105) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.964 && iso < 0.178) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.899 && iso < 0.150));
@@ -644,6 +668,9 @@ int main(int argc, char* argv[])
   float  weightTrigMET80, weightTrigMET100,    weightTrig2CJet20 , weightTrigMET150  , weightTrigMET802CJet, weightTrigMET1002CJet, weightTrigMETLP ;
 
   float weightTrig2012A, weightTrig2012ADiMuon, weightTrig2012ADiEle, weightTrig2012ASingleMuon, weightTrig2012AMuonPlusWCandPt, weightTrig2012ASingleEle;  
+
+  float weightTrig2012DiJet30MHT80,weightTrig2012PFMET150,weightTrig2012SumpT100MET100;
+
 
   int WplusMode,WminusMode;
   int Vtype,nSvs=0;
@@ -950,6 +977,10 @@ int main(int argc, char* argv[])
   _outTree->Branch("weightTrig2012ASingleEle", &weightTrig2012ASingleEle,"weightTrig2012ASingleEle/F");
   _outTree->Branch("weightTrig2012AMuonPlusWCandPt", &weightTrig2012AMuonPlusWCandPt,"weightTrig2012AMuonPlusWCandPt/F");
 
+  _outTree->Branch("weightTrig2012DiJet30MHT80", &weightTrig2012DiJet30MHT80,"weightTrig2012DiJet30MHT80/F");
+  _outTree->Branch("weightTrig2012PFMET150", &weightTrig2012PFMET150,"weightTrig2012PFMET150/F");
+  _outTree->Branch("weightTrig2012SumpT100MET100", &weightTrig2012SumpT100MET100,"weightTrig2012SumpT100MET100/F");
+
 
   _outTree->Branch("deltaPullAngleAK7", &deltaPullAngleAK7  ,  "deltaPullAngleAK7/F");
   _outTree->Branch("deltaPullAngle2AK7", &deltaPullAngle2AK7  ,  "deltaPullAngle2AK7/F");
@@ -1001,6 +1032,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("vLepton_idMVAtrig",vLeptons.idMVAtrig,"idMVAtrig[nvlep]/F");
   _outTree->Branch("vLepton_innerHits",vLeptons.innerHits,"innerHits[nvlep]/F");
   _outTree->Branch("vLepton_photonIsoDoubleCount",vLeptons.photonIsoDoubleCount,"photonIsoDoubleCount[nvlep]/F");
+  _outTree->Branch("vLepton_wpHWW",vLeptons.wpHWW,"wpHWW[nvlep]/F");
   _outTree->Branch("vLepton_wp95",vLeptons.wp95,"wp95[nvlep]/F");
   _outTree->Branch("vLepton_wp90",vLeptons.wp90,"wp90[nvlep]/F");
   _outTree->Branch("vLepton_wp85",vLeptons.wp85,"wp85[nvlep]/F");
@@ -1035,6 +1067,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("aLepton_idMVAtrig",aLeptons.idMVAtrig,"idMVAtrig[nalep]/F");
   _outTree->Branch("aLepton_innerHits",aLeptons.innerHits,"innerHits[nalep]/F");
   _outTree->Branch("aLepton_photonIsoDoubleCount",aLeptons.photonIsoDoubleCount,"photonIsoDoubleCount[nalep]/F");
+  _outTree->Branch("aLepton_wpHWW",aLeptons.wpHWW,"wpHWW[nalep]/F");
   _outTree->Branch("aLepton_wp95",aLeptons.wp95,"wp95[nalep]/F");
   _outTree->Branch("aLepton_wp90",aLeptons.wp90,"wp90[nalep]/F");
   _outTree->Branch("aLepton_wp85",aLeptons.wp85,"wp85[nalep]/F");
@@ -1810,7 +1843,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
           float weightTrig2012ASingleMuonMu1 = triggerWeight.singleMuon2012A(vLeptons.pt[0],vLeptons.eta[0]);         
           float weightTrig2012ASingleMuonMu2 = triggerWeight.singleMuon2012A(vLeptons.pt[1],vLeptons.eta[1]);         
           weightTrig2012ASingleMuon = weightTrig2012ASingleMuonMu1+weightTrig2012ASingleMuonMu2-weightTrig2012ASingleMuonMu1*weightTrig2012ASingleMuonMu2;
-          weightTrig2012A = weightTrig2012ASingleMuon * cweightID; // FIXME: should use 2012 SF for MuID
+          weightTrig2012A = weightTrig2012ASingleMuon ; // FIXME: should use 2012 SF for MuID
  
 	  nvlep=2;
 	  firstAddMu=2;
@@ -1833,7 +1866,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
           float weightTrig2012ASingleEle1 = triggerWeight.singleEle2012Awp95(vLeptons.pt[0],vLeptons.eta[0]);
           float weightTrig2012ASingleEle2 = triggerWeight.singleEle2012Awp95(vLeptons.pt[1],vLeptons.eta[1]);
           weightTrig2012ASingleEle = weightTrig2012ASingleEle1+weightTrig2012ASingleEle2-weightTrig2012ASingleEle1*weightTrig2012ASingleEle2;
-          weightTrig2012A = weightTrig2012ADiEle * weightEleRecoAndId; // FIXME: should use 2012 SF for Ele Reco and ID
+          weightTrig2012A = weightTrig2012ADiEle ; // FIXME: should use 2012 SF for Ele Reco and ID
                  
 
 	}
@@ -1849,7 +1882,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
           weightTrig2012ASingleMuon = triggerWeight.singleMuon2012A(vLeptons.pt[0],vLeptons.eta[0]);
           weightTrig2012AMuonPlusWCandPt = weightTrig2012ASingleMuon + 
                                            triggerWeight.muPlusWCandPt2012A_legMu(vLeptons.pt[0],vLeptons.eta[0])*triggerWeight.muPlusWCandPt2012A_legW(vhCand.V.p4.Pt(),0);
-          weightTrig2012A = cweightID * weightTrig2012ASingleMuon; // FIXME: should use 2012 SF for mu ID          
+          weightTrig2012A =  weightTrig2012ASingleMuon; // FIXME: should use 2012 SF for mu ID          
 
 	  nvlep=1;
 	  firstAddMu=1;
@@ -1872,7 +1905,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	  weightTrig = (weightTrigMay * 0.215 + weightTrigV4 * 1.915)/ 2.13; //FIXME: use proper lumi if we reload 2.fb
 	 
           weightTrig2012ASingleEle = triggerWeight.singleEle2012Awp80(vLeptons.pt[0],vLeptons.eta[0]);
-          weightTrig2012A = weightEleRecoAndId * weightTrig2012ASingleEle; // FIXME: should use 2012 SF for ele reco and ID
+          weightTrig2012A =  weightTrig2012ASingleEle; // FIXME: should use 2012 SF for ele reco and ID
 
 
 	}
@@ -1891,6 +1924,10 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	  float weightTrig1 = triggerWeight.scaleMetHLT(vhCand.V.mets.at(0).p4.Pt());
           weightTrigMETLP = weightTrig1;
           weightTrig = weightTrigMET150 + weightTrigMET802CJet  - weightTrigMET802CJet*weightTrigMET150;
+          weightTrig2012DiJet30MHT80=triggerWeight.scaleDiJet30MHT80_2012A(vhCand.V.mets.at(0).p4.Pt());
+          weightTrig2012PFMET150=triggerWeight.scalePFMET150_2012AB(vhCand.V.mets.at(0).p4.Pt());
+          weightTrig2012SumpT100MET100=triggerWeight.scaleSumpT100MET100_2012B(vhCand.V.mets.at(0).p4.Pt());
+//          weightTrig2012A = 
 	}
       
         if(weightTrigMay < 0) weightTrigMay=weightTrig;
