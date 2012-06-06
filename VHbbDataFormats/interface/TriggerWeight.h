@@ -37,6 +37,7 @@ public:
    tscaleDoubleEle2012A_leg8=openFile(ana,"hltDoubleEle2012A_leg8");
    tscaleDoubleEle2012A_leg17=openFile(ana,"hltDoubleEle2012A_leg17");
    tscaleDoubleMuon2012A_leg8=openFile(ana,"hltDoubleMuon2012A_leg8");
+   tscaleDoubleMuon2012A_leg17=openFile(ana,"hltDoubleMuon2012A_leg17");
 
    tscaleDoubleMuon2012A_dZ=openFile(ana,"hltDoubleMuon2012A_dZ");
    tscaleDoubleEle2012A_dZ=openFile(ana,"hltDoubleEle2012A_dZ");
@@ -62,6 +63,7 @@ static TTree * openFile(const edm::ParameterSet& ana, const char * name)
 
 static  std::pair<float,float> efficiencyFromPtEta(float pt1, float eta1, TTree *t)
   {
+//     std::cout << "here " << t << " pt1 "  << pt1 << " eta1 " << eta1 <<  std::endl;
      float s1 = 1.,err=1.;
      std::pair<float,float> r(s1,err);
      if(!t) return r;
@@ -280,10 +282,12 @@ double scalePFMET150_2012AB(double x)
 
 float doubleEle2012A( float pt1, float eta1, float pt2, float eta2)
 {
+// std::cout << "di ele" << std::endl;
  float eff1_17 = efficiencyFromPtEta(pt1,eta1,tscaleDoubleEle2012A_leg17).first;
  float eff2_17 = efficiencyFromPtEta(pt2,eta2,tscaleDoubleEle2012A_leg17).first;
  float eff1_8 = efficiencyFromPtEta(pt1,eta1,tscaleDoubleEle2012A_leg8).first;
  float eff2_8 = efficiencyFromPtEta(pt2,eta2,tscaleDoubleEle2012A_leg8).first;
+// std::cout << tscaleDoubleEle2012A_dZ << std::endl;
  float eff_dz = efficiencyFromPtEta(eta1,eta2,tscaleDoubleEle2012A_dZ).first;  // despite the name pt,eta is actually eta1,eta2
  
  return (eff1_17 * eff2_8 + eff2_17 * eff1_8 - eff1_17*eff2_17)*eff_dz;
@@ -291,10 +295,12 @@ float doubleEle2012A( float pt1, float eta1, float pt2, float eta2)
 }
 float doubleMuon2012A( float pt1, float eta1, float pt2, float eta2)
 {
+// std::cout << "di mu" << std::endl;
  float eff1_17 = efficiencyFromPtEta(pt1,eta1,tscaleDoubleMuon2012A_leg17).first;
  float eff2_17 = efficiencyFromPtEta(pt2,eta2,tscaleDoubleMuon2012A_leg17).first;
  float eff1_8 = efficiencyFromPtEta(pt1,eta1,tscaleDoubleMuon2012A_leg8).first;
  float eff2_8 = efficiencyFromPtEta(pt2,eta2,tscaleDoubleMuon2012A_leg8).first;
+// std::cout << tscaleDoubleMuon2012A_dZ << std::endl;
  float eff_dz = efficiencyFromPtEta(eta1,eta2,tscaleDoubleMuon2012A_dZ).first;  // despite the name pt,eta is actually eta1,eta2
 
  return (eff1_17 * eff2_8 + eff2_17 * eff1_8 - eff1_17*eff2_17)*eff_dz;
