@@ -99,7 +99,7 @@ process.Analyzer = cms.PSet(
         "HLT_IsoMu20_eta2p1_WCandPt80_v.*", #46
         "HLT_IsoMu20_WCandPt80_v.*", #47
         "HLT_Mu17_TkMu8_v.*", #48
-
+	"HLT_DiCentralPFJet30_PFMET80_v*", #49
 
   ),
     isMC =     cms.bool(False),
@@ -134,7 +134,7 @@ process.Analyzer = cms.PSet(
     hltDoubleMuon2012A_leg17 = cms.string(baseAddFiles+"triggerRootFiles/DoubleMu17.TrigEff.2012A.root"),
     hltMuPlusWCandPt2012A_legMu = cms.string(baseAddFiles+"triggerRootFiles/SingleMu20Not24Or40.TrigEff.2012A.root"),
     hltMuPlusWCandPt2012A_legW = cms.string(baseAddFiles+"triggerRootFiles/WCandPt.TrigEff.2012A.root"),
-
+    jecFolder = cms.string(baseAddFiles+"jec"),
     btagEffFileName = cms.string(baseAddFiles+"btag_generic.txt")
     )
 
