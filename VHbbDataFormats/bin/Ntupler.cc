@@ -30,6 +30,7 @@
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidate.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/TriggerReader.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/TopMassReco.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/JECFWLite.h"
 
 //for IVF
 #include "RecoBTag/SecondaryVertex/interface/SecondaryVertex.h"
@@ -748,6 +749,7 @@ int main(int argc, char* argv[])
   std::string Weight3DfileName_ = in.getParameter<std::string> ("Weight3DfileName") ;
 
 
+  JECFWLite jec(ana.getParameter<std::string>("jecFolder"));
 
   bool isMC_( ana.getParameter<bool>("isMC") );  
     TriggerReader trigger(isMC_);
@@ -1317,6 +1319,9 @@ double MyWeight = LumiWeights_.weight( Tnpv );
            
             for(size_t j=0; j< modifiedEvent.simpleJets2.size() ; j++)
             {
+//               jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true,true); // do ref check, can be commented out 
+               modifiedEvent.simpleJets2[j] = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true); 
+
                TLorentzVector & p4 = modifiedEvent.simpleJets2[j].p4; 
                TLorentzVector & mcp4 = modifiedEvent.simpleJets2[j].bestMCp4;
 	       if ((fabs(p4.Pt() - mcp4.Pt())/ p4.Pt())<0.5) { //Limit the effect to the core 
@@ -1326,7 +1331,16 @@ double MyWeight = LumiWeights_.weight( Tnpv );
             }
             } else
             {
-	      iEvent = vhbbHandle.product();
+	  //    iEvent = vhbbHandle.product();
+           // modify also the real data now to apply JEC 2012
+            iEvent= &modifiedEvent;
+              
+            for(size_t j=0; j< modifiedEvent.simpleJets2.size() ; j++)
+            { 
+  //              jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,false,true); // do ref check, can be commented out 
+                modifiedEvent.simpleJets2[j] = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,false); 
+            }
+ 
             }  
 
 	    algoZ->run(iEvent,*candZlocal,aux);
