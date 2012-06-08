@@ -1133,11 +1133,12 @@ int main(int argc, char* argv[])
 	  for(unsigned int i=0; i<pup_.size(); ++i){
 	    int id=hepeup_.IDUP[i]; //pdgId
 	    int status = hepeup_.ISTUP[i];
-	    if(status == 1 && ( TMath::Abs(id) >= 0 || TMath::Abs(id) < 6 ) ){
-	      lheHT += hepeup_.PUP[i][3];
-	      lheNj++; 
-	    }	     
- 
+	    int idabs=TMath::Abs(id); 
+	    if( status == 1 && ( ( idabs == 21 ) || (idabs > 0 && idabs < 7) ) ){ // gluons and quarks
+	      lheHT += TMath::Sqrt( TMath::Power(hepeup_.PUP[i][0],2) + TMath::Power(hepeup_.PUP[i][1],2) ); // first entry is px, second py
+	      lheNj++;
+	    }
+
 	    if(id==11){ l.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lCheck=true;}
 	    if(id==-11){ lbar.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); lbarCheck=true;}
 	    if(id==12){ vl.SetPxPyPzE(hepeup_.PUP[i][0],hepeup_.PUP[i][1],hepeup_.PUP[i][2],hepeup_.PUP[i][3]); vlCheck=true;}
