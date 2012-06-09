@@ -749,7 +749,7 @@ We adopt the standard cut-based selection from VBTF described in detail here.
   for (unsigned int  it = 0; it< electrons.size(); ++it){
 float mincor=0.0;
 float minrho=0.0;
-float rhoN = std::max(aux.puInfo.rhoNeutral,minrho);
+float rho = std::max(aux.puInfo.rho25,minrho);
 float eta=electrons[it].p4.Eta();
 float areagamma=0.5;
 float areaNH=0.5;
@@ -770,7 +770,7 @@ if(electrons[it].innerHits>0)
  pho-=electrons[it].pfPhoIsoDoubleCounted;
 }
 
-float pfCorrIso = (electrons[it].pfChaIso+ std::max(pho-rhoN*areagamma,mincor )+std::max(electrons[it].pfNeuIso-rhoN*areaNH,mincor))/electrons[it].p4.Pt();
+float pfCorrIso = (electrons[it].pfChaIso+ std::max(pho-rho*areagamma,mincor )+std::max(electrons[it].pfNeuIso-rho*areaNH,mincor))/electrons[it].p4.Pt();
 float iso=pfCorrIso;
 float id=electrons[it].mvaOutTrig;
 bool wp70=((fabs(eta) < 0.8 && id>0.977 && iso < 0.093) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.956 && iso < 0.095) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.966 && iso < 0.171));

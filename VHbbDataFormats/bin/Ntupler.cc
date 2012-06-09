@@ -354,7 +354,7 @@ template <> void LeptonInfo::setSpecific<VHbbEvent::ElectronInfo>(const VHbbEven
   innerHits[j]=i.innerHits;
 float mincor=0.0;
 float minrho=0.0;
-float rhoN = std::max(aux.puInfo.rhoNeutral,minrho);
+float rho = std::max(aux.puInfo.rho25,minrho);
 float eta=i.p4.Eta();
 float areagamma=0.5;
 float areaNH=0.5;
@@ -373,7 +373,7 @@ if(i.innerHits>0)
  pho-=i.pfPhoIsoDoubleCounted;
 }
 
-pfCorrIso[j] = (i.pfChaIso+ std::max(pho-rhoN*areagamma,mincor )+std::max(i.pfNeuIso-rhoN*areaNH,mincor))/i.p4.Pt();
+pfCorrIso[j] = (i.pfChaIso+ std::max(pho-rho*areagamma,mincor )+std::max(i.pfNeuIso-rho*areaNH,mincor))/i.p4.Pt();
 
 id2012tight[j] = fabs(i.dxy) < 0.02  &&fabs(i.dz) < 0.1  &&(
 (i.isEE  &&fabs(i.Deta) < 0.005 &&fabs(i.Dphi) < 0.02 &&i.sihih < 0.03  &&i.HoE < 0.10  &&fabs(i.fMVAVar_IoEmIoP) < 0.05
