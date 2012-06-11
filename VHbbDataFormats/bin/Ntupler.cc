@@ -49,6 +49,7 @@
 #include "ZSV/BAnalysis/interface/SimBHadron.h"
 //btagging
 #include "VHbbAnalysis/VHbbDataFormats/interface/BTagWeight.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/BTagReshaping.h"
 //trigger
 #include "VHbbAnalysis/VHbbDataFormats/interface/TriggerWeight.h"
 
@@ -486,7 +487,14 @@ typedef struct
   int event;
   int json;
 } EventInfo;
-  
+ 
+
+BTagShapeInterface * nominalShape=0;
+BTagShapeInterface * downBCShape=0;
+BTagShapeInterface * upBCShape=0;
+BTagShapeInterface * downLShape=0;
+BTagShapeInterface * upLShape=0;
+ 
 typedef struct 
 {
   void set(const VHbbEvent::SimpleJet & j, int i) 
@@ -496,6 +504,22 @@ typedef struct
     phi[i]=j.p4.Phi();
     e[i]=j.p4.E();
     csv[i]=j.csv;
+   if(nominalShape)
+   {
+    csv_nominal[i]=nominalShape->reshape(eta[i],pt[i],j.csv,j.flavour);
+    csv_upBC[i]=upBCShape->reshape(eta[i],pt[i],j.csv,j.flavour);
+    csv_downBC[i]=downBCShape->reshape(eta[i],pt[i],j.csv,j.flavour);
+    csv_upL[i]=upLShape->reshape(eta[i],pt[i],j.csv,j.flavour);
+    csv_downL[i]=downLShape->reshape(eta[i],pt[i],j.csv,j.flavour);
+   }
+   else
+   {
+    csv_nominal[i]=csv[i];
+    csv_downBC[i]=csv[i];
+    csv_upBC[i]=csv[i];
+    csv_downL[i]=csv[i];
+    csv_upL[i]=csv[i];
+   }
     csvivf[i]=j.csvivf;
     cmva[i]=j.cmva;
     numTracksSV[i] = j.vtxNTracks;
@@ -561,7 +585,7 @@ typedef struct
   void reset()
   {
     for(int i=0;i<MAXJ;i++) {
-      pt[i]=-99; eta[i]=-99; phi[i]=-99;e[i]=-99;csv[i]=-99;
+      pt[i]=-99; eta[i]=-99; phi[i]=-99;e[i]=-99;csv[i]=-99;csv_nominal[i]=-99.;csv_upBC[i]=-99.;csv_downBC[i]=-99.;csv_upL[i]=-99.;csv_downL[i]=-99.;
       csvivf[i]=-99; cmva[i]=-99;
       cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; isSemiLeptMCtruth[i]=-99; isSemiLept[i]=-99;      
       SoftLeptpdgId[i] = -99; SoftLeptIdlooseMu[i] = -99;  SoftLeptId95[i] =  -99;   SoftLeptPt[i] = -99;  SoftLeptdR[i] = -99;   SoftLeptptRel[i] = -99; SoftLeptRelCombIso[i] = -99;  
@@ -573,6 +597,11 @@ typedef struct
   float phi[MAXJ];
   float e[MAXJ];
   float csv[MAXJ];
+  float csv_nominal[MAXJ];
+  float csv_upBC[MAXJ];
+  float csv_downBC[MAXJ];
+  float csv_upL[MAXJ];
+  float csv_downL[MAXJ];
   float csvivf[MAXJ];
   float cmva[MAXJ];
   float cosTheta[MAXJ];
@@ -748,14 +777,20 @@ int main(int argc, char* argv[])
   std::string PUdatafileName_ = in.getParameter<std::string> ("PUdatafileName") ;
   std::string PUdatafileName2011B_ = in.getParameter<std::string> ("PUdatafileName2011B") ;
   std::string Weight3DfileName_ = in.getParameter<std::string> ("Weight3DfileName") ;
-
-
+  
   JECFWLite jec(ana.getParameter<std::string>("jecFolder"));
 
   bool isMC_( ana.getParameter<bool>("isMC") );  
     TriggerReader trigger(isMC_);
    TriggerReader patFilters(false);
-
+  if(isMC_) 
+  {
+  nominalShape = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 0.0, 0.0); 
+  upBCShape = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 1.5, 0.0); 
+  downBCShape = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), -1.5, 0.0); 
+  upLShape = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 0.0, 1.0); 
+  downLShape = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 0.0, -1.0); 
+  }
   edm::LumiReWeighting   lumiWeights;
   edm::LumiReWeighting   lumiWeights1DObs;
   edm::Lumi3DReWeighting   lumiWeights2011B;
@@ -814,6 +849,12 @@ int main(int argc, char* argv[])
   _outTree->Branch("hJet_phi",hJets.phi ,"phi[nhJets]/F");
   _outTree->Branch("hJet_e",hJets.e ,"e[nhJets]/F");
   _outTree->Branch("hJet_csv",hJets.csv ,"csv[nhJets]/F");
+  _outTree->Branch("hJet_csv_nominal",hJets.csv_nominal ,"csv_nominal[nhJets]/F");
+  _outTree->Branch("hJet_csv_upBC",hJets.csv_upBC ,"csv_upBC[nhJets]/F");
+  _outTree->Branch("hJet_csv_downBC",hJets.csv_downBC ,"csv_downBC[nhJets]/F");
+  _outTree->Branch("hJet_csv_upL",hJets.csv_upL ,"csv_upL[nhJets]/F");
+  _outTree->Branch("hJet_csv_downL",hJets.csv_downL ,"csv_downL[nhJets]/F");
+
   _outTree->Branch("hJet_csvivf",hJets.csvivf ,"csvivf[nhJets]/F");
   _outTree->Branch("hJet_cmva",hJets.cmva ,"cmva[nhJets]/F");
   _outTree->Branch("hJet_cosTheta",hJets.cosTheta ,"cosTheta[nhJets]/F");
@@ -897,6 +938,12 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_phi",aJets.phi ,"phi[naJets]/F");
   _outTree->Branch("aJet_e",aJets.e ,"e[naJets]/F");
   _outTree->Branch("aJet_csv",aJets.csv ,"csv[naJets]/F");
+  _outTree->Branch("aJet_csv_nominal",aJets.csv_nominal ,"csv_nominal[naJets]/F");
+  _outTree->Branch("aJet_csv_upBC",aJets.csv_upBC ,"csv_upBC[naJets]/F");
+  _outTree->Branch("aJet_csv_downBC",aJets.csv_downBC ,"csv_downBC[naJets]/F");
+  _outTree->Branch("aJet_csv_upL",aJets.csv_upL ,"csv_upL[naJets]/F");
+  _outTree->Branch("aJet_csv_downL",aJets.csv_downL ,"csv_downL[naJets]/F");
+
   _outTree->Branch("aJet_csvivf",aJets.csvivf ,"csvivf[naJets]/F");
   _outTree->Branch("aJet_cmva",aJets.cmva ,"cmva[naJets]/F");
   _outTree->Branch("aJet_cosTheta",aJets.cosTheta ,"cosTheta[naJets]/F");
