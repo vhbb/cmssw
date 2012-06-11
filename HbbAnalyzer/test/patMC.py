@@ -34,7 +34,7 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.autoCond import autoCond
 
 if  isMC  :
-   process.GlobalTag.globaltag = cms.string( autoCond[ 'startup' ] )
+   process.GlobalTag.globaltag = cms.string("START52_V9::All")
 else :
    process.GlobalTag.globaltag = cms.string("GR_R_52_V7::All")
 
