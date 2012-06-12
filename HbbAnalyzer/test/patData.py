@@ -17,12 +17,12 @@ process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 ## Source
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-"/store/data/Run2012A/DoubleElectron/AOD/PromptReco-v1/000/193/575/D8D5A7EC-EF99-E111-AB1D-003048D2BE12.root",
+#"/store/data/Run2012A/DoubleElectron/AOD/PromptReco-v1/000/193/575/D8D5A7EC-EF99-E111-AB1D-003048D2BE12.root",
 #"/store/data/Run2012A/MuHad/AOD/PromptReco-v1/000/193/556/5E52D114-BA99-E111-AF69-5404A63886C1.root"
 ##	"/store/data/Run2012A/MultiJet/AOD/PromptReco-v1/000/193/556/D84A9140-AC99-E111-A808-001D09F28D4A.root"
 	
 	#"/store/data/Run2012A/MET/RECO/PromptReco-v1/000/190/782/A2D1E62F-8684-E111-B651-00237DDBE41A.root"
-##"file:/networkdata/arizzi/Zll2012MC/00F3A49B-A093-E111-B076-1CC1DE051038.root"
+"file:/networkdata/arizzi/WH/1ACA8AD2-CBAF-E111-AE17-0017A477002C.root"
  )
 )
 ## Maximal Number of Events
@@ -34,7 +34,7 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.autoCond import autoCond
 
 if  isMC  :
-   process.GlobalTag.globaltag = cms.string( autoCond[ 'startup' ] )
+   process.GlobalTag.globaltag = cms.string("START52_V9B::All" )
 else :
    process.GlobalTag.globaltag = cms.string("GR_R_52_V7::All")
 
@@ -85,7 +85,11 @@ postfix = "PFlow"
 jetAlgo = "AK5"
 usePF2PAT(process,runPF2PAT=True, jetAlgo=jetAlgo, runOnMC=isMC, postfix=postfix)
 usePFIso( process )
-switchJetCollection(process, jetCollection=cms.InputTag('pfJetsPFlow'),doJTA=True,doBTagging=True, jetCorrLabel=('AK5PF', inputJetCorrLabel),doType1MET=False, doJetID=False)
+switchJetCollection(process, jetCollection=cms.InputTag('pfJetsPFlow'),doJTA=True,doBTagging=True, jetCorrLabel=('AK5PFchs', inputJetCorrLabel),doType1MET=False, doJetID=False)
+
+process.pfPileUpPFlow.Vertices = cms.InputTag('goodOfflinePrimaryVertices')
+process.pfPileUpPFlow.checkClosestZVertex = cms.bool(False)
+
 
 from PhysicsTools.PatAlgos.tools.trigTools import *
 switchOnTrigger( process )
@@ -144,23 +148,23 @@ process.caVHGenJets = caSubjetFilterGenJets.clone()
 
 from PhysicsTools.PatAlgos.tools.jetTools import *
 #calo subjets in pat
-addJetCollection(process, cms.InputTag('caVHCaloJets:fat'),"CAVHFat","Calo",doJTA=True,doBTagging=True, jetCorrLabel=('AK7Calo', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
-addJetCollection(process, cms.InputTag('caVHCaloJets:sub'),"CAVHSub","Calo",doJTA=True,doBTagging=True, jetCorrLabel=('AK7Calo', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
-addJetCollection(process, cms.InputTag('caVHCaloJets:filter'),"CAVHFilter","Calo",doJTA=True,doBTagging=True, jetCorrLabel=('AK7Calo', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
-addJetCollection(process, cms.InputTag('caVHPFJets:fat'),"CAVHFat","PF",doJTA=True,doBTagging=True, jetCorrLabel=('KT4PF', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
+#addJetCollection(process, cms.InputTag('caVHCaloJets:fat'),"CAVHFat","Calo",doJTA=True,doBTagging=True, jetCorrLabel=('AK5Calo', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
+#addJetCollection(process, cms.InputTag('caVHCaloJets:sub'),"CAVHSub","Calo",doJTA=True,doBTagging=True, jetCorrLabel=('AK5Calo', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
+#addJetCollection(process, cms.InputTag('caVHCaloJets:filter'),"CAVHFilter","Calo",doJTA=True,doBTagging=True, jetCorrLabel=('AK5Calo', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
+addJetCollection(process, cms.InputTag('caVHPFJets:fat'),"CAVHFat","PF",doJTA=True,doBTagging=True, jetCorrLabel=('AK5PF', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
 if isMC :
-   addJetCollection(process, cms.InputTag('caVHPFJets:sub'),"CAVHSub","PF",doJTA=True,doBTagging=True, jetCorrLabel=('KT4PF', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False, genJetCollection=cms.InputTag('caVHGenJets',"sub"))
-   addJetCollection(process, cms.InputTag('caVHPFJets:filter'),"CAVHFilter","PF",doJTA=True,doBTagging=True, jetCorrLabel=('KT4PF', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False, genJetCollection=cms.InputTag('caVHGenJets',"filter"))
+   addJetCollection(process, cms.InputTag('caVHPFJets:sub'),"CAVHSub","PF",doJTA=True,doBTagging=True, jetCorrLabel=('AK5PF', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False, genJetCollection=cms.InputTag('caVHGenJets',"sub"))
+   addJetCollection(process, cms.InputTag('caVHPFJets:filter'),"CAVHFilter","PF",doJTA=True,doBTagging=True, jetCorrLabel=('AK5PF', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False, genJetCollection=cms.InputTag('caVHGenJets',"filter"))
 else :
-   addJetCollection(process, cms.InputTag('caVHPFJets:sub'),"CAVHSub","PF",doJTA=True,doBTagging=True, jetCorrLabel=('KT4PF', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
-   addJetCollection(process, cms.InputTag('caVHPFJets:filter'),"CAVHFilter","PF",doJTA=True,doBTagging=True, jetCorrLabel=('KT4PF', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
+   addJetCollection(process, cms.InputTag('caVHPFJets:sub'),"CAVHSub","PF",doJTA=True,doBTagging=True, jetCorrLabel=('AK5PF', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
+   addJetCollection(process, cms.InputTag('caVHPFJets:filter'),"CAVHFilter","PF",doJTA=True,doBTagging=True, jetCorrLabel=('AK5PF', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
 
 # Place appropriate jet cuts (NB: no cut on number of constituents)
 defaultJetCut = cms.string('pt > 15. & abs(eta) < 5.0')
 defaultFatJetCut = cms.string('pt > 100. & abs(eta) < 5.0')
 process.selectedPatJets.cut = defaultJetCut
 process.selectedPatJetsAK7PF.cut = defaultJetCut
-process.selectedPatJetsCAVHFatCalo.cut = defaultFatJetCut
+#process.selectedPatJetsCAVHFatCalo.cut = defaultFatJetCut
 process.selectedPatJetsCAVHFatPF.cut = defaultFatJetCut
 process.selectedPatJetsCAVHSubPF.cut = cms.string('pt > 15. & abs(eta) < 5.0')
 process.selectedPatJetsCAVHFilterPF.cut = cms.string('pt > 5. & abs(eta) < 5.0')
@@ -222,18 +226,18 @@ process.cleanPatJets.checkOverlaps.electrons.preselection =  (  "pt > 15.0 && ab
 # use cone 0.3 for electron isolation rather than 0.4 (0.3 seem to be recommended by EGamma in the cut based ID twiki page)
 
 process.patElectrons.isolationValues = cms.PSet(
-        pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral03PFIdPFIso"),
-        pfChargedAll = cms.InputTag("elPFIsoValueChargedAll03PFIdPFIso"),
-        pfPUChargedHadrons = cms.InputTag("elPFIsoValuePU03PFIdPFIso"),
-        pfPhotons = cms.InputTag("elPFIsoValueGamma03PFIdPFIso"),
-        pfChargedHadrons = cms.InputTag("elPFIsoValueCharged03PFIdPFIso")
+        pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral04PFIdPFIso"),
+        pfChargedAll = cms.InputTag("elPFIsoValueChargedAll04PFIdPFIso"),
+        pfPUChargedHadrons = cms.InputTag("elPFIsoValuePU04PFIdPFIso"),
+        pfPhotons = cms.InputTag("elPFIsoValueGamma04PFIdPFIso"),
+        pfChargedHadrons = cms.InputTag("elPFIsoValueCharged04PFIdPFIso")
     )
 process.patElectrons.isolationValuesNoPFId = cms.PSet(
-        pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral03NoPFIdPFIso"),
-        pfChargedAll = cms.InputTag("elPFIsoValueChargedAll03NoPFIdPFIso"),
-        pfPUChargedHadrons = cms.InputTag("elPFIsoValuePU03NoPFIdPFIso"),
-        pfPhotons = cms.InputTag("elPFIsoValueGamma03NoPFIdPFIso"),
-        pfChargedHadrons = cms.InputTag("elPFIsoValueCharged03NoPFIdPFIso")
+        pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral04NoPFIdPFIso"),
+        pfChargedAll = cms.InputTag("elPFIsoValueChargedAll04NoPFIdPFIso"),
+        pfPUChargedHadrons = cms.InputTag("elPFIsoValuePU04NoPFIdPFIso"),
+        pfPhotons = cms.InputTag("elPFIsoValueGamma04NoPFIdPFIso"),
+        pfChargedHadrons = cms.InputTag("elPFIsoValueCharged04NoPFIdPFIso")
     )
 
 
@@ -441,7 +445,14 @@ process.bhadrons = cms.EDProducer('MCBHadronProducer',
                                  )
 
 process.gen = cms.Sequence(  process.genParticlesForJets* process.caVHGenJets * process.bhadrons)
+from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
+process.goodOfflinePrimaryVertices = cms.EDFilter(
+    "PrimaryVertexObjectFilter",
+    filterParams = pvSelector.clone( minNdof = cms.double(4.0), maxZ = cms.double(24.0) ),
+    src=cms.InputTag('offlinePrimaryVertices')
+    )
 process.common = cms.Sequence( 
+    process.goodOfflinePrimaryVertices *
     process.softElectronCands*
     process.inclusiveVertexing*
     process.eidSequence*
@@ -474,12 +485,6 @@ else :
    process.p = cms.Path(process.common)
  
 ############# Filter flags
-from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
-process.goodOfflinePrimaryVertices = cms.EDFilter(
-    "PrimaryVertexObjectFilter",
-    filterParams = pvSelector.clone( minNdof = cms.double(4.0), maxZ = cms.double(24.0) ),
-    src=cms.InputTag('offlinePrimaryVertices')
-    )
 
 
 process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
@@ -539,6 +544,7 @@ process.out.outputCommands = cms.untracked.vstring(
        'keep patTriggerFilters_patTrigger_*_*',
        'keep patTriggerPaths_patTrigger_*_*',
        'keep *_patTriggerEvent_*_*'
+	
         )
 
 
