@@ -122,6 +122,9 @@ process.patJets.addTagInfos  = True
 
 # rho2.5 calculation
 process.load("RecoJets.JetProducers.kt4PFJets_cfi")
+process.kt6PFJetsForIsolation = process.kt4PFJets.clone( rParam = 0.6, doRhoFastjet = True )
+process.kt6PFJetsForIsolation.Rho_EtaMax = cms.double(2.5)
+
 process.kt6PFJets25 = process.kt4PFJets.clone( src = 'pfNoElectron'+postfix,rParam = 0.6,doRhoFastjet = True,Ghost_EtaMax = 2.5, Rho_EtaMax = 2.5 )
 process.kt6PFJetsCentralNeutral = process.kt6PFJets.clone( src = cms.InputTag("pfAllNeutralHadronsAndPhotons"+postfix), Ghost_EtaMax = cms.double(3.1), Rho_EtaMax = cms.double(2.5), inputEtMin = cms.double(0.5) )
 
@@ -444,7 +447,7 @@ process.bhadrons = cms.EDProducer('MCBHadronProducer',
                                  quarkId = cms.uint32(5)
                                  )
 
-process.gen = cms.Sequence(  process.genParticlesForJets* process.caVHGenJets * process.bhadrons)
+process.gen = cms.Sequence(  process.genParticlesForJets* process.caVHGenJets * process.bhadrons * process.savedGenParticles)
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 process.goodOfflinePrimaryVertices = cms.EDFilter(
     "PrimaryVertexObjectFilter",
@@ -461,6 +464,7 @@ process.common = cms.Sequence(
     process.pfNoPileUpCharge*
     process.pfMETNoPUCharge*
     process.kt6PFJetsCentralNeutral *
+    process.kt6PFJetsForIsolation *
     process.kt6PFJets25*
     process.ak7PFJets*
     process.caVHCaloJets*

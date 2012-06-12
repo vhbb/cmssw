@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.74 2012/05/17 10:58:34 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.75 2012/05/24 15:55:16 arizzi Exp $
 //
 //
 
@@ -206,6 +206,9 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   edm::Handle<double> rho25Handle;
   iEvent.getByLabel(edm::InputTag("kt6PFJets25", "rho"),rho25Handle);   
   auxInfo->puInfo.rho25 = *rho25Handle;
+  edm::Handle<double> rho25HandleIso;
+  iEvent.getByLabel(edm::InputTag("kt6PFJetsForIsolation", "rho"),rho25HandleIso);   
+  auxInfo->puInfo.rho25Iso = *rho25HandleIso;
  
   edm::Handle<double> rhoNeutralHandle;
   iEvent.getByLabel(edm::InputTag("kt6PFJetsCentralNeutral", "rho"),rhoNeutralHandle);   

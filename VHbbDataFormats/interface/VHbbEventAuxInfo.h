@@ -20,9 +20,9 @@ class VHbbEventAuxInfo{
 
   class PUInfo{
   public:
-    PUInfo(): rho(-99), rho25(-99),rhoNeutral(-99),truePU(9999) {}
+    PUInfo(): rho(-99), rho25(-99),rho25Iso(-99),rhoNeutral(-99),truePU(9999) {}
   public:
-    float rho, rho25,rhoNeutral;
+    float rho, rho25,rhoNeutral,rho25Iso;
     std::map<int,unsigned int>  pus;
     unsigned int truePU;
   };
