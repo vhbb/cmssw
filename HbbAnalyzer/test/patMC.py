@@ -226,18 +226,18 @@ process.cleanPatJets.checkOverlaps.electrons.preselection =  (  "pt > 15.0 && ab
 # use cone 0.3 for electron isolation rather than 0.4 (0.3 seem to be recommended by EGamma in the cut based ID twiki page)
 
 process.patElectrons.isolationValues = cms.PSet(
-        pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral03PFIdPFIso"),
-        pfChargedAll = cms.InputTag("elPFIsoValueChargedAll03PFIdPFIso"),
-        pfPUChargedHadrons = cms.InputTag("elPFIsoValuePU03PFIdPFIso"),
-        pfPhotons = cms.InputTag("elPFIsoValueGamma03PFIdPFIso"),
-        pfChargedHadrons = cms.InputTag("elPFIsoValueCharged03PFIdPFIso")
+        pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral04PFIdPFIso"),
+        pfChargedAll = cms.InputTag("elPFIsoValueChargedAll04PFIdPFIso"),
+        pfPUChargedHadrons = cms.InputTag("elPFIsoValuePU04PFIdPFIso"),
+        pfPhotons = cms.InputTag("elPFIsoValueGamma04PFIdPFIso"),
+        pfChargedHadrons = cms.InputTag("elPFIsoValueCharged04PFIdPFIso")
     )
 process.patElectrons.isolationValuesNoPFId = cms.PSet(
-        pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral03NoPFIdPFIso"),
-        pfChargedAll = cms.InputTag("elPFIsoValueChargedAll03NoPFIdPFIso"),
-        pfPUChargedHadrons = cms.InputTag("elPFIsoValuePU03NoPFIdPFIso"),
-        pfPhotons = cms.InputTag("elPFIsoValueGamma03NoPFIdPFIso"),
-        pfChargedHadrons = cms.InputTag("elPFIsoValueCharged03NoPFIdPFIso")
+        pfNeutralHadrons = cms.InputTag("elPFIsoValueNeutral04NoPFIdPFIso"),
+        pfChargedAll = cms.InputTag("elPFIsoValueChargedAll04NoPFIdPFIso"),
+        pfPUChargedHadrons = cms.InputTag("elPFIsoValuePU04NoPFIdPFIso"),
+        pfPhotons = cms.InputTag("elPFIsoValueGamma04NoPFIdPFIso"),
+        pfChargedHadrons = cms.InputTag("elPFIsoValueCharged04NoPFIdPFIso")
     )
 
 
