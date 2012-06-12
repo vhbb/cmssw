@@ -26,7 +26,7 @@ process.source = cms.Source("PoolSource",
  )
 )
 ## Maximal Number of Events
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 ## Geometry and Detector Conditions (needed for a few patTuple production steps)
 process.load("Configuration.StandardSequences.Geometry_cff")
@@ -408,6 +408,8 @@ process.bhadrons = cms.EDProducer('MCBHadronProducer',
 
 ### Save some gen particles
 # saves leptons with pt > 5 GeV, b and c quarks, B and D hadrons (and Lambda b,c), Z,W,Higgs, all status 3 particles. Daugthers of Z,W,H.
+process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+
 process.savedGenParticles = cms.EDProducer(
     "GenParticlePruner",
     src = cms.InputTag("genParticles"),
