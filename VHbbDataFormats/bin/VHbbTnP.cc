@@ -211,7 +211,7 @@ bool ElectronPresel(const VHbbEvent::ElectronInfo &i) {
   return presel;
 }
 
-bool ElectronWP(const VHbbEvent::ElectronInfo &i,float rho,int wp, bool requireIso = true) {
+bool ElectronWP(const VHbbEvent::ElectronInfo &i,float rho,int wp, bool requireIso = true,bool requireID = true, bool requirePresel=true) {
 
   float iso=ElectronIso(i,rho);
   float id=i.mvaOutTrig;
@@ -225,7 +225,10 @@ bool ElectronWP(const VHbbEvent::ElectronInfo &i,float rho,int wp, bool requireI
 
   bool presel = ElectronPresel(i);
 
+  if (!requireIso && !requireID) return presel;
+
   if (!requireIso) {
+    //    cout << "Not requiring Iso; id=" << id << " iso=" <<iso << endl;
     wp70=((fabs(eta) < 0.8 && id>0.977) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.956) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.966));
     wp80=((fabs(eta) < 0.8 && id>0.913) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.964) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.899));
     wp85=((fabs(eta) < 0.8 && id>0.929) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.931) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.805));
@@ -234,12 +237,26 @@ bool ElectronWP(const VHbbEvent::ElectronInfo &i,float rho,int wp, bool requireI
     wpHWW=((fabs(eta) < 0.8 && id>0.94) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.85) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.92));
   }
 
-  if (wp == 70) return (presel&&wp70);
-  if (wp == 80) return (presel&&wp80);
-  if (wp == 85) return (presel&&wp85);
-  if (wp == 90) return (presel&&wp90);
-  if (wp == 95) return (presel&&wp95);
-  return (presel&&wpHWW);  // use HWW as default
+  if (!requireID) {
+    //    cout << "Not requiring ID; id=" << id << " iso=" << iso << endl;
+    wp70=((fabs(eta) < 0.8 && iso < 0.093) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && iso < 0.095) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && iso < 0.171));
+    wp80=((fabs(eta) < 0.8 && iso < 0.105) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && iso < 0.178) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && iso < 0.150));
+    wp85=((fabs(eta) < 0.8 && iso < 0.135) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && iso < 0.159) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && iso < 0.155));
+    wp90=((fabs(eta) < 0.8 && iso < 0.177) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && iso < 0.180) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && iso < 0.244));
+    wp95=((fabs(eta) < 0.8 && iso < 0.253) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && iso < 0.225) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && iso < 0.308));
+    wpHWW=((fabs(eta) < 0.8 && iso < 0.15) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && iso < 0.15) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && iso < 0.15));
+  }
+
+  if (requirePresel && ! presel) {
+    return false;
+  }
+
+  if (wp == 70) return (wp70);
+  if (wp == 80) return (wp80);
+  if (wp == 85) return (wp85);
+  if (wp == 90) return (wp90);
+  if (wp == 95) return (wp95);
+  return (wpHWW);  // use HWW as default
 }
 
 // Copied from muon selection and LeptonInfo::setSpecific
@@ -281,11 +298,16 @@ int main(int argc, char* argv[])
   //  if (verbose_) cout << "Start of main" << endl;
 
   float rhoN;
+  float rho;
+  float rhoForEleIso;
   int nPVs;
-  METInfo MET;
+  float met;
+  int nJets, nBJets;
 
- float  PUweight, PUweight2011B;
-  float PU0,PUp1,PUm1;
+  float probe_dPhiDiJet, probe_diJetPt, probe_dPhiJetMin, probe_closestJetPt;
+
+  // float  PUweight, PUweight2011B;
+  //  float PU0,PUp1,PUm1;
 
   // load framework libraries
   gSystem->Load("libFWCoreFWLite");
@@ -333,7 +355,11 @@ int main(int argc, char* argv[])
   bool isMC_( ana.getParameter<bool>("isMC") );  
 
   float lumiWeight;
+  float PUweight, PUweight2011B,PUweight1DObs;
+  float PU0,PUp1,PUm1;
 
+
+  /*
   edm::LumiReWeighting   lumiWeights;
   edm::Lumi3DReWeighting   lumiWeights2011B;
   if(isMC_)
@@ -349,7 +375,25 @@ int main(int argc, char* argv[])
 	}
 
     }
+  */
 
+  edm::LumiReWeighting   lumiWeights;
+  edm::LumiReWeighting   lumiWeights1DObs;
+  edm::Lumi3DReWeighting   lumiWeights2011B;
+  if(isMC_)
+    {
+      lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
+      lumiWeights1DObs = edm::LumiReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
+
+      lumiWeights2011B = edm::Lumi3DReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
+      if(Weight3DfileName_!="")
+	{ lumiWeights2011B.weight3D_init(Weight3DfileName_.c_str()); }
+      else
+	{
+	  lumiWeights2011B.weight3D_init(1.0); // generate the weights the fisrt time;
+	}
+
+    }
 
   TFile *_outFile	= new TFile(outputFile_.c_str(), "recreate");	
   TDirectory *muTrigDir = _outFile->mkdir("muTrigDir");
@@ -378,7 +422,7 @@ int main(int argc, char* argv[])
   int muTrigTree_probe_passingIsoMu24ORMu40, muTrigTree_probe_passingMu40ANDNOTIsoMu24, muTrigTree_probe_passingIsoMu20ANDNOTIsoMu24;
   int muTrigTree_probe_passingIsoMu20ANDNOTIsoMu24ANDNOTMu40, muTrigTree_probe_passingIsoMu24ORMu40ORIsoMu20;
   int muTrigTree_probe_passingDiMuTk17ANDNOTeventMu17Mu8, muTrigTree_probe_passingDiMuTk8ANDNOTeventMu17Mu8, muTrigTree_probe_passingDiMuTkDzANDNOTeventMu17Mu8;
-  float muTrigTree_dR;
+  float muTrigTree_dR, muTrigTree_ZPt, muTrigTree_probe_abseta;
   TTree *muTrigTree = new TTree("muTrigTree","muTrigTree"); muTrigTree->SetDirectory(muTrigDir);
   muTrigTree->Branch("tag_pt"            ,  &muTrigTree_tag_pt                 ,  "tag_pt/F");
   muTrigTree->Branch("tag_eta"            ,  &muTrigTree_tag_eta                 ,  "tag_eta/F");
@@ -441,16 +485,29 @@ int main(int argc, char* argv[])
   muTrigTree->Branch("event_Mu17_TkMu8", &muTrigTree_event_Mu17_TkMu8, "event_Mu17_TkMu8/I");
 
   muTrigTree->Branch("probe_passingDiMuTk17ANDNOTeventMu17Mu8", &muTrigTree_probe_passingDiMuTk17ANDNOTeventMu17Mu8, "probe_passingDiMuTk17ANDNOTeventMu17Mu8/I");
- muTrigTree->Branch("probe_passingDiMuTk8ANDNOTeventMu17Mu8", &muTrigTree_probe_passingDiMuTk8ANDNOTeventMu17Mu8, "probe_passingDiMuTk8ANDNOTeventMu17Mu8/I");
- muTrigTree->Branch("probe_passingDiMuTkDzANDNOTeventMu17Mu8", &muTrigTree_probe_passingDiMuTkDzANDNOTeventMu17Mu8, "probe_passingDiMuTkDzANDNOTeventMu17Mu8/I");
-
- muTrigTree->Branch("dR", &muTrigTree_dR, "dR/F");
+  muTrigTree->Branch("probe_passingDiMuTk8ANDNOTeventMu17Mu8", &muTrigTree_probe_passingDiMuTk8ANDNOTeventMu17Mu8, "probe_passingDiMuTk8ANDNOTeventMu17Mu8/I");
+  muTrigTree->Branch("probe_passingDiMuTkDzANDNOTeventMu17Mu8", &muTrigTree_probe_passingDiMuTkDzANDNOTeventMu17Mu8, "probe_passingDiMuTkDzANDNOTeventMu17Mu8/I");
+  
+  muTrigTree->Branch("dR", &muTrigTree_dR, "dR/F");
   muTrigTree->Branch("mass", &muTrigTree_mass, "mass/F");
+  muTrigTree->Branch("ZPt", &muTrigTree_ZPt, "ZPt/F");
+  muTrigTree->Branch("probe_abseta",&muTrigTree_probe_abseta, "probe_abseta/F");
   muTrigTree->Branch("nPVs", &nPVs, "nPVs/I");
   muTrigTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
   muTrigTree->Branch("runNumber", &runNumber, "runNumber/I");
   muTrigTree->Branch("lb", &lb, "lb/I");
   muTrigTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
+  muTrigTree->Branch("PUweight", &PUweight, "PUweight/F");
+  muTrigTree->Branch("PUweight2011B", &PUweight2011B, "PUweight2011B/F");
+  muTrigTree->Branch("PUweight1DObs", &PUweight1DObs, "PUweight1DObs/F");
+
+  muTrigTree->Branch("nJets", &nJets, "nJets/I");
+  muTrigTree->Branch("nBJets", &nBJets, "nBJets/I");
+  muTrigTree->Branch("met", &met, "met/F");
+  muTrigTree->Branch("probe_dPhiDiJet", &probe_dPhiDiJet, "probe_dPhiDiJet/F");
+  muTrigTree->Branch("probe_diJetPt", &probe_diJetPt, "probe_diJetPt/F");
+  muTrigTree->Branch("probe_dPhiJetMin", &probe_dPhiJetMin, "probe_dPhiJetMin/F");
+  muTrigTree->Branch("probe_closestJetPt", &probe_closestJetPt, "probe_closestJetPt/F");
 
 
   float muWCandTree_tag_pt, muWCandTree_tag_eta, muWCandTree_probe_pt, muWCandTree_tag_phi, muWCandTree_probe_phi;
@@ -470,6 +527,10 @@ int main(int argc, char* argv[])
   muWCandTree->Branch("runNumber", &runNumber, "runNumber/I");
   muWCandTree->Branch("lb", &lb, "lb/I");
   muWCandTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
+  muWCandTree->Branch("PUweight", &PUweight, "PUweight/F");
+  muWCandTree->Branch("PUweight2011B", &PUweight2011B, "PUweight2011B/F");
+  muWCandTree->Branch("PUweight1DObs", &PUweight1DObs, "PUweight1DObs/F");
+
 
 
   //  return (i.isPF && i. globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 && i.nValidLayers > 5 &&         (i.cat & 0x1) && i.nMatches >=2 && i.ipDb<.2
@@ -482,6 +543,7 @@ int main(int argc, char* argv[])
   float muRecoTree_probe_Iso, muRecoTree_probe_ipDb, muRecoTree_probe_globChi2, muRecoTree_probe_zPVPt;
   int muRecoTree_probe_isPF, muRecoTree_probe_tracker, muRecoTree_probe_nPixelHits, muRecoTree_probe_nValidLayers, muRecoTree_probe_nMatches;
   int muRecoTree_probe_passingIsoMu24L3, muRecoTree_probe_passingIsoMu24Iso;
+  float muRecoTree_probe_abseta, muRecoTree_ZPt;
   TTree *muRecoTree = new TTree("muRecoTree","muRecoTree"); muRecoTree->SetDirectory(muRecoDir);
   muRecoTree->Branch("tag_pt"            ,  &muRecoTree_tag_pt                 ,  "tag_pt/F");
   muRecoTree->Branch("tag_eta"            ,  &muRecoTree_tag_eta                 ,  "tag_eta/F");
@@ -505,18 +567,34 @@ int main(int argc, char* argv[])
   muRecoTree->Branch("probe_passingIsoMu24L3", &muRecoTree_probe_passingIsoMu24L3, "probe_passingIsoMu24L3/I");
   muRecoTree->Branch("probe_passingIsoMu24Iso", &muRecoTree_probe_passingIsoMu24Iso, "probe_passingIsoMu24Iso/I");
   muRecoTree->Branch("dR", &muRecoTree_dR, "dR/F");
+  muRecoTree->Branch("ZPt", &muRecoTree_ZPt, "ZPt/F");
+  muRecoTree->Branch("probe_abseta",&muRecoTree_probe_abseta, "probe_abseta/F");
   muRecoTree->Branch("mass", &muRecoTree_mass, "mass/F");
   muRecoTree->Branch("nPVs", &nPVs, "nPVs/I");
   muRecoTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
   muRecoTree->Branch("runNumber", &runNumber, "runNumber/I");
   muRecoTree->Branch("lb", &lb, "lb/I");
   muRecoTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
+  muRecoTree->Branch("PUweight", &PUweight, "PUweight/F");
+  muRecoTree->Branch("PUweight2011B", &PUweight2011B, "PUweight2011B/F");
+  muRecoTree->Branch("PUweight1DObs", &PUweight1DObs, "PUweight1DObs/F");
+  muRecoTree->Branch("nJets", &nJets, "nJets/I");
+  muRecoTree->Branch("nBJets", &nBJets, "nBJets/I");
+  muRecoTree->Branch("met", &met, "met/F");
+  muRecoTree->Branch("rho"            ,  &rho                 ,  "rho/F");
+  muRecoTree->Branch("rhoN"            ,  &rhoN                 ,  "rhoN/F");
+  muRecoTree->Branch("probe_dPhiDiJet", &probe_dPhiDiJet, "probe_dPhiDiJet/F");
+  muRecoTree->Branch("probe_diJetPt", &probe_diJetPt, "probe_diJetPt/F");
+  muRecoTree->Branch("probe_dPhiJetMin", &probe_dPhiJetMin, "probe_dPhiJetMin/F");
+  muRecoTree->Branch("probe_closestJetPt", &probe_closestJetPt, "probe_closestJetPt/F");
+
 
   float muRecoIsoTree_tag_pt, muRecoIsoTree_tag_eta, muRecoIsoTree_probe_pt, muRecoIsoTree_probe_eta, muRecoIsoTree_mass, muRecoIsoTree_tag_phi, muRecoIsoTree_probe_phi, muRecoIsoTree_dR;
   int muRecoIsoTree_probe_tightNoIso, muRecoIsoTree_probe_tightIso, muRecoIsoTree_probe_nearTightNoIso, muRecoIsoTree_probe_nearTightIso;
   float muRecoIsoTree_probe_Iso, muRecoIsoTree_probe_ipDb, muRecoIsoTree_probe_globChi2, muRecoIsoTree_probe_zPVPt;
   int muRecoIsoTree_probe_isPF, muRecoIsoTree_probe_tracker, muRecoIsoTree_probe_nPixelHits, muRecoIsoTree_probe_nValidLayers, muRecoIsoTree_probe_nMatches;
   int muRecoIsoTree_probe_passingIsoMu24L3, muRecoIsoTree_probe_passingIsoMu24Iso;
+  float muRecoIsoTree_probe_abseta, muRecoIsoTree_ZPt;
   TTree *muRecoIsoTree = new TTree("muRecoIsoTree","muRecoIsoTree"); muRecoIsoTree->SetDirectory(muRecoIsoDir);
   muRecoIsoTree->Branch("tag_pt"            ,  &muRecoIsoTree_tag_pt                 ,  "tag_pt/F");
   muRecoIsoTree->Branch("tag_eta"            ,  &muRecoIsoTree_tag_eta                 ,  "tag_eta/F");
@@ -540,12 +618,26 @@ int main(int argc, char* argv[])
   muRecoIsoTree->Branch("probe_passingIsoMu24L3", &muRecoIsoTree_probe_passingIsoMu24L3, "probe_passingIsoMu24L3/I");
   muRecoIsoTree->Branch("probe_passingIsoMu24Iso", &muRecoIsoTree_probe_passingIsoMu24Iso, "probe_passingIsoMu24Iso/I");
   muRecoIsoTree->Branch("dR", &muRecoIsoTree_dR, "dR/F");
+  muRecoIsoTree->Branch("ZPt", &muRecoIsoTree_ZPt, "ZPt/F");
+  muRecoIsoTree->Branch("probe_abseta",&muRecoIsoTree_probe_abseta, "probe_abseta/F");
   muRecoIsoTree->Branch("mass", &muRecoIsoTree_mass, "mass/F");
   muRecoIsoTree->Branch("nPVs", &nPVs, "nPVs/I");
   muRecoIsoTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
   muRecoIsoTree->Branch("runNumber", &runNumber, "runNumber/I");
   muRecoIsoTree->Branch("lb", &lb, "lb/I");
   muRecoIsoTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
+  muRecoIsoTree->Branch("nJets", &nJets, "nJets/I");
+  muRecoIsoTree->Branch("nBJets", &nBJets, "nBJets/I");
+  muRecoIsoTree->Branch("met", &met, "met/F");
+  muRecoIsoTree->Branch("PUweight", &PUweight, "PUweight/F");
+  muRecoIsoTree->Branch("PUweight2011B", &PUweight2011B, "PUweight2011B/F");
+  muRecoIsoTree->Branch("PUweight1DObs", &PUweight1DObs, "PUweight1DObs/F");
+  muRecoIsoTree->Branch("rho"            ,  &rho                 ,  "rho/F");
+  muRecoIsoTree->Branch("rhoN"            ,  &rhoN                 ,  "rhoN/F");
+  muRecoIsoTree->Branch("probe_dPhiDiJet", &probe_dPhiDiJet, "probe_dPhiDiJet/F");
+  muRecoIsoTree->Branch("probe_diJetPt", &probe_diJetPt, "probe_diJetPt/F");
+  muRecoIsoTree->Branch("probe_dPhiJetMin", &probe_dPhiJetMin, "probe_dPhiJetMin/F");
+  muRecoIsoTree->Branch("probe_closestJetPt", &probe_closestJetPt, "probe_closestJetPt/F");
 
 
   float eleTrigTree_tag_pt, eleTrigTree_tag_eta, eleTrigTree_probe_pt, eleTrigTree_probe_eta, eleTrigTree_mass, eleTrigTree_tag_phi, eleTrigTree_probe_phi, eleTrigTree_dR;
@@ -553,6 +645,7 @@ int main(int argc, char* argv[])
   int eleTrigTree_probe_passingDiEle17, eleTrigTree_probe_passingDiEle8, eleTrigTree_probe_passingDiEleDz;
   int eleTrigTree_probe_wp70, eleTrigTree_probe_wp80, eleTrigTree_probe_wp85, eleTrigTree_probe_wp90, eleTrigTree_probe_wp95;
   int eleTrigTree_probe_wpHWW;
+  float eleTrigTree_probe_abseta, eleTrigTree_ZPt;
   TTree *eleTrigTree = new TTree("eleTrigTree","eleTrigTree"); eleTrigTree->SetDirectory(eleTrigDir);
   eleTrigTree->Branch("tag_pt"            ,  &eleTrigTree_tag_pt                 ,  "tag_pt/F");
   eleTrigTree->Branch("tag_eta"            ,  &eleTrigTree_tag_eta                 ,  "tag_eta/F");
@@ -572,12 +665,24 @@ int main(int argc, char* argv[])
   eleTrigTree->Branch("probe_wp95"            ,  &eleTrigTree_probe_wp95                 ,  "probe_wp95/I");
   eleTrigTree->Branch("probe_wpHWW"            ,  &eleTrigTree_probe_wpHWW                 ,  "probe_wpHWW/I");
   eleTrigTree->Branch("dR", &eleTrigTree_dR, "dR/F");
+  eleTrigTree->Branch("ZPt", &eleTrigTree_ZPt, "ZPt/F");
+  eleTrigTree->Branch("probe_abseta",&eleTrigTree_probe_abseta, "probe_abseta/F");
   eleTrigTree->Branch("mass", &eleTrigTree_mass, "mass/F");
   eleTrigTree->Branch("nPVs", &nPVs, "nPVs/I");
   eleTrigTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
   eleTrigTree->Branch("runNumber", &runNumber, "runNumber/I");
   eleTrigTree->Branch("lb", &lb, "lb/I");
   eleTrigTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
+  eleTrigTree->Branch("nJets", &nJets, "nJets/I");
+  eleTrigTree->Branch("nBJets", &nBJets, "nBJets/I");
+  eleTrigTree->Branch("met", &met, "met/F");
+  eleTrigTree->Branch("PUweight", &PUweight, "PUweight/F");
+  eleTrigTree->Branch("PUweight2011B", &PUweight2011B, "PUweight2011B/F");
+  eleTrigTree->Branch("PUweight1DObs", &PUweight1DObs, "PUweight1DObs/F");
+  eleTrigTree->Branch("probe_dPhiDiJet", &probe_dPhiDiJet, "probe_dPhiDiJet/F");
+  eleTrigTree->Branch("probe_diJetPt", &probe_diJetPt, "probe_diJetPt/F");
+  eleTrigTree->Branch("probe_dPhiJetMin", &probe_dPhiJetMin, "probe_dPhiJetMin/F");
+  eleTrigTree->Branch("probe_closestJetPt", &probe_closestJetPt, "probe_closestJetPt/F");
 
 
 
@@ -585,10 +690,13 @@ int main(int argc, char* argv[])
   int eleRecoTree_probe_wp70, eleRecoTree_probe_wp80, eleRecoTree_probe_wp85, eleRecoTree_probe_wp90, eleRecoTree_probe_wp95;
   int eleRecoTree_probe_nearWp70, eleRecoTree_probe_nearWp80, eleRecoTree_probe_nearWp85, eleRecoTree_probe_nearWp90, eleRecoTree_probe_nearWp95;
   int eleRecoTree_probe_wp70noIso, eleRecoTree_probe_wp80noIso, eleRecoTree_probe_wp85noIso, eleRecoTree_probe_wp90noIso, eleRecoTree_probe_wp95noIso;
+  int eleRecoTree_probe_wp70noId, eleRecoTree_probe_wp80noId, eleRecoTree_probe_wp85noId, eleRecoTree_probe_wp90noId, eleRecoTree_probe_wp95noId, eleRecoTree_probe_wpHWWnoId;
+  int eleRecoTree_probe_wp70noPresel, eleRecoTree_probe_wp80noPresel, eleRecoTree_probe_wp85noPresel, eleRecoTree_probe_wp90noPresel, eleRecoTree_probe_wp95noPresel, eleRecoTree_probe_wpHWWnoPresel;
   int eleRecoTree_probe_passingEle27HLT;
   int eleRecoTree_probe_wpHWW, eleRecoTree_probe_nearWpHWW, eleRecoTree_probe_wpHWWnoIso;
   float eleRecoTree_probe_iso, eleRecoTree_probe_id;
   int eleRecoTree_probe_presel;
+  float eleRecoTree_probe_abseta, eleRecoTree_ZPt;
   TTree *eleRecoTree = new TTree("eleRecoTree","eleRecoTree"); eleRecoTree->SetDirectory(eleRecoDir);
   eleRecoTree->Branch("tag_pt"            ,  &eleRecoTree_tag_pt                 ,  "tag_pt/F");
   eleRecoTree->Branch("tag_eta"            ,  &eleRecoTree_tag_eta                 ,  "tag_eta/F");
@@ -615,24 +723,55 @@ int main(int argc, char* argv[])
   eleRecoTree->Branch("probe_wp90noIso"            ,  &eleRecoTree_probe_wp90noIso                 ,  "probe_wp90noIso/I");
   eleRecoTree->Branch("probe_wp95noIso"            ,  &eleRecoTree_probe_wp95noIso                 ,  "probe_wp95noIso/I");
   eleRecoTree->Branch("probe_wpHWWnoIso"            ,  &eleRecoTree_probe_wpHWWnoIso                 ,  "probe_wpHWWnoIso/I");
+  eleRecoTree->Branch("probe_wp70noId"            ,  &eleRecoTree_probe_wp70noId                 ,  "probe_wp70noId/I");
+  eleRecoTree->Branch("probe_wp80noId"            ,  &eleRecoTree_probe_wp80noId                 ,  "probe_wp80noId/I");
+  eleRecoTree->Branch("probe_wp85noId"            ,  &eleRecoTree_probe_wp85noId                 ,  "probe_wp85noId/I");
+  eleRecoTree->Branch("probe_wp90noId"            ,  &eleRecoTree_probe_wp90noId                 ,  "probe_wp90noId/I");
+  eleRecoTree->Branch("probe_wp95noId"            ,  &eleRecoTree_probe_wp95noId                 ,  "probe_wp95noId/I");
+  eleRecoTree->Branch("probe_wpHWWnoId"            ,  &eleRecoTree_probe_wpHWWnoId                 ,  "probe_wpHWWnoId/I");
+  eleRecoTree->Branch("probe_wp70noPresel"            ,  &eleRecoTree_probe_wp70noPresel                 ,  "probe_wp70noPresel/I");
+  eleRecoTree->Branch("probe_wp80noPresel"            ,  &eleRecoTree_probe_wp80noPresel                 ,  "probe_wp80noPresel/I");
+  eleRecoTree->Branch("probe_wp85noPresel"            ,  &eleRecoTree_probe_wp85noPresel                 ,  "probe_wp85noPresel/I");
+  eleRecoTree->Branch("probe_wp90noPresel"            ,  &eleRecoTree_probe_wp90noPresel                 ,  "probe_wp90noPresel/I");
+  eleRecoTree->Branch("probe_wp95noPresel"            ,  &eleRecoTree_probe_wp95noPresel                 ,  "probe_wp95noPresel/I");
+  eleRecoTree->Branch("probe_wpHWWnoPresel"            ,  &eleRecoTree_probe_wpHWWnoPresel                 ,  "probe_wpHWWnoPresel/I");
+  eleRecoTree->Branch("rho"            ,  &rho                 ,  "rho/F");
+  eleRecoTree->Branch("rhoN"            ,  &rhoN                 ,  "rhoN/F");
+  eleRecoTree->Branch("rhoForEleIso"            ,  &rhoForEleIso                 ,  "rhoForEleIso/F");
   eleRecoTree->Branch("probe_passingEle27HLT", &eleRecoTree_probe_passingEle27HLT, "probe_passingEle27HLT/I");
   eleRecoTree->Branch("probe_iso"            ,  &eleRecoTree_probe_iso                 ,  "probe_iso/F");
   eleRecoTree->Branch("probe_id"            ,  &eleRecoTree_probe_id                 ,  "probe_id/F");
   eleRecoTree->Branch("dR", &eleRecoTree_dR, "dR/F");
+  eleRecoTree->Branch("ZPt", &eleRecoTree_ZPt, "ZPt/F");
+  eleRecoTree->Branch("probe_abseta",&eleRecoTree_probe_abseta, "probe_abseta/F");
   eleRecoTree->Branch("mass", &eleRecoTree_mass, "mass/F");
   eleRecoTree->Branch("nPVs", &nPVs, "nPVs/I");
   eleRecoTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
   eleRecoTree->Branch("runNumber", &runNumber, "runNumber/I");
   eleRecoTree->Branch("lb", &lb, "lb/I");
   eleRecoTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
+  eleRecoTree->Branch("nBJets", &nBJets, "nBJets/I");
+  eleRecoTree->Branch("nJets", &nJets, "nJets/I");
+  eleRecoTree->Branch("met", &met, "met/F");
+  eleRecoTree->Branch("PUweight", &PUweight, "PUweight/F");
+  eleRecoTree->Branch("PUweight2011B", &PUweight2011B, "PUweight2011B/F");
+  eleRecoTree->Branch("PUweight1DObs", &PUweight1DObs, "PUweight1DObs/F");
+  eleRecoTree->Branch("probe_dPhiDiJet", &probe_dPhiDiJet, "probe_dPhiDiJet/F");
+  eleRecoTree->Branch("probe_diJetPt", &probe_diJetPt, "probe_diJetPt/F");
+  eleRecoTree->Branch("probe_dPhiJetMin", &probe_dPhiJetMin, "probe_dPhiJetMin/F");
+  eleRecoTree->Branch("probe_closestJetPt", &probe_closestJetPt, "probe_closestJetPt/F");
+
+
 
   float eleRecoIsoTree_tag_pt, eleRecoIsoTree_tag_eta, eleRecoIsoTree_probe_pt, eleRecoIsoTree_probe_eta, eleRecoIsoTree_mass, eleRecoIsoTree_tag_phi, eleRecoIsoTree_probe_phi, eleRecoIsoTree_dR;
   int eleRecoIsoTree_probe_wp70, eleRecoIsoTree_probe_wp80, eleRecoIsoTree_probe_wp85, eleRecoIsoTree_probe_wp90, eleRecoIsoTree_probe_wp95;
   int eleRecoIsoTree_probe_nearWp70, eleRecoIsoTree_probe_nearWp80, eleRecoIsoTree_probe_nearWp85, eleRecoIsoTree_probe_nearWp90, eleRecoIsoTree_probe_nearWp95;
   int eleRecoIsoTree_probe_wp70noIso, eleRecoIsoTree_probe_wp80noIso, eleRecoIsoTree_probe_wp85noIso, eleRecoIsoTree_probe_wp90noIso, eleRecoIsoTree_probe_wp95noIso;
+  int eleRecoIsoTree_probe_wp70noId, eleRecoIsoTree_probe_wp80noId, eleRecoIsoTree_probe_wp85noId, eleRecoIsoTree_probe_wp90noId, eleRecoIsoTree_probe_wp95noId, eleRecoIsoTree_probe_wpHWWnoId;
   int eleRecoIsoTree_probe_passingEle27HLT;
   int eleRecoIsoTree_probe_wpHWW, eleRecoIsoTree_probe_nearWpHWW, eleRecoIsoTree_probe_wpHWWnoIso;
   float eleRecoIsoTree_probe_iso, eleRecoIsoTree_probe_id;
+  float eleRecoIsoTree_probe_abseta, eleRecoIsoTree_ZPt;
   TTree *eleRecoIsoTree = new TTree("eleRecoIsoTree","eleRecoIsoTree"); eleRecoIsoTree->SetDirectory(eleRecoIsoDir);
   eleRecoIsoTree->Branch("tag_pt"            ,  &eleRecoIsoTree_tag_pt                 ,  "tag_pt/F");
   eleRecoIsoTree->Branch("tag_eta"            ,  &eleRecoIsoTree_tag_eta                 ,  "tag_eta/F");
@@ -658,16 +797,39 @@ int main(int argc, char* argv[])
   eleRecoIsoTree->Branch("probe_wp90noIso"            ,  &eleRecoIsoTree_probe_wp90noIso                 ,  "probe_wp90noIso/I");
   eleRecoIsoTree->Branch("probe_wp95noIso"            ,  &eleRecoIsoTree_probe_wp95noIso                 ,  "probe_wp95noIso/I");
   eleRecoIsoTree->Branch("probe_wpHWWnoIso"            ,  &eleRecoIsoTree_probe_wpHWWnoIso                 ,  "probe_wpHWWnoIso/I");
+  eleRecoIsoTree->Branch("probe_wp70noId"            ,  &eleRecoIsoTree_probe_wp70noId                 ,  "probe_wp70noId/I");
+  eleRecoIsoTree->Branch("probe_wp80noId"            ,  &eleRecoIsoTree_probe_wp80noId                 ,  "probe_wp80noId/I");
+  eleRecoIsoTree->Branch("probe_wp85noId"            ,  &eleRecoIsoTree_probe_wp85noId                 ,  "probe_wp85noId/I");
+  eleRecoIsoTree->Branch("probe_wp90noId"            ,  &eleRecoIsoTree_probe_wp90noId                 ,  "probe_wp90noId/I");
+  eleRecoIsoTree->Branch("probe_wp95noId"            ,  &eleRecoIsoTree_probe_wp95noId                 ,  "probe_wp95noId/I");
+  eleRecoIsoTree->Branch("probe_wpHWWnoId"            ,  &eleRecoIsoTree_probe_wpHWWnoId                 ,  "probe_wpHWWnoId/I");
+  eleRecoIsoTree->Branch("rho"            ,  &rho                 ,  "rho/F");
+  eleRecoIsoTree->Branch("rhoN"            ,  &rhoN                 ,  "rhoN/F");
+  eleRecoIsoTree->Branch("rhoForEleIso"            ,  &rhoForEleIso                 ,  "rhoForEleIso/F");
   eleRecoIsoTree->Branch("probe_passingEle27HLT", &eleRecoIsoTree_probe_passingEle27HLT, "probe_passingEle27HLT/I");
   eleRecoIsoTree->Branch("probe_iso"            ,  &eleRecoIsoTree_probe_iso                 ,  "probe_iso/F");
   eleRecoIsoTree->Branch("probe_id"            ,  &eleRecoIsoTree_probe_id                 ,  "probe_id/F");
   eleRecoIsoTree->Branch("dR", &eleRecoIsoTree_dR, "dR/F");
+  eleRecoIsoTree->Branch("ZPt", &eleRecoIsoTree_ZPt, "ZPt/F");
+  eleRecoIsoTree->Branch("probe_abseta",&eleRecoIsoTree_probe_abseta, "probe_abseta/F");
   eleRecoIsoTree->Branch("mass", &eleRecoIsoTree_mass, "mass/F");
   eleRecoIsoTree->Branch("nPVs", &nPVs, "nPVs/I");
   eleRecoIsoTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
   eleRecoIsoTree->Branch("runNumber", &runNumber, "runNumber/I");
   eleRecoIsoTree->Branch("lb", &lb, "lb/I");
   eleRecoIsoTree->Branch("lumiWeight", &lumiWeight, "lumiWeight/F");
+  eleRecoIsoTree->Branch("nJets", &nJets, "nJets/I");
+  eleRecoIsoTree->Branch("nBJets", &nBJets, "nBJets/I");
+  eleRecoIsoTree->Branch("met", &met, "met/F");
+  eleRecoIsoTree->Branch("PUweight", &PUweight, "PUweight/F");
+  eleRecoIsoTree->Branch("PUweight2011B", &PUweight2011B, "PUweight2011B/F");
+  eleRecoIsoTree->Branch("PUweight1DObs", &PUweight1DObs, "PUweight1DObs/F");
+  eleRecoIsoTree->Branch("probe_dPhiDiJet", &probe_dPhiDiJet, "probe_dPhiDiJet/F");
+  eleRecoIsoTree->Branch("probe_diJetPt", &probe_diJetPt, "probe_diJetPt/F");
+  eleRecoIsoTree->Branch("probe_dPhiJetMin", &probe_dPhiJetMin, "probe_dPhiJetMin/F");
+  eleRecoIsoTree->Branch("probe_closestJetPt", &probe_closestJetPt, "probe_closestJetPt/F");
+
+
 
   int ievt=0;
   int totalcount=0;
@@ -702,24 +864,51 @@ int main(int argc, char* argv[])
       if (ievt%1000==0) cout << " Entry=" << ievt << " event=" << ev.id().event() << " run=" << ev.id().run() << " lb=" << ev.id().luminosityBlock() << endl;
 
       lumiWeight = 1.;
+
+      /*
       if(isMC_){
  
 	// PU weights // Run2011A
 	std::map<int, unsigned int>::const_iterator puit = aux.puInfo.pus.find(0);
 	int npu =puit->second ;
-	//	PUweight =  lumiWeights.weight( npu );        
-	//	pu->Fill(puit->second);
+	//PUweight =  lumiWeights.weight( npu );        
+	//pu->Fill(puit->second);
 	std::map<int, unsigned int>::const_iterator puit0 =  aux.puInfo.pus.find(0);
 	std::map<int, unsigned int>::const_iterator puitm1 = aux.puInfo.pus.find(-1);
 	std::map<int, unsigned int>::const_iterator puitp1 = aux.puInfo.pus.find(+1);
-	//	PU0=puit0->second;
-	//	PUp1=puitp1->second;
-	//	PUm1=puitm1->second;
-	//	input3DPU->Fill(PUm1,PU0,PUp1);  
+	//PU0=puit0->second;
+	//PUp1=puitp1->second;
+	//PUm1=puitm1->second;
+	//input3DPU->Fill(PUm1,PU0,PUp1);  
 	lumiWeight = lumiWeights2011B.weight3D( puitm1->second, puit0->second,puitp1->second); 
 
       }
+      */
 
+      PUweight=1.;
+      PUweight2011B=1.;
+      PUweight1DObs=1.;
+      if(isMC_){
+	cout << "truePU = " << aux.puInfo.truePU << endl;
+	// PU weights // Run2011A
+	std::map<int, unsigned int>::const_iterator puit = aux.puInfo.pus.find(0);
+	int npu =puit->second ;
+	PUweight =  lumiWeights.weight( (int) aux.puInfo.truePU ); //use new method with "true PU"        
+	//	pu->Fill(puit->second);
+	// PU weight Run2011B
+	// PU weight Run2011B
+	std::map<int, unsigned int>::const_iterator puit0 =  aux.puInfo.pus.find(0);
+	std::map<int, unsigned int>::const_iterator puitm1 = aux.puInfo.pus.find(-1);
+	std::map<int, unsigned int>::const_iterator puitp1 = aux.puInfo.pus.find(+1);
+	PU0=puit0->second;
+	PUp1=puitp1->second;
+	PUm1=puitm1->second;
+	//	input3DPU->Fill(PUm1,PU0,PUp1);  
+	PUweight2011B = lumiWeights2011B.weight3D( puitm1->second, puit0->second,puitp1->second); 
+	PUweight1DObs = lumiWeights1DObs.weight( npu); 
+      }
+
+      if (verbose_) cout << "Weights: " << PUweight2011B << " " << PUweight1DObs << " " << PUweight << endl;
 
       runNumber = ev.id().run();
       eventNumber = ev.id().event();
@@ -733,6 +922,9 @@ int main(int argc, char* argv[])
       modifiedEvent = *vhbbHandle.product();
 
       iEvent = vhbbHandle.product();
+
+      met = iEvent->pfmet.p4.Et();
+
 
 	float trigMatchCut = 0.1;
 	float L1MatchCut = 0.2;
@@ -1095,6 +1287,11 @@ int main(int argc, char* argv[])
 
         nPVs=aux.pvInfo.nVertices;
 	rhoN = aux.puInfo.rhoNeutral;
+	rho = aux.puInfo.rho25;
+	rhoForEleIso = aux.puInfo.rho25Iso;
+
+	if (verbose_) cout << " rhoN=" << rhoN << " rho=" << rho << " rhoForEleIso=" << rhoForEleIso << endl;
+	
 
 	if (verbose_) cout << iEvent->muInfo.size() << " " << iEvent->eleInfo.size() << endl;
 
@@ -1141,6 +1338,7 @@ int main(int argc, char* argv[])
 	      if (verbose_) std::cout << "   Picked Probe Mu " << iEvent->muInfo[probeNumber].p4.Pt() << " " << iEvent->muInfo[probeNumber].p4.Eta() << " " << iEvent->muInfo[probeNumber].p4.Phi() << endl;
 	      muTrigTree_probe_pt= iEvent->muInfo[probeNumber].p4.Pt();
 	      muTrigTree_probe_eta = iEvent->muInfo[probeNumber].p4.Eta();
+	      muTrigTree_probe_abseta = fabs(muTrigTree_probe_eta);
 	      muTrigTree_probe_phi = iEvent->muInfo[probeNumber].p4.Phi();
 	      muTrigTree_probe_passingIsoMu24L1 = 0;
 	      muTrigTree_probe_passingIsoMu24L2 = 0;
@@ -1183,6 +1381,8 @@ int main(int argc, char* argv[])
 
 	      muTrigTree_mass = (iEvent->muInfo[probeNumber].p4 + iEvent->muInfo[tagNumber].p4).M();
               muTrigTree_dR = iEvent->muInfo[probeNumber].p4.DeltaR(iEvent->muInfo[tagNumber].p4);
+              muTrigTree_ZPt = (iEvent->muInfo[probeNumber].p4 + iEvent->muInfo[tagNumber].p4).Pt();
+
 
 
               for (size_t i=0 ; i < mu24L1.size(); i++) {
@@ -1301,6 +1501,37 @@ int main(int argc, char* argv[])
 		if (iEvent->muInfo[probeNumber].p4.DeltaR(mu20WCand[i]) < trigMatchCut) muTrigTree_probe_passingWCandPt = 1;
               }
 
+	      nJets = 0;
+	      nBJets = 0;
+	      probe_dPhiJetMin = 99999.;
+	      probe_closestJetPt = 0.;
+	      std::vector<TLorentzVector> dijets;
+	      for(size_t j=0; j< iEvent->simpleJets2.size(); j++) {
+		if (iEvent->simpleJets2[j].p4.Pt() > 20. && fabs(iEvent->simpleJets2[j].p4.Eta()) < 2.5 
+		    && iEvent->muInfo[probeNumber].p4.DeltaR(iEvent->simpleJets2[j].p4) > 0.5 && iEvent->muInfo[tagNumber].p4.DeltaR(iEvent->simpleJets2[j].p4) > 0.5) {
+		  nJets++;
+		  if (iEvent->simpleJets2[j].csv>0.4) nBJets++;
+		  if (fabs(iEvent->muInfo[probeNumber].p4.DeltaPhi(iEvent->simpleJets2[j].p4)) < fabs(probe_dPhiJetMin)) {
+		    probe_dPhiJetMin = iEvent->muInfo[probeNumber].p4.DeltaPhi(iEvent->simpleJets2[j].p4);
+		    probe_closestJetPt = iEvent->simpleJets2[j].p4.Pt();
+		  }
+		  for(size_t k=j+1; k < iEvent->simpleJets2.size(); k++) {
+		    if (iEvent->simpleJets2[k].p4.Pt() > 20. && fabs(iEvent->simpleJets2[k].p4.Eta()) < 2.5
+			&& iEvent->muInfo[probeNumber].p4.DeltaR(iEvent->simpleJets2[k].p4) > 0.5 && iEvent->muInfo[tagNumber].p4.DeltaR(iEvent->simpleJets2[k].p4) > 0.5) {
+		      dijets.push_back(iEvent->simpleJets2[j].p4+iEvent->simpleJets2[k].p4);
+		    }
+		  }
+		}
+	      }
+	      probe_dPhiDiJet = 99999.;
+	      probe_diJetPt = 0.;
+	      for (size_t j=0; j < dijets.size() ; j++) {
+		if (dijets[j].Pt() > probe_diJetPt) {
+		  probe_dPhiDiJet = iEvent->muInfo[probeNumber].p4.DeltaPhi(dijets[j]);
+		  probe_diJetPt = dijets[j].Pt();
+		}
+	      }
+
 	      muTrigTree->Fill(); // Only if trigger-matched tag and a probe
 
 	    } // potential HLT probe size > 0
@@ -1370,10 +1601,12 @@ int main(int argc, char* argv[])
 	      unsigned int probeNumber = potentialRecoIsoProbes[rand->Integer(potentialRecoIsoProbes.size())];
 	      muRecoIsoTree_probe_pt= iEvent->muInfo[probeNumber].p4.Pt();
 	      muRecoIsoTree_probe_eta = iEvent->muInfo[probeNumber].p4.Eta();
+	      muRecoIsoTree_probe_abseta = fabs(muRecoIsoTree_probe_eta);
 	      muRecoIsoTree_probe_phi = iEvent->muInfo[probeNumber].p4.Phi();
 	      muRecoIsoTree_probe_tightNoIso = muonId2012Tight(iEvent->muInfo[probeNumber],rhoN,false);
 	      muRecoIsoTree_probe_tightIso = muonId2012Tight(iEvent->muInfo[probeNumber],rhoN);
 	      muRecoIsoTree_mass = (iEvent->muInfo[probeNumber].p4 + iEvent->muInfo[tagNumber].p4).M();
+              muRecoIsoTree_ZPt = (iEvent->muInfo[probeNumber].p4 + iEvent->muInfo[tagNumber].p4).Pt();
 	      muRecoIsoTree_dR = iEvent->muInfo[probeNumber].p4.DeltaR(iEvent->muInfo[tagNumber].p4);
               
               
@@ -1403,7 +1636,38 @@ int main(int argc, char* argv[])
 	      for (size_t i=0 ; i < mu24Iso.size(); i++) {
 		if (iEvent->muInfo[probeNumber].p4.DeltaR(mu24Iso[i]) < trigMatchCut) muRecoIsoTree_probe_passingIsoMu24Iso = 1;
 	      }
-              
+
+              nJets = 0;
+              nBJets = 0;
+              probe_dPhiJetMin = 99999.;
+              probe_closestJetPt = 0.;
+	      std::vector<TLorentzVector> dijets;
+              for(size_t j=0; j< iEvent->simpleJets2.size(); j++) {
+                if (iEvent->simpleJets2[j].p4.Pt() > 20. && fabs(iEvent->simpleJets2[j].p4.Eta()) < 2.5
+                    && iEvent->muInfo[probeNumber].p4.DeltaR(iEvent->simpleJets2[j].p4) > 0.5 && iEvent->muInfo[tagNumber].p4.DeltaR(iEvent->simpleJets2[j].p4) > 0.5) {
+                  nJets++;
+                  if (iEvent->simpleJets2[j].csv>0.4) nBJets++;
+                  if (fabs(iEvent->muInfo[probeNumber].p4.DeltaPhi(iEvent->simpleJets2[j].p4)) < fabs(probe_dPhiJetMin)) {
+                    probe_dPhiJetMin = iEvent->muInfo[probeNumber].p4.DeltaPhi(iEvent->simpleJets2[j].p4);
+                    probe_closestJetPt = iEvent->simpleJets2[j].p4.Pt();
+                  }
+                  for(size_t k=j+1; k < iEvent->simpleJets2.size(); k++) {
+                    if (iEvent->simpleJets2[k].p4.Pt() > 20. && fabs(iEvent->simpleJets2[k].p4.Eta()) < 2.5
+                        && iEvent->muInfo[probeNumber].p4.DeltaR(iEvent->simpleJets2[k].p4) > 0.5 && iEvent->muInfo[tagNumber].p4.DeltaR(iEvent->simpleJets2[k].p4) > 0.5) {
+                      dijets.push_back(iEvent->simpleJets2[j].p4+iEvent->simpleJets2[k].p4);
+                    }
+                  }
+                }
+              }
+              probe_dPhiDiJet = 99999.;
+              probe_diJetPt = 0.;
+              for (size_t j=0; j < dijets.size() ; j++) {
+                if (dijets[j].Pt() > probe_diJetPt) {
+                  probe_dPhiDiJet = iEvent->muInfo[probeNumber].p4.DeltaPhi(dijets[j]);
+                  probe_diJetPt = dijets[j].Pt();
+                }
+              }
+             
 	      muRecoIsoTree->Fill(); // Only if trigger-matched tag and a probe
               
 	    } // potential RecoIso probe size > 0
@@ -1461,10 +1725,12 @@ int main(int argc, char* argv[])
               unsigned int probeNumber = potentialRecoProbes[rand->Integer(potentialRecoProbes.size())];
               muRecoTree_probe_pt= iEvent->muInfo[probeNumber].p4.Pt();
               muRecoTree_probe_eta = iEvent->muInfo[probeNumber].p4.Eta();
+	      muRecoTree_probe_abseta = fabs(muRecoTree_probe_eta);
               muRecoTree_probe_phi = iEvent->muInfo[probeNumber].p4.Phi();
 	      muRecoTree_probe_tightNoIso = muonId2012Tight(iEvent->muInfo[probeNumber],rhoN,false);
               muRecoTree_probe_tightIso = muonId2012Tight(iEvent->muInfo[probeNumber],rhoN);
               muRecoTree_mass = (iEvent->muInfo[probeNumber].p4 + iEvent->muInfo[tagNumber].p4).M();
+	      muRecoTree_ZPt = (iEvent->muInfo[probeNumber].p4 + iEvent->muInfo[tagNumber].p4).Pt();
               muRecoTree_dR = iEvent->muInfo[probeNumber].p4.DeltaR(iEvent->muInfo[tagNumber].p4);
 
 
@@ -1495,6 +1761,38 @@ int main(int argc, char* argv[])
                 if (iEvent->muInfo[probeNumber].p4.DeltaR(mu24Iso[i]) < trigMatchCut) muRecoTree_probe_passingIsoMu24Iso = 1;
               }
 
+              nJets = 0;
+              nBJets = 0;
+              probe_dPhiJetMin = 99999.;
+              probe_closestJetPt = 0.;
+	      std::vector<TLorentzVector> dijets;
+              for(size_t j=0; j< iEvent->simpleJets2.size(); j++) {
+                if (iEvent->simpleJets2[j].p4.Pt() > 20. && fabs(iEvent->simpleJets2[j].p4.Eta()) < 2.5
+                    && iEvent->muInfo[probeNumber].p4.DeltaR(iEvent->simpleJets2[j].p4) > 0.5 && iEvent->muInfo[tagNumber].p4.DeltaR(iEvent->simpleJets2[j].p4) > 0.5) {
+                  nJets++;
+                  if (iEvent->simpleJets2[j].csv>0.4) nBJets++;
+                  if (fabs(iEvent->muInfo[probeNumber].p4.DeltaPhi(iEvent->simpleJets2[j].p4)) < fabs(probe_dPhiJetMin)) {
+                    probe_dPhiJetMin = iEvent->muInfo[probeNumber].p4.DeltaPhi(iEvent->simpleJets2[j].p4);
+                    probe_closestJetPt = iEvent->simpleJets2[j].p4.Pt();
+                  }
+                  for(size_t k=j+1; k < iEvent->simpleJets2.size(); k++) {
+                    if (iEvent->simpleJets2[k].p4.Pt() > 20. && fabs(iEvent->simpleJets2[k].p4.Eta()) < 2.5
+                        && iEvent->muInfo[probeNumber].p4.DeltaR(iEvent->simpleJets2[k].p4) > 0.5 && iEvent->muInfo[tagNumber].p4.DeltaR(iEvent->simpleJets2[k].p4) > 0.5) {
+                      dijets.push_back(iEvent->simpleJets2[j].p4+iEvent->simpleJets2[k].p4);
+                    }
+                  }
+                }
+              }
+              probe_dPhiDiJet = 99999.;
+              probe_diJetPt = 0.;
+              for (size_t j=0; j < dijets.size() ; j++) {
+                if (dijets[j].Pt() > probe_diJetPt) {
+                  probe_dPhiDiJet = iEvent->muInfo[probeNumber].p4.DeltaPhi(dijets[j]);
+                  probe_diJetPt = dijets[j].Pt();
+                }
+              }
+
+
 	      muRecoTree->Fill(); // Only if trigger-matched tag and a probe
 
 	    } // potential Reco probe size > 0
@@ -1507,7 +1805,7 @@ int main(int argc, char* argv[])
         std::vector<unsigned int> potentialEleTags;
 
         for(size_t m=0;m<iEvent->eleInfo.size();m++) {
-          if (ElectronWP(iEvent->eleInfo[m],rhoN,80) && iEvent->eleInfo[m].p4.Pt() > 20.) {
+          if (ElectronWP(iEvent->eleInfo[m],rhoForEleIso,80) && iEvent->eleInfo[m].p4.Pt() > 20.) {
 	    if (verbose_) std::cout << "FOUND identified Ele " << iEvent->eleInfo[m].p4.Pt() << " " << iEvent->eleInfo[m].p4.Eta() << " " << iEvent->eleInfo[m].p4.Phi() << endl;
             potentialEleTags.push_back(m);
           }
@@ -1535,7 +1833,7 @@ int main(int argc, char* argv[])
             for(size_t m=0;m<iEvent->eleInfo.size();m++) {
               if (m == tagNumber) continue;
               float mass = (iEvent->eleInfo[m].p4 + iEvent->eleInfo[tagNumber].p4).M();
-              if (ElectronWP(iEvent->eleInfo[m],rhoN,95) && (iEvent->eleInfo[m].charge + iEvent->eleInfo[tagNumber].charge) == 0 && (mass > 50. && mass < 200.)) {
+              if (ElectronWP(iEvent->eleInfo[m],rhoForEleIso,95) && (iEvent->eleInfo[m].charge + iEvent->eleInfo[tagNumber].charge) == 0 && (mass > 50. && mass < 200.)) {
                 potentialHLTProbes.push_back(m);
               }
             }
@@ -1544,19 +1842,21 @@ int main(int argc, char* argv[])
 	      if (verbose_) std::cout << "   Picked Probe Ele " << iEvent->eleInfo[probeNumber].p4.Pt() << " " << iEvent->eleInfo[probeNumber].p4.Eta() << " " << iEvent->eleInfo[probeNumber].p4.Phi() << endl;
               eleTrigTree_probe_pt= iEvent->eleInfo[probeNumber].p4.Pt();
               eleTrigTree_probe_eta = iEvent->eleInfo[probeNumber].p4.Eta();
+	      eleTrigTree_probe_abseta = fabs(eleTrigTree_probe_eta);
               eleTrigTree_probe_phi = iEvent->eleInfo[probeNumber].p4.Phi();
-              eleTrigTree_probe_wpHWW = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,0);
-              eleTrigTree_probe_wp70 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,70);
-              eleTrigTree_probe_wp80 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,80);
-              eleTrigTree_probe_wp85 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,85);
-              eleTrigTree_probe_wp90 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,90);
-              eleTrigTree_probe_wp95 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,95);
+              eleTrigTree_probe_wpHWW = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,0);
+              eleTrigTree_probe_wp70 = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,70);
+              eleTrigTree_probe_wp80 = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,80);
+              eleTrigTree_probe_wp85 = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,85);
+              eleTrigTree_probe_wp90 = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,90);
+              eleTrigTree_probe_wp95 = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,95);
 	      eleTrigTree_probe_passingEle27L1 = 0;
 	      eleTrigTree_probe_passingEle27HLT = 0;
 	      eleTrigTree_probe_passingDiEle17 = 0;
 	      eleTrigTree_probe_passingDiEle8 = 0;
 	      eleTrigTree_probe_passingDiEleDz = 0;
 	      eleTrigTree_mass = (iEvent->eleInfo[probeNumber].p4 + iEvent->eleInfo[tagNumber].p4).M();
+	      eleTrigTree_ZPt = (iEvent->eleInfo[probeNumber].p4 + iEvent->eleInfo[tagNumber].p4).Pt();
               eleTrigTree_dR = iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->eleInfo[tagNumber].p4);
 
 	      
@@ -1574,6 +1874,37 @@ int main(int argc, char* argv[])
               }
               for (size_t i=0 ; i < diEleDz.size(); i++) {
                 if (iEvent->eleInfo[probeNumber].p4.DeltaR(diEleDz[i]) < trigMatchCut) eleTrigTree_probe_passingDiEleDz = 1;
+              }
+
+              nJets = 0;
+              nBJets = 0;
+              probe_dPhiJetMin = 99999.;
+              probe_closestJetPt = 0.;
+	      std::vector<TLorentzVector> dijets;
+              for(size_t j=0; j< iEvent->simpleJets2.size(); j++) {
+                if (iEvent->simpleJets2[j].p4.Pt() > 20. && fabs(iEvent->simpleJets2[j].p4.Eta()) < 2.5
+                    && iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->simpleJets2[j].p4) > 0.5 && iEvent->eleInfo[tagNumber].p4.DeltaR(iEvent->simpleJets2[j].p4) > 0.5) {
+                  nJets++;
+                  if (iEvent->simpleJets2[j].csv>0.4) nBJets++;
+                  if (iEvent->eleInfo[probeNumber].p4.DeltaPhi(iEvent->simpleJets2[j].p4) < probe_dPhiJetMin) {
+                    probe_dPhiJetMin = iEvent->eleInfo[probeNumber].p4.DeltaPhi(iEvent->simpleJets2[j].p4);
+                    probe_closestJetPt = iEvent->simpleJets2[j].p4.Pt();
+                  }
+                  for(size_t k=j+1; k < iEvent->simpleJets2.size(); k++) {
+                    if (iEvent->simpleJets2[k].p4.Pt() > 20. && fabs(iEvent->simpleJets2[k].p4.Eta()) < 2.5
+                        && iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->simpleJets2[k].p4) > 0.5 && iEvent->eleInfo[tagNumber].p4.DeltaR(iEvent->simpleJets2[k].p4) > 0.5) {
+                      dijets.push_back(iEvent->simpleJets2[j].p4+iEvent->simpleJets2[k].p4);
+                    }
+                  }
+                }
+              }
+              probe_dPhiDiJet = 99999.;
+              probe_diJetPt = 0.;
+              for (size_t j=0; j < dijets.size() ; j++) {
+                if (dijets[j].Pt() > probe_diJetPt) {
+                  probe_dPhiDiJet = iEvent->eleInfo[probeNumber].p4.DeltaPhi(dijets[j]);
+                  probe_diJetPt = dijets[j].Pt();
+                }
               }
 
 	      eleTrigTree->Fill();
@@ -1608,10 +1939,10 @@ int main(int argc, char* argv[])
             }
           }
           if (!matched) if (verbose_) cout << "   Has no match!" << endl;
-	  if (!ElectronWP(iEvent->eleInfo[tagNumber],rhoN,80,false)&&verbose_) {
+	  if (!ElectronWP(iEvent->eleInfo[tagNumber],rhoForEleIso,80,false)&&verbose_) {
 	    cout << "  Does not pass WP80 (no Iso) cuts" << endl;
 	  }
-          if (matched&&ElectronWP(iEvent->eleInfo[tagNumber],rhoN,80,false)) {
+          if (matched&&ElectronWP(iEvent->eleInfo[tagNumber],rhoForEleIso,80,false)) {
 	    std::vector<unsigned int> potentialRecoProbes;
             for(size_t m=0;m<iEvent->eleInfo.size();m++) {
               if (m == tagNumber) continue;
@@ -1626,23 +1957,37 @@ int main(int argc, char* argv[])
 	      eleRecoTree_probe_presel = ElectronPresel(iEvent->eleInfo[probeNumber]);
               eleRecoTree_probe_pt= iEvent->eleInfo[probeNumber].p4.Pt();
               eleRecoTree_probe_eta = iEvent->eleInfo[probeNumber].p4.Eta();
+	      eleRecoTree_probe_abseta = fabs(eleRecoTree_probe_eta);
               eleRecoTree_probe_phi = iEvent->eleInfo[probeNumber].p4.Phi();
-              eleRecoTree_probe_wpHWW = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,0);
-	      eleRecoTree_probe_wp70 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,70);
-	      eleRecoTree_probe_wp80 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,80);
-	      eleRecoTree_probe_wp85 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,85);
-	      eleRecoTree_probe_wp90 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,90);
-	      eleRecoTree_probe_wp95 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,95);
-              eleRecoTree_probe_wpHWWnoIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,0,false);
-              eleRecoTree_probe_wp70noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,70,false);
-              eleRecoTree_probe_wp80noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,80,false);
-              eleRecoTree_probe_wp85noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,85,false);
-              eleRecoTree_probe_wp90noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,90,false);
-              eleRecoTree_probe_wp95noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,95,false);
+              eleRecoTree_probe_wpHWW = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,0);
+	      eleRecoTree_probe_wp70 = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,70);
+	      eleRecoTree_probe_wp80 = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,80);
+	      eleRecoTree_probe_wp85 = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,85);
+	      eleRecoTree_probe_wp90 = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,90);
+	      eleRecoTree_probe_wp95 = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,95);
+              eleRecoTree_probe_wpHWWnoIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,0,false);
+              eleRecoTree_probe_wp70noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,70,false);
+              eleRecoTree_probe_wp80noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,80,false);
+              eleRecoTree_probe_wp85noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,85,false);
+              eleRecoTree_probe_wp90noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,90,false);
+              eleRecoTree_probe_wp95noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,95,false);
+              eleRecoTree_probe_wpHWWnoId = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,0,true,false);
+              eleRecoTree_probe_wp70noId = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,70,true,false);
+              eleRecoTree_probe_wp80noId = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,80,true,false);
+	      eleRecoTree_probe_wp85noId = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,85,true,false);
+              eleRecoTree_probe_wp90noId = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,90,true,false);
+	      eleRecoTree_probe_wp95noId = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,95,true,false);
+              eleRecoTree_probe_wpHWWnoPresel = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,0,true,true,false);
+              eleRecoTree_probe_wp70noPresel = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,70,true,true,false);
+              eleRecoTree_probe_wp80noPresel = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,80,true,true,false);
+              eleRecoTree_probe_wp85noPresel = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,85,true,true,false);
+              eleRecoTree_probe_wp90noPresel = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,90,true,true,false);
+              eleRecoTree_probe_wp95noPresel = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,95,true,true,false);
               eleRecoTree_mass = (iEvent->eleInfo[probeNumber].p4 + iEvent->eleInfo[tagNumber].p4).M();
+	      eleRecoTree_ZPt = (iEvent->eleInfo[probeNumber].p4 + iEvent->eleInfo[tagNumber].p4).Pt();
               eleRecoTree_dR = iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->eleInfo[tagNumber].p4);
-	      eleRecoTree_probe_iso = ElectronIso(iEvent->eleInfo[tagNumber],rhoN);
-	      eleRecoTree_probe_id = iEvent->eleInfo[tagNumber].mvaOutTrig;
+	      eleRecoTree_probe_iso = ElectronIso(iEvent->eleInfo[probeNumber],rhoForEleIso);
+	      eleRecoTree_probe_id = iEvent->eleInfo[probeNumber].mvaOutTrig;
 
 	      eleRecoTree_probe_nearWpHWW = 0;
 	      eleRecoTree_probe_nearWp70 = 0;
@@ -1652,17 +1997,48 @@ int main(int argc, char* argv[])
               eleRecoTree_probe_nearWp95 = 0;
 	      for (size_t m=0;m<iEvent->eleInfo.size();m++) {
                 if (m == tagNumber || iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->eleInfo[m].p4) > recoNearMatchCut) continue;
-                if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,0)) eleRecoTree_probe_nearWpHWW = 1;
-		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,70)) eleRecoTree_probe_nearWp70 = 1;
-		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,80)) eleRecoTree_probe_nearWp80 = 1;
-		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,85)) eleRecoTree_probe_nearWp85 = 1;
-		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,90)) eleRecoTree_probe_nearWp90 = 1;
-		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,95)) eleRecoTree_probe_nearWp95 = 1;
+                if (ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,0)) eleRecoTree_probe_nearWpHWW = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,70)) eleRecoTree_probe_nearWp70 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,80)) eleRecoTree_probe_nearWp80 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,85)) eleRecoTree_probe_nearWp85 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,90)) eleRecoTree_probe_nearWp90 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,95)) eleRecoTree_probe_nearWp95 = 1;
               }
 
 	      eleRecoTree_probe_passingEle27HLT = 0;
               for (size_t i=0 ; i < ele27HLT.size(); i++) {
                 if (iEvent->eleInfo[probeNumber].p4.DeltaR(ele27HLT[i]) < trigMatchCut) eleRecoTree_probe_passingEle27HLT = 1;
+              }
+
+              nJets = 0;
+              nBJets = 0;
+	      probe_dPhiJetMin = 99999.;
+              probe_closestJetPt = 0.;
+	      std::vector<TLorentzVector> dijets;
+              for(size_t j=0; j< iEvent->simpleJets2.size(); j++) {
+		if (iEvent->simpleJets2[j].p4.Pt() > 20. && fabs(iEvent->simpleJets2[j].p4.Eta()) < 2.5
+                    && iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->simpleJets2[j].p4) > 0.5 && iEvent->eleInfo[tagNumber].p4.DeltaR(iEvent->simpleJets2[j].p4) > 0.5) {
+		  nJets++;
+                  if (iEvent->simpleJets2[j].csv>0.4) nBJets++;
+                  if (iEvent->eleInfo[probeNumber].p4.DeltaPhi(iEvent->simpleJets2[j].p4) < probe_dPhiJetMin) {
+		    probe_dPhiJetMin = iEvent->eleInfo[probeNumber].p4.DeltaPhi(iEvent->simpleJets2[j].p4);
+                    probe_closestJetPt = iEvent->simpleJets2[j].p4.Pt();
+                  }
+                  for(size_t k=j+1; k < iEvent->simpleJets2.size(); k++) {
+                    if (iEvent->simpleJets2[k].p4.Pt() > 20. && fabs(iEvent->simpleJets2[k].p4.Eta()) < 2.5
+                        && iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->simpleJets2[k].p4) > 0.5 && iEvent->eleInfo[tagNumber].p4.DeltaR(iEvent->simpleJets2[k].p4) > 0.5) {
+                      dijets.push_back(iEvent->simpleJets2[j].p4+iEvent->simpleJets2[k].p4);
+                    }
+                  }
+                }
+              }
+              probe_dPhiDiJet = 99999.;
+              probe_diJetPt = 0.;
+              for (size_t j=0; j < dijets.size() ; j++) {
+                if (dijets[j].Pt() > probe_diJetPt) {
+                  probe_dPhiDiJet = iEvent->eleInfo[probeNumber].p4.DeltaPhi(dijets[j]);
+                  probe_diJetPt = dijets[j].Pt();
+                }
               }
 
 
@@ -1700,10 +2076,10 @@ int main(int argc, char* argv[])
 	    }
 	  }
 	  if (!matched) if (verbose_) cout << "   Has no match!" << endl;
-	  if (!ElectronWP(iEvent->eleInfo[tagNumber],rhoN,80)&&verbose_) {
+	  if (!ElectronWP(iEvent->eleInfo[tagNumber],rhoForEleIso,80)&&verbose_) {
 	    cout << "  Does not pass WP80 cuts" << endl;
 	  }
-	  if (matched&&ElectronWP(iEvent->eleInfo[tagNumber],rhoN,80)) {
+	  if (matched&&ElectronWP(iEvent->eleInfo[tagNumber],rhoForEleIso,80)) {
 	    std::vector<unsigned int> potentialRecoIsoProbes;
 	    for(size_t m=0;m<iEvent->eleInfo.size();m++) {
 	      if (m == tagNumber) continue;
@@ -1717,22 +2093,30 @@ int main(int argc, char* argv[])
 	      unsigned int probeNumber = potentialRecoIsoProbes[rand->Integer(potentialRecoIsoProbes.size())];
 	      eleRecoIsoTree_probe_pt= iEvent->eleInfo[probeNumber].p4.Pt();
 	      eleRecoIsoTree_probe_eta = iEvent->eleInfo[probeNumber].p4.Eta();
+	      eleRecoIsoTree_probe_abseta = fabs(eleRecoIsoTree_probe_eta);
 	      eleRecoIsoTree_probe_phi = iEvent->eleInfo[probeNumber].p4.Phi();
-	      eleRecoIsoTree_probe_wpHWW = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,0);
-	      eleRecoIsoTree_probe_wp70 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,70);
-	      eleRecoIsoTree_probe_wp80 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,80);
-	      eleRecoIsoTree_probe_wp85 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,85);
-	      eleRecoIsoTree_probe_wp90 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,90);
-	      eleRecoIsoTree_probe_wp95 = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,95);
-	      eleRecoIsoTree_probe_wpHWWnoIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,0,false);
-	      eleRecoIsoTree_probe_wp70noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,70,false);
-	      eleRecoIsoTree_probe_wp80noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,80,false);
-	      eleRecoIsoTree_probe_wp85noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,85,false);
-	      eleRecoIsoTree_probe_wp90noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,90,false);
-	      eleRecoIsoTree_probe_wp95noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoN,95,false);
+	      eleRecoIsoTree_probe_wpHWW = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,0);
+	      eleRecoIsoTree_probe_wp70 = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,70);
+	      eleRecoIsoTree_probe_wp80 = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,80);
+	      eleRecoIsoTree_probe_wp85 = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,85);
+	      eleRecoIsoTree_probe_wp90 = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,90);
+	      eleRecoIsoTree_probe_wp95 = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,95);
+	      eleRecoIsoTree_probe_wpHWWnoIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,0,false);
+	      eleRecoIsoTree_probe_wp70noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,70,false);
+	      eleRecoIsoTree_probe_wp80noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,80,false);
+	      eleRecoIsoTree_probe_wp85noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,85,false);
+	      eleRecoIsoTree_probe_wp90noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,90,false);
+	      eleRecoIsoTree_probe_wp95noIso = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,95,false);
+              eleRecoIsoTree_probe_wpHWWnoId = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,0,true,false);
+              eleRecoIsoTree_probe_wp70noId = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,70,true,false);
+              eleRecoIsoTree_probe_wp80noId = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,80,true,false);
+	      eleRecoIsoTree_probe_wp85noId = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,85,true,false);
+              eleRecoIsoTree_probe_wp90noId = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,90,true,false);
+	      eleRecoIsoTree_probe_wp95noId = ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,95,true,false);
 	      eleRecoIsoTree_mass = (iEvent->eleInfo[probeNumber].p4 + iEvent->eleInfo[tagNumber].p4).M();
+	      eleRecoIsoTree_ZPt = (iEvent->eleInfo[probeNumber].p4 + iEvent->eleInfo[tagNumber].p4).Pt();
 	      eleRecoIsoTree_dR = iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->eleInfo[tagNumber].p4);
-	      eleRecoIsoTree_probe_iso = ElectronIso(iEvent->eleInfo[tagNumber],rhoN);
+	      eleRecoIsoTree_probe_iso = ElectronIso(iEvent->eleInfo[tagNumber],rhoForEleIso);
 	      eleRecoIsoTree_probe_id = iEvent->eleInfo[tagNumber].mvaOutTrig;
 
               
@@ -1744,19 +2128,49 @@ int main(int argc, char* argv[])
 	      eleRecoIsoTree_probe_nearWp95 = 0;
 	      for (size_t m=0;m<iEvent->eleInfo.size();m++) {
 		if (m == tagNumber || iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->eleInfo[m].p4) > recoNearMatchCut) continue;
-		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,0)) eleRecoIsoTree_probe_nearWpHWW = 1;
-		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,70)) eleRecoIsoTree_probe_nearWp70 = 1;
-		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,80)) eleRecoIsoTree_probe_nearWp80 = 1;
-		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,85)) eleRecoIsoTree_probe_nearWp85 = 1;
-		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,90)) eleRecoIsoTree_probe_nearWp90 = 1;
-		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoN,95)) eleRecoIsoTree_probe_nearWp95 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,0)) eleRecoIsoTree_probe_nearWpHWW = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,70)) eleRecoIsoTree_probe_nearWp70 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,80)) eleRecoIsoTree_probe_nearWp80 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,85)) eleRecoIsoTree_probe_nearWp85 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,90)) eleRecoIsoTree_probe_nearWp90 = 1;
+		if (ElectronWP(iEvent->eleInfo[probeNumber],rhoForEleIso,95)) eleRecoIsoTree_probe_nearWp95 = 1;
 	      }
               
 	      eleRecoIsoTree_probe_passingEle27HLT = 0;
 	      for (size_t i=0 ; i < ele27HLT.size(); i++) {
 		if (iEvent->eleInfo[probeNumber].p4.DeltaR(ele27HLT[i]) < trigMatchCut) eleRecoIsoTree_probe_passingEle27HLT = 1;
 	      }
-              
+
+              nJets = 0;
+              nBJets = 0;
+	      probe_dPhiJetMin = 99999.;
+              probe_closestJetPt = 0.;
+	      std::vector<TLorentzVector> dijets;
+              for(size_t j=0; j< iEvent->simpleJets2.size(); j++) {
+		if (iEvent->simpleJets2[j].p4.Pt() > 20. && fabs(iEvent->simpleJets2[j].p4.Eta()) < 2.5
+                    && iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->simpleJets2[j].p4) > 0.5 && iEvent->eleInfo[tagNumber].p4.DeltaR(iEvent->simpleJets2[j].p4) > 0.5) {
+		  nJets++;
+                  if (iEvent->simpleJets2[j].csv>0.4) nBJets++;
+                  if (iEvent->eleInfo[probeNumber].p4.DeltaPhi(iEvent->simpleJets2[j].p4) < probe_dPhiJetMin) {
+		    probe_dPhiJetMin = iEvent->eleInfo[probeNumber].p4.DeltaPhi(iEvent->simpleJets2[j].p4);
+                    probe_closestJetPt = iEvent->simpleJets2[j].p4.Pt();
+                  }
+                  for(size_t k=j+1; k < iEvent->simpleJets2.size(); k++) {
+                    if (iEvent->simpleJets2[k].p4.Pt() > 20. && fabs(iEvent->simpleJets2[k].p4.Eta()) < 2.5
+                        && iEvent->eleInfo[probeNumber].p4.DeltaR(iEvent->simpleJets2[k].p4) > 0.5 && iEvent->eleInfo[tagNumber].p4.DeltaR(iEvent->simpleJets2[k].p4) > 0.5) {
+                      dijets.push_back(iEvent->simpleJets2[j].p4+iEvent->simpleJets2[k].p4);
+                    }
+                  }
+                }
+              }
+              probe_dPhiDiJet = 99999.;
+              probe_diJetPt = 0.;
+              for (size_t j=0; j < dijets.size() ; j++) {
+                if (dijets[j].Pt() > probe_diJetPt) {
+                  probe_dPhiDiJet = iEvent->eleInfo[probeNumber].p4.DeltaPhi(dijets[j]);
+                  probe_diJetPt = dijets[j].Pt();
+                }
+              }
               
 	      eleRecoIsoTree->Fill(); // Only if trigger-matched tag and a probe
               
