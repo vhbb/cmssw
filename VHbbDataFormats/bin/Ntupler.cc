@@ -355,7 +355,7 @@ template <> void LeptonInfo::setSpecific<VHbbEvent::ElectronInfo>(const VHbbEven
   innerHits[j]=i.innerHits;
 float mincor=0.0;
 float minrho=0.0;
-float rho = std::max(aux.puInfo.rho25,minrho);
+float rho = std::max(aux.puInfo.rho25Iso,minrho);
 float eta=i.p4.Eta();
 float areagamma=0.5;
 float areaNH=0.5;

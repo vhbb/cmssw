@@ -749,7 +749,7 @@ We adopt the standard cut-based selection from VBTF described in detail here.
   for (unsigned int  it = 0; it< electrons.size(); ++it){
 float mincor=0.0;
 float minrho=0.0;
-float rho = std::max(aux.puInfo.rho25,minrho);
+float rho = std::max(aux.puInfo.rho25Iso,minrho);
 float eta=electrons[it].p4.Eta();
 float areagamma=0.5;
 float areaNH=0.5;

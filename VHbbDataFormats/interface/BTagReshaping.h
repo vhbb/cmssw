@@ -69,8 +69,8 @@ class BTagShape
           x.push_back(eq[eq.size()-i-1].first);
           y.push_back(eq[eq.size()-i-1].second);
       }
-      x.push_back(1.001);
-      y.push_back(1.001);
+      x.push_back(10.001);
+      y.push_back(10.001);
 
      m_i =  new ROOT::Math::Interpolator(x,y,ROOT::Math::Interpolation::kLINEAR);
   }
