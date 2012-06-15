@@ -1,9 +1,9 @@
 from ROOT import *
 from array import array
 
-lumiA = 0.5
-lumiB = 1.7
-verboseOutput = False
+lumiA = 0.7
+lumiB = 3.5
+verboseOutput = True
 
 def makeAvg(inputFiles,inputWeights,outputFile,verbose=False):
   if verbose:
@@ -70,7 +70,7 @@ def makeAvg(inputFiles,inputWeights,outputFile,verbose=False):
 from os import listdir
 
 for fileA in listdir("."):
-  if fileA.count("TrigEff") and fileA.count("2012A.root"):
+  if (fileA.count("TrigEff") or fileA.count("MuRecoId")) and fileA.count("2012A.root") and not fileA.count("2012AB"):
     fileB = fileA.replace("2012A","2012B")
     if not listdir(".").count(fileB):
       raise Exception,"%s exists but %s does not" % (fileA,fileB)
