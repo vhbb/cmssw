@@ -8,7 +8,7 @@ import re
 
 process = cms.Process("FWLitePlots")
 
-baseAddFiles = "/gpfs/gpfsddn/cms/user/arizzi/Hbb/V32/CMSSW_5_2_5/src/VHbbAnalysis/VHbbDataFormats/bin/" 
+baseAddFiles = "/gpfs/gpfsddn/cms/user/arizzi/Hbb/CMSSW_5_2_5/src/VHbbAnalysis/VHbbDataFormats/bin/" 
 
 f = open(os.environ.get("FILETOPROCESS"))
 lines = f.readlines()
@@ -32,7 +32,7 @@ process.fwliteInput = cms.PSet(
     )
 
 
-JSONfile = '/gpfs/gpfsddn/cms/user/arizzi/Hbb/V32/CMSSW_5_2_5/src/VHbbAnalysis/VHbbDataFormats/bin/Cert_190456-195016_8TeV_PromptReco_Collisions12_JSON_v3.txt'
+JSONfile = '/gpfs/gpfsddn/cms/user/arizzi/Hbb/CMSSW_5_2_5/src/VHbbAnalysis/VHbbDataFormats/bin/Cert_190456-195775_8TeV_PromptReco_Collisions12_JSON.txt'
 lumiList = LumiList.LumiList (filename = JSONfile).getCMSSWString().split(',')
 process.fwliteInput.lumisToProcess.extend(lumiList)
 
@@ -146,7 +146,7 @@ process.Analyzer = cms.PSet(
     hltMuPlusWCandPt2012A_legW = cms.string(baseAddFiles+"triggerRootFiles/WCandPt.TrigEff.2012A.root"),
     hltDoubleMuon2012A_dZ = cms.string(baseAddFiles+"triggerRootFiles/DoubleMuDz.TrigEff.2012AB.root"),
     hltDoubleEle2012A_dZ = cms.string(baseAddFiles+"triggerRootFiles/DoubleEleDz.TrigEff.2012AB.root"),
-
+    csvDiscr = cms.string(baseAddFiles+"csvdiscr.root"),
     jecFolder = cms.string(baseAddFiles+"jec"),
     btagEffFileName = cms.string(baseAddFiles+"btag_generic.txt")
     )
