@@ -1,8 +1,8 @@
 from ROOT import *
 from array import array
 
-lumiA = 0.7
-lumiB = 3.5
+lumiA = 0.709
+lumiB = 2.844
 verboseOutput = True
 
 def makeAvg(inputFiles,inputWeights,outputFile,verbose=False):
