@@ -70,7 +70,7 @@ def makeAvg(inputFiles,inputWeights,outputFile,verbose=False):
 from os import listdir
 
 for fileA in listdir("."):
-  if (fileA.count("TrigEff") or fileA.count("MuRecoId")) and fileA.count("2012A.root") and not fileA.count("2012AB"):
+  if (fileA.count("TrigEff") or fileA.count("MuRecoId") or fileA.count("EleRecoId")) and fileA.count("2012A.root") and not fileA.count("2012AB"):
     fileB = fileA.replace("2012A","2012B")
     if not listdir(".").count(fileB):
       raise Exception,"%s exists but %s does not" % (fileA,fileB)
