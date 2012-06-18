@@ -164,6 +164,10 @@ process.Analyzer = cms.PSet(
     hltMuPlusWCandPt2012A_legW = cms.string("triggerRootFiles/WCandPt.TrigEff.2012AB.root"),
     hltDoubleMuon2012A_dZ = cms.string("triggerRootFiles/DoubleMuDz.TrigEff.2012AB.root"),
     hltDoubleEle2012A_dZ = cms.string("triggerRootFiles/DoubleEleDz.TrigEff.2012AB.root"),
+    idMu2012A = cms.string(baseAddFiles+"triggerRootFiles/triggerRootFiles/MuRecoId.ScaleFactor.2012AB.root"),
+    idEle2012A = cms.string(baseAddFiles+"triggerRootFiles/triggerRootFiles/EleRecoId.ScaleFactor.wp95.2012AB.root"),
+    idEle2012Awp80 = cms.string(baseAddFiles+"triggerRootFiles/triggerRootFiles/EleRecoId.ScaleFactor.wp80.2012AB.root"),
+
     jecFolder = cms.string("jec"),
     csvDiscr = cms.string("csvdiscr.root"),
     btagEffFileName = cms.string("btag_generic.txt")

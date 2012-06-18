@@ -44,6 +44,10 @@ public:
 
    tscaleMuPlusWCandPt2012A_legMu=openFile(ana,"hltMuPlusWCandPt2012A_legMu");  
    tscaleMuPlusWCandPt2012A_legW=openFile(ana,"hltMuPlusWCandPt2012A_legW");  
+   
+   tscaleMuID2012A=openFile(ana,"idMu2012A");  
+   tscaleEleID2012A=openFile(ana,"idEle2012A");  
+   tscaleEleID2012Awp80=openFile(ana,"idEle2012Awp80");  
 
    if(tscaleHLTmu == 0 || tscaleIDmu == 0) 
     {
@@ -148,6 +152,9 @@ for(unsigned int j=0; j< pt.size(); j++)
   return   combiner2Thr.weight<Trigger1High2Loose>(allEleWithEffs);
 
 }
+double muId2012A( float pt, float eta){    return efficiencyFromPtEta(pt,eta,tscaleMuID2012A).first;}
+double eleId2012A( float pt, float eta){    return efficiencyFromPtEta(pt,eta,tscaleEleID2012A).first;}
+double eleId2012Awp80( float pt, float eta){    return efficiencyFromPtEta(pt,eta,tscaleEleID2012Awp80).first;}
 
 double scaleSingleEleMay( float pt, float eta){    return efficiencyFromPtEta(pt,eta,tscaleSingleEleMay).first;}
 double scaleSingleEleV4( float pt, float eta){   return efficiencyFromPtEta(pt,eta,tscaleSingleEleV4).first; }
@@ -343,6 +350,10 @@ private:
 
   TTree * tscaleHLTele1Aug;
   TTree * tscaleHLTele2Aug;
+
+  TTree * tscaleMuID2012A;
+  TTree * tscaleEleID2012A;
+  TTree * tscaleEleID2012Awp80;
 
   TTree * tscaleHLTmu;
   TTree * tscaleIDmu;

@@ -1920,7 +1920,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
           float weightTrig2012ASingleMuonMu1 = triggerWeight.singleMuon2012A(vLeptons.pt[0],vLeptons.eta[0]);         
           float weightTrig2012ASingleMuonMu2 = triggerWeight.singleMuon2012A(vLeptons.pt[1],vLeptons.eta[1]);         
           weightTrig2012ASingleMuon = weightTrig2012ASingleMuonMu1+weightTrig2012ASingleMuonMu2-weightTrig2012ASingleMuonMu1*weightTrig2012ASingleMuonMu2;
-          weightTrig2012A = weightTrig2012ASingleMuon ; // FIXME: should use 2012 SF for MuID
+          weightTrig2012A = weightTrig2012ASingleMuon * triggerWeight.muId2012A(vLeptons.pt[0],vLeptons.eta[0]) * triggerWeight.muId2012A(vLeptons.pt[1],vLeptons.eta[1]) ;
  
 	  nvlep=2;
 	  firstAddMu=2;
@@ -1943,7 +1943,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
           float weightTrig2012ASingleEle1 = triggerWeight.singleEle2012Awp95(vLeptons.pt[0],vLeptons.eta[0]);
           float weightTrig2012ASingleEle2 = triggerWeight.singleEle2012Awp95(vLeptons.pt[1],vLeptons.eta[1]);
           weightTrig2012ASingleEle = weightTrig2012ASingleEle1+weightTrig2012ASingleEle2-weightTrig2012ASingleEle1*weightTrig2012ASingleEle2;
-          weightTrig2012A = weightTrig2012ADiEle ; // FIXME: should use 2012 SF for Ele Reco and ID
+          weightTrig2012A = weightTrig2012ADiEle * triggerWeight.eleId2012A(vLeptons.pt[0],vLeptons.eta[0]) * triggerWeight.eleId2012A(vLeptons.pt[1],vLeptons.eta[1]) ; 
                  
 
 	}
@@ -1959,7 +1959,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
           weightTrig2012ASingleMuon = triggerWeight.singleMuon2012A(vLeptons.pt[0],vLeptons.eta[0]);
           weightTrig2012AMuonPlusWCandPt = weightTrig2012ASingleMuon + 
                                            triggerWeight.muPlusWCandPt2012A_legMu(vLeptons.pt[0],vLeptons.eta[0])*triggerWeight.muPlusWCandPt2012A_legW(vhCand.V.p4.Pt(),0);
-          weightTrig2012A =  weightTrig2012ASingleMuon; // FIXME: should use 2012 SF for mu ID          
+          weightTrig2012A =  weightTrig2012ASingleMuon *  triggerWeight.muId2012A(vLeptons.pt[0],vLeptons.eta[0]) ;          
 
 	  nvlep=1;
 	  firstAddMu=1;
@@ -1982,7 +1982,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	  weightTrig = (weightTrigMay * 0.215 + weightTrigV4 * 1.915)/ 2.13; //FIXME: use proper lumi if we reload 2.fb
 	 
           weightTrig2012ASingleEle = triggerWeight.singleEle2012Awp80(vLeptons.pt[0],vLeptons.eta[0]);
-          weightTrig2012A =  weightTrig2012ASingleEle; // FIXME: should use 2012 SF for ele reco and ID
+          weightTrig2012A =  weightTrig2012ASingleEle * triggerWeight.eleId2012Awp80(vLeptons.pt[0],vLeptons.eta[0]) ;
 
 
 	}
