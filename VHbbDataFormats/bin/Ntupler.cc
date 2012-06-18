@@ -1995,15 +1995,16 @@ double MyWeight = LumiWeights_.weight( Tnpv );
         weightTrigMET150 = triggerWeight.scaleMET150(MET.et);
         weightTrigMET802CJet= weightTrigMET80 * weightTrig2CJet20;
         weightTrigMET1002CJet= weightTrigMET100 * weightTrig2CJet20;
+         weightTrig2012DiJet30MHT80=triggerWeight.scaleDiJet30MHT80_2012A(vhCand.V.mets.at(0).p4.Pt());
+          weightTrig2012PFMET150=triggerWeight.scalePFMET150_2012AB(vhCand.V.mets.at(0).p4.Pt());
+          weightTrig2012SumpT100MET100=triggerWeight.scaleSumpT100MET100_2012B(vhCand.V.mets.at(0).p4.Pt());
 }
 	if( Vtype == VHbbCandidate::Znn ){
 	  nvlep=0;
 	  float weightTrig1 = triggerWeight.scaleMetHLT(vhCand.V.mets.at(0).p4.Pt());
           weightTrigMETLP = weightTrig1;
           weightTrig = weightTrigMET150 + weightTrigMET802CJet  - weightTrigMET802CJet*weightTrigMET150;
-          weightTrig2012DiJet30MHT80=triggerWeight.scaleDiJet30MHT80_2012A(vhCand.V.mets.at(0).p4.Pt());
-          weightTrig2012PFMET150=triggerWeight.scalePFMET150_2012AB(vhCand.V.mets.at(0).p4.Pt());
-          weightTrig2012SumpT100MET100=triggerWeight.scaleSumpT100MET100_2012B(vhCand.V.mets.at(0).p4.Pt());
+     
 //          weightTrig2012A = 
 	}
       
