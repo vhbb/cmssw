@@ -169,19 +169,19 @@ class BTagShapeInterface
 
       binsBC.push_back(EtaPtBin(-2.5,2.5,-9e99,beff::ptmin[0]));
       float sft = beff::CSVT_SFb(beff::ptmin[0]);
-      sft+=scaleBC * 0.12*2;// add error
+      sft+=scaleBC * 0.12;// add error
       cutsAndSFbinB.push_back(std::pair<float, float>(0.898, sft));
       sft+=scaleBC * 0.12*charmFactor; // charm additional error
       cutsAndSFbinC.push_back(std::pair<float, float>(0.898, sft));
    
       float sfm = beff::CSVM_SFb(beff::ptmin[0]);
-      sfm+=scaleBC * 0.12*2; // add error
+      sfm+=scaleBC * 0.12; // add error
       cutsAndSFbinB.push_back(std::pair<float, float>(0.679,sfm));
       sfm+=scaleBC * 0.12*charmFactor; // charm additional error
       cutsAndSFbinC.push_back(std::pair<float, float>(0.679,sfm));
       
       float sfl = beff::CSVL_SFb(beff::ptmin[0]);
-      sfl+=scaleBC * 0.12*2; // add error
+      sfl+=scaleBC * 0.12; // add error
       cutsAndSFbinB.push_back(std::pair<float, float>(0.244,sfl));
       sfl+=scaleBC * 0.12*charmFactor; // charm additional error
       cutsAndSFbinC.push_back(std::pair<float, float>(0.244,sfl));
