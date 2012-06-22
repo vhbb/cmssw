@@ -115,7 +115,7 @@ public:
       {
          if(m_bins[i].contains(fabs(eta),pt)) return m_shapes[i].eval(x);
       }
-    std::cout << "Cannot reshape eta pt discr "  << eta << " " << pt << " " << x << std::endl; 
+      //    std::cout << "Cannot reshape eta pt discr "  << eta << " " << pt << " " << x << std::endl; 
     return x;
   }
 
