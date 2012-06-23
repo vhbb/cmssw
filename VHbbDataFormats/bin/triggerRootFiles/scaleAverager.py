@@ -1,8 +1,11 @@
 from ROOT import *
 from array import array
 
-lumiA = 0.709
-lumiB = 2.844
+#lumiA = 0.709
+#lumiB = 2.844
+lumiA = 0.7
+lumiB = 2.8
+lumiT = 1.5
 verboseOutput = True
 
 def makeAvg(inputFiles,inputWeights,outputFile,verbose=False):
@@ -69,10 +72,20 @@ def makeAvg(inputFiles,inputWeights,outputFile,verbose=False):
 # do everything in directory
 from os import listdir
 
+#for fileA in listdir("."):
+#  if (fileA.count("TrigEff") or fileA.count("MuRecoId") or fileA.count("EleRecoId")) and fileA.count("2012A.root") and not fileA.count("2012AB"):
+#    fileB = fileA.replace("2012A","2012B")
+#    if not listdir(".").count(fileB):
+#      raise Exception,"%s exists but %s does not" % (fileA,fileB)
+#    makeAvg([fileA,fileB],[lumiA,lumiB],fileA.replace("2012A","2012AB"),verboseOutput)
+
 for fileA in listdir("."):
   if (fileA.count("TrigEff") or fileA.count("MuRecoId") or fileA.count("EleRecoId")) and fileA.count("2012A.root") and not fileA.count("2012AB"):
     fileB = fileA.replace("2012A","2012B")
+    fileT = fileA.replace("2012A","2012T")
     if not listdir(".").count(fileB):
       raise Exception,"%s exists but %s does not" % (fileA,fileB)
-    makeAvg([fileA,fileB],[lumiA,lumiB],fileA.replace("2012A","2012AB"),verboseOutput)
-    
+    if not listdir(".").count(fileT):
+      raise Exception,"%s exists but %s does not" % (fileA,fileT)
+    makeAvg([fileA,fileB,fileT],[lumiA,lumiB,lumiT],fileA.replace("2012A","2012AB"),verboseOutput)
+
