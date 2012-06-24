@@ -62,7 +62,7 @@ if __name__ == '__main__':
         
     if True:
         names = [f for f in options.datasetName.split('/') if f]
-        name = '%s-%s.root' % (names[0],names[-1])
+        name = '%s-%s-%s.root' % (names[0],names[1],names[-1])
         options.outputFile = os.path.join(options.outputDirectory,name)
         
     files = getFiles(
@@ -104,6 +104,8 @@ struct Variables{\
     Double_t hemi2Mass;\
     Double_t hemi1MassMB;\
     Double_t hemi2MassMB;\
+    Double_t mStop;\
+    Double_t mLSP;\
 };""")
     
     rt.gROOT.ProcessLine("""
@@ -140,6 +142,8 @@ struct Filters{\
     Bool_t quadTriggerFilter;\
     Bool_t sixTriggerFilter;\
     Bool_t eightTriggerFilter;\
+    Bool_t l1MultiJetFilter;\
+    Bool_t selectionFilter;\
     Bool_t ecalDeadCellTPfilter;\
     Bool_t HBHENoiseFilterResultProducer2010;\
     Bool_t HBHENoiseFilterResultProducer2011IsoDefault;\
@@ -178,6 +182,7 @@ struct Filters{\
     jetSel30H = Handle("std::vector<cmg::PFJet>")
     hemiHadH = Handle("std::vector<cmg::DiObject<cmg::Hemisphere, cmg::Hemisphere> >")
     metH = Handle("std::vector<cmg::BaseMET>")
+    lheH = Handle('LHEEventProduct')
 
     electronH = Handle("std::vector<cmg::Electron>")
     muonH = Handle("std::vector<cmg::Muon>")
@@ -197,19 +202,6 @@ struct Filters{\
 
     # loop over events
     for event in events:
-        
-        event.getByLabel(('TriggerResults','','MJSkim'),pathTriggerH)
-        pathTrigger = pathTriggerH.product()
-
-        #start by vetoing events that didn't pass the MultiJet path
-        pathTriggerNames = event.object().triggerNames(pathTrigger)
-        path = pathTrigger.wasrun(pathTriggerNames.triggerIndex('razorMJPath')) and \
-               pathTrigger.accept(pathTriggerNames.triggerIndex('razorMJPath'))
-        if not path: continue
-
-        event.getByLabel(('razorMJPFJetSel30'),jetSel30H)
-        jets = jetSel30H.product()
-        info.nJet = len(jets)
 
         info.event = event.object().id().event()
         info.lumi = event.object().id().luminosityBlock()
@@ -218,11 +210,37 @@ struct Filters{\
         if (count % 1000) == 0:
             print count,'run/lumi/event',info.run,info.lumi,info.event
             tree.AutoSave()
+        count += 1    
 
-        for f in filter_tags:
-            event.getByLabel(f,filterH)
-            result = filterH.product()[0]
-            setattr(filters,f,result)
+        event.getByLabel(('TriggerResults','','MJSkim'),pathTriggerH)
+        pathTrigger = pathTriggerH.product()
+
+        #start by vetoing events that didn't pass the MultiJet path
+        pathTriggerNames = event.object().triggerNames(pathTrigger)
+        path = pathTrigger.wasrun(pathTriggerNames.triggerIndex('razorMJPath')) and \
+               pathTrigger.accept(pathTriggerNames.triggerIndex('razorMJPath'))
+        filters.selectionFilter = path
+        if not path: continue
+
+        event.getByLabel(('razorMJPFJetSel30'),jetSel30H)
+        if not jetSel30H.isValid(): continue
+        jets = jetSel30H.product()
+        info.nJet = len(jets)
+
+        event.getByLabel(('cmgTriggerObjectSel'),triggerH)
+        hlt = triggerH.product()[0]
+
+        filters.quadTriggerFilter = hlt.getSelectionRegExp("^HLT_QuadJet[0-9]+.*_v[0-9]+$")
+        filters.sixTriggerFilter = hlt.getSelectionRegExp("^HLT_SixJet[0-9]+.*_v[0-9]+$")
+        filters.eightTriggerFilter = hlt.getSelectionRegExp("^HLT_EightJet[0-9]+.*_v[0-9]+$")
+        filters.l1MultiJetFilter = hlt.getSelectionRegExp("^HLT_L1MultiJet_v[0-9]+$")
+        filters.triggerFilter = filters.quadTriggerFilter or filters.sixTriggerFilter or filters.eightTriggerFilter
+        #if not filters.l1MultiJetFilter: continue
+            
+        #for f in filter_tags:
+        #    event.getByLabel(f,filterH)
+        #    result = filterH.product()[0]
+        #    setattr(filters,f,result)
 
         for i in xrange(len(jets)):
             name = 'jet%iPt' % (i + 1)
@@ -246,13 +264,6 @@ struct Filters{\
         met = metH.product()[0]
         vars.met = met.et()
 
-        event.getByLabel(('cmgTriggerObjectSel'),triggerH)
-        hlt = triggerH.product()[0]
-
-        filters.quadTriggerFilter = hlt.getSelectionRegExp("^HLT_QuadJet[0-9]+.*_v[0-9]+$")
-        filters.sixTriggerFilter = hlt.getSelectionRegExp("^HLT_SixJet[0-9]+.*_v[0-9]+$")
-        filters.eightTriggerFilter = hlt.getSelectionRegExp("^HLT_EightJet[0-9]+.*_v[0-9]+$")
-        filters.triggerFilter = filters.quadTriggerFilter or filters.sixTriggerFilter or filters.eightTriggerFilter
         
         event.getByLabel(('razorMJDiHemiHadBoxTop'),hemiHadH)
         if not len(hemiHadH.product()): continue
@@ -300,8 +311,18 @@ struct Filters{\
         info.nTauTight = len(tau_sel_tight)
         info.nVertex = countH.product()[0]
 
+        #get the LHE product info
+        event.getByLabel(('source'),lheH)
+        lhe = lheH.product()
+        for i in xrange(lhe.comments_size()):
+            comment = lhe.getComment(i)
+            if 'model' not in comment: continue
+            comment = comment.replace('\n','')
+            parameters = comment.split(' ')[-1]
+            masses = map(float,parameters.split('_')[-2:])
+            vars.mStop = masses[0]
+            vars.mLSP = masses[1]
         tree.Fill()
-        count += 1
 
 #    tree.SetDirectory(output)
 #    tree.Write()

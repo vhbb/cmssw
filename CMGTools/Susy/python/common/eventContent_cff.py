@@ -15,7 +15,9 @@ jetId = [
     ]
 
 gen = [
-    'keep LHEEventProduct_*_*_*'   
+    'keep LHEEventProduct_*_*_*',
+    'keep *_dumpPdfWeights_*_*',
+    'keep *_simpleGenInfo_*_*'
     ]
 
 reco = [
@@ -26,7 +28,8 @@ reco = [
 pat = [
     'drop recoPFCandidates_greedyMuonsTagging_*_*',
     'drop recoPFCandidates_inconsistentMuonsTagging_*_*',
-    'drop patElectrons_selectedPatElectronsAK5LC_*_*'
+    'drop *_*AK5LC*_*_*',
+    'drop *_*AK7*_*_*'
 ]
 
 cmg = [
