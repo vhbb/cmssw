@@ -271,20 +271,20 @@ float scaleMuOr30IsoHLT(float pt1, float eta1)
 
 double scaleDiJet30MHT80_2012A(double x)
 {
- if(x<110) return 0;
- return   (1e0 - exp(-0.0161*(x)));
+  if(x<110) return 0;
+  return   (1e0 - exp(-0.0225*(x-36.2)));
 }
 //For 2012B HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned, valid for pfMET > 120 GeV:
 double scaleSumpT100MET100_2012B(double x)
 {
- if(x<120) return 0;
- return  (1e0 - exp(-0.0130*(x)));
+  if(x<110) return 0;
+  return  (1e0 - exp(-0.0144*(x)));
 }
 //For 2012A+B HLT_PFMET150, valid for pfMET > 150 GeV:
 double scalePFMET150_2012AB(double x)
 {
- if(x<150) return 0;
- return  (1e0 - exp(-0.0671*(x-142.7)));
+  if(x<150) return 0;
+  return  (1e0 - exp(-0.0679*(x-143.4)));
 }
 
 float doubleEle2012A( float pt1, float eta1, float pt2, float eta2)
