@@ -73,10 +73,18 @@ namespace cmg {
     /// - level = loose, medium, tight
     /// - name = "full", "simple" or "cut-based".
     /// see  PileupJetIdentifier for more information
-    bool passPuJetId(const std::string & name, PileupJetIdentifier::Id level) const { return PileupJetIdentifier::passJetId(puId(name),level); } 
-    bool passPuJetId(const char* name, PileupJetIdentifier::Id level) const { 
-      return PileupJetIdentifier::passJetId(puId(std::string(name)),level); 
+    bool passPuJetId(const std::string & name, PileupJetIdentifier::Id level) const { 
+      return PileupJetIdentifier::passJetId(puId(name),level); 
     } 
+/*     bool passPuJetId(const std::string & name, int level) const {  */
+/*       return PileupJetIdentifier::passJetId(puId(name),static_cast<PileupJetIdentifier::Id>(level));  */
+/*     }  */
+    bool passPuJetId(const char* name, PileupJetIdentifier::Id level) const {
+      return PileupJetIdentifier::passJetId(puId(std::string(name)),level);
+    }
+    bool passLooseFullPuJetId() const {
+      return PileupJetIdentifier::passJetId( puId("full"), PileupJetIdentifier::kLoose ); 
+    }
 
     friend class PFJetFactory;
     
