@@ -34,6 +34,7 @@ class Muon;
 	   pixelHits_(UnSet(int)),
 	   trackerHits_(UnSet(int)),
 	   globalNormChi2_(UnSet(double)),
+	   dBS2D_(UnSet(double)),
 	   muonHits_(UnSet(int)),
 	   nMatches_(UnSet(int)){
       }
@@ -59,6 +60,9 @@ class Muon;
      Double_t normalizedChi2() const{
        return globalNormChi2_;
      }
+     Double_t dBS2D() const{
+       return dBS2D_;
+     }
      Int_t numberOfValidMuonHits() const{
        return muonHits_;
      }
@@ -82,6 +86,7 @@ class Muon;
      Int_t trackerHits_;
      //Dxy...
      Double_t globalNormChi2_;
+     Double_t dBS2D_;
      Int_t muonHits_;
      Int_t nMatches_;
      //eta...

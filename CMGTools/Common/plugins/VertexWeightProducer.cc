@@ -35,11 +35,11 @@ VertexWeightProducer::VertexWeightProducer(const edm::ParameterSet& ps):
   verbose_(ps.getUntrackedParameter<bool>("verbose",false)) {
 
 
-  TFile fileData( ps.getParameter<std::string>("inputHistData").c_str() );  
+  TFile fileData( ps.getParameter<edm::FileInPath>("inputHistData").fullPath().c_str() );  
   if(fileData.IsZombie())
     throw cms::Exception("VertexWeightProducer")<<" bad input Data file "<<fileData.GetName();
 
-  TFile fileMC( ps.getParameter<std::string>("inputHistMC").c_str() );
+  TFile fileMC( ps.getParameter<edm::FileInPath>("inputHistMC").fullPath().c_str() );
   if(fileMC.IsZombie())
     throw cms::Exception("VertexWeightProducer")<<" bad input MC file "<<fileMC.GetName();
  

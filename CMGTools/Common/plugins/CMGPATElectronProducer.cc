@@ -5,6 +5,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/Exception.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "FWCore/ParameterSet/interface/FileInPath.h"
 
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterLazyTools.h"
@@ -32,12 +33,12 @@ private:
   edm::InputTag redEERecHitsIT_; 
   
   //weight files
-  std::string  d0LowPt_;
-  std::string  d1LowPt_;
-  std::string  d2LowPt_;
-  std::string  d0HighPt_;
-  std::string  d1HighPt_;
-  std::string  d2HighPt_;
+  edm::FileInPath  d0LowPt_;
+  edm::FileInPath  d1LowPt_;
+  edm::FileInPath  d2LowPt_;
+  edm::FileInPath  d0HighPt_;
+  edm::FileInPath  d1HighPt_;
+  edm::FileInPath  d2HighPt_;
 
   bool verbose_;
 
@@ -49,12 +50,12 @@ CMGPATElectronProducer::CMGPATElectronProducer(const edm::ParameterSet & iConfig
   srcIT_( iConfig.getParameter<edm::InputTag>("src") ),
   redEBRecHitsIT_( iConfig.getParameter<edm::InputTag>("redEBRecHits") ),
   redEERecHitsIT_( iConfig.getParameter<edm::InputTag>("redEERecHits") ),
-  d0LowPt_( iConfig.getParameter<std::string>("d0LowPt") ),
-  d1LowPt_( iConfig.getParameter<std::string>("d1LowPt") ),
-  d2LowPt_( iConfig.getParameter<std::string>("d2LowPt") ),
-  d0HighPt_( iConfig.getParameter<std::string>("d0HighPt") ),
-  d1HighPt_( iConfig.getParameter<std::string>("d1HighPt") ),
-  d2HighPt_( iConfig.getParameter<std::string>("d2HighPt") ),
+  d0LowPt_( iConfig.getParameter<edm::FileInPath>("d0LowPt") ),
+  d1LowPt_( iConfig.getParameter<edm::FileInPath>("d1LowPt") ),
+  d2LowPt_( iConfig.getParameter<edm::FileInPath>("d2LowPt") ),
+  d0HighPt_( iConfig.getParameter<edm::FileInPath>("d0HighPt") ),
+  d1HighPt_( iConfig.getParameter<edm::FileInPath>("d1HighPt") ),
+  d2HighPt_( iConfig.getParameter<edm::FileInPath>("d2HighPt") ),
   
   verbose_( iConfig.getUntrackedParameter<bool>("verbose", false ) )
 

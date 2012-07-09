@@ -19,7 +19,7 @@ cmgObjectSequence = cms.Sequence(
     metSequence +
     muonSequence +
     electronSequence +
-    tauSequence + 
+    #tauSequence + 
     triggerSequence
     )
 
@@ -28,11 +28,11 @@ analysisSequence = cms.Sequence(
     # build the CMG objects and select them
     cmgObjectSequence +
     # build miscellaneous objects not inheriting from cmg::PhysicsObject
-    miscSequence + 
+    miscSequence 
     # skimming (counting the selected CMG objects)
-    skimSequence +
+    #skimSequence +
     # summary of cuts for all objects, after skimming
-    cutSummarySequence +
+    #cutSummarySequence
     # histograms for all objects, after skimming
-    histogramSequence 
+    #histogramSequence 
     )

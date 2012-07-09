@@ -12,7 +12,7 @@ collectionSizeSequence = cms.Sequence(
     vertexSize +
     muonSelSize +
     electronSelSize +
-    tauSelSize +
+    #tauSelSize +
     pfJetSelSize
     )
 

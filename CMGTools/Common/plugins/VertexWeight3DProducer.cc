@@ -32,11 +32,11 @@ VertexWeight3DProducer::VertexWeight3DProducer(const edm::ParameterSet& ps):
   verbose_(ps.getUntrackedParameter<bool>("verbose",false)) {
 
 
-  TFile fileData( ps.getParameter<std::string>("inputHistData").c_str() );  
+  TFile fileData( ps.getParameter<edm::FileInPath>("inputHistData").fullPath().c_str() );  
   if(fileData.IsZombie())
     throw cms::Exception("VertexWeight3DProducer")<<" bad input Data file "<<fileData.GetName();
 
-  TFile fileMC( ps.getParameter<std::string>("inputHistMC").c_str() );
+  TFile fileMC( ps.getParameter<edm::FileInPath>("inputHistMC").fullPath().c_str() );
   if(fileMC.IsZombie())
     throw cms::Exception("VertexWeight3DProducer")<<" bad input MC file "<<fileMC.GetName();
  
@@ -49,8 +49,8 @@ VertexWeight3DProducer::VertexWeight3DProducer(const edm::ParameterSet& ps):
     throw cms::Exception("VertexWeight3DProducer")<<"MC histogram doesn't exist in file "<<fileMC.GetName();
 
 
-  LumiWeights_ = new edm::Lumi3DReWeighting(ps.getParameter<std::string>("inputHistMC").c_str()
-					    ,ps.getParameter<std::string>("inputHistData").c_str()
+  LumiWeights_ = new edm::Lumi3DReWeighting(ps.getParameter<edm::FileInPath>("inputHistMC").fullPath().c_str()
+					    ,ps.getParameter<edm::FileInPath>("inputHistData").fullPath().c_str()
 					    , "pileup"
 					    , "pileup"
 					    , "");

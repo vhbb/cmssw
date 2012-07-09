@@ -29,6 +29,7 @@ void cmg::MuonFactory::set(const pat::MuonPtr& input, cmg::Muon* const output, c
     output->isTracker_ = cmg::toTriBool(input->isTrackerMuon());
     output->muonID_ = cmg::toTriBool(input->muonID(muonIDType_));
     output->nMatches_ = input->numberOfMatches();
+    output->dBS2D_ = input->dB(pat::Muon::BS2D);
 
     reco::TrackRef combinedMuon = getTrack(input);
     if(combinedMuon.isNonnull() && combinedMuon.isAvailable()){
