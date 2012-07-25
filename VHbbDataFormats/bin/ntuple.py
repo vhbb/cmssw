@@ -34,21 +34,25 @@ process.fwliteInput = cms.PSet(
     )
 
 # get JSON file 
-JSONfile = 'Cert_190456-194479_8TeV_PromptReco_Collisions12_JSON.txt'
+JSONfile = 'Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt'
 lumiList = LumiList.LumiList (filename = JSONfile).getCMSSWString().split(',')
 
 #Uncomment to run with JSON
 process.fwliteInput.lumisToProcess.extend(lumiList)
 
 
-channel =  "SM2012BLOCALTEST"
+channel =  "MET2012BLOCALTEST240712"
 import os
 #dirnameOld = "//pnfs/pi.infn.it/data/cms/store/user/bortigno/DoubleMu/HBB_EDMNtupleV3_ProcV1_may/07fb60889166b64f474d8d0aa162db69/"
 #dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/METRun2011APromptV1EdmV31"
-#dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/METRun2011APromptV1EdmV31/degrutto/MET/HBB_EDMNtupleV31_May2012Prod/f3f16f0a8d4ba1fd82b25c3d99de1c78/"
+##dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/METRun2011APromptV1EdmV31/degrutto/MET/HBB_EDMNtupleV31_May2012Prod/f3f16f0a8d4ba1fd82b25c3d99de1c78/"
 #dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/METRun2011BPromptV1EdmV31/degrutto/MET/HBB_EDMNtupleV31_May2012Prod/f3f16f0a8d4ba1fd82b25c3d99de1c78/"
 #dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/SingleMuRun2012APromptV1EdmV31/degrutto/SingleMu/HBB_EDMNtupleV31_May2012Prod/f3f16f0a8d4ba1fd82b25c3d99de1c78/"
-dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/SingleMuRun2012BPromptV1EdmV31/degrutto/SingleMu/HBB_EDMNtupleV31_May2012Prod/f3f16f0a8d4ba1fd82b25c3d99de1c78/"
+#dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/dlopes/SingleMuRun2012APromptV1EdmV33/dlopes/SingleMu/HBB_EDMNtupleV33/fc9898cbaf0c3f28aabf20b09408f841/"
+#dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/dlopes/SingleMuRun2012BPromptV1EdmV33/dlopes/SingleMu/HBB_EDMNtupleV33/fc9898cbaf0c3f28aabf20b09408f841/"
+##dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/METRun2012APromptJul12/"
+dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/METRun2012BPromptJul12/"
+
 
 
 #for i in range(len(channels)):
@@ -116,18 +120,21 @@ process.Analyzer = cms.PSet(
         "HLT_LooseIsoPFTau35_Trk20_v.*", #36
         "HLT_LooseIsoPFTau35_Trk20_MET70_v.*", #37
         "HLT_LooseIsoPFTau35_Trk20_MET75_v.*", #38
-        "HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned_v*", #39
-        "HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80*", #40
-        "HLT_DiCentralPFJet30_PFMET80_BTagCSV07*", #41
-        "HLT_PFMET150_v*", #42
-        "HLT_L1ETM40_v*", #43
+        "HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned_v.*", #39
+        "HLT_DiCentralJet20_CaloMET65_BTagCSV07_PFMHT80_v.*", #40
+        "HLT_DiCentralPFJet30_PFMET80_BTagCSV07_v.*", #41
+        "HLT_PFMET150_v.*", #42
+        "HLT_L1ETM40_v.*", #43
         "HLT_Ele27_WP80_v.*", #44
         "HLT_Ele27_WP80_WCandPt80_v.*", #45
         "HLT_IsoMu20_eta2p1_WCandPt80_v.*", #46
         "HLT_IsoMu20_WCandPt80_v.*", #47
         "HLT_Mu17_TkMu8_v.*", #48
-        "HLT_DiCentralPFJet30_PFMET80_v*", #49
+        "HLT_DiCentralPFJet30_PFMHT80_v.*", #49 ## run2012A
+        "HLT_DiCentralPFJet30_PFMET80_v.*", #50 ## run2012B prescaled
+
         
+
    ),
     isMC =     cms.bool(False),
     verbose = cms.bool(False),
@@ -164,9 +171,9 @@ process.Analyzer = cms.PSet(
     hltMuPlusWCandPt2012A_legW = cms.string("triggerRootFiles/WCandPt.TrigEff.2012AB.root"),
     hltDoubleMuon2012A_dZ = cms.string("triggerRootFiles/DoubleMuDz.TrigEff.2012AB.root"),
     hltDoubleEle2012A_dZ = cms.string("triggerRootFiles/DoubleEleDz.TrigEff.2012AB.root"),
-    idMu2012A = cms.string(baseAddFiles+"triggerRootFiles/triggerRootFiles/MuRecoId.ScaleFactor.2012AB.root"),
-    idEle2012A = cms.string(baseAddFiles+"triggerRootFiles/triggerRootFiles/EleRecoId.ScaleFactor.wp95.2012AB.root"),
-    idEle2012Awp80 = cms.string(baseAddFiles+"triggerRootFiles/triggerRootFiles/EleRecoId.ScaleFactor.wp80.2012AB.root"),
+    idMu2012A = cms.string("triggerRootFiles/MuRecoId.ScaleFactor.2012AB.root"),
+    idEle2012A = cms.string("triggerRootFiles/EleRecoId.ScaleFactor.wp95.2012AB.root"),
+    idEle2012Awp80 = cms.string("triggerRootFiles/EleRecoId.ScaleFactor.wp80.2012AB.root"),
 
     jecFolder = cms.string("jec"),
     csvDiscr = cms.string("csvdiscr.root"),
