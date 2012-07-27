@@ -15,7 +15,7 @@ class VHbbCandidate {
    //Wen = 3
    //Znn = 4
 
-  enum CandidateType{Zmumu, Zee, Wmun, Wen, Znn, UNKNOWN};
+  enum CandidateType{Zmumu, Zee, Wmun, Wen, Znn, Zemu, UNKNOWN};
 
     VHbbCandidate(){candidateType=UNKNOWN;}
 
@@ -37,8 +37,46 @@ class VHbbCandidate {
        float et=ptl+met;
        return sqrt(et*et - p4.Pt()*p4.Pt()  );
       }
+		if(candidateType==Zemu)
+			{
+				float ptl=muons[0].p4.Pt();
+				float met=mets[0].p4.Pt();
+				float et=ptl+met;
+				return sqrt(et*et - p4.Pt()*p4.Pt()  );
+			}
+		
     return 0;
    }
+   	  double Mte(CandidateType candidateType) const {
+		  if(candidateType==Zemu)
+			  {
+				  TVector3 Vecte = electrons[0].p4.Vect();
+				  TVector3 VectMET = mets[0].p4.Vect();
+				  float dotprod = Vecte.Dot(VectMET);
+				  float cosphi = dotprod/(Vecte.Mag()*VectMET.Mag());
+				  float ptl=electrons[0].p4.Pt();
+				  float met=mets[0].p4.Pt();
+				  float et=2*ptl*met;
+				  return sqrt(et*(1 - cosphi));
+			  }
+		  return 0;
+	  }
+	  double Mtmu(CandidateType candidateType) const {
+		  if(candidateType==Zemu)
+			  {
+				  TVector3 Vectmu = muons[0].p4.Vect();
+				  TVector3 VectMET = mets[0].p4.Vect();
+				  float dotprod = Vectmu.Dot(VectMET);
+				  float cosphi = dotprod/(Vectmu.Mag()*VectMET.Mag());				  
+				  float ptl=muons[0].p4.Pt();
+				  float met=mets[0].p4.Pt();
+				  float et=2*ptl*met;
+				  return sqrt(et*(1 - cosphi));
+			  }
+		  return 0;
+	  }
+
+	  
     TLorentzVector p4;
     std::vector<VHbbEvent::MuonInfo> muons;
     std::vector<VHbbEvent::ElectronInfo> electrons;
@@ -83,11 +121,18 @@ class VHbbCandidate {
   double Mt() const {
    return V.Mt(candidateType);
   }
+  double Mte() const {
+   return V.Mte(candidateType);
+  }
+  double Mtmu() const {
+   return V.Mtmu(candidateType);
+  }
+
   
  int additionalLeptons() const {
    int expectedLeptons = 0;
    if(  candidateType == Wmun ||  candidateType == Wen) expectedLeptons =1;
-   if(  candidateType == Zmumu ||  candidateType == Zee) expectedLeptons =2;
+   if(  candidateType == Zmumu ||  candidateType == Zee || candidateType == Zemu) expectedLeptons =2;
 
    return ( V.muons.size() + V.electrons.size() - expectedLeptons);
 

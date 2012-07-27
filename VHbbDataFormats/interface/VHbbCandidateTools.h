@@ -39,11 +39,25 @@ class VHbbCandidateTools {
     ok = false;
     VHbbCandidate temp=in;
     // Require exactly one tau and muon, and no electrons
+	  std::vector<VHbbEvent::MuonInfo> Nmuons_ = temp.V.muons;
+	  std::vector<VHbbEvent::ElectronInfo> Nelectrons_ = temp.V.electrons;
+int Nmuons = 0;
+int Nelectrons = 0;
+int postition = 0;
+	  for(unsigned int i = 0; i<temp.V.muons.size();i++){
+		  if (Nmuons_[i].p4.Pt()>20) {
+		  Nmuons++;
+	postition = i;
+		  }	  }
+	  for(unsigned int j = 0; j<temp.V.electrons.size();j++){
+		  if (Nelectrons_[j].p4.Pt()>20) Nelectrons++;
+	  }
+	  
     if (temp.V.taus.size()!=1) return in;
-    if (temp.V.muons.size()!=1) return in ;
-    if (temp.V.electrons.size()!=0) return in ;
-    temp.V.p4 = temp.V.taus[0].p4 + temp.V.muons[0].p4;
-    temp.V.firstLepton = muPos[0];
+    if (Nmuons!=1) return in ;
+    if (Nelectrons!=0) return in ;
+    temp.V.p4 = temp.V.taus[0].p4 + temp.V.muons[postition].p4;
+    temp.V.firstLepton = muPos[postition];
     temp.V.secondLepton = tauPos[0];
     
     ok = true;
@@ -60,9 +74,23 @@ class VHbbCandidateTools {
     ok = false;
     VHbbCandidate temp=in;
     // require a tau and no electrons or muons
+	  std::vector<VHbbEvent::MuonInfo> Nmuons_ = temp.V.muons;
+	  std::vector<VHbbEvent::ElectronInfo> Nelectrons_ = temp.V.electrons;
+	  int Nmuons = 0;
+	  int Nelectrons = 0;
+	  int postition = 0;
+	  for(unsigned int i = 0; i<temp.V.muons.size();i++){
+		  if (Nmuons_[i].p4.Pt()>20) {
+			  Nmuons++;
+			  postition = i;
+		  }	  }
+	  for(unsigned int j = 0; j<temp.V.electrons.size();j++){
+		  if (Nelectrons_[j].p4.Pt()>20) Nelectrons++;
+	  }
+	  
     if (temp.V.taus.size()!=1) return in;
-    if (temp.V.muons.size()!=0) return in ;
-    if (temp.V.electrons.size()!=0) return in ;
+    if (Nmuons!=0) return in ;
+    if (Nelectrons!=0) return in ;
     if (temp.V.mets.size()<1) return in ;
     temp.V.p4 = temp.V.taus[0].p4+temp.V.mets[0].p4;
     temp.V.firstLepton=pos[0];
@@ -75,6 +103,113 @@ class VHbbCandidateTools {
     return temp;
   }
  
+ 	VHbbCandidate getHZemuCandidate(const VHbbCandidate & in, bool & ok, std::vector<unsigned int>& pos){
+		if (verbose_){
+			std::cout <<" getHZemuCandidate input mu "<<in.V.muons.size()<<" e "<<in.V.electrons.size()<<std::endl;
+		}
+		ok = false;
+		VHbbCandidate temp=in;
+		
+		//
+		// change: allow for additional leptons; by definition 
+		//
+		if (temp.V.muons.size()<1) return in ;
+		if (temp.V.electrons.size()<1) return in ;
+		if (temp.V.mets.size()<1) return in;
+		
+		//    if (temp.V.electrons.size()!=0) return in ;
+		std::vector<VHbbEvent::MuonInfo> muons_ = temp.V.muons;
+		std::vector<VHbbEvent::ElectronInfo> electrons_ = temp.V.electrons;
+		
+		//orthogonality with Zmumu and Zee
+		if (temp.V.muons.size()>1){
+			if (muons_[0].p4.Pt()>20 && muons_[1].p4.Pt()>20 && (muons_[0].charge*muons_[1].charge)< 0)return in;
+		}
+		if (temp.V.electrons.size()>1){
+			if (electrons_[0].p4.Pt()>20 && electrons_[1].p4.Pt()>20&&(electrons_[0].charge*electrons_[1].charge)< 0)return in;
+		}
+		
+		
+		// beware: assumes already sorted!!!!
+		
+		//    CompareJetPtMuons ptComparator;
+		//    std::sort(muons_.begin(), muons_.end(), ptComparator);
+		if (muons_[0].p4.Pt()<10 || electrons_[0].p4.Pt()<10 ) return in;
+		
+		//
+		// now I need to ask also for the charge
+		//
+		int tauEle=-99, tauMu =-99;
+		float Tau_pT = -99.99;
+		int tmpEle =0, tmpMu =0;
+		int N_pairs = 0;
+		//
+		// i need to find a proper pair
+		//
+		
+		for (unsigned int ele_it=0; ele_it< electrons_.size(); ++ele_it){
+			for (unsigned int mu_it=0; mu_it< muons_.size(); ++mu_it){
+				if (muons_[mu_it].p4.Pt()>10 && electrons_[ele_it].p4.Pt()>10 ){
+					if (  electrons_[ele_it].charge * muons_[mu_it].charge < 0) {
+						tmpEle = ele_it;
+						tmpMu = mu_it;
+						if (N_pairs ==0){
+							tauEle = ele_it;
+							tauMu = mu_it;
+						}
+						N_pairs++;
+						temp.V.p4 = muons_[mu_it].p4+electrons_[ele_it].p4;
+						if (temp.V.p4.Pt() > Tau_pT) {
+							tauEle = ele_it;
+							tauMu = mu_it;
+							Tau_pT = temp.V.p4.Pt();
+						}
+					} // if opposite charge
+				}//leption pt requirement
+			}  // muon for loop
+		} //electron for loop
+		if (tauEle==-99) return in;
+		if (N_pairs>1) std::cout <<" Number emu pairs: "<<N_pairs<<std::endl;
+		
+		
+		temp.V.p4 = muons_[tauMu].p4+electrons_[tauEle].p4;
+		std::vector<VHbbEvent::MuonInfo> muons2_;
+		for (std::vector<VHbbEvent::MuonInfo>::const_iterator it = muons_.begin(); it!= muons_.end(); ++it){
+			if (it->p4.Pt()>10) muons2_.push_back(*it);
+		}
+		temp.V.muons = muons2_;
+		
+		// beware; assumes already sorted
+		
+		//    CompareJetPtElectrons ptComparator2;
+		//    std::sort(electrons_.begin(), electrons_.end(), ptComparator2);
+		std::vector<VHbbEvent::ElectronInfo> electrons2_;
+		for (std::vector<VHbbEvent::ElectronInfo>::const_iterator it = electrons_.begin(); it!= electrons_.end(); ++it){
+			if (it->p4.Pt()>10) electrons2_.push_back(*it);
+		}
+		temp.V.electrons = electrons2_;
+		
+		//
+		// consider all 
+		//
+		
+		
+		//    if (temp.V.Pt()<150 ) return in;
+		//    if (temp.H.Pt()<150) return in;
+		//    if (temp.H.firstJet().csv< 0.9) return in;
+		//    if (temp.H.secondJet().csv<0.5) return in;
+		//    if (deltaPhi(temp.V.Phi(),temp.H.Phi())<2.7) return in;
+		//    if (temp.V.FourMomentum.Mass()<75 || temp.V.FourMomentum.Mass()>105) return in; 
+		//    if (temp.additionalJets.size()>0) return in;
+		//    if (std::Abs(deltaTheta) ????
+		
+		temp.V.firstLepton = pos[tauEle];
+		temp.V.secondLepton = pos[tauMu];
+		ok = true;
+		
+		return temp;
+	}  
+	
 
   
   VHbbCandidate getHZmumuCandidate(const VHbbCandidate & in, bool & ok, std::vector<unsigned int>& pos){
@@ -87,7 +222,21 @@ class VHbbCandidateTools {
     //
     // change: allow for additional leptons; by definition 
     //
-    if (temp.V.muons.size()<2) return in ;
+	  std::vector<VHbbEvent::MuonInfo> Nmuons_ = temp.V.muons;
+	  std::vector<VHbbEvent::ElectronInfo> Nelectrons_ = temp.V.electrons;
+	  int Nmuons = 0;
+	  int Nelectrons = 0;
+	  int postition = 0;
+	  for(unsigned int i = 0; i<temp.V.muons.size();i++){
+		  if (Nmuons_[i].p4.Pt()>20) {
+			  Nmuons++;
+			  postition = i;
+		  }	  }
+	  for(unsigned int j = 0; j<temp.V.electrons.size();j++){
+		  if (Nelectrons_[j].p4.Pt()>20) Nelectrons++;
+	  }
+	  
+    if (Nmuons<2) return in ;
     //    if (temp.V.electrons.size()!=0) return in ;
     std::vector<VHbbEvent::MuonInfo> muons_ = temp.V.muons;
 
@@ -165,7 +314,21 @@ class VHbbCandidateTools {
     //
     // change: allow for additional leptons; by definition 
     //
-    if (temp.V.electrons.size()<2) return in ;
+	  std::vector<VHbbEvent::MuonInfo> Nmuons_ = temp.V.muons;
+	  std::vector<VHbbEvent::ElectronInfo> Nelectrons_ = temp.V.electrons;
+	  int Nmuons = 0;
+	  int Nelectrons = 0;
+	  int postition = 0;
+	  for(unsigned int i = 0; i<temp.V.muons.size();i++){
+		  if (Nmuons_[i].p4.Pt()>20) {
+			  Nmuons++;
+			  postition = i;
+		  }	  }
+	  for(unsigned int j = 0; j<temp.V.electrons.size();j++){
+		  if (Nelectrons_[j].p4.Pt()>20) Nelectrons++;
+	  }
+	  
+    if (Nelectrons<2) return in ;
     //    if (temp.V.electrons.size()!=0) return in ;
     std::vector<VHbbEvent::ElectronInfo> electrons_ = temp.V.electrons;
 
@@ -255,9 +418,25 @@ class VHbbCandidateTools {
     ok = false;
     VHbbCandidate temp=in;
     // require a muon and no electrons
-    if (temp.V.muons.size()!=1) return in ;
-    if (temp.V.electrons.size()!=0) return in ;
+	  std::vector<VHbbEvent::MuonInfo> Nmuons_ = temp.V.muons;
+	  std::vector<VHbbEvent::ElectronInfo> Nelectrons_ = temp.V.electrons;
+	  int Nmuons = 0;
+	  int Nelectrons = 0;
+	  int postition = 0;
+	  for(unsigned int i = 0; i<temp.V.muons.size();i++){
+		  if (Nmuons_[i].p4.Pt()>20) {
+			  Nmuons++;
+			  postition = i;
+		  }	  }
+	  for(unsigned int j = 0; j<temp.V.electrons.size();j++){
+		  if (Nelectrons_[j].p4.Pt()>20) Nelectrons++;
+	  }
+	  
+    if (Nmuons!=1) return in ;
+    if (Nelectrons!=0) return in ;
     if (temp.V.mets.size()<1) return in ;
+	std::vector<VHbbEvent::MuonInfo> muons_ = temp.V.muons;
+	if (muons_[postition].p4.Pt()<20) return in;
     //
     /*pT(W) > 150 GeV (pt(W) computed using lepton px,y and PF MET x and y components)
       pT(H) > 150 GeV
@@ -275,7 +454,7 @@ class VHbbCandidateTools {
       We don't cut on the transverse mass (for boosted objects cutting on the transverse mass introduces an inefficiency due to the angle between the MET and the lepton being close to 0.) 
     */
     
-    temp.V.p4 = temp.V.muons[0].p4+temp.V.mets[0].p4;
+    temp.V.p4 = temp.V.muons[postition].p4+temp.V.mets[0].p4;
     temp.V.firstLepton=pos[0];
 
     ok=true;
@@ -285,9 +464,27 @@ class VHbbCandidateTools {
   VHbbCandidate getHWenCandidate(const VHbbCandidate & in, bool & ok, std::vector<unsigned int>& pos){
     ok = false;
     VHbbCandidate temp=in;
-    if (temp.V.electrons.size()!=1) return in ;
-    if (temp.V.muons.size()!=0) return in ;
+	  std::vector<VHbbEvent::MuonInfo> Nmuons_ = temp.V.muons;
+	  std::vector<VHbbEvent::ElectronInfo> Nelectrons_ = temp.V.electrons;
+	  int Nmuons = 0;
+	  int Nelectrons = 0;
+	  int postition = 0;
+	  for(unsigned int i = 0; i<temp.V.muons.size();i++){
+		  if (Nmuons_[i].p4.Pt()>20) {
+			  Nmuons++;
+			 
+		  }	  }
+	  for(unsigned int j = 0; j<temp.V.electrons.size();j++){
+		  if (Nelectrons_[j].p4.Pt()>20) {
+		  Nelectrons++;
+		   postition = j;
+		  } }
+	  
+    if (Nelectrons!=1) return in ;
+    if (Nmuons!=0) return in ;
     if (temp.V.mets.size()<1) return in ;
+	std::vector<VHbbEvent::ElectronInfo> electrons_ = temp.V.electrons;
+	if (electrons_[postition].p4.Pt()<20) return in;
     //
     /*pT(W) > 150 GeV (pt(W) computed using lepton px,y and PF MET x and y components)
       pT(H) > 150 GeV

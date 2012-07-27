@@ -171,6 +171,12 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
     result.setCandidateType(VHbbCandidate::Zee);
     candidates.push_back(result);
   }
+  	//Zemu
+	result = selector. getHZemuCandidate(temp,ok,elePos);
+	if ( ok == true ){
+		result.setCandidateType(VHbbCandidate::Zemu);
+		candidates.push_back(result);
+	}	
   //HWmunu
   result = selector. getHWmunCandidate(temp,ok,muPos);
   if ( ok == true ){
@@ -565,7 +571,7 @@ For both W -> mu nu and Z -> mu mu, we adopt the standard VBTF muon selection de
 	//	(muons[it].hIso+muons[it].eIso+muons[it].tIso)/muons[it].p4.Pt()<.15 &&
 	(muons[it].pfChaIso+muons[it].pfPhoIso+muons[it].pfNeuIso)/muons[it].p4.Pt()<.15  &&
 	fabs(muons[it].p4.Eta())<2.4 &&
-	muons[it].p4.Pt()>20 ) {
+	muons[it].p4.Pt()>10 ) {
       out.push_back(muons[it]);
       positions.push_back(it);
   }
@@ -603,7 +609,7 @@ We adopt the standard cut-based selection from VBTF described in detail here.
 	fabs(electrons[it].p4.Eta()) < 2.5 &&
 //Remove this workaround as now we have the proper flags
 //	!( fabs(electrons[it].p4.Eta()) < 1.57 && fabs(electrons[it].p4.Eta()) > 1.44) &&
-	electrons[it].p4.Pt()>20 //  I use the minimum ok for both Z and W
+	electrons[it].p4.Pt()>10 //  I use the minimum ok for both Z and W
 	){
       out.push_back(electrons[it]);
       positions.push_back(it);
