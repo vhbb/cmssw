@@ -134,7 +134,7 @@ int postition = 0;
 		
 		//    CompareJetPtMuons ptComparator;
 		//    std::sort(muons_.begin(), muons_.end(), ptComparator);
-		if (muons_[0].p4.Pt()<10 || electrons_[0].p4.Pt()<10 ) return in;
+		if (muons_[0].p4.Pt()<8 || electrons_[0].p4.Pt()<8 ) return in;
 		
 		//
 		// now I need to ask also for the charge
@@ -149,7 +149,7 @@ int postition = 0;
 		
 		for (unsigned int ele_it=0; ele_it< electrons_.size(); ++ele_it){
 			for (unsigned int mu_it=0; mu_it< muons_.size(); ++mu_it){
-				if (muons_[mu_it].p4.Pt()>10 && electrons_[ele_it].p4.Pt()>10 ){
+				if (muons_[mu_it].p4.Pt()>8 && electrons_[ele_it].p4.Pt()>8 ){
 					if (  electrons_[ele_it].charge * muons_[mu_it].charge < 0) {
 						tmpEle = ele_it;
 						tmpMu = mu_it;
@@ -175,7 +175,7 @@ int postition = 0;
 		temp.V.p4 = muons_[tauMu].p4+electrons_[tauEle].p4;
 		std::vector<VHbbEvent::MuonInfo> muons2_;
 		for (std::vector<VHbbEvent::MuonInfo>::const_iterator it = muons_.begin(); it!= muons_.end(); ++it){
-			if (it->p4.Pt()>10) muons2_.push_back(*it);
+			if (it->p4.Pt()>8) muons2_.push_back(*it);
 		}
 		temp.V.muons = muons2_;
 		
@@ -185,7 +185,7 @@ int postition = 0;
 		//    std::sort(electrons_.begin(), electrons_.end(), ptComparator2);
 		std::vector<VHbbEvent::ElectronInfo> electrons2_;
 		for (std::vector<VHbbEvent::ElectronInfo>::const_iterator it = electrons_.begin(); it!= electrons_.end(); ++it){
-			if (it->p4.Pt()>10) electrons2_.push_back(*it);
+			if (it->p4.Pt()>8) electrons2_.push_back(*it);
 		}
 		temp.V.electrons = electrons2_;
 		
