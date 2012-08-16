@@ -1,7 +1,7 @@
 #include <TH1F.h>
 #include <TH3F.h>
 #include "PhysicsTools/Utilities/interface/LumiReWeighting.h"
-#include "PhysicsTools/Utilities/interface/Lumi3DReWeighting.h"
+//#include "PhysicsTools/Utilities/interface/Lumi3DReWeighting.h"
 #include <TH2F.h>
 #include <TROOT.h>
 #include <TFile.h>
@@ -373,38 +373,38 @@ int main(int argc, char* argv[])
 
   /*
   edm::LumiReWeighting   lumiWeights;
-  edm::Lumi3DReWeighting   lumiWeights2011B;
+///  edm::Lumi3DReWeighting   lumiWeights2011B;
   if(isMC_)
     {
       lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
 
-      lumiWeights2011B = edm::Lumi3DReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
-      if(Weight3DfileName_!="")
-	{ lumiWeights2011B.weight3D_init(Weight3DfileName_.c_str()); }
-      else
-	{
-	  lumiWeights2011B.weight3D_init(1.0); // generate the weights the fisrt time;
-	}
+   //   lumiWeights2011B = edm::Lumi3DReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
+    //  if(Weight3DfileName_!="")
+//	{ lumiWeights2011B.weight3D_init(Weight3DfileName_.c_str()); }
+ //     else
+//	{
+//	  lumiWeights2011B.weight3D_init(1.0); // generate the weights the fisrt time;
+//	}
 
     }
   */
 
   edm::LumiReWeighting   lumiWeights;
   edm::LumiReWeighting   lumiWeights1DObs;
-  edm::Lumi3DReWeighting   lumiWeights2011B;
+//  edm::Lumi3DReWeighting   lumiWeights2011B;
   if(isMC_)
     {
       lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
       lumiWeights1DObs = edm::LumiReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
 
-      lumiWeights2011B = edm::Lumi3DReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
+/*      lumiWeights2011B = edm::Lumi3DReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
       if(Weight3DfileName_!="")
 	{ lumiWeights2011B.weight3D_init(Weight3DfileName_.c_str()); }
       else
 	{
 	  lumiWeights2011B.weight3D_init(1.0); // generate the weights the fisrt time;
 	}
-
+*/
     }
 
   TFile *_outFile	= new TFile(outputFile_.c_str(), "recreate");	
@@ -916,7 +916,8 @@ int main(int argc, char* argv[])
 	PUp1=puitp1->second;
 	PUm1=puitm1->second;
 	//	input3DPU->Fill(PUm1,PU0,PUp1);  
-	PUweight2011B = lumiWeights2011B.weight3D( puitm1->second, puit0->second,puitp1->second); 
+//	lumiWeight = lumiWeights2011B.weight3D( puitm1->second, puit0->second,puitp1->second); 
+//	PUweight2011B = lumiWeights2011B.weight3D( puitm1->second, puit0->second,puitp1->second); 
 	PUweight1DObs = lumiWeights1DObs.weight( npu); 
       }
 

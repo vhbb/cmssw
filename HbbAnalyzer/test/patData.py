@@ -22,7 +22,7 @@ process.source = cms.Source("PoolSource",
 ##	"/store/data/Run2012A/MultiJet/AOD/PromptReco-v1/000/193/556/D84A9140-AC99-E111-A808-001D09F28D4A.root"
 	
 	#"/store/data/Run2012A/MET/RECO/PromptReco-v1/000/190/782/A2D1E62F-8684-E111-B651-00237DDBE41A.root"
-"file:/networkdata/arizzi/WH/1ACA8AD2-CBAF-E111-AE17-0017A477002C.root"
+"/store/data/Run2012C/SingleMu/AOD/PromptReco-v2/000/200/369/60F3A873-74E2-E111-8A04-003048D37538.root"
  )
 )
 ## Maximal Number of Events

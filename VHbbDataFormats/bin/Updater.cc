@@ -80,18 +80,18 @@ int main(int argc, char* argv[])
   std::string PUdatafileName_ = in.getParameter<std::string> ("PUdatafileName") ;
   std::string PUdatafileName2011B_ = in.getParameter<std::string> ("PUdatafileName2011B") ;
   lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
-  lumiWeights2011B = edm::Lumi3DReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
+//  lumiWeights2011B = edm::Lumi3DReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
 
 
   //lumiWeights2011B.weight3D_init(); // generate the weights the fisrt time;
-                   if(Weight3DfileName_!="")
+  /*                 if(Weight3DfileName_!="")
                       { lumiWeights2011B.weight3D_init(Weight3DfileName_.c_str()); }
                    else
                       {
                         lumiWeights2011B.weight3D_init(73.5/68.); // generate the weights the fisrt time;
                       }
 
-
+*/
   }
 
 
