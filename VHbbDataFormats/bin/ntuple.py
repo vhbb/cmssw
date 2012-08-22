@@ -9,7 +9,7 @@ process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(
 
 
-#"file:../../HbbAnalyzer/test/PAT.edm.root"
+"file:../../HbbAnalyzer/test/PAT.edm.root"
 ###"dcache:///pnfs/cms/WAX/11/store/user/lpchbb/msegala/WH_WToLNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_May2012Prod_2/e63abc9239312b3f728ddbd5ef32b303/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm_11_1_oQQ.root" ,
 ##    "../../HbbAnalyzer/test/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm.root",
 #"dcache:///cmsdcache//pnfs/pi.infn.it/data/cms/store/user/tboccali/WH_WToLNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_ProcV1_WH_WToLNu_HToBB_M-120/14fe2b624ddea84f5c39709f51bf546f/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm_51_1_3LJ.root"
@@ -34,26 +34,27 @@ process.fwliteInput = cms.PSet(
     )
 
 # get JSON file 
-JSONfile = 'Cert_190456-196531_8TeV_PromptReco_Collisions12_JSON.txt'
+JSONfile = 'Cert_190456-200601_8TeV_PromptReco_Collisions12_JSON.txt'
 lumiList = LumiList.LumiList (filename = JSONfile).getCMSSWString().split(',')
 
 #Uncomment to run with JSON
 process.fwliteInput.lumisToProcess.extend(lumiList)
 
 
-channel =  "MET2012BLOCALTEST240712"
+
+channel =  "TEST"
 import os
 #dirnameOld = "//pnfs/pi.infn.it/data/cms/store/user/bortigno/DoubleMu/HBB_EDMNtupleV3_ProcV1_may/07fb60889166b64f474d8d0aa162db69/"
 #dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/METRun2011APromptV1EdmV31"
 ##dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/METRun2011APromptV1EdmV31/degrutto/MET/HBB_EDMNtupleV31_May2012Prod/f3f16f0a8d4ba1fd82b25c3d99de1c78/"
 #dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/METRun2011BPromptV1EdmV31/degrutto/MET/HBB_EDMNtupleV31_May2012Prod/f3f16f0a8d4ba1fd82b25c3d99de1c78/"
 #dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/SingleMuRun2012APromptV1EdmV31/degrutto/SingleMu/HBB_EDMNtupleV31_May2012Prod/f3f16f0a8d4ba1fd82b25c3d99de1c78/"
+#dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/SingleMuRun2012BPromptV1EdmV31/degrutto/SingleMu/HBB_EDMNtupleV31_May2012Prod/f3f16f0a8d4ba1fd82b25c3d99de1c78/"
 #dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/dlopes/SingleMuRun2012APromptV1EdmV33/dlopes/SingleMu/HBB_EDMNtupleV33/fc9898cbaf0c3f28aabf20b09408f841/"
 #dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/dlopes/SingleMuRun2012BPromptV1EdmV33/dlopes/SingleMu/HBB_EDMNtupleV33/fc9898cbaf0c3f28aabf20b09408f841/"
 ##dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/METRun2012APromptJul12/"
-dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/METRun2012BPromptJul12/"
-
-
+#dirnameOld = "//pnfs/cms/WAX/11/store/user/lpchbb/degrutto/METRun2012BPromptJul12/"
+dirnameOld = "/"
 
 #for i in range(len(channels)):
  
@@ -62,8 +63,8 @@ dirname =  dirnameOld
 dirlist = os.listdir(dirname)
 basenamelist = os.listdir(dirname + "/")
 for basename in basenamelist:
-   process.fwliteInput.fileNames.append("dcache:/" + dirname + "/" + basename)
-print "Number of files to process is %s" %(len(process.fwliteInput.fileNames)) 
+#   process.fwliteInput.fileNames.append("dcache:/" + dirname + "/" + basename)
+ print "Number of files to process is %s" %(len(process.fwliteInput.fileNames)) 
     
     
 

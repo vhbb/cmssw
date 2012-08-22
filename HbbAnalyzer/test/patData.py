@@ -22,21 +22,51 @@ process.source = cms.Source("PoolSource",
 ##	"/store/data/Run2012A/MultiJet/AOD/PromptReco-v1/000/193/556/D84A9140-AC99-E111-A808-001D09F28D4A.root"
 	
 	#"/store/data/Run2012A/MET/RECO/PromptReco-v1/000/190/782/A2D1E62F-8684-E111-B651-00237DDBE41A.root"
-"/store/data/Run2012C/SingleMu/AOD/PromptReco-v2/000/200/369/60F3A873-74E2-E111-8A04-003048D37538.root"
+#"/store/data/Run2012C/SingleMu/AOD/PromptReco-v2/000/200/369/60F3A873-74E2-E111-8A04-003048D37538.root"
+#"/store/data/Run2012C/MET/AOD/PromptReco-v1/000/197/770/6E668370-77C3-E111-991E-BCAEC5364C4C.root"
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/913/4AE2FEC7-78CE-E111-9D10-485B3962633D.root',
+       '/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/913/4AE2FEC7-78CE-E111-9D10-485B3962633D.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/910/B407D1A8-63CE-E111-B387-001D09F34488.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/898/F0BF5EF9-D7CD-E111-AFDD-001D09F2527B.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/860/B6346A43-93CD-E111-B9EF-BCAEC53296F7.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/859/8C808C7D-92CD-E111-AE97-003048D3733E.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/856/30AA8473-8BCD-E111-B094-003048D2C16E.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/846/F0A27F93-67CD-E111-ABC9-001D09F253D4.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/791/92DD6C27-0ACD-E111-848B-001D09F2447F.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/765/2A8C22EE-E7CC-E111-A786-BCAEC5329708.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/748/8A6F63A6-E2CC-E111-92E4-BCAEC5364C93.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/744/34077371-D0CC-E111-BAB1-003048D373AE.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/722/6A33D4FA-CECC-E111-9E5D-003048F117B4.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/720/7CBC0E4B-C7CC-E111-8713-003048D2C1C4.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/719/7CECB460-C7CC-E111-A21C-E0CB4E55367F.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/713/189903DC-BECC-E111-87C8-0025901D623C.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/523/A450C8B1-F1CA-E111-8B59-003048678110.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/522/8ACE12FC-2FCB-E111-84A9-BCAEC518FF41.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/522/88D09516-83CB-E111-9768-003048D2BC4C.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/522/7E78A738-2ACB-E111-930C-E0CB4E55365D.root',
+	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/522/68EACC62-24CB-E111-8375-001D09F24024.root',
+
+
  )
 )
+
+import FWCore.PythonUtilities.LumiList as LumiList
+myLumis = LumiList.LumiList(filename = 'Cert_190456-200601_8TeV_PromptReco_Collisions12_JSON.txt')
+process.source.lumisToProcess = myLumis.getVLuminosityBlockRange()
+
+
 ## Maximal Number of Events
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 ## Geometry and Detector Conditions (needed for a few patTuple production steps)
-process.load("Configuration.StandardSequences.Geometry_cff")
+process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.autoCond import autoCond
 
 if  isMC  :
-   process.GlobalTag.globaltag = cms.string("START52_V9B::All" )
+   process.GlobalTag.globaltag = cms.string("START53_V7E::All" )
 else :
-   process.GlobalTag.globaltag = cms.string("GR_R_52_V7::All")
+   process.GlobalTag.globaltag = cms.string("GR_P_V40_AN1::All")
 
 process.load("Configuration.StandardSequences.MagneticField_cff")
 
@@ -487,32 +517,66 @@ if isMC :
    process.p = cms.Path(process.gen * process.common)
 else :
    process.p = cms.Path(process.common)
- 
-############# Filter flags
-
-
-process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
-# ecal filter
-process.load('JetMETAnalysis.ecalDeadCellTools.EcalDeadCellEventFilter_cfi') ## still not in the release
-# CSC beam halo.... 
-process.load('RecoMET.METAnalyzers.CSCHaloFilter_cfi')
-# HCAL laser filter
-process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
-# tracking failurefilter
-process.load('JetMETCorrections.Configuration.DefaultJEC_cff')                    # TODO: these 3 lines make no sense (AR)
-process.load('RecoMET.METFilters.trackingFailureFilter_cfi')                      #
-process.trackingFailureFilter.JetSource = cms.InputTag('ak5PFJetsL2L3Residual')   #
-process.trackingFailureFilter.VertexSource = cms.InputTag('goodOfflinePrimaryVertices')
-process.hbhepath = cms.Path(process.HBHENoiseFilter)
-process.ecalFilter = cms.Path(process.EcalDeadCellEventFilter)
-process.cschaloFilter = cms.Path(process.CSCTightHaloFilter)
-process.hcallaserFilter=cms.Path(process.hcalLaserEventFilter)
-process.trackingfailureFilter = cms.Path( process.goodOfflinePrimaryVertices*process.ak5PFJetsL2L3Residual*process.trackingFailureFilter)
-### END of filters required by JETMET for  MET analysis 
-############ End of filter flags
-
 
 ########## Hbb specific finishes here #######################################
+ 
+############# MET Filter flags
+### from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/RecoMET/METFilters/test/exampleICHEPrecommendation_cfg.py?revision=1.1&view=markup&pathrev=V00-00-08
+## The good primary vertex filter ____________________________________________||
+process.primaryVertexFilter = cms.EDFilter(
+	"VertexSelector",
+	src = cms.InputTag("offlinePrimaryVertices"),
+	cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2"),
+	filter = cms.bool(True)
+	)
+
+## The beam scraping filter __________________________________________________||
+process.noscraping = cms.EDFilter(
+	"FilterOutScraping",
+	applyfilter = cms.untracked.bool(True),
+	debugOn = cms.untracked.bool(False),
+	numtrack = cms.untracked.uint32(10),
+	thresh = cms.untracked.double(0.25)
+	)
+
+## The iso-based HBHE noise filter ___________________________________________||
+process.load('CommonTools.RecoAlgos.HBHENoiseFilter_cfi')
+
+## The CSC beam halo tight filter ____________________________________________||
+process.load('RecoMET.METAnalyzers.CSCHaloFilter_cfi')
+
+## The HCAL laser filter _____________________________________________________||
+process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
+process.hcalLaserEventFilter.vetoByRunEventNumber=cms.untracked.bool(False)
+process.hcalLaserEventFilter.vetoByHBHEOccupancy=cms.untracked.bool(True)
+
+## The ECAL dead cell trigger primitive filter _______________________________||
+process.load('RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi')
+## For AOD and RECO recommendation to use recovered rechits
+process.EcalDeadCellTriggerPrimitiveFilter.tpDigiCollection = cms.InputTag("ecalTPSkimNA")
+
+## The EE bad SuperCrystal filter ____________________________________________||
+process.load('RecoMET.METFilters.eeBadScFilter_cfi')
+
+## The Good vertices collection needed by the tracking failure filter ________||
+process.goodVertices = cms.EDFilter(
+	"VertexSelector",
+	filter = cms.bool(False),
+	src = cms.InputTag("offlinePrimaryVertices"),
+	cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.rho < 2")
+	)
+
+   ## The tracking failure filter _______________________________________________||
+process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
+
+process.hbhepath = cms.Path(process.HBHENoiseFilter)
+process.ecalFilter = cms.Path(process.EcalDeadCellTriggerPrimitiveFilter )
+process.cschaloFilter = cms.Path(process.CSCTightHaloFilter)
+process.hcallaserFilter=cms.Path(process.hcalLaserEventFilter)
+process.trackingfailureFilter = cms.Path(    process.goodVertices * process.trackingFailureFilter )
+process.eebadscFilter= cms.Path(  process.eeBadScFilter)  					      
+##### END of filters required by JETMET for  MET analysis 
+
 
 
 #   process.GlobalTag.globaltag =  ...    ##  (according to https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideFrontierConditions)

@@ -718,7 +718,7 @@ int main(int argc, char* argv[])
   int nSimBs=0;
   int numJets,numBJets,eventFlav;
   //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
-  bool triggerFlags[500],hbhe,ecalFlag,totalKinematics,  cschaloFlag,  hcallaserFlag,   trackingfailureFlag ;
+  bool triggerFlags[500],hbhe,ecalFlag,totalKinematics,  cschaloFlag,  hcallaserFlag,   trackingfailureFlag , eebadscFlag ;
 
 
   float btag1T2CSF=1.,btag2TSF=1.,btag1TSF=1.,btagA0CSF=1., btagA0TSF=1., btag2CSF=1., btag1TA1C=1.;
@@ -1206,6 +1206,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("cschaloFlag"		,  &cschaloFlag	         ,   "cschaloFlag/b");
   _outTree->Branch("hcallaserFlag"		,  &hcallaserFlag	         ,   "hcallaserFlag/b");
   _outTree->Branch("trackingfailureFlag"		,  &trackingfailureFlag	         ,   "trackingfailureFlag/b");
+  _outTree->Branch("eebadscFlag"		,  &eebadscFlag	         ,   "eebadscFlag/b");
   _outTree->Branch("btag1TSF"		,  &btag1TSF	         ,   "btag1TSF/F");
   _outTree->Branch("btag2TSF"		,  &btag2TSF	         ,   "btag2TSF/F");
   _outTree->Branch("btag1T2CSF"	,  &btag1T2CSF	         ,   "btag1T2CSF/F");
@@ -1480,6 +1481,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
         cschaloFlag = patFilters.accept("cschaloFilter");   
         hcallaserFlag = patFilters.accept("hcallaserFilter");   
         trackingfailureFlag = patFilters.accept("trackingfailureFilter");   
+        eebadscFlag = patFilters.accept("eebadscFilter");   
 
 	trigger.setEvent(&ev);
 	for(size_t j=0;j < triggers.size();j++)

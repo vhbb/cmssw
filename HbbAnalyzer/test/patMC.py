@@ -29,7 +29,7 @@ process.source = cms.Source("PoolSource",
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 ## Geometry and Detector Conditions (needed for a few patTuple production steps)
-process.load("Configuration.StandardSequences.Geometry_cff")
+process.load("Configuration.Geometry.GeometryIdeal_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.autoCond import autoCond
 
@@ -490,31 +490,66 @@ if isMC :
 else :
    process.p = cms.Path(process.common)
  
-############# Filter flags
+########## Hbb specific finishes here #######################################
+   
+############# MET Filter flags
+### from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/RecoMET/METFilters/test/exampleICHEPrecommendation_cfg.py?revision=1.1&view=markup&pathrev=V00-00-08
+## The good primary vertex filter ____________________________________________||
+process.primaryVertexFilter = cms.EDFilter(
+	"VertexSelector",
+	src = cms.InputTag("offlinePrimaryVertices"),
+	cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.Rho <= 2"),
+	filter = cms.bool(True)
+	)
 
+## The beam scraping filter __________________________________________________||
+process.noscraping = cms.EDFilter(
+	"FilterOutScraping",
+	applyfilter = cms.untracked.bool(True),
+	debugOn = cms.untracked.bool(False),
+	numtrack = cms.untracked.uint32(10),
+	thresh = cms.untracked.double(0.25)
+	)
 
-process.load('CommonTools/RecoAlgos/HBHENoiseFilter_cfi')
-# ecal filter
-process.load('JetMETAnalysis.ecalDeadCellTools.EcalDeadCellEventFilter_cfi') ## still not in the release
-# CSC beam halo.... 
+## The iso-based HBHE noise filter ___________________________________________||
+process.load('CommonTools.RecoAlgos.HBHENoiseFilter_cfi')
+
+## The CSC beam halo tight filter ____________________________________________||
 process.load('RecoMET.METAnalyzers.CSCHaloFilter_cfi')
-# HCAL laser filter
+
+## The HCAL laser filter _____________________________________________________||
 process.load("RecoMET.METFilters.hcalLaserEventFilter_cfi")
-# tracking failurefilter
-process.load('JetMETCorrections.Configuration.DefaultJEC_cff')                    # TODO: these 3 lines make no sense (AR)
-process.load('RecoMET.METFilters.trackingFailureFilter_cfi')                      #
-process.trackingFailureFilter.JetSource = cms.InputTag('ak5PFJetsL2L3Residual')   #
-process.trackingFailureFilter.VertexSource = cms.InputTag('goodOfflinePrimaryVertices')
+process.hcalLaserEventFilter.vetoByRunEventNumber=cms.untracked.bool(False)
+process.hcalLaserEventFilter.vetoByHBHEOccupancy=cms.untracked.bool(True)
+
+## The ECAL dead cell trigger primitive filter _______________________________||
+process.load('RecoMET.METFilters.EcalDeadCellTriggerPrimitiveFilter_cfi')
+## For AOD and RECO recommendation to use recovered rechits
+process.EcalDeadCellTriggerPrimitiveFilter.tpDigiCollection = cms.InputTag("ecalTPSkimNA")
+
+## The EE bad SuperCrystal filter ____________________________________________||
+process.load('RecoMET.METFilters.eeBadScFilter_cfi')
+
+## The Good vertices collection needed by the tracking failure filter ________||
+process.goodVertices = cms.EDFilter(
+	"VertexSelector",
+	filter = cms.bool(False),
+	src = cms.InputTag("offlinePrimaryVertices"),
+	cut = cms.string("!isFake && ndof > 4 && abs(z) <= 24 && position.rho < 2")
+	)
+
+   ## The tracking failure filter _______________________________________________||
+process.load('RecoMET.METFilters.trackingFailureFilter_cfi')
+
 process.hbhepath = cms.Path(process.HBHENoiseFilter)
-process.ecalFilter = cms.Path(process.EcalDeadCellEventFilter)
+process.ecalFilter = cms.Path(process.EcalDeadCellTriggerPrimitiveFilter )
 process.cschaloFilter = cms.Path(process.CSCTightHaloFilter)
 process.hcallaserFilter=cms.Path(process.hcalLaserEventFilter)
-process.trackingfailureFilter = cms.Path( process.goodOfflinePrimaryVertices*process.ak5PFJetsL2L3Residual*process.trackingFailureFilter)
-### END of filters required by JETMET for  MET analysis 
-############ End of filter flags
+process.trackingfailureFilter = cms.Path(    process.goodVertices * process.trackingFailureFilter )
+process.eebadscFilter= cms.Path(  process.eeBadScFilter)  					      
+##### END of filters required by JETMET for  MET analysis 
 
 
-########## Hbb specific finishes here #######################################
 
 
 #   process.GlobalTag.globaltag =  ...    ##  (according to https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideFrontierConditions)
