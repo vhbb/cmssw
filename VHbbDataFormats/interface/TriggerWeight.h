@@ -97,7 +97,7 @@ static  std::pair<float,float> efficiencyFromPtEta(float pt1, float eta1, TTree 
           }
       }
 
-    if(count == 0 || s1 == 0)
+    if(count == 0)
       {
         return r;
       }
