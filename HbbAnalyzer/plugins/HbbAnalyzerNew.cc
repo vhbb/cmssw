@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.75 2012/05/24 15:55:16 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.76 2012/06/12 19:40:16 arizzi Exp $
 //
 //
 
@@ -928,6 +928,33 @@ BTagSFContainer btagSFs;
     fillSimpleJet(fj,filterjet_iter);
     //  if(!runOnMC_)  
     setJecUnc(fj,jecUnc);
+
+    if(runOnMC_){
+
+      //BTV scale factors
+     // fillScaleFactors(sj, btagSFs);
+
+      //PAT genJet matching
+      //genJet
+      const reco::GenJet *gJ = filterjet_iter->genJet();
+      //physical parton for mother info ONLY
+      if( (filterjet_iter->genParton()) ){
+        fj.bestMCid = filterjet_iter->genParton()->pdgId();
+        if( (filterjet_iter->genParton()->mother()) )
+          fj.bestMCmomid=filterjet_iter->genParton()->mother()->pdgId();
+      }
+      TLorentzVector gJp4;
+      if(gJ){
+        gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
+        fj.bestMCp4 = gJp4;
+        if(verbose_){
+          std::clog << "filter genJet matched Pt = " << gJp4.Pt() << std::endl;
+          std::clog << "filter genJet matched eta = " << gJp4.Eta() << std::endl;
+          std::clog << "filter genJet matched deltaR = " << gJp4.DeltaR(fj.p4) << std::endl;
+          std::clog << "filter genJet matched mother id = " << fj.bestMCmomid << std::endl;
+        }
+      }
+    }
 
     hbbInfo->filterJets.push_back(fj);
     
