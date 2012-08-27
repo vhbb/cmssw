@@ -25,34 +25,10 @@ process.source = cms.Source("PoolSource",
 #"/store/data/Run2012C/SingleMu/AOD/PromptReco-v2/000/200/369/60F3A873-74E2-E111-8A04-003048D37538.root"
 #"/store/data/Run2012C/MET/AOD/PromptReco-v1/000/197/770/6E668370-77C3-E111-991E-BCAEC5364C4C.root"
 	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/913/4AE2FEC7-78CE-E111-9D10-485B3962633D.root',
-       '/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/913/4AE2FEC7-78CE-E111-9D10-485B3962633D.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/910/B407D1A8-63CE-E111-B387-001D09F34488.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/898/F0BF5EF9-D7CD-E111-AFDD-001D09F2527B.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/860/B6346A43-93CD-E111-B9EF-BCAEC53296F7.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/859/8C808C7D-92CD-E111-AE97-003048D3733E.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/856/30AA8473-8BCD-E111-B094-003048D2C16E.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/846/F0A27F93-67CD-E111-ABC9-001D09F253D4.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/791/92DD6C27-0ACD-E111-848B-001D09F2447F.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/765/2A8C22EE-E7CC-E111-A786-BCAEC5329708.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/748/8A6F63A6-E2CC-E111-92E4-BCAEC5364C93.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/744/34077371-D0CC-E111-BAB1-003048D373AE.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/722/6A33D4FA-CECC-E111-9E5D-003048F117B4.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/720/7CBC0E4B-C7CC-E111-8713-003048D2C1C4.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/719/7CECB460-C7CC-E111-A21C-E0CB4E55367F.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/713/189903DC-BECC-E111-87C8-0025901D623C.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/523/A450C8B1-F1CA-E111-8B59-003048678110.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/522/8ACE12FC-2FCB-E111-84A9-BCAEC518FF41.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/522/88D09516-83CB-E111-9768-003048D2BC4C.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/522/7E78A738-2ACB-E111-930C-E0CB4E55365D.root',
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/522/68EACC62-24CB-E111-8375-001D09F24024.root',
 
 
  )
 )
-
-import FWCore.PythonUtilities.LumiList as LumiList
-myLumis = LumiList.LumiList(filename = 'Cert_190456-200601_8TeV_PromptReco_Collisions12_JSON.txt')
-process.source.lumisToProcess = myLumis.getVLuminosityBlockRange()
 
 
 ## Maximal Number of Events
@@ -438,6 +414,8 @@ process.bhadrons = cms.EDProducer('MCBHadronProducer',
 
 ### Save some gen particles
 # saves leptons with pt > 5 GeV, b and c quarks, B and D hadrons (and Lambda b,c), Z,W,Higgs, all status 3 particles. Daugthers of Z,W,H.
+process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+
 process.savedGenParticles = cms.EDProducer(
     "GenParticlePruner",
     src = cms.InputTag("genParticles"),
