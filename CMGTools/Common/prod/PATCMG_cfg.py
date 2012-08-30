@@ -21,8 +21,9 @@ runOnMC = True
 from CMGTools.Production.datasetToSource import *
 process.source = datasetToSource(
     'cmgtools_group',
-    #'/DYToTauTau_M_20_TuneZ2star_8TeV_pythia6_tauola/Summer12-PU_S8_START52_V9-v1/AODSIM/V5'
-    '/GluGluToHToTauTau_M-125_8TeV-powheg-pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM/V5'
+    '/VBF_HToTauTau_M-125_7TeV-powheg-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V5',
+    # '/VBF_HToTauTau_M-125_7TeV-powheg-pythia6-tauola/Fall11-PU_S6_START42_V14B-v1/AODSIM/V5',
+    # '/GluGluToHToTauTau_M-125_8TeV-powheg-pythia6/Summer12-PU_S7_START52_V9-v1/AODSIM/V5'
     #'CMS',
     # '/DoubleMu/Run2012B-PromptReco-v1/AOD'
    )
@@ -211,7 +212,7 @@ print 'Global tag       : ', process.GlobalTag.globaltag
 ## Geometry and Detector Conditions (needed for a few patTuple production steps)
 
 from CMGTools.Common.PAT.patCMGSchedule_cff import getSchedule
-process.schedule = getSchedule(process, runOnMC)
+process.schedule = getSchedule(process, runOnMC, runOnFastSim=False)
 process.schedule.append( process.outpath )
 
 ## MessageLogger

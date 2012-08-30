@@ -11,7 +11,8 @@ def getSchedule(process, runOnMC, runOnFastSim):
         process.trackingFailureFilterPath,
         process.primaryVertexFilterPath,
         process.noscrapingFilterPath,
-        process.eeBadScFilterPath,
+        # doesn't work in 44X 
+        # process.eeBadScFilterPath,
         process.metNoiseCleaningPath
         )
     if runOnMC:
@@ -19,7 +20,7 @@ def getSchedule(process, runOnMC, runOnFastSim):
     if not( runOnFastSim ):
         result.append(process.CSCTightHaloFilterPath)
         result.append(process.HBHENoiseFilterPath)
-    if runOnFastSim :
+    else:
         process.metNoiseCleaningPath.remove(process.CSCTightHaloFilter)
         process.metNoiseCleaningPath.remove(process.HBHENoiseFilter)
     return result

@@ -57,8 +57,10 @@ EcalDeadCellTriggerPrimitiveFilter.tpDigiCollection = cms.InputTag("ecalTPSkimNA
 EcalDeadCellTriggerPrimitiveFilterPath = cms.Path(EcalDeadCellTriggerPrimitiveFilter)
 
 ## The EE bad SuperCrystal filter
-from RecoMET.METFilters.eeBadScFilter_cfi import eeBadScFilter
-eeBadScFilterPath = cms.Path(eeBadScFilter)
+#COLIN commenting this filter out, as it makes the python configuration
+# not compatible with 44X anymore. 
+# from RecoMET.METFilters.eeBadScFilter_cfi import eeBadScFilter
+# eeBadScFilterPath = cms.Path(eeBadScFilter)
 
 ## The Good vertices collection needed by the tracking failure filter
 goodVertices = cms.EDFilter(
@@ -82,8 +84,10 @@ metNoiseCleaning = cms.Sequence(primaryVertexFilter+
                                 HBHENoiseFilter+
                                 hcalLaserEventFilter+
                                 EcalDeadCellTriggerPrimitiveFilter+
-                                trackingFailureSequence+
-                                eeBadScFilter)
+                                trackingFailureSequence
+                                # eeBadScFilter
+                                )
+    
 metNoiseCleaningPath = cms.Path(metNoiseCleaning)
 
 #the HCal noise filter only works on AOD in 5.2
