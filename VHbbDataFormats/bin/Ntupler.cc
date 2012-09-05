@@ -577,7 +577,7 @@ typedef struct
     puJetIdM[i]=j.puJetIdM; 
     puJetIdT[i]=j.puJetIdT; 
     puJetIdMva[i]=j.puJetIdMva; 
-     
+    charge[i]=j.charge;     
 
   }
   bool jetId(int i)
@@ -599,7 +599,7 @@ typedef struct
       csvivf[i]=-99; cmva[i]=-99;
       cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; isSemiLeptMCtruth[i]=-99; isSemiLept[i]=-99;      
       SoftLeptpdgId[i] = -99; SoftLeptIdlooseMu[i] = -99;  SoftLeptId95[i] =  -99;   SoftLeptPt[i] = -99;  SoftLeptdR[i] = -99;   SoftLeptptRel[i] = -99; SoftLeptRelCombIso[i] = -99;  
-      genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99; ptRaw[i]=-99.; ptLeadTrack[i]=-99.; puJetIdL[i]=-99; puJetIdM[i]=-99; puJetIdT[i]=-99; puJetIdMva[i]=-99;
+      genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99; ptRaw[i]=-99.; ptLeadTrack[i]=-99.; puJetIdL[i]=-99; puJetIdM[i]=-99; puJetIdT[i]=-99; puJetIdMva[i]=-99; charge[i]=-99;
     }
   }
   float pt[MAXJ];
@@ -656,6 +656,7 @@ typedef struct
   float puJetIdM[MAXJ];
   float puJetIdT[MAXJ];
   float puJetIdMva[MAXJ];
+  float charge[MAXJ];
 
 } JetInfo;
   
@@ -909,6 +910,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("hJet_puJetIdM",hJets.puJetIdM ,"puJetIdM[nhJets]/F");
   _outTree->Branch("hJet_puJetIdT",hJets.puJetIdT ,"puJetIdT[nhJets]/F");
   _outTree->Branch("hJet_puJetIdMva",hJets.puJetIdMva ,"puJetIdMva[nhJets]/F");
+  _outTree->Branch("hJet_charge",hJets.charge ,"charge[nhJets]/F");
 
   _outTree->Branch("fathFilterJets_pt",fathFilterJets.pt ,"pt[nfathFilterJets]/F");
   _outTree->Branch("fathFilterJets_eta",fathFilterJets.eta ,"eta[nfathFilterJets]/F");
@@ -978,6 +980,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_puJetIdM", aJets.puJetIdM , "puJetIdM[naJets]/F");
   _outTree->Branch("aJet_puJetIdT", aJets.puJetIdT , "puJetIdT[naJets]/F");
   _outTree->Branch("aJet_puJetIdMva", aJets.puJetIdMva , "puJetIdMva[naJets]/F");
+  _outTree->Branch("aJet_charge",aJets.charge ,"charge[naJets]/F");
 
   _outTree->Branch("aJet_genPt",aJets.genPt ,"genPt[naJets]/F");
   _outTree->Branch("aJet_genEta",aJets.genEta ,"genEta[naJets]/F");
