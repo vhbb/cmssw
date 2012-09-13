@@ -88,8 +88,8 @@ class EtaPtBin
  EtaPtBin(){}
  EtaPtBin(float emin,float emax,float ptmin,float ptmax) : etaMin(emin), etaMax(emax), ptMin(ptmin), ptMax(ptmax) {}
  bool contains(float eta,float pt) {return eta < etaMax && eta >= etaMin && pt < ptMax && pt >= ptMin ; } 
- float centerEta() { return (etaMax-etaMin)/2.;}
- float centerPt() { return (ptMax-ptMin)/2.;}
+ float centerEta() { return (etaMax+etaMin)/2.;}
+ float centerPt() { return (ptMax+ptMin)/2.;}
 
  float etaMin;
  float etaMax;
