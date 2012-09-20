@@ -1387,7 +1387,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
       //         VHbbEvent::SimpleJet orig=modifiedEvent.simpleJets2[j];
     //           VHbbEvent::SimpleJet origRemade = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true,true); // do ref check, can be commented out 
   //             VHbbEvent::SimpleJet corr2011 = jec.correctRight( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true,true); // do ref check, can be commented out 
-               modifiedEvent.simpleJets2[j] = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true); 
+//REMOVE JEC               modifiedEvent.simpleJets2[j] = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true); 
 //               std::cout << "Original " << orig.p4.Pt() << " == " << origRemade.p4.Pt() << " using CHS2011 " << corr2011.p4.Pt() << " final: " << modifiedEvent.simpleJets2[j].p4.Pt() << std::endl;
                TLorentzVector & p4 = modifiedEvent.simpleJets2[j].p4; 
                TLorentzVector & mcp4 = modifiedEvent.simpleJets2[j].bestMCp4;
@@ -1405,7 +1405,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
             for(size_t j=0; j< modifiedEvent.simpleJets2.size() ; j++)
             { 
   //              jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,false,true); // do ref check, can be commented out 
-                modifiedEvent.simpleJets2[j] = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,false); 
+  //REMOVE JEC              modifiedEvent.simpleJets2[j] = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,false); 
             }
  
             }  

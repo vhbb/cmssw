@@ -9,7 +9,7 @@ process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(
 
 
-"file:../../HbbAnalyzer/test/PAT.edm.root"
+"file:/gpfs/ddn/srm/cms/store/user/arizzi/ZJetsToNuNu_50_HT_100_TuneZ2Star_8TeV_madgraph/ZJetsToNuNu_50_HT_100_TuneZ2Star_8TeV_madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_EDMNtuple_V42_ProcV1/9803889241b1fc304f795d3b3875632d/PAT.edm_100_2_bTX.root"
 ###"dcache:///pnfs/cms/WAX/11/store/user/lpchbb/msegala/WH_WToLNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_May2012Prod_2/e63abc9239312b3f728ddbd5ef32b303/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm_11_1_oQQ.root" ,
 ##    "../../HbbAnalyzer/test/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm.root",
 #"dcache:///cmsdcache//pnfs/pi.infn.it/data/cms/store/user/tboccali/WH_WToLNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_ProcV1_WH_WToLNu_HToBB_M-120/14fe2b624ddea84f5c39709f51bf546f/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm_51_1_3LJ.root"
@@ -22,8 +22,8 @@ process.fwliteInput = cms.PSet(
 
     PUmcfileName2011B= cms.string("Summer12MCObserved.root"),
     PUdatafileName2011B = cms.string("MyDataPileupHistogramObserved.root"),
-    PUmcfileName = cms.string("Summer12MCTrue.root"),
-    PUdatafileName = cms.string("Summer12DataTrue.root"),
+    PUmcfileName = cms.string("MC_S10_fromTwiki_60bins.root"),
+    PUdatafileName = cms.string("data_PU_60bins_190456-202305.root"),
     Weight3DfileName = cms.string(""),
     maxEvents   = cms.int32(-1),                             ## optional
     runMin  = cms.int32(-1),
@@ -137,7 +137,7 @@ process.Analyzer = cms.PSet(
         
 
    ),
-    isMC =     cms.bool(False),
+    isMC =     cms.bool(True),
     verbose = cms.bool(False),
     readFromCandidates = cms.bool(False),
     jetPtThresholdZ = cms.double(20),
