@@ -143,7 +143,7 @@ class BTagShapeInterface
       float sft = beff::CSVT_SFb(bin.centerPt());
       sft+=scaleBC * beff::CSVT_SFb_error[i]; // add error
       cutsAndSFbinB.push_back(std::pair<float, float>(0.898, sft));
-      sft+=scaleBC * beff::CSVL_SFb_error[i]*charmFactor; // charm additional error
+      sft+=scaleBC * beff::CSVT_SFb_error[i]*charmFactor; // charm additional error
       cutsAndSFbinC.push_back(std::pair<float, float>(0.898, sft));
 
       float sfm = beff::CSVM_SFb(bin.centerPt());
