@@ -3,9 +3,12 @@ from array import array
 
 #lumiA = 0.709
 #lumiB = 2.844
-lumiA = 0.7
-lumiB = 2.8
-lumiT = 1.5
+#lumiA = 0.7
+#lumiB = 2.8
+#lumiT = 1.5
+lumiA = 0.001*(809.379 + 82.136)
+lumiB = 4.404 # 4.398 for ele
+lumiC = 11.931 - lumiA - lumiB
 verboseOutput = True
 
 def makeAvg(inputFiles,inputWeights,outputFile,verbose=False):
@@ -82,10 +85,13 @@ from os import listdir
 for fileA in listdir("."):
   if (fileA.count("TrigEff") or fileA.count("MuRecoId") or fileA.count("EleRecoId")) and fileA.count("2012A.root") and not fileA.count("2012AB"):
     fileB = fileA.replace("2012A","2012B")
-    fileT = fileA.replace("2012A","2012T")
+    fileC = fileA.replace("2012A","2012C")
     if not listdir(".").count(fileB):
       raise Exception,"%s exists but %s does not" % (fileA,fileB)
-    if not listdir(".").count(fileT):
-      raise Exception,"%s exists but %s does not" % (fileA,fileT)
-    makeAvg([fileA,fileB,fileT],[lumiA,lumiB,lumiT],fileA.replace("2012A","2012AB"),verboseOutput)
-
+    if not listdir(".").count(fileC):
+      raise Exception,"%s exists but %s does not" % (fileA,fileC)
+    if fileA.count("Ele"):
+      makeAvg([fileA,fileB,fileC],[lumiA,lumiB-0.006,lumiC],fileA.replace("2012A","2012AB"),verboseOutput)
+    else:
+      makeAvg([fileA,fileB,fileC],[lumiA,lumiB-0.006,lumiC],fileA.replace("2012A","2012AB"),verboseOutput)
+            
