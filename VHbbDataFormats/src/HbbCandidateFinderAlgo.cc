@@ -157,11 +157,29 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
 
   temp.FatH.FatHiggsFlag= foundHardJets;
   if(foundHardJets){
-  temp.FatH.p4 = fatj1.p4;
-  temp.FatH.subjetsSize=subJetsout.size();
-  if(subJetsout.size()==2) {temp.FatH.jets.push_back(subJetsout[0]);temp.FatH.jets.push_back(subJetsout[1]);}
-  if(subJetsout.size()==3) {temp.FatH.jets.push_back(subJetsout[0]);
-  temp.FatH.jets.push_back(subJetsout[1]);temp.FatH.jets.push_back(subJetsout[2]);}
+        TVector3 fathiggsBoost;
+	temp.FatH.p4 = fatj1.p4;
+	temp.FatH.subjetsSize=subJetsout.size();
+	if(subJetsout.size()==2) {
+	  temp.FatH.jets.push_back(subJetsout[0]);
+	  temp.FatH.jets.push_back(subJetsout[1]);
+	  temp.FatH.p4 = subJetsout[0].p4 + subJetsout[1].p4;
+	  fathiggsBoost = (temp.FatH.p4).BoostVector();
+	  temp.FatH.helicities.push_back(selector.getHelicity(subJetsout[0],fathiggsBoost));
+	  temp.FatH.helicities.push_back(selector.getHelicity(subJetsout[1],fathiggsBoost));
+	  temp.FatH.deltaTheta = selector.getDeltaTheta(subJetsout[0],subJetsout[1]);
+	}
+	if(subJetsout.size()==3) {
+	  temp.FatH.jets.push_back(subJetsout[0]);
+	  temp.FatH.jets.push_back(subJetsout[1]);
+	  temp.FatH.jets.push_back(subJetsout[2]);
+	  temp.FatH.p4 = subJetsout[0].p4 + subJetsout[1].p4 + subJetsout[2].p4;
+	  fathiggsBoost = (temp.FatH.p4).BoostVector();
+	  temp.FatH.helicities.push_back(selector.getHelicity(subJetsout[0],fathiggsBoost));
+	  temp.FatH.helicities.push_back(selector.getHelicity(subJetsout[1],fathiggsBoost));
+	  temp.FatH.helicities.push_back(selector.getHelicity(subJetsout[2],fathiggsBoost));
+	  temp.FatH.deltaTheta = selector.getDeltaTheta(subJetsout[0],subJetsout[1]);
+	}
   }
 
   std::vector<VHbbEvent::TauInfo> tauNoCandidateJetOverlap;	 

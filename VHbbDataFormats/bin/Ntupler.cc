@@ -578,8 +578,10 @@ typedef struct
     puJetIdT[i]=j.puJetIdT; 
     puJetIdMva[i]=j.puJetIdMva; 
     charge[i]=j.charge;     
-
+    jetArea[i]=j.jetArea;
+  
   }
+
   bool jetId(int i)
   {
     if(nhf[i] > 0.99) return false;
@@ -599,7 +601,7 @@ typedef struct
       csvivf[i]=-99; cmva[i]=-99;
       cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; isSemiLeptMCtruth[i]=-99; isSemiLept[i]=-99;      
       SoftLeptpdgId[i] = -99; SoftLeptIdlooseMu[i] = -99;  SoftLeptId95[i] =  -99;   SoftLeptPt[i] = -99;  SoftLeptdR[i] = -99;   SoftLeptptRel[i] = -99; SoftLeptRelCombIso[i] = -99;  
-      genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99; ptRaw[i]=-99.; ptLeadTrack[i]=-99.; puJetIdL[i]=-99; puJetIdM[i]=-99; puJetIdT[i]=-99; puJetIdMva[i]=-99; charge[i]=-99;
+      genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99; ptRaw[i]=-99.; ptLeadTrack[i]=-99.; puJetIdL[i]=-99; puJetIdM[i]=-99; puJetIdT[i]=-99; puJetIdMva[i]=-99; charge[i]=-99; jetArea[i]=-99;
     }
   }
   float pt[MAXJ];
@@ -657,14 +659,12 @@ typedef struct
   float puJetIdT[MAXJ];
   float puJetIdMva[MAXJ];
   float charge[MAXJ];
-
+  float jetArea[MAXJ];
 } JetInfo;
   
 int main(int argc, char* argv[]) 
 {
   gROOT->Reset();
-
-
 
   TTree *_outTree;
   IVFInfo IVF;
@@ -933,7 +933,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("fathFilterJets_vtxEta",fathFilterJets.vtxEta ,"vtxEta[nfathFilterJets]/F");
   _outTree->Branch("fathFilterJets_vtxPhi",fathFilterJets.vtxPhi ,"vtxPhi[nfathFilterJets]/F");
   _outTree->Branch("fathFilterJets_vtxE",fathFilterJets.vtxE ,"vtxE[nfathFilterJets]/F");
- 
+
 
 //  _outTree->Branch("fathFilterJets_pt",fathFilterJets.pt ,"pt[nfathFilterJets]/F");
 //  _outTree->Branch("fathFilterJets_eta",fathFilterJets.eta ,"eta[nfathFilterJets]/F");
@@ -943,7 +943,8 @@ int main(int argc, char* argv[])
   _outTree->Branch("fathFilterJets_csvivf",fathFilterJets.csvivf ,"csvivf[nfathFilterJets]/F");
   _outTree->Branch("fathFilterJets_cmva",fathFilterJets.cmva ,"cmva[nfathFilterJets]/F");
 //  _outTree->Branch("fathFilterJets_flavour",fathFilterJets.flavour ,"flavour[nfathFilterJets]/F");
-
+  _outTree->Branch("fathFilterJets_cosTheta",fathFilterJets.cosTheta ,"cosTheta[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_jetArea",fathFilterJets.jetArea ,"jetArea[nfathFilterJets]/F");
 
   _outTree->Branch("aJet_pt",aJets.pt ,"pt[naJets]/F");
   _outTree->Branch("aJet_eta",aJets.eta ,"eta[naJets]/F");
@@ -1220,7 +1221,7 @@ int main(int argc, char* argv[])
 
   int ievt=0;  
   int totalcount=0;
-
+ 
   //  TFile* inFile = new TFile(inputFile.c_str(), "read");
   for(unsigned int iFile=0; iFile<inputFiles_.size(); ++iFile) {
     std::cout << iFile << std::endl;
@@ -1455,8 +1456,8 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 
 	genHpt=aux.mcH.size() > 0 ? aux.mcH[0].p4.Pt():-99;
 
-	if(cand->size() == 0 or cand->at(0).H.jets.size() < 2) continue;
-	//if(cand->size() == 0 ) continue;
+       	// if(cand->size() == 0 or cand->at(0).H.jets.size() < 2) continue;
+	if(cand->size() == 0 ) continue;
         //std::cout << "cand->size() " << cand->size() << std::endl;
 	//std::cout << "cand->at(0).H.jets.size() " << cand->at(0).H.jets.size() << std::endl;
 	if(cand->size() > 1 ) 
@@ -1525,8 +1526,8 @@ double MyWeight = LumiWeights_.weight( Tnpv );
          FatH.eta = -99.;
         }
         FatH.phi = vhCand.FatH.p4.Phi();
-
         
+
 //        if(vhCand.FatH.FatHiggsFlag)  vhCand.FatH.subjetsSize; 
         nfathFilterJets=vhCand.FatH.subjetsSize;  
         for( int j=0; j < nfathFilterJets; j++ ){
@@ -1538,12 +1539,17 @@ double MyWeight = LumiWeights_.weight( Tnpv );
         FatH.filteredpt=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4).Pt();
         FatH.filteredeta=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4).Eta();
         FatH.filteredphi=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4).Phi();
-        }
+        fathFilterJets.cosTheta[0]=  vhCand.FatH.helicities[0];
+	fathFilterJets.cosTheta[1]=  vhCand.FatH.helicities[1];
+	}
         else if(nfathFilterJets==3){
         FatH.filteredmass=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4+vhCand.FatH.jets[2].p4).M();
         FatH.filteredpt=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4+vhCand.FatH.jets[2].p4).Pt();
         FatH.filteredeta=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4+vhCand.FatH.jets[2].p4).Eta();
         FatH.filteredphi=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4+vhCand.FatH.jets[2].p4).Phi();
+	fathFilterJets.cosTheta[0]=  vhCand.FatH.helicities[0];
+	fathFilterJets.cosTheta[1]=  vhCand.FatH.helicities[1];
+	fathFilterJets.cosTheta[2]=  vhCand.FatH.helicities[2];
         }
  
         naJetsFat=vhCand.additionalJetsFat.size();
@@ -1552,7 +1558,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
             aJetsFat.set(vhCand.additionalJetsFat[j],j);
           }
 
- 
+	
         } // FatHiggsFlag
 
         hJets.reset();
