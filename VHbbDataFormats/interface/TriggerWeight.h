@@ -267,25 +267,51 @@ float scaleMuOr30IsoHLT(float pt1, float eta1)
 }
 
 
-//For 2012A HLT_DiCentralPFJet30_PFMHT80, valid for pfMET > 110 GeV:
-
+//For 2012A HLT_DiCentralPFJet30_PFMHT80, valid for pfMET > 100 GeV:
 double scaleDiJet30MHT80_2012A(double x)
 {
-  if(x<110) return 0;
-  return   (1e0 - exp(-0.0225*(x-36.2)));
+  if(x<100) return 0;
+  return   (1e0 - exp(-0.04197*(x-75.73)) * 0.9721) ;
 }
-//For 2012B HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned, valid for pfMET > 120 GeV:
+//For 2012B HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned, valid for pfMET > 100 GeV:
 double scaleSumpT100MET100_2012B(double x)
 {
-  if(x<110) return 0;
-  return  (1e0 - exp(-0.0144*(x)));
+  if(x<100) return 0;
+  return   (1e0 - exp(-0.06704*(x-96.84)) * 0.9199) ;
 }
 //For 2012A+B HLT_PFMET150, valid for pfMET > 150 GeV:
 double scalePFMET150_2012AB(double x)
 {
   if(x<150) return 0;
-  return  (1e0 - exp(-0.0679*(x-143.4)));
+  return  (1e0 - exp(-0.07135*(x-147.4)) * 0.9707);
 }
+
+
+//For 2012A HLT_PFMET150 OR HLT_DiCentralPFJet30_PFMHT80, valid for pfMET > 100 GeV:
+double scalePFMET150orDiJetMET_2012A(double x)
+{
+  if(x<100) return 0;
+  return  (1e0 - exp(-0.0412*(x-75.52)) * 0.9772);
+}
+
+//For 2012B HLT_PFMET150 OR HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned, valid for pfMET > 100 GeV:
+double scalePFMET150orDiJetMET_2012B(double x)
+{
+  if(x<100) return 0;
+  return  (1e0 - exp(-0.05482*(x-95.59)) * 0.9702);
+}
+
+
+//For 2012C HLT_PFMET150 OR HLT_DiCentralJetSumpT100_dPhi05_DiCentralPFJet60_25_PFMET100_HBHENoiseCleaned, valid for pfMET > 100 GeV:
+double scalePFMET150orDiJetMET_2012C(double x)
+{
+  if(x<100) return 0;
+  return  (1e0 - exp(-0.05627*(x-95.15)) * 0.9659);
+}
+
+
+
+
 
 float doubleEle2012A( float pt1, float eta1, float pt2, float eta2)
 {

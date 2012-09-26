@@ -712,6 +712,7 @@ int main(int argc, char* argv[])
   float weightTrig2012A, weightTrig2012ADiMuon, weightTrig2012ADiEle, weightTrig2012ASingleMuon, weightTrig2012AMuonPlusWCandPt, weightTrig2012ASingleEle;  
 
   float weightTrig2012DiJet30MHT80,weightTrig2012PFMET150,weightTrig2012SumpT100MET100;
+  float weightTrig2012APFMET150orDiJetMET, weightTrig2012BPFMET150orDiJetMET, weightTrig2012CPFMET150orDiJetMET; 
 
 
   int WplusMode,WminusMode;
@@ -1044,6 +1045,11 @@ int main(int argc, char* argv[])
   _outTree->Branch("weightTrig2012DiJet30MHT80", &weightTrig2012DiJet30MHT80,"weightTrig2012DiJet30MHT80/F");
   _outTree->Branch("weightTrig2012PFMET150", &weightTrig2012PFMET150,"weightTrig2012PFMET150/F");
   _outTree->Branch("weightTrig2012SumpT100MET100", &weightTrig2012SumpT100MET100,"weightTrig2012SumpT100MET100/F");
+  _outTree->Branch("weightTrig2012APFMET150orDiJetMET", &weightTrig2012APFMET150orDiJetMET,"weightTrig2012APFMET150orDiJetMET/F");
+  _outTree->Branch("weightTrig2012BPFMET150orDiJetMET", &weightTrig2012BPFMET150orDiJetMET,"weightTrig2012BPFMET150orDiJetMET/F");
+  _outTree->Branch("weightTrig2012CPFMET150orDiJetMET", &weightTrig2012CPFMET150orDiJetMET,"weightTrig2012CPFMET150orDiJetMET/F");
+
+
 
 
   _outTree->Branch("deltaPullAngleAK7", &deltaPullAngleAK7  ,  "deltaPullAngleAK7/F");
@@ -2006,9 +2012,14 @@ double MyWeight = LumiWeights_.weight( Tnpv );
         weightTrigMET150 = triggerWeight.scaleMET150(MET.et);
         weightTrigMET802CJet= weightTrigMET80 * weightTrig2CJet20;
         weightTrigMET1002CJet= weightTrigMET100 * weightTrig2CJet20;
-         weightTrig2012DiJet30MHT80=triggerWeight.scaleDiJet30MHT80_2012A(vhCand.V.mets.at(0).p4.Pt());
-          weightTrig2012PFMET150=triggerWeight.scalePFMET150_2012AB(vhCand.V.mets.at(0).p4.Pt());
-          weightTrig2012SumpT100MET100=triggerWeight.scaleSumpT100MET100_2012B(vhCand.V.mets.at(0).p4.Pt());
+        weightTrig2012DiJet30MHT80=triggerWeight.scaleDiJet30MHT80_2012A(vhCand.V.mets.at(0).p4.Pt()); 
+        weightTrig2012PFMET150=triggerWeight.scalePFMET150_2012AB(vhCand.V.mets.at(0).p4.Pt()); // demonstrated to hold also for RunC (used averaged efficiency)
+        weightTrig2012SumpT100MET100=triggerWeight.scaleSumpT100MET100_2012B(vhCand.V.mets.at(0).p4.Pt()); // demonstrated to hold also for RunC (used averaged efficiency)
+        weightTrig2012APFMET150orDiJetMET=triggerWeight.scalePFMET150orDiJetMET_2012A(vhCand.V.mets.at(0).p4.Pt()); 
+        weightTrig2012BPFMET150orDiJetMET=triggerWeight.scalePFMET150orDiJetMET_2012B(vhCand.V.mets.at(0).p4.Pt()); 
+        weightTrig2012CPFMET150orDiJetMET=triggerWeight.scalePFMET150orDiJetMET_2012C(vhCand.V.mets.at(0).p4.Pt()); 
+
+
 }
 	if( Vtype == VHbbCandidate::Znn ){
 	  nvlep=0;
