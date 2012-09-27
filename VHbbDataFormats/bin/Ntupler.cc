@@ -793,7 +793,7 @@ int main(int argc, char* argv[])
   JECFWLite jec(ana.getParameter<std::string>("jecFolder"));
 
   bool isMC_( ana.getParameter<bool>("isMC") );  
-    TriggerReader trigger(isMC_);
+    TriggerReader trigger(false);
    TriggerReader patFilters(false);
   if(isMC_) 
   {
