@@ -23,7 +23,7 @@ process.fwliteInput = cms.PSet(
     PUmcfileName2011B= cms.string("Summer12MCObserved.root"),
     PUdatafileName2011B = cms.string("MyDataPileupHistogramObserved.root"),
     PUmcfileName = cms.string("MC_S10_fromTwiki_60bins.root"),
-    PUdatafileName = cms.string("data_PU_60bins_190456-202305.root"),
+    PUdatafileName = cms.string("data_PU_60bins_190456-202305_69.4mb.root"),
     Weight3DfileName = cms.string(""),
     maxEvents   = cms.int32(-1),                             ## optional
     runMin  = cms.int32(-1),
@@ -34,7 +34,7 @@ process.fwliteInput = cms.PSet(
     )
 
 # get JSON file 
-JSONfile = 'Cert_190456-200601_8TeV_PromptReco_Collisions12_JSON.txt'
+JSONfile = 'Cert_190456-203002_8TeV_PromptReco_Collisions12_JSON.txt'
 lumiList = LumiList.LumiList (filename = JSONfile).getCMSSWString().split(',')
 
 #Uncomment to run with JSON
