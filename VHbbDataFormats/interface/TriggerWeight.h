@@ -123,7 +123,7 @@ static  std::pair<float,float> efficiencyFromPtEta(float pt1, float eta1, TTree 
 double scaleDoubleEle17Ele8Aug( std::vector<float> pt, std::vector<float> eta )
 {
    std::vector< std::vector<float> > allEleWithEffs;
-for(unsigned int j=0; j< pt.size(); j++)
+for(unsigned int j=0; j< pt.size() && j < 10 ; j++)
  {
   std::vector<float> thisEleEffs;
   thisEleEffs.push_back(efficiencyFromPtEta(pt[j],eta[j],tscaleHLTele1Aug).first);
@@ -140,7 +140,7 @@ for(unsigned int j=0; j< pt.size(); j++)
 double scaleDoubleEle17Ele8( std::vector<float> pt, std::vector<float> eta )
 {
    std::vector< std::vector<float> > allEleWithEffs;
-for(unsigned int j=0; j< pt.size(); j++)
+for(unsigned int j=0; j< pt.size() && j<10; j++)
  {
   std::vector<float> thisEleEffs;
   thisEleEffs.push_back(efficiencyFromPtEta(pt[j],eta[j],tscaleHLTele1).first);
