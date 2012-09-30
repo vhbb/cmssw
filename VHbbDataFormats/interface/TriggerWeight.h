@@ -187,7 +187,7 @@ double scaleJet30Jet25( std::vector<float> pt, std::vector<float> eta)
 {
 
   std::vector< std::vector<float> > allJetsWithEffs;
-for(unsigned int j=0; j< pt.size(); j++)
+for(unsigned int j=0; j< pt.size() && j < 10 ; j++)
  {
   std::vector<float> thisJetEffs;
   thisJetEffs.push_back(efficiencyFromPtEta(pt[j],eta[j],tscaleHLTeleJet1).first);
@@ -241,7 +241,7 @@ double scale2CentralJet( std::vector<float> pt, std::vector<float> eta)
 {
 
   std::vector< std::vector<float> > allJetsWithEffs;
-for(unsigned int j=0; j< pt.size(); j++)
+for(unsigned int j=0; j< pt.size() && j < 10; j++)
  {
   if(fabs(eta[j]) < 2.5)
   {
