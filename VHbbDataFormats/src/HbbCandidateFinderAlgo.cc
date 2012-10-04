@@ -376,7 +376,7 @@ bool HbbCandidateFinderAlgo::findDiJetsHighestPt (const std::vector<VHbbEvent::S
   for (unsigned int i =0; i< jets.size()-1; ++i){
     for (unsigned int j =i+1; j< jets.size(); ++j){
       float pt = (jets[i].p4+jets[j].p4).Pt();
-      if (pt>highestPt && jets[j].p4.Pt()> jetPtThreshold && jets[i].p4.Pt()> jetPtThreshold && fabs(jets[i].p4.Eta()) < etaThr &&  fabs(jets[j].p4.Eta()) < etaThr && jetID(jets[i]) && jetID(jets[j]) && jets[i].puJetIdL && jets[j].puJetIdL ){
+      if (pt>highestPt && jets[j].p4.Pt()> jetPtThreshold && jets[i].p4.Pt()> jetPtThreshold && fabs(jets[i].p4.Eta()) < etaThr &&  fabs(jets[j].p4.Eta()) < etaThr && jetID(jets[i]) && jetID(jets[j]) && jets[i].puJetIdL >0&& jets[j].puJetIdL >0 ){
 	highestPt = pt;
 	highesti=i;
 	highestj=j;
