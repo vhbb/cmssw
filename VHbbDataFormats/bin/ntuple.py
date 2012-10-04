@@ -9,7 +9,7 @@ process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(
 
 
-"file:/gpfs/ddn/srm/cms/store/user/arizzi/ZJetsToNuNu_50_HT_100_TuneZ2Star_8TeV_madgraph/ZJetsToNuNu_50_HT_100_TuneZ2Star_8TeV_madgraph_Summer12_DR53X-PU_S10_START53_V7A-v1_EDMNtuple_V42_ProcV1/9803889241b1fc304f795d3b3875632d/PAT.edm_100_2_bTX.root"
+"file:/gpfs/ddn/srm/cms/store/user/lpchbb/degrutto/TT_CT10_TuneZ2star_8TeV-powheg-tauolaSummer12_DR53X-PU_S10_START53_V7A-v2/degrutto/TT_CT10_TuneZ2star_8TeV-powheg-tauola/HBB_EDMNtupleV42/9803889241b1fc304f795d3b3875632d/PAT.edm_693_1_Sys.root"      
 ###"dcache:///pnfs/cms/WAX/11/store/user/lpchbb/msegala/WH_WToLNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_May2012Prod_2/e63abc9239312b3f728ddbd5ef32b303/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm_11_1_oQQ.root" ,
 ##    "../../HbbAnalyzer/test/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm.root",
 #"dcache:///cmsdcache//pnfs/pi.infn.it/data/cms/store/user/tboccali/WH_WToLNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_ProcV1_WH_WToLNu_HToBB_M-120/14fe2b624ddea84f5c39709f51bf546f/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm_51_1_3LJ.root"
@@ -24,6 +24,8 @@ process.fwliteInput = cms.PSet(
     PUdatafileName2011B = cms.string("MyDataPileupHistogramObserved.root"),
     PUmcfileName = cms.string("MC_S10_fromTwiki_60bins.root"),
     PUdatafileName = cms.string("data_PU_60bins_190456-202305_69.4mb.root"),
+    PUdatafileNameMinus = cms.string("data_PU_60bins_190456-202305_66.5mb.root"),
+    PUdatafileNamePlus = cms.string("data_PU_60bins_190456-202305_72.4mb.root"),
     Weight3DfileName = cms.string(""),
     maxEvents   = cms.int32(-1),                             ## optional
     runMin  = cms.int32(-1),
@@ -161,6 +163,46 @@ process.Analyzer = cms.PSet(
     hltSingleEleV4FileName = cms.string("TriggerEfficiency_Electrons_PromptV4Aug05PromptV6.root"),
     idEleFileName = cms.string("ScaleFactor_PFElectrons_DataMontecarlo.root"),
     hltMuOr30FileName =  cms.string("ScaleFactor_muonEffsIsoToHLT2.2fb_efficiency.root"),
+    hltSingleEle2012Awp95 = cms.string("triggerRootFiles/SingleEle.TrigEff.wp95.2012ABC.root"),
+    hltSingleEle2012Awp80 = cms.string("triggerRootFiles/SingleEle.TrigEff.wp80.2012ABC.root"),
+    hltSingleMuon2012A = cms.string("triggerRootFiles/SingleMu24OR40.TrigEff.2012ABC.root"),
+    hltDoubleEle2012A_leg8 = cms.string("triggerRootFiles/DoubleEle8.TrigEff.wp95.2012ABC.root"),
+    hltDoubleEle2012A_leg17 = cms.string("triggerRootFiles/DoubleEle17.TrigEff.wp95.2012ABC.root"),
+    hltDoubleMuon2012A_leg8 = cms.string("triggerRootFiles/DoubleMu8.TrigEff.2012ABC.root"),
+    hltDoubleMuon2012A_leg17 = cms.string("triggerRootFiles/DoubleMu17.TrigEff.2012ABC.root"),
+    hltMuPlusWCandPt2012A_legMu = cms.string("triggerRootFiles/SingleMu20Not24Or40.TrigEff.2012ABC.root"),
+    hltMuPlusWCandPt2012A_legW = cms.string("triggerRootFiles/WCandPt.TrigEff.2012ABC.root"),
+    hltDoubleMuon2012A_dZ = cms.string("triggerRootFiles/DoubleMuDz.TrigEff.2012ABC.root"),
+    hltDoubleEle2012A_dZ = cms.string("triggerRootFiles/DoubleEleDz.TrigEff.2012ABC.root"),
+    idMu2012A = cms.string("triggerRootFiles/MuRecoId.ScaleFactor.2012ABC.root"),
+    idEle2012A = cms.string("triggerRootFiles/EleRecoId.ScaleFactor.wp95.2012ABC.root"),
+    idEle2012Awp80 = cms.string("triggerRootFiles/EleRecoId.ScaleFactor.wp80.2012ABC.root"),
+
+    jecFolder = cms.string("jec"),
+    csvDiscr = cms.string("csvdiscr.root"),
+    btagEffFileName = cms.string("btag_generic.txt")
+    )
+
+    
+  
+    
+process.Analyzer2012ABOnly = cms.PSet(
+    idMuFileName = cms.string("ScaleEffs42.root"),
+    hltMuFileName = cms.string("ScaleFactor_muonEffsOnlyIsoToHLT2.2fb_efficiency.root"),
+
+    hltEle1FileName = cms.string("Ele17.root"),
+    hltEle2FileName = cms.string("Ele8NotEle17.root"),
+    hltEle1AugFileName = cms.string("Ele17Aug5PromptRecoV6.root"),
+    hltEle2AugFileName = cms.string("Ele8NotEle17Aug5PromptRecoV6.root"),
+    idEle80FileName = cms.string("PFElectronToWP80.root"),
+    idEle95FileName = cms.string("PFElectronToWP95.root"),
+    hltJetEle1FileName = cms.string("TriggerEfficiency_Jet30_PromptV4Aug05PromptV6.root"),
+    hltJetEle2FileName = cms.string("TriggerEfficiency_JetNo30_Jet25_PromptV4Aug05PromptV6.root"),
+    recoEleFileName = cms.string("EleReco.root"),
+    hltSingleEleMayFileName = cms.string("TriggerEfficiency_Electrons_May10.root"),
+    hltSingleEleV4FileName = cms.string("TriggerEfficiency_Electrons_PromptV4Aug05PromptV6.root"),
+    idEleFileName = cms.string("ScaleFactor_PFElectrons_DataMontecarlo.root"),
+    hltMuOr30FileName =  cms.string("ScaleFactor_muonEffsIsoToHLT2.2fb_efficiency.root"),
     hltSingleEle2012Awp95 = cms.string("triggerRootFiles/SingleEle.TrigEff.wp95.2012AB.root"),
     hltSingleEle2012Awp80 = cms.string("triggerRootFiles/SingleEle.TrigEff.wp80.2012AB.root"),
     hltSingleMuon2012A = cms.string("triggerRootFiles/SingleMu24OR40.TrigEff.2012AB.root"),
@@ -175,13 +217,6 @@ process.Analyzer = cms.PSet(
     idMu2012A = cms.string("triggerRootFiles/MuRecoId.ScaleFactor.2012AB.root"),
     idEle2012A = cms.string("triggerRootFiles/EleRecoId.ScaleFactor.wp95.2012AB.root"),
     idEle2012Awp80 = cms.string("triggerRootFiles/EleRecoId.ScaleFactor.wp80.2012AB.root"),
+)
 
-    jecFolder = cms.string("jec"),
-    csvDiscr = cms.string("csvdiscr.root"),
-    btagEffFileName = cms.string("btag_generic.txt")
-    )
-
-    
-  
-    
 

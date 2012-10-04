@@ -24,7 +24,7 @@ class BTagShape
 {
  public: 
    BTagShape(){}
-   BTagShape(TFile *file ,const char * name,const std::vector<std::pair<float, float> > & cutsAndSF)
+   BTagShape(TFile *file ,const char * name,const std::vector<std::pair<float, float> > & cutsAndSF, float boundX, float boundY)
 
    {
      TH1F * m_h = (TH1F *) file->Get(name);
@@ -69,8 +69,8 @@ class BTagShape
           x.push_back(eq[eq.size()-i-1].first);
           y.push_back(eq[eq.size()-i-1].second);
       }
-      x.push_back(10.001);
-      y.push_back(10.001);
+      x.push_back(boundX);
+      y.push_back(boundY);
 
      m_i =  new ROOT::Math::Interpolator(x,y,ROOT::Math::Interpolation::kLINEAR);
   }
@@ -101,11 +101,11 @@ class BinnedBTagShape
 {
 public:
    BinnedBTagShape(){}
-  BinnedBTagShape(std::vector<EtaPtBin> & bins, std::vector< std::vector<std::pair<float, float> > > &  cutsAndSF, TFile * f, const char * name):m_bins(bins)
+  BinnedBTagShape(std::vector<EtaPtBin> & bins, std::vector< std::vector<std::pair<float, float> > > &  cutsAndSF, TFile * f, const char * name,float boundX,float boundY):m_bins(bins)
   {
    for(unsigned int i =0; i < bins.size(); i++)
    {
-     m_shapes.push_back( BTagShape(f , name, cutsAndSF[i]));
+     m_shapes.push_back( BTagShape(f , name, cutsAndSF[i],boundX,boundY));
    }
  }
 
@@ -128,7 +128,7 @@ class BTagShapeInterface
 {
  public:
   BTagShapeInterface(){}
-  BTagShapeInterface(const char * file, float scaleBC, float scaleL) : m_file(new TFile(file))
+  BTagShapeInterface(const char * file, float scaleBC, float scaleL, bool use4points=false, float boundX=1.0, float boundY=1.0) : m_file(new TFile(file))
   {
     std::vector<EtaPtBin> binsBC;
     std::vector< std::vector<std::pair<float, float> > > cutsAndSFB;
@@ -140,11 +140,21 @@ class BTagShapeInterface
       binsBC.push_back(bin);
       std::vector<std::pair< float, float > > cutsAndSFbinB;
       std::vector<std::pair< float, float > > cutsAndSFbinC;
-      float sft = beff::CSVT_SFb(bin.centerPt());
+
+      float sft = 0.94;
+      if(use4points)
+      {
+      sft+=scaleBC * beff::CSVT_SFb_error[i]; // add error
+      cutsAndSFbinB.push_back(std::pair<float, float>(0.98, sft));
+      sft+=scaleBC * beff::CSVT_SFb_error[i]*charmFactor; // charm additional error
+      cutsAndSFbinC.push_back(std::pair<float, float>(0.98, sft));
+      }
+      sft = beff::CSVT_SFb(bin.centerPt());
       sft+=scaleBC * beff::CSVT_SFb_error[i]; // add error
       cutsAndSFbinB.push_back(std::pair<float, float>(0.898, sft));
       sft+=scaleBC * beff::CSVT_SFb_error[i]*charmFactor; // charm additional error
       cutsAndSFbinC.push_back(std::pair<float, float>(0.898, sft));
+  
 
       float sfm = beff::CSVM_SFb(bin.centerPt());
       sfm+=scaleBC * beff::CSVM_SFb_error[i]; // add error
@@ -221,8 +231,8 @@ class BTagShapeInterface
     }
    
 
-    m_b = new BinnedBTagShape(binsBC,cutsAndSFB,m_file,"hb");
-    m_c = new BinnedBTagShape(binsBC,cutsAndSFC,m_file,"hc");
+    m_b = new BinnedBTagShape(binsBC,cutsAndSFB,m_file,"hb",boundX,boundY);
+    m_c = new BinnedBTagShape(binsBC,cutsAndSFC,m_file,"hc",boundX,boundY);
 
     std::vector<EtaPtBin> binsL;
     std::vector< std::vector<std::pair<float, float> > > cutsAndSFL;
@@ -274,7 +284,7 @@ class BTagShapeInterface
 
    }
  
-    m_l = new BinnedBTagShape(binsL,cutsAndSFL,m_file,"hl");
+    m_l = new BinnedBTagShape(binsL,cutsAndSFL,m_file,"hl",boundX,boundY);
 
 
   }
