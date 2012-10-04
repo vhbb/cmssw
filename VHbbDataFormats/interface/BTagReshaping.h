@@ -128,7 +128,7 @@ class BTagShapeInterface
 {
  public:
   BTagShapeInterface(){}
-  BTagShapeInterface(const char * file, float scaleBC, float scaleL, bool use4points=false, float boundX=1.0, float boundY=1.0) : m_file(new TFile(file))
+  BTagShapeInterface(const char * file, float scaleBC, float scaleL, bool use4points=false, float boundX=1.001, float boundY=1.001) : m_file(new TFile(file))
   {
     std::vector<EtaPtBin> binsBC;
     std::vector< std::vector<std::pair<float, float> > > cutsAndSFB;
