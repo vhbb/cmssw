@@ -53,16 +53,16 @@ void cmg::MuonFactory::set(const pat::MuonPtr& input, cmg::Muon* const output, c
 
     //get the magnetic field and calculate the covariance
     //matrix in cartesian coordinates
-    if( input->muonBestTrack().isNonnull()) {
+    if( input->innerTrack().isNonnull()) {
       edm::ESHandle<MagneticField> magfield;
       iSetup.get<IdealMagneticFieldRecord>().get(magfield); 
       
       GlobalTrajectoryParameters gp(GlobalPoint(input->vx(), input->vy(),  input->vz()),
-				    GlobalVector(input->muonBestTrack()->px(),input->muonBestTrack()->py(),input->muonBestTrack()->pz()),
-				    input->muonBestTrack()->charge(),
+				    GlobalVector(input->innerTrack()->px(),input->innerTrack()->py(),input->innerTrack()->pz()),
+				    input->innerTrack()->charge(),
 				    magfield.product());
       JacobianCurvilinearToCartesian curv2cart(gp);
-      CartesianTrajectoryError cartErr= ROOT::Math::Similarity(curv2cart.jacobian(), input->muonBestTrack()->covariance());
+      CartesianTrajectoryError cartErr= ROOT::Math::Similarity(curv2cart.jacobian(), input->innerTrack()->covariance());
       AlgebraicSymMatrix66  m = cartErr.matrix();
       output->covarianceMatrix_ = m;
     }

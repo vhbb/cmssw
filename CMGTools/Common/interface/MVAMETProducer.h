@@ -353,12 +353,7 @@ void MVAMETProducer< RecBosonType >::makeJets(std::vector<MetUtilities::JetInfo>
     //double lMVA = pCJet->passPuJetId("full", PileupJetIdentifier::kMedium );
     double lMVA = pCJet->puMva("philv1");//, PileupJetIdentifier::kMedium );
     // FIXME compute properly, according to what Phil does
-    //COLIN 53 
-    double lNeuFrac = 1.;
-    if (fabs(pCJet->eta())<2.5)
-      lNeuFrac = pCJet->component( reco::PFCandidate::gamma ).fraction() + pCJet->component( reco::PFCandidate::h0 ).fraction() + pCJet->component( reco::PFCandidate::egamma_HF ).fraction();
-    //COLIN old 52 recipe:
-    // double lNeuFrac = pCJet->component( reco::PFCandidate::gamma ).fraction() + pCJet->component( reco::PFCandidate::h0 ).fraction() + pCJet->component( reco::PFCandidate::egamma_HF ).fraction();
+    double lNeuFrac = pCJet->component( reco::PFCandidate::gamma ).fraction() + pCJet->component( reco::PFCandidate::h0 ).fraction() + pCJet->component( reco::PFCandidate::egamma_HF ).fraction();
     MetUtilities::JetInfo pJetObject; 
     pJetObject.p4       = pCJet->p4(); 
     pJetObject.mva      = lMVA;

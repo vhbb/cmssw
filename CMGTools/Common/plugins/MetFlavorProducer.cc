@@ -117,12 +117,7 @@ void MetFlavorProducer::makeJets(std::vector<MetUtilities::JetInfo> &iJetInfo,
     double lJec = 0;
     double lMVA = jetMVA(pCJet,lJec,iVertices[0],iVertices,false);
     double lJetEnergy = pCJet->correctedJet(0).pt()/pCJet->pt()*pCJet->energy();
-    // COLIN 53 
-    double lNeuFrac = 1.;
-    if (fabs(pCJet->eta())<2.5)
-      lNeuFrac = (pCJet->neutralEmEnergy() + pCJet->neutralHadronEnergy())/lJetEnergy;
-    // Old 52 recipe:
-    // double lNeuFrac = (pCJet->neutralEmEnergy() + pCJet->neutralHadronEnergy())/lJetEnergy;
+    double lNeuFrac = (pCJet->neutralEmEnergy() + pCJet->neutralHadronEnergy())/lJetEnergy;
     MetUtilities::JetInfo pJetObject; 
     pJetObject.p4       = pCJet->p4(); 
     pJetObject.mva      = lMVA;
