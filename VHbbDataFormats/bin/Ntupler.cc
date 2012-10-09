@@ -544,7 +544,7 @@ typedef struct
     numTracksSV[i] = j.vtxNTracks;
     vtxMass[i]= j.vtxMass;
     vtxPt[i]= j.vtxP4.Pt();
-    vtxEta[i]= j.vtxP4.Eta();
+    if(j.vtxP4.Pt() > 0) vtxEta[i]= j.vtxP4.Eta(); else  vtxEta[i]=-99;
     vtxPhi[i]= j.vtxP4.Phi();
     vtxE[i]= j.vtxP4.E();
     vtx3dL[i] = j.vtx3dL;
@@ -715,7 +715,7 @@ int main(int argc, char* argv[])
   float lheNj=0; //for the Madgraph sample stitching
   TrackSharingInfo TkSharing; // track sharing info;
 
-  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, genHpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweightP,PUweightM, PUweight2011B,PUweight1DObs;
+  float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, genHpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweightP,PUweightM, PUweightAB, PUweight2011B,PUweight1DObs;
   float PU0,PUp1,PUm1;
 
   float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart,weightEleTrigEleAugPart;
@@ -804,6 +804,7 @@ int main(int argc, char* argv[])
   std::string PUmcfileName_ = in.getParameter<std::string> ("PUmcfileName") ;
   std::string PUmcfileName2011B_ = in.getParameter<std::string> ("PUmcfileName2011B") ;
 
+  std::string PUdatafileNameAB = in.getParameter<std::string> ("PUdatafileNameAB") ;
   std::string PUdatafileName_ = in.getParameter<std::string> ("PUdatafileName") ;
   std::string PUdatafileName_plusOneSigma = in.getParameter<std::string> ("PUdatafileNamePlus") ;
   std::string PUdatafileName_minusOneSigma = in.getParameter<std::string> ("PUdatafileNameMinus") ;
@@ -826,7 +827,7 @@ int main(int argc, char* argv[])
   upBCShape4p = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 0.0, 0.0,true,1.001,1.001); 
   downBCShape4p = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 0.0, 0.0,true,1.005,1.005); 
   }
-  edm::LumiReWeighting   lumiWeights,lumiWeightsPl,lumiWeightsMi;
+  edm::LumiReWeighting   lumiWeights,lumiWeightsPl,lumiWeightsMi,lumiWeightsAB;
   edm::LumiReWeighting   lumiWeights1DObs;
 // edm::Lumi3DReWeighting   lumiWeights2011B;
   if(isMC_)
@@ -834,6 +835,7 @@ int main(int argc, char* argv[])
         	   lumiWeights = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_ , "pileup", "pileup");
         	   lumiWeightsPl = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_plusOneSigma , "pileup", "pileup");
         	   lumiWeightsMi = edm::LumiReWeighting(PUmcfileName_,PUdatafileName_minusOneSigma , "pileup", "pileup");
+        	   lumiWeightsAB = edm::LumiReWeighting(PUmcfileName_,PUdatafileNameAB , "pileup", "pileup");
         	   lumiWeights1DObs = edm::LumiReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
 
 //		   lumiWeights2011B = edm::Lumi3DReWeighting(PUmcfileName2011B_,PUdatafileName2011B_ , "pileup", "pileup");
@@ -852,6 +854,8 @@ int main(int argc, char* argv[])
   TH1F *  countWithPU = new TH1F("CountWithPU","CountWithPU", 1,0,2 );
   TH1F *  countWithPUP = new TH1F("CountWithPUP","CountWithPU plus one sigma", 1,0,2 );
   TH1F *  countWithPUM = new TH1F("CountWithPUM","CountWithPU minus one sigma", 1,0,2 );
+  TH1F *  countWithPUAB = new TH1F("CountWithPUAB","CountWithPU 2012AB", 1,0,2 );
+
   TH1F *  countWithPU2011B = new TH1F("CountWithPU2011B","CountWithPU2011B", 1,0,2 );
   TH3F *  input3DPU = new TH3F("Input3DPU","Input3DPU", 36,-0.5,35.5,36,-0.5,35.5, 36,-0.5,35.5 );
 
@@ -1109,6 +1113,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("PUweight",       &PUweight  ,  "PUweight/F");
   _outTree->Branch("PUweightP",       &PUweightP  ,  "PUweightP/F");
   _outTree->Branch("PUweightM",       &PUweightM  ,  "PUweightM/F");
+  _outTree->Branch("PUweightAB",       &PUweightAB  ,  "PUweightAB/F");
   _outTree->Branch("PUweight2011B",       &PUweight2011B  ,  "PUweight2011B/F");
   _outTree->Branch("PUweight1DObs",       &PUweight1DObs  ,  "PUweight1DObs/F");
   _outTree->Branch("eventFlav",       &eventFlav  ,  "eventFlav/I");
@@ -1331,6 +1336,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
       PUweight=1.;
       PUweightP=1.;
       PUweightM=1.;
+      PUweightAB=1.;
       PUweight2011B=1.;
       PUweight1DObs=1.;
  	  if(isMC_){
@@ -1341,6 +1347,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	  PUweight =  lumiWeights.weight( (int) aux.puInfo.truePU ); //use new method with "true PU"        
 	  PUweightP =  lumiWeightsPl.weight( (int) aux.puInfo.truePU ); //use new method with "true PU"        
 	  PUweightM =  lumiWeightsMi.weight( (int) aux.puInfo.truePU ); //use new method with "true PU"        
+	  PUweightAB =  lumiWeightsAB.weight( (int) aux.puInfo.truePU ); //use new method with "true PU"        
 	  pu->Fill(puit->second);
 	  // PU weight Run2011B
 	  // PU weight Run2011B
@@ -1358,6 +1365,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	countWithPU->Fill(1,PUweight);
 	countWithPUP->Fill(1,PUweightP);
 	countWithPUM->Fill(1,PUweightM);
+	countWithPUAB->Fill(1,PUweightAB);
 	countWithPU2011B->Fill(1,PUweight2011B);
       
 	//LHE Infos
@@ -2227,7 +2235,9 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	  if (aux.mcZ[i].status==3) {
 	    genZstar.mass = aux.mcZ[i].p4.M();
 	    genZstar.pt = aux.mcZ[i].p4.Pt();
-	    genZstar.eta = aux.mcZ[i].p4.Eta();
+//   genZstar.eta = aux.mcZ[i].p4.Eta();
+   if(genZstar.pt>0.1)      genZstar.eta = aux.mcZ[i].p4.Eta(); else genZstar.eta=-99;
+
 	    genZstar.phi = aux.mcZ[i].p4.Phi();
 	    genZstar.status = aux.mcZ[i].status;
 	    genZstar.charge = aux.mcZ[i].charge;
@@ -2240,7 +2250,8 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	    if ( abs(aux.mcZ[i].dauid[0])==13 || abs(aux.mcZ[i].dauid[0])==11 ) {
 	      genZ.mass = aux.mcZ[i].p4.M();
 	      genZ.pt = aux.mcZ[i].p4.Pt();
-	      genZ.eta = aux.mcZ[i].p4.Eta();
+//	      genZ.eta = aux.mcZ[i].p4.Eta();
+if(genZ.pt>0.1) genZ.eta = aux.mcZ[i].p4.Eta(); else genZ.eta=-99;
 	      genZ.phi = aux.mcZ[i].p4.Phi();
 	      genZ.status = aux.mcZ[i].status;
 	      genZ.charge = aux.mcZ[i].charge;

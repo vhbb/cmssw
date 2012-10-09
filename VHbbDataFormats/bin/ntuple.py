@@ -23,6 +23,7 @@ process.fwliteInput = cms.PSet(
     PUmcfileName2011B= cms.string("Summer12MCObserved.root"),
     PUdatafileName2011B = cms.string("MyDataPileupHistogramObserved.root"),
     PUmcfileName = cms.string("MC_S10_fromTwiki_60bins.root"),
+    PUdatafileNameAB = cms.string("data_PU_60bins_190456-196509_69.4mb.root"),
     PUdatafileName = cms.string("data_PU_60bins_190456-202305_69.4mb.root"),
     PUdatafileNameMinus = cms.string("data_PU_60bins_190456-202305_66.5mb.root"),
     PUdatafileNamePlus = cms.string("data_PU_60bins_190456-202305_72.4mb.root"),
