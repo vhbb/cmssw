@@ -1,20 +1,27 @@
-const int n = 12;
-//const int n = 24;
+const int n = 24-2;
 std::string files[n]=
 {
-"8TeV/WenuH_110_8TeV.root",
-"8TeV/WenuH_115_8TeV.root",
-"8TeV/WenuH_120_8TeV.root",
-"8TeV/WenuH_125_8TeV.root",
-"8TeV/WenuH_130_8TeV.root",
-"8TeV/WenuH_135_8TeV.root",
-"8TeV/WmunuH_110_8TeV.root",
-"8TeV/WmunuH_115_8TeV.root",
-"8TeV/WmunuH_120_8TeV.root",
-"8TeV/WmunuH_125_8TeV.root",
-"8TeV/WmunuH_130_8TeV.root",
-"8TeV/WmunuH_135_8TeV.root"
-};
-
-
-
+"vhbb_WS_BDT_M110_ZeeHighPt_8TeV.root",
+"vhbb_WS_BDT_M110_ZeeLowPt_8TeV.root",
+"vhbb_WS_BDT_M110_ZmmHighPt_8TeV.root",
+"vhbb_WS_BDT_M110_ZmmLowPt_8TeV.root",
+"vhbb_WS_BDT_M115_ZeeHighPt_8TeV.root",
+"vhbb_WS_BDT_M115_ZeeLowPt_8TeV.root",
+"vhbb_WS_BDT_M115_ZmmHighPt_8TeV.root",
+"vhbb_WS_BDT_M115_ZmmLowPt_8TeV.root",
+"vhbb_WS_BDT_M120_ZeeHighPt_8TeV.root",
+"vhbb_WS_BDT_M120_ZeeLowPt_8TeV.root",
+"vhbb_WS_BDT_M120_ZmmHighPt_8TeV.root",
+"vhbb_WS_BDT_M120_ZmmLowPt_8TeV.root",
+//"vhbb_WS_BDT_M125_ZeeHighPt_8TeV.root",
+//"vhbb_WS_BDT_M125_ZeeLowPt_8TeV.root",
+"vhbb_WS_BDT_M125_ZmmHighPt_8TeV.root",
+"vhbb_WS_BDT_M125_ZmmLowPt_8TeV.root",
+"vhbb_WS_BDT_M130_ZeeHighPt_8TeV.root",
+"vhbb_WS_BDT_M130_ZeeLowPt_8TeV.root",
+"vhbb_WS_BDT_M130_ZmmHighPt_8TeV.root",
+"vhbb_WS_BDT_M130_ZmmLowPt_8TeV.root",
+"vhbb_WS_BDT_M135_ZeeHighPt_8TeV.root",
+"vhbb_WS_BDT_M135_ZeeLowPt_8TeV.root",
+"vhbb_WS_BDT_M135_ZmmHighPt_8TeV.root",
+"vhbb_WS_BDT_M135_ZmmLowPt_8TeV.root"};

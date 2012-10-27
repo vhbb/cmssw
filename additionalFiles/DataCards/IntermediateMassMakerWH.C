@@ -42,13 +42,13 @@ std::string massS[51]={
 "135"};
 
 
-void makeSystPlot( TFile * f, TString oldFolder, RooWorkspace *WS,  string channel, string syst, int toMassNo, int fromMassNo) //massNo 0-51, see xSec7TeV.h 
+void makeSystPlot( TFile * f, TString myRooWS, RooWorkspace *WS,  string channel, string syst, int toMassNo, int fromMassNo) //massNo 0-51, see xSec7TeV.h 
 {
 
   RooArgList  * hobs = new RooArgList("hobs");
   RooRealVar BDT("CMS_vhbb_BDT_Wln_8TeV", "CMS_vhbb_BDT_Wln_8TeV", -1, 1);///OLD VARIABLE NAME HERE
   hobs->add(*WS->var("CMS_vhbb_BDT_Wln_8TeV"));  ///NEW VARIABLE NAME HERE
-  RooWorkspace *tempWS =  (RooWorkspace*) f->Get(oldFolder.Data());
+  RooWorkspace *tempWS =  (RooWorkspace*) f->Get(myRooWS.Data());
   TString systT(syst);
   TString chanT(channel);
 
@@ -63,7 +63,7 @@ void makeSystPlot( TFile * f, TString oldFolder, RooWorkspace *WS,  string chann
     kount++;
     std::string namen  = channel;
     
-    std::cout << oldFolder.Data() << std::endl;
+    std::cout << myRooWS.Data() << std::endl;
     std::cout << namen << std::endl;
     RooDataHist* tempRooDataHistNom = (RooDataHist*)  tempWS->data(namen.c_str());
     TH1 *tempHistNom = tempRooDataHistNom->createHistogram(namen.c_str(),BDT,Binning(bins));
@@ -82,7 +82,7 @@ void makeSystPlot( TFile * f, TString oldFolder, RooWorkspace *WS,  string chann
 
   if(syst == "stat")
   {
-   if(oldFolder.Contains("Wen"))
+   if(myRooWS.Contains("Wen"))
    { 
      nameUp  = channel + "_CMS_vhbb_stat" + channel + "_WenuUp";
      namen  = channel;
@@ -119,9 +119,9 @@ void makeSystPlot( TFile * f, TString oldFolder, RooWorkspace *WS,  string chann
   nameDown = channel + "_CMS_" + syst + "Down";
   }
  
-  if((syst == "stat") && (oldFolder.Contains("High")))
+  if((syst == "stat") && (myRooWS.Contains("High")))
   {
-   if(oldFolder.Contains("Wen"))
+   if(myRooWS.Contains("Wen"))
    { 
      nameUp  = channel + "_CMS_vhbb_stat" + channel + "_Wenu2Up";
      namen  = channel;
@@ -159,7 +159,7 @@ void makeSystPlot( TFile * f, TString oldFolder, RooWorkspace *WS,  string chann
      nameDown  = channel + "_CMS_vhbb_WModelDown";
   }
 
-  if( systT.Contains("stat") && (oldFolder.Contains("Wen")) && IFILE.Contains("8TeV") && !(oldFolder.Contains("High")))
+  if( systT.Contains("stat") && (myRooWS.Contains("Wen")) && IFILE.Contains("8TeV") && !(myRooWS.Contains("High")))
   { 
      nameUp  = channel + "_CMS_vhbb_stat" + channel + "_Wenu_8TeVUp";
      namen  = channel;
@@ -175,7 +175,7 @@ void makeSystPlot( TFile * f, TString oldFolder, RooWorkspace *WS,  string chann
 
   }
 
-  if( systT.Contains("stat") && (oldFolder.Contains("Wmn")) && IFILE.Contains("8TeV") && !(oldFolder.Contains("High")))
+  if( systT.Contains("stat") && (myRooWS.Contains("Wmn")) && IFILE.Contains("8TeV") && !(myRooWS.Contains("High")))
   { 
      nameUp  = channel + "_CMS_vhbb_stat" + channel + "_Wmunu_8TeVUp";
      namen  = channel;
@@ -192,7 +192,7 @@ void makeSystPlot( TFile * f, TString oldFolder, RooWorkspace *WS,  string chann
   }
 
 
-  if( systT.Contains("stat") && (oldFolder.Contains("Wen")) && IFILE.Contains("8TeV") && (oldFolder.Contains("High")))
+  if( systT.Contains("stat") && (myRooWS.Contains("Wen")) && IFILE.Contains("8TeV") && (myRooWS.Contains("High")))
   { 
      nameUp  = channel + "_CMS_vhbb_stat" + channel + "_Wenu2_8TeVUp";
      namen  = channel;
@@ -208,7 +208,7 @@ void makeSystPlot( TFile * f, TString oldFolder, RooWorkspace *WS,  string chann
 
   }
 
-  if( systT.Contains("stat") && (oldFolder.Contains("Wmn")) && IFILE.Contains("8TeV") && (oldFolder.Contains("High")))
+  if( systT.Contains("stat") && (myRooWS.Contains("Wmn")) && IFILE.Contains("8TeV") && (myRooWS.Contains("High")))
   { 
      nameUp  = channel + "_CMS_vhbb_stat" + channel + "_Wmunu2_8TeVUp";
      namen  = channel;
@@ -236,7 +236,7 @@ if(writeIt)
   RooDataHist* tempRooDataHistNom = (RooDataHist*)  tempWS->data(namen.c_str());
 
 
-  std::cout << oldFolder.Data() << std::endl; 
+  std::cout << myRooWS.Data() << std::endl; 
   std::cout << nameUp.c_str() << std::endl; 
   
 
@@ -297,7 +297,7 @@ if(writeIt)
 
 
 
-void Process(TString fname, TString oldFolder, int toMass, int fromMass)
+void Process(TString fname, TString myRooWS, int toMass, int fromMass)
 {
 
 
@@ -319,7 +319,7 @@ void Process(TString fname, TString oldFolder, int toMass, int fromMass)
   TFile * outfile = new TFile(fname.Data(), "RECREATE");
 
   using namespace RooFit;
-  RooWorkspace *myWS = new RooWorkspace(oldFolder.Data(),oldFolder.Data());
+  RooWorkspace *myWS = new RooWorkspace(myRooWS.Data(),myRooWS.Data());
   myWS->factory("CMS_vhbb_BDT_Wln_8TeV[-1.,1.]"); ///NEW VARIABLE NAME HERE 
 
   
@@ -327,15 +327,15 @@ void Process(TString fname, TString oldFolder, int toMass, int fromMass)
   {
      kount2 = 0;  
     for (int s =0; s<5 ; s++ ){
-      makeSystPlot( file, oldFolder, myWS,  channels[c], systs[s], toMass, fromMass );
+      makeSystPlot( file, myRooWS, myWS,  channels[c], systs[s], toMass, fromMass );
     }
   }
 
 
   if(!(IFILE.Contains("8TeV")))
   {
-  makeSystPlot(file, oldFolder, myWS, "WjLF", "WModel",toMass, fromMass);
-  makeSystPlot(file, oldFolder, myWS, "WjHF", "WModel",toMass, fromMass);
+  makeSystPlot(file, myRooWS, myWS, "WjLF", "WModel",toMass, fromMass);
+  makeSystPlot(file, myRooWS, myWS, "WjHF", "WModel",toMass, fromMass);
   }
 
   myWS->writeToFile(fname.Data());  
@@ -362,52 +362,52 @@ maxCount=0;
 
 for(int i = 0; i < n; i++)
 {
-  TString oldFolder;
+  TString myRooWS;
   IFILE = files[i];
 
 if(IFILE.Contains("7TeV"))
 {
-  if(IFILE.Contains("Wenu")) oldFolder = "Wenu";
-  if(IFILE.Contains("Wmn"))oldFolder = "Wmunu";
+  if(IFILE.Contains("Wenu")) myRooWS = "Wenu";
+  if(IFILE.Contains("Wmn"))myRooWS = "Wmunu";
 }
 
-  if(IFILE.Contains ("Wmn") && IFILE.Contains("Low") && IFILE.Contains("8TeV"))  oldFolder = "WmnLowPt_8TeV";
-  if(IFILE.Contains ("Wen") && IFILE.Contains("Low") && IFILE.Contains("8TeV"))  oldFolder = "WenLowPt_8TeV";
-  if(IFILE.Contains ("Wmn") && IFILE.Contains("High") && IFILE.Contains("8TeV"))  oldFolder = "WmnHighPt_8TeV";
-  if(IFILE.Contains ("Wen") && IFILE.Contains("High") && IFILE.Contains("8TeV"))  oldFolder = "WenHighPt_8TeV";
+  if(IFILE.Contains ("Wmn") && IFILE.Contains("Low") && IFILE.Contains("8TeV"))  myRooWS = "WmnLowPt_8TeV";
+  if(IFILE.Contains ("Wen") && IFILE.Contains("Low") && IFILE.Contains("8TeV"))  myRooWS = "WenLowPt_8TeV";
+  if(IFILE.Contains ("Wmn") && IFILE.Contains("High") && IFILE.Contains("8TeV"))  myRooWS = "WmnHighPt_8TeV";
+  if(IFILE.Contains ("Wen") && IFILE.Contains("High") && IFILE.Contains("8TeV"))  myRooWS = "WenHighPt_8TeV";
 
   if((IFILE.Contains("110")))
   {
-     Process(IFILE, oldFolder, 0,0);
-     Process(IFILE, oldFolder, 1,0);
-     Process(IFILE, oldFolder, 2,0);
-     Process(IFILE, oldFolder, 3,0);
-     Process(IFILE, oldFolder, 4,0);
+     Process(IFILE, myRooWS, 0,0);
+     Process(IFILE, myRooWS, 1,0);
+     Process(IFILE, myRooWS, 2,0);
+     Process(IFILE, myRooWS, 3,0);
+     Process(IFILE, myRooWS, 4,0);
   }
   if((IFILE.Contains("115")))
   {
-     for(int to = 5; to < 15; to++)   Process(IFILE, oldFolder, to , 10);
+     for(int to = 5; to < 15; to++)   Process(IFILE, myRooWS, to , 10);
   }
 
   if((IFILE.Contains("120")))
   {
-     for(int to = 15; to < 25; to++)   Process(IFILE, oldFolder,to , 20);
+     for(int to = 15; to < 25; to++)   Process(IFILE, myRooWS,to , 20);
   }
 
   if((IFILE.Contains("125")))
   {
-     for(int to = 25; to < 35; to++)   Process(IFILE, oldFolder,to , 30);
+     for(int to = 25; to < 35; to++)   Process(IFILE, myRooWS,to , 30);
   }
 
   if((IFILE.Contains("130")))
   {
-     for(int to = 35; to < 45; to++)   Process(IFILE, oldFolder,to , 40);
+     for(int to = 35; to < 45; to++)   Process(IFILE, myRooWS,to , 40);
   }
 
 
   if((IFILE.Contains("135")))
   {
-     for(int to = 45; to < 51; to++)   Process(IFILE, oldFolder,to , 50);
+     for(int to = 45; to < 51; to++)   Process(IFILE, myRooWS,to , 50);
   }
 
   
