@@ -32,6 +32,8 @@ xSec7ZH, xSec7WH, or xSec8WH)
    c) correct the sed (replacement) commands to edit cards .root WS to new official formats
       (the ones from IntermediateMassMaker that do not have Masses in the
 filenames)
+   d) check that signal columns are correct (awk '{print $x}' commands have x
+ as signal columns!
 
 6) run scalerXXX.py
 

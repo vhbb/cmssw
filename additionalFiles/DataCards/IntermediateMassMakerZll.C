@@ -28,23 +28,92 @@
 #include "RooHistPdf.h"
 #include "tdrstyle.h"
 
-const int bins = 10;
+const int bins = 15;
 int kount;
 int kount2;
 TString IFILE;
 int maxCount;
-std::string massS[51]={
-"110","110_5","111","111_5","112","112_5","113","113_5","114","114_5",
-"115","115_5","116","116_5","117","117_5","118","118_5","119","119_5",
-"120","120_5","121","121_5","122","122_5","123","123_5","124","124_5",
-"125","125_5","126","126_5","127","127_5","128","128_5","129","129_5",
-"130","130_5","131","131_5","132","132_5","133","133_5","134","134_5",
-"135"};
+
+
+const int masspoints = 67;
+
+
+std::string massS[masspoints]={
+"110","110.5","111","111.5","112","112.5","113","113.5","114","114.5",
+"115","115.5","116","116.5","117","117.5","118","118.5","119","119.5",
+"120","120.5","121","121.5","122","122.5","123","123.5","124","124.5",
+"125","125.5","126","126.5","127","127.5","128","128.5","129","129.5",
+"130","130.5","131","131.5","132","132.5","133","133.5","134","134.5",
+"135","124.6","124.7","124.8","124.9","125.1","125.2","125.3","125.4",
+"125.6","125.7","125.8","125.9","126.1","126.2","126.3","126.4"
+};
+
+
+void Process(TString fname, TString myRooWS, int toMass, int fromMass)
+{
+
+
+
+
+  std::string channels[] = {"data_obs", "ZH", "TT",  "ZjLF", "ZjHF" , "VV" , "s_Top"};
+  std::string systs[] = {"eff_b", "fake_b_8TeV", "res_j", "scale_j" , "stat", "UEPS", "model" };
+
+  kount = 0;  
+
+  gROOT->SetStyle("Plain");
+  setTDRStyle();
+
+  TFile * file = new TFile(fname.Data(), "READ");
+  std::cout << "reading " << fname.Data() << std::endl;
+  TString fname2(fname.Data());
+  fname2.ReplaceAll("_WS_BDT_M110","");
+  fname2.ReplaceAll("_WS_BDT_M115","");
+  fname2.ReplaceAll("_WS_BDT_M120","");
+  fname2.ReplaceAll("_WS_BDT_M125","");
+  fname2.ReplaceAll("_WS_BDT_M130","");
+  fname2.ReplaceAll("_WS_BDT_M135","");
+  TString outname("./");
+  outname.Append(massS[toMass]);
+  outname.Append("/");
+  outname.Append(fname2.Data());
+  TFile * outfile = new TFile(outname.Data(), "RECREATE");
+
+  using namespace RooFit;
+  RooWorkspace *myWS = new RooWorkspace(myRooWS.Data(),myRooWS.Data());
+  myWS->factory("CMS_vhbb_BDT_Zll_8TeV[-1.,1.]"); ///NEW VARIABLE NAME HERE 
+
+
+  
+  
+  for (int c =0; c<7; c++)
+  {
+    kount2 = 0;  
+    for (int s =0; s<7 ; s++ ){
+      makeSystPlot( file, myRooWS, myWS,  channels[c], systs[s], toMass, fromMass );
+    }
+  }
+
+
+  
+
+
+
+  myWS->writeToFile(outname.Data());  
+  std::cout << std::endl << std::endl << std::endl << std::endl << "///////////////////////////" << std::endl;
+  std::cout << outname.Data() << " written" << std::endl;
+  std::cout << "///////////////////////////" << std::endl << std::endl << std::endl;
+
+
+  outfile->Write();
+  outfile->Close();
+
+
+}
+
 
 
 void makeSystPlot( TFile * f, TString myRooWS, RooWorkspace *WS,  string channel, string syst, int toMassNo, int fromMassNo) //massNo 0-51, see xSec7TeV.h 
 {
-
   RooArgList  * hobs = new RooArgList("hobs");
   RooRealVar BDT("CMS_vhbb_BDT_Zll_8TeV", "CMS_vhbb_BDT_Zll_8TeV", -1, 1);///OLD VARIABLE NAME HERE
   hobs->add(*WS->var("CMS_vhbb_BDT_Zll_8TeV"));  ///NEW VARIABLE NAME HERE
@@ -65,7 +134,7 @@ void makeSystPlot( TFile * f, TString myRooWS, RooWorkspace *WS,  string channel
     std::cout << "reading WS "<< myRooWS.Data() << std::endl;
     std::cout << namen << std::endl;
     RooDataHist* tempRooDataHistNom = (RooDataHist*)  tempWS->data(namen.c_str());
-    TH1 *tempHistNom = tempRooDataHistNom->createHistogram(namen.c_str(),BDT,Binning(bins));
+    TH1 *tempHistNom = tempRooDataHistNom->createHistogram(namen.c_str(),BDT,RooFit::Binning(bins));
     std::cout << namen << std::endl;
 
     RooDataHist *DHnom = new RooDataHist(channel.c_str(),"",*hobs,tempHistNom);  
@@ -82,6 +151,7 @@ void makeSystPlot( TFile * f, TString myRooWS, RooWorkspace *WS,  string channel
 
   if((syst == "stat"))
   {
+
     if(IFILE.Contains("7TeV"))
     {
       nameUp  = channel + "CMS_vhbb_stats_" + channel + "_" + myRooWS.Data() + "Up";
@@ -91,10 +161,22 @@ void makeSystPlot( TFile * f, TString myRooWS, RooWorkspace *WS,  string channel
     if(IFILE.Contains("8TeV"))
     { 
       nameUp  = channel + "CMS_vhbb_stats_" + channel + "_" + myRooWS.Data() + "Up";
-      namen  = channel;
       nameDown  = channel + "CMS_vhbb_stats_" + channel + "_" + myRooWS.Data() + "Down";
+      namen  = channel;
     }
+  }
 
+  else if(syst == "UEPS")
+  {
+   nameUp  = channel + syst + "Up";
+   namen  = channel;
+   nameDown = channel + syst + "Down";
+  }
+  else if(syst == "model")
+  {
+   nameUp  = channel + "CMS_vhbb_" + syst + "_" + channel + "Up";
+   namen  = channel;
+   nameDown  = channel + "CMS_vhbb_" + syst + "_" + channel + "Down";
   }
   else
   {
@@ -130,19 +212,19 @@ void makeSystPlot( TFile * f, TString myRooWS, RooWorkspace *WS,  string channel
     std::cout << myRooWS.Data() << std::endl; 
     std::cout << nameUp.c_str() << std::endl; 
  	 
-    TH1 *tempHistUp = tempRooDataHistUp->createHistogram(nameUp.c_str(),BDT,Binning(bins));
-    TH1 *tempHistDown = tempRooDataHistDown->createHistogram(nameDown.c_str(),BDT,Binning(bins));
+    TH1 *tempHistUp = tempRooDataHistUp->createHistogram(nameUp.c_str(),BDT,RooFit::Binning(bins));
+    TH1 *tempHistDown = tempRooDataHistDown->createHistogram(nameDown.c_str(),BDT,RooFit::Binning(bins));
     std::cout << namen.c_str() << std::endl;
-    TH1 *tempHistNom = tempRooDataHistNom->createHistogram(namen.c_str(),BDT,Binning(bins));
+    TH1 *tempHistNom = tempRooDataHistNom->createHistogram(namen.c_str(),BDT,RooFit::Binning(bins));
 
-    if(chanT.Contains("VH") && IFILE.Contains("7TeV"))
+    if(chanT.Contains("ZH") && IFILE.Contains("7TeV"))
     {
      tempHistUp->Scale(xSec7ZH[toMassNo]/xSec7ZH[fromMassNo]);
      tempHistDown->Scale(xSec7ZH[toMassNo]/xSec7ZH[fromMassNo]);
      tempHistNom->Scale(xSec7ZH[toMassNo]/xSec7ZH[fromMassNo]);
     }  
  
-   if(chanT.Contains("VH") && IFILE.Contains("8TeV"))
+   if(chanT.Contains("ZH") && IFILE.Contains("8TeV"))
    {
      tempHistUp->Scale(xSec8ZH[toMassNo]/xSec8ZH[fromMassNo]);
      tempHistDown->Scale(xSec8ZH[toMassNo]/xSec8ZH[fromMassNo]);
@@ -176,66 +258,12 @@ void makeSystPlot( TFile * f, TString myRooWS, RooWorkspace *WS,  string channel
    }
  }
 
-
 }
 
 
 
 
 
-
-void Process(TString fname, TString myRooWS, int toMass, int fromMass)
-{
-
-
-
-
-  std::string channels[] = {"data_obs", "VH", "TT",  "WjLF", "WjHF", "ZjLF", "ZjHF" , "VV" , "s_Top", "QCD"};
-  std::string systs[] = {"eff_b", "fake_b_8TeV", "res_j", "scale_j" , "stat" };
-
-  kount = 0;  
-
-  gROOT->SetStyle("Plain");
-  setTDRStyle();
-
-  TFile * file = new TFile(fname.Data(), "READ");
-  std::cout << "reading " << fname.Data() << std::endl;
-  TString outname(massS[toMass]);
-  outname.Append(".root");
-  fname.ReplaceAll(".root",outname.Data());
-  TFile * outfile = new TFile(fname.Data(), "RECREATE");
-
-  using namespace RooFit;
-  RooWorkspace *myWS = new RooWorkspace(myRooWS.Data(),myRooWS.Data());
-  myWS->factory("CMS_vhbb_BDT_Zll_8TeV[-1.,1.]"); ///NEW VARIABLE NAME HERE 
-
-
-  
-  
-  for (int c =0; c<10; c++)
-  {
-    kount2 = 0;  
-    for (int s =0; s<5 ; s++ ){
-      makeSystPlot( file, myRooWS, myWS,  channels[c], systs[s], toMass, fromMass );
-    }
-  }
-
-
-  
-
-
-
-  myWS->writeToFile(fname.Data());  
-  std::cout << std::endl << std::endl << std::endl << std::endl << "///////////////////////////" << std::endl;
-  std::cout << fname.Data() << " written" << std::endl;
-  std::cout << "///////////////////////////" << std::endl << std::endl << std::endl;
-
-
-  outfile->Write();
-  outfile->Close();
-
-
-}
 
   
 
@@ -243,10 +271,7 @@ void Process(TString fname, TString myRooWS, int toMass, int fromMass)
 
 void IntermediateMassMakerZll()
 {
-
 maxCount=0;
-
-
 
 
 for(int i = 0; i < n; i++)
@@ -273,6 +298,7 @@ for(int i = 0; i < n; i++)
      Process(IFILE, myRooWS, 3,0);
      Process(IFILE, myRooWS, 4,0);
   }
+
   if((IFILE.Contains("115")))
   {
      for(int to = 5; to < 15; to++)   Process(IFILE, myRooWS, to , 10);
@@ -282,22 +308,24 @@ for(int i = 0; i < n; i++)
   {
      for(int to = 15; to < 25; to++)   Process(IFILE, myRooWS,to , 20);
   }
-
+*/
   if((IFILE.Contains("125")))
   {
      for(int to = 25; to < 35; to++)   Process(IFILE, myRooWS,to , 30);
+     for(int to = 51; to < 67; to++)   Process(IFILE, myRooWS,to , 30);
   }
+
 
   if((IFILE.Contains("130")))
   {
      for(int to = 35; to < 45; to++)   Process(IFILE, myRooWS,to , 40);
   }
 
-
   if((IFILE.Contains("135")))
   {
      for(int to = 45; to < 51; to++)   Process(IFILE, myRooWS,to , 50);
   }
+
 
   
   
