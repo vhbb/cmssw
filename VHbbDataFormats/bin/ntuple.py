@@ -7,7 +7,18 @@ process = cms.Process("FWLitePlots")
 #fileNames   = cms.vstring('file:2l2bMetEdmNtuples.root'),         ## mandatory
 process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(
-"../../HbbAnalyzer/test/PAT.edm.root"
+"file:/home/hep/wilken/DiTauMassReco/src/VHbbAnalysis/HbbAnalyzer/test/Summer11_Hmass125/H125_1M_Summer11_Ditau29.root",
+"file:/home/hep/wilken/DiTauMassReco/src/VHbbAnalysis/HbbAnalyzer/test/Summer11_Hmass125/H125_1M_Summer11_Ditau3.root",
+"file:/home/hep/wilken/DiTauMassReco/src/VHbbAnalysis/HbbAnalyzer/test/Summer11_Hmass125/H125_1M_Summer11_Ditau30.root",
+"file:/home/hep/wilken/DiTauMassReco/src/VHbbAnalysis/HbbAnalyzer/test/Summer11_Hmass125/H125_1M_Summer11_Ditau31.root",
+"file:/home/hep/wilken/DiTauMassReco/src/VHbbAnalysis/HbbAnalyzer/test/Summer11_Hmass125/H125_1M_Summer11_Ditau32.root",
+"file:/home/hep/wilken/DiTauMassReco/src/VHbbAnalysis/HbbAnalyzer/test/Summer11_Hmass125/H125_1M_Summer11_Ditau33.root",
+"file:/home/hep/wilken/DiTauMassReco/src/VHbbAnalysis/HbbAnalyzer/test/Summer11_Hmass125/H125_1M_Summer11_Ditau34.root",
+"file:/home/hep/wilken/DiTauMassReco/src/VHbbAnalysis/HbbAnalyzer/test/Summer11_Hmass125/H125_1M_Summer11_Ditau35.root",
+"file:/home/hep/wilken/DiTauMassReco/src/VHbbAnalysis/HbbAnalyzer/test/Summer11_Hmass125/H125_1M_Summer11_Ditau36.root",
+"file:/home/hep/wilken/DiTauMassReco/src/VHbbAnalysis/HbbAnalyzer/test/Summer11_Hmass125/H125_1M_Summer11_Ditau37.root",
+"file:/home/hep/wilken/DiTauMassReco/src/VHbbAnalysis/HbbAnalyzer/test/Summer11_Hmass125/H125_1M_Summer11_Ditau38.root",
+"file:/home/hep/wilken/DiTauMassReco/src/VHbbAnalysis/HbbAnalyzer/test/Summer11_Hmass125/H125_1M_Summer11_Ditau39.root"
 
 
 ),
@@ -34,7 +45,7 @@ process.fwliteInput = cms.PSet(
 #process.fwliteInput.lumisToProcess.extend(lumiList)
 
 
-channel =  "DYpt100"
+channel =  "Summer11ZH125tautree"
 import os
 dirnameOld = "//pnfs/pi.infn.it/data/cms/store/user/bortigno/DoubleMu/HBB_EDMNtupleV3_ProcV1_may/07fb60889166b64f474d8d0aa162db69/"
 
@@ -106,6 +117,10 @@ process.Analyzer = cms.PSet(
         "HLT_LooseIsoPFTau35_Trk20_v.*", #36
         "HLT_LooseIsoPFTau35_Trk20_MET70_v.*", #37
         "HLT_LooseIsoPFTau35_Trk20_MET75_v.*" #38
+        "HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_v.*", #39
+        "HLT_Mu8_Ele17_CaloIdL_v.*", #40
+        "HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_v.*" #41
+
         
    ),
     isMC =     cms.bool(True),
@@ -132,7 +147,10 @@ process.Analyzer = cms.PSet(
     hltSingleEleV4FileName = cms.string("TriggerEfficiency_Electrons_PromptV4Aug05PromptV6.root"),
     idEleFileName = cms.string("ScaleFactor_PFElectrons_DataMontecarlo.root"),
     hltMuOr30FileName =  cms.string("ScaleFactor_muonEffsIsoToHLT2.2fb_efficiency.root"),
-    btagEffFileName = cms.string("btag_generic.txt")
+    btagEffFileName = cms.string("btag_generic.txt"),
+       hltMuCrossTrig = cms.string("TriggerEfficiency_MuonCrossTrigger.root"),
+        hltEleCrossTrig = cms.string("TriggerEfficiency_ElectronCrossTrigger.root")
+ 
     )
 
     

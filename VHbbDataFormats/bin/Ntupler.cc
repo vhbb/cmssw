@@ -39,6 +39,10 @@
 #include <DataFormats/GeometrySurface/interface/Surface.h>
 #include "Math/SMatrix.h"
 
+#include "AnalysisDataFormats/TauAnalysis/interface/PFMEtSignCovMatrix.h"
+#include "TauAnalysis/CandidateTools/interface/NSVfitStandaloneAlgorithm.h"
+#include <TMatrixD.h>
+
 //Move class definition to Ntupler.h ?
 //#include "VHbbAnalysis/VHbbDataFormats/interface/Ntupler.h"
 
@@ -53,11 +57,50 @@
 #include <string>
 
 #define MAXJ 30
-#define MAXL 10
+#define MAXL 50
 #define MAXB 10
 #define MAXT 60
 #define nMetUnc 24 
+
+#define GENPTOLOR(a) TLorentzVector((a).px(), (a).py(), (a).pz(), (a).energy())
+#define GENPTOLORP(a) TLorentzVector((a)->px(), (a)->py(), (a)->pz(),(a)->energy())
+
 //eleEnDown/Up, muEn, tauEn, JES, JER, Unclustered for type1 MET [0-11] and than type1p2 MET [12-23]
+
+TLorentzVector VisibleP(const reco::Candidate & p) {
+	TLorentzVector mcp4 = GENPTOLOR(p);
+	if (p.numberOfDaughters() == 0) {
+		if (abs(p.pdgId()) == 12 || abs(p.pdgId()) == 14 || abs(p.pdgId()) == 16) {
+			TLorentzVector zeroVector(0.,0.,0.,0.);
+			return zeroVector;
+		} else {
+			return mcp4;
+		}
+	} else { // has daughters
+		TLorentzVector sum(0.,0.,0.,0.);
+		for (unsigned int i = 0 ; i < p.numberOfDaughters() ; i++) {
+			const reco::Candidate *d = p.daughter(i);
+			sum += VisibleP(*d);
+		}
+		return sum;
+	}
+}// VisibleP
+
+double evalEt( double pt, double eta, double phi, double e){
+	TLorentzVector j;
+	j.SetPtEtaPhiE(pt,eta,phi, e );
+	return j.Et(); 
+	
+}
+
+
+double evalMt( double pt, double eta, double phi, double e){
+	TLorentzVector j;
+	j.SetPtEtaPhiE(pt,eta,phi, e );
+	return j.Mt(); 
+	
+}
+
 
 struct CompareDeltaR {
 	CompareDeltaR(TLorentzVector p4dir_): p4dir(p4dir_) {}
@@ -81,7 +124,6 @@ bool jsonContainsEvent (const std::vector< edm::LuminosityBlockRange > &jsonVec,
 	// events should pass
 	if (jsonVec.empty())
 		{
-			//cout <<  "json file empty" << endl;
 			return true;
 		}
 	bool (* funcPtr) (edm::LuminosityBlockRange const &,
@@ -266,7 +308,21 @@ struct  LeptonInfo
 		for(int i =0; i < MAXL;i++){ 
 			mass[i]=-99; pt[i]=-99; eta[i]=-99; phi[i]=-99; aodCombRelIso[i]=-99; pfCombRelIso[i]=-99; photonIso[i]=-99; neutralHadIso[i]=-99; chargedHadIso[i]=-99; chargedPUIso[i]=-99; particleIso[i]=-99; dxy[i]=-99; dz[i]=-99; type[i]=-99;  genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99;  
 			id80[i]=-99; id95[i]=-99; vbtf[i]=-99; id80NoIso[i]=-99;
-			charge[i]=-99; 
+			acop[i]=-99; 
+			charge[i]=-99;wp70[i]=-99; wp80[i]=-99;wp85[i]=-99;wp90[i]=-99;wp95[i]=-99;wpHWW[i]=-99;
+			pfCorrIso[i]=-99.; id2012tight[i]=-99; idMVAnotrig[i]=-99; idMVAtrig[i]=-99;innerHits[i]=-99.;
+			decayModeFinding[i] =-99.;
+			byLooseCombinedIsolationDeltaBetaCorr[i] =-99.;
+			againstMuonTight[i] =-99.;
+			againstElectronLoose[i] =-99.;
+			againstElectronMedium[i] =-99.;
+			againstElectronMVA[i] =-99.;
+			NsignalPFChargedHadrCands[i] =-99;
+			NsignalPFGammaCands[i] =-99;
+			leadPFChargedHadrCandPt[i] = -99.;
+			byLooseIsolation[i]  = -99.;
+			byMediumIsolation[i] = -99.;
+			byTightIsolation[i] = -99.;
 		}
 	}
 	
@@ -284,6 +340,7 @@ struct  LeptonInfo
 		chargedHadIso[j]=i.pfChaIso;
 		chargedPUIso[j]=i.pfChaPUIso;
 		charge[j]=i.charge;
+		acop[j]=i.acop;
 		if(i.mcFourMomentum.Pt() > 0)
 			{ 
 				genPt[j]=i.mcFourMomentum.Pt();
@@ -321,7 +378,24 @@ struct  LeptonInfo
 	float vbtf[MAXL];
 	float id80NoIso[MAXL];
 	float charge[MAXL];
+	float acop[MAXL];
 	
+	float pfCorrIso[MAXL];
+	float id2012tight[MAXL];
+	float idMVAnotrig[MAXL];
+	float idMVAtrig[MAXL];
+	float idMVApresel[MAXL];
+	float wp70[MAXL]; 
+	float wp80[MAXL]; 
+	float wp85[MAXL]; 
+	float wp90[MAXL]; 
+	float wp95[MAXL]; 
+	float wpHWW[MAXL];
+	float innerHits[MAXL]; 
+	float photonIsoDoubleCount[MAXL];
+	float decayModeFinding[MAXL],byLooseCombinedIsolationDeltaBetaCorr[MAXL],againstMuonTight[MAXL],againstElectronLoose[MAXL],againstElectronMedium[MAXL],againstElectronMVA[MAXL];
+	int NsignalPFChargedHadrCands[MAXL], NsignalPFGammaCands[MAXL];
+	float leadPFChargedHadrCandPt[MAXL], byLooseIsolation[MAXL], byMediumIsolation[MAXL], byTightIsolation[MAXL]; 	
 };
 
 template <> void LeptonInfo::setSpecific<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j){
@@ -336,6 +410,22 @@ template <> void LeptonInfo::setSpecific<VHbbEvent::MuonInfo>(const VHbbEvent::M
 	vbtf[j]=( i.globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 && i.nHits > 10 && i.cat & 0x1 && i.cat & 0x2 && i.nMatches >=2 && i.ipDb<.2 &&
 			 (i.pfChaIso+i.pfPhoIso+i.pfNeuIso)/i.p4.Pt()<.15  && fabs(i.p4.Eta())<2.4 && i.p4.Pt()>20 ) ;
 	
+}
+template <> void LeptonInfo::setSpecific<VHbbEvent::TauInfo>(const VHbbEvent::TauInfo &i, int j) {
+	//  std::cout << "In tau set specific" << std::endl;
+	
+	decayModeFinding[j] = i.decayModeFinding;
+	byLooseCombinedIsolationDeltaBetaCorr[j] =i.byLooseCombinedIsolationDeltaBetaCorr;
+	againstMuonTight[j] =i.againstMuonTight;
+	againstElectronLoose[j] =i.againstElectronLoose;
+	againstElectronMedium[j] =i.againstElectronMedium;
+	againstElectronMVA[j] =i.againstElectronMVA;
+	NsignalPFChargedHadrCands[j] =i.NsignalPFChargedHadrCands;
+	NsignalPFGammaCands[j] =i.NsignalPFGammaCands;
+	leadPFChargedHadrCandPt[j] = i.leadPFChargedHadrCandPt;
+	byLooseIsolation[j] = i.byLooseIsolation;
+	byMediumIsolation[j] = i.byMediumIsolation;
+	byTightIsolation[j] = i.byTightIsolation;
 }
 
 
@@ -393,11 +483,17 @@ typedef struct
 			eta[i]=j.p4.Eta();
 			phi[i]=j.p4.Phi();
 			e[i]=j.p4.E();
+			Mt[i]=evalEt(j.p4.Pt(),j.p4.Eta(),j.p4.Phi(),j.p4.E());
+			Et[i]=evalMt(j.p4.Pt(),j.p4.Eta(),j.p4.Phi(),j.p4.E());
 			csv[i]=j.csv;
 			csvivf[i]=j.csvivf;
 			cmva[i]=j.cmva;
 			numTracksSV[i] = j.vtxNTracks;
 			vtxMass[i]= j.vtxMass;
+			vtxPt[i]= j.vtxP4.Pt();
+			vtxEta[i]= j.vtxP4.Eta();
+			vtxPhi[i]= j.vtxP4.Phi();
+			vtxE[i]= j.vtxP4.E();			
 			vtx3dL[i] = j.vtx3dL;
 			vtx3deL[i] = j.vtx3deL;
 			chf[i]=j.chargedHadronEFraction;
@@ -431,6 +527,11 @@ typedef struct
 				}
 			JECUnc[i]=j.jecunc;
 			id[i]=jetId(i);
+			ptRaw[i]=j.ptRaw;
+			ptLeadTrack[i]=j.ptLeadTrack; 
+			charge[i]=j.charge;     
+			jetArea[i]=j.jetArea;
+			
 		}
 		bool jetId(int i)
 		{
@@ -447,13 +548,19 @@ typedef struct
 		void reset()
 		{
 			for(int i=0;i<MAXJ;i++) {
-				pt[i]=-99; eta[i]=-99; phi[i]=-99;e[i]=-99;csv[i]=-99; csvivf[i]=-99; cmva[i]=-99; cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; isSemiLeptMCtruth[i]=-99; isSemiLept[i]=-99;      SoftLeptpdgId[i] = -99; SoftLeptIdlooseMu[i] = -99;  SoftLeptId95[i] =  -99;   SoftLeptPt[i] = -99;  SoftLeptdR[i] = -99;   SoftLeptptRel[i] = -99; SoftLeptRelCombIso[i] = -99;  genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99;
+				pt[i]=-99; eta[i]=-99; phi[i]=-99;e[i]=-99;csv[i]=-99,Et[i]=-99,Mt[i]=-99;
+				csvivf[i]=-99; cmva[i]=-99;
+				cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; isSemiLeptMCtruth[i]=-99; isSemiLept[i]=-99;      
+				SoftLeptpdgId[i] = -99; SoftLeptIdlooseMu[i] = -99;  SoftLeptId95[i] =  -99;   SoftLeptPt[i] = -99;  SoftLeptdR[i] = -99;   SoftLeptptRel[i] = -99; SoftLeptRelCombIso[i] = -99;  
+				genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99; ptRaw[i]=-99.; ptLeadTrack[i]=-99.; selectedTauDR[i] = -99.; charge[i]=-99; jetArea[i]=-99;
 			}
 		}
 		float pt[MAXJ];
 		float eta[MAXJ];
 		float phi[MAXJ];
 		float e[MAXJ];
+		float Mt[MAXJ];
+		float Et[MAXJ];
 		float csv[MAXJ];
 		float csvivf[MAXJ];
 		float cmva[MAXJ];
@@ -480,6 +587,10 @@ typedef struct
 		float genPhi[MAXJ];
 		float JECUnc[MAXJ];
 		float vtxMass[MAXJ];
+		float vtxPt[MAXJ];
+		float vtxEta[MAXJ];
+		float vtxPhi[MAXJ];
+		float vtxE[MAXJ];		
 		float vtx3dL [MAXJ];
 		float vtx3deL[MAXJ];
 		bool id[MAXJ];
@@ -489,6 +600,12 @@ typedef struct
 		float SF_CSVLerr[MAXJ];
 		float SF_CSVMerr[MAXJ];
 		float SF_CSVTerr[MAXJ];  
+		float ptRaw[MAXJ];
+		float ptLeadTrack[MAXJ];
+		float selectedTauDR[MAXJ];
+		float charge[MAXJ];
+		float jetArea[MAXJ];
+		
 	} JetInfo;
 
 int main(int argc, char* argv[]) 
@@ -526,15 +643,24 @@ int main(int argc, char* argv[])
 	int naJets=0, nhJets=0, nfathFilterJets=0;
 	HiggsInfo H,SVH; //add here the fatjet higgs
 	FatHiggsInfo FatH;
-	genParticleInfo genZ, genZstar, genWstar, genW,  genH, genB, genBbar; //add here the fatjet higgs
+	genParticleInfo genZ, genZstar, genWstar, genW,  genH, genB, genBbar, genTau, genTauMu; //add here the fatjet higgs
 	genTopInfo genTop, genTbar;
 	TrackInfo V;
 	int nvlep=0,nalep=0; 
 	
 	TrackSharingInfo TkSharing; // track sharing info;
 	
-	float HVdPhi,HVMass,HMETdPhi,VMt,VMte,VMtmu,deltaPullAngle, deltaPullAngleAK7, deltaPullAngle2, deltaPullAngle2AK7, gendrcc, gendrbb, genZpt, genWpt, genHpt, weightTrig, weightTrigMay, weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET, minDeltaPhijetMETZtau,  jetPt_minDeltaPhijetMET, PUweight, PUweight2011B;
+	float HVdPhi,HVMass,HMETdPhi,VMt,VMte,VMtmu,deltaPullAngle, deltaPullAngleAK7, deltaPullAngle2;
+	float deltaPullAngle2AK7, gendrcc, gendrbb, genZpt, genWpt, genHpt, weightTrig, weightTrigMay, weightTrigV4;
+	float weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET, PUweight, PUweight2011B;
 	float PU0,PUp1,PUm1;
+	float CovMartixfirst, CovMartixsecond, CovMatrixCorrelation, minDeltaPhijetMETZtau, svmass;
+	float PzetaVis, PzetaMiss, Pzeta25, Pzeta85, Pzeta45, Pzeta65;
+	bool genZtaumu, genWmunu, genWenu, genZmumu, genZee, genZnunu;
+	
+	float tau_decayModeFinding[200], tau_byLooseCombinedIsolationDeltaBetaCorr[200], tau_againstMuonTight[200], tau_againstElectronLoose[200], tau_againstElectronMedium[200], tau_againstElectronMVA[200];
+	for (int t=0; t!=200; t++) tau_decayModeFinding[t]=tau_byLooseCombinedIsolationDeltaBetaCorr[t]=tau_againstMuonTight[t]=tau_againstElectronLoose[t]=tau_againstElectronMedium[t]=tau_againstElectronMVA[t]=-1.;
+	int nRecoTaus;
 	
 	float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart,weightEleTrigEleAugPart;
 	float  weightTrigMET80, weightTrigMET100,    weightTrig2CJet20 , weightTrigMET150  , weightTrigMET802CJet, weightTrigMET1002CJet, weightTrigMETLP ;
@@ -542,7 +668,7 @@ int main(int argc, char* argv[])
 	//FIXME
 	//  float SimBs_dr = -99, SimBs_dEta= -99, SimBs_dPhi = -99, SimBs_Hmass = -99, SimBs_Hpt = -99, SimBs_Heta = -99, SimBs_Hphi = -99;
 	int WplusMode,WminusMode;
-	int Vtype,nSvs,nSimBs,numJets,numBJets,eventFlav;
+	int Vtype,nSvs,numJets,numBJets,eventFlav;
 	//   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
 	bool triggerFlags[500],hbhe,ecalFlag,totalKinematics,  cschaloFlag,  hcallaserFlag,   trackingfailureFlag ;
 	
@@ -581,7 +707,6 @@ int main(int argc, char* argv[])
 			std::vector<edm::LuminosityBlockRange> const & lumisTemp =
 			in.getUntrackedParameter<std::vector<edm::LuminosityBlockRange> > ("lumisToProcess");
 			jsonVector.resize( lumisTemp.size() );
-			cout << "json vector size " << jsonVector.size() << endl;
 			copy( lumisTemp.begin(), lumisTemp.end(), jsonVector.begin() );
 		}
 	
@@ -591,7 +716,6 @@ int main(int argc, char* argv[])
 	int runMin_( in.getParameter<int>("runMin") );
 	int runMax_( in.getParameter<int>("runMax") );
 	bool Verbage = ana.getParameter<bool>("verbose");
-	unsigned int outputEvery_( in.getParameter<unsigned int>("outputEvery") );
 	std::string outputFile_( out.getParameter<std::string>("fileName" ) );
 	std::vector<std::string> triggers( ana.getParameter<std::vector<std::string> >("triggers") );
 	double btagThr =  ana.getParameter<double>("bJetCountThreshold" );
@@ -662,7 +786,28 @@ int main(int argc, char* argv[])
 	_outTree->Branch("genTop"		,  &genTop	            ,  "bmass/F:bpt/F:beta:bphi/F:bstatus/F:wdau1mass/F:wdau1pt/F:wdau1eta:wdau1phi/F:wdau1id/F:wdau2mass/F:wdau2pt/F:wdau2eta:wdau2phi/F:wdau2id/F");
 	_outTree->Branch("genTbar"		,  &genTbar	            ,  "bmass/F:bpt/F:beta:bphi/F:bstatus/F:wdau1mass/F:wdau1pt/F:wdau1eta:wdau1phi/F:wdau1id/F:wdau2mass/F:wdau2pt/F:wdau2eta:wdau2phi/F:wdau2id/F");
 	
+	_outTree->Branch("genTau"		,  &genTau	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+	
+	_outTree->Branch("genTauMu"		,  &genTauMu	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+	
 	_outTree->Branch("TkSharing", &TkSharing, "HiggsCSVtkSharing/b:HiggsIPtkSharing:HiggsSVtkSharing:FatHiggsCSVtkSharing:FatHiggsIPtkSharing:FatHiggsSVtkSharing");
+	
+	// only for testing tau reco:
+	_outTree->Branch("nRecoTaus", &nRecoTaus, "nRecoTaus/I");
+	_outTree->Branch("tau_decayModeFinding", &tau_decayModeFinding, "tau_decayModeFinding[nRecoTaus]/F");
+	_outTree->Branch("tau_byLooseCombinedIsolationDeltaBetaCorr", &tau_byLooseCombinedIsolationDeltaBetaCorr, "tau_byLooseCombinedIsolationDeltaBetaCorr[nRecoTaus]/F");
+	_outTree->Branch("tau_againstMuonTight", &tau_againstMuonTight, "tau_againstMuonTight[nRecoTaus]/F");
+	_outTree->Branch("tau_againstElectronLoose", &tau_againstElectronLoose, "tau_againstElectronLoose[nRecoTaus]/F");
+	_outTree->Branch("tau_againstElectronMedium", &tau_againstElectronMedium, "tau_againstElectronMedium[nRecoTaus]/F");
+	_outTree->Branch("tau_againstElectronMVA", &tau_againstElectronMVA, "tau_againstElectronMVA[nRecoTaus]/F");
+	
+	
+	_outTree->Branch("genZtaumu", &genZtaumu, "genZtaumu/O");
+	_outTree->Branch("genWmunu", &genWmunu, "genWmunu/O");
+	_outTree->Branch("genWenu", &genWenu, "genWenu/O");
+	_outTree->Branch("genZmumu", &genZmumu, "genZmumu/O");
+	_outTree->Branch("genZee", &genZee, "genZee/O");
+	_outTree->Branch("genZnunu", &genZnunu, "genZnunu/O");
 	
 	_outTree->Branch("nhJets"		,  &nhJets	            ,  "nhJets/I");
 	_outTree->Branch("nfathFilterJets",   &nfathFilterJets,   "nfathFilterJets/I");
@@ -674,6 +819,8 @@ int main(int argc, char* argv[])
 	_outTree->Branch("hJet_eta",hJets.eta ,"eta[nhJets]/F");
 	_outTree->Branch("hJet_phi",hJets.phi ,"phi[nhJets]/F");
 	_outTree->Branch("hJet_e",hJets.e ,"e[nhJets]/F");
+	_outTree->Branch("hJet_Et",hJets.Et ,"Et[nhJets]/F");
+	_outTree->Branch("hJet_Mt",hJets.Mt ,"Mt[nhJets]/F");
 	_outTree->Branch("hJet_csv",hJets.csv ,"csv[nhJets]/F");
 	_outTree->Branch("hJet_csvivf",hJets.csvivf ,"csvivf[nhJets]/F");
 	_outTree->Branch("hJet_cmva",hJets.cmva ,"cmva[nhJets]/F");
@@ -700,6 +847,10 @@ int main(int argc, char* argv[])
 	_outTree->Branch("hJet_genPhi",hJets.genPhi ,"genPhi[nhJets]/F");
 	_outTree->Branch("hJet_JECUnc",hJets.JECUnc ,"JECUnc[nhJets]/F");
 	_outTree->Branch("hJet_vtxMass",hJets.vtxMass ,"vtxMass[nhJets]/F");
+	_outTree->Branch("hJet_vtxPt",hJets.vtxPt ,"vtxPt[nhJets]/F");
+	_outTree->Branch("hJet_vtxEta",hJets.vtxEta ,"vtxEta[nhJets]/F");
+	_outTree->Branch("hJet_vtxPhi",hJets.vtxPhi ,"vtxPhi[nhJets]/F");
+	_outTree->Branch("hJet_vtxE",hJets.vtxE ,"vtxE[nhJets]/F");	
 	_outTree->Branch("hJet_vtx3dL",hJets.vtx3dL ,"vtx3dL[nhJets]/F");
 	_outTree->Branch("hJet_vtx3deL",hJets.vtx3deL ,"vtx3deL[nhJets]/F");
 	_outTree->Branch("hJet_id",hJets.id ,"id[nhJets]/b");
@@ -709,6 +860,11 @@ int main(int argc, char* argv[])
 	_outTree->Branch("hJet_SF_CSVLerr",hJets.SF_CSVLerr ,"SF_CSVLerr[nhJets]/b");
 	_outTree->Branch("hJet_SF_CSVMerr",hJets.SF_CSVMerr ,"SF_CSVMerr[nhJets]/b");
 	_outTree->Branch("hJet_SF_CSVTerr",hJets.SF_CSVTerr ,"SF_CSVTerr[nhJets]/b");
+	_outTree->Branch("hJet_ptRaw",hJets.ptRaw ,"ptRaw[nhJets]/F");
+	_outTree->Branch("hJet_ptLeadTrack",hJets.ptLeadTrack ,"ptLeadTrack[nhJets]/F");
+	_outTree->Branch("hJet_charge",hJets.charge ,"charge[nhJets]/F");
+	_outTree->Branch("hJet_jetArea",hJets.jetArea ,"jetArea[nhJets]/F");
+
 	
 	_outTree->Branch("fathFilterJets_pt",fathFilterJets.pt ,"pt[nfathFilterJets]/F");
 	_outTree->Branch("fathFilterJets_eta",fathFilterJets.eta ,"eta[nfathFilterJets]/F");
@@ -724,6 +880,8 @@ int main(int argc, char* argv[])
 	_outTree->Branch("aJet_eta",aJets.eta ,"eta[naJets]/F");
 	_outTree->Branch("aJet_phi",aJets.phi ,"phi[naJets]/F");
 	_outTree->Branch("aJet_e",aJets.e ,"e[naJets]/F");
+	_outTree->Branch("aJet_Et",aJets.Et ,"Et[naJets]/F");
+	_outTree->Branch("aJet_Mt",aJets.Mt ,"Mt[naJets]/F");
 	_outTree->Branch("aJet_csv",aJets.csv ,"csv[naJets]/F");
 	_outTree->Branch("aJet_csvivf",aJets.csvivf ,"csvivf[naJets]/F");
 	_outTree->Branch("aJet_cmva",aJets.cmva ,"cmva[naJets]/F");
@@ -745,7 +903,10 @@ int main(int argc, char* argv[])
 	_outTree->Branch("aJet_SoftLeptdR", aJets.SoftLeptdR , "SoftLeptdR[naJets]/F");
 	_outTree->Branch("aJet_SoftLeptptRel", aJets.SoftLeptptRel , "SoftLeptptRel[naJets]/F");
 	_outTree->Branch("aJet_SoftLeptRelCombIso", aJets.SoftLeptRelCombIso , "SoftLeptRelCombIso[naJets]/F");
-	
+	_outTree->Branch("aJet_jetArea",aJets.jetArea ,"jetArea[naJets]/F");
+	_outTree->Branch("aJet_charge",aJets.charge ,"charge[naJets]/F");
+	_outTree->Branch("aJet_selectedTauDR",aJets.selectedTauDR ,"selectedTauDR[naJets]/F");
+
 	_outTree->Branch("aJet_genPt",aJets.genPt ,"genPt[naJets]/F");
 	_outTree->Branch("aJet_genEta",aJets.genEta ,"genEta[naJets]/F");
 	_outTree->Branch("aJet_genPhi",aJets.genPhi ,"genPhi[naJets]/F");
@@ -809,7 +970,6 @@ int main(int argc, char* argv[])
   	_outTree->Branch("VMte"  	,  &VMte      ,   "VMte/F"    );             	
 	_outTree->Branch("VMtmu"  	,  &VMtmu      ,   "VMtmu/F"    );             	
 	
-	
 	_outTree->Branch("nvlep"	,  &nvlep    ,   "nvlep/I");
 	_outTree->Branch("nalep"	,  &nalep    ,   "nalep/I");
 	
@@ -835,6 +995,7 @@ int main(int argc, char* argv[])
 	_outTree->Branch("vLepton_genEta",vLeptons.genEta ,"genEta[nvlep]");
 	_outTree->Branch("vLepton_genPhi",vLeptons.genPhi ,"genPhi[nvlep]/F");
 	_outTree->Branch("vLepton_charge",vLeptons.charge ,"charge[nvlep]/F");
+	_outTree->Branch("vLepton_acop",vLeptons.acop ,"acop[nvlep]/F");
 	
 	_outTree->Branch("aLepton_mass",aLeptons.mass ,"mass[nalep]/F");
 	_outTree->Branch("aLepton_pt",aLeptons.pt ,"pt[nalep]/F");
@@ -858,6 +1019,7 @@ int main(int argc, char* argv[])
 	_outTree->Branch("aLepton_genEta",aLeptons.genEta ,"genEta[nalep]");
 	_outTree->Branch("aLepton_genPhi",aLeptons.genPhi ,"genPhi[nalep]/F");
 	_outTree->Branch("aLepton_charge",aLeptons.charge ,"charge[nalep]/F");
+	_outTree->Branch("aLepton_acop",aLeptons.acop ,"acop[nalep]/F");
 	
 	_outTree->Branch("top"		,  &top	         ,   "mass/F:pt/F:wMass/F");
 	_outTree->Branch("WplusMode"		,  &WplusMode	 ,   "WplusMode/I");
@@ -877,29 +1039,6 @@ int main(int argc, char* argv[])
 	_outTree->Branch("Sv_dist3D_norm", &IVF.dist3D_norm,"dist3D_norm[nSvs]/F");
 	//IVF higgs candidate
 	_outTree->Branch("SVH"          ,  &SVH               ,  "mass/F:pt/F:eta:phi/F:dR/F:dPhi/F:dEta/F");
-	
-	
-	//FIXME : need to update the EDMNtuple with BHadron infos
-	//   //SimBHadron
-	//   _outTree->Branch("nSimBs",&nSimBs ,"nSimBs/I");
-	//   _outTree->Branch("SimBs_mass", &SimBs.mass,"mass[nSvs]/F");
-	//   _outTree->Branch("SimBs_pt", &SimBs.pt,"pt[nSvs]/F");
-	//   _outTree->Branch("SimBs_eta", &SimBs.eta,"eta[nSvs]/F");
-	//   _outTree->Branch("SimBs_phi", &SimBs.phi,"phi[nSvs]/F");
-	//   _outTree->Branch("SimBs_vtx_x", &SimBs.vtx_x,"vtx_x[nSvs]/F");
-	//   _outTree->Branch("SimBs_vtx_y", &SimBs.vtx_y,"vtx_y[nSvs]/F");
-	//   _outTree->Branch("SimBs_vtx_z", &SimBs.vtx_z,"vtx_z[nSvs]/F");
-	//   _outTree->Branch("SimBs_pdgId", &SimBs.pdgId,"pdgId[nSvs]/F");
-	//   _outTree->Branch("SimBs_status", &SimBs.status,"status[nSvs]/F");
-	//   //SimBHadron Higgs Candidate
-	//   _outTree->Branch("SimBs_dr", &SimBs_dr,"SimBs_dr/F");
-	//   _outTree->Branch("SimBs_dPhi", &SimBs_dPhi,"SimBs_dPhi/F");
-	//   _outTree->Branch("SimBs_dEta", &SimBs_dEta,"SimBs_dEta/F");
-	//   _outTree->Branch("SimBs_Hmass", &SimBs_Hmass,"SimBs_Hmass/F");
-	//   _outTree->Branch("SimBs_Hpt", &SimBs_Hpt,"SimBs_Hpt/F");
-	//   _outTree->Branch("SimBs_Heta", &SimBs_Heta,"SimBs_Heta/F");
-	//   _outTree->Branch("SimBs_Hphi", &SimBs_Hphi,"SimBs_Hphi/F");
-	
 	
 	_outTree->Branch("rho"		,  &rho	         ,   "rho/F");
 	_outTree->Branch("rho25"		,  &rho25	         ,   "rho25/F");
@@ -924,6 +1063,18 @@ int main(int argc, char* argv[])
 	_outTree->Branch("minDeltaPhijetMETZtau"		,  &minDeltaPhijetMETZtau	         ,   "minDeltaPhijetMETZtau/F");
 	_outTree->Branch("jetPt_minDeltaPhijetMET"		,  &jetPt_minDeltaPhijetMET	         ,   "jetPt_minDeltaPhijetMET/F");
 	
+	_outTree->Branch("CovMartixfirst"		,  &CovMartixfirst	         ,   "CovMartixfirst/F");
+	_outTree->Branch("CovMartixsecond"		,  &CovMartixsecond	         ,   "CovMartixsecond/F");
+	_outTree->Branch("CovMatrixCorrelation"		,  &CovMatrixCorrelation	         ,   "CovMatrixCorrelation/F");
+	_outTree->Branch("svmass"		,  &svmass	         ,   "svmass/F");
+	_outTree->Branch("PzetaVis"		,  &PzetaVis	         ,   "PzetaVis/F");
+	_outTree->Branch("PzetaMiss"		,  &PzetaMiss	         ,   "PzetaMiss/F");
+	_outTree->Branch("Pzeta25"		,  &Pzeta25	         ,   "Pzeta25/F");
+	_outTree->Branch("Pzeta45"		,  &Pzeta45	         ,   "Pzeta45/F");
+	_outTree->Branch("Pzeta65"		,  &Pzeta65	         ,   "Pzeta65/F");
+	_outTree->Branch("Pzeta85"		,  &Pzeta85	         ,   "Pzeta85/F");
+	
+	
 	std::stringstream s;
 	s << "triggerFlags[" << triggers.size() << "]/b";
 	_outTree->Branch("triggerFlags", triggerFlags, s.str().c_str()); 
@@ -943,18 +1094,41 @@ int main(int argc, char* argv[])
 	_outTree->Branch("btagA0TSF"	,  &btagA0TSF	         ,   "btagA0TSF/F");
 	_outTree->Branch("btag1TA1C"	,  &btag1TA1C	         ,   "btag1TA1C/F");
 	
+	_outTree->Branch("vLepton_decayModeFinding",vLeptons.decayModeFinding,"decayModeFinding[nvlep]/F");
+	_outTree->Branch("vLepton_byLooseCombinedIsolationDeltaBetaCorr",vLeptons.byLooseCombinedIsolationDeltaBetaCorr,"byLooseCombinedIsolationDeltaBetaCorr[nvlep]/F");
+	_outTree->Branch("vLepton_againstMuonTight",vLeptons.againstMuonTight,"againstMuonTight[nvlep]/F");
+	_outTree->Branch("vLepton_againstElectronLoose",vLeptons.againstElectronLoose,"againstElectronLoose[nvlep]/F");
+	_outTree->Branch("vLepton_againstElectronMedium",vLeptons.againstElectronMedium,"againstElectronMedium[nvlep]/F");
+	_outTree->Branch("vLepton_againstElectronMVA",vLeptons.againstElectronMVA,"againstElectronMVA[nvlep]/F");
+	_outTree->Branch("vLepton_NsignalPFChargedHadrCands",vLeptons.NsignalPFChargedHadrCands,"NsignalPFChargedHadrCands[nvlep]/I");
+	_outTree->Branch("vLepton_NsignalPFGammaCands",vLeptons.NsignalPFGammaCands,"NsignalPFGammaCands[nvlep]/I");
+	_outTree->Branch("vLepton_leadPFChargedHadrCandPt",vLeptons.leadPFChargedHadrCandPt,"leadPFChargedHadrCandPt[nvlep]/F");
+	_outTree->Branch("vLepton_byLooseIsolation",vLeptons.byLooseIsolation,"byLooseIsolation[nvlep]/F");
+	_outTree->Branch("vLepton_byMediumIsolation",vLeptons.byMediumIsolation,"byMediumIsolation[nvlep]/F");
+	_outTree->Branch("vLepton_byTightIsolation",vLeptons.byTightIsolation,"byTightIsolation[nvlep]/F");
+	
+	_outTree->Branch("aLepton_decayModeFinding",aLeptons.decayModeFinding,"decayModeFinding[nvlep]/F");
+	_outTree->Branch("aLepton_byLooseCombinedIsolationDeltaBetaCorr",aLeptons.byLooseCombinedIsolationDeltaBetaCorr,"byLooseCombinedIsolationDeltaBetaCorr[nvlep]/F");
+	_outTree->Branch("aLepton_againstMuonTight",aLeptons.againstMuonTight,"againstMuonTight[nvlep]/F");
+	_outTree->Branch("aLepton_againstElectronLoose",aLeptons.againstElectronLoose,"againstElectronLoose[nvlep]/F");
+	_outTree->Branch("aLepton_againstElectronMedium",aLeptons.againstElectronMedium,"againstElectronMedium[nvlep]/F");
+	_outTree->Branch("aLepton_againstElectronMVA",aLeptons.againstElectronMVA,"againstElectronMVA[nvlep]/F");
+	_outTree->Branch("aLepton_NsignalPFChargedHadrCands",aLeptons.NsignalPFChargedHadrCands,"NsignalPFChargedHadrCands[nvlep]/I");
+	_outTree->Branch("aLepton_NsignalPFGammaCands",aLeptons.NsignalPFGammaCands,"NsignalPFGammaCands[nvlep]/I");
+	_outTree->Branch("aLepton_leadPFChargedHadrCandPt",aLeptons.leadPFChargedHadrCandPt,"leadPFChargedHadrCandPt[nvlep]/F");
+	_outTree->Branch("aLepton_byLooseIsolation",aLeptons.byLooseIsolation,"byLooseIsolation[nvlep]/F");
+	_outTree->Branch("aLepton_byMediumIsolation",aLeptons.byMediumIsolation,"byMediumIsolation[nvlep]/F");
+	_outTree->Branch("aLepton_byTightIsolation",aLeptons.byTightIsolation,"byTightIsolation[nvlep]/F");
+		
 	int ievt=0;  
-	int totalcount=0;
   	int Nevents = 0;
-	int Nevents_NoCandidates = 0;
-	int Nevents_withTauLeptons = 0;
-	int Nevents_emu = 0;
+	int Nevents_Zmumu = 0, Nevents_Zee = 0, Nevents_Wmun = 0, Nevents_Wen = 0, Nevents_Znunu = 0, Nmulti = 0;
+	int Nevents_Zemu = 0, Nevents_Ztaumu = 0, Nevents_Ztaue = 0, Nevents_Wtaun = 0, Nevents_Ztautau = 0, Nevents_Zbb = 0;
 	int Nevents_LowJetPt = 0;
 	//	unsigned int LumiNumber = -99;
 	//	unsigned int RunNumber = 0;
 	//	unsigned int trueLumiNumber = 999999;
 	//	unsigned int trueRunNumber = 0;
-	
 	
 	//  TFile* inFile = new TFile(inputFile.c_str(), "read");
 	for(unsigned int iFile=0; iFile<inputFiles_.size(); ++iFile) {
@@ -967,6 +1141,8 @@ int main(int argc, char* argv[])
 		fwlite::Event ev(inFile);
 		for(ev.toBegin(); !ev.atEnd() ; ++ev, ++ievt)
 			{
+				if(Verbage) std::cout << "Event number  " << ievt << std::endl;
+				
 				if (ievt <= skipEvents_) continue;
 				if (maxEvents_ >= 0){
 					if (ievt > maxEvents_ + skipEvents_) break;
@@ -1010,36 +1186,11 @@ int main(int argc, char* argv[])
 				countWithPU->Fill(1,PUweight);
 				countWithPU2011B->Fill(1,PUweight2011B);
 				
-				/*			if (RunNumber != ev.id().run()) {
-				 cout << "json info: RunNumber " << ev.id().run() << " replaceME " << endl;
-				 LumiNumber = -99;
-				 RunNumber = ev.id().run();
-				 }
-				 if (LumiNumber != ev.id().luminosityBlock()){
-				 cout << "json info: LumiSection " << ev.id().luminosityBlock() << " LumiME " << endl;
-				 LumiNumber = ev.id().luminosityBlock();
-				 }
-				 */		
-				
-				
 				//Write event info 
 				EVENT.run = ev.id().run();
 				EVENT.lumi = ev.id().luminosityBlock();
 				EVENT.event = ev.id().event();
 				EVENT.json = jsonContainsEvent (jsonVector, ev);
-				/*			if(EVENT.json ==1){
-				 if (trueRunNumber != ev.id().run()) {
-				 cout << "jsontrue info: RunNumber " << ev.id().run() << " replaceME " << endl;
-				 trueLumiNumber = -99;
-				 trueRunNumber = ev.id().run();
-				 }
-				 if (trueLumiNumber != ev.id().luminosityBlock()){
-				 cout << "jsontrue info: LumiSection " << ev.id().luminosityBlock() << " LumiME " << endl;
-				 trueLumiNumber = ev.id().luminosityBlock();
-				 }
-				 }
-				 */
-				
 				//FIXME : need to update EDM ntuple with BHadron infos
 				// 	// simBHadrons
 				// 	fwlite::Handle<SimBHadronCollection> SBHC;
@@ -1130,37 +1281,6 @@ int main(int argc, char* argv[])
 				//      std::clog << "Filling tree "<< std::endl;
 				bool isW=false;
 				
-				if(cand->size() == 0 or cand->at(0).H.jets.size() < 2) {
-					std::vector<VHbbEvent::MuonInfo> myfailedmuons(iEvent->muInfo);
-					std::vector<VHbbEvent::ElectronInfo> myfailedelectrons(iEvent->eleInfo);
-					bool mutau = false;
-					for(size_t j=0;j< iEvent->muInfo.size();j++){	
-						if (myfailedmuons[j].mcMomId == 15 || myfailedmuons[j].mcMomId == -15 ){
-							if(Verbage) std::cout << "failed muon mother is tau pt " << myfailedmuons[j].p4.Pt() << endl;
-							if (!mutau) Nevents_withTauLeptons++;
-							mutau = true;
-						}else if (myfailedmuons[j].mcgMomId == 15 || myfailedmuons[j].mcgMomId == -15 ){
-							if(Verbage) std::cout << "failed muon grandmother is tau pt " << myfailedmuons[j].p4.Pt() << endl;
-							if (!mutau) Nevents_withTauLeptons++;
-							mutau = true;
-						}
-						
-					}
-					for(size_t jj=0;jj< iEvent->eleInfo.size();jj++){		
-						if (myfailedelectrons[jj].mcMomId == 15 || myfailedelectrons[jj].mcMomId == -15 ){
-							if(Verbage) std::cout << "failed electron mother is tau pt " << myfailedelectrons[jj].p4.Pt() << endl;
-							if (!mutau) Nevents_withTauLeptons++;
-						}else if (myfailedelectrons[jj].mcgMomId == 15 || myfailedelectrons[jj].mcgMomId == -15 ){
-							if(Verbage) std::cout << "failed electron grandmother is tau pt " << myfailedelectrons[jj].p4.Pt() << endl;
-							if (!mutau) Nevents_withTauLeptons++;
-						}
-						
-					}				
-					Nevents_NoCandidates++;
-					continue;
-				}
-				
-				
 				// to check how much we gain with jets subtraction 
 				
 				
@@ -1169,51 +1289,39 @@ int main(int argc, char* argv[])
 				
 				if(cand->size() == 0 or cand->at(0).H.jets.size() < 2) continue;
 				//if(cand->size() == 0 ) continue;
-				//std::cout << "cand->size() " << cand->size() << std::endl;
+				if(Verbage)std::cout << "cand->size() " << cand->size() << std::endl;
 				//std::cout << "cand->at(0).H.jets.size() " << cand->at(0).H.jets.size() << std::endl;
+				
+				unsigned int tauCandidate = 0;
 				if(cand->size() > 1 ) 
 					{
 						std::cout << "MULTIPLE CANDIDATES: " << cand->size() << std::endl;
+						Nmulti++;
+						for (unsigned int i=0; i!=cand->size(); i++){
+							if (cand->at(i).candidateType > 4 && (tauCandidate!=7||tauCandidate!=6)) tauCandidate = i;
+							cout << "cand(" << i << ").Vtype: " << cand->at(i).candidateType << endl; 
+						}// loop on candidates
 					}
 				if(cand->at(0).candidateType == VHbbCandidate::Wmun || cand->at(0).candidateType == VHbbCandidate::Wen ) { cand=candW; isW=true; }
-				if(cand->size() == 0) 
-					{
-						//            std::cout << "W event loss due to tigther cuts" << std::endl;
-						continue;
-					}
-				
-				std::vector<VHbbEvent::MuonInfo> mymuons(iEvent->muInfo);
-				std::vector<VHbbEvent::ElectronInfo> myelectrons(iEvent->eleInfo);
-				bool mutau = false;
-				for(size_t j=0;j< iEvent->muInfo.size();j++){	
-					if (mymuons[j].mcMomId == 15 || mymuons[j].mcMomId == -15 ){
-						if(Verbage) std::cout << "muon mother is tau pt " << mymuons[j].p4.Pt() << endl;
-						if (!mutau) Nevents_withTauLeptons++;
-						mutau = true;
-					} else if (mymuons[j].mcgMomId == 15 || mymuons[j].mcgMomId == -15 ){
-						if(Verbage) std::cout << "muon grandmother is tau pt" << mymuons[j].p4.Pt() << endl;
-						if (!mutau) Nevents_withTauLeptons++;
-						mutau = true;
-					}
-					
-				}
-				for(size_t jj=0;jj< iEvent->eleInfo.size();jj++){		
-					if (myelectrons[jj].mcMomId == 15 || myelectrons[jj].mcMomId == -15 ){
-						if(Verbage) std::cout << "electron mother is tau pt " << myelectrons[jj].p4.Pt() << endl;
-						if (!mutau) Nevents_withTauLeptons++;
-					}else if (myelectrons[jj].mcgMomId == 15 || (myelectrons[jj].mcgMomId == -15 && abs(myelectrons[jj].mcgMomId) != 15 ) ){
-						if(Verbage) std::cout << "electron grandmother is tau pt " << myelectrons[jj].p4.Pt() << endl;
-						if (!mutau) Nevents_withTauLeptons++;
-					}
-					
-				}				
-				
-				
+				if((cand->at(0).candidateType == VHbbCandidate::Wmun || cand->at(0).candidateType == VHbbCandidate::Wen || cand->at(0).candidateType == VHbbCandidate::Wtaun) && cand->size() < 2) { cand=candW; isW=true;}
+ 
+				if(cand->at(0).H.jets.size() < 2) continue;
 				
 				// secondary vtxs
 				fwlite::Handle<std::vector<reco::Vertex> > SVC;
 				SVC.getByLabel(ev,"bcandidates");
 				const std::vector<reco::Vertex> svc = *(SVC.product());
+				
+				//CovMatrix
+				TMatrixD metCov(2, 2);
+				fwlite::Handle<PFMEtSignCovMatrix> CovM;
+				CovM.getByLabel(ev,"pfMEtSignCovMatrix");
+				metCov = (*CovM);
+				if(Verbage) cout << "first element " << metCov(0,0) << endl;
+				CovMartixfirst =  metCov(0,0);
+				CovMartixsecond =  metCov(1,1);
+				CovMatrixCorrelation =  metCov(0,1);
+				
 				
 				const VHbbCandidate & vhCand =  cand->at(0);
 				patFilters.setEvent(&ev,"VH");
@@ -1238,9 +1346,30 @@ int main(int argc, char* argv[])
 				
 				Vtype = vhCand.candidateType;
 				
+				
+				/*nRecoTaus = iEvent->tauInfo.size();
+				 for(size_t j=0;j< iEvent->tauInfo.size();j++){
+				 tau_decayModeFinding[j] = iEvent->tauInfo[j].decayModeFinding;
+				 tau_byLooseCombinedIsolationDeltaBetaCorr[j] = iEvent->tauInfo[j].byLooseCombinedIsolationDeltaBetaCorr;
+				 tau_againstMuonTight[j] = iEvent->tauInfo[j].againstMuonTight;
+				 tau_againstElectronLoose[j] = iEvent->tauInfo[j].againstElectronLoose;
+				 tau_againstElectronMedium[j] = iEvent->tauInfo[j].againstElectronMedium;
+				 tau_againstElectronMVA[j] = iEvent->tauInfo[j].againstElectronMVA;
+				 }// loop on taus
+				 */
+				nRecoTaus = vhCand.V.taus.size();
+				for(size_t j=0;j< vhCand.V.taus.size();j++){
+					tau_decayModeFinding[j] = vhCand.V.taus[j].decayModeFinding;
+					tau_byLooseCombinedIsolationDeltaBetaCorr[j] = vhCand.V.taus[j].byLooseCombinedIsolationDeltaBetaCorr;
+					tau_againstMuonTight[j] = vhCand.V.taus[j].againstMuonTight;
+					tau_againstElectronLoose[j] = vhCand.V.taus[j].againstElectronLoose;
+					tau_againstElectronMedium[j] = vhCand.V.taus[j].againstElectronMedium;
+					tau_againstElectronMVA[j] = vhCand.V.taus[j].againstElectronMVA;
+				}// loop on taus
+				
+				
 				H.mass = vhCand.H.p4.M();
 				H.pt = vhCand.H.p4.Pt();
-				
 				
 				H.eta = vhCand.H.p4.Eta();
 				H.phi = vhCand.H.p4.Phi();
@@ -1268,7 +1397,6 @@ int main(int argc, char* argv[])
 				}
 				
 				
-				
 				V.mass = vhCand.V.p4.M();
 				if(isW) V.mass = vhCand.Mt(); 
 				V.pt = vhCand.V.p4.Pt();
@@ -1288,6 +1416,9 @@ int main(int argc, char* argv[])
 					{
 						aJets.set(vhCand.additionalJets[j],j);
 						if(vhCand.additionalJets[j].csv> btagThr) numBJets++;
+						if (Vtype==VHbbCandidate::Wtaun||Vtype==VHbbCandidate::Ztaumu||Vtype==VHbbCandidate::Ztaue||Vtype==VHbbCandidate::Ztautau) {
+							aJets.selectedTauDR[j] = vhCand.V.taus[0].p4.DeltaR(vhCand.additionalJets[j].p4);
+						}						
 					}   
 				numJets = vhCand.additionalJets.size()+2;
 				H.dR = deltaR(vhCand.H.jets[0].p4.Eta(),vhCand.H.jets[0].p4.Phi(),vhCand.H.jets[1].p4.Eta(),vhCand.H.jets[1].p4.Phi());
@@ -1303,6 +1434,8 @@ int main(int argc, char* argv[])
 				deltaPullAngle  =  VHbbCandidateTools::getDeltaTheta(vhCand.H.jets[0],vhCand.H.jets[1]);
 				deltaPullAngle2 =  VHbbCandidateTools::getDeltaTheta(vhCand.H.jets[1],vhCand.H.jets[0]);
 				
+				if(Verbage) cout << "at(0) used for HMETdPhi " << HMETdPhi << endl;
+
 				
 				hJets.cosTheta[0]=  vhCand.H.helicities[0];
 				hJets.cosTheta[1]=  vhCand.H.helicities[1];
@@ -1312,6 +1445,9 @@ int main(int argc, char* argv[])
 				MET.sumet = vhCand.V.mets.at(0).sumEt;
 				MET.sig = vhCand.V.mets.at(0).metSig;
 				
+				
+				if(Verbage) cout << "middle of MET info" << endl;
+
 				
 				fakeMET.sumet = 0;
 				fakeMET.sig = 0;
@@ -1369,11 +1505,11 @@ int main(int argc, char* argv[])
 				METnoPUtype1p2corr.sumet = iEvent->pfmetNoPUType1p2corr.sumEt;
 				METnoPUtype1p2corr.sig = iEvent->pfmetNoPUType1p2corr.metSig;
 				
-				//	std::cout << " iEvent->metUncInfo.size() " << iEvent->metUncInfo.size() << std::endl;
+				if(Verbage)	std::cout << " iEvent->metUncInfo.size() " << iEvent->metUncInfo.size() << std::endl;
 				for(size_t m=0;m<iEvent->metUncInfo.size();m++)
 					{ 
 						metUnc.set(iEvent->metUncInfo[m], m );
-						//	     std::cout << "metUncInfo[" << m <<" ].et = " << metUnc.et[m] << std::endl; 
+						if(Verbage)	     std::cout << "metUncInfo[" << m <<" ].et = " << metUnc.et[m] << std::endl; 
 					}
 				
 				
@@ -1387,7 +1523,6 @@ int main(int argc, char* argv[])
 					MHT.ht = iEvent->mht.sumEt; 
 					MHT.sig = iEvent->mht.metSig; 
 				}
-				
 				
 				/////////
 				// track sharing flags:
@@ -1468,6 +1603,8 @@ int main(int argc, char* argv[])
 				////////
 				////////
 				
+				
+				
 				//Secondary Vertices
 				IVF.reset();
 				nSvs = svc.size();
@@ -1500,31 +1637,12 @@ int main(int argc, char* argv[])
 					SVH.phi = BCands_H.Phi();
 				}
 				
-				//FIXME : need to update EDM ntuple with simBhadron info
-				// 	//SimBhadron
-				// 	SimBs.reset();
-				// 	nSimBs = sbhc.size();
-				// 	for( int j=0; j < nSimBs && j < MAXB; ++j )
-				// 	  SimBs.set( sbhc.at(j), j);
-				// 	if(nSimBs > 2){
-				// 	  TLorentzVector SimBs_H1, SimBs_H2, SimBs_H;
-				// 	  SimBs_H1.SetPtEtaPhiM(SimBs.pt[0], SimBs.eta[0], SimBs.phi[0], SimBs.mass[0]);
-				// 	  SimBs_H2.SetPtEtaPhiM(SimBs.pt[1], SimBs.eta[1], SimBs.phi[1], SimBs.mass[1]);
-				// 	  SimBs_H = SimBs_H1 + SimBs_H2;
-				// 	  SimBs_dr = deltaR(SimBs.eta[0], SimBs.phi[0], SimBs.eta[1], SimBs.phi[1] );
-				// 	  SimBs_dPhi = deltaPhi(SimBs.phi[0], SimBs.phi[1] );
-				// 	  SimBs_dEta = TMath::Abs(SimBs.eta[0] - SimBs.eta[1] );
-				// 	  SimBs_Hmass = SimBs_H.M();
-				// 	  SimBs_Hpt = SimBs_H.Pt();
-				// 	  SimBs_Heta = SimBs_H.Eta();
-				// 	  SimBs_Hphi = SimBs_H.Phi();
-				// 	}
-				
-				
 				//Loop on jets
 				double maxBtag=-99999;
 				minDeltaPhijetMET = 999;
 				minDeltaPhijetMETZtau = 999;
+				svmass = 999;
+				PzetaVis = 999, PzetaMiss = 999, Pzeta25 = 999, Pzeta45 = 999, Pzeta65 = 999, Pzeta85 = 999;
 				TLorentzVector bJet;
 				TLorentzVector METZtau;
 				std::vector<std::vector<BTagWeight::JetInfo> > btagJetInfos;
@@ -1612,7 +1730,9 @@ int main(int argc, char* argv[])
 				TLorentzVector leptonForTop;
 				size_t firstAddMu=0;
 				size_t firstAddEle=0;
+				size_t firstAddTau=0;
 				if(Vtype == VHbbCandidate::Zmumu ){
+				Nevents_Zmumu++;
 					vLeptons.set(vhCand.V.muons[0],0,13); 
 					vLeptons.set(vhCand.V.muons[1],1,13);
 					float weightMuonRecoAndID = triggerWeight.scaleMuID(vLeptons.pt[0],vLeptons.eta[0]) * triggerWeight.scaleMuID(vLeptons.pt[1],vLeptons.eta[1]) ;
@@ -1624,6 +1744,7 @@ int main(int argc, char* argv[])
 					firstAddMu=2;
 				}
 				if( Vtype == VHbbCandidate::Zee ){
+				Nevents_Zee++;
 					vLeptons.set(vhCand.V.electrons[0],0,11);
 					vLeptons.set(vhCand.V.electrons[1],1,11);
 					nvlep=2;
@@ -1636,113 +1757,166 @@ int main(int argc, char* argv[])
 					weightEleTrigElePart = triggerWeight.scaleDoubleEle17Ele8(pt,eta); 
 					weightEleTrigEleAugPart = triggerWeight.scaleDoubleEle17Ele8Aug(pt,eta); 
 					weightTrig = (weightEleTrigElePart*1.14+weightEleTrigEleAugPart*0.98 )/2.12 * weightEleRecoAndId;
-					
-					
-					
 				}
 				
+				
+				TMatrixD* metsig = new TMatrixD(2,2);
+				(*metsig)[0][0] = metCov(0,0);
+				(*metsig)[0][1] = metCov(0,1);
+				(*metsig)[1][0] = metCov(1,0);
+				(*metsig)[1][1] = metCov(1,1);
+				TVector3 m,e,tau,metv;
+				
 				if(Vtype == VHbbCandidate::Zemu ){
-					leptonForTop=vhCand.V.muons[1].p4;
+				Nevents_Zemu++;
+					leptonForTop=vhCand.V.muons[0].p4;
 					vLeptons.set(vhCand.V.electrons[0],0,11); 
 					vLeptons.set(vhCand.V.muons[0],1,13);
-					float weightMuonRecoAndID = 1.0;
-					cout <<"electron pt " << vLeptons.pt[0] << " eta " << vLeptons.eta[0] << endl;
-					//cout <<"muon pt " << vLeptons.pt[1] << " eta " << vLeptons.eta[1] << endl;
-					//if (vLeptons.pt[1]>20) cout <<"scaleMuID " << triggerWeight.scaleMuID(vLeptons.pt[1],vLeptons.eta[1]) << endl;
-					//if (vLeptons.pt[1]<=20) cout <<"scaleMuID " << triggerWeight.scaleMuID(20,vLeptons.eta[1]) << endl; 
-					//if (vLeptons.pt[1]<=20) cout <<"just curious if function for lower pt " << triggerWeight.scaleMuID(vLeptons.pt[1],vLeptons.eta[1]) << endl; 
-					//if (vLeptons.pt[0]>20) cout <<"scaleID95Ele " << triggerWeight.scaleID95Ele(vLeptons.pt[0],vLeptons.eta[0])  << " scaleRecoEle " << triggerWeight.scaleRecoEle(vLeptons.pt[0],vLeptons.eta[0]) << endl;
-					//if (vLeptons.pt[0]<=20) cout <<"scaleID95Ele " << triggerWeight.scaleID95Ele(20,vLeptons.eta[0])  << " scaleRecoEle " << triggerWeight.scaleRecoEle(20,vLeptons.eta[0]) << endl;
+					float weightMuonHLTRecoAndID = 1.0;
+					float weightEleHLTRecoAndId = 1.0;
+					//cout <<"electron pt " << vLeptons.pt[0] << " eta " << vLeptons.eta[0] << endl;
 					
-					if (vLeptons.pt[1] >20 ){	weightMuonRecoAndID = triggerWeight.scaleMuID(vLeptons.pt[1],vLeptons.eta[1]);}
-					else{
-						//float weightMuonRecoAndID;
-						weightMuonRecoAndID = triggerWeight.scaleMuID(20,vLeptons.eta[1]);
+					if (vLeptons.pt[1]>10&&vLeptons.pt[0]>10){
+						weightEleHLTRecoAndId = triggerWeight.scaleEleCrossTrig(vLeptons.pt[0],vLeptons.eta[0]);
+						weightMuonHLTRecoAndID =triggerWeight.scaleMuCrossTrig(vLeptons.pt[1],vLeptons.eta[1]);
+						//Which trigger more likely to fire if both leptons above upper leg threshold
+						if( vLeptons.pt[1]>20&&vLeptons.pt[0]>20){
+							if (weightEleHLTRecoAndId>weightMuonHLTRecoAndID)weightMuonHLTRecoAndID = 1.0;
+							if (weightEleHLTRecoAndId<weightMuonHLTRecoAndID)weightEleHLTRecoAndId = 1.0;
+						}
+						if( vLeptons.pt[1]>10&&vLeptons.pt[1]<20){ // Muon bottom leg
+							weightEleHLTRecoAndId = 1.0;
+						}
+						if( vLeptons.pt[0]>10&&vLeptons.pt[0]<20){ // Electron bottom leg
+							weightMuonHLTRecoAndID = 1.0;
+						}
+					}
+					
+					if (vLeptons.pt[1]>20&&vLeptons.pt[0]>20){
+						weightEleHLTRecoAndId = weightEleHLTRecoAndId*triggerWeight.scaleID95Ele(vLeptons.pt[0],vLeptons.eta[0]) * triggerWeight.scaleRecoEle(vLeptons.pt[0],vLeptons.eta[0]);
+						weightMuonHLTRecoAndID = weightMuonHLTRecoAndID*triggerWeight.scaleMuID(vLeptons.pt[1],vLeptons.eta[1]);
+					} else {
+						float MuonID = triggerWeight.scaleMuID(21,vLeptons.eta[1]);
+						float EleID = triggerWeight.scaleID95Ele(21,vLeptons.eta[0]) * triggerWeight.scaleRecoEle(21,vLeptons.eta[0]);
 						if ( vLeptons.pt[1] <= 15 && vLeptons.pt[1] >10) {
-							if (vLeptons.eta[1] >= 1.0) weightMuonRecoAndID = 0.98*weightMuonRecoAndID;
-							if (vLeptons.eta[1] < 1.0) weightMuonRecoAndID = 0.92*weightMuonRecoAndID;
+							if (vLeptons.eta[1] >= 1.0) weightMuonHLTRecoAndID = 0.98*weightMuonHLTRecoAndID*MuonID;
+							if (vLeptons.eta[1] < 1.0) weightMuonHLTRecoAndID = 0.92*weightMuonHLTRecoAndID*MuonID;
 						}
 						if ( vLeptons.pt[1] <= 20 && vLeptons.pt[1] >15) {
-							if (vLeptons.eta[1] >= 1.0) weightMuonRecoAndID = 0.962*weightMuonRecoAndID;
-							if (vLeptons.eta[1] < 1.0) weightMuonRecoAndID = 0.948*weightMuonRecoAndID;
+							if (vLeptons.eta[1] >= 1.0) weightMuonHLTRecoAndID = 0.962*weightMuonHLTRecoAndID*MuonID;
+							if (vLeptons.eta[1] < 1.0) weightMuonHLTRecoAndID = 0.948*weightMuonHLTRecoAndID*MuonID;
 						}
-					}					
-					if (vLeptons.pt[0] > 20 ) {
-						weightEleRecoAndId=triggerWeight.scaleID95Ele(vLeptons.pt[0],vLeptons.eta[0]) * triggerWeight.scaleRecoEle(vLeptons.pt[0],vLeptons.eta[0]);
-					}else{
-						weightEleRecoAndId=triggerWeight.scaleID95Ele(20,vLeptons.eta[0]) * triggerWeight.scaleRecoEle(20,vLeptons.eta[0]);
 						if ( vLeptons.pt[0] <= 15 && vLeptons.pt[0] >10) {
-							if (vLeptons.eta[0] >= 1.2) weightEleRecoAndId = 1.19*weightEleRecoAndId;
-							if (vLeptons.eta[0] < 1.2) weightEleRecoAndId = 1.11*weightEleRecoAndId;
+							if (vLeptons.eta[0] >= 1.2) weightEleHLTRecoAndId = 1.19*weightEleHLTRecoAndId*EleID;
+							if (vLeptons.eta[0] < 1.2) weightEleHLTRecoAndId = 1.11*weightEleHLTRecoAndId*EleID;
 						}
 						if ( vLeptons.pt[0] <= 20 && vLeptons.pt[0] >15) {
-							if (vLeptons.eta[0] >= 1.2) weightEleRecoAndId = 1.06*weightEleRecoAndId;
-							if (vLeptons.eta[0] < 1.2) weightEleRecoAndId = 0.98*weightEleRecoAndId;
+							if (vLeptons.eta[0] >= 1.2) weightEleHLTRecoAndId = 1.06*weightEleHLTRecoAndId*EleID;
+							if (vLeptons.eta[0] < 1.2) weightEleHLTRecoAndId = 0.98*weightEleHLTRecoAndId*EleID;
 						}
 					}					
 					
-					float SingleMuHLTweight = 1.0;
-					if ( vLeptons.pt[1] > 20 ) {
-						SingleMuHLTweight = triggerWeight.scaleMuIsoHLT(vLeptons.pt[1],vLeptons.eta[1]);
-						if (vLeptons.pt[1] <= 30) {
-							if (vLeptons.eta[1] >= 1.5) SingleMuHLTweight = 1.04*SingleMuHLTweight;
-							if (vLeptons.eta[1] < 1.5) SingleMuHLTweight = 0.99*SingleMuHLTweight;
-						}else{
-							if (vLeptons.eta[1] >= 1.5) SingleMuHLTweight = 1.06*SingleMuHLTweight;
-							if (vLeptons.eta[1] < 1.5) SingleMuHLTweight = 0.992*SingleMuHLTweight;
-						}						
-					}else if ( vLeptons.pt[1] <= 15 && vLeptons.pt[1] >10) {
-						SingleMuHLTweight = triggerWeight.scaleMuIsoHLT(20,vLeptons.eta[1]);
-						if (vLeptons.eta[1] >= 1.5) SingleMuHLTweight = 1.03*SingleMuHLTweight;
-						if (vLeptons.eta[1] < 1.5) SingleMuHLTweight = 1.01*SingleMuHLTweight;
-					}else if ( vLeptons.pt[1] <= 20 && vLeptons.pt[1] >15) {
-						SingleMuHLTweight = triggerWeight.scaleMuIsoHLT(20,vLeptons.eta[1]);
-						if (vLeptons.eta[1] >= 1.5) SingleMuHLTweight = 1.07*SingleMuHLTweight;
-						if (vLeptons.eta[1] < 1.5) SingleMuHLTweight = 0.99*SingleMuHLTweight;						
-					}
-					float SingleEleHLTweight = 1.0;
-					if (vLeptons.pt[0] >30){
-						weightTrigMay = triggerWeight.scaleSingleEleMay(vLeptons.pt[0],vLeptons.eta[0]);
-						weightTrigV4 = triggerWeight.scaleSingleEleV4(vLeptons.pt[0],vLeptons.eta[0]);
-						weightEleTrigJetMETPart=triggerWeight.scaleJet30Jet25(jet30pt,jet30eta)*triggerWeight.scalePFMHTEle(MET.et);
-						weightTrigV4*=weightEleTrigJetMETPart;
-						SingleEleHLTweight = (weightTrigMay * 0.215 + weightTrigV4 * 1.915)/ 2.13;
-						if (vLeptons.eta[0] >= 1.479) SingleEleHLTweight = 1.008*SingleEleHLTweight;
-						if (vLeptons.eta[0] < 1.479) SingleEleHLTweight = 1.003*SingleEleHLTweight;
-					}else{
-						weightTrigMay = triggerWeight.scaleSingleEleMay(30,vLeptons.eta[0]);
-						weightTrigV4 = triggerWeight.scaleSingleEleV4(30,vLeptons.eta[0]);
-						weightEleTrigJetMETPart=triggerWeight.scaleJet30Jet25(jet30pt,jet30eta)*triggerWeight.scalePFMHTEle(MET.et);
-						weightTrigV4*=weightEleTrigJetMETPart;
-						SingleEleHLTweight = (weightTrigMay * 0.215 + weightTrigV4 * 1.915)/ 2.13;
-						if ( vLeptons.pt[0] <= 15 && vLeptons.pt[0] >10) {
-							if (vLeptons.eta[0] >= 1.479) SingleEleHLTweight = 0.97*SingleEleHLTweight;
-							if (vLeptons.eta[0] < 1.479) SingleEleHLTweight = 0.98*SingleEleHLTweight;
-						}else if ( vLeptons.pt[0] <= 20 && vLeptons.pt[0] >15) {
-							if (vLeptons.eta[0] >= 1.479) SingleEleHLTweight = 1.05*SingleEleHLTweight;
-							if (vLeptons.eta[0] < 1.479) SingleEleHLTweight = 1.00*SingleEleHLTweight;
-						}else if (vLeptons.pt[0] <= 30 && vLeptons.pt[0] >20){
-							if (vLeptons.eta[0] >= 1.479) SingleEleHLTweight = 1.0*SingleEleHLTweight;
-							if (vLeptons.eta[0] < 1.479) SingleEleHLTweight = 1.001*SingleEleHLTweight;
-						}
-					}
-					//float cweightTrig = weightTrig1 + weightTrig2 - weightTrig1*weightTrig2;
-					cout <<"SingleEleHLTweight " << SingleEleHLTweight << " SingleMuHLTweight " << SingleMuHLTweight << endl;
-					//cout <<"weightMuonRecoAndID " << weightMuonRecoAndID << " weightEleRecoAndId " << weightEleRecoAndId << endl;
-					
-					
-					float weightTrig2 = 1.0;
-					weightTrig2 = SingleEleHLTweight*SingleMuHLTweight;
-					weightTrig = weightMuonRecoAndID * weightTrig2*weightEleRecoAndId;
-					//cout <<"weightTrig2 " << weightTrig2 << " weightTrig " << weightTrig << endl;
+					weightTrig = weightEleHLTRecoAndId * weightMuonHLTRecoAndID;
 					nvlep=2;
 					firstAddMu=1;
 					firstAddEle=1;
-					Nevents_emu++;
 					if (Verbage) std::cout <<"event " <<ievt << " is a Zemu event" << endl;
+					
+					LorentzVector tauelectron = LorentzVector(vhCand.V.electrons[0].p4.Px(),vhCand.V.electrons[0].p4.Py(),vhCand.V.electrons[0].p4.Pz(),vhCand.V.electrons[0].p4.P());
+					LorentzVector taumuon = LorentzVector(vhCand.V.muons[0].p4.Px(),vhCand.V.muons[0].p4.Py(),vhCand.V.muons[0].p4.Pz(),vhCand.V.muons[0].p4.P());
+					NSVfitStandalone::Vector measuredMET( vhCand.V.mets.at(0).p4.Px(), vhCand.V.mets.at(0).p4.Py(), 0);
+					std::vector<NSVfitStandalone::MeasuredTauLepton> measuredTauLeptons;
+					NSVfitStandalone::LorentzVector p1 = tauelectron;
+					measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(NSVfitStandalone::kLepDecay,p1));
+					NSVfitStandalone::LorentzVector p2 = taumuon;
+					measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(NSVfitStandalone::kLepDecay,p2));
+					unsigned int flagSA = 0;
+					NSVfitStandaloneAlgorithm algo(measuredTauLeptons,measuredMET,*metsig,flagSA);
+					algo.addLogM(false);
+					algo.integrate();
+					svmass = algo.getMass(); // mass uncertainty not implemented yet
+					//cout << "original mass " << vhCand.V.p4.M() << " SVfit mass " << svmass << " %diff " << (vhCand.V.p4.M()-svmass)/vhCand.V.p4.M() << endl;
+
+					m.SetPtEtaPhi(vhCand.V.muons[0].p4.Pt(),0,vhCand.V.muons[0].p4.Phi());
+					e.SetPtEtaPhi(vhCand.V.electrons[0].p4.Pt(),0,vhCand.V.electrons[0].p4.Phi());
+					metv.SetPtEtaPhi(vhCand.V.mets.at(0).p4.Pt(),0,vhCand.V.mets.at(0).p4.Phi());
+					TVector3 bisector(m.Unit() + e.Unit());
+					bisector = bisector.Unit();
+					PzetaVis  = (m+e).Dot(bisector);
+					PzetaMiss  =  metv.Dot(bisector);
+					
+					
+				}
+				
+				if(Vtype == VHbbCandidate::Ztaumu ){
+				Nevents_Ztaumu++;
+					//cout << "Ztaumu candidate" << endl;
+					leptonForTop=vhCand.V.muons[0].p4;
+					vLeptons.set(vhCand.V.muons[0],0,13); 
+					vLeptons.set(vhCand.V.taus[0],1,15);
+					nvlep=2;
+					firstAddMu=1;
+					firstAddTau=1;
+				
+					LorentzVector hadronictau = LorentzVector(vhCand.V.taus[0].p4.Px(),vhCand.V.taus[0].p4.Py(),vhCand.V.taus[0].p4.Pz(),vhCand.V.taus[0].p4.P());
+					LorentzVector taumuon = LorentzVector(vhCand.V.muons[0].p4.Px(),vhCand.V.muons[0].p4.Py(),vhCand.V.muons[0].p4.Pz(),vhCand.V.muons[0].p4.P());
+					NSVfitStandalone::Vector measuredMET( vhCand.V.mets.at(0).p4.Px(), vhCand.V.mets.at(0).p4.Py(), 0);
+					std::vector<NSVfitStandalone::MeasuredTauLepton> measuredTauLeptons;
+					NSVfitStandalone::LorentzVector p1 = hadronictau;
+					measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(NSVfitStandalone::kHadDecay,p1));
+					NSVfitStandalone::LorentzVector p2 = taumuon;
+					measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(NSVfitStandalone::kLepDecay,p2));
+					unsigned int flagSA = 0;
+					NSVfitStandaloneAlgorithm algo(measuredTauLeptons,measuredMET,*metsig,flagSA);
+					algo.addLogM(false);
+					algo.integrate();
+					svmass = algo.getMass(); // mass uncertainty not implemented yet
+					//cout << "original mass " << vhCand.V.p4.M() << " SVfit mass " << svmass << " %diff " << (vhCand.V.p4.M()-svmass)/vhCand.V.p4.M() << endl;
+					m.SetPtEtaPhi(vhCand.V.muons[0].p4.Pt(),0,vhCand.V.muons[0].p4.Phi());
+					tau.SetPtEtaPhi(vhCand.V.taus[0].p4.Pt(),0,vhCand.V.taus[0].p4.Phi());
+					metv.SetPtEtaPhi(vhCand.V.mets.at(0).p4.Pt(),0,vhCand.V.mets.at(0).p4.Phi());
+					TVector3 bisector(m.Unit() + tau.Unit());
+					bisector = bisector.Unit();
+					PzetaVis  = (m+tau).Dot(bisector);
+					PzetaMiss  =  metv.Dot(bisector);
+					
+				}
+				if(Vtype == VHbbCandidate::Ztaue ){
+				Nevents_Ztaue++;
+					//cout << "Ztaue candidate" << endl;
+					leptonForTop=vhCand.V.electrons[0].p4;
+					vLeptons.set(vhCand.V.electrons[0],0,11); 
+					vLeptons.set(vhCand.V.taus[0],1,15);
+					nvlep=2;
+					firstAddEle=1;
+					firstAddTau=1;
+					
+					LorentzVector hadronictau = LorentzVector(vhCand.V.taus[0].p4.Px(),vhCand.V.taus[0].p4.Py(),vhCand.V.taus[0].p4.Pz(),vhCand.V.taus[0].p4.P());
+					LorentzVector tauelectron = LorentzVector(vhCand.V.electrons[0].p4.Px(),vhCand.V.electrons[0].p4.Py(),vhCand.V.electrons[0].p4.Pz(),vhCand.V.electrons[0].p4.P());
+					NSVfitStandalone::Vector measuredMET( vhCand.V.mets.at(0).p4.Px(), vhCand.V.mets.at(0).p4.Py(), 0);
+					std::vector<NSVfitStandalone::MeasuredTauLepton> measuredTauLeptons;
+					NSVfitStandalone::LorentzVector p1 = hadronictau;
+					measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(NSVfitStandalone::kHadDecay,p1));
+					NSVfitStandalone::LorentzVector p2 = tauelectron;
+					measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(NSVfitStandalone::kLepDecay,p2));
+					unsigned int flagSA = 0;
+					NSVfitStandaloneAlgorithm algo(measuredTauLeptons,measuredMET,*metsig,flagSA);
+					algo.addLogM(false);
+					algo.integrate();
+					svmass = algo.getMass(); // mass uncertainty not implemented yet
+					//cout << "original mass " << vhCand.V.p4.M() << " SVfit mass " << svmass << " %diff " << (vhCand.V.p4.M()-svmass)/vhCand.V.p4.M() << endl;
+					tau.SetPtEtaPhi(vhCand.V.taus[0].p4.Pt(),0,vhCand.V.taus[0].p4.Phi());
+					e.SetPtEtaPhi(vhCand.V.electrons[0].p4.Pt(),0,vhCand.V.electrons[0].p4.Phi());
+					metv.SetPtEtaPhi(vhCand.V.mets.at(0).p4.Pt(),0,vhCand.V.mets.at(0).p4.Phi());
+					TVector3 bisector(tau.Unit() + e.Unit());
+					bisector = bisector.Unit();
+					PzetaVis  = (tau+e).Dot(bisector);
+					PzetaMiss  =  metv.Dot(bisector);
+					
 				}
 				
 				if(Vtype == VHbbCandidate::Wmun ){
+				Nevents_Wmun++;
 					leptonForTop=vhCand.V.muons[0].p4;
 					vLeptons.set(vhCand.V.muons[0],0,13); 
 					float weightMuonRecoAndID = triggerWeight.scaleMuID(vLeptons.pt[0],vLeptons.eta[0]);
@@ -1753,8 +1927,10 @@ int main(int argc, char* argv[])
 					weightTrigOrMu30 = weightMuonRecoAndID*weightTrig1OrMu30;
 					nvlep=1;
 					firstAddMu=1;
-				}
+					
+					}
 				if( Vtype == VHbbCandidate::Wen ){
+				Nevents_Wen++;
 					leptonForTop=vhCand.V.electrons[0].p4;
 					vLeptons.set(vhCand.V.electrons[0],0,11);
 					nvlep=1;
@@ -1771,7 +1947,76 @@ int main(int argc, char* argv[])
 					//	  weightTrig = weightTrigMay * 0.187 + weightTrigV4 * (1.-0.187); //FIXME: use proper lumi if we reload 2.fb
 					weightTrig = (weightTrigMay * 0.215 + weightTrigV4 * 1.915)/ 2.13; //FIXME: use proper lumi if we reload 2.fb
 				}
-				
+				if(Vtype == VHbbCandidate::Wtaun ){
+				Nevents_Wtaun++;
+					vLeptons.set(vhCand.V.taus[0],0,15); 
+					nvlep=1;
+					firstAddTau=1;
+					
+					if (vhCand.V.taus.size()>1){
+						LorentzVector hadronictau = LorentzVector(vhCand.V.taus[0].p4.Px(),vhCand.V.taus[0].p4.Py(),vhCand.V.taus[0].p4.Pz(),vhCand.V.taus[0].p4.P());
+						LorentzVector hadronictau2 = LorentzVector(vhCand.V.taus[1].p4.Px(),vhCand.V.taus[1].p4.Py(),vhCand.V.taus[1].p4.Pz(),vhCand.V.taus[1].p4.P());
+						NSVfitStandalone::Vector measuredMET( vhCand.V.mets.at(0).p4.Px(), vhCand.V.mets.at(0).p4.Py(), 0);
+						std::vector<NSVfitStandalone::MeasuredTauLepton> measuredTauLeptons;
+						NSVfitStandalone::LorentzVector p1 = hadronictau;
+						measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(NSVfitStandalone::kHadDecay,p1));
+						NSVfitStandalone::LorentzVector p2 = hadronictau2;
+						measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(NSVfitStandalone::kHadDecay,p2));
+						unsigned int flagSA = 0;
+						NSVfitStandaloneAlgorithm algo(measuredTauLeptons,measuredMET,*metsig,flagSA);
+						algo.addLogM(false);
+						algo.integrate();
+						svmass = algo.getMass(); // mass uncertainty not implemented yet
+						//cout << "original mass " << vhCand.V.p4.M() << " SVfit mass " << svmass << " %diff " << (vhCand.V.p4.M()-svmass)/vhCand.V.p4.M() << endl;
+						tau.SetPtEtaPhi(vhCand.V.taus[0].p4.Pt(),0,vhCand.V.taus[0].p4.Phi());
+						e.SetPtEtaPhi(vhCand.V.taus[1].p4.Pt(),0,vhCand.V.taus[1].p4.Phi());
+						metv.SetPtEtaPhi(vhCand.V.mets.at(0).p4.Pt(),0,vhCand.V.mets.at(0).p4.Phi());
+						TVector3 bisector(tau.Unit() + e.Unit());
+						bisector = bisector.Unit();
+						PzetaVis  = (tau+e).Dot(bisector);
+						PzetaMiss  =  metv.Dot(bisector);
+						
+				}
+				}
+					if(Vtype == VHbbCandidate::Ztautau &&  Vtype != VHbbCandidate::Wtaun ){
+					Nevents_Ztautau++;
+						vLeptons.set(vhCand.V.taus[0],0,15); 
+						vLeptons.set(vhCand.V.taus[1],0,15); 
+						nvlep=2;
+						firstAddTau=2;
+						
+						if (vhCand.V.taus.size()>1){
+							LorentzVector hadronictau = LorentzVector(vhCand.V.taus[0].p4.Px(),vhCand.V.taus[0].p4.Py(),vhCand.V.taus[0].p4.Pz(),vhCand.V.taus[0].p4.P());
+							LorentzVector hadronictau2 = LorentzVector(vhCand.V.taus[1].p4.Px(),vhCand.V.taus[1].p4.Py(),vhCand.V.taus[1].p4.Pz(),vhCand.V.taus[1].p4.P());
+							NSVfitStandalone::Vector measuredMET( vhCand.V.mets.at(0).p4.Px(), vhCand.V.mets.at(0).p4.Py(), 0);
+							std::vector<NSVfitStandalone::MeasuredTauLepton> measuredTauLeptons;
+							NSVfitStandalone::LorentzVector p1 = hadronictau;
+							measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(NSVfitStandalone::kHadDecay,p1));
+							NSVfitStandalone::LorentzVector p2 = hadronictau2;
+							measuredTauLeptons.push_back(NSVfitStandalone::MeasuredTauLepton(NSVfitStandalone::kHadDecay,p2));
+							unsigned int flagSA = 0;
+							NSVfitStandaloneAlgorithm algo(measuredTauLeptons,measuredMET,*metsig,flagSA);
+							algo.addLogM(false);
+							algo.integrate();
+							svmass = algo.getMass(); // mass uncertainty not implemented yet
+							//cout << "original mass " << vhCand.V.p4.M() << " SVfit mass " << svmass << " %diff " << (vhCand.V.p4.M()-svmass)/vhCand.V.p4.M() << endl;
+							tau.SetPtEtaPhi(vhCand.V.taus[0].p4.Pt(),0,vhCand.V.taus[0].p4.Phi());
+							e.SetPtEtaPhi(vhCand.V.taus[1].p4.Pt(),0,vhCand.V.taus[1].p4.Phi());
+							metv.SetPtEtaPhi(vhCand.V.mets.at(0).p4.Pt(),0,vhCand.V.mets.at(0).p4.Phi());
+							TVector3 bisector(tau.Unit() + e.Unit());
+							bisector = bisector.Unit();
+							PzetaVis  = (tau+e).Dot(bisector);
+							PzetaMiss  =  metv.Dot(bisector);
+							
+						}
+					}
+				Pzeta25 = PzetaVis - (0.25*PzetaMiss);
+				Pzeta45 = PzetaVis - (0.45*PzetaMiss);
+				Pzeta65 = PzetaVis - (0.65*PzetaMiss);
+				Pzeta85 = PzetaVis - (0.85*PzetaMiss);
+				if(Vtype == VHbbCandidate::Zbb )Nevents_Zbb++;
+
+						
 				if(isMC_)
 					{
 						weightTrigMET80 =  triggerWeight.scaleMET80(MET.et);
@@ -1781,7 +2026,10 @@ int main(int argc, char* argv[])
 						weightTrigMET802CJet= weightTrigMET80 * weightTrig2CJet20;
 						weightTrigMET1002CJet= weightTrigMET100 * weightTrig2CJet20;
 					}
+					//cout << "right before Znunu event definition" << endl;
 				if( Vtype == VHbbCandidate::Znn ){
+				//cout << "have a Znunu event" << endl;
+				Nevents_Znunu++;
 					nvlep=0;
 					float weightTrig1 = triggerWeight.scaleMetHLT(vhCand.V.mets.at(0).p4.Pt());
 					weightTrigMETLP = weightTrig1;
@@ -1814,29 +2062,34 @@ int main(int argc, char* argv[])
 					{
 						for(size_t j=firstAddMu;j< vhCand.V.muons.size();j++) aLeptons.set(vhCand.V.muons[j],nalep++,13);
 						for(size_t j=firstAddEle;j< vhCand.V.electrons.size();j++) aLeptons.set(vhCand.V.electrons[j],nalep++,11);
+						for(size_t j=firstAddTau;j< vhCand.V.taus.size();j++) aLeptons.set(vhCand.V.taus[j],nalep++,15);
 					}
 				else
 					{
 						
 						for(size_t j=0;j< iEvent->muInfo.size();j++)
 							{ 
-								if((j!= vhCand.V.firstLepton && j!= vhCand.V.secondLepton) || ((Vtype != VHbbCandidate::Wmun ) && (Vtype != VHbbCandidate::Zmumu ) && (Vtype != VHbbCandidate::Zemu)) )
+								if((j!= vhCand.V.firstLepton && j!= vhCand.V.secondLepton) || ((Vtype != VHbbCandidate::Wmun ) && (Vtype != VHbbCandidate::Zmumu ) && (Vtype != VHbbCandidate::Zemu) && (Vtype != VHbbCandidate::Ztaumu)) )
 									aLeptons.set(iEvent->muInfo[j],nalep++,13);
-								if(j> 0 && Vtype == VHbbCandidate::Zemu) aLeptons.set(iEvent->muInfo[j],nalep++,13);
 							}
 						for(size_t j=0;j< iEvent->eleInfo.size();j++)
 							{ 
-								if((j!= vhCand.V.firstLepton && j!= vhCand.V.secondLepton) || ((Vtype != VHbbCandidate::Wen ) && (Vtype != VHbbCandidate::Zee ) && (Vtype != VHbbCandidate::Zemu)))
+								if((j!= vhCand.V.firstLepton && j!= vhCand.V.secondLepton) || ((Vtype != VHbbCandidate::Wen ) && (Vtype != VHbbCandidate::Zee ) && (Vtype != VHbbCandidate::Zemu) && (Vtype != VHbbCandidate::Ztaue)))
 									aLeptons.set(iEvent->eleInfo[j],nalep++,11);
-								if(j> 0 && Vtype == VHbbCandidate::Zemu) aLeptons.set(iEvent->eleInfo[j],nalep++,11);
 							}
-						
+						for(size_t j=0;j< iEvent->tauInfo.size();j++)
+							{ 
+								if((j!= vhCand.V.firstLepton && j!= vhCand.V.secondLepton) || ((Vtype != VHbbCandidate::Ztaumu) && (Vtype != VHbbCandidate::Wtaun) && (Vtype != VHbbCandidate::Ztaue) && (Vtype != VHbbCandidate::Ztautau)) ){
+									aLeptons.set(iEvent->tauInfo[j],nalep++,15);
+									//cout << "tau Pt: " << iEvent->tauInfo[j].p4.Pt() << endl;
+								}
+							}
 					}
 				
 				
 				if(isMC_)
 					{
-						//std::cout << "BTAGSF " <<  btagJetInfos.size() << " " << btag.weight<BTag1Tight2CustomFilter>(btagJetInfos) << std::endl;
+						if(Verbage)std::cout << "BTAGSF " <<  btagJetInfos.size() << " " << btag.weight<BTag1Tight2CustomFilter>(btagJetInfos) << std::endl;
 						if ( btagJetInfos.size()< 10) 
 							{
 								btag1T2CSF = btag.weight<BTag1Tight2CustomFilter>(btagJetInfos);
@@ -1879,13 +2132,41 @@ int main(int argc, char* argv[])
 				//         gendrcc=aux.genCCDeltaR(); 
 				//         gendrbb=aux.genBBDeltaR(); 
 				
+				if(isMC_) {
+					
+					genTau.mass = -1.;
+					genTau.pt = 0.;
+					genTau.eta = -99.;
+					genTau.phi = -99.;
+					fwlite::Handle<reco::GenParticleCollection> genParticles;
+					genParticles.getByLabel(ev,"savedGenParticles");
+					for(size_t i = 0; i < genParticles->size(); ++ i) {
+						const reco::GenParticle p = (*genParticles)[i];
+						int id = p.pdgId();
+						//int st = p.status();
+						//int ch = p.charge();
+						TLorentzVector mc_p4 = GENPTOLOR(p);
+						if (abs(id)==15) {
+							TLorentzVector visibleP = VisibleP(p);
+							//cout << "found tau" << ", mass: " << visibleP.M() << ", pT: " << visibleP.Pt() << endl;
+							genTau.mass = visibleP.M();
+							genTau.pt = visibleP.Pt();
+							genTau.eta = visibleP.Eta();
+							genTau.phi = visibleP.Phi();
+							
+						}
+					}
+				}
 				
 				
 				genZpt=aux.mcZ.size() > 0 ? aux.mcZ[0].p4.Pt():-99;
 				genWpt=aux.mcW.size() > 0 ? aux.mcW[0].p4.Pt():-99;
 				
+				bool tauDauFromZ = false;
+				genZmumu = false, genZee = false, genZnunu = false;
 				// Z* is status=3 and Nmother=2 (q and qbar)  
 				// Z is status=2 and Ndau=2 (mup and mum)  
+				if(Verbage)std::cout << "Gen Zstar info " << endl;
 				for (unsigned int i=0; i<aux.mcZ.size(); i++){
 					if (aux.mcZ[i].status==3) {
 						genZstar.mass = aux.mcZ[i].p4.M();
@@ -1897,10 +2178,12 @@ int main(int argc, char* argv[])
 						if (aux.mcZ[i].momid!=-99) genZstar.momid  =  aux.mcZ[i].momid ;
 					}
 					
-					
-					
-					if (aux.mcZ[i].dauid.size()>1) {
-						if ( abs(aux.mcZ[i].dauid[0])==13 || abs(aux.mcZ[i].dauid[0])==11 ) {
+					if (aux.mcZ[i].dauid.size()==2 && aux.mcZ[i].status == 2) {
+						if ((abs(aux.mcZ[i].dauid[0])==12 && abs(aux.mcZ[i].dauid[1])==12) || (abs(aux.mcZ[i].dauid[0])==14 && abs(aux.mcZ[i].dauid[1])==14) || (abs(aux.mcZ[i].dauid[0])==16 && abs(aux.mcZ[i].dauid[1])==16)) genZnunu = true;
+						if ( abs(aux.mcZ[i].dauid[0])==13 || abs(aux.mcZ[i].dauid[0])==11 || abs(aux.mcZ[i].dauid[0])==15 ) {
+							for (unsigned int d = 0; d != aux.mcZ[i].dauid.size(); d++){
+								if (abs(aux.mcZ[i].dauid[d])==15) tauDauFromZ = true;
+							}// loop Z daughters
 							genZ.mass = aux.mcZ[i].p4.M();
 							genZ.pt = aux.mcZ[i].p4.Pt();
 							genZ.eta = aux.mcZ[i].p4.Eta();
@@ -1908,11 +2191,66 @@ int main(int argc, char* argv[])
 							genZ.status = aux.mcZ[i].status;
 							genZ.charge = aux.mcZ[i].charge;
 							if ( aux.mcZ[i].momid!=-99) genZ.momid = aux.mcZ[i].momid;
+							if (abs(aux.mcZ[i].dauid[0])==13 && abs(aux.mcZ[i].dauid[1])==13) genZmumu = true;
+							if (abs(aux.mcZ[i].dauid[0])==11 && abs(aux.mcZ[i].dauid[1])==11) genZee = true;
 						}
 					}
 				}
 				
+				int muTauDau = 0, eTauDau = 0, hasPions = 0, hadTau = 0;
+				genTauMu.mass = -1.;
+				genTauMu.pt = 0.;
+				genTauMu.eta = -99.;
+				genTauMu.phi = -99.;
+				if (aux.mcTau.size() > 1 && tauDauFromZ==true){
+					//cout << "********" << endl;
+					//cout << "there are " << aux.mcTau.size() << " taus in event " << ev.id().event() << endl;
+					//cout << "********" << endl;
+					TLorentzVector hadronicTauDecays, dummy;
+					for (unsigned int t=0; t<aux.mcTau.size(); t++){
+						bool hasMu = false, hasE = false;
+						for (unsigned int dt = 0; dt != aux.mcTau[t].dauid.size(); dt++){
+							//cout << "tau[" << t << "].daughter[" << dt << "]: " << aux.mcTau[t].dauid[dt] << endl;
+							if (abs(aux.mcTau[t].dauid[dt])==13){
+								hasMu=true;
+								genTauMu.mass = aux.mcTau[t].dauFourMomentum[dt].M();
+								genTauMu.pt = aux.mcTau[t].dauFourMomentum[dt].Pt();
+								genTauMu.eta = aux.mcTau[t].dauFourMomentum[dt].Eta();
+								genTauMu.phi = aux.mcTau[t].dauFourMomentum[dt].Phi();
+							}
+							else if (abs(aux.mcTau[t].dauid[dt])==11) hasE=true;
+							else{
+								dummy.SetPtEtaPhiM(aux.mcTau[t].dauFourMomentum[dt].Pt(), aux.mcTau[t].dauFourMomentum[dt].Eta(), aux.mcTau[t].dauFourMomentum[dt].Phi(), aux.mcTau[t].dauFourMomentum[dt].M());
+								hadronicTauDecays = hadronicTauDecays + dummy;
+							}// hadro tau
+							uint32_t pdgid=abs(aux.mcTau[t].dauid[dt]);
+							uint32_t hundreds=pdgid%1000;
+							if (hundreds>=111 && hundreds<=215) hasPions=true;
+						}// loop on tau daughters
+						if (!hasMu && !hasE){
+							hadTau++;
+							////genTau.mass = hadronicTauDecays.M();
+							////genTau.pt = hadronicTauDecays.Pt();
+							////genTau.eta = hadronicTauDecays.Eta();
+							////genTau.phi = hadronicTauDecays.Phi();
+							//genTau.status = hadronicTauDecays.status;
+							//genTau.charge = hadronicTauDecays.charge;
+							//genTau.momid = hadronicTauDecays.momid;
+							//cout << "tau eta: " << aux.mcTau[t].p4.Eta() << " mass: " << aux.mcTau[t].p4.M() << endl;
+							//cout << "momid: " << aux.mcTau[t].momid << endl;
+						}// hadTau
+						//if (hasMu && abs(aux.mcTau[t].momid)==15) muTauDau++;
+						//if (hasE && abs(aux.mcTau[t].momid)==15) eTauDau++;
+						if (hasMu) muTauDau++;
+						if (hasE) eTauDau++;
+					}// loop on taus
+				}// if 2 gen taus in event
+				//cout << "********" << endl;
+				//cout << "tau decays: " << hadTau << " hadronic, " << muTauDau << " muon, " << eTauDau << " electron." << endl;
+				//cout << "********" << endl;
 				
+				genZtaumu = false;
+				if (muTauDau >= 1 && hadTau >= 1) genZtaumu = true;
 				
 				for (unsigned int i=0; i<aux.mcW.size(); i++){
 					if  ( aux.mcW[i].momid==6 && aux.mcW[i].dauid.size()>1 ){
@@ -1930,6 +2268,7 @@ int main(int argc, char* argv[])
 						
 					}
 					
+					if(Verbage)std::cout << "Gen Tbar info " << endl;
 					
 					if  ( aux.mcW[i].momid==-6 && aux.mcW[i].dauid.size()>1 ){
 						genTbar.wdau1mass= aux.mcW[i].dauFourMomentum[0].M();
@@ -1946,6 +2285,8 @@ int main(int argc, char* argv[])
 						
 					}
 					
+					genWmunu = false;
+					genWenu = false;
 					if (aux.mcW[i].status==3 ) {
 						genWstar.mass = aux.mcW[i].p4.M();
 						genWstar.pt = aux.mcW[i].p4.Pt();
@@ -1955,6 +2296,9 @@ int main(int argc, char* argv[])
 						genWstar.charge = aux.mcW[i].charge;
 						if ( aux.mcW[i].momid!=-99) genWstar.momid =  aux.mcW[i].momid;
 					}
+					
+					if(Verbage)std::cout << "Gen W info " << endl;
+					
 					if (aux.mcW[i].dauid.size()>1 && (abs(aux.mcW[i].dauid[0])==13 || abs(aux.mcW[i].dauid[0])==11 )) {
 						genW.mass = aux.mcW[i].p4.M();
 						genW.pt = aux.mcW[i].p4.Pt();
@@ -1963,9 +2307,13 @@ int main(int argc, char* argv[])
 						genW.status = aux.mcW[i].status;
 						genW.charge = aux.mcW[i].charge;
 						if (aux.mcW[i].momid!=-99) genW.momid =  aux.mcW[i].momid;
+						if ( (abs(aux.mcW[i].dauid[0])==13 && abs(aux.mcW[i].dauid[1])==14) || (abs(aux.mcW[i].dauid[0])==14 && abs(aux.mcW[i].dauid[1])==13) ){
+							genWmunu = true;
+						}  
+						if ( (abs(aux.mcW[i].dauid[0])==11 && abs(aux.mcW[i].dauid[1])==12) || (abs(aux.mcW[i].dauid[0])==12 && abs(aux.mcW[i].dauid[1])==11) ) genWenu = true;
 					}
 				}
-				// b coming from Higgs
+				if(Verbage)std::cout << "Gen b info " << endl;
 				for (unsigned int i=0; i<aux.mcB.size(); i++){
 					if (abs(aux.mcB[i].momid)!=5) {
 						genB.mass = aux.mcB[i].p4.M();
@@ -1986,6 +2334,7 @@ int main(int argc, char* argv[])
 						
 					}
 				}
+				if(Verbage)std::cout << "Gen Bbar info " << endl;
 				
 				for (unsigned int i=0; i<aux.mcBbar.size(); i++){
 					if (abs(aux.mcBbar[i].momid)!=5 ) {
@@ -2009,8 +2358,7 @@ int main(int argc, char* argv[])
 				}
 				
 				
-				
-				
+				if(Verbage)std::cout << "Gen Higgs info " << endl;
 				if (aux.mcH.size()>0) {
 					genH.mass = aux.mcH[0].p4.M();
 					genH.pt = aux.mcH[0].p4.Pt();
@@ -2091,6 +2439,7 @@ int main(int argc, char* argv[])
 				}
 				
 				_outTree->Fill();
+				if(Verbage)std::cout << "After Fill outTree" << endl;
 				
 			}// closed event loop
 		
@@ -2101,12 +2450,20 @@ int main(int argc, char* argv[])
 	
 	
 	std::cout << "Events: " << ievt <<std::endl;
-	std::cout << "TotalCount: " << totalcount <<std::endl;
-	std::cout << "Number of Events without candidates " <<  Nevents_NoCandidates << endl;
-	std::cout << "Number of Events with tau leptons " << Nevents_withTauLeptons << endl;
-	std::cout << "Number of Zemu Events " << Nevents_emu << endl;
 	std::cout << "Number of Events with 15 GeV Pt threshold for jets " << Nevents_LowJetPt << endl;
-	
+
+	std::cout << "Number of Zmumu Events " << Nevents_Zmumu << endl;
+	std::cout << "Number of Zee Events " << Nevents_Zee << endl;
+	std::cout << "Number of Wmun Events " << Nevents_Wmun << endl;
+	std::cout << "Number of Wen Events " << Nevents_Wen << endl;
+	std::cout << "Number of Znunu Events " << Nevents_Znunu << endl;
+	std::cout << "Number of Zemu Events " << Nevents_Zemu << endl;
+	std::cout << "Number of Ztaumu Events " << Nevents_Ztaumu << endl;
+	std::cout << "Number of Ztaue Events " << Nevents_Ztaue << endl;
+	std::cout << "Number of Wtaun Events " << Nevents_Wtaun << endl;
+	std::cout << "Number of Ztautau Events " << Nevents_Ztautau << endl;
+	std::cout << "Number of Zbb Events " << Nevents_Zbb << endl;
+	std::cout << "More than one Candidate " << Nmulti << endl;
     
     
 	_outFile->cd();
