@@ -29,26 +29,18 @@ process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 # source
 process.source = cms.Source("PoolSource",
 			    fileNames=cms.untracked.vstring(
-#	"file:/uscms/home/sethzenz/nobackup/9ECB2776-81AD-E011-8B94-E0CB4E19F972.root"
-'file:////shome/bortigno/MadGraph/fromSimon/CMSSW_4_2_8_patch3/src/Analyzer/GenAnalyzer/test/WJETS_FEFFC5AA-91F9-E011-914B-E0CB4E1A1183.root'
-#"file:/data/uftrig01b/jhugon/kinFitter/filesFall11/ttbarTestSampleEDM5k.root" 
-#"file:DYJetsToLL_PtZ-100.root",
-#"/store/relval/CMSSW_4_2_6/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0009/5645192C-E7AA-E011-A714-0026189437F8.root"
-#/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/E0457C77-11BB-E011-8C7C-00304867C0C4.root
-#/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/D27FB95F-10BB-E011-A4D4-003048678E94.root
-#/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/B885B6EB-13BB-E011-8ADC-001A92971ACE.root
-#/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/7C859A88-15BB-E011-B629-00304867918A.root
-#/store/relval/CMSSW_4_2_8/RelValTTbar/GEN-SIM-RECO/START42_V12-v1/0025/06CA9A61-0EBB-E011-B9EE-003048678F8A.root
-#"file:Summer11_ZH_ZToLL_HToBB_M-115_7TeV-powheg_1.root",
-#"rfio:/castor/cern.ch/user/d/degrutto/test/Summer11_ZH_ZToLL_HToBB_M-115_7TeV-powheg_1.root",
+"file:/mnt/hadoop/user/uscms01/pnfs/unl.edu/data4/cms/store/mc/Fall11/ZH_ZToLL_HToBB_M-125_7TeV-powheg-herwigpp/AODSIM/PU_S6_START42_V14B-v1/0000/4AC41B53-B60C-E111-B38B-20CF3027A577.root",
+"file:/mnt/hadoop/user/uscms01/pnfs/unl.edu/data4/cms/store/mc/Fall11/ZH_ZToLL_HToBB_M-125_7TeV-powheg-herwigpp/AODSIM/PU_S6_START42_V14B-v1/0000/4E4F81B7-C10C-E111-984A-485B39800BA0.root",
+"file:/mnt/hadoop/user/uscms01/pnfs/unl.edu/data4/cms/store/mc/Fall11/ZH_ZToLL_HToBB_M-125_7TeV-powheg-herwigpp/AODSIM/PU_S6_START42_V14B-v1/0000/7EA0B77B-FF0C-E111-A498-20CF3027A5E9.root",
+"file:/mnt/hadoop/user/uscms01/pnfs/unl.edu/data4/cms/store/mc/Fall11/ZH_ZToLL_HToBB_M-125_7TeV-powheg-herwigpp/AODSIM/PU_S6_START42_V14B-v1/0000/84F0DC03-B10C-E111-8757-E0CB4E553644.root",
+"file:/mnt/hadoop/user/uscms01/pnfs/unl.edu/data4/cms/store/mc/Fall11/ZH_ZToLL_HToBB_M-125_7TeV-powheg-herwigpp/AODSIM/PU_S6_START42_V14B-v1/0000/9C1AF259-B30C-E111-9449-90E6BA0D09D7.root",
+"file:/mnt/hadoop/user/uscms01/pnfs/unl.edu/data4/cms/store/mc/Fall11/ZH_ZToLL_HToBB_M-125_7TeV-powheg-herwigpp/AODSIM/PU_S6_START42_V14B-v1/0000/A83884EC-B90C-E111-BA3D-E0CB4E29C503.root",
+"file:/mnt/hadoop/user/uscms01/pnfs/unl.edu/data4/cms/store/mc/Fall11/ZH_ZToLL_HToBB_M-125_7TeV-powheg-herwigpp/AODSIM/PU_S6_START42_V14B-v1/0000/A8D1BB82-AD0C-E111-8F15-20CF3019DEF7.root",
+"file:/mnt/hadoop/user/uscms01/pnfs/unl.edu/data4/cms/store/mc/Fall11/ZH_ZToLL_HToBB_M-125_7TeV-powheg-herwigpp/AODSIM/PU_S6_START42_V14B-v1/0000/B88CF49F-AA0C-E111-9C8B-E0CB4E19F96D.root",
+"file:/mnt/hadoop/user/uscms01/pnfs/unl.edu/data4/cms/store/mc/Fall11/ZH_ZToLL_HToBB_M-125_7TeV-powheg-herwigpp/AODSIM/PU_S6_START42_V14B-v1/0000/E091B3C4-B20C-E111-BDAC-00261834B53C.root",
+"file:/mnt/hadoop/user/uscms01/pnfs/unl.edu/data4/cms/store/mc/Fall11/ZH_ZToLL_HToBB_M-125_7TeV-powheg-herwigpp/AODSIM/PU_S6_START42_V14B-v1/0000/F063894C-AF0C-E111-989D-485B39800B62.root",
+"file:/mnt/hadoop/user/uscms01/pnfs/unl.edu/data4/cms/store/mc/Fall11/ZH_ZToLL_HToBB_M-125_7TeV-powheg-herwigpp/AODSIM/PU_S6_START42_V14B-v1/0000/FA629A0A-B90C-E111-8325-90E6BA442F2C.root"
 
-#"rfio:/castor/cern.ch/user/d/degrutto/test/DYJetsToLL_PtZ-100.root",
-
-#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/32CECED6-BFAD-E011-B08D-00261834B5A4.root',
-#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/3EE916B3-C4AD-E011-9159-90E6BA0D09B0.root',
-#	'root://cmsdcache7.pi.infn.it:7070//store/mc/Summer11/ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp/AODSIM/PU_S4_START42_V11-v1/0000/42622800-C1AD-E011-AD65-485B39800BF2.root',
-#		"/store/mc/CMSSW_4_2_3/RelValProdTTbar/GEN-SIM-RECO/MC_42_V12_JobRobot-v1/0000/B89A0B07-818C-E011-953E-0030487CD7E0.root"
-#	"dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat//store/mc/Summer11/BdToMuMu_2MuPtFilter_7TeV-pythia6-evtgen//GEN-SIM-RECO//PU_S4_START42_V11-v1///0000//92DE42C9-CD8C-E011-A421-001F296B758E.root"
 ),
 )
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -95,6 +87,7 @@ process.out1 = cms.OutputModule(
 #        'keep *_TriggerResults_*_*',
 	'keep *_bcandidates_*_*',
 	'keep *_bhadrons_*_*',
+	'keep *_pfMEtSignCovMatrix_*_*',
        	"keep *_HLTDiCentralJet20MET80_*_*",
        	"keep *_HLTDiCentralJet20MET100HBHENoiseFiltered_*_*",
 	"keep *_HLTPFMHT150_*_*",
@@ -532,7 +525,7 @@ process.selectedPatMuons.cut = cms.string('')
 process.selectedPatMuonsWithIso = process.selectedPatMuons.clone(
     src = 'selectedPatMuons',
      cut =  (
-        "pt > 20 && isGlobalMuon && isTrackerMuon && globalTrack().normalizedChi2 < 10 &&" +
+        "pt > 10 && isGlobalMuon && isTrackerMuon && globalTrack().normalizedChi2 < 10 &&" +
             "innerTrack().hitPattern().numberOfValidTrackerHits > 10 && "                      +
             "innerTrack().hitPattern().numberOfValidPixelHits > 0 && "                         +
             "globalTrack().hitPattern().numberOfValidMuonHits > 0 && "                         +
@@ -545,7 +538,7 @@ process.selectedPatMuonsWithIso = process.selectedPatMuons.clone(
 process.selectedPatElectronsWithIso = process.selectedPatElectrons.clone(
     src = 'selectedPatElectrons',
     cut = (
-   "pt > 15.0 && abs(eta) < 2.5 &&"
+   "pt > 10.0 && abs(eta) < 2.5 &&"
    "(isEE || isEB) && !isEBEEGap &&"
    "ecalDrivenSeed==1 && (abs(superCluster.eta)<2.5)"
    " && !(1.4442<abs(superCluster.eta)<1.566)"
@@ -629,9 +622,28 @@ process.load("VHbbAnalysis.HbbAnalyzer.pfIsoDeltaBeta04_cff")
 
 process.selectedPatElectrons.cut = (
     "(ecalDrivenSeed==1) &&"                                       +
-    "pt > 15.0 && abs(eta) < 2.5 &&"                               +
+    "pt > 5.0 && abs(eta) < 2.5 &&"                               +
     "(isEE || isEB) && !isEBEEGap"                              
 )
+
+from JetMETCorrections.Type1MET.pfMETCorrections_cff import pfCandsNotInJet
+process.pfCandsNotInJetForPFMEtSignCovMatrix = pfCandsNotInJet.clone()
+
+from RecoMET.METProducers.METSigParams_cfi import *
+process.pfMEtSignCovMatrix = cms.EDProducer("PFMEtSignCovMatrixProducer",
+  METSignificance_params,
+  src = cms.VInputTag(
+      'selectedPatMuonsWithIso',
+	  'selectedPatElectronsWithIso',
+      'cleanPatJetsAK5PF',
+      'pfCandsNotInJetForPFMEtSignCovMatrix'
+  ),
+  addJERcorr = cms.PSet(
+      inputFileName = cms.FileInPath('PhysicsTools/PatUtils/data/pfJetResolutionMCtoDataCorrLUT.root'),
+      lutName = cms.string('pfJetResolutionMCtoDataCorrLUT')
+  )
+)
+
 
 process.HbbAnalyzerNew = cms.EDProducer("HbbAnalyzerNew",
     runOnMC = cms.bool(isMC),
@@ -728,12 +740,27 @@ process.selectedElectronsMatched = cms.EDProducer( "PATTriggerMatchElectronEmbed
         matches = cms.VInputTag( cms.InputTag('selectedElectronsTriggerMatch') )
     )
 
+# trigger match for taus
+process.selectedTausTriggerMatch = defaultTriggerMatch.clone(
+        src         = cms.InputTag( "selectedPatTaus" ), 
+        matchedCuts = cms.string('path("*Tau*",0,0)')
+
+)
+# trigger object embedders for the same collections
+process.selectedTausMatched = cms.EDProducer( "PATTriggerMatchTauEmbedder",
+        src     = cms.InputTag(  "selectedPatTaus" ),
+        matches = cms.VInputTag( cms.InputTag('selectedTausTriggerMatch') )
+    )
+
+
 
 process.leptonTrigMatch = cms.Sequence (
 	process.selectedElectronsTriggerMatch
 	*process.selectedElectronsMatched
 	*process.selectedMuonsTriggerMatch
 	*process.selectedMuonsMatched
+	*process.selectedTausTriggerMatch
+	*process.selectedTausMatched
 	)
 
 
@@ -1003,6 +1030,7 @@ if isMC == False :
 		    process.selectedPatMuonsWithIso*
 		    process.selectedPatElectronsWithIso*
 		    process.cleanPatJetsAK5PF*
+			
 
 #                     process.patPF2PATSequence* # added with usePF2PAT
 	            process.patMETsHT*
@@ -1017,7 +1045,10 @@ if isMC == False :
 #                     process.inclusiveMergedVertices* #already included now in inclusiveVertexing sequence
 		     process.selectedVertices*
                      process.bcandidates*
-                     process.HbbAnalyzerNew
+                     process.HbbAnalyzerNew*
+					 			process.pfCandsNotInJetForPFMEtSignCovMatrix*
+			process.pfMEtSignCovMatrix
+
 
 #process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
                      )
@@ -1047,6 +1078,7 @@ else :
                      process.caVHCaloJets*
                      process.caVHPFJets*
                      process.eidSequence*
+					 
                      process.patDefaultSequence*
 		    #
 		    # add no iso stuff
@@ -1070,7 +1102,9 @@ else :
                      process.selectedVertices*
                      process.bcandidates*
 		     process.bhadrons*
-                     process.HbbAnalyzerNew
+                     process.HbbAnalyzerNew*
+					 					 			process.pfCandsNotInJetForPFMEtSignCovMatrix*
+			process.pfMEtSignCovMatrix
 #process.hbbCandidates*process.hbbHighestPtHiggsPt30Candidates*process.hbbBestCSVPt20Candidates
                      )
 
