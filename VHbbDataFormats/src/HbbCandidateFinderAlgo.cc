@@ -172,9 +172,28 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
     candidates.push_back(result);
   }
   	//Zemu
-	result = selector. getHZemuCandidate(temp,ok,elePos);
+	result = selector. getHZemuCandidate(temp,ok,elePos,muPos);
 	if ( ok == true ){
 		result.setCandidateType(VHbbCandidate::Zemu);
+		candidates.push_back(result);
+	}
+	// New tau categorizations 
+	result = selector.getHZtaumuCandidate(temp,ok,muPos,tauPosNoCandidateJetOverlap);
+	if ( ok == true ){
+		if (verbose_) std::cout << "We have a HZtaumu candidate" << std::endl;
+		result.setCandidateType(VHbbCandidate::Ztaumu);
+		candidates.push_back(result);
+	}
+	result = selector.getHZtaueCandidate(temp,ok,elePos,tauPosNoCandidateJetOverlap);
+	if ( ok == true ){
+		if (verbose_) std::cout << "We have a HZtaue candidate" << std::endl;
+		result.setCandidateType(VHbbCandidate::Ztaue);
+		candidates.push_back(result);
+	}
+	result = selector.getHWtaunCandidate(temp,ok,tauPosNoCandidateJetOverlap);
+	if ( ok == true ){
+		if (verbose_) std::cout << "We have a taun candidate" << std::endl;
+		result.setCandidateType(VHbbCandidate::Wtaun);
 		candidates.push_back(result);
 	}	
   //HWmunu
@@ -189,31 +208,23 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
     result.setCandidateType(VHbbCandidate::Wen);
     candidates.push_back(result);
   }
-  // New tau categorizations currently commented out
-  /*
-  result = selector.getHWtaunCandidate(temp,ok,tauPosNoCandidateJetOverlap);
-  if ( ok == true ){
-    if (verbose_) std::cout << "We have a taun candidate" << std::endl;
-    result.setCandidateType(VHbbCandidate::Wtaun);
-    candidates.push_back(result);
-  }
-  result = selector.getHZtaumuCandidate(temp,ok,muPos,tauPosNoCandidateJetOverlap);
-  if ( ok == true ){
-    if (verbose_) std::cout << "We have a HZtaumu candidate" << std::endl;
-    result.setCandidateType(VHbbCandidate::Ztaumu);
-    candidates.push_back(result);
-  }
-  */
-
-  if (candidates.size()!=0 ) return;
-
-  // HZnn - look at it only if nothing found up to now
-  result = selector. getHZnnCandidate(temp,ok);
-  if ( ok == true ){
-    result.setCandidateType(VHbbCandidate::Znn);
-    candidates.push_back(result);
-  }
-  return;
+ 
+ 
+ 	result = selector. getHZtautauCandidate(temp,ok,tauPosNoCandidateJetOverlap);
+	if ( ok == true ){
+		result.setCandidateType(VHbbCandidate::Ztautau);
+		candidates.push_back(result);
+	}
+	// std::cout << "number of candidates before Znunu " << candidates.size() << std::endl;
+	if (candidates.size()==0 ) {
+    // HZnn - look at it only if no non-tau candidates found up to now
+	result = selector. getHZnnCandidate(temp,ok);
+	if ( ok == true ){
+		result.setCandidateType(VHbbCandidate::Znn);
+		candidates.push_back(result);
+	}
+	}
+	return;
 }
 
 void HbbCandidateFinderAlgo::findMET(const VHbbEvent::METInfo & met, std::vector<VHbbEvent::METInfo>& out){
@@ -571,7 +582,7 @@ For both W -> mu nu and Z -> mu mu, we adopt the standard VBTF muon selection de
 	//	(muons[it].hIso+muons[it].eIso+muons[it].tIso)/muons[it].p4.Pt()<.15 &&
 	(muons[it].pfChaIso+muons[it].pfPhoIso+muons[it].pfNeuIso)/muons[it].p4.Pt()<.15  &&
 	fabs(muons[it].p4.Eta())<2.4 &&
-	muons[it].p4.Pt()>8 ) {
+	muons[it].p4.Pt()>10 ) {
       out.push_back(muons[it]);
       positions.push_back(it);
   }
@@ -609,7 +620,7 @@ We adopt the standard cut-based selection from VBTF described in detail here.
 	fabs(electrons[it].p4.Eta()) < 2.5 &&
 //Remove this workaround as now we have the proper flags
 //	!( fabs(electrons[it].p4.Eta()) < 1.57 && fabs(electrons[it].p4.Eta()) > 1.44) &&
-	electrons[it].p4.Pt()>8 //  I use the minimum ok for both Z and W
+	electrons[it].p4.Pt()>10 //  I use the minimum ok for both Z and W
 	){
       out.push_back(electrons[it]);
       positions.push_back(it);
