@@ -12,6 +12,8 @@
 <use   name="PhysicsTools/Utilities"/>
 <use   name="PhysicsTools/SelectorUtils"/>
 <use   name="RecoBTag/SecondaryVertex"/>
+<use   name="TauAnalysis/CandidateTools"/>
+
 <environment>
   <bin  file="make_histos.cxx"></bin>
   <bin  file="TMVAClassification.cxx"></bin>
