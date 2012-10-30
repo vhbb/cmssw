@@ -31,6 +31,8 @@ public:
    tscaleSingleEleMay=openFile(ana,"hltSingleEleMayFileName");
    tscaleSingleEleV4=openFile(ana,"hltSingleEleV4FileName");
    tscaleHLTmuOr30=openFile(ana,"hltMuOr30FileName");
+   tscaleHLTmuonCrossTrig = openFile(ana,"hltMuCrossTrig");
+   tscaleHLTelectronCrossTrig = openFile(ana,"hltEleCrossTrig");
 
    if(tscaleHLTmu == 0 || tscaleIDmu == 0) 
     {
@@ -100,6 +102,17 @@ static  std::pair<float,float> efficiencyFromPtEta(float pt1, float eta1, TTree 
   {
     return efficiencyFromPtEta(pt1,eta1,tscaleIDmu).first;
   }
+
+	float scaleMuCrossTrig(float pt1, float eta1)
+	{
+		return efficiencyFromPtEta(pt1,eta1,tscaleHLTmuonCrossTrig).first;
+	}
+	
+	float scaleEleCrossTrig(float pt1, float eta1)
+	{
+		return efficiencyFromPtEta(pt1,eta1,tscaleHLTelectronCrossTrig).first;
+	}
+	
 
 
 double scaleDoubleEle17Ele8Aug( std::vector<float> pt, std::vector<float> eta )
@@ -264,7 +277,10 @@ private:
   TTree * tscaleHLTele2Aug;
 
   TTree * tscaleHLTmu;
-  TTree * tscaleIDmu;
+	TTree * tscaleIDmu;
+	TTree * tscaleHLTmuonCrossTrig;
+	TTree * tscaleHLTelectronCrossTrig;
+  
   MultiThresholdEfficiency combiner2Thr; 
   MultiThresholdEfficiency combiner1Thr; 
 };
