@@ -53,6 +53,10 @@ class VHbbEvent{
     float ptRaw,ptLeadTrack;  
     float jetArea;  
 
+    //for quark-gluon tagger
+    float constituentPtDistribution;
+    float constituentEtaPhiSpread;
+
     //MC parton matching
     TLorentzVector bestMCp4,bestMCp4mom;
     int bestMCid, bestMCmomid;

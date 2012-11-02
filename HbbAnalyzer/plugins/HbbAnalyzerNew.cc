@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.76 2012/06/12 19:40:16 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.77 2012/08/27 21:34:22 dlopes Exp $
 //
 //
 
@@ -2021,8 +2021,9 @@ void HbbAnalyzerNew ::fillSimpleJet (VHbbEvent::SimpleJet& sj, edm::View<pat::Je
     sj.SF_CSVMerr=0;
     sj.SF_CSVTerr=0;
 
-    
-
+    //for quark-gluon tagger
+    sj.constituentPtDistribution = jet_iter->constituentPtDistribution();
+    sj.constituentEtaPhiSpread = jet_iter->constituentEtaPhiSpread(); 
 
     
     if (jet_iter->isPFJet() == true) {
