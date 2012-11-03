@@ -23,68 +23,161 @@ mass=["110","110.5","111","111.5","112","112.5","113","113.5","114","114.5","115
 
 
 files=[
-"WH_2bin_110.txt",
-"WH_2bin_115.txt",
-"WH_2bin_120.txt",
-"vhbb_Wln_7TeV.txt",
-"WH_2bin_130.txt",
-"WH_2bin_135.txt"
+"combined_vhbb_DC_BDT_M110_8TeV.txt",
+"combined_vhbb_DC_BDT_M115_8TeV.txt",
+"combined_vhbb_DC_BDT_M120_8TeV.txt",
+"combined_vhbb_DC_BDT_M125_8TeV.txt",
+"combined_vhbb_DC_BDT_M130_8TeV.txt",
+"combined_vhbb_DC_BDT_M135_8TeV.txt"
 ]
 
 
-
 def Process(file, toMass, fromMass):
-       newcard = file.replace( '.txt', "_.txt"  )
-       newcard = newcard.replace( '.txt', mass[toMass]  )
-       newcard += ".txt"
+       file2 = file.replace("combined_","")
+       file2 = file2.replace("DC_BDT_M110","Wln")
+       file2 = file2.replace("DC_BDT_M115","Wln")
+       file2 = file2.replace("DC_BDT_M120","Wln")
+       file2 = file2.replace("DC_BDT_M125","Wln")
+       file2 = file2.replace("DC_BDT_M130","Wln")
+       file2 = file2.replace("DC_BDT_M135","Wln")
+       newcard = mass[toMass] + "/" + file2
        os.system('more %s | grep rate > a' % file)
-       os.system("more a |  awk '{print $2}'  > aVH1")
-       os.system("more a |  awk '{print $11}'  > aVH2")
-       os.system("more a |  awk '{print $20}'  > aVH3")
-       os.system("more a |  awk '{print $29}'  > aVH4")
+       os.system("more a |  awk '{print $2} '  > aZH1")
+       os.system("more a |  awk '{print $12}'  > aZH2")
+       os.system("more a |  awk '{print $22}'  > aZH3")
+       os.system("more a |  awk '{print $32}'  > aZH4")
+       os.system("more a |  awk '{print $42}'  > aZH5")
+       os.system("more a |  awk '{print $52}'  > aZH6")
+       os.system("more a |  awk '{print $3}'   > aWH1")
+       os.system("more a |  awk '{print $13}'  > aWH2")
+       os.system("more a |  awk '{print $23}'  > aWH3")
+       os.system("more a |  awk '{print $33}'  > aWH4")
+       os.system("more a |  awk '{print $43}'  > aWH5")
+       os.system("more a |  awk '{print $53}'  > aWH6")
  
-       fVH1 = open("aVH1", "r")
-       fVH2 = open("aVH2", "r")
-       fVH3 = open("aVH3", "r")
-       fVH4 = open("aVH4", "r")
+       fZH1 = open("aZH1", "r")
+       fZH2 = open("aZH2", "r")
+       fZH3 = open("aZH3", "r")
+       fZH4 = open("aZH4", "r")
+       fZH5 = open("aZH5", "r")
+       fZH6 = open("aZH6", "r")
+       fWH1 = open("aWH1", "r")
+       fWH2 = open("aWH2", "r")
+       fWH3 = open("aWH3", "r")
+       fWH4 = open("aWH4", "r")
+       fWH5 = open("aWH5", "r")
+       fWH6 = open("aWH6", "r")
 
-       sVH1 = fVH1.read().rstrip('\n')
-       sVH2 = fVH2.read().rstrip('\n')
-       sVH3 = fVH3.read().rstrip('\n')
-       sVH4 = fVH4.read().rstrip('\n')
+       sZH1 = fZH1.read().rstrip('\n')
+       sZH2 = fZH2.read().rstrip('\n')
+       sZH3 = fZH3.read().rstrip('\n')
+       sZH4 = fZH4.read().rstrip('\n')
+       sZH5 = fZH5.read().rstrip('\n')
+       sZH6 = fZH6.read().rstrip('\n')
+       sWH1 = fWH1.read().rstrip('\n')
+       sWH2 = fWH2.read().rstrip('\n')
+       sWH3 = fWH3.read().rstrip('\n')
+       sWH4 = fWH4.read().rstrip('\n')
+       sWH5 = fWH5.read().rstrip('\n')
+       sWH6 = fWH6.read().rstrip('\n')
 
-       VH1 = float(sVH1)
-       VH2 = float(sVH2)
-       VH3 = float(sVH3)
-       VH4 = float(sVH4)
 
-       bVH1 = (xSec[toMass]/xSec[fromMass])*VH1
-       bVH2 = (xSec[toMass]/xSec[fromMass])*VH2
-       bVH3 = (xSec[toMass]/xSec[fromMass])*VH3
-       bVH4 = (xSec[toMass]/xSec[fromMass])*VH4
+       ZH1 = float(sZH1)
+       ZH2 = float(sZH2)
+       ZH3 = float(sZH3)
+       ZH4 = float(sZH4)
+       ZH5 = float(sZH5)
+       ZH6 = float(sZH6)
 
-       os.system("sed 's/%s/%f/g' a > b" % (sVH1,bVH1))
-       os.system("sed -i 's/%s/%f/g' b" % (sVH2,bVH2))
-       os.system("sed -i 's/%s/%f/g' b" % (sVH3,bVH3))
-       os.system("sed -i 's/%s/%f/g' b" % (sVH4,bVH4))
+       WH1 = float(sWH1)
+       WH2 = float(sWH2)
+       WH3 = float(sWH3)
+       WH4 = float(sWH4)
+       WH5 = float(sWH5)
+       WH6 = float(sWH6)
+
+
+       bZH1 = (xSec[toMass]/xSec[fromMass])*ZH1
+       bZH2 = (xSec[toMass]/xSec[fromMass])*ZH2
+       bZH3 = (xSec[toMass]/xSec[fromMass])*ZH3
+       bZH4 = (xSec[toMass]/xSec[fromMass])*ZH4
+       bZH5 = (xSec[toMass]/xSec[fromMass])*ZH5
+       bZH6 = (xSec[toMass]/xSec[fromMass])*ZH6
+
+       bWH1 = (xSec[toMass]/xSec[fromMass])*WH1
+       bWH2 = (xSec[toMass]/xSec[fromMass])*WH2
+       bWH3 = (xSec[toMass]/xSec[fromMass])*WH3
+       bWH4 = (xSec[toMass]/xSec[fromMass])*WH4
+       bWH5 = (xSec[toMass]/xSec[fromMass])*WH5
+       bWH6 = (xSec[toMass]/xSec[fromMass])*WH6
+
+
+
+       os.system("sed 's/%s/%f/g' a > b" %(sZH1,bZH1))
+       os.system("sed -i 's/%s/%f/g' b" % (sZH2,bZH2))
+       os.system("sed -i 's/%s/%f/g' b" % (sZH3,bZH3))
+       os.system("sed -i 's/%s/%f/g' b" % (sZH4,bZH4))
+       os.system("sed -i 's/%s/%f/g' b" % (sZH5,bZH5))
+       os.system("sed -i 's/%s/%f/g' b" % (sZH6,bZH6))
+
+       os.system("sed -i 's/%s/%f/g' b" % (sWH1,bWH1))
+       os.system("sed -i 's/%s/%f/g' b" % (sWH2,bWH2))
+       os.system("sed -i 's/%s/%f/g' b" % (sWH3,bWH3))
+       os.system("sed -i 's/%s/%f/g' b" % (sWH4,bWH4))
+       os.system("sed -i 's/%s/%f/g' b" % (sWH5,bWH5))
+       os.system("sed -i 's/%s/%f/g' b" % (sWH6,bWH6))
+
 
        fRO = open("a", "r")
        sRO = fRO.read().rstrip('\n')
        fRF = open("b", "r")
        sRF = fRF.read().rstrip('\n')
        os.system("sed 's/%s/%s/g' %s > %s" % (sRO,sRF,file,newcard))
-       os.system("sed -i 's/WmunuH_110_NWS.root/WmunuH_110_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WmunuH_115_NWS.root/WmunuH_115_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WmunuH_120_NWS.root/WmunuH_120_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WmunuH_125_NWS.root/WmunuH_125_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WmunuH_130_NWS.root/WmunuH_130_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WmunuH_135_NWS.root/WmunuH_135_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WenuH_110_NWS.root/WenuH_110_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WenuH_115_NWS.root/WenuH_115_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WenuH_120_NWS.root/WenuH_120_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WenuH_125_NWS.root/WenuH_125_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WenuH_130_NWS.root/WenuH_130_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WenuH_135_NWS.root/WenuH_135_%s.root/g' %s " % (mass[toMass],newcard))
+
+       os.system("sed -i 's/vhbb_WS_BDT_M110_WenLowPt_8TeV.root/vhbb_WenLowPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M110_WmnLowPt_8TeV.root/vhbb_WmnLowPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M110_WenHighPt_8TeV.root/vhbb_WenHighPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M110_WmnHighPt_8TeV.root/vhbb_WmnHighPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M110_WenHighPtLooseCSV_8TeV.root/vhbb_WenHighPtLooseCSV_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M110_WmnHighPtLooseCSV_8TeV.root/vhbb_WmnHighPtLooseCSV_8TeV.root/g' %s " % (newcard))
+ 
+       os.system("sed -i 's/vhbb_WS_BDT_M115_WenLowPt_8TeV.root/vhbb_WenLowPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M115_WmnLowPt_8TeV.root/vhbb_WmnLowPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M115_WenHighPt_8TeV.root/vhbb_WenHighPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M115_WmnHighPt_8TeV.root/vhbb_WmnHighPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M115_WenHighPtLooseCSV_8TeV.root/vhbb_WenHighPtLooseCSV_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M115_WmnHighPtLooseCSV_8TeV.root/vhbb_WmnHighPtLooseCSV_8TeV.root/g' %s " % (newcard))
+ 
+       os.system("sed -i 's/vhbb_WS_BDT_M120_WenLowPt_8TeV.root/vhbb_WenLowPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M120_WmnLowPt_8TeV.root/vhbb_WmnLowPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M120_WenHighPt_8TeV.root/vhbb_WenHighPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M120_WmnHighPt_8TeV.root/vhbb_WmnHighPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M120_WenHighPtLooseCSV_8TeV.root/vhbb_WenHighPtLooseCSV_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M120_WmnHighPtLooseCSV_8TeV.root/vhbb_WmnHighPtLooseCSV_8TeV.root/g' %s " % (newcard))
+ 
+       os.system("sed -i 's/vhbb_WS_BDT_M125_WenLowPt_8TeV.root/vhbb_WenLowPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M125_WmnLowPt_8TeV.root/vhbb_WmnLowPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M125_WenHighPt_8TeV.root/vhbb_WenHighPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M125_WmnHighPt_8TeV.root/vhbb_WmnHighPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M125_WenHighPtLooseCSV_8TeV.root/vhbb_WenHighPtLooseCSV_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M125_WmnHighPtLooseCSV_8TeV.root/vhbb_WmnHighPtLooseCSV_8TeV.root/g' %s " % (newcard))
+ 
+       os.system("sed -i 's/vhbb_WS_BDT_M130_WenLowPt_8TeV.root/vhbb_WenLowPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M130_WmnLowPt_8TeV.root/vhbb_WmnLowPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M130_WenHighPt_8TeV.root/vhbb_WenHighPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M130_WmnHighPt_8TeV.root/vhbb_WmnHighPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M130_WenHighPtLooseCSV_8TeV.root/vhbb_WenHighPtLooseCSV_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M130_WmnHighPtLooseCSV_8TeV.root/vhbb_WmnHighPtLooseCSV_8TeV.root/g' %s " % (newcard))
+ 
+       os.system("sed -i 's/vhbb_WS_BDT_M135_WenLowPt_8TeV.root/vhbb_WenLowPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M135_WmnLowPt_8TeV.root/vhbb_WmnLowPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M135_WenHighPt_8TeV.root/vhbb_WenHighPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M135_WmnHighPt_8TeV.root/vhbb_WmnHighPt_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M135_WenHighPtLooseCSV_8TeV.root/vhbb_WenHighPtLooseCSV_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M135_WmnHighPtLooseCSV_8TeV.root/vhbb_WmnHighPtLooseCSV_8TeV.root/g' %s " % (newcard))
+ 
+
+
        os.system("echo %s written" % (newcard))
 
 Process(files[0],0,0);

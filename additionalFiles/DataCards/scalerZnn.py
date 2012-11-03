@@ -17,18 +17,17 @@ xSec8ZH = [0.5869,0.5788,0.5708,0.5629,0.5552,0.5476,0.5402,0.5329,0.5258,0.5187
 xSec8WH = [1.060 ,1.045 ,1.030 ,1.015 ,	0.9998,	0.9852,	0.9709,	0.9570,	0.9432,	0.9297,	0.9165,	0.9035,	0.8907,	0.8782,	0.8659,	0.8538,	0.8420,	0.8303,	0.8187,	0.8075,	0.7966,	0.7859,	0.7753,	0.7649,	0.7547,	0.7446,	0.7347,	0.7249,	0.7154,	0.7060,	0.6966,	0.6873,	0.6782,	0.6691,	0.6602,	0.6515,	0.6429,	0.6344,	0.6260,	0.6177,	0.6095,	0.6015,	0.5936,	0.5859,	0.5783,	0.5708,	0.5634,	0.5562,	0.5491,	0.5420,	0.5351, 0.70412,0.70224,0.70036,0.69848,0.69474,0.69288,0.69102,0.68916,0.68548,0.68366,0.68184,0.68002,0.67638,0.67456,0.67274,0.67092]
 
 
-xSec = xSec8ZH
 
 mass=["110","110.5","111","111.5","112","112.5","113","113.5","114","114.5","115","115.5","116","116.5","117","117.5","118","118.5","119","119.5","120","120.5","121","121.5","122","122.5","123","123.5","124","124.5","125","125.5","126","126.5","127","127.5","128","128.5","129","129.5","130","130.5","131","131.5","132","132.5","133","133.5","134","134.5","135","124.6","124.7","124.8","124.9","125.1","125.2","125.3","125.4","125.6","125.7","125.8","125.9","126.1","126.2","126.3","126.4"];
 
 
 files=[
-"WH_2bin_110.txt",
-"WH_2bin_115.txt",
-"WH_2bin_120.txt",
-"vhbb_Znn_7TeV.txt",
-"WH_2bin_130.txt",
-"WH_2bin_135.txt"
+"vhbb_DC_BDT_M110_Znn_8TeV.txt",
+"vhbb_DC_BDT_M115_Znn_8TeV.txt",
+"vhbb_DC_BDT_M120_Znn_8TeV.txt",
+"vhbb_DC_BDT_M125_Znn_8TeV.txt",
+"vhbb_DC_BDT_M130_Znn_8TeV.txt",
+"vhbb_DC_BDT_M135_Znn_8TeV.txt"
 ]
 
 
@@ -36,42 +35,70 @@ files=[
 def Process(file, toMass, fromMass):
        newcard = "./%s/aaa" % mass[toMass]
        newcard = newcard.replace( 'aaa', file)
+       newcard = newcard.replace('_DC_BDT_M110','')
+       newcard = newcard.replace('_DC_BDT_M115','')
+       newcard = newcard.replace('_DC_BDT_M120','')
+       newcard = newcard.replace('_DC_BDT_M125','')
+       newcard = newcard.replace('_DC_BDT_M130','')
+       newcard = newcard.replace('_DC_BDT_M135','')
+
        os.system('more %s | grep rate > a' % file)
-       os.system("more a |  awk '{print $2}'  > aVH1")
-       os.system("more a |  awk '{print $11}'  > aVH2")
+       os.system("more a |  awk '{print $2}'  > aZH1")
+       os.system("more a |  awk '{print $12}'  > aZH2")
+       os.system("more a |  awk '{print $22}'  > aZH3")
+       os.system("more a |  awk '{print $3}'  > aWH1")
+       os.system("more a |  awk '{print $13}'  > aWH2")
+       os.system("more a |  awk '{print $23}'  > aWH3")
  
-       fVH1 = open("aVH1", "r")
-       fVH2 = open("aVH2", "r")
+       fZH1 = open("aZH1", "r")
+       fZH2 = open("aZH2", "r")
+       fZH3 = open("aZH3", "r")
+       fWH1 = open("aWH1", "r")
+       fWH2 = open("aWH2", "r")
+       fWH3 = open("aWH3", "r")
 
-       sVH1 = fVH1.read().rstrip('\n')
-       sVH2 = fVH2.read().rstrip('\n')
+       sZH1 = fZH1.read().rstrip('\n')
+       sZH2 = fZH2.read().rstrip('\n')
+       sZH3 = fZH3.read().rstrip('\n')
+       sWH1 = fWH1.read().rstrip('\n')
+       sWH2 = fWH2.read().rstrip('\n')
+       sWH3 = fWH3.read().rstrip('\n')
 
-       VH1 = float(sVH1)
-       VH2 = float(sVH2)
 
-       bVH1 = (xSec[toMass]/xSec[fromMass])*VH1
-       bVH2 = (xSec[toMass]/xSec[fromMass])*VH2
 
-       os.system("sed 's/%s/%f/g' a > b" % (sVH1,bVH1))
-       os.system("sed -i 's/%s/%f/g' b" % (sVH2,bVH2))
+       ZH1 = float(sZH1)
+       ZH2 = float(sZH2)
+       ZH3 = float(sZH3)
+       WH1 = float(sWH1)
+       WH2 = float(sWH2)
+       WH3 = float(sWH3)
+
+       bZH1 = (xSec8ZH[toMass]/xSec8ZH[fromMass])*ZH1
+       bZH2 = (xSec8ZH[toMass]/xSec8ZH[fromMass])*ZH2
+       bZH3 = (xSec8ZH[toMass]/xSec8ZH[fromMass])*ZH3
+       bWH1 = (xSec8WH[toMass]/xSec8WH[fromMass])*WH1
+       bWH2 = (xSec8WH[toMass]/xSec8WH[fromMass])*WH2
+       bWH3 = (xSec8WH[toMass]/xSec8WH[fromMass])*WH3
+
+
+       os.system("sed 's/%s/%f/g' a > b" % (sWH1,bWH1))
+       os.system("sed -i 's/%s/%f/g' b" % (sWH2,bWH2))
+       os.system("sed -i 's/%s/%f/g' b" % (sWH3,bWH3))
+       os.system("sed -i 's/%s/%f/g' b" % (sZH1,bZH1))
+       os.system("sed -i 's/%s/%f/g' b" % (sZH2,bZH2))
+       os.system("sed -i 's/%s/%f/g' b" % (sZH3,bZH3))
 
        fRO = open("a", "r")
        sRO = fRO.read().rstrip('\n')
        fRF = open("b", "r")
        sRF = fRF.read().rstrip('\n')
        os.system("sed 's/%s/%s/g' %s > %s" % (sRO,sRF,file,newcard))
-       os.system("sed -i 's/WmunuH_110_NWS.root/WmunuH_110_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WmunuH_115_NWS.root/WmunuH_115_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WmunuH_120_NWS.root/WmunuH_120_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WmunuH_125_NWS.root/WmunuH_125_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WmunuH_130_NWS.root/WmunuH_130_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WmunuH_135_NWS.root/WmunuH_135_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WenuH_110_NWS.root/WenuH_110_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WenuH_115_NWS.root/WenuH_115_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WenuH_120_NWS.root/WenuH_120_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WenuH_125_NWS.root/WenuH_125_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WenuH_130_NWS.root/WenuH_130_%s.root/g' %s " % (mass[toMass],newcard))
-       os.system("sed -i 's/WenuH_135_NWS.root/WenuH_135_%s.root/g' %s " % (mass[toMass],newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M110_Znn_8TeV.root/vhbb_Znn_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M115_Znn_8TeV.root/vhbb_Znn_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M120_Znn_8TeV.root/vhbb_Znn_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M125_Znn_8TeV.root/vhbb_Znn_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M130_Znn_8TeV.root/vhbb_Znn_8TeV.root/g' %s " % (newcard))
+       os.system("sed -i 's/vhbb_WS_BDT_M135_Znn_8TeV.root/vhbb_Znn_8TeV.root/g' %s " % (newcard))
        os.system("echo %s written" % (newcard))
 
 Process(files[0],0,0);
