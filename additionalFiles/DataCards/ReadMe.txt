@@ -40,4 +40,17 @@ filenames)
 
 7) edit/run tester.py to test all DCs
 
+8) To submit:
+ 
+first edit submitter.py to point to the correct source folders
+(kinit)
+
+mkdir HCP2012
+cp submitter.py HCP2012/
+cd HCP2012
+setenv SVNGRP svn+ssh://svn.cern.ch/reps/cmshcg
+svn co $SVNGRP/trunk/hcp2012 
+svn update (IMPORTANT - ALWAYS DO THIS BEFORE COMMIT)
+python submitter.py
+svn commit
  
