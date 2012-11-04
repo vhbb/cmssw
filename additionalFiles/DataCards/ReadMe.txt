@@ -24,10 +24,11 @@ to these files and correct the array size
    source /afs/cern.ch/sw/lcg/external/gcc/4.3.2/x86_64-slc5/setup.csh
 
    Be careful not to run all 67 mass point loops at once, you will likely crash the computer. I'd say to run 1 or 2 loops (mass pt DCs) max  at a time.
+   
+   RUN IT COMPILED, IT IS 10X FASTER IE: root IntermediateMassMakerXX.C++   
 
 5) edit scalerXXX.py:
-   a)   set the proper energy and channel ie:     xSec = xSec8ZH  (can also be
-xSec7ZH, xSec7WH, or xSec8WH)
+   a)   set the proper energy and channel all xsecs are available, is xSec8ZH, xSec7ZH, xSec7WH, or xSec8WH
    b) edit files =[ ] to datacards in order of masses
    c) correct the sed (replacement) commands to edit cards .root WS to new official formats
       (the ones from IntermediateMassMaker that do not have Masses in the
