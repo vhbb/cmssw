@@ -22,11 +22,16 @@ process.source = cms.Source("PoolSource",
 ##	"/store/data/Run2012A/MultiJet/AOD/PromptReco-v1/000/193/556/D84A9140-AC99-E111-A808-001D09F28D4A.root"
 	
 	#"/store/data/Run2012A/MET/RECO/PromptReco-v1/000/190/782/A2D1E62F-8684-E111-B651-00237DDBE41A.root"
-"file:/networkdata/arizzi/WH/1ACA8AD2-CBAF-E111-AE17-0017A477002C.root"
+#"file:/networkdata/arizzi/WH/1ACA8AD2-CBAF-E111-AE17-0017A477002C.root"
+
+#"/store/mc/Summer12_DR53X/WJetsToLNu_PtW-100_TuneZ2star_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/1CEFFE92-22E4-E111-8EFA-00259073E45E.root"
+"/store/mc/Summer12/WH_WToLNu_HToBB_M-125_8TeV-powheg-herwigpp/AODSIM/PU_S7_START52_V9-v1/0000/FC1B8D73-E6B3-E111-B244-0026189438B9.root",
+"/store/mc/Summer12/WH_WToLNu_HToBB_M-125_8TeV-powheg-herwigpp/AODSIM/PU_S7_START52_V9-v1/0000/02BCC7F3-D0B3-E111-85CA-001A92810AC0.root",
+"/store/mc/Summer12/WH_WToLNu_HToBB_M-125_8TeV-powheg-herwigpp/AODSIM/PU_S7_START52_V9-v1/0000/0270C75A-E8B3-E111-9F79-003048678B7C.root",
  )
 )
 ## Maximal Number of Events
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(15) )
 
 ## Geometry and Detector Conditions (needed for a few patTuple production steps)
 process.load("Configuration.Geometry.GeometryIdeal_cff")
@@ -149,6 +154,7 @@ process.load('RecoJets.JetProducers.caSubjetFilterGenJets_cfi')
 from RecoJets.JetProducers.caSubjetFilterGenJets_cfi import caSubjetFilterGenJets
 process.caVHGenJets = caSubjetFilterGenJets.clone()
 
+
 from PhysicsTools.PatAlgos.tools.jetTools import *
 #calo subjets in pat
 #addJetCollection(process, cms.InputTag('caVHCaloJets:fat'),"CAVHFat","Calo",doJTA=True,doBTagging=True, jetCorrLabel=('AK5Calo', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
@@ -171,6 +177,60 @@ process.selectedPatJetsAK7PF.cut = defaultJetCut
 process.selectedPatJetsCAVHFatPF.cut = defaultFatJetCut
 process.selectedPatJetsCAVHSubPF.cut = cms.string('pt > 15. & abs(eta) < 5.0')
 process.selectedPatJetsCAVHFilterPF.cut = cms.string('pt > 5. & abs(eta) < 5.0')
+
+
+##################-------------------
+## by Nhan
+##################-------------------
+jetCutCA12             = 'pt > 100.'
+
+from RecoJets.JetProducers.ca4GenJets_cfi import ca4GenJets
+from RecoJets.JetProducers.ca4PFJets_cfi import ca4PFJets
+
+#process.ca12GenJetsNoNu = ca4GenJets.clone( rParam = cms.double(1.2),src = cms.InputTag("genParticlesForJetsNoNu"))
+process.ca12GenJetsNoNu = ca4GenJets.clone( rParam = cms.double(1.2),src = cms.InputTag("genParticlesForJets"))
+process.ca12PFJetsPFlow = ca4PFJets.clone(
+                                          rParam = cms.double(1.2),
+                                          src = cms.InputTag('pfNoElectron'+postfix),
+                                          doAreaFastjet = cms.bool(True),
+                                          doRhoFastjet = cms.bool(True),
+                                          Rho_EtaMax = cms.double(6.0),
+                                          Ghost_EtaMax = cms.double(7.0)
+                                          )
+if isMC :
+
+    addJetCollection(process,
+                     cms.InputTag('ca12PFJetsPFlow'), # Jet collection; must be already in the event when patLayer0 sequence is executed
+                     'CA12', 'PF',
+                     doJTA=True, # Run Jet-Track association & JetCharge
+                     doBTagging=True, # Run b-tagging
+                     jetCorrLabel= ( 'AK5PF', inputJetCorrLabel ),
+                     doType1MET=True,
+                     doL1Cleaning=False,
+                     doL1Counters=False,
+                     genJetCollection = cms.InputTag("ca12GenJetsNoNu"),
+                     doJetID = False
+                     )
+else :
+
+    addJetCollection(process,
+                     cms.InputTag('ca12PFJetsPFlow'), # Jet collection; must be already in the event when patLayer0 sequence is executed
+                     'CA12', 'PF',
+                     doJTA=True, # Run Jet-Track association & JetCharge
+                     doBTagging=True, # Run b-tagging
+                     jetCorrLabel= ( 'AK5PF', inputJetCorrLabel ),
+                     doType1MET=True,
+                     doL1Cleaning=False,
+                     doL1Counters=False,
+                     #genJetCollection = cms.InputTag("ca12GenJetsNoNu"),
+                     doJetID = False
+                     )
+
+process.selectedPatJetsCA12PF.cut = jetCutCA12
+
+##################-------------------
+##################-------------------
+
 
 #load btag SF 
 process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
@@ -449,7 +509,8 @@ process.bhadrons = cms.EDProducer('MCBHadronProducer',
                                  quarkId = cms.uint32(5)
                                  )
 
-process.gen = cms.Sequence(  process.genParticlesForJets* process.caVHGenJets * process.bhadrons * process.savedGenParticles)
+## Added by Nhan
+process.gen = cms.Sequence(  process.genParticlesForJets* process.caVHGenJets * process.ca12GenJetsNoNu * process.bhadrons * process.savedGenParticles)
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 process.goodOfflinePrimaryVertices = cms.EDFilter(
     "PrimaryVertexObjectFilter",
@@ -471,6 +532,9 @@ process.common = cms.Sequence(
     process.ak7PFJets*
     process.caVHCaloJets*
     process.caVHPFJets*
+  # by Nhan                              
+    process.ca12PFJetsPFlow*
+  # by Nhan                                                            
     process.mvaID *
     process.patDefaultSequence*
    process.patMETsHT*

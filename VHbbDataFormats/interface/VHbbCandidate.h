@@ -73,7 +73,45 @@ class VHbbCandidate {
     VHbbEvent::SimpleJet& firstJet(){return jets[0];}
     VHbbEvent::SimpleJet& secondJet(){return jets[1];}
  };
-
+    
+    // *****************************
+    // added by Nhan
+class RawFatHiggsCandidate {
+public:
+    
+    TLorentzVector p4;
+    bool RawFatHiggsFlag;
+    
+    float prunedJetMass;
+    float trimmedJetMass;
+    float filteredJetMass;
+    float ungroomedJetMass;
+    
+    float pT_pr;
+    float eta_pr;    
+    float px_pr;        
+    float py_pr;        
+    float pz_pr;        
+    float e_pr;        
+    float tau1;
+    float tau2;
+    float tau3;
+    float tau4;
+    
+    float sj1_px_pr;
+    float sj1_py_pr;
+    float sj1_pz_pr;
+    float sj1_e_pr;    
+    float sj2_px_pr;
+    float sj2_py_pr;
+    float sj2_pz_pr;
+    float sj2_e_pr;
+    
+public:
+    TLorentzVector getp4(){ return p4; }
+};    
+    // *****************************    
+    
   void setCandidateType (CandidateType c){candidateType = c;}
 
 
@@ -99,6 +137,7 @@ class VHbbCandidate {
   CandidateType candidateType;
   HiggsCandidate H;
   FatHiggsCandidate FatH;
+    RawFatHiggsCandidate RawFatH;
   VectorCandidate V;
   std::vector<VHbbEvent::SimpleJet> additionalJets;
   std::vector<VHbbEvent::SimpleJet> additionalJetsFat;

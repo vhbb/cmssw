@@ -81,6 +81,20 @@ class VHbbEvent{
     std::vector<float> etaSub, phiSub;
   };
 
+class RawJet {
+public:
+    RawJet(): Nconstituents(-99){}
+public:
+    int Nconstituents;
+    std::vector<float> constituents_px;
+    std::vector<float> constituents_py;
+    std::vector<float> constituents_pz;
+    std::vector<float> constituents_e;
+    std::vector<float> constituents_pdgId;    
+    TLorentzVector p4;
+//    std::vector<TLorentzVector> subFourMomentum;
+//    std::vector<float> etaSub, phiSub;
+};
 
   class METInfo {
   public:
@@ -190,6 +204,9 @@ class VHbbEvent{
   std::vector<SimpleJet> subJets; //???
   std::vector<SimpleJet> filterJets; //???
   std::vector<HardJet> hardJets;
+  std::vector<RawJet> rawJets;
+  std::vector<RawJet> rawJetsGen;    
+    
   
   METInfo calomet;
   METInfo tcmet;

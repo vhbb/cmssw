@@ -17,6 +17,7 @@
 <class name="VHbbEvent::ElectronInfo"/>
 
 <class name="VHbbEvent::HardJet"/>
+<class name="VHbbEvent::RawJet"/>
 
 <class name="VHbbEvent::MuonInfo"/>
 <class name="VHbbEvent::SimpleJet"/>
@@ -27,6 +28,7 @@
 <class name="std::vector<VHbbEvent::DiMuonInfo>"/>
 <class name="std::vector<VHbbEvent::ElectronInfo>"/>
 <class name="std::vector<VHbbEvent::HardJet>"/>
+<class name="std::vector<VHbbEvent::RawJet>"/>    
 <class name="std::vector<VHbbEvent::METInfo>"/>
 <class name="std::vector<VHbbEvent::MuonInfo>"/>
 <class name="std::vector<VHbbEvent::SimpleJet>"/>

@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.76 2012/06/12 19:40:16 arizzi Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.2 2012/10/16 16:50:38 ntran Exp $
 //
 //
 
@@ -832,7 +832,94 @@ BTagSFContainer btagSFs;
        }
   */
    
+        //////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////
+        ////// Nhan's Jets  
+    
+    edm::Handle<edm::View<pat::Jet> > ca12jetHandle;
+    iEvent.getByLabel("selectedPatJetsCA12PF",ca12jetHandle);
+    edm::View<pat::Jet> ca12jets = *ca12jetHandle;
+    int ctr = 0;
+    for(edm::View<pat::Jet>::const_iterator jet_iter = ca12jets.begin(); jet_iter!=ca12jets.end(); ++jet_iter){
+//        std::cout << "jet # " << ctr << std::endl;
+//        std::cout << "size: " << jet_iter->getPFConstituents().size() << std::endl;
+        
+        std::vector<reco::PFCandidatePtr> constituents = jet_iter->getPFConstituents();        
+        VHbbEvent::RawJet rj;
+        rj.p4 = GENPTOLORP(jet_iter);
+        rj.Nconstituents = jet_iter->getPFConstituents().size();
+        
+        for (unsigned int iJC = 0; iJC<constituents.size(); ++iJC ){
 
+            rj.constituents_px.push_back( jet_iter->getPFConstituents().at(iJC)->px() );
+            rj.constituents_py.push_back( jet_iter->getPFConstituents().at(iJC)->py() );
+            rj.constituents_pz.push_back( jet_iter->getPFConstituents().at(iJC)->pz() );
+            rj.constituents_e.push_back( jet_iter->getPFConstituents().at(iJC)->energy() );
+            rj.constituents_pdgId.push_back( jet_iter->getPFConstituents().at(iJC)->pdgId() );
+        }
+        
+        hbbInfo->rawJets.push_back( rj );
+        ctr++;
+        
+    }
+
+        // fill the GEN jet information too!
+    if(runOnMC_){
+        
+        
+        edm::Handle<reco::GenJetCollection> genJets ;
+        iEvent.getByLabel("ca12GenJetsNoNu",genJets);
+        
+        for (reco::GenJetCollection::const_iterator moIter = genJets->begin(); moIter != genJets->end(); ++moIter) {
+//            std::cout << "jet eta: " << moIter->eta() << std::endl;
+            if (moIter->pt() > 80.){
+                VHbbEvent::RawJet rgj;
+                rgj.p4 = TLorentzVector( moIter->px(), moIter->py(), moIter->pz(), moIter->energy() );
+                rgj.Nconstituents = moIter->getGenConstituents().size();
+
+                for (unsigned int iJC = 0; iJC < moIter->getGenConstituents().size(); iJC++){
+                    rgj.constituents_px.push_back( moIter->getGenConstituents().at(iJC)->px() );
+                    rgj.constituents_py.push_back( moIter->getGenConstituents().at(iJC)->py() );
+                    rgj.constituents_pz.push_back( moIter->getGenConstituents().at(iJC)->pz() );
+                    rgj.constituents_e.push_back( moIter->getGenConstituents().at(iJC)->energy() );
+                    rgj.constituents_pdgId.push_back( moIter->getGenConstituents().at(iJC)->pdgId() );
+                }
+                hbbInfo->rawJetsGen.push_back( rgj );
+            }
+        }
+//        edm::Handle<edm::View<reco::GenJet> > ca12genjetHandle;
+//        iEvent.getByLabel("ca12GenJetsNoNu",ca12genjetHandle);
+//        edm::View<pat::Jet> ca12genjets = *ca12genjetHandle;
+//        ctr = 0;
+//        for(edm::View<reco::GenJet>::const_iterator jet_iter = ca12genjets.begin(); jet_iter!=ca12genjets.end(); ++jet_iter){
+//            std::cout << "jet # " << ctr << std::endl;
+//            std::coit << "jet pt = " << jet_iter->pt() << std::endl;
+
+//            std::cout << "size: " << jet_iter->getPFConstituents().size() << std::endl;
+//            
+//            std::vector<reco::PFCandidatePtr> constituents = jet_iter->getPFConstituents();        
+//            VHbbEvent::RawJet rj;
+//            rj.p4 = GENPTOLORP(jet_iter);
+//            rj.Nconstituents = jet_iter->getPFConstituents().size();
+//            
+//            for (unsigned int iJC = 0; iJC<constituents.size(); ++iJC ){
+//                
+//                rj.constituents_px.push_back( jet_iter->getPFConstituents().at(iJC)->px() );
+//                rj.constituents_py.push_back( jet_iter->getPFConstituents().at(iJC)->py() );
+//                rj.constituents_pz.push_back( jet_iter->getPFConstituents().at(iJC)->pz() );
+//                rj.constituents_e.push_back( jet_iter->getPFConstituents().at(iJC)->energy() );
+//                rj.constituents_pdgId.push_back( jet_iter->getPFConstituents().at(iJC)->pdgId() );
+//            }
+//            
+//            hbbInfo->rawJetsGen.push_back( rj );
+
+//            ctr++;
+//            
+//        }
+
+    }
+        //////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////
 
   /////// hard jet
 
@@ -845,7 +932,9 @@ BTagSFContainer btagSFs;
     if(printJet) {std::cout << "Jet Pt: " << jet_iter->pt() << " E,M: " << jet_iter->p4().E() << " " << jet_iter->p4().M() << "\n";} 
     
     reco::Jet::Constituents constituents = jet_iter->getJetConstituents();
-    
+    std::cout << "NsubJets: " << constituents.size() << "\n";
+//    std::cout << "Nconstituents: " << jet_iter->getConstituents().size() << "\n";
+      
     //    if(printJet) {std::cout << "NsubJets: " << constituents.size() << "\n";} 
     VHbbEvent::HardJet hj;
     hj.constituents=constituents.size();
@@ -861,6 +950,8 @@ BTagSFContainer btagSFs;
       hj.subFourMomentum.push_back(GENPTOLORP(icandJet));
       hj.etaSub.push_back(icandJet->eta());
       hj.phiSub.push_back(icandJet->phi());
+        
+//        std::cout << "subjet constituents: " << icandJet->getJetConstituents.size() << std::endl;  
      
     }
     hbbInfo->hardJets.push_back(hj);
