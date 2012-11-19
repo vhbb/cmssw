@@ -169,7 +169,7 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
         // added by Nhan
     std::cout << "My Fat H!!!! -------" << std::endl;
     bool foundRawJets = false;  
-    std::vector< VHbbEvent::RawJet > rjets = event->rawJets;
+    std::vector< VHbbEvent::RawJet > rjets = event->CA12wConstits;
 //    for (unsigned int kk = 0; kk < rjets.size(); kk++){
 //        
 //        std::cout << "rjet #" << kk << ": " << rjets[kk].p4.Pt() << std::endl;

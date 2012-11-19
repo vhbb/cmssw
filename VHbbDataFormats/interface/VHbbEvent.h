@@ -204,9 +204,15 @@ public:
   std::vector<SimpleJet> subJets; //???
   std::vector<SimpleJet> filterJets; //???
   std::vector<HardJet> hardJets;
-  std::vector<RawJet> rawJets;
-  std::vector<RawJet> rawJetsGen;    
-    
+//  std::vector<RawJet> rawJets;
+//  std::vector<RawJet> rawJetsGen;    
+  
+    std::vector<SimpleJet> CAmdft12;
+    std::vector<SimpleJet> CAmdft12_subjets;
+    std::vector<SimpleJet> CApr12_subjets;
+    std::vector<SimpleJet> CAft12_subjets;    
+    std::vector<RawJet> CA12wConstits;
+    std::vector<RawJet> CA12wConstitsGen;    
   
   METInfo calomet;
   METInfo tcmet;

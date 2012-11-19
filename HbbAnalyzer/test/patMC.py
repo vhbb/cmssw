@@ -179,14 +179,30 @@ process.selectedPatJetsCAVHSubPF.cut = cms.string('pt > 15. & abs(eta) < 5.0')
 process.selectedPatJetsCAVHFilterPF.cut = cms.string('pt > 5. & abs(eta) < 5.0')
 
 
-##################-------------------
+##################--------------------------------------------------------------------
 ## by Nhan
-##################-------------------
+##################--------------------------------------------------------------------
 jetCutCA12             = 'pt > 100.'
+subjetCutCA12             = 'pt > 1.'
 
 from RecoJets.JetProducers.ca4GenJets_cfi import ca4GenJets
 from RecoJets.JetProducers.ca4PFJets_cfi import ca4PFJets
 
+from RecoJets.JetProducers.ak5PFJetsFiltered_cfi import ak5PFJetsFiltered
+from RecoJets.JetProducers.ak5PFJetsFiltered_cfi import ak5PFJetsMassDropFiltered
+
+process.ak5FilteredPFlow = ak5PFJetsFiltered.clone(
+                                                   doAreaFastjet = cms.bool(True)
+                                                   )
+process.ak5PFJetsMassDropFilteredPFlow = ak5PFJetsMassDropFiltered.clone(
+                                                   doAreaFastjet = cms.bool(True)
+                                                   )
+from RecoJets.JetProducers.ak5PFJetsPruned_cfi import ak5PFJetsPruned
+process.ak5PrunedPFlow = ak5PFJetsPruned.clone(
+                                               doAreaFastjet = cms.bool(True)
+                                               )
+
+## ...... Plain CA12 jets
 #process.ca12GenJetsNoNu = ca4GenJets.clone( rParam = cms.double(1.2),src = cms.InputTag("genParticlesForJetsNoNu"))
 process.ca12GenJetsNoNu = ca4GenJets.clone( rParam = cms.double(1.2),src = cms.InputTag("genParticlesForJets"))
 process.ca12PFJetsPFlow = ca4PFJets.clone(
@@ -197,6 +213,29 @@ process.ca12PFJetsPFlow = ca4PFJets.clone(
                                           Rho_EtaMax = cms.double(6.0),
                                           Ghost_EtaMax = cms.double(7.0)
                                           )
+## this thing produces subjets by default
+process.ca12PFJetsPrunedPFlow = process.ak5PrunedPFlow.clone(
+                                                      src = cms.InputTag('pfNoElectron'+postfix),
+                                                      doAreaFastjet = cms.bool(True),
+                                                      rParam = cms.double(1.2),    
+                                                      jetAlgorithm = cms.string("CambridgeAachen"),
+                                                             #writeCompound = cms.bool(True), # this is used by default
+                                                             #jetCollInstanceName=cms.string("SubJets"), # this is used by default
+                                                      )
+## this thing produces subjets by default
+process.ca12PFJetsFilteredPFlow = process.ak5FilteredPFlow.clone(
+                                                          src = cms.InputTag('pfNoElectron'+postfix),
+                                                          doAreaFastjet = cms.bool(True),
+                                                          rParam = cms.double(1.2),
+                                                          jetAlgorithm = cms.string("CambridgeAachen"),
+                                                          )
+## this thing produces subjets by default
+process.ca12PFJetsMassDropFilteredPFlow = process.ak5PFJetsMassDropFilteredPFlow.clone(
+                                                                 src = cms.InputTag('pfNoElectron'+postfix),
+                                                                 doAreaFastjet = cms.bool(True),
+                                                                 rParam = cms.double(1.2),
+                                                                 jetAlgorithm = cms.string("CambridgeAachen"),
+                                                                 )
 if isMC :
 
     addJetCollection(process,
@@ -204,7 +243,7 @@ if isMC :
                      'CA12', 'PF',
                      doJTA=True, # Run Jet-Track association & JetCharge
                      doBTagging=True, # Run b-tagging
-                     jetCorrLabel= ( 'AK5PF', inputJetCorrLabel ),
+                     jetCorrLabel=None,
                      doType1MET=True,
                      doL1Cleaning=False,
                      doL1Counters=False,
@@ -218,7 +257,7 @@ else :
                      'CA12', 'PF',
                      doJTA=True, # Run Jet-Track association & JetCharge
                      doBTagging=True, # Run b-tagging
-                     jetCorrLabel= ( 'AK5PF', inputJetCorrLabel ),
+                     jetCorrLabel=None,
                      doType1MET=True,
                      doL1Cleaning=False,
                      doL1Counters=False,
@@ -226,19 +265,70 @@ else :
                      doJetID = False
                      )
 
-process.selectedPatJetsCA12PF.cut = jetCutCA12
 
-##################-------------------
-##################-------------------
+## adding the subject collections which are b-tagged...
+addJetCollection(process, 
+                 cms.InputTag('ca12PFJetsMassDropFilteredPFlow'),         # Jet collection; must be already in the event when patLayer0 sequence is executed
+                 'CA12MassDropFiltered', 'PF',
+                 doJTA=True,            # Run Jet-Track association & JetCharge
+                 doBTagging=False,       # Run b-tagging
+                 jetCorrLabel=None,
+                 doType1MET=True,
+                 doL1Cleaning=False,
+                 doL1Counters=False,
+                 #genJetCollection = cms.InputTag("ak5GenJetsNoNu"),
+                 doJetID = False
+                 )
+addJetCollection(process, 
+                 cms.InputTag('ca12PFJetsMassDropFilteredPFlow', 'SubJets'),         # Jet collection; must be already in the event when patLayer0 sequence is executed
+                 'CA12MassDropFilteredSubjets', 'PF',
+                 doJTA=True,            # Run Jet-Track association & JetCharge
+                 doBTagging=True,       # Run b-tagging
+                 jetCorrLabel=( 'AK5PF', inputJetCorrLabel ),
+                 doType1MET=True,
+                 doL1Cleaning=False,
+                 doL1Counters=False,
+                 #genJetCollection = cms.InputTag("ak5GenJetsNoNu"),
+                 doJetID = False
+                 )
+addJetCollection(process, 
+                 cms.InputTag('ca12PFJetsFilteredPFlow', 'SubJets'),         # Jet collection; must be already in the event when patLayer0 sequence is executed
+                 'CA12FilteredSubjets', 'PF',
+                 doJTA=True,            # Run Jet-Track association & JetCharge
+                 doBTagging=True,       # Run b-tagging
+                 jetCorrLabel=( 'AK5PF', inputJetCorrLabel ),
+                 doType1MET=True,
+                 doL1Cleaning=False,
+                 doL1Counters=False,
+                 #genJetCollection = cms.InputTag("ak5GenJetsNoNu"),
+                 doJetID = False
+                 )
+addJetCollection(process, 
+                 cms.InputTag('ca12PFJetsPrunedPFlow', 'SubJets'),         # Jet collection; must be already in the event when patLayer0 sequence is executed
+                 'CA12PrunedSubjets', 'PF',
+                 doJTA=True,            # Run Jet-Track association & JetCharge
+                 doBTagging=True,       # Run b-tagging
+                 jetCorrLabel=( 'AK5PF', inputJetCorrLabel ),
+                 doType1MET=True,
+                 doL1Cleaning=False,
+                 doL1Counters=False,
+                 #genJetCollection = cms.InputTag("ak5GenJetsNoNu"),
+                 doJetID = False
+                 )
+
+process.selectedPatJetsCA12PF.cut = jetCutCA12
+process.selectedPatJetsCA12MassDropFilteredPF.cut = jetCutCA12
+process.selectedPatJetsCA12MassDropFilteredSubjetsPF.cut = subjetCutCA12
+process.selectedPatJetsCA12FilteredSubjetsPF.cut = subjetCutCA12
+process.selectedPatJetsCA12PrunedSubjetsPF.cut = subjetCutCA12
+
+##################--------------------------------------------------------------------
+##################--------------------------------------------------------------------
 
 
 #load btag SF 
 process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
 process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
-
-
-
-
 
 #do cleaning only against isolatted and ID'ed leptons (TODO: review the electron selection)
 
@@ -534,6 +624,9 @@ process.common = cms.Sequence(
     process.caVHPFJets*
   # by Nhan                              
     process.ca12PFJetsPFlow*
+    process.ca12PFJetsPrunedPFlow*
+    process.ca12PFJetsFilteredPFlow*
+    process.ca12PFJetsMassDropFilteredPFlow*
   # by Nhan                                                            
     process.mvaID *
     process.patDefaultSequence*
