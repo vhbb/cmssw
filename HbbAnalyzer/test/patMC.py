@@ -183,7 +183,7 @@ process.selectedPatJetsCAVHFilterPF.cut = cms.string('pt > 5. & abs(eta) < 5.0')
 ## by Nhan
 ##################--------------------------------------------------------------------
 jetCutCA12             = 'pt > 100.'
-subjetCutCA12             = 'pt > 1.'
+subjetCutCA12             = 'pt > 5.'
 
 #from RecoJets.JetProducers.ca4GenJets_cfi import ca4GenJets
 from RecoJets.JetProducers.ca4PFJets_cfi import ca4PFJets
