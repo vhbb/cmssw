@@ -18,7 +18,10 @@
 #include "fastjet/tools/MassDropTagger.hh"
 #include "fastjet/GhostedAreaSpec.hh"
 
-#include "VHbbAnalysis/VHbbDataFormats/interface/Nsubjettiness.h"
+//#include "VHbbAnalysis/VHbbDataFormats/interface/Nsubjettiness.h"
+#include "VHbbAnalysis/VHbbDataFormats/interface/NjettinessPlugin.hh"
+#include "VHbbAnalysis/VHbbDataFormats/interface/Nsubjettiness.hh"
+#include "VHbbAnalysis/VHbbDataFormats/src/QjetsPlugin.h"
 
 #include <iostream>
 
@@ -28,7 +31,7 @@ class JetSubstructureTools {
  public:
     
     // constructor
-    JetSubstructureTools( std::vector<float> c_px, std::vector<float> c_py, std::vector<float> c_pz, std::vector<float> c_e, std::vector<float> c_pdgId );    
+    JetSubstructureTools( double radii, std::vector<float> c_px, std::vector<float> c_py, std::vector<float> c_pz, std::vector<float> c_e, std::vector<float> c_pdgId );    
     ~JetSubstructureTools(){}
     
     fastjet::PseudoJet getPrunedJet(){ return prunedJet_; }
@@ -48,9 +51,10 @@ class JetSubstructureTools {
         else if (i == 1) return prunedSubJet2_;
         else throw cms::Exception("JetSubstructureTools") << "Too many subjets..." << std::endl;
     }
-
+    double getQjetVolatility(int seed);
     // data members
- public:
+ 
+  public:
     
     std::vector<fastjet::PseudoJet> FJconstituents_;
     std::vector<float> c_pdgIds_; 
@@ -90,6 +94,8 @@ class JetSubstructureTools {
     fastjet::PseudoJet prunedSubJet2_;    
     
     float QJetVolatility_;
+    
+    double mJetRadius;
 };
 
     // -------------------------------------------
@@ -98,11 +104,11 @@ class JetSubstructureTools {
     // -------------------------------------------
 
     // constructor
-JetSubstructureTools::JetSubstructureTools( std::vector<float> c_px, std::vector<float> c_py, std::vector<float> c_pz, std::vector<float> c_e, std::vector<float> c_pdgId )   
+JetSubstructureTools::JetSubstructureTools( double radii, std::vector<float> c_px, std::vector<float> c_py, std::vector<float> c_pz, std::vector<float> c_e, std::vector<float> c_pdgId )   
 {
+
     
-    std::cout << "hey y'all!" << std::endl;
-    
+    mJetRadius = radii;
         // check that they are all the same size
     if ((c_px.size() == c_py.size())&&(c_py.size() == c_pz.size())&&(c_pz.size() == c_e.size())&&(c_e.size() == c_pdgId.size())){
         for (unsigned int i = 0; i < c_px.size(); i++){
@@ -116,7 +122,7 @@ JetSubstructureTools::JetSubstructureTools( std::vector<float> c_px, std::vector
     
         // -------------------------------------------
         // recluster on the fly....
-    double mJetRadius = 1.2;
+
     fastjet::JetDefinition jetDef(fastjet::cambridge_algorithm, mJetRadius);
     
     int activeAreaRepeats = 1;
@@ -144,11 +150,17 @@ JetSubstructureTools::JetSubstructureTools( std::vector<float> c_px, std::vector
     transformers.push_back(&filter);
     transformers.push_back(&pruner);
 
+//        // define n-subjettiness
+//    float mNsubjettinessKappa = 1.;
+//    NsubParameters paraNsub = NsubParameters(mNsubjettinessKappa, mJetRadius);   
+//    Nsubjettiness routine(nsub_kt_axes, paraNsub);
+    
         // define n-subjettiness
     float mNsubjettinessKappa = 1.;
-    NsubParameters paraNsub = NsubParameters(mNsubjettinessKappa, mJetRadius);   
-    Nsubjettiness routine(nsub_kt_axes, paraNsub);
-    
+    double beta = mNsubjettinessKappa; // power for angular dependence, e.g. beta = 1 --> linear k-means, beta = 2 --> quadratic/classic k-means
+    double R0 = mJetRadius; // Characteristic jet radius for normalization            
+    double Rcut = mJetRadius; // maximum R particles can be from axis to be included in jet           
+
     
     ungroomedJetMass_ = out_jets.at(0).m();
         // -------------------------------------------    
@@ -193,14 +205,52 @@ JetSubstructureTools::JetSubstructureTools( std::vector<float> c_px, std::vector
     
         // -------------------------------------------    
         // compute n-subjettiness  -------------
-    tau1_ = routine.getTau(1, out_jets.at(0).constituents()); 
-    tau2_ = routine.getTau(2, out_jets.at(0).constituents());
-    tau3_ = routine.getTau(3, out_jets.at(0).constituents());
-    tau4_ = routine.getTau(4, out_jets.at(0).constituents());
+    fastjet::Nsubjettiness nSub1KT(1, Njettiness::onepass_kt_axes, beta, R0, Rcut);
+    tau1_ = nSub1KT(out_jets.at(0));
+    fastjet::Nsubjettiness nSub2KT(2, Njettiness::onepass_kt_axes, beta, R0, Rcut);
+    tau2_ = nSub2KT(out_jets.at(0));
+    fastjet::Nsubjettiness nSub3KT(3, Njettiness::onepass_kt_axes, beta, R0, Rcut);
+    tau3_ = nSub3KT(out_jets.at(0));
+    fastjet::Nsubjettiness nSub4KT(4, Njettiness::onepass_kt_axes, beta, R0, Rcut);
+    tau4_ = nSub4KT(out_jets.at(0));  
     
 }
     // -------------------------------------------
     // -------------------------------------------
+double JetSubstructureTools::getQjetVolatility(int seed){
+    
+//    double mJetRadius = 1.2;
+//    fastjet::JetDefinition jetDef(fastjet::cambridge_algorithm, mJetRadius);    
+//    int mQJetsN = 50;
+//    int mQJetsPreclustering = 30;
+//    
+//    std::vector< float > qjetmasses;
+//    
+//    fastjet::ClusterSequence thisClustering_basic(FJconstituents_, jetDef);
+//    std::vector<fastjet::PseudoJet> out_jets_basic = sorted_by_pt(thisClustering_basic.inclusive_jets(50.0));
+//    
+//    int j = 0; // the hardest jet
+//    
+//    double zcut(0.1), dcut_fctr(0.5), exp_min(0.), exp_max(0.), rigidity(0.1);          
+//    
+//    vector<fastjet::PseudoJet> constits;
+//    unsigned int nqjetconstits = out_jets_basic.at(j).constituents().size();
+//    if (nqjetconstits < (unsigned int) mQJetsPreclustering) constits = out_jets_basic.at(j).constituents();
+//    else constits = out_jets_basic.at(j).associated_cluster_sequence()->exclusive_subjets_up_to(out_jets_basic.at(j),mQJetsPreclustering);
+//    for(unsigned int ii = 0 ; ii < (unsigned int) mQJetsN ; ii++){
+//        QjetsPlugin qjet_plugin(zcut, dcut_fctr, exp_min, exp_max, rigidity);
+//            //                qjet_plugin.SetRandSeed(seed+ii); // new feature in Qjets to set the random seed
+//        fastjet::JetDefinition qjet_def(&qjet_plugin);
+//        fastjet::ClusterSequence qjet_seq(constits, qjet_def);
+//        vector<fastjet::PseudoJet> inclusive_jets2 = sorted_by_pt(qjet_seq.inclusive_jets(50.0));
+//        
+//        if (inclusive_jets2.size()>0) { qjetmasses.push_back( inclusive_jets2[0].m() ); }
+//        
+//    }
+    
+    
+    return 1.;
+}
     // -------------------------------------------
     // -------------------------------------------
 
