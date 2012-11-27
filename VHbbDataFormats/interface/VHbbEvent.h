@@ -207,7 +207,7 @@ public:
 //  std::vector<RawJet> rawJets;
 //  std::vector<RawJet> rawJetsGen;    
   
-    std::vector<SimpleJet> CAmdft12;
+    std::vector<HardJet> CAmdft12;
     std::vector<SimpleJet> CAmdft12_subjets;
     std::vector<SimpleJet> CApr12_subjets;
     std::vector<SimpleJet> CAft12_subjets;    

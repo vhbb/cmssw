@@ -1,15 +1,18 @@
-<flags   CXXFLAGS="-O0 -g -DDEBUG"/>
-<use   name="FWCore/Framework"/>
-<use   name="FWCore/PluginManager"/>
-<use   name="FWCore/ParameterSet"/>
-<use   name="FWCore/ServiceRegistry"/>
-<use   name="DataFormats/Candidate"/>
-<use   name="DataFormats/PatCandidates"/>
-<use   name="PhysicsTools/UtilAlgos"/>
-<use   name="DataFormats/BeamSpot"/>
-<use   name="root"/>
+<use name="CondFormats/JetMETObjects"/>
+<use name="DataFormats/Common"/>
+<use name="DataFormats/FWLite"/>
+<use name="DataFormats/GeometryVector"/>
+<use name="DataFormats/Math"/>
+<use name="FWCore/Common"/>
+<use name="FWCore/Framework"/>
+<use name="FWCore/ParameterSet"/>
+<use name="FWCore/PythonParameterSet"/>
 <use name="fastjet"/>
+<use name="rootphysics"/>
+<use name="rootrflx"/>
+<flags CXXFLAGS="-O0 -g -DDEBUG"/>
 <export>
-  <lib   name="1"/>
+    <lib name="1"/>
 </export>
+
 

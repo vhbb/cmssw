@@ -76,36 +76,36 @@ class VHbbCandidate {
     
     // *****************************
     // added by Nhan
-class RawFatHiggsCandidate {
+class FatHiggsCandidateFJ3 {
 public:
     
     TLorentzVector p4;
-    bool RawFatHiggsFlag;
+    bool FatHiggsFJ3Flag;
     
-    float prunedJetMass;
-    float trimmedJetMass;
-    float filteredJetMass;
-    float ungroomedJetMass;
+    TLorentzVector p4_pr;
+    TLorentzVector p4_ft;
+    TLorentzVector p4_tr;
+    TLorentzVector area_pr;
+    TLorentzVector area_ft;
+    TLorentzVector area_tr;
     
-    float pT_pr;
-    float eta_pr;    
-    float px_pr;        
-    float py_pr;        
-    float pz_pr;        
-    float e_pr;        
     float tau1;
     float tau2;
     float tau3;
     float tau4;
     
-    float sj1_px_pr;
-    float sj1_py_pr;
-    float sj1_pz_pr;
-    float sj1_e_pr;    
-    float sj2_px_pr;
-    float sj2_py_pr;
-    float sj2_pz_pr;
-    float sj2_e_pr;
+        // mdft matching
+    bool matchedMDFTCandidate;
+    TLorentzVector matchedMDFTCandidate_p4;
+    std::vector< TLorentzVector > subjets_mdft_p4;
+    std::vector< TLorentzVector > subjets_mdft_csv;
+
+    std::vector< TLorentzVector > subjets_pr_p4;
+    std::vector< TLorentzVector > subjets_pr_csv;
+
+    std::vector< TLorentzVector > subjets_ft_p4;
+    std::vector< TLorentzVector > subjets_ft_csv;
+    
     
 public:
     TLorentzVector getp4(){ return p4; }
@@ -137,7 +137,7 @@ public:
   CandidateType candidateType;
   HiggsCandidate H;
   FatHiggsCandidate FatH;
-    RawFatHiggsCandidate RawFatH;
+    FatHiggsCandidateFJ3 FatHFJ3;
   VectorCandidate V;
   std::vector<VHbbEvent::SimpleJet> additionalJets;
   std::vector<VHbbEvent::SimpleJet> additionalJetsFat;

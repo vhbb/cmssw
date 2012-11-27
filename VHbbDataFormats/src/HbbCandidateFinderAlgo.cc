@@ -167,48 +167,92 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
     
         // ***********************************
         // added by Nhan
-    std::cout << "My Fat H!!!! -------" << std::endl;
     bool foundRawJets = false;  
     std::vector< VHbbEvent::RawJet > rjets = event->CA12wConstits;
+    std::vector< VHbbEvent::SimpleJet > rjets_CAmdft12_subjets = event->CAmdft12_subjets;
+    std::vector< VHbbEvent::SimpleJet > rjets_CApr12_subjets = event->CApr12_subjets;
+    std::vector< VHbbEvent::SimpleJet > rjets_CAft12_subjets = event->CAft12_subjets;
+    std::vector< VHbbEvent::HardJet > rjets_CAmdft12 = event->CAmdft12;
+
 //    for (unsigned int kk = 0; kk < rjets.size(); kk++){
 //        
 //        std::cout << "rjet #" << kk << ": " << rjets[kk].p4.Pt() << std::endl;
 //        
 //    }
     if (rjets.size() > 0){
-        JetSubstructureTools tmpJet( rjets[0].constituents_px, rjets[0].constituents_py, rjets[0].constituents_pz, rjets[0].constituents_e, rjets[0].constituents_pdgId ) ;
+        double jetradius = 1.2;
+        JetSubstructureTools tmpJet( jetradius, rjets[0].constituents_px, rjets[0].constituents_py, rjets[0].constituents_pz, rjets[0].constituents_e, rjets[0].constituents_pdgId ) ;
 
-        temp.RawFatH.p4 = rjets[0].p4;
-        temp.RawFatH.RawFatHiggsFlag = true;
-        temp.RawFatH.prunedJetMass = tmpJet.prunedJetMass_;
-        temp.RawFatH.trimmedJetMass = tmpJet.trimmedJetMass_;
-        temp.RawFatH.filteredJetMass = tmpJet.filteredJetMass_;
-        temp.RawFatH.ungroomedJetMass = tmpJet.ungroomedJetMass_;     
-//        std::cout << "jet pT: " << rjets[0].p4.Pt() << std::endl;
-        temp.RawFatH.pT_pr = rjets[0].p4.Pt();
-        temp.RawFatH.eta_pr = rjets[0].p4.Eta();
-        temp.RawFatH.px_pr = rjets[0].p4.Px();
-        temp.RawFatH.py_pr = rjets[0].p4.Py();
-        temp.RawFatH.pz_pr = rjets[0].p4.Pz();
-        temp.RawFatH.e_pr = rjets[0].p4.E();
+            // --------------------------------------
+            // filling basic information
         
-        temp.RawFatH.tau1 = tmpJet.tau1_;
-        temp.RawFatH.tau2 = tmpJet.tau2_;
-        temp.RawFatH.tau3 = tmpJet.tau3_;
-        temp.RawFatH.tau4 = tmpJet.tau4_;  
+        temp.FatHFJ3.p4 = rjets[0].p4;
+        temp.FatHFJ3.FatHiggsFJ3Flag = true;
+        temp.FatHFJ3.p4_pr = TLorentzVector( tmpJet.prunedJet_.px(), tmpJet.prunedJet_.py(), tmpJet.prunedJet_.pz(), tmpJet.prunedJet_.e() );
+        temp.FatHFJ3.p4_ft = TLorentzVector( tmpJet.filteredJet_.px(), tmpJet.filteredJet_.py(), tmpJet.filteredJet_.pz(), tmpJet.filteredJet_.e() );
+        temp.FatHFJ3.p4_tr = TLorentzVector( tmpJet.trimmedJet_.px(), tmpJet.trimmedJet_.py(), tmpJet.trimmedJet_.pz(), tmpJet.trimmedJet_.e() );
+        temp.FatHFJ3.area_pr = tmpJet.prunedJetArea_;
+        temp.FatHFJ3.area_ft = tmpJet.filteredJetArea_;
+        temp.FatHFJ3.area_tr = tmpJet.trimmedJetArea_;
         
-//        std::cout << "tmpJet.tau1 = " << tmpJet.tau1_ << std::endl;
-//        std::cout << "tmpJet.tau2 = " << tmpJet.tau2_ << std::endl;        
+        temp.FatHFJ3.tau1 = tmpJet.tau1_;
+        temp.FatHFJ3.tau2 = tmpJet.tau2_;
+        temp.FatHFJ3.tau3 = tmpJet.tau3_;
+        temp.FatHFJ3.tau4 = tmpJet.tau4_;  
+
+            // --------------------------------------
+            // filling pruned subject information
+        std::vector< TLorentzVector > tmpRawSubjets;
+        tmpRawSubjets.push_back( TLorentzVector(tmpJet.prunedSubJet1_.px(),tmpJet.prunedSubJet1_.py(),tmpJet.prunedSubJet1_.pz(),tmpJet.prunedSubJet1_.e()) );
+        tmpRawSubjets.push_back( TLorentzVector(tmpJet.prunedSubJet2_.px(),tmpJet.prunedSubJet2_.py(),tmpJet.prunedSubJet2_.pz(),tmpJet.prunedSubJet2_.e()) );   
+            // get b-tag information
+        for (unsigned int i_pr_subjets_raw = 0; i_pr_subjets_raw < tmpRawSubjets.size(); i_pr_subjets_raw++){
+            for (unsigned int i_pr_subjets = 0; i_pr_subjets < rjets_CApr12_subjets.size(); i_pr_subjets++){                
+                double deltaR_tmp = tmpRawSubjets[i_pr_subjets_raw].DeltaR(rjets_CApr12_subjets[i_pr_subjets].p4);
+                if (deltaR_tmp < 0.01){
+                    temp.FatHFJ3.subjets_pr_p4.push_back(rjets_CApr12_subjets[i_pr_subjets].p4);                    
+                    temp.FatHFJ3.subjets_pr_csv.push_back(rjets_CApr12_subjets[i_pr_subjets].csv);
+                }
+            }
+        }
+            // --------------------------------------        
+            // filling matching to MDFT
         
-        temp.RawFatH.sj1_px_pr = tmpJet.prunedSubJet1_.px();
-        temp.RawFatH.sj1_py_pr = tmpJet.prunedSubJet1_.py();
-        temp.RawFatH.sj1_pz_pr = tmpJet.prunedSubJet1_.pz();
-        temp.RawFatH.sj1_e_pr = tmpJet.prunedSubJet1_.e();        
-        temp.RawFatH.sj2_px_pr = tmpJet.prunedSubJet2_.px();
-        temp.RawFatH.sj2_py_pr = tmpJet.prunedSubJet2_.py();
-        temp.RawFatH.sj2_pz_pr = tmpJet.prunedSubJet2_.pz();
-        temp.RawFatH.sj2_e_pr = tmpJet.prunedSubJet2_.e();        
+            // matched MDFT jet? 
+        int i_mdft_match = -1;
+        for (unsigned int i_mdft = 0; i_mdft < rjets_CAmdft12.size(); i_mdft++){
+            double deltaR_mdft = rjets[0].p4.DeltaR(rjets_CAmdft12[i_mdft].p4);
+            if (deltaR_mdft < 0.3){
+                i_mdft_match = (int) i_mdft;
+            }
+        }
         
+        if (i_mdft_match >= 0){ 
+            temp.FatHFJ3.matchedMDFTCandidate = true; 
+            temp.FatHFJ3.matchedMDFTCandidate_p4.SetPxPyPzE( rjets_CAmdft12[i_mdft_match].p4.Px(), rjets_CAmdft12[i_mdft_match].p4.Py(), rjets_CAmdft12[i_mdft_match].p4.Pz(), rjets_CAmdft12[i_mdft_match].p4.E() );  
+            
+            for (unsigned int i_mdft_subjets = 0; i_mdft_subjets < rjets_CAmdft12_subjets.size(); i_mdft_subjets++){
+                double deltaR_mdftsubjets = rjets_CAmdft12[i_mdft_match].p4.DeltaR( rjets_CAmdft12_subjets[i_mdft_subjets].p4 );
+                if (deltaR_mdftsubjets < jetradius){
+                    temp.FatHFJ3.subjets_mdft_p4.push_back( rjets_CAmdft12_subjets[i_mdft_subjets].p4 );
+                    temp.FatHFJ3.subjets_mdft_csv.push_back( rjets_CAmdft12_subjets[i_mdft_subjets].csv );                    
+                }
+            }
+        }
+        else{
+            temp.FatHFJ3.matchedMDFTCandidate = false;         
+            temp.FatHFJ3.matchedMDFTCandidate_p4.SetPxPyPzE( 0, 0, 0, 0 );          
+        } 
+
+            // --------------------------------------        
+            // filling plain filtered subjet information
+        for (unsigned int i_ft_subjets = 0; i_ft_subjets < rjets_CAft12_subjets.size(); i_ft_subjets++){
+            double deltaR_ftsubjets = rjets[0].p4.DeltaR( rjets_CAft12_subjets[i_ft_subjets].p4 );
+            if (deltaR_ftsubjets < jetradius){
+                temp.FatHFJ3.subjets_ft_p4.push_back( rjets_CAft12_subjets[i_ft_subjets].p4 );
+                temp.FatHFJ3.subjets_ft_csv.push_back( rjets_CAft12_subjets[i_ft_subjets].csv );                    
+            }
+        }
     }
     
         // ***********************************

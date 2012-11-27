@@ -11,5 +11,4 @@ namespace {
   VHbbCandidate pippo2;
   std::vector<VHbbCandidate> pippo3;
   edm::Wrapper<std::vector<VHbbCandidate> > pippo4;
-    
 }

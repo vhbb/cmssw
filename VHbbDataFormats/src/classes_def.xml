@@ -4,7 +4,7 @@
       <class name="VHbbEventAuxInfo"/>
   <class name="edm::Wrapper<VHbbEvent>"/>
   <class name="edm::Wrapper<VHbbEventAuxInfo>"/>
-
+    
 <class name="VHbbEvent::METInfo"/>
 <class name="VHbbEventAuxInfo::PUInfo"/>
 <class name="VHbbEventAuxInfo::ParticleMCInfo"/>
@@ -42,5 +42,5 @@
 
 <class name="VHbbCandidate::HiggsCandidate"/>
 <class name="VHbbCandidate::VectorCandidate"/>
-
+    
 </lcgdict>
