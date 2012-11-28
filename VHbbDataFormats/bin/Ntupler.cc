@@ -223,6 +223,7 @@ typedef struct
     float tau2;
     float tau3;
     float tau4;
+    float qjetVol;
     
     int matchedMDFT;
 
@@ -902,7 +903,7 @@ int main(int argc, char* argv[])
     _outTree->Branch("V"		        ,  &V	                    ,  "mass/F:pt/F:eta:phi/F");
     _outTree->Branch("FatH"               ,  &FatH                    ,  "FatHiggsFlag/I:mass/F:pt/F:eta:phi/F:filteredmass/F:filteredpt/F:filteredeta/F:filteredphi/F");
         // branches for FJ3 stuff
-    _outTree->Branch("FatHFJ3", &FatHFJ3, "FatHiggsFJ3Flag/I:p4_px/F:p4_py/F:p4_pz/F:p4_e/F:p4_pr_px/F:p4_pr_py/F:p4_pr_pz/F:p4_pr_e/F:p4_ft_px/F:p4_ft_py/F:p4_ft_pz/F:p4_ft_e/F:p4_tr_px/F:p4_tr_py/F:p4_tr_pz/F:p4_tr_e/F:tau1/F:tau2/F:tau3/F:tau4/F:matchedMDFT/I");
+    _outTree->Branch("FatHFJ3", &FatHFJ3, "FatHiggsFJ3Flag/I:p4_px/F:p4_py/F:p4_pz/F:p4_e/F:p4_pr_px/F:p4_pr_py/F:p4_pr_pz/F:p4_pr_e/F:p4_ft_px/F:p4_ft_py/F:p4_ft_pz/F:p4_ft_e/F:p4_tr_px/F:p4_tr_py/F:p4_tr_pz/F:p4_tr_e/F:tau1/F:tau2/F:tau3/F:tau4/F:qjetVol/F:matchedMDFT/I");
     _outTree->Branch("FatHFJ3Subjet_mdft", &FatHFJ3Subjet_mdft, "nsubjets/I:p4_px_0/F:p4_py_0/F:p4_pz_0/F:p4_e_0/F:p4_px_1/F:p4_py_1/F:p4_pz_1/F:p4_e_1/F:p4_px_2/F:p4_py_2/F:p4_pz_2/F:p4_e_2/F:p4_px_3/F:p4_py_3/F:p4_pz_3/F:p4_e_3/F:csv_0/F:csv_1/F:csv_2/F:csv_3/F");
     _outTree->Branch("FatHFJ3Subjet_pr", &FatHFJ3Subjet_pr, "nsubjets/I:p4_px_0/F:p4_py_0/F:p4_pz_0/F:p4_e_0/F:p4_px_1/F:p4_py_1/F:p4_pz_1/F:p4_e_1/F:p4_px_2/F:p4_py_2/F:p4_pz_2/F:p4_e_2/F:p4_px_3/F:p4_py_3/F:p4_pz_3/F:p4_e_3/F:csv_0/F:csv_1/F:csv_2/F:csv_3/F");
     _outTree->Branch("FatHFJ3Subjet_ft", &FatHFJ3Subjet_ft, "nsubjets/I:p4_px_0/F:p4_py_0/F:p4_pz_0/F:p4_e_0/F:p4_px_1/F:p4_py_1/F:p4_pz_1/F:p4_e_1/F:p4_px_2/F:p4_py_2/F:p4_pz_2/F:p4_e_2/F:p4_px_3/F:p4_py_3/F:p4_pz_3/F:p4_e_3/F:csv_0/F:csv_1/F:csv_2/F:csv_3/F");
@@ -1701,7 +1702,8 @@ int main(int argc, char* argv[])
                 FatHFJ3.tau2 = vhCand.FatHFJ3.tau2;
                 FatHFJ3.tau3 = vhCand.FatHFJ3.tau3;
                 FatHFJ3.tau4 = vhCand.FatHFJ3.tau4;
-                
+                FatHFJ3.qjetVol = vhCand.FatHFJ3.qjetVol;
+
                 if (vhCand.FatHFJ3.matchedMDFTCandidate){
                     FatHFJ3.matchedMDFT = 1;
                 }
