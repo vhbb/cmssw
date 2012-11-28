@@ -13,7 +13,7 @@
     //
     // Original Author:  David Lopes Pegna,Address unknown,NONE,
     //         Created:  Thu Mar  5 13:51:28 EST 2009
-    // $Id: HbbAnalyzerNew.cc,v 1.77.2.1 2012/11/16 21:20:42 ntran Exp $
+    // $Id: HbbAnalyzerNew.cc,v 1.77.2.2 2012/11/19 20:53:44 ntran Exp $
     //
     //
 
@@ -146,6 +146,12 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
         { auxInfo->weightMCProd =1.;}
         //
         // ??
+    
+        //eventNo
+    auxInfo->run = iEvent.id().run();
+    auxInfo->event = iEvent.id().event();
+    auxInfo->lumi  = iEvent.luminosityBlock();
+    auxInfo->bunch = iEvent.bunchCrossing();
     
         // trigger
     
