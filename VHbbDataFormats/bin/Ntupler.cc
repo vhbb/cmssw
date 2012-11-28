@@ -786,7 +786,7 @@ int main(int argc, char* argv[])
     gSystem->Load("libFWCoreFWLite");
     gSystem->Load("libDataFormatsFWLite");
     AutoLibraryLoader::enable();
-    
+        
         // parse arguments
     if ( argc < 2 ) {
         return 0;

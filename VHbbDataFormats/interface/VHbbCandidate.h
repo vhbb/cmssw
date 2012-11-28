@@ -93,7 +93,8 @@ public:
     float tau2;
     float tau3;
     float tau4;
-    
+    float qjetVol;
+        
         // mdft matching
     bool matchedMDFTCandidate;
     TLorentzVector matchedMDFTCandidate_p4;

@@ -1,8 +1,7 @@
 #include "VHbbAnalysis/VHbbDataFormats/interface/HbbCandidateFinderAlgo.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbCandidateTools.h"
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEventAuxInfo.h"
-
-#include "VHbbAnalysis/VHbbDataFormats/interface/JetSubstructureTools.h"
+#include "JetSubstructure/SubstructureTools/interface/JetSubstructureTools.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
 #include <algorithm>
@@ -199,6 +198,7 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
         temp.FatHFJ3.tau2 = tmpJet.tau2_;
         temp.FatHFJ3.tau3 = tmpJet.tau3_;
         temp.FatHFJ3.tau4 = tmpJet.tau4_;  
+        temp.FatHFJ3.qjetVol = tmpJet.getQjetVolatility(aux.event);
 
             // --------------------------------------
             // filling pruned subject information

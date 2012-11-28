@@ -1,25 +1,77 @@
-<use   name="root"/>
-<use   name="roottmva"/>
-<use   name="boost"/>
-<use   name="fastjet"/>
-<use   name="rootcintex"/>
-<use   name="FWCore/FWLite"/>
-<use   name="DataFormats/FWLite"/>
-<use   name="DataFormats/Luminosity"/>
-<use   name="FWCore/PythonParameterSet"/>
-<use   name="CommonTools/Utils"/>
-<use   name="PhysicsTools/FWLite"/>
-<use   name="PhysicsTools/Utilities"/>
-<use   name="PhysicsTools/SelectorUtils"/>
-<use   name="RecoBTag/SecondaryVertex"/>
-<use   name="lhapdf"/>
-<use   name="CondFormats/JetMETObjects"/>
-<environment>
-  <bin  file="make_histos.cxx"></bin>
-  <bin  file="TMVAClassification.cxx"></bin>
-  <bin  file="make_tree.cxx"></bin>
-  <bin  file="Ntupler.cc"></bin>
-  <bin  file="Ntupler7TeV.cc"></bin>
-  <bin  file="VHbbTnP.cc"></bin>
-  <bin  file="Updater.cc"></bin>
-</environment>
+<bin name="Ntupler" file="Ntupler.cc">
+ <use name="JetSubstructure/SubstructureTools"/>
+ <use name="DataFormats/Common"/>
+ <use name="DataFormats/Provenance"/>
+ <use name="DataFormats/FWLite"/>
+ <use name="DataFormats/GeometryCommonDetAlgo"/>
+ <use name="DataFormats/GeometrySurface"/>
+ <use name="DataFormats/GeometryVector"/>
+ <use name="DataFormats/Luminosity"/>
+ <use name="DataFormats/Math"/>
+ <use name="DataFormats/MuonReco"/>
+ <use name="DataFormats/PatCandidates"/>
+ <use name="FWCore/FWLite"/>
+ <use name="FWCore/ParameterSet"/>
+ <use name="FWCore/PythonParameterSet"/>
+ <use name="PhysicsTools/FWLite"/>
+ <use name="PhysicsTools/Utilities"/>
+ <use name="RecoBTag/SecondaryVertex"/>
+ <use name="SimDataFormats/GeneratorProducts"/>
+ <use name="VHbbAnalysis/VHbbDataFormats"/>
+ <use name="ZSV/BAnalysis"/>
+ <use name="python"/>
+ <use name="rootphysics"/>
+</bin>
+<bin name="make_tree" file="make_tree.cxx">
+ <use name="DataFormats/FWLite"/>
+ <use name="DataFormats/GeometryVector"/>
+ <use name="DataFormats/Math"/>
+ <use name="FWCore/FWLite"/>
+ <use name="PhysicsTools/FWLite"/>
+ <use name="VHbbAnalysis/VHbbDataFormats"/>
+ <use name="rootphysics"/>
+</bin>
+<bin name="Ntupler7TeV" file="Ntupler7TeV.cc">
+</bin>
+<bin name="VHbbTnP" file="VHbbTnP.cc">
+ <use name="DataFormats/FWLite"/>
+ <use name="DataFormats/GeometryCommonDetAlgo"/>
+ <use name="DataFormats/GeometrySurface"/>
+ <use name="DataFormats/GeometryVector"/>
+ <use name="DataFormats/Luminosity"/>
+ <use name="DataFormats/Math"/>
+ <use name="DataFormats/MuonReco"/>
+ <use name="DataFormats/PatCandidates"/>
+ <use name="FWCore/FWLite"/>
+ <use name="FWCore/ParameterSet"/>
+ <use name="FWCore/PythonParameterSet"/>
+ <use name="PhysicsTools/FWLite"/>
+ <use name="PhysicsTools/Utilities"/>
+ <use name="RecoBTag/SecondaryVertex"/>
+ <use name="SimDataFormats/GeneratorProducts"/>
+ <use name="VHbbAnalysis/VHbbDataFormats"/>
+ <use name="ZSV/BAnalysis"/>
+ <use name="python"/>
+ <use name="rootphysics"/>
+</bin>
+<bin name="Updater" file="Updater.cc">
+ <use name="JetSubstructure/SubstructureTools"/>
+ <use name="DataFormats/Math"/>
+ <use name="FWCore/ParameterSet"/>
+ <use name="FWCore/PythonParameterSet"/>
+ <use name="PhysicsTools/Utilities"/>
+ <use name="VHbbAnalysis/VHbbDataFormats"/>
+ <use name="python"/>
+ <use name="rootphysics"/>
+</bin>
+<bin name="TMVAClassification" file="TMVAClassification.cxx">
+ <use name="roottmva"/>
+</bin>
+<bin name="make_histos" file="make_histos.cxx">
+ <use name="DataFormats/FWLite"/>
+ <use name="DataFormats/Math"/>
+ <use name="FWCore/FWLite"/>
+ <use name="PhysicsTools/FWLite"/>
+ <use name="VHbbAnalysis/VHbbDataFormats"/>
+ <use name="rootphysics"/>
+</bin>

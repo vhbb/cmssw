@@ -56,6 +56,12 @@ class VHbbEventAuxInfo{
  }
  
  public:
+
+    int run;
+    int event; 
+    int lumi; 
+    int bunch; 
+    
   PUInfo puInfo;
   float weightMCProd;  
  PrimaryVertexInfo pvInfo;
