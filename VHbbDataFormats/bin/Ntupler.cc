@@ -226,7 +226,7 @@ typedef struct
     float qjetVol;
     
     int matchedMDFT;
-
+    
 } FatHiggsFJ3Info;
 typedef struct
 {
@@ -787,7 +787,7 @@ int main(int argc, char* argv[])
     gSystem->Load("libFWCoreFWLite");
     gSystem->Load("libDataFormatsFWLite");
     AutoLibraryLoader::enable();
-        
+    
         // parse arguments
     if ( argc < 2 ) {
         return 0;
@@ -1355,8 +1355,8 @@ int main(int argc, char* argv[])
             if(EVENT.run > runMax_ && runMax_ > 0) continue;
             
             count->Fill(1.);
-            
-            
+            std::cout << "--------------------------------------------" << std::endl;
+            std::cout << "Event Number: " << EVENT.event << " and " << ievt << std::endl;
             
             /*
              Handle<std::vector< PileupSummaryInfo > >  PupInfo;
@@ -1525,7 +1525,9 @@ int main(int argc, char* argv[])
                         
                         }  
                 
+                std::cout << "run algoZ..." << std::endl;
                 algoZ->run(iEvent,*candZlocal,aux);
+                std::cout << "run algoW..." << std::endl;
                 algoW->run(iEvent,*candWlocal,aux);
                 
                 
@@ -1553,9 +1555,7 @@ int main(int argc, char* argv[])
                 }
             
             const std::vector<VHbbCandidate> * cand = candZ;
-            
-            
-            
+                        
             /*  fwlite::Handle< VHbbEvent > vhbbHandle; 
              vhbbHandle.getByLabel(ev,"HbbAnalyzerNew");
              const VHbbEvent iEvent = *vhbbHandle.product();
@@ -1624,6 +1624,7 @@ int main(int argc, char* argv[])
                 H.phi = vhCand.H.p4.Phi();
             }
             
+            
             if(vhCand.FatH.FatHiggsFlag) FatH.FatHiggsFlag =1; else FatH.FatHiggsFlag=0;
             fathFilterJets.reset();
             aJetsFat.reset();
@@ -1639,21 +1640,24 @@ int main(int argc, char* argv[])
                 }
                 FatH.phi = vhCand.FatH.p4.Phi();
                 
+                
                     //        if(vhCand.FatH.FatHiggsFlag)  vhCand.FatH.subjetsSize; 
                 nfathFilterJets=vhCand.FatH.subjetsSize;  
                 for( int j=0; j < nfathFilterJets; j++ ){
                     fathFilterJets.set(vhCand.FatH.jets[j],j);
                 }
+
                 
                 if(nfathFilterJets==2){
                     FatH.filteredmass=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4).M();
                     FatH.filteredpt=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4).Pt();
                     FatH.filteredeta=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4).Eta();
                     FatH.filteredphi=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4).Phi();
-                    fathFilterJets.cosTheta[0]=  vhCand.FatH.helicities[0];
-                    fathFilterJets.cosTheta[1]=  vhCand.FatH.helicities[1];
+//                    fathFilterJets.cosTheta[0]=  vhCand.FatH.helicities[0];
+//                    fathFilterJets.cosTheta[1]=  vhCand.FatH.helicities[1];
                 }
                 else if(nfathFilterJets==3){
+
                     FatH.filteredmass=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4+vhCand.FatH.jets[2].p4).M();
                     FatH.filteredpt=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4+vhCand.FatH.jets[2].p4).Pt();
                     FatH.filteredeta=(vhCand.FatH.jets[0].p4+vhCand.FatH.jets[1].p4+vhCand.FatH.jets[2].p4).Eta();
@@ -1675,9 +1679,10 @@ int main(int argc, char* argv[])
             
                 // ******************************
                 // added by Nhan
+            
             if(vhCand.FatHFJ3.FatHiggsFJ3Flag) FatHFJ3.FatHiggsFJ3Flag =1; else FatH.FatHiggsFlag=0;
             if(vhCand.FatHFJ3.FatHiggsFJ3Flag){ 
-                
+                                
                 FatHFJ3.p4_px = vhCand.FatHFJ3.p4.Px();
                 FatHFJ3.p4_py = vhCand.FatHFJ3.p4.Py();
                 FatHFJ3.p4_pz = vhCand.FatHFJ3.p4.Pz();
@@ -1697,13 +1702,13 @@ int main(int argc, char* argv[])
                 FatHFJ3.p4_tr_py = vhCand.FatHFJ3.p4_tr.Py();
                 FatHFJ3.p4_tr_pz = vhCand.FatHFJ3.p4_tr.Pz();
                 FatHFJ3.p4_tr_e = vhCand.FatHFJ3.p4_tr.E();                
-
+                
                 FatHFJ3.tau1 = vhCand.FatHFJ3.tau1;
                 FatHFJ3.tau2 = vhCand.FatHFJ3.tau2;
                 FatHFJ3.tau3 = vhCand.FatHFJ3.tau3;
                 FatHFJ3.tau4 = vhCand.FatHFJ3.tau4;
                 FatHFJ3.qjetVol = vhCand.FatHFJ3.qjetVol;
-
+                
                 if (vhCand.FatHFJ3.matchedMDFTCandidate){
                     FatHFJ3.matchedMDFT = 1;
                 }

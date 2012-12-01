@@ -7,9 +7,11 @@ process = cms.Process("FWLitePlots")
 #fileNames   = cms.vstring('file:2l2bMetEdmNtuples.root'),         ## mandatory
 process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(
-
-
-"file:/uscms_data/d2/ntran/physics/VHbb/substructureDev_v2/CMSSW_5_3_3_patch2/src/VHbbAnalysis/HbbAnalyzer/test/PAT.edm.root"      
+#                              "file:/uscms_data/d2/ntran/physics/VHbb/substructureDev_v2/CMSSW_5_3_3_patch2/src/VHbbAnalysis/HbbAnalyzer/test/PAT.edm.root"   
+                              "dcache:///pnfs/cms/WAX/11/store/user/lpchbb/apana/dev/Skim_pT300/Step1/PAT.edm__Higgs_PT300_0.root",
+                              "dcache:///pnfs/cms/WAX/11/store/user/lpchbb/apana/dev/Skim_pT300/Step1/PAT.edm__Higgs_PT300_1.root",
+                              "dcache:///pnfs/cms/WAX/11/store/user/lpchbb/apana/dev/Skim_pT300/Step1/PAT.edm__Higgs_PT300_2.root",
+                              "dcache:///pnfs/cms/WAX/11/store/user/lpchbb/apana/dev/Skim_pT300/Step1/PAT.edm__Higgs_PT300_3.root"                              
 ###"dcache:///pnfs/cms/WAX/11/store/user/lpchbb/msegala/WH_WToLNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_May2012Prod_2/e63abc9239312b3f728ddbd5ef32b303/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm_11_1_oQQ.root" ,
 ##    "../../HbbAnalyzer/test/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm.root",
 #"dcache:///cmsdcache//pnfs/pi.infn.it/data/cms/store/user/tboccali/WH_WToLNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_ProcV1_WH_WToLNu_HToBB_M-120/14fe2b624ddea84f5c39709f51bf546f/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm_51_1_3LJ.root"
@@ -28,7 +30,7 @@ process.fwliteInput = cms.PSet(
     PUdatafileNameMinus = cms.string("data_PU_60bins_190456-202305_66.5mb.root"),
     PUdatafileNamePlus = cms.string("data_PU_60bins_190456-202305_72.4mb.root"),
     Weight3DfileName = cms.string(""),
-    maxEvents   = cms.int32(-1),                             ## optional
+    maxEvents   = cms.int32(1000),                             ## optional
     runMin  = cms.int32(-1),
     runMax  = cms.int32(-1),
     skipEvents   = cms.int32(0),                             ## optional
