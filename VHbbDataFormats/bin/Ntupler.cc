@@ -1624,7 +1624,7 @@ int main(int argc, char* argv[])
                 H.phi = vhCand.H.p4.Phi();
             }
             
-            
+            nfathFilterJets=0;
             if(vhCand.FatH.FatHiggsFlag) FatH.FatHiggsFlag =1; else FatH.FatHiggsFlag=0;
             fathFilterJets.reset();
             aJetsFat.reset();
