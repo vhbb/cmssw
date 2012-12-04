@@ -1,6 +1,11 @@
 import FWCore.ParameterSet.Config as cms
 isMC = True
 
+############################
+doSkim=True  #  set to true to filter on Gen pt (see process.mySkim declaration for current parameters)
+ptcut=100.
+###########################
+
 if isMC == False :
         inputJetCorrLabel = ['L1FastJet','L2Relative', 'L3Absolute', 'L2L3Residual']
 else :
@@ -25,9 +30,11 @@ process.source = cms.Source("PoolSource",
 #"file:/networkdata/arizzi/WH/1ACA8AD2-CBAF-E111-AE17-0017A477002C.root"
 
 #"/store/mc/Summer12_DR53X/WJetsToLNu_PtW-100_TuneZ2star_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/1CEFFE92-22E4-E111-8EFA-00259073E45E.root"
-"/store/mc/Summer12/WH_WToLNu_HToBB_M-125_8TeV-powheg-herwigpp/AODSIM/PU_S7_START52_V9-v1/0000/FC1B8D73-E6B3-E111-B244-0026189438B9.root",
-"/store/mc/Summer12/WH_WToLNu_HToBB_M-125_8TeV-powheg-herwigpp/AODSIM/PU_S7_START52_V9-v1/0000/02BCC7F3-D0B3-E111-85CA-001A92810AC0.root",
-"/store/mc/Summer12/WH_WToLNu_HToBB_M-125_8TeV-powheg-herwigpp/AODSIM/PU_S7_START52_V9-v1/0000/0270C75A-E8B3-E111-9F79-003048678B7C.root",
+# "/store/mc/Summer12/WH_WToLNu_HToBB_M-125_8TeV-powheg-herwigpp/AODSIM/PU_S7_START52_V9-v1/0000/FC1B8D73-E6B3-E111-B244-0026189438B9.root",
+# "/store/mc/Summer12/WH_WToLNu_HToBB_M-125_8TeV-powheg-herwigpp/AODSIM/PU_S7_START52_V9-v1/0000/02BCC7F3-D0B3-E111-85CA-001A92810AC0.root",
+# "/store/mc/Summer12/WH_WToLNu_HToBB_M-125_8TeV-powheg-herwigpp/AODSIM/PU_S7_START52_V9-v1/0000/0270C75A-E8B3-E111-9F79-003048678B7C.root",
+
+"dcache:/pnfs/cms/WAX/11/store/user/lpchbb/apana/dev/Skim_pT300/ZH_ZToLL_HToBB_M-125_8TeV-powheg-herwigpp_Skim_pTH300_1_1_vqK.root"
  )
 )
 ## Maximal Number of Events
@@ -641,9 +648,20 @@ process.common = cms.Sequence(
     process.puJetIdSqeuence *   ### it is not a typo ;-)
     process.HbbAnalyzerNew
 )
+## pt Gen filter
+import VHbbAnalysis.HbbAnalyzer.SkimGen_cfi as MCSkim
+process.mySkim = MCSkim.skim.clone(
+    # genparts=cms.vint32(25), # Higgs
+    genparts=cms.vint32(23,24), # W,Z
+    genpt=cms.double(ptcut),
+    Debug=cms.bool(False)
+    )
 
-if isMC : 
-   process.p = cms.Path(process.gen * process.common)
+if isMC :
+   if doSkim:
+	   process.p = cms.Path(process.mySkim * process.gen * process.common)
+   else:
+	   process.p = cms.Path(process.gen * process.common)
 else :
    process.p = cms.Path(process.common)
  
