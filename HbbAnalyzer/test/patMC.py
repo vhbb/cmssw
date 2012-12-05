@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 isMC = True
 
 ############################
-doSkim=True  #  set to true to filter on Gen pt (see process.mySkim declaration for current parameters)
+doSkim=False  #  set to true to filter on Gen pt (see process.mySkim declaration for current parameters)
 ptcut=100.
 ###########################
 
