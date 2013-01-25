@@ -696,6 +696,7 @@ Effective area, last column matters for us:
   for (unsigned int it = 0; it < muons.size();  ++it){
 float mincor=0.0;
 float minrho=0.0;
+float NoverCh=0.5;
 float rhoN = std::max(aux.puInfo.rhoNeutral,minrho);
 float eta=muons[it].p4.Eta();
 float area=0.5;
@@ -705,7 +706,10 @@ if(fabs(eta)>1.5 && fabs(eta) <= 2.0) {area=0.442;}
 if(fabs(eta)>2.0 && fabs(eta) <= 2.2) {area=0.515;}
 if(fabs(eta)>2.2 && fabs(eta) <= 2.3) {area=0.821;}
 if(fabs(eta)>2.3 && fabs(eta) <= 2.4) {area=0.660;}
-float pfCorrIso = (muons[it].pfChaIso+ std::max(muons[it].pfPhoIso+muons[it].pfNeuIso-rhoN*area,mincor))/muons[it].p4.Pt();
+// EA corrections
+//float pfCorrIso = (muons[it].pfChaIso+ std::max(muons[it].pfPhoIso+muons[it].pfNeuIso-rhoN*area,mincor))/muons[it].p4.Pt();
+// dBeta correction
+float pfCorrIso = (muons[it].pfChaIso+ std::max(muons[it].pfPhoIso+muons[it].pfNeuIso-NoverCh*muons[it].pfChaPUIso,mincor))/muons[it].p4.Pt();
     if (
         muons[it].isPF &&
 	muons[it]. globChi2<10 &&
@@ -772,7 +776,15 @@ float eta=electrons[it].p4.Eta();
 float areagamma=0.5;
 float areaNH=0.5;
 float areaComb=0.5;
-
+// new EA for electrons to use for Moriond 13
+if(fabs(eta) <= 1.0 ) {areaComb=0.21;}
+if(fabs(eta) > 1.0 &&  fabs(eta) <= 1.479 ) {areaComb=0.21;}
+if(fabs(eta) > 1.479 &&  fabs(eta) <= 2.0 ) {areaComb=0.11;}
+if(fabs(eta) > 2.0 &&  fabs(eta) <= 2.2 ) {areaComb=0.14;}
+if(fabs(eta) > 2.2 &&  fabs(eta) <= 2.3 ) {areaComb=0.18;}
+if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areaComb=0.19;}
+if(fabs(eta) > 2.4  ) {areaComb=0.26;}
+/*
 if(fabs(eta) <= 1.0 ) {areagamma=0.14; areaNH=0.044; areaComb=0.18;}
 if(fabs(eta) > 1.0 &&  fabs(eta) <= 1.479 ) {areagamma=0.13; areaNH=0.065; areaComb=0.20;}
 if(fabs(eta) > 1.479 &&  fabs(eta) <= 2.0 ) {areagamma=0.079; areaNH=0.068; areaComb=0.15;}
@@ -780,6 +792,7 @@ if(fabs(eta) > 2.0 &&  fabs(eta) <= 2.2 ) {areagamma=0.13; areaNH=0.057; areaCom
 if(fabs(eta) > 2.2 &&  fabs(eta) <= 2.3 ) {areagamma=0.15; areaNH=0.058; areaComb=0.21;}
 if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areagamma=0.16; areaNH=0.061; areaComb=0.22;}
 if(fabs(eta) > 2.4  ) {areagamma=0.18; areaNH=0.11; areaComb=0.29;}
+*/
 /*
 if(fabs(eta) <= 1.0 ) {areagamma=0.081; areaNH=0.024; areaComb=0.10;}
 if(fabs(eta) > 1.0 &&  fabs(eta) <= 1.479 ) {areagamma=0.084; areaNH=0.037; areaComb=0.12;}
@@ -789,15 +802,16 @@ if(fabs(eta) > 2.2 &&  fabs(eta) <= 2.3 ) {areagamma=0.092; areaNH=0.023; areaCo
 if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areagamma=0.097; areaNH=0.021; areaComb=0.12;}
 if(fabs(eta) > 2.4  ) {areagamma=0.11; areaNH=0.021; areaComb=0.13;}
 */
-
 //Correct electron photon double count
 float pho=electrons[it].pfPhoIso;
 if(electrons[it].innerHits>0) 
 { 
  pho-=electrons[it].pfPhoIsoDoubleCounted;
 }
-
-float pfCorrIso = (electrons[it].pfChaIso+ std::max(pho-rho*areagamma,mincor )+std::max(electrons[it].pfNeuIso-rho*areaNH,mincor))/electrons[it].p4.Pt();
+//HCP 12 
+//float pfCorrIso = (electrons[it].pfChaIso+ std::max(pho-rho*areagamma,mincor )+std::max(electrons[it].pfNeuIso-rho*areaNH,mincor))/electrons[it].p4.Pt();
+// new Moriond 12
+float pfCorrIso = (electrons[it].pfChaIso+ std::max(pho+electrons[it].pfNeuIso-rho*areaComb,mincor))/electrons[it].p4.Pt();
 float iso=pfCorrIso;
 float id=electrons[it].mvaOutTrig;
 bool wp70=((fabs(eta) < 0.8 && id>0.977 && iso < 0.093) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.956 && iso < 0.095) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.966 && iso < 0.171));
