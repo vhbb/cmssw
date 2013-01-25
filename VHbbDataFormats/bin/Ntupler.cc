@@ -981,6 +981,19 @@ int main(int argc, char* argv[])
   _outTree->Branch("fathFilterJets_cosTheta",fathFilterJets.cosTheta ,"cosTheta[nfathFilterJets]/F");
   _outTree->Branch("fathFilterJets_jetArea",fathFilterJets.jetArea ,"jetArea[nfathFilterJets]/F");
 
+  //ccla 25Jan13 
+  _outTree->Branch("fathFilterJets_nconstituents",fathFilterJets.nconstituents ,"nconstituents[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_JECUnc",fathFilterJets.JECUnc ,"JECUnc[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_SoftLeptPt", fathFilterJets.SoftLeptPt , "SoftLeptPt[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_SoftLeptdR", fathFilterJets.SoftLeptdR , "SoftLeptdR[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_SoftLeptptRel", fathFilterJets.SoftLeptptRel , "SoftLeptptRel[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_csv_nominal",fathFilterJets.csv_nominal ,"csv_nominal[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_nhf",fathFilterJets.nhf ,"nhf[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_cef",fathFilterJets.cef ,"cef[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_nef",fathFilterJets.nef ,"nef[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_nch",fathFilterJets.nch ,"nch[nfathFilterJets]/F");
+  _outTree->Branch("fathFilterJets_id",fathFilterJets.id ,"id[nfathFilterJets]/b");
+
   _outTree->Branch("aJet_pt",aJets.pt ,"pt[naJets]/F");
   _outTree->Branch("aJet_eta",aJets.eta ,"eta[naJets]/F");
   _outTree->Branch("aJet_phi",aJets.phi ,"phi[naJets]/F");
@@ -1583,6 +1596,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	H.phi = vhCand.H.p4.Phi();
 	}
 
+	nfathFilterJets=0;
         if(vhCand.FatH.FatHiggsFlag) FatH.FatHiggsFlag =1; else FatH.FatHiggsFlag=0;
         fathFilterJets.reset();
         aJetsFat.reset();
