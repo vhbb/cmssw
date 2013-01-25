@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.78 2012/11/02 15:22:15 bortigno Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.79 2013/01/25 01:56:57 jiafulow Exp $
 //
 //
 
@@ -466,6 +466,17 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   edm::ESHandle<BtagPerformance> mistagSF_CSVT_;
   iSetup.get<BTagPerformanceRecord>().get("MISTAGCSVT",mistagSF_CSVT_);
 
+
+  //ccla moved out to SimpleJets2 loop
+  edm::Handle<edm::View<reco::Candidate> > muonNoCutsHandle;
+  iEvent.getByLabel(muonoCutsLabel_,muonNoCutsHandle);
+  edm::View<reco::Candidate> muonsNoCuts = *muonNoCutsHandle; 
+
+  edm::Handle<edm::View<reco::Candidate> > eleNoCutsHandle;
+  iEvent.getByLabel(elenoCutsLabel_,eleNoCutsHandle);
+  edm::View<reco::Candidate> elesNoCuts = *eleNoCutsHandle; 
+
+
 BTagSFContainer btagSFs;
   btagSFs.BTAGSF_CSVL = (bTagSF_CSVL_.product());
   btagSFs.BTAGSF_CSVM = (bTagSF_CSVM_.product());
@@ -615,6 +626,7 @@ BTagSFContainer btagSFs;
 #endif //ENABLE SIMPLEJETS4
 
 
+
   for(edm::View<pat::Jet>::const_iterator jet_iter = simplejets2.begin(); jet_iter!=simplejets2.end(); ++jet_iter){
     
 
@@ -745,9 +757,6 @@ BTagSFContainer btagSFs;
     }  //isMC
 
         // add flag if a reco lepton is find inside a cone around the jets... 
-    edm::Handle<edm::View<reco::Candidate> > muonNoCutsHandle;
-    iEvent.getByLabel(muonoCutsLabel_,muonNoCutsHandle);
-    edm::View<reco::Candidate> muonsNoCuts = *muonNoCutsHandle; 
     
     
 
@@ -773,12 +782,7 @@ BTagSFContainer btagSFs;
       }
     }
     
-    
-    edm::Handle<edm::View<reco::Candidate> > eleNoCutsHandle;
-      iEvent.getByLabel(elenoCutsLabel_,eleNoCutsHandle);
-      edm::View<reco::Candidate> elesNoCuts = *eleNoCutsHandle; 
- 
-    
+     
 
       for(edm::View<reco::Candidate>::const_iterator ele = elesNoCuts.begin(); ele!=elesNoCuts.end() && sj.isSemiLept!=1; ++ele){
     
@@ -976,6 +980,7 @@ BTagSFContainer btagSFs;
         fillSimpleJet(sj,subjet_iter);
         setJecUnc(sj,jecUnc);
         
+
         if(runOnMC_) {
             // BTV scale factors
             //fillScaleFactors(sj, btagSFs);
@@ -994,6 +999,70 @@ BTagSFContainer btagSFs;
                 sj.bestMCp4 = gJp4;
             }
         }
+
+	//ccla    
+    
+
+	for(edm::View<reco::Candidate>::const_iterator mu = muonsNoCuts.begin(); mu!=muonsNoCuts.end() && sj.isSemiLept!=1; ++mu){
+	  //      std::cout<< "found a muon with pt " << mu->pt()   << std::endl;
+	  const pat::Muon& m = static_cast <const pat::Muon&> (*mu); 
+	  float Smpt = m.pt(); 
+	  float Smeta = m.eta();
+	  float Smphi = m.phi();
+      
+	  float SmJdR = deltaR(Smeta, Smphi, sj.p4.Eta(), sj.p4.Phi());
+      
+	  if   ( Smpt> lep_ptCutForBjets_ && SmJdR <0.5)  {
+	    sj.isSemiLept=1;
+	    //isSemiLept(-99), isSemiLeptMCtruth(-99), SoftLeptPt(-99), SoftLeptdR(-99), SoftLeptptRel(-99), SoftLeptpdgId(-99), SoftLeptIdlooseMu(-99), SoftLeptId95(-99), SoftLeptRelCombIso(-99),  
+	    sj.SoftLeptpdgId =13;
+	    sj.SoftLeptdR= SmJdR;
+	    sj.SoftLeptPt=Smpt;
+	    TVector3 mvec ( m.p4().Vect().X(), m.p4().Vect().Y(), m.p4().Vect().Z()  ); 
+	    sj.SoftLeptptRel=  sj.p4.Perp(  mvec );
+	    sj.SoftLeptRelCombIso = (m.trackIso() + m.ecalIso() + m.hcalIso() ) / Smpt ;
+	    sj.SoftLeptIdlooseMu=m.muonID("TMLastStationLoose");
+	  }
+	}
+    
+    
+	//edm::Handle<edm::View<reco::Candidate> > eleNoCutsHandle;
+	//iEvent.getByLabel(elenoCutsLabel_,eleNoCutsHandle);
+	//edm::View<reco::Candidate> elesNoCuts = *eleNoCutsHandle; 
+ 
+    
+
+	for(edm::View<reco::Candidate>::const_iterator ele = elesNoCuts.begin(); ele!=elesNoCuts.end() && sj.isSemiLept!=1; ++ele){
+    
+	  const pat::Electron& e = static_cast <const pat::Electron&> (*ele); 
+	  float Smpt = e.pt(); 
+	  float Smeta = e.eta();
+	  float Smphi = e.phi();
+       
+	  float SmJdR = deltaR(Smeta, Smphi, sj.p4.Eta(), sj.p4.Phi());
+	  if   ( Smpt> lep_ptCutForBjets_ && SmJdR <0.5)  {
+	    sj.isSemiLept=1;
+	    sj.SoftLeptpdgId =11;
+	    sj.SoftLeptdR= SmJdR;
+	    sj.SoftLeptPt=Smpt;
+	    TVector3 mvec ( e.p4().Vect().X(), e.p4().Vect().Y(), e.p4().Vect().Z()  ); 
+	    sj.SoftLeptptRel=  sj.p4.Perp(  mvec );
+	    sj.SoftLeptRelCombIso = (e.trackIso() + e.ecalIso() + e.hcalIso() ) / Smpt ;
+	    //	 sj.SoftLeptId95=e.electronID("eidVBTFCom95");
+	    //std::cout << "before ele id " << std::endl;      
+	    // std::cout << " e.e.sigmaIetaIeta " << e.sigmaIetaIeta() <<  std::endl;
+	    //std::cout << " e.isEB() " << e.isEB() << std::endl;
+	    if (  
+		( fabs(Smeta)<2.5 && !( abs(Smeta)>1.4442 && abs(Smeta)<1.566))  && 
+              
+		(( abs(Smeta)>1.566  && (e.sigmaIetaIeta()<0.01) && ( e.deltaPhiSuperClusterTrackAtVtx()<0.8  && e.deltaPhiSuperClusterTrackAtVtx()>-0.8) && ( e.deltaEtaSuperClusterTrackAtVtx()<0.007 && e.deltaEtaSuperClusterTrackAtVtx()>-0.007 )  )
+		 || ( abs(Smeta)<1.4442  && (e.sigmaIetaIeta()<0.03) && ( e.deltaPhiSuperClusterTrackAtVtx()<0.7 && e.deltaPhiSuperClusterTrackAtVtx()>-0.7 ) && ( e.deltaEtaSuperClusterTrackAtVtx()<0.01 && e.deltaEtaSuperClusterTrackAtVtx()>-0.01 ) ))
+		  )
+	      sj.SoftLeptId95=1;
+	  }
+	}
+
+
         hbbInfo->filterJets.push_back(sj);
     }
 
