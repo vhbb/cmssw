@@ -1,6 +1,11 @@
 import FWCore.ParameterSet.Config as cms
 isMC = False
 
+# Set doSkimGen to True to filter on Gen pt (see process.mySkim declaration for current parameters)
+doSkimGen = False
+skimgenptcut = 100. 
+
+
 if isMC == False :
         inputJetCorrLabel = ['L1FastJet','L2Relative', 'L3Absolute', 'L2L3Residual']
 else :
@@ -19,20 +24,15 @@ process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
 #"/store/data/Run2012A/DoubleElectron/AOD/PromptReco-v1/000/193/575/D8D5A7EC-EF99-E111-AB1D-003048D2BE12.root",
 #"/store/data/Run2012A/MuHad/AOD/PromptReco-v1/000/193/556/5E52D114-BA99-E111-AF69-5404A63886C1.root"
-##	"/store/data/Run2012A/MultiJet/AOD/PromptReco-v1/000/193/556/D84A9140-AC99-E111-A808-001D09F28D4A.root"
-	
-	#"/store/data/Run2012A/MET/RECO/PromptReco-v1/000/190/782/A2D1E62F-8684-E111-B651-00237DDBE41A.root"
-#"/store/data/Run2012C/SingleMu/AOD/PromptReco-v2/000/200/369/60F3A873-74E2-E111-8A04-003048D37538.root"
-#"/store/data/Run2012C/MET/AOD/PromptReco-v1/000/197/770/6E668370-77C3-E111-991E-BCAEC5364C4C.root"
-	'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/913/4AE2FEC7-78CE-E111-9D10-485B3962633D.root',
-
-
+#"/store/data/Run2012A/MultiJet/AOD/PromptReco-v1/000/193/556/D84A9140-AC99-E111-A808-001D09F28D4A.root"
+#"/store/data/Run2012A/MET/RECO/PromptReco-v1/000/190/782/A2D1E62F-8684-E111-B651-00237DDBE41A.root"
+#"file:/networkdata/arizzi/WH/1ACA8AD2-CBAF-E111-AE17-0017A477002C.root"
+#"/store/mc/Summer12_DR53X/WJetsToLNu_PtW-100_TuneZ2star_8TeV-madgraph/AODSIM/PU_S10_START53_V7A-v1/0000/1CEFFE92-22E4-E111-8EFA-00259073E45E.root"
+'/store/data/Run2012C/MET/AOD/PromptReco-v1/000/198/913/4AE2FEC7-78CE-E111-9D10-485B3962633D.root',
  )
 )
-
-
 ## Maximal Number of Events
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 ## Geometry and Detector Conditions (needed for a few patTuple production steps)
 process.load("Configuration.Geometry.GeometryIdeal_cff")
@@ -131,6 +131,10 @@ process.load("RecoJets.JetProducers.kt4PFJets_cfi")
 process.kt6PFJetsForIsolation = process.kt4PFJets.clone( rParam = 0.6, doRhoFastjet = True )
 process.kt6PFJetsForIsolation.Rho_EtaMax = cms.double(2.5)
 
+# This is only needed if using the obsolete jetTools.py from VHbbAnalysis/additionalFiles
+if not hasattr(process,'kt6PFJets'):
+    setattr(process,'kt6PFJets', process.kt4PFJets.clone(doAreaFastjet=True, doRhoFastjet=True, rParam=0.6))
+
 process.kt6PFJets25 = process.kt4PFJets.clone( src = 'pfNoElectron'+postfix,rParam = 0.6,doRhoFastjet = True,Ghost_EtaMax = 2.5, Rho_EtaMax = 2.5 )
 process.kt6PFJetsCentralNeutral = process.kt6PFJets.clone( src = cms.InputTag("pfAllNeutralHadronsAndPhotons"+postfix), Ghost_EtaMax = cms.double(3.1), Rho_EtaMax = cms.double(2.5), inputEtMin = cms.double(0.5) )
 
@@ -140,33 +144,53 @@ addJetCollection(process,cms.InputTag("ak7PFJets"),"AK7","PF", doJTA=True,doBTag
 
 
 
-##### SUBJET stuff
-process.load("RecoJets.Configuration.GenJetParticles_cff")
-from RecoJets.JetProducers.ca4GenJets_cfi import ca4GenJets
-process.ca4GenJets = ca4GenJets
-process.ca8GenJets = ca4GenJets.clone( rParam = cms.double(0.8) )
-process.load('RecoJets.JetProducers.caSubjetFilterPFJets_cfi')
+# ------------------------------------------------------------------------------
+# Jet Substructure (FastJet 2)
+# ------------------------------------------------------------------------------
+from PhysicsTools.PatAlgos.tools.jetTools import *
+
+#process.load('RecoJets.JetProducers.caSubjetFilterPFJets_cfi')
 from RecoJets.JetProducers.caSubjetFilterPFJets_cfi import caSubjetFilterPFJets
 process.caVHPFJets = caSubjetFilterPFJets.clone(src=cms.InputTag('pfNoElectron'+postfix),useAdjacency = cms.int32(0))
-process.load('RecoJets.JetProducers.caSubjetFilterCaloJets_cfi')
-from RecoJets.JetProducers.caSubjetFilterCaloJets_cfi import caSubjetFilterCaloJets
-process.caVHCaloJets = caSubjetFilterCaloJets.clone(useAdjacency = cms.int32(0))
-process.load('RecoJets.JetProducers.caSubjetFilterGenJets_cfi')
+
+#process.load('RecoJets.JetProducers.caSubjetFilterGenJets_cfi')
 from RecoJets.JetProducers.caSubjetFilterGenJets_cfi import caSubjetFilterGenJets
 process.caVHGenJets = caSubjetFilterGenJets.clone()
 
-from PhysicsTools.PatAlgos.tools.jetTools import *
-#calo subjets in pat
-#addJetCollection(process, cms.InputTag('caVHCaloJets:fat'),"CAVHFat","Calo",doJTA=True,doBTagging=True, jetCorrLabel=('AK5Calo', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
-#addJetCollection(process, cms.InputTag('caVHCaloJets:sub'),"CAVHSub","Calo",doJTA=True,doBTagging=True, jetCorrLabel=('AK5Calo', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
-#addJetCollection(process, cms.InputTag('caVHCaloJets:filter'),"CAVHFilter","Calo",doJTA=True,doBTagging=True, jetCorrLabel=('AK5Calo', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
-addJetCollection(process, cms.InputTag('caVHPFJets:fat'),"CAVHFat","PF",doJTA=True,doBTagging=True, jetCorrLabel=('AK5PF', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
-if isMC :
-   addJetCollection(process, cms.InputTag('caVHPFJets:sub'),"CAVHSub","PF",doJTA=True,doBTagging=True, jetCorrLabel=('AK5PF', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False, genJetCollection=cms.InputTag('caVHGenJets',"sub"))
-   addJetCollection(process, cms.InputTag('caVHPFJets:filter'),"CAVHFilter","PF",doJTA=True,doBTagging=True, jetCorrLabel=('AK5PF', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False, genJetCollection=cms.InputTag('caVHGenJets',"filter"))
-else :
-   addJetCollection(process, cms.InputTag('caVHPFJets:sub'),"CAVHSub","PF",doJTA=True,doBTagging=True, jetCorrLabel=('AK5PF', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
-   addJetCollection(process, cms.InputTag('caVHPFJets:filter'),"CAVHFilter","PF",doJTA=True,doBTagging=True, jetCorrLabel=('AK5PF', inputJetCorrLabel),doType1MET=False, doL1Cleaning=False, doL1Counters=False,doJetID=False)
+addJetCollection(process, cms.InputTag("caVHPFJets:fat"),
+    "CAVHFat", "PF",
+    doJTA            = True,
+    doBTagging       = True,
+    jetCorrLabel     = ("AK5PF", inputJetCorrLabel),
+    doType1MET       = False,
+    doL1Cleaning     = False,
+    doL1Counters     = False,
+    doJetID          = False,
+    )
+
+addJetCollection(process, cms.InputTag("caVHPFJets:sub"),
+    "CAVHSub", "PF",
+    doJTA            = True,
+    doBTagging       = True,
+    jetCorrLabel     = ("AK5PF", inputJetCorrLabel),
+    doType1MET       = False,
+    doL1Cleaning     = False,
+    doL1Counters     = False,
+    genJetCollection = (cms.InputTag("caVHGenJets:sub") if isMC else None),
+    doJetID          = False,
+    )
+
+addJetCollection(process, cms.InputTag("caVHPFJets:filter"),
+    "CAVHFilter","PF",
+    doJTA            = True,
+    doBTagging       = True,
+    jetCorrLabel     = ("AK5PF", inputJetCorrLabel),
+    doType1MET       = False,
+    doL1Cleaning     = False,
+    doL1Counters     = False,
+    genJetCollection = (cms.InputTag("caVHGenJets:filter") if isMC else None),
+    doJetID          = False,
+    )
 
 # Place appropriate jet cuts (NB: no cut on number of constituents)
 defaultJetCut = cms.string('pt > 15. & abs(eta) < 5.0')
@@ -178,12 +202,133 @@ process.selectedPatJetsCAVHFatPF.cut = defaultFatJetCut
 process.selectedPatJetsCAVHSubPF.cut = cms.string('pt > 15. & abs(eta) < 5.0')
 process.selectedPatJetsCAVHFilterPF.cut = cms.string('pt > 5. & abs(eta) < 5.0')
 
+# ------------------------------------------------------------------------------
+# Jet Substructure (FastJet 3)
+# ------------------------------------------------------------------------------
+from RecoJets.JetProducers.ca4GenJets_cfi import ca4GenJets
+from RecoJets.JetProducers.ca4PFJets_cfi import ca4PFJets
+
+from RecoJets.JetProducers.ak5PFJetsPruned_cfi import ak5PFJetsPruned
+ak5PrunedPFlow = ak5PFJetsPruned.clone(doAreaFastjet = cms.bool(True))
+
+from RecoJets.JetProducers.ak5PFJetsFiltered_cfi import ak5PFJetsFiltered
+ak5FilteredPFlow = ak5PFJetsFiltered.clone(doAreaFastjet = cms.bool(True))
+
+from RecoJets.JetProducers.ak5PFJetsFiltered_cfi import ak5PFJetsMassDropFiltered
+ak5MassDropFilteredPFlow = ak5PFJetsMassDropFiltered.clone(doAreaFastjet = cms.bool(True))
+
+#process.ca12GenJetsNoNu = ca4GenJets.clone( rParam = cms.double(1.2),src = cms.InputTag("genParticlesForJetsNoNu"))
+process.ca12GenJets = ca4GenJets.clone( rParam = cms.double(1.2),src = cms.InputTag("genParticlesForJets"))
+process.ca12PFJetsPFlow = ca4PFJets.clone(
+    rParam = cms.double(1.2),
+    src = cms.InputTag('pfNoElectron'+postfix),
+    doAreaFastjet = cms.bool(True),
+    doRhoFastjet = cms.bool(True),
+    Rho_EtaMax = cms.double(6.0),
+    Ghost_EtaMax = cms.double(7.0)
+    )
+## this thing produces subjets by default
+process.ca12PFJetsPrunedPFlow = ak5PrunedPFlow.clone(
+    src = cms.InputTag('pfNoElectron'+postfix),
+    doAreaFastjet = cms.bool(True),
+    rParam = cms.double(1.2),    
+    jetAlgorithm = cms.string("CambridgeAachen"),
+    #writeCompound = cms.bool(True), # this is used by default
+    #jetCollInstanceName = cms.string("SubJets"), # this is used by default
+    )
+## this thing produces subjets by default
+process.ca12PFJetsFilteredPFlow = ak5FilteredPFlow.clone(
+    src = cms.InputTag('pfNoElectron'+postfix),
+    doAreaFastjet = cms.bool(True),
+    rParam = cms.double(1.2),
+    jetAlgorithm = cms.string("CambridgeAachen"),
+    )
+## this thing produces subjets by default
+process.ca12PFJetsMassDropFilteredPFlow = ak5MassDropFilteredPFlow.clone(
+    src = cms.InputTag('pfNoElectron'+postfix),
+    doAreaFastjet = cms.bool(True),
+    rParam = cms.double(1.2),
+    jetAlgorithm = cms.string("CambridgeAachen"),
+    )
+
+addJetCollection(process,
+    cms.InputTag('ca12PFJetsPFlow'), # Jet collection; must be already in the event when patLayer0 sequence is executed
+    'CA12', 'PF',
+    doJTA=True, # Run Jet-Track association & JetCharge
+    doBTagging=True, # Run b-tagging
+    jetCorrLabel=None,
+    doType1MET=True,
+    doL1Cleaning=False,
+    doL1Counters=False,
+    genJetCollection = (cms.InputTag("ca12GenJets") if isMC else None),
+    doJetID = False
+    )
+
+addJetCollection(process, 
+    cms.InputTag('ca12PFJetsMassDropFilteredPFlow'), # Jet collection; must be already in the event when patLayer0 sequence is executed
+    'CA12MassDropFiltered', 'PF',
+    doJTA=True, # Run Jet-Track association & JetCharge
+    doBTagging=False, # Run b-tagging
+    jetCorrLabel=None,
+    doType1MET=True,
+    doL1Cleaning=False,
+    doL1Counters=False,
+    #genJetCollection = cms.InputTag("ak5GenJetsNoNu"),
+    doJetID = False
+    )
+
+## adding the subjet collections which are b-tagged...
+addJetCollection(process, 
+    cms.InputTag('ca12PFJetsMassDropFilteredPFlow', 'SubJets'), # Jet collection; must be already in the event when patLayer0 sequence is executed
+    'CA12MassDropFilteredSubjets', 'PF',
+    doJTA=True, # Run Jet-Track association & JetCharge
+    doBTagging=True, # Run b-tagging
+    jetCorrLabel=( 'AK5PF', inputJetCorrLabel ),
+    doType1MET=True,
+    doL1Cleaning=False,
+    doL1Counters=False,
+    #genJetCollection = cms.InputTag("ak5GenJetsNoNu"),
+    doJetID = False
+    )
+
+addJetCollection(process, 
+    cms.InputTag('ca12PFJetsFilteredPFlow', 'SubJets'), # Jet collection; must be already in the event when patLayer0 sequence is executed
+    'CA12FilteredSubjets', 'PF',
+    doJTA=True, # Run Jet-Track association & JetCharge
+    doBTagging=True, # Run b-tagging
+    jetCorrLabel=( 'AK5PF', inputJetCorrLabel ),
+    doType1MET=True,
+    doL1Cleaning=False,
+    doL1Counters=False,
+    #genJetCollection = cms.InputTag("ak5GenJetsNoNu"),
+    doJetID = False
+    )
+
+addJetCollection(process, 
+    cms.InputTag('ca12PFJetsPrunedPFlow', 'SubJets'), # Jet collection; must be already in the event when patLayer0 sequence is executed
+    'CA12PrunedSubjets', 'PF',
+    doJTA=True, # Run Jet-Track association & JetCharge
+    doBTagging=True, # Run b-tagging
+    jetCorrLabel=( 'AK5PF', inputJetCorrLabel ),
+    doType1MET=True,
+    doL1Cleaning=False,
+    doL1Counters=False,
+    #genJetCollection = cms.InputTag("ak5GenJetsNoNu"),
+    doJetID = False
+    )
+
+jetCutCA12    = 'pt > 100.'
+subjetCutCA12 = 'pt > 5.'
+process.selectedPatJetsCA12PF.cut = jetCutCA12
+process.selectedPatJetsCA12MassDropFilteredPF.cut = jetCutCA12
+process.selectedPatJetsCA12MassDropFilteredSubjetsPF.cut = subjetCutCA12
+process.selectedPatJetsCA12FilteredSubjetsPF.cut = subjetCutCA12
+process.selectedPatJetsCA12PrunedSubjetsPF.cut = subjetCutCA12
+
+
 #load btag SF 
 process.load ("RecoBTag.PerformanceDB.PoolBTagPerformanceDB1107")
 process.load ("RecoBTag.PerformanceDB.BTagPerformanceDB1107")
-
-
-
 
 
 #do cleaning only against isolatted and ID'ed leptons (TODO: review the electron selection)
@@ -455,7 +600,7 @@ process.bhadrons = cms.EDProducer('MCBHadronProducer',
                                  quarkId = cms.uint32(5)
                                  )
 
-process.gen = cms.Sequence(  process.genParticlesForJets* process.caVHGenJets * process.bhadrons * process.savedGenParticles)
+process.gen = cms.Sequence(  process.genParticlesForJets* process.caVHGenJets * process.ca12GenJets * process.bhadrons * process.savedGenParticles)
 from PhysicsTools.SelectorUtils.pvSelector_cfi import pvSelector
 process.goodOfflinePrimaryVertices = cms.EDFilter(
     "PrimaryVertexObjectFilter",
@@ -475,11 +620,14 @@ process.common = cms.Sequence(
     process.kt6PFJetsForIsolation *
     process.kt6PFJets25*
     process.ak7PFJets*
-    process.caVHCaloJets*
     process.caVHPFJets*
+    process.ca12PFJetsPFlow*
+    process.ca12PFJetsPrunedPFlow*
+    process.ca12PFJetsFilteredPFlow*
+    process.ca12PFJetsMassDropFilteredPFlow*
     process.mvaID *
     process.patDefaultSequence*
-   process.patMETsHT*
+    process.patMETsHT*
     process.patPFMetNoPU *
 #                    process.patType1CorrectedPFMetNoPU *
 #                    process.patType1p2CorrectedPFMetNoPU *
@@ -491,13 +639,26 @@ process.common = cms.Sequence(
     process.HbbAnalyzerNew
 )
 
-if isMC : 
-   process.p = cms.Path(process.gen * process.common)
-else :
-   process.p = cms.Path(process.common)
+## pt Gen filter
+#from VHbbAnalysis.HbbAnalyzer.SkimGen_cfi import skim
+#process.skimgen = skim.clone(
+#    # genparts=cms.vint32(25), # Higgs
+#    genparts=cms.vint32(23,24), # W,Z
+#    genpt=cms.double(skimgenptcut),
+#    Debug=cms.bool(False)
+#    )
 
-########## Hbb specific finishes here #######################################
+if isMC:
+    if doSkimGen:
+        process.p = cms.Path(process.gen * process.common)
+        #process.p = cms.Path(process.skimgen * process.gen * process.common)
+    else:
+        process.p = cms.Path(process.gen * process.common)
+else:
+   process.p = cms.Path(process.common)
  
+########## Hbb specific finishes here #######################################
+   
 ############# MET Filter flags
 ### from http://cmssw.cvs.cern.ch/cgi-bin/cmssw.cgi/CMSSW/RecoMET/METFilters/test/exampleICHEPrecommendation_cfg.py?revision=1.1&view=markup&pathrev=V00-00-08
 ## The good primary vertex filter ____________________________________________||
@@ -554,6 +715,7 @@ process.hcallaserFilter=cms.Path(process.hcalLaserEventFilter)
 process.trackingfailureFilter = cms.Path(    process.goodVertices * process.trackingFailureFilter )
 process.eebadscFilter= cms.Path(  process.eeBadScFilter)  					      
 ##### END of filters required by JETMET for  MET analysis 
+
 
 
 
