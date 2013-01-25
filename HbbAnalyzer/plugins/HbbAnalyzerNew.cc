@@ -13,7 +13,7 @@ Implementation:
 //
 // Original Author:  David Lopes Pegna,Address unknown,NONE,
 //         Created:  Thu Mar  5 13:51:28 EST 2009
-// $Id: HbbAnalyzerNew.cc,v 1.77 2012/08/27 21:34:22 dlopes Exp $
+// $Id: HbbAnalyzerNew.cc,v 1.78 2012/11/02 15:22:15 bortigno Exp $
 //
 //
 
@@ -401,9 +401,9 @@ HbbAnalyzerNew::produce(edm::Event& iEvent, const edm::EventSetup& iSetup){
   edm::View<pat::Muon> muons = *muonHandle;
 
   // hard jet   
-  edm::Handle<edm::View<pat::Jet> > jetHandle;
-  iEvent.getByLabel(jetLabel_,jetHandle);
-  edm::View<pat::Jet> jets = *jetHandle;
+  edm::Handle<edm::View<pat::Jet> > fatjetHandle;
+  iEvent.getByLabel(jetLabel_,fatjetHandle);
+  edm::View<pat::Jet> fatjets = *fatjetHandle;
 
   // sub jet   
   edm::Handle<edm::View<pat::Jet> > subjetHandle;
@@ -832,134 +832,170 @@ BTagSFContainer btagSFs;
        }
   */
    
+    // S U B S T R U C T U R E
+    // (FastJet3)
+    edm::Handle<edm::View<pat::Jet> > ca12jetHandle;
+    iEvent.getByLabel("selectedPatJetsCA12PF",ca12jetHandle);
+    edm::View<pat::Jet> ca12jets = *ca12jetHandle;
+    edm::Handle<edm::View<pat::Jet> > camdft12jetHandle;
+    iEvent.getByLabel("selectedPatJetsCA12MassDropFilteredPF",camdft12jetHandle);
+    edm::View<pat::Jet> camdft12jets = *camdft12jetHandle;
 
+    edm::Handle<edm::View<pat::Jet> > camdft12subjetHandle;
+    iEvent.getByLabel("selectedPatJetsCA12MassDropFilteredSubjetsPF",camdft12subjetHandle);
+    edm::View<pat::Jet> camdft12subjets = *camdft12subjetHandle;
+    edm::Handle<edm::View<pat::Jet> > caft12subjetHandle;
+    iEvent.getByLabel("selectedPatJetsCA12FilteredSubjetsPF",caft12subjetHandle);
+    edm::View<pat::Jet> caft12subjets = *caft12subjetHandle;
+    edm::Handle<edm::View<pat::Jet> > capr12subjetHandle;
+    iEvent.getByLabel("selectedPatJetsCA12PrunedSubjetsPF",capr12subjetHandle);
+    edm::View<pat::Jet> capr12subjets = *capr12subjetHandle;
 
-  /////// hard jet
-
-  
-  double matEta[1000*30],matPhi[1000*30];
-  for(int i=0;i<1000;i++){for(int j=0;j<30;j++){matEta[i*j]=-99.;matPhi[i*j]=-99.;}}
-
-  for(edm::View<pat::Jet>::const_iterator jet_iter = jets.begin(); jet_iter!=jets.end(); ++jet_iter){
-    
-    if(printJet) {std::cout << "Jet Pt: " << jet_iter->pt() << " E,M: " << jet_iter->p4().E() << " " << jet_iter->p4().M() << "\n";} 
-    
-    reco::Jet::Constituents constituents = jet_iter->getJetConstituents();
-    
-    //    if(printJet) {std::cout << "NsubJets: " << constituents.size() << "\n";} 
-    VHbbEvent::HardJet hj;
-    hj.constituents=constituents.size();
-    hj.p4 =GENPTOLORP(jet_iter);
-    
-    for (unsigned int iJC(0); iJC<constituents.size(); ++iJC ){
-      Jet::Constituent icandJet = constituents[iJC];
-
-      if(printJet) {std::cout << "subJet Pt: " << icandJet->pt() << " subJet E,M,eta,phi: " <<  icandJet->p4().E() << "," 
-			      << icandJet->p4().M() << "," << icandJet->eta() << "," << icandJet->phi() << "\n"; } 
-
-
-      hj.subFourMomentum.push_back(GENPTOLORP(icandJet));
-      hj.etaSub.push_back(icandJet->eta());
-      hj.phiSub.push_back(icandJet->phi());
-     
-    }
-    hbbInfo->hardJets.push_back(hj);
-  }
-    
-  //  HardJetSubEta2.SetMatrixArray(matEta);
-  //  HardJetSubPhi2.SetMatrixArray(matPhi);
-  //  TMatrixDRow a1(HardJetSubEta2,0);
-  //  for(int i=0;i<30;i++){
-  //   std::cout << "test: " << a1[i] << "\n";  
-  //  }
-
-  // pat subJets with Btag
-
-
-  for(edm::View<pat::Jet>::const_iterator subjet_iter = subjets.begin(); subjet_iter!=subjets.end(); ++subjet_iter){
-
-    if(printJet) {std::cout << "SubJetTagged Pt: " << subjet_iter->pt() << " E,M,eta,phi,Btag: " << subjet_iter->p4().E() 
-			    << "," << subjet_iter->p4().M() << "," << subjet_iter->eta() << "," << subjet_iter->phi()  
-			    << "," << subjet_iter->bDiscriminator("combinedSecondaryVertexBJetTags") << "\n";}
-
-    VHbbEvent::SimpleJet sj;
-    //    std::cout <<" sub jet "<<std::endl;
-    fillSimpleJet(sj,subjet_iter);
-    //  if(!runOnMC_)  
-    setJecUnc(sj,jecUnc);
-    /*    sj.flavour = subjet_iter->partonFlavour();
-    sj.tVector = getTvect(&(*subjet_iter));
-    sj.tche=subjet_iter->bDiscriminator("trackCountingHighEffBJetTags");
-    sj.tchp=subjet_iter->bDiscriminator("trackCountingHighPurBJetTags");
-    sj.jp=subjet_iter->bDiscriminator("jetProbabilityBJetTags");
-    sj.jpb=subjet_iter->bDiscriminator("jetBProbabilityBJetTags");
-    sj.ssvhe=subjet_iter->bDiscriminator("simpleSecondaryVertexHighEffBJetTags");
-    sj.csv=subjet_iter->bDiscriminator("combinedSecondaryVertexBJetTags");
-    sj.csvmva=subjet_iter->bDiscriminator("combinedSecondaryVertexMVABJetTags");
-    sj.charge=subjet_iter->jetCharge();
-    sj.ntracks=subjet_iter->associatedTracks().size();
-    sj.p4=GENPTOLORP(subjet_iter);
-    sj.p4=(getChargedTracksMomentum(&*(subjet_iter)));
-
-    //
-    // addtaginfo for csv
-    //
-
-    if (subjet_iter->hasTagInfo("SimpleSecondaryVertex")) {
-
-      const reco::SecondaryVertexTagInfo * tf = subjet_iter->tagInfoSecondaryVertex();
-      sj.vtxMass = tf->secondaryVertex(0).p4().mass();
-      sj.vtxNTracks = tf->secondaryVertex(0).nTracks();
-      Measurement1D m = tf->flightDistance(0);
-      sj.vtx3dL = m.value();
-      sj.vtx3deL = m.error();
-    }
-    */
-    hbbInfo->subJets.push_back(sj);
-
-  }
-
-  for(edm::View<pat::Jet>::const_iterator filterjet_iter = filterjets.begin(); filterjet_iter!=filterjets.end(); ++filterjet_iter){
- 
-    if(printJet) {std::cout << "FilterjetTagged Pt: " << filterjet_iter->pt() << " E,M,eta,phi,Btag: " << filterjet_iter->p4().E()  << "," << filterjet_iter->p4().M() << "," << filterjet_iter->eta() << "," << filterjet_iter->phi()  << "," << filterjet_iter->bDiscriminator("combinedSecondaryVertexBJetTags") << "\n";}
- 
-    VHbbEvent::SimpleJet fj;
-    //    std::cout <<" sub jet "<<std::endl;
-    fillSimpleJet(fj,filterjet_iter);
-    //  if(!runOnMC_)  
-    setJecUnc(fj,jecUnc);
-
-    if(runOnMC_){
-
-      //BTV scale factors
-     // fillScaleFactors(sj, btagSFs);
-
-      //PAT genJet matching
-      //genJet
-      const reco::GenJet *gJ = filterjet_iter->genJet();
-      //physical parton for mother info ONLY
-      if( (filterjet_iter->genParton()) ){
-        fj.bestMCid = filterjet_iter->genParton()->pdgId();
-        if( (filterjet_iter->genParton()->mother()) )
-          fj.bestMCmomid=filterjet_iter->genParton()->mother()->pdgId();
-      }
-      TLorentzVector gJp4;
-      if(gJ){
-        gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
-        fj.bestMCp4 = gJp4;
-        if(verbose_){
-          std::clog << "filter genJet matched Pt = " << gJp4.Pt() << std::endl;
-          std::clog << "filter genJet matched eta = " << gJp4.Eta() << std::endl;
-          std::clog << "filter genJet matched deltaR = " << gJp4.DeltaR(fj.p4) << std::endl;
-          std::clog << "filter genJet matched mother id = " << fj.bestMCmomid << std::endl;
+    // C A 1 2   R A W   J E T S
+    //std::cout << "Fill CA12 Raw jet!" << std::endl;
+    for(edm::View<pat::Jet>::const_iterator jet_iter = ca12jets.begin(); jet_iter!=ca12jets.end(); ++jet_iter){
+        const std::vector<reco::PFCandidatePtr>& constituents = jet_iter->getPFConstituents();
+        //std::cout << "size: " << constituents.size() << std::endl;
+        VHbbEvent::RawJet rj;
+        rj.p4 = GENPTOLORP(jet_iter);
+        rj.Nconstituents = constituents.size();
+        for (unsigned int iJC=0; iJC<constituents.size(); ++iJC) {
+            rj.constituents_px.push_back( constituents.at(iJC)->px() );
+            rj.constituents_py.push_back( constituents.at(iJC)->py() );
+            rj.constituents_pz.push_back( constituents.at(iJC)->pz() );
+            rj.constituents_e.push_back( constituents.at(iJC)->energy() );
+            rj.constituents_pdgId.push_back( constituents.at(iJC)->pdgId() );
         }
-      }
+        
+        if (jet_iter->genJet()){
+            const std::vector <const reco::GenParticle*>& genconstituents = jet_iter->genJet()->getGenConstituents();
+            rj.genP4 = GENPTOLORP(jet_iter->genJet());
+            rj.Ngenconstituents = genconstituents.size();
+            for (unsigned int iJC=0; iJC<genconstituents.size(); ++iJC) {
+                rj.genconstituents_px.push_back( genconstituents.at(iJC)->px() );
+                rj.genconstituents_py.push_back( genconstituents.at(iJC)->py() );
+                rj.genconstituents_pz.push_back( genconstituents.at(iJC)->pz() );
+                rj.genconstituents_e.push_back( genconstituents.at(iJC)->energy() );
+                rj.genconstituents_pdgId.push_back( genconstituents.at(iJC)->pdgId() );
+            }
+        }
+        hbbInfo->CA12_rawJets.push_back(rj);
+    }
+    
+    // C A 1 2   M A S S D R O P / F I L T E R E D   J E T S
+    //std::cout << "Fill CA12 MDFT jet!" << std::endl;
+    for(edm::View<pat::Jet>::const_iterator jet_iter = camdft12jets.begin(); jet_iter!=camdft12jets.end(); ++jet_iter){
+        if(printJet) {std::cout << "Jet Pt: " << jet_iter->pt() << " E,M: " << jet_iter->p4().E() << " " << jet_iter->p4().M() << "\n";}
+        const reco::Jet::Constituents& constituents = jet_iter->getJetConstituents();
+        //std::cout << "size: " << constituents.size() << std::endl;
+        VHbbEvent::HardJet hj;
+        hj.p4 = GENPTOLORP(jet_iter);
+        hj.constituents = constituents.size();
+        
+        for (unsigned int iJC=0; iJC<constituents.size(); ++iJC) {
+            const reco::Jet::Constituent& icandJet = constituents.at(iJC);
+            if(printJet) {std::cout << "subJet Pt: " << icandJet->pt() << " subJet E,M,eta,phi: " <<  icandJet->p4().E() << "," << icandJet->p4().M() << "," << icandJet->eta() << "," << icandJet->phi() << "\n"; } 
+            hj.subFourMomentum.push_back(GENPTOLORP(icandJet));
+            hj.etaSub.push_back(icandJet->eta());
+            hj.phiSub.push_back(icandJet->phi());
+        }
+        hbbInfo->CA12mdft_hardJets.push_back(hj);
+    }
+    
+    // C A 1 2   M A S S D R O P / F I L T E R E D   S U B J E T S
+    //std::cout << "Fill CA12 MDFT subjet!" << std::endl;    
+    for(edm::View<pat::Jet>::const_iterator subjet_iter = camdft12subjets.begin(); subjet_iter!=camdft12subjets.end(); ++subjet_iter) {
+        VHbbEvent::SimpleJet sj;
+        fillSimpleJet(sj,subjet_iter);
+        //setJecUnc(sj,jecUnc);
+        hbbInfo->CA12mdft_subJets.push_back(sj);
+    }
+    
+    // C A 1 2   F I L T E R E D   S U B J E T S
+    //std::cout << "Fill CA12 FT subjet!" << std::endl;    
+    for(edm::View<pat::Jet>::const_iterator subjet_iter = caft12subjets.begin(); subjet_iter!=caft12subjets.end(); ++subjet_iter) {
+        VHbbEvent::SimpleJet sj;
+        fillSimpleJet(sj,subjet_iter);
+        //setJecUnc(sj,jecUnc);
+        hbbInfo->CA12ft_subJets.push_back(sj);
+    }
+    
+    // C A 1 2   P R U N E D   S U B J E T S
+    //std::cout << "Fill CA12 PR subjet!" << std::endl;    
+    for(edm::View<pat::Jet>::const_iterator subjet_iter = capr12subjets.begin(); subjet_iter!=capr12subjets.end(); ++subjet_iter) {
+        VHbbEvent::SimpleJet sj;
+        fillSimpleJet(sj,subjet_iter);
+        //setJecUnc(sj,jecUnc);
+        hbbInfo->CA12pr_subJets.push_back(sj);
     }
 
-    hbbInfo->filterJets.push_back(fj);
-    
+    // S U B S T R U C T U R E
+    // (FastJet2)
+    for(edm::View<pat::Jet>::const_iterator jet_iter = fatjets.begin(); jet_iter!=fatjets.end(); ++jet_iter){
+        if(printJet) {std::cout << "Jet Pt: " << jet_iter->pt() << " E,M: " << jet_iter->p4().E() << " " << jet_iter->p4().M() << "\n";}
+        const reco::Jet::Constituents& constituents = jet_iter->getJetConstituents();
+        //std::cout << "size: " << constituents.size() << std::endl;
+        VHbbEvent::HardJet hj;
+        hj.p4 = GENPTOLORP(jet_iter);
+        hj.constituents=constituents.size();
+        
+        for (unsigned int iJC=0; iJC<constituents.size(); ++iJC ){
+            const Jet::Constituent& icandJet = constituents.at(iJC);
+            if(printJet) {std::cout << "subJet Pt: " << icandJet->pt() << " subJet E,M,eta,phi: " <<  icandJet->p4().E() << "," << icandJet->p4().M() << "," << icandJet->eta() << "," << icandJet->phi() << "\n"; } 
+            hj.subFourMomentum.push_back(GENPTOLORP(icandJet));
+            hj.etaSub.push_back(icandJet->eta());
+            hj.phiSub.push_back(icandJet->phi());
+        }
+        hbbInfo->hardJets.push_back(hj);
+    }
 
-  }
+    //double matEta[1000*30],matPhi[1000*30];
+    //for(int i=0;i<1000;i++){for(int j=0;j<30;j++){matEta[i*j]=-99.;matPhi[i*j]=-99.;}}
+    //HardJetSubEta2.SetMatrixArray(matEta);
+    //HardJetSubPhi2.SetMatrixArray(matPhi);
+    //TMatrixDRow a1(HardJetSubEta2,0);
+    //for(int i=0;i<30;i++){
+    //  std::cout << "test: " << a1[i] << "\n";  
+    //}
+
+    for(edm::View<pat::Jet>::const_iterator subjet_iter = subjets.begin(); subjet_iter!=subjets.end(); ++subjet_iter) {
+        if(printJet) {std::cout << "SubJetTagged Pt: " << subjet_iter->pt() << " E,M,eta,phi,Btag: " << subjet_iter->p4().E() 
+            << "," << subjet_iter->p4().M() << "," << subjet_iter->eta() << "," << subjet_iter->phi() 
+            << "," << subjet_iter->bDiscriminator("combinedSecondaryVertexBJetTags") << "\n";}
+        VHbbEvent::SimpleJet sj;
+        fillSimpleJet(sj,subjet_iter);
+        setJecUnc(sj,jecUnc);
+        hbbInfo->subJets.push_back(sj);
+    }
+
+    for(edm::View<pat::Jet>::const_iterator subjet_iter = filterjets.begin(); subjet_iter!=filterjets.end(); ++subjet_iter) {
+        if(printJet) {std::cout << "FilterjetTagged Pt: " << subjet_iter->pt() << " E,M,eta,phi,Btag: " << subjet_iter->p4().E() 
+            << "," << subjet_iter->p4().M() << "," << subjet_iter->eta() << "," << subjet_iter->phi() 
+            << "," << subjet_iter->bDiscriminator("combinedSecondaryVertexBJetTags") << "\n";}
+        VHbbEvent::SimpleJet sj;
+        fillSimpleJet(sj,subjet_iter);
+        setJecUnc(sj,jecUnc);
+        
+        if(runOnMC_) {
+            // BTV scale factors
+            //fillScaleFactors(sj, btagSFs);
+
+            // physical parton for mother info ONLY
+            if( (subjet_iter->genParton()) ) {
+                sj.bestMCid = subjet_iter->genParton()->pdgId();
+                if( (subjet_iter->genParton()->mother()) )
+                    sj.bestMCmomid=subjet_iter->genParton()->mother()->pdgId();
+            }
+            // genJet
+            const reco::GenJet * gJ = subjet_iter->genJet();
+            TLorentzVector gJp4;
+            if(gJ) {
+                gJp4.SetPtEtaPhiE(gJ->pt(),gJ->eta(),gJ->phi(),gJ->energy());
+                sj.bestMCp4 = gJp4;
+            }
+        }
+        hbbInfo->filterJets.push_back(sj);
+    }
 
   //
   // add charged met
