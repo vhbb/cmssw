@@ -361,6 +361,15 @@ float areagamma=0.5;
 float areaNH=0.5;
 float areaComb=0.5;
 
+ // new EA for electrons to use for Moriond 13
+ if(fabs(eta) <= 1.0 ) {areaComb=0.21;}
+ if(fabs(eta) > 1.0 &&  fabs(eta) <= 1.479 ) {areaComb=0.21;}
+ if(fabs(eta) > 1.479 &&  fabs(eta) <= 2.0 ) {areaComb=0.11;}
+ if(fabs(eta) > 2.0 &&  fabs(eta) <= 2.2 ) {areaComb=0.14;}
+ if(fabs(eta) > 2.2 &&  fabs(eta) <= 2.3 ) {areaComb=0.18;}
+ if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areaComb=0.19;}
+ if(fabs(eta) > 2.4  ) {areaComb=0.26;}
+/*
 	   if(fabs(eta) <= 1.0 ) {areagamma=0.14; areaNH=0.044; areaComb=0.18;}
  	   if(fabs(eta) > 1.0 &&  fabs(eta) <= 1.479 ) {areagamma=0.13; areaNH=0.065; areaComb=0.20;}
  	   if(fabs(eta) > 1.479 &&  fabs(eta) <= 2.0 ) {areagamma=0.079; areaNH=0.068; areaComb=0.15;}
@@ -368,6 +377,7 @@ float areaComb=0.5;
  	   if(fabs(eta) > 2.2 &&  fabs(eta) <= 2.3 ) {areagamma=0.15; areaNH=0.058; areaComb=0.21;}
  	   if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areagamma=0.16; areaNH=0.061; areaComb=0.22;}
  	   if(fabs(eta) > 2.4  ) {areagamma=0.18; areaNH=0.11; areaComb=0.29;}
+*/
 /*
 if(fabs(eta) <= 1.0 ) {areagamma=0.081; areaNH=0.024; areaComb=0.10;}
 if(fabs(eta) > 1.0 &&  fabs(eta) <= 1.479 ) {areagamma=0.084; areaNH=0.037; areaComb=0.12;}
@@ -384,7 +394,9 @@ if(i.innerHits>0)
  pho-=i.pfPhoIsoDoubleCounted;
 }
 
-pfCorrIso[j] = (i.pfChaIso+ std::max(pho-rho*areagamma,mincor )+std::max(i.pfNeuIso-rho*areaNH,mincor))/i.p4.Pt();
+//pfCorrIso[j] = (i.pfChaIso+ std::max(pho-rho*areagamma,mincor )+std::max(i.pfNeuIso-rho*areaNH,mincor))/i.p4.Pt(); 
+// new definition for Moriond13 
+pfCorrIso[j] = (i.pfChaIso+ std::max(pho+i.pfNeuIso-rho*areaComb,mincor))/i.p4.Pt();
 
 id2012tight[j] = fabs(i.dxy) < 0.02  &&fabs(i.dz) < 0.1  &&(
 (i.isEE  &&fabs(i.Deta) < 0.005 &&fabs(i.Dphi) < 0.02 &&i.sihih < 0.03  &&i.HoE < 0.10  &&fabs(i.fMVAVar_IoEmIoP) < 0.05
@@ -434,8 +446,14 @@ template <> void LeptonInfo::setSpecific<VHbbEvent::MuonInfo>(const VHbbEvent::M
   dz[j]=i.zPVPt;
   vbtf[j]=( i.globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 && i.nHits > 10 && i.cat & 0x1 && i.cat & 0x2 && i.nMatches >=2 && i.ipDb<.2 &&
         (i.pfChaIso+i.pfPhoIso+i.pfNeuIso)/i.p4.Pt()<.15  && fabs(i.p4.Eta())<2.4 && i.p4.Pt()>20 ) ;
+
+
+
+
+
 float mincor=0.0;
 float minrho=0.0;
+float NoverCh=0.5;
 float rhoN = std::max(aux.puInfo.rhoNeutral,minrho);
 float eta=i.p4.Eta();
 float area=0.5;
@@ -445,8 +463,12 @@ if(fabs(eta)>1.5 && fabs(eta) <= 2.0) {area=0.442;}
 if(fabs(eta)>2.0 && fabs(eta) <= 2.2) {area=0.515;}
 if(fabs(eta)>2.2 && fabs(eta) <= 2.3) {area=0.821;}
 if(fabs(eta)>2.3 && fabs(eta) <= 2.4) {area=0.660;}
-pfCorrIso[j] = (i.pfChaIso+ std::max(i.pfPhoIso+i.pfNeuIso-rhoN*area,mincor))/i.p4.Pt();
-id2012tight[j]= i.isPF && i. globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 && i.nValidLayers > 5 &&         (i.cat & 0x2) && i.nMatches >=2 && i.ipDb<.2;
+//pfCorrIso[j] = (i.pfChaIso+ std::max(i.pfPhoIso+i.pfNeuIso-rhoN*area,mincor))/i.p4.Pt();
+// Moriond13: using dbeta corrections
+pfCorrIso[j] = (i.pfChaIso+ std::max(i.pfPhoIso+i.pfNeuIso-NoverCh*i.pfChaPUIso,mincor))/i.p4.Pt();
+
+id2012tight[j]= i.isPF && i.globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 && i.nValidLayers > 5 &&         (i.cat & 0x2) && i.nMatches >=2 && i.ipDb<.2;
+
 
 
 }
