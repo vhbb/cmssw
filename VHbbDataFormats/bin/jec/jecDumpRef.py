@@ -3,7 +3,7 @@ process = cms.Process("jectxt")
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 # define your favorite global tag
-process.GlobalTag.globaltag = 'GR_R_52_V7::All'
+process.GlobalTag.globaltag = 'GR_P_V40_AN1::All'
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
 process.source = cms.Source("EmptySource")
 process.readAK5PFchs    = cms.EDAnalyzer('JetCorrectorDBReader',  
