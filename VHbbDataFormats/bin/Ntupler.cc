@@ -713,6 +713,7 @@ int main(int argc, char* argv[])
   METInfo METtype1p2corr;
   METInfo METnoPUtype1corr;
   METInfo METnoPUtype1p2corr;
+  METInfo METtype1diff;
 
   MHTInfo MHT;
   
@@ -1284,6 +1285,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("METtype1p2corr"		,  &METtype1p2corr	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("METnoPUtype1corr"		,  &METnoPUtype1corr	         ,   "et/F:sumet:sig/F:phi/F");
   _outTree->Branch("METnoPUtype1p2corr"		,  &METnoPUtype1p2corr	         ,   "et/F:sumet:sig/F:phi/F");
+  _outTree->Branch("METtype1diff"		,  &METtype1diff	         ,   "et/F:sumet:sig/F:phi/F");
 
   _outTree->Branch("metUnc_et",&metUnc.et ,"et[24]/F");
   _outTree->Branch("metUnc_phi",&metUnc.phi ,"phi[24]/F");
@@ -1464,6 +1466,10 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	  sbhc = SBHC.product();
 	}
 	
+    // adapted from PhysicsTools/PatUtils/plugins/PATPFJetMETcorrInputProducer.cc
+    // To propagate the effect of JEC at Step 2 to METtype1corr
+    double METtype1diff_mex=0.0, METtype1diff_mey=0.0, METtype1diff_sumet=0.0, METtype1diff_type1JetPtThreshold=10.0, METtype1diff_skipEMfractionThreshold=0.9;
+    
 	const std::vector<VHbbCandidate> * candZ ;
 	const std::vector<VHbbCandidate> * candW ;
 	VHbbEvent modifiedEvent;;
@@ -1487,33 +1493,53 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	    modifiedEvent = *vhbbHandle.product();
             if(isMC_)
             {
-            iEvent= &modifiedEvent;
-           
-            for(size_t j=0; j< modifiedEvent.simpleJets2.size() ; j++)
-            {
-      //         VHbbEvent::SimpleJet orig=modifiedEvent.simpleJets2[j];
-    //           VHbbEvent::SimpleJet origRemade = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true,true); // do ref check, can be commented out 
-  //             VHbbEvent::SimpleJet corr2011 = jec.correctRight( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true,true); // do ref check, can be commented out 
-//REMOVE JEC               modifiedEvent.simpleJets2[j] = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true); 
-//               std::cout << "Original " << orig.p4.Pt() << " == " << origRemade.p4.Pt() << " using CHS2011 " << corr2011.p4.Pt() << " final: " << modifiedEvent.simpleJets2[j].p4.Pt() << std::endl;
-               TLorentzVector & p4 = modifiedEvent.simpleJets2[j].p4; 
-               TLorentzVector & mcp4 = modifiedEvent.simpleJets2[j].bestMCp4;
-	       if ((fabs(p4.Pt() - mcp4.Pt())/ p4.Pt())<0.5) { //Limit the effect to the core 
-                  float cor = (p4.Pt()+resolutionBias(fabs(p4.Eta()))*(p4.Pt()-mcp4.Pt()))/p4.Pt();
-                  p4.SetPtEtaPhiE(p4.Pt()*cor,p4.Eta(), p4.Phi(), p4.E()*cor);
-               }
-            }
-            } else
-            {
-	  //    iEvent = vhbbHandle.product();
-           // modify also the real data now to apply JEC 2012
-            iEvent= &modifiedEvent;
+                iEvent= &modifiedEvent;
+               
+                for(size_t j=0; j< modifiedEvent.simpleJets2.size() ; j++)
+                {
+                    //VHbbEvent::SimpleJet orig=modifiedEvent.simpleJets2[j];
+                    //VHbbEvent::SimpleJet origRemade = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true,true); // do ref check, can be commented out 
+                    //VHbbEvent::SimpleJet corr2011 = jec.correctRight( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true,true); // do ref check, can be commented out
+//REMOVE JEC                    if (modifiedEvent.simpleJets2[j].p4.Pt() > METtype1diff_type1JetPtThreshold && (modifiedEvent.simpleJets2[j].chargedEmEFraction+modifiedEvent.simpleJets2[j].neutralEmEFraction) < METtype1diff_skipEMfractionThreshold) {
+//REMOVE JEC                        METtype1diff_mex += modifiedEvent.simpleJets2[j].p4.Px();
+//REMOVE JEC                        METtype1diff_mey += modifiedEvent.simpleJets2[j].p4.Py();
+//REMOVE JEC                        METtype1diff_sumet -= modifiedEvent.simpleJets2[j].p4.Et();
+//REMOVE JEC                    }
+//REMOVE JEC                    modifiedEvent.simpleJets2[j] = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true); 
+                    //std::cout << "Original " << orig.p4.Pt() << " == " << origRemade.p4.Pt() << " using CHS2011 " << corr2011.p4.Pt() << " final: " << modifiedEvent.simpleJets2[j].p4.Pt() << std::endl;
+//REMOVE JEC                    if (modifiedEvent.simpleJets2[j].p4.Pt() > METtype1diff_type1JetPtThreshold && (modifiedEvent.simpleJets2[j].chargedEmEFraction+modifiedEvent.simpleJets2[j].neutralEmEFraction) < METtype1diff_skipEMfractionThreshold) {
+//REMOVE JEC                        METtype1diff_mex -= modifiedEvent.simpleJets2[j].p4.Px();
+//REMOVE JEC                        METtype1diff_mey -= modifiedEvent.simpleJets2[j].p4.Py();
+//REMOVE JEC                        METtype1diff_sumet += modifiedEvent.simpleJets2[j].p4.Et();
+//REMOVE JEC                    }
+                    TLorentzVector & p4 = modifiedEvent.simpleJets2[j].p4; 
+                    TLorentzVector & mcp4 = modifiedEvent.simpleJets2[j].bestMCp4;
+                    if ((fabs(p4.Pt() - mcp4.Pt())/ p4.Pt())<0.5) { //Limit the effect to the core 
+                        float cor = (p4.Pt()+resolutionBias(fabs(p4.Eta()))*(p4.Pt()-mcp4.Pt()))/p4.Pt();
+                        p4.SetPtEtaPhiE(p4.Pt()*cor,p4.Eta(), p4.Phi(), p4.E()*cor);
+                    }
+                }
+            } else {  // for data
+                //iEvent = vhbbHandle.product();
+                // modify also the real data now to apply JEC 2012
+                iEvent= &modifiedEvent;
               
-            for(size_t j=0; j< modifiedEvent.simpleJets2.size() ; j++)
-            { 
-  //              jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,false,true); // do ref check, can be commented out 
-  //REMOVE JEC              modifiedEvent.simpleJets2[j] = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,false); 
-            }
+                for(size_t j=0; j< modifiedEvent.simpleJets2.size() ; j++)
+                { 
+                    //jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,false,true); // do ref check, can be commented out 
+
+//REMOVE JEC                    if (modifiedEvent.simpleJets2[j].p4.Pt() > METtype1diff_type1JetPtThreshold && (modifiedEvent.simpleJets2[j].chargedEmEFraction+modifiedEvent.simpleJets2[j].neutralEmEFraction) < METtype1diff_skipEMfractionThreshold) {
+//REMOVE JEC                        METtype1diff_mex += modifiedEvent.simpleJets2[j].p4.Px();
+//REMOVE JEC                        METtype1diff_mey += modifiedEvent.simpleJets2[j].p4.Py();
+//REMOVE JEC                        METtype1diff_sumet -= modifiedEvent.simpleJets2[j].p4.Et();
+//REMOVE JEC                    }
+//REMOVE JEC                    modifiedEvent.simpleJets2[j] = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,false); 
+//REMOVE JEC                    if (modifiedEvent.simpleJets2[j].p4.Pt() > METtype1diff_type1JetPtThreshold && (modifiedEvent.simpleJets2[j].chargedEmEFraction+modifiedEvent.simpleJets2[j].neutralEmEFraction) < METtype1diff_skipEMfractionThreshold) {
+//REMOVE JEC                        METtype1diff_mex -= modifiedEvent.simpleJets2[j].p4.Px();
+//REMOVE JEC                        METtype1diff_mey -= modifiedEvent.simpleJets2[j].p4.Py();
+//REMOVE JEC                        METtype1diff_sumet += modifiedEvent.simpleJets2[j].p4.Et();
+//REMOVE JEC                    }
+                }
  
             }  
 
@@ -1773,6 +1799,12 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	METnoPUtype1p2corr.phi = iEvent->pfmetNoPUType1p2corr.p4.Phi();
 	METnoPUtype1p2corr.sumet = iEvent->pfmetNoPUType1p2corr.sumEt;
 	METnoPUtype1p2corr.sig = iEvent->pfmetNoPUType1p2corr.metSig;
+    
+    TVector2 METtype1diff_vec2(METtype1diff_mex, METtype1diff_mey);
+    METtype1diff.et = METtype1diff_vec2.Mod();
+    METtype1diff.phi = METtype1diff_vec2.Phi();
+    METtype1diff.sumet = METtype1diff_sumet;
+    METnoPUtype1p2corr.sig = 0;
 
 	//	std::cout << " iEvent->metUncInfo.size() " << iEvent->metUncInfo.size() << std::endl;
 	for(size_t m=0;m<iEvent->metUncInfo.size();m++)
@@ -2283,7 +2315,9 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 
 
           if (aux.mcZ[i].dauid.size()>1) {
-	    if ( abs(aux.mcZ[i].dauid[0])==13 || abs(aux.mcZ[i].dauid[0])==11 ) {
+	    if ( abs(aux.mcZ[i].dauid[0])==11 || abs(aux.mcZ[i].dauid[0])==12 ||
+             abs(aux.mcZ[i].dauid[0])==13 || abs(aux.mcZ[i].dauid[0])==14 ||
+             abs(aux.mcZ[i].dauid[0])==15 || abs(aux.mcZ[i].dauid[0])==16 ) {
 	      genZ.mass = aux.mcZ[i].p4.M();
 	      genZ.pt = aux.mcZ[i].p4.Pt();
 //	      genZ.eta = aux.mcZ[i].p4.Eta();
