@@ -12,40 +12,42 @@ class JECFWLite
 {
 public:
 
-   JECFWLite(std::string base)
+   JECFWLite(std::string base,std::string jettype="AK5PFchs")
    {
-        std::string prefix = base + "/Summer12V3MC";
-        parMC.push_back( JetCorrectorParameters((prefix+"_L1FastJet_AK5PFchs.txt").c_str()));
-        parMC.push_back( JetCorrectorParameters((prefix+"_L2Relative_AK5PFchs.txt").c_str()));
-        parMC.push_back( JetCorrectorParameters((prefix+"_L3Absolute_AK5PFchs.txt").c_str()));
+        //std::string prefix = base + "/Summer12V3MC";
+        std::string prefix = base + "/START53_V15MC";
+        parMC.push_back( JetCorrectorParameters((prefix+"_L1FastJet_"+jettype+".txt").c_str()));
+        parMC.push_back( JetCorrectorParameters((prefix+"_L2Relative_"+jettype+".txt").c_str()));
+        parMC.push_back( JetCorrectorParameters((prefix+"_L3Absolute_"+jettype+".txt").c_str()));
         jetCorrectorMC= new FactorizedJetCorrector(parMC);
 
-        prefix = base + "/ReferenceMC";
+/*        prefix = base + "/ReferenceMC";
         parMCRefW.push_back( JetCorrectorParameters((prefix+"_L1FastJet_AK5PF.txt").c_str()));
         parMCRefW.push_back( JetCorrectorParameters((prefix+"_L2Relative_AK5PF.txt").c_str()));
         parMCRefW.push_back( JetCorrectorParameters((prefix+"_L3Absolute_AK5PF.txt").c_str()));
         jetCorrectorMCRefWrong= new FactorizedJetCorrector(parMCRefW);
+*/
 
 
         prefix = base + "/ReferenceMC";
-        parMCRef.push_back( JetCorrectorParameters((prefix+"_L1FastJet_AK5PFchs.txt").c_str()));
-        parMCRef.push_back( JetCorrectorParameters((prefix+"_L2Relative_AK5PFchs.txt").c_str()));
-        parMCRef.push_back( JetCorrectorParameters((prefix+"_L3Absolute_AK5PFchs.txt").c_str()));
+        parMCRef.push_back( JetCorrectorParameters((prefix+"_L1FastJet_"+jettype+".txt").c_str()));
+        parMCRef.push_back( JetCorrectorParameters((prefix+"_L2Relative_"+jettype+".txt").c_str()));
+        parMCRef.push_back( JetCorrectorParameters((prefix+"_L3Absolute_"+jettype+".txt").c_str()));
         jetCorrectorMCRef= new FactorizedJetCorrector(parMCRef);
 
 
-        prefix = base + "/Summer12V3DATA";
-        parData.push_back( JetCorrectorParameters((prefix+"_L1FastJet_AK5PFchs.txt").c_str()));
-        parData.push_back( JetCorrectorParameters((prefix+"_L2Relative_AK5PFchs.txt").c_str()));
-        parData.push_back( JetCorrectorParameters((prefix+"_L3Absolute_AK5PFchs.txt").c_str()));
-        parData.push_back( JetCorrectorParameters((prefix+"_L2L3Residual_AK5PFchs.txt").c_str()));
+        prefix = base + "/GR_P_V42_AN3DATA";
+        parData.push_back( JetCorrectorParameters((prefix+"_L1FastJet_"+jettype+".txt").c_str()));
+        parData.push_back( JetCorrectorParameters((prefix+"_L2Relative_"+jettype+".txt").c_str()));
+        parData.push_back( JetCorrectorParameters((prefix+"_L3Absolute_"+jettype+".txt").c_str()));
+        parData.push_back( JetCorrectorParameters((prefix+"_L2L3Residual_"+jettype+".txt").c_str()));
         jetCorrectorData= new FactorizedJetCorrector(parData);
 
         prefix = base + "/Reference";
-        parDataRef.push_back( JetCorrectorParameters((prefix+"_L1FastJet_AK5PFchs.txt").c_str()));
-        parDataRef.push_back( JetCorrectorParameters((prefix+"_L2Relative_AK5PFchs.txt").c_str()));
-        parDataRef.push_back( JetCorrectorParameters((prefix+"_L3Absolute_AK5PFchs.txt").c_str()));
-        parDataRef.push_back( JetCorrectorParameters((prefix+"_L2L3Residual_AK5PFchs.txt").c_str()));
+        parDataRef.push_back( JetCorrectorParameters((prefix+"_L1FastJet_"+jettype+".txt").c_str()));
+        parDataRef.push_back( JetCorrectorParameters((prefix+"_L2Relative_"+jettype+".txt").c_str()));
+        parDataRef.push_back( JetCorrectorParameters((prefix+"_L3Absolute_"+jettype+".txt").c_str()));
+        parDataRef.push_back( JetCorrectorParameters((prefix+"_L2L3Residual_"+jettype+".txt").c_str()));
         jetCorrectorDataRef= new FactorizedJetCorrector(parDataRef);
 
         
@@ -73,7 +75,7 @@ public:
    {
      VHbbEvent::SimpleJet c=j;
      FactorizedJetCorrector * corr=0;
-     if(checkRef && isMC) corr=jetCorrectorMCRefWrong;
+     if(checkRef && isMC) corr=jetCorrectorMCRef;
      if(!checkRef && isMC) corr=jetCorrectorMC;
      if(checkRef && !isMC) corr=jetCorrectorDataRef;
      if(!checkRef && !isMC) corr=jetCorrectorData;
@@ -94,7 +96,8 @@ public:
 	     std::cout << "ERROR CORRECTIONS ARE NOT CLOSING: " << c.p4.Pt() << " vs " <<  j.p4.Pt() << " raw "  << j.ptRaw << " new corr " << corr->getCorrection() << " old " <<  j.p4.Pt()/j.ptRaw <<  std::endl;
            }
  
-       }
+       } 
+ //else {std::cout << "Check ok: " <<  c.p4.Pt() << " vs " <<  j.p4.Pt() << " raw "  << j.ptRaw << " new corr " << corr->getCorrection() << " old " <<  j.p4.Pt()/j.ptRaw << std::endl;}
      return c;
    }   
 
