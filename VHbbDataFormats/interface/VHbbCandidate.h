@@ -21,7 +21,7 @@ class VHbbCandidate {
 
   class VectorCandidate {
   public:
-  VectorCandidate() : firstLepton(99999),secondLepton(99999) {}
+  VectorCandidate() : firstLepton(0),secondLepton(1) {}
     double Mt(CandidateType candidateType) const {
     if(candidateType==Wen)
       {
@@ -53,12 +53,16 @@ class VHbbCandidate {
   public:
    TLorentzVector p4;
     std::vector<VHbbEvent::SimpleJet> jets;
+    size_t indices[2];
     bool HiggsFlag;
     float deltaTheta;
     std::vector <float> helicities;
  public:
     VHbbEvent::SimpleJet& firstJet(){return jets[0];}
     VHbbEvent::SimpleJet& secondJet(){return jets[1];}
+
+    size_t firstJetIndex(){return indices[0];}
+    size_t secondJetIndex(){return indices[1];}
  };
   
   class FatHiggsCandidate {
