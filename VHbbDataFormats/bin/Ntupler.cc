@@ -1765,7 +1765,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	fakeMET.phi = 0;
         if( Vtype == VHbbCandidate::Zmumu) {
  	        TVector3 mu1 = vhCand.V.muons[0].p4.Vect();
-	        TVector3 mu2 = vhCand.V.muons[1].p4.Vect();
+	        TVector3 mu2 = vhCand.V.muons[vhCand.V.secondLepton].p4.Vect();
 // Not needed with PFMET
 //		mu1.SetMag( mu1.Mag() - vhCand.V.muons[0].emEnergy - vhCand.V.muons[0].hadEnergy);
 //		mu2.SetMag( mu2.Mag() - vhCand.V.muons[1].emEnergy - vhCand.V.muons[1].hadEnergy);
@@ -2073,7 +2073,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	size_t firstAddEle=0;
 	if(Vtype == VHbbCandidate::Zmumu ){
 	  vLeptons.set(vhCand.V.muons[0],0,13,aux); 
-	  vLeptons.set(vhCand.V.muons[1],1,13,aux);
+	  vLeptons.set(vhCand.V.muons[vhCand.V.secondLepton],1,13,aux);
 	  float cweightID = triggerWeight.scaleMuID(vLeptons.pt[0],vLeptons.eta[0]) * triggerWeight.scaleMuID(vLeptons.pt[1],vLeptons.eta[1]) ;
 	  float weightTrig1 = triggerWeight.scaleMuIsoHLT(vLeptons.pt[0],vLeptons.eta[0]);
 	  float weightTrig2 = triggerWeight.scaleMuIsoHLT(vLeptons.pt[1],vLeptons.eta[1]);
@@ -2103,7 +2103,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	}
 	if( Vtype == VHbbCandidate::Zee ){
 	  vLeptons.set(vhCand.V.electrons[0],0,11,aux);
-	  vLeptons.set(vhCand.V.electrons[1],1,11,aux);
+	  vLeptons.set(vhCand.V.electrons[vhCand.V.secondLepton],1,11,aux);
 	  nvlep=2;
 	  firstAddEle=2;
 	  std::vector<float> pt,eta;
