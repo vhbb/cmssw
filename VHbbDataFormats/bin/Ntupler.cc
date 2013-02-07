@@ -1505,6 +1505,10 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 
             iEvent= &modifiedEvent;
            
+                for(size_t j=0; j< modifiedEvent.subJets.size() ; j++)   modifiedEvent.subJets[j] = jec.correct( modifiedEvent.subJets[j],aux.puInfo.rho,true);
+                for(size_t j=0; j< modifiedEvent.filterJets.size() ; j++)   modifiedEvent.filterJets[j] = jec.correct( modifiedEvent.filterJets[j],aux.puInfo.rho,true);
+
+                
                 for(size_t j=0; j< modifiedEvent.simpleJets2.size() ; j++)
                 {
                     //VHbbEvent::SimpleJet orig=modifiedEvent.simpleJets2[j];
@@ -1533,6 +1537,8 @@ double MyWeight = LumiWeights_.weight( Tnpv );
                 //iEvent = vhbbHandle.product();
                 // modify also the real data now to apply JEC 2012
                 iEvent= &modifiedEvent;
+                for(size_t j=0; j< modifiedEvent.subJets.size() ; j++)   modifiedEvent.subJets[j] = jec.correct( modifiedEvent.subJets[j],aux.puInfo.rho,false);
+                for(size_t j=0; j< modifiedEvent.filterJets.size() ; j++)   modifiedEvent.filterJets[j] = jec.correct( modifiedEvent.filterJets[j],aux.puInfo.rho,false);
                 for(size_t j=0; j< modifiedEvent.simpleJets2.size() ; j++)
                 { 
                     //jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,false,true); // do ref check, can be commented out 
