@@ -530,6 +530,7 @@ BTagShapeInterface * upLShape=0;
 BTagShapeInterface * nominalShape4p=0;
 BTagShapeInterface * downBCShape4p=0;
 BTagShapeInterface * upBCShape4p=0;
+BTagShapeInterface * nominalShape1Bin=0;
 typedef struct 
 {
   void set(const VHbbEvent::SimpleJet & j, int i) 
@@ -549,6 +550,7 @@ typedef struct
     csv_nominal4p[i]=nominalShape4p->reshape(eta[i],pt[i],j.csv,j.flavour);
     csv_upBC4p[i]=upBCShape4p->reshape(eta[i],pt[i],j.csv,j.flavour);
     csv_downBC4p[i]=downBCShape4p->reshape(eta[i],pt[i],j.csv,j.flavour);
+    csv_nominal1Bin[i]=nominalShape1Bin->reshape(eta[i],pt[i],j.csv,j.flavour);
    }
    else
    {
@@ -560,6 +562,7 @@ typedef struct
     csv_nominal4p[i]=csv[i];
     csv_downBC4p[i]=csv[i];
     csv_upBC4p[i]=csv[i];
+    csv_nominal1Bin[i]=csv[i];
    }
     csvivf[i]=j.csvivf;
     cmva[i]=j.cmva;
@@ -628,7 +631,7 @@ typedef struct
   void reset()
   {
     for(int i=0;i<MAXJ;i++) {
-      pt[i]=-99; eta[i]=-99; phi[i]=-99;e[i]=-99;csv[i]=-99;csv_nominal[i]=-99.;csv_upBC[i]=-99.;csv_downBC[i]=-99.;csv_upL[i]=-99.;csv_downL[i]=-99.;
+      pt[i]=-99; eta[i]=-99; phi[i]=-99;e[i]=-99;csv[i]=-99;csv_nominal[i]=-99.;csv_upBC[i]=-99.;csv_downBC[i]=-99.;csv_upL[i]=-99.;csv_downL[i]=-99.;csv_nominal1Bin[i]=-99.;
       csvivf[i]=-99; cmva[i]=-99;
       cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; isSemiLeptMCtruth[i]=-99; isSemiLept[i]=-99;      
       SoftLeptpdgId[i] = -99; SoftLeptIdlooseMu[i] = -99;  SoftLeptId95[i] =  -99;   SoftLeptPt[i] = -99;  SoftLeptdR[i] = -99;   SoftLeptptRel[i] = -99; SoftLeptRelCombIso[i] = -99;  
@@ -648,6 +651,7 @@ typedef struct
   float csv_nominal4p[MAXJ];
   float csv_upBC4p[MAXJ];
   float csv_downBC4p[MAXJ];
+  float csv_nominal1Bin[MAXJ];
   float csvivf[MAXJ];
   float cmva[MAXJ];
   float cosTheta[MAXJ];
@@ -739,7 +743,7 @@ int main(int argc, char* argv[])
   TrackSharingInfo TkSharing; // track sharing info;
 
   float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, genHpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweightP,PUweightM, PUweightAB, PUweight2011B,PUweight1DObs;
-  float PU0,PUp1,PUm1;
+  float PU0,PUp1,PUm1,weightMCProd;
 
   float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart,weightEleTrigEleAugPart;
   float  weightTrigMET80, weightTrigMET100,    weightTrig2CJet20 , weightTrigMET150  , weightTrigMET802CJet, weightTrigMET1002CJet, weightTrigMETLP ;
@@ -849,6 +853,7 @@ int main(int argc, char* argv[])
   nominalShape4p = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 0.0, 0.0,true,1.003,1.003); 
   upBCShape4p = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 0.0, 0.0,true,1.001,1.001); 
   downBCShape4p = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 0.0, 0.0,true,1.005,1.005); 
+  nominalShape1Bin = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 0.0, 0.0,true,1.001,1.001,1); 
   }
   edm::LumiReWeighting   lumiWeights,lumiWeightsPl,lumiWeightsMi,lumiWeightsAB;
   edm::LumiReWeighting   lumiWeights1DObs;
@@ -908,6 +913,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("nfathFilterJets",   &nfathFilterJets,   "nfathFilterJets/I");
   _outTree->Branch("naJets"		,  &naJets	            ,  "naJets/I");
 
+  _outTree->Branch("weightMCProd"             ,  &weightMCProd                 ,   "weightMCProd/F");
 
 
   _outTree->Branch("hJet_pt",hJets.pt ,"pt[nhJets]/F");
@@ -923,6 +929,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("hJet_csv_nominal4p",hJets.csv_nominal4p ,"csv_nominal4p[nhJets]/F");
   _outTree->Branch("hJet_csv_upBC4p",hJets.csv_upBC4p ,"csv_upBC4p[nhJets]/F");
   _outTree->Branch("hJet_csv_downBC4p",hJets.csv_downBC4p ,"csv_downBC4p[nhJets]/F");
+  _outTree->Branch("hJet_csv_nominal1Bin",hJets.csv_nominal1Bin ,"csv_nominal1Bin[nhJets]/F");
 
   _outTree->Branch("hJet_csvivf",hJets.csvivf ,"csvivf[nhJets]/F");
   _outTree->Branch("hJet_cmva",hJets.cmva ,"cmva[nhJets]/F");
@@ -1030,6 +1037,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_csv_nominal4p",aJets.csv_nominal4p ,"csv_nominal4p[naJets]/F");
   _outTree->Branch("aJet_csv_upBC4p",aJets.csv_upBC4p ,"csv_upBC4p[naJets]/F");
   _outTree->Branch("aJet_csv_downBC4p",aJets.csv_downBC4p ,"csv_downBC4p[naJets]/F");
+  _outTree->Branch("aJet_csv_nominal1Bin",aJets.csv_nominal1Bin ,"csv_nominal1Bin[naJets]/F");
 
   _outTree->Branch("aJet_csvivf",aJets.csvivf ,"csvivf[naJets]/F");
   _outTree->Branch("aJet_cmva",aJets.cmva ,"cmva[naJets]/F");
@@ -1344,6 +1352,7 @@ int main(int argc, char* argv[])
       EVENT.lumi = ev.id().luminosityBlock();
       EVENT.event = ev.id().event();
       EVENT.json = jsonContainsEvent (jsonVector, ev);
+      weightMCProd = aux.weightMCProd; 	
 
       if(EVENT.run < runMin_ && runMin_ > 0) continue;
       if(EVENT.run > runMax_ && runMax_ > 0) continue;
@@ -1493,25 +1502,26 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	    modifiedEvent = *vhbbHandle.product();
             if(isMC_)
             {
-                iEvent= &modifiedEvent;
-               
+
+            iEvent= &modifiedEvent;
+           
                 for(size_t j=0; j< modifiedEvent.simpleJets2.size() ; j++)
                 {
                     //VHbbEvent::SimpleJet orig=modifiedEvent.simpleJets2[j];
                     //VHbbEvent::SimpleJet origRemade = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true,true); // do ref check, can be commented out 
                     //VHbbEvent::SimpleJet corr2011 = jec.correctRight( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true,true); // do ref check, can be commented out
-//REMOVE JEC                    if (modifiedEvent.simpleJets2[j].p4.Pt() > METtype1diff_type1JetPtThreshold && (modifiedEvent.simpleJets2[j].chargedEmEFraction+modifiedEvent.simpleJets2[j].neutralEmEFraction) < METtype1diff_skipEMfractionThreshold) {
-//REMOVE JEC                        METtype1diff_mex += modifiedEvent.simpleJets2[j].p4.Px();
-//REMOVE JEC                        METtype1diff_mey += modifiedEvent.simpleJets2[j].p4.Py();
-//REMOVE JEC                        METtype1diff_sumet -= modifiedEvent.simpleJets2[j].p4.Et();
-//REMOVE JEC                    }
-//REMOVE JEC                    modifiedEvent.simpleJets2[j] = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true); 
+                   if (modifiedEvent.simpleJets2[j].p4.Pt() > METtype1diff_type1JetPtThreshold && (modifiedEvent.simpleJets2[j].chargedEmEFraction+modifiedEvent.simpleJets2[j].neutralEmEFraction) < METtype1diff_skipEMfractionThreshold) {
+                        METtype1diff_mex += modifiedEvent.simpleJets2[j].p4.Px();
+                        METtype1diff_mey += modifiedEvent.simpleJets2[j].p4.Py();
+                        METtype1diff_sumet -= modifiedEvent.simpleJets2[j].p4.Et();
+                   }
+                   modifiedEvent.simpleJets2[j] = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,true); 
                     //std::cout << "Original " << orig.p4.Pt() << " == " << origRemade.p4.Pt() << " using CHS2011 " << corr2011.p4.Pt() << " final: " << modifiedEvent.simpleJets2[j].p4.Pt() << std::endl;
-//REMOVE JEC                    if (modifiedEvent.simpleJets2[j].p4.Pt() > METtype1diff_type1JetPtThreshold && (modifiedEvent.simpleJets2[j].chargedEmEFraction+modifiedEvent.simpleJets2[j].neutralEmEFraction) < METtype1diff_skipEMfractionThreshold) {
-//REMOVE JEC                        METtype1diff_mex -= modifiedEvent.simpleJets2[j].p4.Px();
-//REMOVE JEC                        METtype1diff_mey -= modifiedEvent.simpleJets2[j].p4.Py();
-//REMOVE JEC                        METtype1diff_sumet += modifiedEvent.simpleJets2[j].p4.Et();
-//REMOVE JEC                    }
+                   if (modifiedEvent.simpleJets2[j].p4.Pt() > METtype1diff_type1JetPtThreshold && (modifiedEvent.simpleJets2[j].chargedEmEFraction+modifiedEvent.simpleJets2[j].neutralEmEFraction) < METtype1diff_skipEMfractionThreshold) {
+                        METtype1diff_mex -= modifiedEvent.simpleJets2[j].p4.Px();
+                        METtype1diff_mey -= modifiedEvent.simpleJets2[j].p4.Py();
+                        METtype1diff_sumet += modifiedEvent.simpleJets2[j].p4.Et();
+                    }
                     TLorentzVector & p4 = modifiedEvent.simpleJets2[j].p4; 
                     TLorentzVector & mcp4 = modifiedEvent.simpleJets2[j].bestMCp4;
                     if ((fabs(p4.Pt() - mcp4.Pt())/ p4.Pt())<0.5) { //Limit the effect to the core 
@@ -1523,22 +1533,21 @@ double MyWeight = LumiWeights_.weight( Tnpv );
                 //iEvent = vhbbHandle.product();
                 // modify also the real data now to apply JEC 2012
                 iEvent= &modifiedEvent;
-              
                 for(size_t j=0; j< modifiedEvent.simpleJets2.size() ; j++)
                 { 
                     //jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,false,true); // do ref check, can be commented out 
 
-//REMOVE JEC                    if (modifiedEvent.simpleJets2[j].p4.Pt() > METtype1diff_type1JetPtThreshold && (modifiedEvent.simpleJets2[j].chargedEmEFraction+modifiedEvent.simpleJets2[j].neutralEmEFraction) < METtype1diff_skipEMfractionThreshold) {
-//REMOVE JEC                        METtype1diff_mex += modifiedEvent.simpleJets2[j].p4.Px();
-//REMOVE JEC                        METtype1diff_mey += modifiedEvent.simpleJets2[j].p4.Py();
-//REMOVE JEC                        METtype1diff_sumet -= modifiedEvent.simpleJets2[j].p4.Et();
-//REMOVE JEC                    }
-//REMOVE JEC                    modifiedEvent.simpleJets2[j] = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,false); 
-//REMOVE JEC                    if (modifiedEvent.simpleJets2[j].p4.Pt() > METtype1diff_type1JetPtThreshold && (modifiedEvent.simpleJets2[j].chargedEmEFraction+modifiedEvent.simpleJets2[j].neutralEmEFraction) < METtype1diff_skipEMfractionThreshold) {
-//REMOVE JEC                        METtype1diff_mex -= modifiedEvent.simpleJets2[j].p4.Px();
-//REMOVE JEC                        METtype1diff_mey -= modifiedEvent.simpleJets2[j].p4.Py();
-//REMOVE JEC                        METtype1diff_sumet += modifiedEvent.simpleJets2[j].p4.Et();
-//REMOVE JEC                    }
+                  if (modifiedEvent.simpleJets2[j].p4.Pt() > METtype1diff_type1JetPtThreshold && (modifiedEvent.simpleJets2[j].chargedEmEFraction+modifiedEvent.simpleJets2[j].neutralEmEFraction) < METtype1diff_skipEMfractionThreshold) {
+                      METtype1diff_mex += modifiedEvent.simpleJets2[j].p4.Px();
+                      METtype1diff_mey += modifiedEvent.simpleJets2[j].p4.Py();
+                      METtype1diff_sumet -= modifiedEvent.simpleJets2[j].p4.Et();
+                   }
+                   modifiedEvent.simpleJets2[j] = jec.correct( modifiedEvent.simpleJets2[j],aux.puInfo.rho,false); 
+                   if (modifiedEvent.simpleJets2[j].p4.Pt() > METtype1diff_type1JetPtThreshold && (modifiedEvent.simpleJets2[j].chargedEmEFraction+modifiedEvent.simpleJets2[j].neutralEmEFraction) < METtype1diff_skipEMfractionThreshold) {
+                      METtype1diff_mex -= modifiedEvent.simpleJets2[j].p4.Px();
+                      METtype1diff_mey -= modifiedEvent.simpleJets2[j].p4.Py();
+                      METtype1diff_sumet += modifiedEvent.simpleJets2[j].p4.Et();
+                   }
                 }
  
             }  
