@@ -4,6 +4,7 @@
 
 #include "DataFormats/Math/interface/deltaR.h"
 #include <algorithm>
+#include <map>
 
 #include <iostream>
 #include<cstdlib>
@@ -16,7 +17,8 @@ struct CompareJetPt {
 
 struct CompareBTag {
   bool operator()(const  VHbbEvent::SimpleJet& j1, const  VHbbEvent::SimpleJet& j2 ) const {
-    return j1.csv > j2.csv;
+  if(j1.csv == j2.csv)  return j1.p4.Pt() > j2.p4.Pt();
+  return j1.csv > j2.csv;
   }
 };
 
@@ -35,9 +37,9 @@ VHbbCandidate HbbCandidateFinderAlgo::changeHiggs(bool useHighestPtHiggs , const
   bool foundJets;
 
   if (useHighestPtHiggs == false){
-    foundJets = findDiJets(jets,j1,j2,addJets) ;
+    foundJets = findDiJets(jets,j1,j2,addJets,temp.H.indices) ;
   }else{
-    foundJets= findDiJetsHighestPt(jets,j1,j2,addJets) ;
+    foundJets= findDiJetsHighestPt(jets,j1,j2,addJets,temp.H.indices) ;
   }
 
   temp.H.jets.clear();
@@ -103,12 +105,19 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   VHbbEvent::SimpleJet j1,j2;
   std::vector<VHbbEvent::SimpleJet> addJets;
   bool foundJets;
+  VHbbCandidate temp;
+  if (useHighestPtHiggs_ == false){
+    foundJets = findDiJets(noOverlap,j1,j2,addJets,temp.H.indices) ;
+  }else{
+    foundJets= findDiJetsHighestPt(noOverlap,j1,j2,addJets,temp.H.indices) ;
+  }
+/*
   if (useHighestPtHiggs_ == false){
     foundJets = findDiJets(noOverlap,j1,j2,addJets) ;
   }else{
     foundJets= findDiJetsHighestPt(noOverlap,j1,j2,addJets) ;
   }
-
+*/
   if (verbose_){
     std::cout <<" Found Dijets: "<<foundJets<< " Additional: "<<addJets.size()<< std::endl;
   }
@@ -142,7 +151,6 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   //
   // fill!
   //
-  VHbbCandidate temp;
   temp.H.HiggsFlag = foundJets;
   if(foundJets){
   temp.H.jets.push_back(j1);
@@ -286,7 +294,7 @@ return true;
 }
 
 
-bool HbbCandidateFinderAlgo::findDiJets (const std::vector<VHbbEvent::SimpleJet>& jetsin, VHbbEvent::SimpleJet& j1, VHbbEvent::SimpleJet& j2,std::vector<VHbbEvent::SimpleJet>& addJets){
+bool HbbCandidateFinderAlgo::findDiJets (const std::vector<VHbbEvent::SimpleJet>& jetsin, VHbbEvent::SimpleJet& j1, VHbbEvent::SimpleJet& j2,std::vector<VHbbEvent::SimpleJet>& addJets,size_t * indices){
   
 
 
@@ -302,10 +310,21 @@ if (verbose_){
 
  if (jetsin.size()<2) return false;
 
+  
  std::vector<VHbbEvent::SimpleJet> jets = jetsin;
- 
+ std::vector<size_t> mapidx;
  std::sort(jets.begin(), jets.end(), bTagComparator);
 
+ std::multimap<VHbbEvent::SimpleJet,size_t,CompareBTag> jmap;
+ for(size_t i = 0; i < jetsin.size(); i++) jmap.insert(std::pair<VHbbEvent::SimpleJet,size_t>(jetsin[i],i));
+
+ std::multimap<VHbbEvent::SimpleJet,size_t,CompareBTag>::iterator it=jmap.begin();
+ for(size_t i=0; it!=jmap.end(); it++,i++ )
+   {
+       if(jets[i].p4!=it->first.p4) std::cout << "DIFFERENT SORT OUTPUT" << jets[i].p4.Pt() << " vs " << it->first.p4.Pt() <<  std::endl;
+       mapidx.push_back(it->second);
+  } 
+ 
  //
  // now I need at least 2 with pt > threshold
  //
@@ -324,6 +343,12 @@ if (verbose_){
 
 if (jets[index1].p4.Pt()<(jets[index2].p4.Pt())){
   std::swap (index1,index2);
+ }
+ if(indices) {
+   indices[0]=mapidx[index1];
+   indices[1]=mapidx[index2]; 
+//   std::cout << "IndicesCSV " << mapidx[index1] << " " << mapidx[index2] <<  " jet1pt = " << jets[index1].p4.Pt() << " vs " << jetsin[mapidx[index1]].p4.Pt() <<  std::endl;
+
  }
  j1 = jets[index1];
  j2 = jets[index2];
@@ -353,20 +378,37 @@ if (jets[index1].p4.Pt()<(jets[index2].p4.Pt())){
 }
 
 
-bool HbbCandidateFinderAlgo::findDiJetsHighestPt (const std::vector<VHbbEvent::SimpleJet>& jetsin, VHbbEvent::SimpleJet& j1, VHbbEvent::SimpleJet& j2,std::vector<VHbbEvent::SimpleJet>& addJets){
+bool HbbCandidateFinderAlgo::findDiJetsHighestPt (const std::vector<VHbbEvent::SimpleJet>& jetsin, VHbbEvent::SimpleJet& j1, VHbbEvent::SimpleJet& j2,std::vector<VHbbEvent::SimpleJet>& addJets, size_t * indices){
   
-
   if (verbose_){
     std::cout <<" CandidateFinder: Input Jets = "<<jetsin.size()<<std::endl;
   }
   if (jetsin.size()<2) return false;
   
   float etaThr = 2.5;
+/*//OLD 
   std::vector<VHbbEvent::SimpleJet> jets = jetsin;
   //loop over the dijets and save the one with highest Pt
   
   CompareJetPt ptComparator;
   std::sort(jets.begin(), jets.end(), ptComparator);
+*/
+  CompareJetPt ptComparator;
+ std::vector<VHbbEvent::SimpleJet> jets = jetsin;
+ std::vector<size_t> mapidx;
+ std::sort(jets.begin(), jets.end(), ptComparator);
+
+ std::multimap<VHbbEvent::SimpleJet,size_t,CompareJetPt> jmap;
+ for(size_t i = 0; i < jetsin.size(); i++) jmap.insert(std::pair<VHbbEvent::SimpleJet,size_t>(jetsin[i],i));
+
+ std::multimap<VHbbEvent::SimpleJet,size_t,CompareJetPt>::iterator it=jmap.begin();
+ for(size_t i=0; it!=jmap.end(); it++,i++ )
+   {
+       if(jets[i].p4!=it->first.p4) std::cout << "DIFFERENT SORT OUTPUT" << jets[i].p4.Pt() << " vs " << it->first.p4.Pt() <<  std::endl;
+       mapidx.push_back(it->second);
+  }
+
+
   //
   // so if i<j, pt(i)>pt(j)
   //
@@ -387,7 +429,14 @@ bool HbbCandidateFinderAlgo::findDiJetsHighestPt (const std::vector<VHbbEvent::S
   if (highesti == 999999 || highestj == 999999) return false;
   j1 = jets[highesti]; 
   j2 = jets[highestj]; 
-  
+
+ if(indices) {
+   indices[0]=mapidx[highesti];
+   indices[1]=mapidx[highestj];
+//   std::cout << "Indices " << mapidx[highesti] << " " << mapidx[highestj] <<  " jet1pt = " << jets[highesti].p4.Pt() << " vs " << jetsin[mapidx[highesti]].p4.Pt() <<  std::endl;
+
+ }
+
   for (unsigned int i=0; i<jets.size(); ++i){
     if (i!= highesti && i!= highestj)
       addJets.push_back(jets[i]);
