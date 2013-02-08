@@ -21,6 +21,9 @@ process.fwliteInput = cms.PSet(
     PUdatafileName2011B = cms.string(baseAddFiles+"MyDataPileupHistogramObserved.root"),
     PUmcfileName = cms.string(baseAddFiles+"MC_S10_fromTwiki_60bins.root"),
     PUdatafileName = cms.string(baseAddFiles+"data_PU_60bins_190456-202305_69.4mb.root"),
+    PUdatafileNameMinus = cms.string(baseAddFiles+"data_PU_60bins_190456-202305_66.5mb.root"),
+    PUdatafileNamePlus = cms.string(baseAddFiles+"data_PU_60bins_190456-202305_72.4mb.root"),
+    PUdatafileNameAB = cms.string(baseAddFiles+"data_PU_60bins_190456-196509_69.4mb.root"),
     #PUdatafileName = cms.string(baseAddFiles+"Cert_190456-196509_8TeV_PromptReco_Collisions12_JSON.root"),
 #    Weight3DfileName = cms.string(baseAddFiles+"Weight3D_Summer12.root"),
     Weight3DfileName = cms.string(""),
@@ -31,12 +34,13 @@ process.fwliteInput = cms.PSet(
     skipEvents   = cms.int32(0),                             ## optional
     )
 
-JSONfile = '/gpfs/ddn/cms/user/arizzi/Hbb/V42/CMSSW_5_3_3_patch2/src/VHbbAnalysis/VHbbDataFormats/bin/Cert_190456-203002_8TeV_PromptReco_Collisions12_JSON.txt'
+JSONfile = '/gpfs/ddn/cms/user/arizzi/Hbb/V42/CMSSW_5_3_3_patch2/src/VHbbAnalysis/VHbbDataFormats/bin/Cert_190456-196531_8TeV_13Jul2012ReReco_ert_190782-190949_8TeV_06Aug2012ReReco_Cert_198022-198523_8TeV_24Aug2012ReReco_Cert_198941-203002_8TeV_PromptReco_Collisions12_JSON.txt'
 lumiList = LumiList.LumiList (filename = JSONfile).getCMSSWString().split(',')
 process.fwliteInput.lumisToProcess.extend(lumiList)
 
 
 channel =  re.sub(".txt","",os.environ.get("FILETOPROCESS"))
+channel =  re.sub(".*/","",channel)
 
 
 for l in lines :
@@ -162,7 +166,7 @@ process.Analyzer = cms.PSet(
   
     
 
-   process.Analyzer2012ABOnly = cms.PSet(
+process.Analyzer2012ABOnly = cms.PSet(
     idMuFileName = cms.string(baseAddFiles+"ScaleEffs42.root"),
     hltMuFileName = cms.string(baseAddFiles+"ScaleFactor_muonEffsOnlyIsoToHLT2.2fb_efficiency.root"),
     hltEle1FileName = cms.string(baseAddFiles+"Ele17.root"),
