@@ -128,13 +128,14 @@ class BTagShapeInterface
 {
  public:
   BTagShapeInterface(){}
-  BTagShapeInterface(const char * file, float scaleBC, float scaleL, bool use4points=false, float boundX=1.001, float boundY=1.001) : m_file(new TFile(file))
+  BTagShapeInterface(const char * file, float scaleBC, float scaleL, bool use4points=false, float boundX=1.001, float boundY=1.001,unsigned int maxbins=9999) : m_file(new TFile(file))
   {
     std::vector<EtaPtBin> binsBC;
     std::vector< std::vector<std::pair<float, float> > > cutsAndSFB;
     std::vector< std::vector<std::pair<float, float> > > cutsAndSFC;
     float charmFactor = 2. -1.0 ; //additional uncertainty for charm
-    for(unsigned int i=0;i<beff::bins;i++)
+    if(maxbins > beff::bins)  maxbins = beff::bins;
+    for(unsigned int i=0;i<maxbins;i++)
     {
       EtaPtBin bin(-2.5,2.5,beff::ptmin[i],beff::ptmax[i]);
       binsBC.push_back(bin);
@@ -206,23 +207,23 @@ class BTagShapeInterface
       std::vector<std::pair< float, float > > cutsAndSFbinC;
       std::vector<std::pair< float, float > > cutsAndSFbinB;
 
-      binsBC.push_back(EtaPtBin(-2.5,2.5,beff::ptmax[beff::bins-1],9e99));
-      float sft = beff::CSVT_SFb(beff::ptmax[beff::bins-1]);
-      sft+=scaleBC * beff::CSVT_SFb_error[beff::bins-1]*2;// add error
+      binsBC.push_back(EtaPtBin(-2.5,2.5,beff::ptmax[maxbins-1],9e99));
+      float sft = beff::CSVT_SFb(beff::ptmax[maxbins-1]);
+      sft+=scaleBC * beff::CSVT_SFb_error[maxbins-1]*2;// add error
       cutsAndSFbinB.push_back(std::pair<float, float>(0.898, sft));
-      sft+=scaleBC * beff::CSVT_SFb_error[beff::bins-1]*charmFactor; // charm additional error
+      sft+=scaleBC * beff::CSVT_SFb_error[maxbins-1]*charmFactor; // charm additional error
       cutsAndSFbinC.push_back(std::pair<float, float>(0.898, sft));
       
-      float sfm = beff::CSVM_SFb(beff::ptmax[beff::bins-1]);
-      sfm+=scaleBC * beff::CSVM_SFb_error[beff::bins-1]*2; // add error
+      float sfm = beff::CSVM_SFb(beff::ptmax[maxbins-1]);
+      sfm+=scaleBC * beff::CSVM_SFb_error[maxbins-1]*2; // add error
       cutsAndSFbinB.push_back(std::pair<float, float>(0.679,sfm));
-      sfm+=scaleBC * beff::CSVM_SFb_error[beff::bins-1]*charmFactor; // charm additional error
+      sfm+=scaleBC * beff::CSVM_SFb_error[maxbins-1]*charmFactor; // charm additional error
       cutsAndSFbinC.push_back(std::pair<float, float>(0.679,sfm));
       
-      float sfl = beff::CSVL_SFb(beff::ptmax[beff::bins-1]);
-      sfl+=scaleBC * beff::CSVL_SFb_error[beff::bins-1]*2; // add error
+      float sfl = beff::CSVL_SFb(beff::ptmax[maxbins-1]);
+      sfl+=scaleBC * beff::CSVL_SFb_error[maxbins-1]*2; // add error
       cutsAndSFbinB.push_back(std::pair<float, float>(0.244,sfl));
-      sfl+=scaleBC * beff::CSVL_SFb_error[beff::bins-1]*charmFactor; // charm additional error
+      sfl+=scaleBC * beff::CSVL_SFb_error[maxbins-1]*charmFactor; // charm additional error
       cutsAndSFbinC.push_back(std::pair<float, float>(0.244,sfl));
 
       std::cout << "Lastbin SFs " << sfl << " " << sfm << " " << sft << std::endl;
