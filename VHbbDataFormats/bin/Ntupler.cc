@@ -885,6 +885,9 @@ int main(int argc, char* argv[])
   TH1F *  countWithPUAB = new TH1F("CountWithPUAB","CountWithPU 2012AB", 1,0,2 );
 
   TH1F *  countWithPU2011B = new TH1F("CountWithPU2011B","CountWithPU2011B", 1,0,2 );
+  TH1F *  coutnWithMCProd = new TH1F("CountWithMCProd","CountWithMCProd", 1,0,2 );
+  TH1F *  countWithPUMCProd = new TH1F("CountWithPUMCProd","CountWithPUMCProd", 1,0,2 );
+
   TH3F *  input3DPU = new TH3F("Input3DPU","Input3DPU", 36,-0.5,35.5,36,-0.5,35.5, 36,-0.5,35.5 );
 
   TH1F * pu = new TH1F("pileup","",51,-0.5,50.5);
@@ -1413,7 +1416,9 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	countWithPUM->Fill(1,PUweightM);
 	countWithPUAB->Fill(1,PUweightAB);
 	countWithPU2011B->Fill(1,PUweight2011B);
-      
+        coutnWithMCProd->Fill(1,weightMCProd);
+        countWithPUMCProd->Fill(1,weightMCProd*PUweight);
+
 	//LHE Infos
 	fwlite::Handle<LHEEventProduct> evt;
 
