@@ -19,11 +19,7 @@
   <bin  file="TMVAClassification.cxx"></bin>
   <bin  file="make_tree.cxx"></bin>
   <bin  file="Ntupler.cc"></bin>
-  <bin  file="Ntupler2.cc"></bin>
-  <bin  file="NtuplerDebug.cc"></bin>
   <bin  file="Ntupler7TeV.cc"></bin>
-  <bin  file="Ntupler_pdfWeight.cc"></bin>
-  <bin  file="NtuplerNew.cc"></bin>
   <bin  file="VHbbTnP.cc"></bin>
   <bin  file="Updater.cc"></bin>
 </environment>
