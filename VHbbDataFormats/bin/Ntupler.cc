@@ -795,6 +795,7 @@ int main(int argc, char* argv[])
   genParticleInfo genZ, genZstar, genWstar, genW,  genH, genB, genBbar; //add here the fatjet higgs
   genTopInfo genTop, genTbar;
   TrackInfo V;
+  TrackInfo VTau;
   int nvlep=0,nalep=0; 
   float lheV_pt=0; //for the Madgraph sample stitching
   float lheHT=0; //for the Madgraph sample stitching
@@ -816,7 +817,7 @@ int main(int argc, char* argv[])
 
 
   int WplusMode,WminusMode;
-  int Vtype,nSvs=0;
+  int Vtype,VtypeWithTau,nSvs=0;
   int nSimBs=0;
   int numJets,numBJets,eventFlav;
   //   bool isMET80_CJ80, ispfMHT150, isMET80_2CJ20,isMET65_2CJ20, isJETID,isIsoMu17;
@@ -960,6 +961,7 @@ int main(int argc, char* argv[])
   
   _outTree->Branch("H"	        	,  &H	                    ,  "HiggsFlag/I:mass/F:pt/F:eta:phi/F:dR/F:dPhi/F:dEta/F");
   _outTree->Branch("V"		        ,  &V	                    ,  "mass/F:pt/F:eta:phi/F");
+  _outTree->Branch("VTau"	        ,  &VTau                    ,  "mass/F:pt/F:eta:phi/F");
   _outTree->Branch("FatH"               ,  &FatH                    ,  "FatHiggsFlag/I:mass/F:pt/F:eta:phi/F:filteredmass/F:filteredpt/F:filteredeta/F:filteredphi/F");
   _outTree->Branch("lheV_pt"            ,  &lheV_pt                 ,  "lheV_pt/F");
   _outTree->Branch("lheHT"            ,  &lheHT                 ,  "lheHT/F");
@@ -1235,6 +1237,7 @@ int main(int argc, char* argv[])
    
     
   _outTree->Branch("Vtype"     ,  &Vtype   ,   "Vtype/I" );                
+  _outTree->Branch("VtypeWithTau"     ,  &VtypeWithTau   ,   "VtypeWithTau/I" );                
   _outTree->Branch("HVdPhi"     ,  &HVdPhi   ,   "HVdPhi/F" );                
   _outTree->Branch("HVMass"     ,  &HVMass   ,   "HVMass/F" );                
   _outTree->Branch("HMETdPhi"     ,  &HMETdPhi   ,   "HMETdPhi/F" );                
@@ -1822,7 +1825,17 @@ double MyWeight = LumiWeights_.weight( Tnpv );
         V.eta = vhCand.V.p4.Eta();
         V.phi = vhCand.V.p4.Phi();
         VMt = vhCand.Mt() ;
+        VtypeWithTau=vhCand.candidateTypeWithTau;
+        if(VtypeWithTau==VHbbCandidate::Wtaun)
+         {
+        VTau.mass = vhCand.VTau.p4.M();
+        VTau.pt = vhCand.VTau.p4.Pt();
+        VTau.eta = vhCand.VTau.p4.Eta();
+        VTau.phi = vhCand.VTau.p4.Phi();
 
+
+         }
+  
 
 // METInfo calomet;  METInfo tcmet;  METInfo pfmet;  METInfo mht;  METInfo metNoPU
 	MET.et = vhCand.V.mets.at(0).p4.Pt();

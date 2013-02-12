@@ -27,6 +27,7 @@ process.fwliteInput = cms.PSet(
     PUdatafileName = cms.string("data_PU_60bins_190456-202305_69.4mb.root"),
     PUdatafileNameMinus = cms.string("data_PU_60bins_190456-202305_66.5mb.root"),
     PUdatafileNamePlus = cms.string("data_PU_60bins_190456-202305_72.4mb.root"),
+    badEventsFileName = cms.string("HCALLaser2012AllDatasets.txt"),
     Weight3DfileName = cms.string(""),
     maxEvents   = cms.int32(-1),                             ## optional
     runMin  = cms.int32(-1),
