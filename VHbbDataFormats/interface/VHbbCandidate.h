@@ -15,7 +15,7 @@ class VHbbCandidate {
    //Wen = 3
    //Znn = 4
 
-  enum CandidateType{Zmumu, Zee, Wmun, Wen, Znn, UNKNOWN};
+  enum CandidateType{Zmumu, Zee, Wmun, Wen, Znn,  Zemu, Ztaumu, Ztaue, Wtaun, Ztautau, Zbb, UNKNOWN};
 
     VHbbCandidate(){candidateType=UNKNOWN;}
 
@@ -101,9 +101,11 @@ class VHbbCandidate {
  public:
   TLorentzVector p4(){return V.p4+H.p4;}
   CandidateType candidateType;
+  CandidateType candidateTypeWithTau;
   HiggsCandidate H;
   FatHiggsCandidate FatH;
   VectorCandidate V;
+  VectorCandidate VTau;
   std::vector<VHbbEvent::SimpleJet> additionalJets;
   std::vector<VHbbEvent::SimpleJet> additionalJetsFat;
 };

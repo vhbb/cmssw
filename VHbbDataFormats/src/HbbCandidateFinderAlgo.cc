@@ -243,10 +243,10 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
     candidates.push_back(result);
   }
 
-  // New tau categorizations currently commented out	 
-   /*	 
-   result = selector.getHWtaunCandidate(temp,ok,tauPosNoCandidateJetOverlap);	 
-   if ( ok == true ){	 
+  // New tau categorizations, only flag mode right now
+    bool tauOk=false;
+    VHbbCandidate tauResult = selector.getHWtaunCandidate(temp,tauOk,tauPosNoCandidateJetOverlap);	 
+  /* if ( ok == true ){	 
      if (verbose_) std::cout << "We have a taun candidate" << std::endl;	 
      result.setCandidateType(VHbbCandidate::Wtaun);	 
      candidates.push_back(result);	 
@@ -265,6 +265,8 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   result = selector. getHZnnCandidate(temp,ok);
   if ( ok == true ){
     result.setCandidateType(VHbbCandidate::Znn);
+    result.candidateTypeWithTau = tauOk?VHbbCandidate::Wtaun:VHbbCandidate::Znn;
+    if(tauOk)  result.VTau = tauResult.V;    
     candidates.push_back(result);
   }
   return;
