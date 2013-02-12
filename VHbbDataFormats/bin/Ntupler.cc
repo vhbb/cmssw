@@ -55,6 +55,12 @@
 
 #include <sstream>
 #include <string>
+#include <fstream>
+#include <iostream>
+#include <algorithm>
+#include <vector>       // std::vector
+
+
 
 #define MAXJ 130
 #define MAXL 110
@@ -77,6 +83,59 @@ const GlobalVector flightDirection(const TVector3 pv, const reco::Vertex &sv){
                     sv.position().Z() - pv.Z());
   return fdir;
 }
+
+struct RLE
+{
+ RLE(){}
+ RLE(
+  unsigned long run_,
+ unsigned long lumi_,
+ unsigned long event_
+) : run(run_),lumi(lumi_),event(event_) {}
+ unsigned long run;
+ unsigned long lumi;
+ unsigned long event;
+};
+
+bool evcomp (RLE i,RLE j) {
+if(i.run!=j.run) return (i.run<j.run);
+if(i.lumi!=j.lumi) return (i.lumi<j.lumi);
+return (i.event<j.event);
+
+}
+
+void  readBadEvents(const char * filename, vector<RLE> & badEvents)
+{
+  string str ;
+  RLE temp;
+  ifstream myfile (filename);
+  if (myfile.is_open())
+  {
+    while ( myfile.good() )
+    {
+      getline (myfile,str);
+      replace( str.begin(), str.end(), ':', ' ' ) ;
+      istringstream stm(str) ;
+      int a, b, c ;
+      stm >> a >> b >> c ;
+      temp.run=a; temp.event=c; temp.lumi=b;
+      badEvents.push_back(temp);
+  //    cout << a << '\t' << b << '\t' << c << '\n' ; 
+   }
+ }
+
+/*d::cout << "Presort" << std::endl;
+std::cout <<  std::binary_search (badEvents.begin(), badEvents.end(), RLE(1,1,1),evcomp) << endl;
+std::cout <<  std::binary_search (badEvents.begin(), badEvents.end(), RLE(190456,59,3971011),evcomp) << endl;
+std::cout << "sort" << std::endl;*/
+std::sort (badEvents.begin(), badEvents.end(), evcomp);
+std::cout << "sorted" << std::endl;
+/*d::cout <<  std::binary_search (badEvents.begin(), badEvents.end(), RLE(1,1,1),evcomp) << endl;
+std::cout <<  std::binary_search (badEvents.begin(), badEvents.end(), RLE(190456,59,3971011),evcomp) << endl;
+*/
+ myfile.close();
+}
+
 
 bool jsonContainsEvent (const std::vector< edm::LuminosityBlockRange > &jsonVec,
                         const edm::EventBase &event)
@@ -744,7 +803,7 @@ int main(int argc, char* argv[])
 
   float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, genHpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweightP,PUweightM, PUweightAB, PUweight2011B,PUweight1DObs;
   float PU0,PUp1,PUm1,weightMCProd;
-
+  bool isBadHcalEvent=false;
   float weightEleRecoAndId,weightEleTrigJetMETPart, weightEleTrigElePart,weightEleTrigEleAugPart;
   float  weightTrigMET80, weightTrigMET100,    weightTrig2CJet20 , weightTrigMET150  , weightTrigMET802CJet, weightTrigMET1002CJet, weightTrigMETLP ;
 
@@ -843,6 +902,12 @@ int main(int argc, char* argv[])
   bool isMC_( ana.getParameter<bool>("isMC") );  
     TriggerReader trigger(false);
    TriggerReader patFilters(false);
+
+  vector<RLE> badEvents;
+  if(isMC_)
+     {
+       readBadEvents(in.getParameter<std::string> ("badEventsFileName").c_str() ,badEvents);
+     }
   if(isMC_) 
   {
   nominalShape = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 0.0, 0.0); 
@@ -916,8 +981,9 @@ int main(int argc, char* argv[])
   _outTree->Branch("nfathFilterJets",   &nfathFilterJets,   "nfathFilterJets/I");
   _outTree->Branch("naJets"		,  &naJets	            ,  "naJets/I");
 
-  _outTree->Branch("weightMCProd"             ,  &weightMCProd                 ,   "weightMCProd/F");
 
+  _outTree->Branch("weightMCProd"             ,  &weightMCProd                 ,   "weightMCProd/F");
+  _outTree->Branch("isBadHcalEvent"             ,  &isBadHcalEvent                 ,   "isBadHcalEvent/b");
 
   _outTree->Branch("hJet_pt",hJets.pt ,"pt[nhJets]/F");
   _outTree->Branch("hJet_eta",hJets.eta ,"eta[nhJets]/F");
@@ -1355,6 +1421,7 @@ int main(int argc, char* argv[])
       EVENT.lumi = ev.id().luminosityBlock();
       EVENT.event = ev.id().event();
       EVENT.json = jsonContainsEvent (jsonVector, ev);
+      isBadHcalEvent = std::binary_search (badEvents.begin(), badEvents.end(), RLE( EVENT.run,EVENT.lumi,EVENT.event),evcomp);
       weightMCProd = aux.weightMCProd; 	
 
       if(EVENT.run < runMin_ && runMin_ > 0) continue;
