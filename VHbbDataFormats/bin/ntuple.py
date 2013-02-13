@@ -8,8 +8,8 @@ process = cms.Process("FWLitePlots")
 process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(
 
-
-"file:/gpfs/ddn/srm/cms/store/user/lpchbb/degrutto/TT_CT10_TuneZ2star_8TeV-powheg-tauolaSummer12_DR53X-PU_S10_START53_V7A-v2/degrutto/TT_CT10_TuneZ2star_8TeV-powheg-tauola/HBB_EDMNtupleV42/9803889241b1fc304f795d3b3875632d/PAT.edm_693_1_Sys.root"      
+"file:/gpfs/ddn/srm/cms/store/user/lpchbb/dlopes/WH125_Summer12_53X_V42b/dlopes/WH_WToLNu_HToBB_M-125_8TeV-powheg-herwigpp/HBB_EDMNtupleV42/9803889241b1fc304f795d3b3875632d//PAT.edm_10_1_lT1.root"
+#"file:/gpfs/ddn/srm/cms/store/user/lpchbb/degrutto/TT_CT10_TuneZ2star_8TeV-powheg-tauolaSummer12_DR53X-PU_S10_START53_V7A-v2/degrutto/TT_CT10_TuneZ2star_8TeV-powheg-tauola/HBB_EDMNtupleV42/9803889241b1fc304f795d3b3875632d/PAT.edm_693_1_Sys.root"      
 ###"dcache:///pnfs/cms/WAX/11/store/user/lpchbb/msegala/WH_WToLNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_May2012Prod_2/e63abc9239312b3f728ddbd5ef32b303/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm_11_1_oQQ.root" ,
 ##    "../../HbbAnalyzer/test/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm.root",
 #"dcache:///cmsdcache//pnfs/pi.infn.it/data/cms/store/user/tboccali/WH_WToLNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_ProcV1_WH_WToLNu_HToBB_M-120/14fe2b624ddea84f5c39709f51bf546f/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm_51_1_3LJ.root"

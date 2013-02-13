@@ -259,12 +259,15 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
    }	 
    */
 
-  if (candidates.size()!=0 ) return;
+  if (candidates.size()!=0 ) {
+    candidates[0].candidateTypeWithTau = candidates[0].candidateType;
+   return;
+  }
 
   // HZnn - look at it only if nothing found up to now
   result = selector. getHZnnCandidate(temp,ok);
-  if ( ok == true ){
-    result.setCandidateType(VHbbCandidate::Znn);
+  if ( ok == true or tauOk ){
+    result.setCandidateType(ok?VHbbCandidate::Znn:VHbbCandidate::Wtaun);
     result.candidateTypeWithTau = tauOk?VHbbCandidate::Wtaun:VHbbCandidate::Znn;
     if(tauOk)  result.VTau = tauResult.V;    
     candidates.push_back(result);
