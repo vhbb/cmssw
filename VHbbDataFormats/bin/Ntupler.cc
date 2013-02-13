@@ -391,6 +391,7 @@ struct  LeptonInfo
   float id80NoIso[MAXL];
   float charge[MAXL];
   float pfCorrIso[MAXL];
+  float pfCorrIsoHCP[MAXL];
   float id2012tight[MAXL];
   float idMVAnotrig[MAXL];
   float idMVAtrig[MAXL];
@@ -453,7 +454,7 @@ if(i.innerHits>0)
  pho-=i.pfPhoIsoDoubleCounted;
 }
 
-//pfCorrIso[j] = (i.pfChaIso+ std::max(pho-rho*areagamma,mincor )+std::max(i.pfNeuIso-rho*areaNH,mincor))/i.p4.Pt(); 
+pfCorrIsoHCP[j] = (i.pfChaIso+ std::max(pho-rho*areagamma,mincor )+std::max(i.pfNeuIso-rho*areaNH,mincor))/i.p4.Pt(); 
 // new definition for Moriond13 
 pfCorrIso[j] = (i.pfChaIso+ std::max(pho+i.pfNeuIso-rho*areaComb,mincor))/i.p4.Pt();
 
@@ -905,7 +906,7 @@ int main(int argc, char* argv[])
    TriggerReader patFilters(false);
 
   vector<RLE> badEvents;
-  if(isMC_)
+  if(!isMC_)
      {
        readBadEvents(in.getParameter<std::string> ("badEventsFileName").c_str() ,badEvents);
      }
@@ -1269,6 +1270,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("vLepton_genPhi",vLeptons.genPhi ,"genPhi[nvlep]/F");
   _outTree->Branch("vLepton_charge",vLeptons.charge ,"charge[nvlep]/F");
   _outTree->Branch("vLepton_pfCorrIso",vLeptons.pfCorrIso,"pfCorrIso[nvlep]/F");
+  _outTree->Branch("vLepton_pfCorrIsoHCP",vLeptons.pfCorrIsoHCP,"pfCorrIsoHCP[nvlep]/F");
   _outTree->Branch("vLepton_id2012tight",vLeptons.id2012tight,"id2012tight[nvlep]/F");
   _outTree->Branch("vLepton_idMVAnotrig",vLeptons.idMVAnotrig,"idMVAnotrig[nvlep]/F");
   _outTree->Branch("vLepton_idMVAtrig",vLeptons.idMVAtrig,"idMVAtrig[nvlep]/F");
@@ -1305,6 +1307,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("aLepton_genPhi",aLeptons.genPhi ,"genPhi[nalep]/F");
   _outTree->Branch("aLepton_charge",aLeptons.charge ,"charge[nalep]/F");
   _outTree->Branch("aLepton_pfCorrIso",aLeptons.pfCorrIso,"pfCorrIso[nalep]/F");
+  _outTree->Branch("aLepton_pfCorrIsoHCP",aLeptons.pfCorrIsoHCP,"pfCorrIsoHCP[nalep]/F");
   _outTree->Branch("aLepton_id2012tight",aLeptons.id2012tight,"id2012tight[nalep]/F");
   _outTree->Branch("aLepton_idMVAnotrig",aLeptons.idMVAnotrig,"idMVAnotrig[nalep]/F");
   _outTree->Branch("aLepton_idMVAtrig",aLeptons.idMVAtrig,"idMVAtrig[nalep]/F");
@@ -2188,6 +2191,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	}
 	if( Vtype == VHbbCandidate::Zee ){
 	  vLeptons.set(vhCand.V.electrons[0],0,11,aux);
+//	  std::cout << vhCand.V.secondLepton << std::endl;
 	  vLeptons.set(vhCand.V.electrons[vhCand.V.secondLepton],1,11,aux);
 	  nvlep=2;
 	  firstAddEle=2;
@@ -2335,12 +2339,12 @@ double MyWeight = LumiWeights_.weight( Tnpv );
           {
 	    for(size_t j=0;j< iEvent->muInfo.size();j++)
 	      { 
-                if((j!= vhCand.V.firstLepton && j!= vhCand.V.secondLepton) || ((Vtype != VHbbCandidate::Wmun ) && (Vtype != VHbbCandidate::Zmumu )) )
+                if((j!= vhCand.V.firstLeptonOrig && j!= vhCand.V.secondLeptonOrig) || ((Vtype != VHbbCandidate::Wmun ) && (Vtype != VHbbCandidate::Zmumu )) )
 		  aLeptons.set(iEvent->muInfo[j],nalep++,13,aux);
 	      }
 	    for(size_t j=0;j< iEvent->eleInfo.size();j++)
 	      { 
-                if((j!= vhCand.V.firstLepton && j!= vhCand.V.secondLepton) || ((Vtype != VHbbCandidate::Wen ) && (Vtype != VHbbCandidate::Zee )))
+                if((j!= vhCand.V.firstLeptonOrig && j!= vhCand.V.secondLeptonOrig) || ((Vtype != VHbbCandidate::Wen ) && (Vtype != VHbbCandidate::Zee )))
 		  aLeptons.set(iEvent->eleInfo[j],nalep++,11,aux);
 	      }
 

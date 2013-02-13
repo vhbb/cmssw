@@ -21,7 +21,7 @@ class VHbbCandidate {
 
   class VectorCandidate {
   public:
-  VectorCandidate() : firstLepton(0),secondLepton(1) {}
+  VectorCandidate() : firstLepton(0),secondLepton(1),firstLeptonOrig(99),secondLeptonOrig(99) {}
     double Mt(CandidateType candidateType) const {
     if(candidateType==Wen)
       {
@@ -45,7 +45,8 @@ class VHbbCandidate {
     std::vector<VHbbEvent::TauInfo> taus;
     std::vector<VHbbEvent::METInfo> mets;
     
-    unsigned int firstLepton,secondLepton;
+    unsigned int firstLepton,secondLepton; // position in the above lepton collections
+    unsigned int firstLeptonOrig,secondLeptonOrig; //position in the original VHEvent collections
     
   };
   

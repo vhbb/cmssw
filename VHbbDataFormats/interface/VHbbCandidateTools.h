@@ -150,8 +150,11 @@ class VHbbCandidateTools {
     //    if (temp.additionalJets.size()>0) return in;
     //    if (std::Abs(deltaTheta) ????
 
-    temp.V.firstLepton = pos[0];
-    temp.V.secondLepton = pos[selectMu2];
+    temp.V.firstLepton = 0;
+    temp.V.secondLepton = selectMu2;
+    temp.V.firstLeptonOrig = pos[0];
+    temp.V.secondLeptonOrig = pos[selectMu2];
+
    ok = true;
     return temp;
   }  
@@ -213,8 +216,10 @@ class VHbbCandidateTools {
     }
     temp.V.muons = muons2_;
 
-    temp.V.firstLepton = pos[0];
-    temp.V.secondLepton = pos[selectE2];
+    temp.V.firstLepton = 0;
+    temp.V.secondLepton = selectE2;
+    temp.V.firstLeptonOrig = pos[0];
+    temp.V.secondLeptonOrig = pos[selectE2];
 
     
    ok = true;
@@ -276,7 +281,7 @@ class VHbbCandidateTools {
     */
     
     temp.V.p4 = temp.V.muons[0].p4+temp.V.mets[0].p4;
-    temp.V.firstLepton=pos[0];
+    temp.V.firstLeptonOrig=pos[0];
 
     ok=true;
     return temp;
@@ -306,7 +311,7 @@ class VHbbCandidateTools {
     */
     
     ok=true;
-    temp.V.firstLepton=pos[0];
+    temp.V.firstLeptonOrig=pos[0];
     temp.V.p4 = temp.V.electrons[0].p4+temp.V.mets[0].p4;
     return temp;
   }
