@@ -104,6 +104,30 @@ return (i.event<j.event);
 
 }
 
+float weightNLOEWKsignal(float pt)
+{
+ if(pt < 50) return 1;
+ return 0.94-0.033*(pt-50.);
+}
+
+float weightNNLOQCDsignal(float pt,int njets)
+{
+/*      =      0.99532   +/-   0.0705809   
+p1                        = -0.000262157   +/-   0.000254908 
+*/
+
+/*
+p0                        =       1.0064   +/-   0.353707    
+p1                        =  0.000288831   +/-   0.00210877  
+*/
+ //  SF for jet veto
+if(njets <=2)   return 0.99532-pt*0.000262157;
+  
+
+return 1.0064+pt*0.0002888;
+
+}
+
 void  readBadEvents(const char * filename, vector<RLE> & badEvents)
 {
   string str ;
@@ -160,9 +184,17 @@ bool jsonContainsEvent (const std::vector< edm::LuminosityBlockRange > &jsonVec,
 float resolutionBias(float eta)
 {
 // return 0;//Nominal!
- if(eta< 1.1) return 0.05;
+/* if(eta< 1.1) return 0.05;
  if(eta< 2.5) return 0.10;
- if(eta< 5) return 0.30;
+ if(eta< 5) return 0.30;*/
+//new numbers from:	https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
+   if(eta< 0.5) return 0.052;
+   if(eta< 1.1) return 0.057;
+   if(eta< 1.7) return 0.096;
+   if(eta< 2.3) return 0.134;
+   if(eta< 5) return 0.28;
+
+
  return 0;
 }
 
@@ -912,6 +944,8 @@ int main(int argc, char* argv[])
   float weightTrig2012DiJet30MHT80,weightTrig2012PFMET150,weightTrig2012SumpT100MET100;
   float weightTrig2012APFMET150orDiJetMET, weightTrig2012BPFMET150orDiJetMET, weightTrig2012CPFMET150orDiJetMET; 
 
+  float weightSignalEWK, weightSignalQCD;
+ 
   int tauPlusMode, tauMinusMode;
   int WplusMode,WminusMode;
   int Vtype,VtypeWithTau,nSvs=0;
@@ -1093,6 +1127,8 @@ int main(int argc, char* argv[])
   TH1F *  countWithPU2011B = new TH1F("CountWithPU2011B","CountWithPU2011B", 1,0,2 );
   TH1F *  coutnWithMCProd = new TH1F("CountWithMCProd","CountWithMCProd", 1,0,2 );
   TH1F *  countWithPUMCProd = new TH1F("CountWithPUMCProd","CountWithPUMCProd", 1,0,2 );
+  TH1F *  countWithSignalQCDcorrections = new TH1F("countWithSignalQCDcorrections","countWithSignalQCDcorrections", 1,0,2 );
+
 
   TH3F *  input3DPU = new TH3F("Input3DPU","Input3DPU", 36,-0.5,35.5,36,-0.5,35.5, 36,-0.5,35.5 );
 
@@ -1311,6 +1347,9 @@ int main(int argc, char* argv[])
   _outTree->Branch("genZpt"    , &genZpt      ,  "genZpt/F");
   _outTree->Branch("genWpt"    , &genWpt      ,  "genWpt/F");
   _outTree->Branch("genHpt"    , &genHpt      ,  "genHpt/F");
+  _outTree->Branch("weightSignalEWK"        , &weightSignalEWK         ,  "weightSignalEWK/F");
+  _outTree->Branch("weightSignalQCD"        , &weightSignalQCD         ,  "weightSignalQCD/F");
+
   _outTree->Branch("weightTrig"        , &weightTrig          ,  "weightTrig/F");
   _outTree->Branch("weightTrigMay"        , &weightTrigMay          ,  "weightTrigMay/F");
   _outTree->Branch("weightTrigV4"        , &weightTrigV4          ,  "weightTrigV4/F");
@@ -1610,6 +1649,8 @@ int main(int argc, char* argv[])
       EVENT.json = jsonContainsEvent (jsonVector, ev);
       isBadHcalEvent = std::binary_search (badEvents.begin(), badEvents.end(), RLE( EVENT.run,EVENT.lumi,EVENT.event),evcomp);
       weightMCProd = aux.weightMCProd; 	
+      weightSignalQCD=1.;
+      weightSignalEWK=1.;
 
       if(EVENT.run < runMin_ && runMin_ > 0) continue;
       if(EVENT.run > runMax_ && runMax_ > 0) continue;
@@ -1642,6 +1683,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
       PUweightAB=1.;
       PUweight2011B=1.;
       PUweight1DObs=1.;
+      weightSignalQCD=1;
  	  if(isMC_){
  
  	  // PU weights // Run2011A
@@ -1663,7 +1705,6 @@ double MyWeight = LumiWeights_.weight( Tnpv );
           input3DPU->Fill(PUm1,PU0,PUp1);	  
 //	  PUweight2011B = lumiWeights2011B.weight3D( puitm1->second, puit0->second,puitp1->second); 
 	  PUweight1DObs = lumiWeights1DObs.weight( npu); 
-
 	}
 	countWithPU->Fill(1,PUweight);
 	countWithPUP->Fill(1,PUweightP);
@@ -1672,7 +1713,6 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	countWithPU2011B->Fill(1,PUweight2011B);
         coutnWithMCProd->Fill(1,weightMCProd);
         countWithPUMCProd->Fill(1,weightMCProd*PUweight);
-
 	//LHE Infos
 	fwlite::Handle<LHEEventProduct> evt;
 
@@ -1811,6 +1851,24 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	    fwlite::Handle< VHbbEvent > vhbbHandle;
 	    vhbbHandle.getByLabel(ev,"HbbAnalyzerNew");
 	    modifiedEvent = *vhbbHandle.product();
+
+	    if(aux.mcH.size()>0)
+              {
+                 float pt=aux.mcH[0].p4.Pt();
+                 int nMCJets=0;
+		 if(aux.mcW.size()>1) pt=aux.mcW[1].p4.Pt();
+		 if(aux.mcZ.size()>1) pt=aux.mcZ[1].p4.Pt();
+                 for(size_t j=0; j< modifiedEvent.simpleJets2.size() ; j++)
+                 {
+//um$(VHbbEvent_HbbAnalyzerNew__VH.obj.simpleJets2.p4.Pt()>20 && abs(VHbbEvent_HbbAnalyzerNew__VH.obj.simpleJets2.p4.Eta() )< 2.5)
+                   if( modifiedEvent.simpleJets2[j].bestMCp4.Pt()>20 && fabs(modifiedEvent.simpleJets2[j].bestMCp4.Eta())<2.5) nMCJets++;
+		 }
+                 weightSignalQCD=weightNNLOQCDsignal(pt,nMCJets);
+		 weightSignalEWK=weightNLOEWKsignal(pt);
+
+	      }
+            countWithSignalQCDcorrections->Fill(1,weightSignalQCD);
+
             if(isMC_)
             {
 
