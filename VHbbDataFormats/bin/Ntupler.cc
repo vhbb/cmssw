@@ -107,7 +107,7 @@ return (i.event<j.event);
 float weightNLOEWKsignal(float pt)
 {
  if(pt < 50) return 1;
- return 0.94-0.033*(pt-50.);
+ return 0.94-(0.2-0.068)/400.*(pt-50.);
 }
 
 float weightNNLOQCDsignal(float pt,int njets)
