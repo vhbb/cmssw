@@ -610,7 +610,7 @@ if(fabs(eta)>1.5 && fabs(eta) <= 2.0) {area=0.442;}
 if(fabs(eta)>2.0 && fabs(eta) <= 2.2) {area=0.515;}
 if(fabs(eta)>2.2 && fabs(eta) <= 2.3) {area=0.821;}
 if(fabs(eta)>2.3 && fabs(eta) <= 2.4) {area=0.660;}
-//pfCorrIso[j] = (i.pfChaIso+ std::max(i.pfPhoIso+i.pfNeuIso-rhoN*area,mincor))/i.p4.Pt();
+pfCorrIsoHCP[j] = (i.pfChaIso+ std::max(i.pfPhoIso+i.pfNeuIso-rhoN*area,mincor))/i.p4.Pt();
 // Moriond13: using dbeta corrections
 pfCorrIso[j] = (i.pfChaIso+ std::max(i.pfPhoIso+i.pfNeuIso-NoverCh*i.pfChaPUIso,mincor))/i.p4.Pt();
 
