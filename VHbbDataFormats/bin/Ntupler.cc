@@ -1828,6 +1828,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
         V.eta = vhCand.V.p4.Eta();
         V.phi = vhCand.V.p4.Phi();
         VMt = vhCand.Mt() ;
+
         VtypeWithTau=vhCand.candidateTypeWithTau;
         if(VtypeWithTau==VHbbCandidate::Wtaun)
          {
@@ -2330,6 +2331,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
         } 
 	aLeptons.reset();
 	nalep=0;
+//	   std::cout << "Triggers" << std::endl;
 	if(fromCandidate)
           {
             for(size_t j=firstAddMu;j< vhCand.V.muons.size();j++) aLeptons.set(vhCand.V.muons[j],nalep++,13,aux);
@@ -2349,6 +2351,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	      }
 
           }
+//	   std::cout << "Leptons done" << std::endl;
 
 
 	if(isMC_)
@@ -2440,12 +2443,14 @@ if(genZ.pt>0.1) genZ.eta = aux.mcZ[i].p4.Eta(); else genZ.eta=-99;
           if  ( aux.mcW[i].momid==6 && aux.mcW[i].dauid.size()>1 ){
             genTop.wdau1mass= aux.mcW[i].dauFourMomentum[0].M();
             genTop.wdau1pt= aux.mcW[i].dauFourMomentum[0].Pt();
+if(genTop.wdau1pt > 0.1)
             genTop.wdau1eta= aux.mcW[i].dauFourMomentum[0].Eta();
             genTop.wdau1phi= aux.mcW[i].dauFourMomentum[0].Phi();
             genTop.wdau1id= aux.mcW[i].dauid[0];
 
             genTop.wdau2mass= aux.mcW[i].dauFourMomentum[1].M();
             genTop.wdau2pt= aux.mcW[i].dauFourMomentum[1].Pt();
+if(genTop.wdau2pt > 0.1) 
             genTop.wdau2eta= aux.mcW[i].dauFourMomentum[1].Eta();
             genTop.wdau2phi= aux.mcW[i].dauFourMomentum[1].Phi();
             genTop.wdau2id= aux.mcW[i].dauid[1];
@@ -2456,12 +2461,13 @@ if(genZ.pt>0.1) genZ.eta = aux.mcZ[i].p4.Eta(); else genZ.eta=-99;
           if  ( aux.mcW[i].momid==-6 && aux.mcW[i].dauid.size()>1 ){
             genTbar.wdau1mass= aux.mcW[i].dauFourMomentum[0].M();
             genTbar.wdau1pt= aux.mcW[i].dauFourMomentum[0].Pt();
+  if(genTbar.wdau1pt>0)
             genTbar.wdau1eta= aux.mcW[i].dauFourMomentum[0].Eta();
             genTbar.wdau1phi= aux.mcW[i].dauFourMomentum[0].Phi();
             genTbar.wdau1id= aux.mcW[i].dauid[0];
-
             genTbar.wdau2mass= aux.mcW[i].dauFourMomentum[1].M();
             genTbar.wdau2pt= aux.mcW[i].dauFourMomentum[1].Pt();
+if(genTbar.wdau2pt>0)
             genTbar.wdau2eta= aux.mcW[i].dauFourMomentum[1].Eta();
             genTbar.wdau2phi= aux.mcW[i].dauFourMomentum[1].Phi();
             genTbar.wdau2id= aux.mcW[i].dauid[1];
@@ -2471,6 +2477,7 @@ if(genZ.pt>0.1) genZ.eta = aux.mcZ[i].p4.Eta(); else genZ.eta=-99;
 	  if (aux.mcW[i].status==3 ) {
 	    genWstar.mass = aux.mcW[i].p4.M();
 	    genWstar.pt = aux.mcW[i].p4.Pt();
+if(genWstar.pt>0.1)
 	    genWstar.eta = aux.mcW[i].p4.Eta();
 	    genWstar.phi = aux.mcW[i].p4.Phi();
 	    genWstar.status = aux.mcW[i].status;
@@ -2480,6 +2487,7 @@ if(genZ.pt>0.1) genZ.eta = aux.mcZ[i].p4.Eta(); else genZ.eta=-99;
 	  if (aux.mcW[i].dauid.size()>1 && (abs(aux.mcW[i].dauid[0])==13 || abs(aux.mcW[i].dauid[0])==11 )) {
 	    genW.mass = aux.mcW[i].p4.M();
 	    genW.pt = aux.mcW[i].p4.Pt();
+if(genW.pt>0)
 	    genW.eta = aux.mcW[i].p4.Eta();
 	    genW.phi = aux.mcW[i].p4.Phi();
 	    genW.status = aux.mcW[i].status;
@@ -2492,6 +2500,7 @@ if(genZ.pt>0.1) genZ.eta = aux.mcZ[i].p4.Eta(); else genZ.eta=-99;
 	  if (abs(aux.mcB[i].momid)!=5) {
 	    genB.mass = aux.mcB[i].p4.M();
 	    genB.pt = aux.mcB[i].p4.Pt();
+if(genB.pt>0)
 	    genB.eta = aux.mcB[i].p4.Eta();
 	    genB.phi = aux.mcB[i].p4.Phi();
 	    genB.status = aux.mcB[i].status;
@@ -2502,6 +2511,7 @@ if(genZ.pt>0.1) genZ.eta = aux.mcZ[i].p4.Eta(); else genZ.eta=-99;
           if  ( aux.mcB[i].momid==6 ){
 	    genTop.bmass = aux.mcB[i].p4.M();
 	    genTop.bpt = aux.mcB[i].p4.Pt();
+if(  genTop.bpt >0)
 	    genTop.beta = aux.mcB[i].p4.Eta();
 	    genTop.bphi = aux.mcB[i].p4.Phi();
 	    genTop.bstatus = aux.mcB[i].status;
@@ -2513,6 +2523,7 @@ if(genZ.pt>0.1) genZ.eta = aux.mcZ[i].p4.Eta(); else genZ.eta=-99;
 	  if (abs(aux.mcBbar[i].momid)!=5 ) {
 	    genBbar.mass = aux.mcBbar[i].p4.M();
 	    genBbar.pt = aux.mcBbar[i].p4.Pt();
+if(genBbar.pt >0)
 	    genBbar.eta = aux.mcBbar[i].p4.Eta();
 	    genBbar.phi = aux.mcBbar[i].p4.Phi();
 	    genBbar.status = aux.mcBbar[i].status;
@@ -2521,6 +2532,7 @@ if(genZ.pt>0.1) genZ.eta = aux.mcZ[i].p4.Eta(); else genZ.eta=-99;
           if  ( aux.mcBbar[i].momid==-6 ){
 	    genTbar.bmass = aux.mcBbar[i].p4.M();
 	    genTbar.bpt = aux.mcBbar[i].p4.Pt();
+if( genTbar.bpt>0)
 	    genTbar.beta = aux.mcBbar[i].p4.Eta();
 	    genTbar.bphi = aux.mcBbar[i].p4.Phi();
 	    genTbar.bstatus = aux.mcBbar[i].status;
@@ -2536,6 +2548,7 @@ if(genZ.pt>0.1) genZ.eta = aux.mcZ[i].p4.Eta(); else genZ.eta=-99;
 	if (aux.mcH.size()>0) {
 	  genH.mass = aux.mcH[0].p4.M();
 	  genH.pt = aux.mcH[0].p4.Pt();
+if(genH.pt>0)
 	  genH.eta = aux.mcH[0].p4.Eta();
 	  genH.phi = aux.mcH[0].p4.Phi();
 	  genH.status = aux.mcH[0].status;
@@ -2614,6 +2627,7 @@ if(genZ.pt>0.1) genZ.eta = aux.mcZ[i].p4.Eta(); else genZ.eta=-99;
         }
         }//HiggsFlag
 
+//	std::cout << "Fill" << std::endl;
 	_outTree->Fill();
 
 	}// closed event loop
