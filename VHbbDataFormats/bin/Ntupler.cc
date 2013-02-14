@@ -350,6 +350,38 @@ struct  LeptonInfo
      id80[i]=-99; id95[i]=-99; vbtf[i]=-99; id80NoIso[i]=-99;
      charge[i]=-99;wp70[i]=-99; wp80[i]=-99;wp85[i]=-99;wp90[i]=-99;wp95[i]=-99;wpHWW[i]=-99;
      pfCorrIso[i]=-99.; id2012tight[i]=-99; idMVAnotrig[i]=-99; idMVAtrig[i]=-99;innerHits[i]=-99.;
+
+      decayModeFinding[i] =-99.;
+      byLooseCombinedIsolationDeltaBetaCorr[i] =-99.;
+      againstMuonTight[i] =-99.;
+      againstElectronLoose[i] =-99.;
+      againstElectronMedium[i] =-99.;
+      againstElectronMVA[i] =-99.;
+      NsignalPFChargedHadrCands[i] =-99;
+      NsignalPFGammaCands[i] =-99;
+      leadPFChargedHadrCandPt[i] = -99.;
+      byLooseIsolation[i]  = -99.;
+      byMediumIsolation[i] = -99.;
+      byTightIsolation[i] = -99.;
+      byLooseCombinedIsolationDeltaBetaCorr3Hits[i] = -99.;
+      byMediumCombinedIsolationDeltaBetaCorr3Hits[i] = -99.;
+      byTightCombinedIsolationDeltaBetaCorr3Hits[i] = -99.;
+      againstElectronMVA3raw[i] = -99.;
+      againstElectronMVA3category[i] = -99.;
+      againstElectronLooseMVA3[i] = -99.;
+      againstElectronMediumMVA3[i] = -99.;
+      againstElectronTightMVA3[i] = -99.;
+      againstElectronVTightMVA3[i] = -99.;
+      againstElectronDeadECAL[i] = -99.;
+      byLooseIsolationMVA[i] = -99.;
+      byMediumIsolationMVA[i] = -99.;
+      byTightIsolationMVA[i] = -99.;
+      byLooseIsolationMVA2[i] = -99.;
+      byMediumIsolationMVA2[i] = -99.;
+      byTightIsolationMVA2[i] = -99.;
+      againstMuonLoose2[i] = -99.;
+      againstMuonMedium2[i] = -99.;
+      againstMuonTight2[i] = -99.;
  
      }
   }
@@ -370,11 +402,11 @@ struct  LeptonInfo
     charge[j]=i.charge;
     if(i.mcFourMomentum.Pt() > 0)
     { 
-     genPt[j]=i.mcFourMomentum.Pt();
-    genEta[j]=i.mcFourMomentum.Eta();
-    genPhi[j]=i.mcFourMomentum.Phi();
-   }
-         setSpecific(i,j,aux);
+      genPt[j]=i.mcFourMomentum.Pt();
+      genEta[j]=i.mcFourMomentum.Eta();
+      genPhi[j]=i.mcFourMomentum.Phi();
+    }
+    setSpecific(i,j,aux);
   }
   template <class Input> void setSpecific(const Input & i, int j,const VHbbEventAuxInfo & aux)
   {
@@ -419,6 +451,14 @@ struct  LeptonInfo
   float wpHWW[MAXL];
   float innerHits[MAXL]; 
   float photonIsoDoubleCount[MAXL];
+
+  float decayModeFinding[MAXL],byLooseCombinedIsolationDeltaBetaCorr[MAXL],againstMuonTight[MAXL],againstElectronLoose[MAXL],againstElectronMedium[MAXL],againstElectronMVA[MAXL];
+  int NsignalPFChargedHadrCands[MAXL], NsignalPFGammaCands[MAXL];
+  float leadPFChargedHadrCandPt[MAXL], byLooseIsolation[MAXL], byMediumIsolation[MAXL], byTightIsolation[MAXL]; 
+  float byLooseCombinedIsolationDeltaBetaCorr3Hits[MAXL],  byMediumCombinedIsolationDeltaBetaCorr3Hits[MAXL], byTightCombinedIsolationDeltaBetaCorr3Hits[MAXL], againstElectronMVA3raw[MAXL], againstElectronMVA3category[MAXL], againstElectronLooseMVA3[MAXL], againstElectronMediumMVA3[MAXL], againstElectronTightMVA3[MAXL], againstElectronVTightMVA3[MAXL], againstElectronDeadECAL[MAXL], byLooseIsolationMVA[MAXL], byMediumIsolationMVA[MAXL], byTightIsolationMVA[MAXL], byLooseIsolationMVA2[MAXL], byMediumIsolationMVA2[MAXL], byTightIsolationMVA2[MAXL], againstMuonLoose2[MAXL], againstMuonMedium2[MAXL], againstMuonTight2[MAXL];
+
+
+
 };
   
 template <> void LeptonInfo::setSpecific<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j,const VHbbEventAuxInfo & aux){
@@ -548,6 +588,43 @@ id2012tight[j]= i.isPF && i.globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 
 
 }
 
+template <> void LeptonInfo::setSpecific<VHbbEvent::TauInfo>(const VHbbEvent::TauInfo &i, int j,const VHbbEventAuxInfo & aux) {
+  //std::cout << "In tau set specific" << std::endl;
+
+  decayModeFinding[j] = i.decayModeFinding;
+  byLooseCombinedIsolationDeltaBetaCorr[j] =i.byLooseCombinedIsolationDeltaBetaCorr;
+  againstMuonTight[j] =i.againstMuonTight;
+  againstElectronLoose[j] =i.againstElectronLoose;
+  againstElectronMedium[j] =i.againstElectronMedium;
+  againstElectronMVA[j] =i.againstElectronMVA;
+  NsignalPFChargedHadrCands[j] =i.NsignalPFChargedHadrCands;
+  NsignalPFGammaCands[j] =i.NsignalPFGammaCands;
+  leadPFChargedHadrCandPt[j] = i.leadPFChargedHadrCandPt;
+  byLooseIsolation[j] = i.byLooseIsolation;
+  byMediumIsolation[j] = i.byMediumIsolation;
+  byTightIsolation[j] = i.byTightIsolation;
+
+  byLooseCombinedIsolationDeltaBetaCorr3Hits[j] = i.byLooseCombinedIsolationDeltaBetaCorr3Hits;
+  byMediumCombinedIsolationDeltaBetaCorr3Hits[j] = i.byMediumCombinedIsolationDeltaBetaCorr3Hits;
+  byTightCombinedIsolationDeltaBetaCorr3Hits[j] = i.byTightCombinedIsolationDeltaBetaCorr3Hits;
+  againstElectronMVA3raw[j] = i.againstElectronMVA3raw;
+  againstElectronMVA3category[j] = i.againstElectronMVA3category;
+  againstElectronLooseMVA3[j] = i.againstElectronLooseMVA3;
+  againstElectronMediumMVA3[j] = i.againstElectronMediumMVA3;
+  againstElectronTightMVA3[j] = i.againstElectronTightMVA3;
+  againstElectronVTightMVA3[j] = i.againstElectronVTightMVA3;
+  againstElectronDeadECAL[j] = i.againstElectronDeadECAL;
+  byLooseIsolationMVA[j] = i.byLooseIsolationMVA;
+  byMediumIsolationMVA[j] = i.byMediumIsolationMVA;
+  byTightIsolationMVA[j] = i.byTightIsolationMVA;
+  byLooseIsolationMVA2[j] = i.byLooseIsolationMVA2;
+  byMediumIsolationMVA2[j] = i.byMediumIsolationMVA2;
+  byTightIsolationMVA2[j] = i.byTightIsolationMVA2;
+  againstMuonLoose2[j] = i.againstMuonLoose2;
+  againstMuonMedium2[j] = i.againstMuonMedium2;
+  againstMuonTight2[j] = i.againstMuonTight2;
+
+}
 
 typedef struct 
 {
@@ -710,7 +787,7 @@ typedef struct
       csvivf[i]=-99; cmva[i]=-99;
       cosTheta[i]=-99; numTracksSV[i]=-99; chf[i]=-99; nhf[i]=-99; cef[i]=-99; nef[i]=-99; nch[i]=-99; nconstituents[i]=-99; flavour[i]=-99; isSemiLeptMCtruth[i]=-99; isSemiLept[i]=-99;      
       SoftLeptpdgId[i] = -99; SoftLeptIdlooseMu[i] = -99;  SoftLeptId95[i] =  -99;   SoftLeptPt[i] = -99;  SoftLeptdR[i] = -99;   SoftLeptptRel[i] = -99; SoftLeptRelCombIso[i] = -99;  
-      genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99; ptRaw[i]=-99.; ptLeadTrack[i]=-99.; puJetIdL[i]=-99; puJetIdM[i]=-99; puJetIdT[i]=-99; puJetIdMva[i]=-99; charge[i]=-99; jetArea[i]=-99;
+      genPt[i]=-99; genEta[i]=-99; genPhi[i]=-99; JECUnc[i]=-99; ptRaw[i]=-99.; ptLeadTrack[i]=-99.; puJetIdL[i]=-99; puJetIdM[i]=-99; puJetIdT[i]=-99; puJetIdMva[i]=-99; charge[i]=-99; jetArea[i]=-99; selectedTauDR[i] = -99.;
     }
   }
   float pt[MAXJ];
@@ -773,6 +850,7 @@ typedef struct
   float puJetIdMva[MAXJ];
   float charge[MAXJ];
   float jetArea[MAXJ];
+  float selectedTauDR[MAXJ];
 } JetInfo;
   
 int main(int argc, char* argv[]) 
@@ -804,7 +882,7 @@ int main(int argc, char* argv[])
   //  JetInfo jet1,jet2, addJet1, addJet2;
   // lepton1,lepton2;
   JetInfo hJets, aJets, fathFilterJets, aJetsFat;
-  LeptonInfo vLeptons, aLeptons;
+  LeptonInfo vLeptons, aLeptons, vLeptonsTaus;
   int naJets=0, nhJets=0, nfathFilterJets=0, naJetsFat=0;
   HiggsInfo H,SVH,SimBsH;
   FatHiggsInfo FatH;
@@ -812,7 +890,7 @@ int main(int argc, char* argv[])
   genTopInfo genTop, genTbar;
   TrackInfo V;
   TrackInfo VTau;
-  int nvlep=0,nalep=0; 
+  int nvlep=0,nalep=0,nvlepTau=0; 
   float lheV_pt=0; //for the Madgraph sample stitching
   float lheHT=0; //for the Madgraph sample stitching
   float lheNj=0; //for the Madgraph sample stitching
@@ -834,7 +912,7 @@ int main(int argc, char* argv[])
   float weightTrig2012DiJet30MHT80,weightTrig2012PFMET150,weightTrig2012SumpT100MET100;
   float weightTrig2012APFMET150orDiJetMET, weightTrig2012BPFMET150orDiJetMET, weightTrig2012CPFMET150orDiJetMET; 
 
-
+  int tauPlusMode, tauMinusMode;
   int WplusMode,WminusMode;
   int Vtype,VtypeWithTau,nSvs=0;
   int nSimBs=0;
@@ -1309,6 +1387,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("VMt"  	,  &VMt      ,   "VMt/F"    );             	
 
   _outTree->Branch("nvlep"	,  &nvlep    ,   "nvlep/I");
+  _outTree->Branch("nvlepTau"	,  &nvlepTau    ,   "nvlepTau/I");
   _outTree->Branch("nalep"	,  &nalep    ,   "nalep/I");
 
   _outTree->Branch("vLepton_mass",vLeptons.mass ,"mass[nvlep]/F");
@@ -1347,6 +1426,44 @@ int main(int argc, char* argv[])
   _outTree->Branch("vLepton_wp85",vLeptons.wp85,"wp85[nvlep]/F");
   _outTree->Branch("vLepton_wp80",vLeptons.wp80,"wp80[nvlep]/F");
   _outTree->Branch("vLepton_wp70",vLeptons.wp70,"wp70[nvlep]/F");
+
+  // Adding variables for tau leptons
+  _outTree->Branch("vLeptonTaus_decayModeFinding",vLeptonsTaus.decayModeFinding,"decayModeFinding[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_byLooseCombinedIsolationDeltaBetaCorr",vLeptonsTaus.byLooseCombinedIsolationDeltaBetaCorr,"byLooseCombinedIsolationDeltaBetaCorr[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_againstMuonTight",vLeptonsTaus.againstMuonTight,"againstMuonTight[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_againstElectronLoose",vLeptonsTaus.againstElectronLoose,"againstElectronLoose[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_againstElectronMedium",vLeptonsTaus.againstElectronMedium,"againstElectronMedium[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_againstElectronMVA",vLeptonsTaus.againstElectronMVA,"againstElectronMVA[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_NsignalPFChargedHadrCands",vLeptonsTaus.NsignalPFChargedHadrCands,"NsignalPFChargedHadrCands[nvlepTau]/I");
+  _outTree->Branch("vLeptonTaus_NsignalPFGammaCands",vLeptonsTaus.NsignalPFGammaCands,"NsignalPFGammaCands[nvlepTau]/I");
+  _outTree->Branch("vLeptonTaus_leadPFChargedHadrCandPt",vLeptonsTaus.leadPFChargedHadrCandPt,"leadPFChargedHadrCandPt[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_byLooseIsolation",vLeptonsTaus.byLooseIsolation,"byLooseIsolation[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_byMediumIsolation",vLeptonsTaus.byMediumIsolation,"byMediumIsolation[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_byTightIsolation",vLeptonsTaus.byTightIsolation,"byTightIsolation[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_byLooseCombinedIsolationDeltaBetaCorr3Hits",vLeptonsTaus.byLooseCombinedIsolationDeltaBetaCorr3Hits,"byLooseCombinedIsolationDeltaBetaCorr3Hits[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_byMediumCombinedIsolationDeltaBetaCorr3Hits",vLeptonsTaus.byMediumCombinedIsolationDeltaBetaCorr3Hits,"byMediumCombinedIsolationDeltaBetaCorr3Hits[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_byTightCombinedIsolationDeltaBetaCorr3Hits",vLeptonsTaus.byTightCombinedIsolationDeltaBetaCorr3Hits,"byTightCombinedIsolationDeltaBetaCorr3Hits[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_againstElectronMVA3raw",vLeptonsTaus.againstElectronMVA3raw,"againstElectronMVA3raw[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_againstElectronMVA3category",vLeptonsTaus.againstElectronMVA3category,"againstElectronMVA3category[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_againstElectronLooseMVA3",vLeptonsTaus.againstElectronLooseMVA3,"againstElectronLooseMVA3[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_againstElectronMediumMVA3",vLeptonsTaus.againstElectronMediumMVA3,"againstElectronMediumMVA3[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_againstElectronTightMVA3",vLeptonsTaus.againstElectronTightMVA3,"againstElectronTightMVA3[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_againstElectronVTightMVA3",vLeptonsTaus.againstElectronVTightMVA3,"againstElectronVTightMVA3[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_againstElectronDeadECAL",vLeptonsTaus.againstElectronDeadECAL,"againstElectronDeadECAL[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_byLooseIsolationMVA",vLeptonsTaus.byLooseIsolationMVA,"byLooseIsolationMVA[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_byMediumIsolationMVA",vLeptonsTaus.byMediumIsolationMVA,"byMediumIsolationMVA[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_byTightIsolationMVA",vLeptonsTaus.byTightIsolationMVA,"byTightIsolationMVA[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_byLooseIsolationMVA2",vLeptonsTaus.byLooseIsolationMVA2,"byLooseIsolationMVA2[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_byMediumIsolationMVA2",vLeptonsTaus.byMediumIsolationMVA2,"byMediumIsolationMVA2[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_byTightIsolationMVA2",vLeptonsTaus.byTightIsolationMVA2,"byTightIsolationMVA2[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_againstMuonLoose2",vLeptonsTaus.againstMuonLoose2,"againstMuonLoose2[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_againstMuonMedium2",vLeptonsTaus.againstMuonMedium2,"againstMuonMedium2[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_againstMuonTight2",vLeptonsTaus.againstMuonTight2,"againstMuonTight2[nvlepTau]/F");
+
+  _outTree->Branch("aJet_selectedTauDR",aJets.selectedTauDR ,"selectedTauDR[naJets]/F");
+  _outTree->Branch("tauPlusMode"          ,  &tauPlusMode    ,   "tauPlusMode/I");
+  _outTree->Branch("tauMinusMode"         ,  &tauMinusMode   ,   "tauMinusMode/I");
+
 
   _outTree->Branch("aLepton_mass",aLeptons.mass ,"mass[nalep]/F");
   _outTree->Branch("aLepton_pt",aLeptons.pt ,"pt[nalep]/F");
@@ -1795,6 +1912,25 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 
 
 
+	tauMinusMode = -99;
+	tauPlusMode = -99;
+	for(unsigned int j=0; j< aux.mcTau.size();j++)
+	  {
+	    for(unsigned int k=0;k< aux.mcTau[j].dauid.size();k++)
+	      {
+		if (ana.getParameter<bool>("verbose")) {
+		  std::cout << "(j,k,m_Tau,dauid,pt_dau,momid)=(" << j << "," << k << "," << aux.mcTau[j].p4.M() << "," << aux.mcTau[j].dauid[k] << ","
+			    << aux.mcTau[j].dauFourMomentum[k].Pt() << "," << aux.mcTau[j].momid  <<")" << std::endl;
+		}
+		int idd=abs(aux.mcTau[j].dauid[k]);
+		if( idd != 15 && idd!=16  /*(idd==11 || idd==13 )*/)
+		  {
+		    if(tauMinusMode==-99 && aux.mcTau[j].charge ==-1) tauMinusMode = idd;
+		    if(tauPlusMode==-99 && aux.mcTau[j].charge ==+1) tauPlusMode = idd;
+		  }
+	      }
+	  }
+	
 	genHpt=aux.mcH.size() > 0 ? aux.mcH[0].p4.Pt():-99;
 
        //	 if(cand->size() == 0 or cand->at(0).H.jets.size() < 2) continue;
@@ -1911,7 +2047,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	hJets.set(vhCand.H.jets[0],0);
 	hJets.set(vhCand.H.jets[1],1);
 
-
+	VtypeWithTau=vhCand.candidateTypeWithTau;
 	aJets.reset();
 
 	naJets=vhCand.additionalJets.size();
@@ -1922,6 +2058,9 @@ double MyWeight = LumiWeights_.weight( Tnpv );
           {
 	    aJets.set(vhCand.additionalJets[j],j);
 	    if(vhCand.additionalJets[j].csv> btagThr) numBJets++;
+	    if (VtypeWithTau==VHbbCandidate::Wtaun) {
+	      aJets.selectedTauDR[j] = vhCand.VTau.taus[0].p4.DeltaR(vhCand.additionalJets[j].p4);
+	    }
           }   
 	numJets = vhCand.additionalJets.size()+2;
 	H.dR = deltaR(vhCand.H.jets[0].p4.Eta(),vhCand.H.jets[0].p4.Phi(),vhCand.H.jets[1].p4.Eta(),vhCand.H.jets[1].p4.Phi());
@@ -1945,16 +2084,14 @@ double MyWeight = LumiWeights_.weight( Tnpv );
         V.phi = vhCand.V.p4.Phi();
         VMt = vhCand.Mt() ;
 
-        VtypeWithTau=vhCand.candidateTypeWithTau;
         if(VtypeWithTau==VHbbCandidate::Wtaun)
-         {
-        VTau.mass = vhCand.VTau.p4.M();
-        VTau.pt = vhCand.VTau.p4.Pt();
-        VTau.eta = vhCand.VTau.p4.Eta();
-        VTau.phi = vhCand.VTau.p4.Phi();
-
-
-         }
+	  {
+	    //VTau.mass = vhCand.VTau.p4.M();
+	    VTau.mass = vhCand.MtTau();
+	    VTau.pt = vhCand.VTau.p4.Pt();
+	    VTau.eta = vhCand.VTau.p4.Eta();
+	    VTau.phi = vhCand.VTau.p4.Phi();
+	  }
   
 
 // METInfo calomet;  METInfo tcmet;  METInfo pfmet;  METInfo mht;  METInfo metNoPU
@@ -2269,6 +2406,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 
 	  }
 	vLeptons.reset();
+	vLeptonsTaus.reset();
 	weightTrig = 1.; // better to default to 1 
 	weightTrigMay = -1.;
 	weightTrigV4 = -1.; 
@@ -2398,6 +2536,15 @@ double MyWeight = LumiWeights_.weight( Tnpv );
           weightTrig2012AB =  weightTrig2012ABSingleEle * triggerWeightAB.eleId2012Awp80(vLeptons.pt[0],vLeptons.eta[0]) ;
 
 	}
+
+	if(VtypeWithTau==VHbbCandidate::Wtaun){	  
+	  if ( vhCand.VTau.taus.size() > 0 ){
+	    vLeptonsTaus.set(vhCand.VTau.taus[0],0,15,aux); 
+	    //cout << vLeptonsTaus.pt[0] << ", " << vLeptonsTaus.decayModeFinding[0] << endl;
+	    nvlepTau=1;
+	  }
+       	}
+
 
  if(isMC_)
 {

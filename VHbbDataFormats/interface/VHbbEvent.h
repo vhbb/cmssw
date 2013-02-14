@@ -169,7 +169,13 @@ class VHbbEvent{
       againstElectronLoose(-99),  againstElectronMedium(-99),  againstElectronTight(-99),  againstMuonLoose(-99),  againstMuonTight(-99),  
       byLooseIsolation(-99),  byMediumIsolation(-99),  byTightIsolation(-99),  byVLooseIsolation(-99),  decayModeFinding(-99),
       isolationPFChargedHadrCandsPtSum(-999999.), isolationPFGammaCandsEtSum(-999999.),leadPFChargedHadrCandPt(-999999.),
-      NsignalPFChargedHadrCands (-99),NsignalPFGammaCands(-99), byLooseCombinedIsolationDeltaBetaCorr(-99), againstElectronMVA(-99) {}
+      NsignalPFChargedHadrCands (-99),NsignalPFGammaCands(-99), byLooseCombinedIsolationDeltaBetaCorr(-99), againstElectronMVA(-99),
+      byLooseCombinedIsolationDeltaBetaCorr3Hits(-99), byMediumCombinedIsolationDeltaBetaCorr3Hits(-99),
+      byTightCombinedIsolationDeltaBetaCorr3Hits(-99), againstElectronMVA3raw(-99), againstElectronMVA3category(-99), againstElectronLooseMVA3(-99),
+      againstElectronMediumMVA3(-99), againstElectronTightMVA3(-99), againstElectronVTightMVA3(-99), againstElectronDeadECAL(-99),
+      byLooseIsolationMVA(-99), byMediumIsolationMVA(-99), byTightIsolationMVA(-99), byLooseIsolationMVA2(-99),
+      byMediumIsolationMVA2(-99), byTightIsolationMVA2(-99), againstMuonLoose2(-99), againstMuonMedium2(-99),
+      againstMuonTight2(-99){}
   public:
     TLorentzVector p4;
     int charge;
@@ -183,6 +189,9 @@ class VHbbEvent{
     int NsignalPFChargedHadrCands, NsignalPFGammaCands;
     float byLooseCombinedIsolationDeltaBetaCorr, againstElectronMVA;
 
+    float byLooseCombinedIsolationDeltaBetaCorr3Hits, byMediumCombinedIsolationDeltaBetaCorr3Hits,byTightCombinedIsolationDeltaBetaCorr3Hits;
+    float againstElectronMVA3raw, againstElectronMVA3category, againstElectronLooseMVA3, againstElectronMediumMVA3, againstElectronTightMVA3, againstElectronVTightMVA3, againstElectronDeadECAL;
+    float byLooseIsolationMVA, byMediumIsolationMVA, byTightIsolationMVA, byLooseIsolationMVA2, byMediumIsolationMVA2, byTightIsolationMVA2, againstMuonLoose2, againstMuonMedium2, againstMuonTight2;
 
     TLorentzVector mcFourMomentum;
   };

@@ -39,6 +39,20 @@ class VHbbCandidate {
       }
     return 0;
    }
+    
+    double MtTau(CandidateType candidateTypeWithTau) const {
+      if(candidateTypeWithTau == Wtaun)
+	{
+	  float ptl=taus[0].p4.Pt();
+	  float met=mets[0].p4.Pt();
+	  float et=ptl+met;
+	  return sqrt(et*et - p4.Pt()*p4.Pt()  );
+	}
+      return 0;
+    }
+
+
+
     TLorentzVector p4;
     std::vector<VHbbEvent::MuonInfo> muons;
     std::vector<VHbbEvent::ElectronInfo> electrons;
@@ -88,6 +102,10 @@ class VHbbCandidate {
 
   double Mt() const {
    return V.Mt(candidateType);
+  }
+
+  double MtTau() const {
+   return V.MtTau(candidateTypeWithTau);
   }
   
  int additionalLeptons() const {
