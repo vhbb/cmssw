@@ -61,7 +61,7 @@
 #include <vector>       // std::vector
 
 
-
+#define MAXPDF 100
 #define MAXJ 130
 #define MAXL 110
 #define MAXB 110
@@ -165,6 +165,21 @@ float resolutionBias(float eta)
  if(eta< 5) return 0.30;
  return 0;
 }
+
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+namespace LHAPDF {
+  void initPDFSet(int nset, int setid, int member=0);
+  void initPDFSet(int nset, const std::string& filename, int member=0);
+  int numberPDF(int nset);
+  void usePDFMember(int nset, int member);
+  double xfx(int nset, double x, double Q, int fl);
+  double getXmin(int nset, int member);
+  double getXmax(int nset, int member);
+  double getQ2min(int nset, int member);
+  double getQ2max(int nset, int member);
+  void extrapolate(bool extrapolate=true);
+}
+
 
 
 typedef struct
@@ -802,6 +817,9 @@ int main(int argc, char* argv[])
   float lheHT=0; //for the Madgraph sample stitching
   float lheNj=0; //for the Madgraph sample stitching
   TrackSharingInfo TkSharing; // track sharing info;
+  unsigned int nPdf=0; // number of pdf sets stored
+  float PDFweight[MAXPDF]; // for pdf reweighting (only madgraph)
+
 
   float HVdPhi,HVMass,HMETdPhi,VMt,deltaPullAngle,deltaPullAngleAK7,deltaPullAngle2,deltaPullAngle2AK7,gendrcc,gendrbb, genZpt, genWpt, genHpt, weightTrig, weightTrigMay,weightTrigV4, weightTrigMET, weightTrigOrMu30, minDeltaPhijetMET,  jetPt_minDeltaPhijetMET , PUweight, PUweightP,PUweightM, PUweightAB, PUweight2011B,PUweight1DObs;
   float PU0,PUp1,PUm1,weightMCProd;
@@ -838,6 +856,49 @@ int main(int argc, char* argv[])
   gSystem->Load("libFWCoreFWLite");
   gSystem->Load("libDataFormatsFWLite");
   AutoLibraryLoader::enable();
+
+  //init the PDF set. Need to check for each sample beacuse pdfset and pdfmember info missing in AODSIM.
+
+  //here the list of supported set http://lhapdf.hepforge.org/manual 
+  //you can aslo call it by name
+  //initPDFSet(int nset,const std::string &filename, int member=0) // If you want to use more than one (but not more than 3) at the same time, initialize them giving nset.
+  //Initialise member in PDF set file filename. If filename contains a "/" character, it will be used as a path, otherwise it will be assumed to be a PDF file in the LHAPDF PDFsets directory.
+  //LHAPDF::initPDFSet(1,_pdfset, _pdfmember);
+  // (for Madgraph always (1,10042,0) :  mctqe6l) // CTEQ6l (LO fit/NLO alphas)
+  LHAPDF::initPDFSet(1, 10042, 0); // this should always be the first
+  
+  std::vector<std::string> pdfNames;
+  //from pdf prescription from LHC PDF group http://arxiv.org/pdf/1101.0538v1.pdf
+  //  pdfNames.push_back("NNPDF20_100.LHgrid"); //NNPDF20 (Neutral Network 100/1000 sets)
+  //  pdfNames.push_back("cteq6mE.LHgrid"); //
+  pdfNames.push_back("cteq66.LHgrid"); //
+  //  pdfNames.push_back("MSTW2008lo68cl.LHgrid"); // MSTW2008 (LO central)
+  pdfNames.push_back("MSTW2008nlo68cl.LHgrid"); // MSTW2008 (NLO central)
+  //Other possible examples:
+//   pdfNames.push_back("cteq6lg.LHgrid"); // CTEQ61 (central value)
+//   pdfNames.push_back("cteq61.LHgrid"); // CTEQ61 (central value)
+//   pdfNames.push_back("CT10.LHgrid"); // CT10 (central value) 
+//   pdfNames.push_back("CT10nlo.LHgrid"); // CT10nlo (new fit - central value)
+//   pdfNames.push_back("CT10nnlo.LHgrid"); // CT10nnlo (new fit - central value)
+//   pdfNames.push_back("cteq5m1.LHgrid"); //CTEQ5m1 (updated CTEQ5m)
+//   pdfNames.push_back("MRST2001lo.LHgrid.gz");// MRST2001lo (LO fit)
+//   pdfNames.push_back("MRST2001nlo.LHgrid.gz"); // MRST2001nlo (Standard MSbar)
+//   pdfNames.push_back("MRST2001nnlo.LHgrid.gz"); // MRST2001nnlo (NNLO fit)
+//   pdfNames.push_back("NNPDF21_nnlo_as_0114.LHgrid"); // NNPDF23_nnlo_as_ (Neutral Network NNLO 0+100 replicas)
+//   pdfNames.push_back("NNPDF21_100.LHgrid"); //NNPDF23_nlo_as_ (Neutral Network NLO 0+100 replicas)
+//   pdfNames.push_back("MSTW2008lo68cl.LHgrid"); // MSTW2008 (LO central)
+//   pdfNames.push_back("MSTW2008nnlo68cl.LHgrid"); // MSTW2008 (NNLO central)
+  
+  //initializing all the pdf sets
+  nPdf=1; // one count the nominal PDF
+  for (unsigned int setpdf=2; setpdf <= pdfNames.size()+1; setpdf++){
+    //    std::cout << "pdf set " << setpdf << std::endl;
+    //    LHAPDF::initPDFSet(setpdf, pdfNames[setpdf-2], 0); // the member should always be zero (if you do not know what you are doing)
+    LHAPDF::initPDFSet(setpdf, pdfNames[setpdf-2]); // the member should always be zero (if you do not know what you are doing)
+    nPdf+=LHAPDF::numberPDF(setpdf); // count all the members of all the pdfsets
+  }
+  std::cout << "pdf memebers " << nPdf << std::endl;
+
   
   // parse arguments
   if ( argc < 2 ) {
@@ -967,6 +1028,9 @@ int main(int argc, char* argv[])
   _outTree->Branch("lheV_pt"            ,  &lheV_pt                 ,  "lheV_pt/F");
   _outTree->Branch("lheHT"            ,  &lheHT                 ,  "lheHT/F");
   _outTree->Branch("lheNj"            ,  &lheNj                 ,  "lheNj/F");
+  _outTree->Branch("nPdf"            ,  &nPdf                 ,  "nPdf/I");
+  _outTree->Branch("PDFweight"          ,  PDFweight               ,  "PDFweight[nPdf]/F");
+
   _outTree->Branch("genZ"		,  &genZ	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
   _outTree->Branch("genZstar"		,  &genZstar	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
   _outTree->Branch("genW"		,  &genW	            ,  "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
@@ -1509,6 +1573,58 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	  TLorentzVector l,lbar,vl,vlbar,V_tlv;
 	  const lhef::HEPEUP hepeup_ = evt->hepeup();
 	  const std::vector<lhef::HEPEUP::FiveVector> pup_ = hepeup_.PUP; // px, py, pz, E, M
+
+//################# PDF CODE ##################
+
+
+          //############# PDF reweighting ##################
+          //change it if you want to rescale the energy
+          double _newECMS = 8000; // energy in GeV
+          double _origECMS = 8000; // energy in GeV
+          float Q = hepeup_.SCALUP;
+          int id1        = hepeup_.IDUP[0];
+          double x1      = fabs(hepeup_.PUP[0][2]/(_origECMS/2));
+          double x1prime = fabs(hepeup_.PUP[0][2]/(_newECMS/2));
+          int id2        = hepeup_.IDUP[1];
+          double x2      = fabs(hepeup_.PUP[1][2]/(_origECMS/2));
+          double x2prime = fabs(hepeup_.PUP[1][2]/(_newECMS/2));
+          //      gluon is 0 in the LHAPDF numberin
+          if (id1 == 21)
+            id1 = 0;
+          if (id2 == 21)
+            id2 = 0;
+          int _pdfmember = 0; //member = 0 is the pdf central value.
+          //madgrpah default pdf
+          //      LHAPDF::usePDFMember(1,_pdfmember);
+          double oldpdf1 = LHAPDF::xfx(1, x1, Q, id1)/x1;
+          double oldpdf2 = LHAPDF::xfx(1, x2, Q, id2)/x2;
+          double newpdf1=0;
+          double newpdf2=0;
+
+          newpdf1 = LHAPDF::xfx(1, x1prime, Q, id1)/x1prime;
+          newpdf2 = LHAPDF::xfx(1, x2prime, Q, id2)/x2prime;
+          PDFweight[0] = (newpdf1/oldpdf1)*(newpdf2/oldpdf2);
+
+
+          //new pdf set
+          for (unsigned int setpdf=2; setpdf <= pdfNames.size()+1; ++setpdf){
+
+            for(int pdfmember = 0; pdfmember < LHAPDF::numberPDF(setpdf); pdfmember++){
+
+              LHAPDF::usePDFMember(setpdf, pdfmember); //load the right memeber once again to be sure...
+              newpdf1 = LHAPDF::xfx(setpdf, x1prime, Q, id1)/x1prime;
+              newpdf2 = LHAPDF::xfx(setpdf, x2prime, Q, id2)/x2prime;
+              int norm = (setpdf-2)*LHAPDF::numberPDF(setpdf); // normalisation
+              PDFweight[norm+setpdf-1+pdfmember] = (newpdf1/oldpdf1)*(newpdf2/oldpdf2);
+
+            }
+
+          }
+
+          //############### LHE stitching information ##################
+
+
+//################# END OF PDF CODE ##################
 	  for(unsigned int i=0; i<pup_.size(); ++i){
 	    int id=hepeup_.IDUP[i]; //pdgId
 	    int status = hepeup_.ISTUP[i];
