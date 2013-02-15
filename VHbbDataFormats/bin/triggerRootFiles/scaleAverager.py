@@ -9,6 +9,7 @@ from array import array
 lumiA = 0.001*(809.379 + 82.136)
 lumiB = 4.404 # 4.398 for ele
 lumiC = 0.495+4.655+1.656
+lumiD = 19.510 - (lumiA+lumiB+lumiC)
 verboseOutput = True
 
 def makeAvg(inputFiles,inputWeights,outputFile,verbose=False):
@@ -85,30 +86,36 @@ from os import listdir
 for fileA in listdir("."):
   if (fileA.count("TrigEff") or fileA.count("MuRecoId") or fileA.count("EleRecoId")) and (fileA.count("2012A.root") or fileA.count("2012A.PUAB.root")) and not fileA.count("2012AB"):
     if fileA.count("PUAB"):
-      fileB = fileA.replace("2012A","2012B")
-      if not listdir(".").count(fileB):
-        raise Exception,"%s exists but %s does not" % (fileA,fileB)
-      if fileA.count("Ele"):
-        makeAvg([fileA,fileB],[lumiA,lumiB-0.006],fileA.replace("2012A","2012AB").replace(".PUAB",""),verboseOutput)
-      else:
-        makeAvg([fileA,fileB],[lumiA,lumiB-0.006],fileA.replace("2012A","2012AB").replace(".PUAB",""),verboseOutput)
-    else:  
+      pass
+#      fileB = fileA.replace("2012A","2012B")
+#      if not listdir(".").count(fileB):
+#        raise Exception,"%s exists but %s does not" % (fileA,fileB)
+#      if fileA.count("Ele"):
+#        makeAvg([fileA,fileB],[lumiA,lumiB-0.006],fileA.replace("2012A","2012AB").replace(".PUAB",""),verboseOutput)
+#      else:
+#        makeAvg([fileA,fileB],[lumiA,lumiB-0.006],fileA.replace("2012A","2012AB").replace(".PUAB",""),verboseOutput)
+    else:
+      if fileA.count("wp70") or fileA.count("wp85") or fileA.count("wp90"):
+        continue
       fileB = fileA.replace("2012A","2012B")
       fileC = fileA.replace("2012A","2012C")
+      fileD = fileA.replace("2012A","2012D")
       if not listdir(".").count(fileB):
         raise Exception,"%s exists but %s does not" % (fileA,fileB)
       if not listdir(".").count(fileC):
         raise Exception,"%s exists but %s does not" % (fileA,fileC)
+      if not listdir(".").count(fileC):
+        raise Exception,"%s exists but %s does not" % (fileA,fileD)
       if fileA.count("Ele"):
-        makeAvg([fileA,fileB,fileC],[lumiA,lumiB-0.006,lumiC],fileA.replace("2012A","2012ABC"),verboseOutput)
+        makeAvg([fileA,fileB,fileC,fileD],[lumiA,lumiB-0.006,lumiC,lumiD],fileA.replace("2012A","2012ABC"),verboseOutput)
       else:
-        makeAvg([fileA,fileB,fileC],[lumiA,lumiB-0.006,lumiC],fileA.replace("2012A","2012ABC"),verboseOutput)
-      if fileA.count("TrigEff"):
-        fileB = fileA.replace("2012A","2012B")
-        if not listdir(".").count(fileB):
-          raise Exception,"%s exists but %s does not" % (fileA,fileB)
-        if fileA.count("Ele"):
-          makeAvg([fileA,fileB],[lumiA,lumiB-0.006],fileA.replace("2012A","2012AB"),verboseOutput)
-        else:
-          makeAvg([fileA,fileB],[lumiA,lumiB-0.006],fileA.replace("2012A","2012AB"),verboseOutput)
+        makeAvg([fileA,fileB,fileC,fileD],[lumiA,lumiB,lumiC,lumiD],fileA.replace("2012A","2012ABC"),verboseOutput)
+#      if fileA.count("TrigEff"):
+#        fileB = fileA.replace("2012A","2012B")
+#        if not listdir(".").count(fileB):
+#          raise Exception,"%s exists but %s does not" % (fileA,fileB)
+#        if fileA.count("Ele"):
+#          makeAvg([fileA,fileB],[lumiA,lumiB-0.006],fileA.replace("2012A","2012AB"),verboseOutput)
+#        else:
+#          makeAvg([fileA,fileB],[lumiA,lumiB-0.006],fileA.replace("2012A","2012AB"),verboseOutput)
                             
