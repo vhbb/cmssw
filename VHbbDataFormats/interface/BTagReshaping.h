@@ -252,7 +252,7 @@ class BTagShapeInterface
       EtaPtBin bin(etamin[j],etamax[j],ptmin[i],ptmax[i]);
       binsL.push_back(bin);
       std::vector<std::pair< float, float > > cutsAndSFbinL;
-      float sft = mistag_CSVT(bin.centerEta(),bin.centerPt(),scaleL*1.5);
+      float sft = mistag_CSVT(bin.centerEta(),bin.centerPt(),scaleL);
       cutsAndSFbinL.push_back(std::pair<float, float>(0.898, sft));
 
       float sfm = mistag_CSVM(bin.centerEta(),bin.centerPt(),scaleL);
