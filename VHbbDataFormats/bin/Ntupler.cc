@@ -1086,8 +1086,8 @@ int main(int argc, char* argv[])
   if(isMC_) 
   {
   nominalShape = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 0.0, 0.0); 
-  upBCShape = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 1.5, 0.0); 
-  downBCShape = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), -1.5, 0.0); 
+  upBCShape = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 1.0, 0.0); 
+  downBCShape = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), -1.0, 0.0); 
   upLShape = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 0.0, 1.0); 
   downLShape = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 0.0, -1.0); 
   nominalShape4p = new BTagShapeInterface(ana.getParameter<std::string>("csvDiscr").c_str(), 0.0, 0.0,true,1.003,1.003); 
