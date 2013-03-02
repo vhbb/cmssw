@@ -238,13 +238,20 @@ class BTagShapeInterface
     std::vector<EtaPtBin> binsL;
     std::vector< std::vector<std::pair<float, float> > > cutsAndSFL;
     //20-30 is also covered for mistag
-    float ptmin[] = {20,30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500};
-    float ptmax[] = {30,40, 50, 60, 70, 80,100, 120, 160, 210, 260, 320, 400, 500, 670};
-    float etamin[]  = {0,0.5,1.0,1.5};
-    float etamax[]  = {0.5,1.0,1.5,2.5};
-    size_t bins=15;
+//  float ptmin[] = {20,30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500};
+//  float ptmax[] = {30,40, 50, 60, 70, 80,100, 120, 160, 210, 260, 320, 400, 500, 670};
+//    size_t bins=15;
 
-    for(unsigned int j = 0; j < 4 ; j++)
+float ptmin[] = {20, 30, 40, 50, 60, 70, 80, 100, 120, 160, 210, 260, 320, 400, 500, 600};
+float ptmax[] = {30, 40, 50, 60, 70, 80,100, 120, 160, 210, 260, 320, 400, 500, 600, 800};
+size_t bins=16;
+//  float etamin[]  = {0,0.5,1.0,1.5};
+//  float etamax[]  = {0.5,1.0,1.5,2.5};
+float etamin[]  = {0,0.5,0.8,1.0,1.5};
+float etamax[]  = {0.5,0.8,1.0,1.5,2.5};
+
+
+    for(unsigned int j = 0; j < 5 ; j++)
     {
    
     for(unsigned int i=0;i<bins;i++)
