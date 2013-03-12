@@ -269,7 +269,7 @@ void HbbCandidateFinderAlgo::run (const VHbbEvent* event, std::vector<VHbbCandid
   if ( ok == true or tauOk ){
     result.setCandidateType(ok?VHbbCandidate::Znn:VHbbCandidate::Wtaun);
     result.candidateTypeWithTau = tauOk?VHbbCandidate::Wtaun:VHbbCandidate::Znn;
-    if(tauOk)  result.VTau = tauResult.V;    
+   if(tauOk)  result.VTau = tauResult.V;    
     candidates.push_back(result);
   }
   return;

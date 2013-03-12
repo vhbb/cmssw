@@ -2058,6 +2058,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 
 
 	Vtype = vhCand.candidateType;
+	VtypeWithTau=vhCand.candidateTypeWithTau;
 
         if(vhCand.H.HiggsFlag) H.HiggsFlag=1; else H.HiggsFlag=0;
 
@@ -2128,7 +2129,6 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	hJets.set(vhCand.H.jets[0],0);
 	hJets.set(vhCand.H.jets[1],1);
 
-	VtypeWithTau=vhCand.candidateTypeWithTau;
 	aJets.reset();
 
 	naJets=vhCand.additionalJets.size();
