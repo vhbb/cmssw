@@ -1,9 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 import os
 import re
-import FWCore.PythonUtilities.LumiList as LumiList
-import FWCore.ParameterSet.Config as cms
-import FWCore.ParameterSet.Types as CfgTypes
 
 process = cms.Process("FWLitePlots")
 
@@ -16,16 +13,13 @@ f.close()
 #fileNames   = cms.vstring('file:2l2bMetEdmNtuples.root'),         ## mandatory
 process.fwliteInput = cms.PSet(
     fileNames   = cms.vstring(),
-    lumisToProcess = CfgTypes.untracked(CfgTypes.VLuminosityBlockRange()),
     PUmcfileName2011B= cms.string(baseAddFiles+"Summer12MCObserved.root"),
     PUdatafileName2011B = cms.string(baseAddFiles+"MyDataPileupHistogramObserved.root"),
     PUmcfileName = cms.string(baseAddFiles+"MC_S10_fromTwiki_60bins.root"),
-    PUdatafileName = cms.string(baseAddFiles+"data_PU_60bins_190456-202305_69.4mb.root"),
-    PUdatafileNameMinus = cms.string(baseAddFiles+"data_PU_60bins_190456-202305_66.5mb.root"),
-    PUdatafileNamePlus = cms.string(baseAddFiles+"data_PU_60bins_190456-202305_72.4mb.root"),
-    PUdatafileNameAB = cms.string(baseAddFiles+"data_PU_60bins_190456-196509_69.4mb.root"),
-    badEventsFileName = cms.string(baseAddFiles+"HCALLaser2012AllDatasets.txt"),
-
+    PUdatafileName = cms.string(baseAddFiles+"data_PU_60bins_190456-208686_69.4mb.root"),
+    PUdatafileNameMinus = cms.string(baseAddFiles+"data_PU_60bins_190456-208686_66.5mb.root"),
+    PUdatafileNamePlus = cms.string(baseAddFiles+"data_PU_60bins_190456-208686_72.4mb.root"),
+    PUdatafileNameAB = cms.string(baseAddFiles+"data_PU_60bins_190456-202305_69.4mb.root"),
     #PUdatafileName = cms.string(baseAddFiles+"Cert_190456-196509_8TeV_PromptReco_Collisions12_JSON.root"),
 #    Weight3DfileName = cms.string(baseAddFiles+"Weight3D_Summer12.root"),
     Weight3DfileName = cms.string(""),
@@ -35,11 +29,6 @@ process.fwliteInput = cms.PSet(
     outputEvery = cms.uint32(0),                            ## optional
     skipEvents   = cms.int32(0),                             ## optional
     )
-
-JSONfile = '/gpfs/ddn/cms/user/arizzi/Hbb/V42/CMSSW_5_3_3_patch2/src/VHbbAnalysis/VHbbDataFormats/bin/Cert_190456-196531_8TeV_13Jul2012ReReco_v2_Cert_190782-190949_8TeV_06Aug2012ReReco_Cert_201191-201191_8TeV_11Dec2012ReReco-recover_Cert_190456-208686_8TeV_PromptReco.txt'
-#Cert_190456-196531_8TeV_13Jul2012ReReco_ert_190782-190949_8TeV_06Aug2012ReReco_Cert_198022-198523_8TeV_24Aug2012ReReco_Cert_198941-203002_8TeV_PromptReco_Recover201191-201191_8TeV_11Dec2012ReReco__203002-208686_8TeV_PromptReco_Collisions12_JSON.txt'
-lumiList = LumiList.LumiList (filename = JSONfile).getCMSSWString().split(',')
-process.fwliteInput.lumisToProcess.extend(lumiList)
 
 
 channel =  re.sub(".txt","",os.environ.get("FILETOPROCESS"))
@@ -122,7 +111,7 @@ process.Analyzer = cms.PSet(
         "HLT_LooseIsoPFTau35_Trk20_Prong1_MET75_v.*", #53
 
   ),
-    isMC =     cms.bool(False),
+    isMC =     cms.bool(True),
     verbose = cms.bool(False),
     readFromCandidates = cms.bool(False),
     jetPtThresholdZ = cms.double(20),
@@ -145,20 +134,20 @@ process.Analyzer = cms.PSet(
     hltSingleEleV4FileName = cms.string(baseAddFiles+"TriggerEfficiency_Electrons_PromptV4Aug05PromptV6.root"),
     idEleFileName = cms.string(baseAddFiles+"ScaleFactor_PFElectrons_DataMontecarlo.root"),
     hltMuOr30FileName =  cms.string(baseAddFiles+"ScaleFactor_muonEffsIsoToHLT2.2fb_efficiency.root"),
-    hltSingleEle2012Awp95 = cms.string(baseAddFiles+"triggerRootFiles/SingleEle.TrigEff.wp95.2012AB.root"),
-    hltSingleEle2012Awp80 = cms.string(baseAddFiles+"triggerRootFiles/SingleEle.TrigEff.wp80.2012AB.root"),
-    hltSingleMuon2012A = cms.string(baseAddFiles+"triggerRootFiles/SingleMu24OR40.TrigEff.2012AB.root"),
-    hltDoubleEle2012A_leg8 = cms.string(baseAddFiles+"triggerRootFiles/DoubleEle8.TrigEff.wp95.2012AB.root"),
-    hltDoubleEle2012A_leg17 = cms.string(baseAddFiles+"triggerRootFiles/DoubleEle17.TrigEff.wp95.2012AB.root"),
-    hltDoubleMuon2012A_leg8 = cms.string(baseAddFiles+"triggerRootFiles/DoubleMu8.TrigEff.2012AB.root"),
-    hltDoubleMuon2012A_leg17 = cms.string(baseAddFiles+"triggerRootFiles/DoubleMu17.TrigEff.2012AB.root"),
-    hltMuPlusWCandPt2012A_legMu = cms.string(baseAddFiles+"triggerRootFiles/SingleMu20Not24Or40.TrigEff.2012AB.root"),
-    hltMuPlusWCandPt2012A_legW = cms.string(baseAddFiles+"triggerRootFiles/WCandPt.TrigEff.2012AB.root"),
-    hltDoubleMuon2012A_dZ = cms.string(baseAddFiles+"triggerRootFiles/DoubleMuDz.TrigEff.2012AB.root"),
-    hltDoubleEle2012A_dZ = cms.string(baseAddFiles+"triggerRootFiles/DoubleEleDz.TrigEff.2012AB.root"),
-    idMu2012A = cms.string(baseAddFiles+"triggerRootFiles/MuRecoId.ScaleFactor.2012AB.root"),
-    idEle2012A = cms.string(baseAddFiles+"triggerRootFiles/EleRecoId.ScaleFactor.wp95.2012AB.root"),
-    idEle2012Awp80 = cms.string(baseAddFiles+"triggerRootFiles/EleRecoId.ScaleFactor.wp80.2012AB.root"),
+    hltSingleEle2012Awp95 = cms.string(baseAddFiles+"triggerRootFiles/SingleEle.TrigEff.wp95.2012ABCD.root"),
+    hltSingleEle2012Awp80 = cms.string(baseAddFiles+"triggerRootFiles/SingleEle.TrigEff.wp80.2012ABCD.root"),
+    hltSingleMuon2012A = cms.string(baseAddFiles+"triggerRootFiles/SingleMu24OR40.TrigEff.2012ABCD.root"),
+    hltDoubleEle2012A_leg8 = cms.string(baseAddFiles+"triggerRootFiles/DoubleEle8.TrigEff.wp95.2012ABCD.root"),
+    hltDoubleEle2012A_leg17 = cms.string(baseAddFiles+"triggerRootFiles/DoubleEle17.TrigEff.wp95.2012ABCD.root"),
+    hltDoubleMuon2012A_leg8 = cms.string(baseAddFiles+"triggerRootFiles/DoubleMu8.TrigEff.2012ABCD.root"),
+    hltDoubleMuon2012A_leg17 = cms.string(baseAddFiles+"triggerRootFiles/DoubleMu17.TrigEff.2012ABCD.root"),
+    hltMuPlusWCandPt2012A_legMu = cms.string(baseAddFiles+"triggerRootFiles/SingleMu20Not24Or40.TrigEff.2012ABCD.root"),
+    hltMuPlusWCandPt2012A_legW = cms.string(baseAddFiles+"triggerRootFiles/WCandPt.TrigEff.2012ABCD.root"),
+    hltDoubleMuon2012A_dZ = cms.string(baseAddFiles+"triggerRootFiles/DoubleMuDz.TrigEff.2012ABCD.root"),
+    hltDoubleEle2012A_dZ = cms.string(baseAddFiles+"triggerRootFiles/DoubleEleDz.TrigEff.2012ABCD.root"),
+    idMu2012A = cms.string(baseAddFiles+"triggerRootFiles/MuRecoId.ScaleFactor.2012ABCD.root"),
+    idEle2012A = cms.string(baseAddFiles+"triggerRootFiles/EleRecoId.ScaleFactor.wp95.2012ABCD.root"),
+    idEle2012Awp80 = cms.string(baseAddFiles+"triggerRootFiles/EleRecoId.ScaleFactor.wp80.2012ABCD.root"),
     jecFolder = cms.string(baseAddFiles+"jec"),
     csvDiscr = cms.string(baseAddFiles+"csvdiscr.root"),
     btagEffFileName = cms.string(baseAddFiles+"btag_generic.txt")
@@ -167,10 +156,6 @@ process.Analyzer = cms.PSet(
 
 
 
-
-    
-  
-    
 
 process.Analyzer2012ABOnly = cms.PSet(
     idMuFileName = cms.string(baseAddFiles+"ScaleEffs42.root"),
@@ -188,19 +173,22 @@ process.Analyzer2012ABOnly = cms.PSet(
     hltSingleEleV4FileName = cms.string(baseAddFiles+"TriggerEfficiency_Electrons_PromptV4Aug05PromptV6.root"),
     idEleFileName = cms.string(baseAddFiles+"ScaleFactor_PFElectrons_DataMontecarlo.root"),
     hltMuOr30FileName =  cms.string(baseAddFiles+"ScaleFactor_muonEffsIsoToHLT2.2fb_efficiency.root"),
-    hltSingleEle2012Awp95 = cms.string(baseAddFiles+"triggerRootFiles/SingleEle.TrigEff.wp95.2012AB.root"),
-    hltSingleEle2012Awp80 = cms.string(baseAddFiles+"triggerRootFiles/SingleEle.TrigEff.wp80.2012AB.root"),
-    hltSingleMuon2012A = cms.string(baseAddFiles+"triggerRootFiles/SingleMu24OR40.TrigEff.2012AB.root"),
-    hltDoubleEle2012A_leg8 = cms.string(baseAddFiles+"triggerRootFiles/DoubleEle8.TrigEff.wp95.2012AB.root"),
-    hltDoubleEle2012A_leg17 = cms.string(baseAddFiles+"triggerRootFiles/DoubleEle17.TrigEff.wp95.2012AB.root"),
-    hltDoubleMuon2012A_leg8 = cms.string(baseAddFiles+"triggerRootFiles/DoubleMu8.TrigEff.2012AB.root"),
-    hltDoubleMuon2012A_leg17 = cms.string(baseAddFiles+"triggerRootFiles/DoubleMu17.TrigEff.2012AB.root"),
-    hltMuPlusWCandPt2012A_legMu = cms.string(baseAddFiles+"triggerRootFiles/SingleMu20Not24Or40.TrigEff.2012AB.root"),
-    hltMuPlusWCandPt2012A_legW = cms.string(baseAddFiles+"triggerRootFiles/WCandPt.TrigEff.2012AB.root"),
-    hltDoubleMuon2012A_dZ = cms.string(baseAddFiles+"triggerRootFiles/DoubleMuDz.TrigEff.2012AB.root"),
-    hltDoubleEle2012A_dZ = cms.string(baseAddFiles+"triggerRootFiles/DoubleEleDz.TrigEff.2012AB.root"),
-    idMu2012A = cms.string(baseAddFiles+"triggerRootFiles/MuRecoId.ScaleFactor.2012AB.root"),
-    idEle2012A = cms.string(baseAddFiles+"triggerRootFiles/EleRecoId.ScaleFactor.wp95.2012AB.root"),
-    idEle2012Awp80 = cms.string(baseAddFiles+"triggerRootFiles/EleRecoId.ScaleFactor.wp80.2012AB.root"),
+    hltSingleEle2012Awp95 = cms.string(baseAddFiles+"triggerRootFiles/SingleEle.TrigEff.wp95.2012ABC.root"),
+    hltSingleEle2012Awp80 = cms.string(baseAddFiles+"triggerRootFiles/SingleEle.TrigEff.wp80.2012ABC.root"),
+    hltSingleMuon2012A = cms.string(baseAddFiles+"triggerRootFiles/SingleMu24OR40.TrigEff.2012ABC.root"),
+    hltDoubleEle2012A_leg8 = cms.string(baseAddFiles+"triggerRootFiles/DoubleEle8.TrigEff.wp95.2012ABC.root"),
+    hltDoubleEle2012A_leg17 = cms.string(baseAddFiles+"triggerRootFiles/DoubleEle17.TrigEff.wp95.2012ABC.root"),
+    hltDoubleMuon2012A_leg8 = cms.string(baseAddFiles+"triggerRootFiles/DoubleMu8.TrigEff.2012ABC.root"),
+    hltDoubleMuon2012A_leg17 = cms.string(baseAddFiles+"triggerRootFiles/DoubleMu17.TrigEff.2012ABC.root"),
+    hltMuPlusWCandPt2012A_legMu = cms.string(baseAddFiles+"triggerRootFiles/SingleMu20Not24Or40.TrigEff.2012ABC.root"),
+    hltMuPlusWCandPt2012A_legW = cms.string(baseAddFiles+"triggerRootFiles/WCandPt.TrigEff.2012ABC.root"),
+    hltDoubleMuon2012A_dZ = cms.string(baseAddFiles+"triggerRootFiles/DoubleMuDz.TrigEff.2012ABC.root"),
+    hltDoubleEle2012A_dZ = cms.string(baseAddFiles+"triggerRootFiles/DoubleEleDz.TrigEff.2012ABC.root"),
+    idMu2012A = cms.string(baseAddFiles+"triggerRootFiles/MuRecoId.ScaleFactor.2012ABC.root"),
+    idEle2012A = cms.string(baseAddFiles+"triggerRootFiles/EleRecoId.ScaleFactor.wp95.2012ABC.root"),
+    idEle2012Awp80 = cms.string(baseAddFiles+"triggerRootFiles/EleRecoId.ScaleFactor.wp80.2012ABC.root"),
     )
+ 
+  
+    
 
