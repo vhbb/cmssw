@@ -6,6 +6,7 @@
 #include "VHbbAnalysis/VHbbDataFormats/interface/VHbbEvent.h"
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 
 
 class JECFWLite
@@ -20,6 +21,7 @@ public:
         parMC.push_back( JetCorrectorParameters((prefix+"_L2Relative_"+jettype+".txt").c_str()));
         parMC.push_back( JetCorrectorParameters((prefix+"_L3Absolute_"+jettype+".txt").c_str()));
         jetCorrectorMC= new FactorizedJetCorrector(parMC);
+	jecUncMC = new JetCorrectionUncertainty((prefix+"_Uncertainty_"+jettype+".txt").c_str());
 
 /*        prefix = base + "/ReferenceMC";
         parMCRefW.push_back( JetCorrectorParameters((prefix+"_L1FastJet_AK5PF.txt").c_str()));
@@ -34,6 +36,7 @@ public:
         parMCRef.push_back( JetCorrectorParameters((prefix+"_L2Relative_"+jettype+".txt").c_str()));
         parMCRef.push_back( JetCorrectorParameters((prefix+"_L3Absolute_"+jettype+".txt").c_str()));
         jetCorrectorMCRef= new FactorizedJetCorrector(parMCRef);
+	jecUncMCRef = new JetCorrectionUncertainty((prefix+"_Uncertainty_"+jettype+".txt").c_str());
 
 
         prefix = base + "/GR_P_V42_AN3DATA";
@@ -42,6 +45,7 @@ public:
         parData.push_back( JetCorrectorParameters((prefix+"_L3Absolute_"+jettype+".txt").c_str()));
         parData.push_back( JetCorrectorParameters((prefix+"_L2L3Residual_"+jettype+".txt").c_str()));
         jetCorrectorData= new FactorizedJetCorrector(parData);
+	jecUncData = new JetCorrectionUncertainty((prefix+"_Uncertainty_"+jettype+".txt").c_str());
 
         prefix = base + "/Reference";
         parDataRef.push_back( JetCorrectorParameters((prefix+"_L1FastJet_"+jettype+".txt").c_str()));
@@ -49,6 +53,7 @@ public:
         parDataRef.push_back( JetCorrectorParameters((prefix+"_L3Absolute_"+jettype+".txt").c_str()));
         parDataRef.push_back( JetCorrectorParameters((prefix+"_L2L3Residual_"+jettype+".txt").c_str()));
         jetCorrectorDataRef= new FactorizedJetCorrector(parDataRef);
+	jecUncDataRef = new JetCorrectionUncertainty((prefix+"_Uncertainty_"+jettype+".txt").c_str());
 
         
    }
@@ -70,6 +75,34 @@ public:
         return c;
 
   }
+   float  uncert(float eta, float pt, bool isMC, bool checkRef = false)
+   {
+     JetCorrectionUncertainty *jecUnc;
+     if(checkRef && isMC) jecUnc=jecUncMCRef;
+     if(!checkRef && isMC) jecUnc=jecUncMC;
+     if(checkRef && !isMC) jecUnc=jecUncDataRef;
+     if(!checkRef && !isMC) jecUnc=jecUncData;
+
+     jecUnc->setJetEta(eta);
+     jecUnc->setJetPt(pt); // here you must use the CORRECTED jet pt
+     double unc = jecUnc->getUncertainty(true);
+     return unc;
+   }
+
+  
+   float  uncert(const VHbbEvent::SimpleJet &j, bool isMC, bool checkRef = false)
+   {
+     JetCorrectionUncertainty *jecUnc; 
+     if(checkRef && isMC) jecUnc=jecUncMCRef;
+     if(!checkRef && isMC) jecUnc=jecUncMC;
+     if(checkRef && !isMC) jecUnc=jecUncDataRef;
+     if(!checkRef && !isMC) jecUnc=jecUncData;
+
+     jecUnc->setJetEta(j.p4.Eta());
+     jecUnc->setJetPt(j.p4.Pt()); // here you must use the CORRECTED jet pt
+     double unc = jecUnc->getUncertainty(true);
+     return unc;
+   }
 
    VHbbEvent::SimpleJet correct(const VHbbEvent::SimpleJet &j, float rho, bool isMC, bool checkRef = false)
    {
@@ -111,6 +144,11 @@ public:
    FactorizedJetCorrector * jetCorrectorMCRef;
    FactorizedJetCorrector * jetCorrectorData;
    FactorizedJetCorrector * jetCorrectorDataRef;
+   JetCorrectionUncertainty *jecUncMC;
+   JetCorrectionUncertainty *jecUncMCRef;
+   JetCorrectionUncertainty *jecUncData;
+   JetCorrectionUncertainty *jecUncDataRef;
+
 
 };
 
