@@ -107,9 +107,9 @@ for fileA in listdir("."):
       if not listdir(".").count(fileC):
         raise Exception,"%s exists but %s does not" % (fileA,fileD)
       if fileA.count("Ele"):
-        makeAvg([fileA,fileB,fileC,fileD],[lumiA,lumiB-0.006,lumiC,lumiD],fileA.replace("2012A","2012ABC"),verboseOutput)
+        makeAvg([fileA,fileB,fileC,fileD],[lumiA,lumiB-0.006,lumiC,lumiD],fileA.replace("2012A","2012ABCD"),verboseOutput)
       else:
-        makeAvg([fileA,fileB,fileC,fileD],[lumiA,lumiB,lumiC,lumiD],fileA.replace("2012A","2012ABC"),verboseOutput)
+        makeAvg([fileA,fileB,fileC,fileD],[lumiA,lumiB,lumiC,lumiD],fileA.replace("2012A","2012ABCD"),verboseOutput)
 #      if fileA.count("TrigEff"):
 #        fileB = fileA.replace("2012A","2012B")
 #        if not listdir(".").count(fileB):
