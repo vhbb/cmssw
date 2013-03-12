@@ -14,7 +14,7 @@ process.fwliteInput = cms.PSet(
 ##    "../../HbbAnalyzer/test/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm.root",
 #"dcache:///cmsdcache//pnfs/pi.infn.it/data/cms/store/user/tboccali/WH_WToLNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_ProcV1_WH_WToLNu_HToBB_M-120/14fe2b624ddea84f5c39709f51bf546f/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm_51_1_3LJ.root"
 #/pnfs/pi.infn.it/data/cms/store/user/tboccali/ZH_ZToNuNu_HToBB_M-120_8TeV-powheg-herwigpp/HBB_EDMNtupleV30_ProcV1_ZH_ZToNuNu_HToBB_M-120/14fe2b624ddea84f5c39709f51bf546f/"dcap:///pnfs/cms/WAX/11/store/user/degrutto//testMET2012/PAT.edm_51_1_ukR.root
-"dcache:///pnfs/cms/WAX/11/store/user/lpchbb/msegala/WH_WToLNu_HToBB_M-125_TAU_ID_TEST_PromptV1EdmV42/PAT.edm_1_1_xCI.root"
+'dcap:///pnfs/cms/WAX/11/store/user/lpchbb/msegala/Tau2012D_PromptReco_PromptV1EdmV42_GLIDEIN/PAT.edm_1000_1_zqH.root'
 
 ),
 
@@ -140,7 +140,7 @@ process.Analyzer = cms.PSet(
         "HLT_LooseIsoPFTau35_Trk20_Prong1_MET75_v.*", #53
        
    ),
-    isMC =     cms.bool(True),
+    isMC =     cms.bool(False),
     verbose = cms.bool(False),
     readFromCandidates = cms.bool(False),
     jetPtThresholdZ = cms.double(20),

@@ -623,6 +623,19 @@ id2012tight[j]= i.isPF && i.globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 
 template <> void LeptonInfo::setSpecific<VHbbEvent::TauInfo>(const VHbbEvent::TauInfo &i, int j,const VHbbEventAuxInfo & aux) {
   //std::cout << "In tau set specific" << std::endl;
 
+  pt[j]=i.p4.Pt(); 
+  mass[j]=i.p4.M();
+  eta[j]=i.p4.Eta();
+  phi[j]=i.p4.Phi();
+  pfCombRelIso[j]=(i.pfChaIso+i.pfPhoIso+i.pfNeuIso)/i.p4.Pt();
+  charge[j]=i.charge;
+  if(i.mcFourMomentum.Pt() > 0)
+    { 
+      genPt[j]=i.mcFourMomentum.Pt();
+      genEta[j]=i.mcFourMomentum.Eta();
+      genPhi[j]=i.mcFourMomentum.Phi();
+    }
+
   decayModeFinding[j] = i.decayModeFinding;
   byLooseCombinedIsolationDeltaBetaCorr[j] =i.byLooseCombinedIsolationDeltaBetaCorr;
   againstMuonTight[j] =i.againstMuonTight;
@@ -1075,8 +1088,8 @@ int main(int argc, char* argv[])
   JECFWLite jec(ana.getParameter<std::string>("jecFolder"));
 
   bool isMC_( ana.getParameter<bool>("isMC") );  
-    TriggerReader trigger(false);
-   TriggerReader patFilters(false);
+  TriggerReader trigger(false);
+  TriggerReader patFilters(false);
 
   vector<RLE> badEvents;
   if(!isMC_)
@@ -1467,6 +1480,15 @@ int main(int argc, char* argv[])
   _outTree->Branch("vLepton_wp70",vLeptons.wp70,"wp70[nvlep]/F");
 
   // Adding variables for tau leptons
+  _outTree->Branch("vLeptonTaus_mass",vLeptonsTaus.mass ,"mass[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_pt",vLeptonsTaus.pt ,"pt[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_eta",vLeptonsTaus.eta ,"eta[nvlepTau]");
+  _outTree->Branch("vLeptonTaus_phi",vLeptonsTaus.phi ,"phi[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_pfCombRelIso",vLeptonsTaus.pfCombRelIso ,"pfCombRelIso[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_genPt",vLeptonsTaus.genPt ,"genPt[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_genEta",vLeptonsTaus.genEta ,"genEta[nvlepTau]");
+  _outTree->Branch("vLeptonTaus_genPhi",vLeptonsTaus.genPhi ,"genPhi[nvlepTau]/F");
+  _outTree->Branch("vLeptonTaus_charge",vLeptonsTaus.charge ,"charge[nvlepTau]/F");
   _outTree->Branch("vLeptonTaus_decayModeFinding",vLeptonsTaus.decayModeFinding,"decayModeFinding[nvlepTau]/F");
   _outTree->Branch("vLeptonTaus_byLooseCombinedIsolationDeltaBetaCorr",vLeptonsTaus.byLooseCombinedIsolationDeltaBetaCorr,"byLooseCombinedIsolationDeltaBetaCorr[nvlepTau]/F");
   _outTree->Branch("vLeptonTaus_againstMuonTight",vLeptonsTaus.againstMuonTight,"againstMuonTight[nvlepTau]/F");
@@ -1498,6 +1520,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("vLeptonTaus_againstMuonLoose2",vLeptonsTaus.againstMuonLoose2,"againstMuonLoose2[nvlepTau]/F");
   _outTree->Branch("vLeptonTaus_againstMuonMedium2",vLeptonsTaus.againstMuonMedium2,"againstMuonMedium2[nvlepTau]/F");
   _outTree->Branch("vLeptonTaus_againstMuonTight2",vLeptonsTaus.againstMuonTight2,"againstMuonTight2[nvlepTau]/F");
+
 
   _outTree->Branch("aJet_selectedTauDR",aJets.selectedTauDR ,"selectedTauDR[naJets]/F");
   _outTree->Branch("tauPlusMode"          ,  &tauPlusMode    ,   "tauPlusMode/I");
@@ -2464,7 +2487,6 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 
 	  }
 	vLeptons.reset();
-	vLeptonsTaus.reset();
 	weightTrig = 1.; // better to default to 1 
 	weightTrigMay = -1.;
 	weightTrigV4 = -1.; 
@@ -2472,6 +2494,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 	TLorentzVector leptonForTop;
 	size_t firstAddMu=0;
 	size_t firstAddEle=0;
+	size_t firstAddTau=0;
 	if(Vtype == VHbbCandidate::Zmumu ){
 	  vLeptons.set(vhCand.V.muons[0],0,13,aux); 
 	  vLeptons.set(vhCand.V.muons[vhCand.V.secondLepton],1,13,aux);
@@ -2595,14 +2618,17 @@ double MyWeight = LumiWeights_.weight( Tnpv );
 
 	}
 
+	vLeptonsTaus.reset();
+
 	if(VtypeWithTau==VHbbCandidate::Wtaun){	  
+
 	  if ( vhCand.VTau.taus.size() > 0 ){
 	    vLeptonsTaus.set(vhCand.VTau.taus[0],0,15,aux); 
 	    //cout << vLeptonsTaus.pt[0] << ", " << vLeptonsTaus.decayModeFinding[0] << endl;
 	    nvlepTau=1;
+	    firstAddTau=1;
 	  }
-       	}
-
+	}
 
  if(isMC_)
 {

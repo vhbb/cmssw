@@ -56,7 +56,7 @@ class VHbbCandidateTools {
       std::cout <<" getHWtaunCandidate input mu "<<in.V.muons.size()<<" e "<<in.V.electrons.size()<< " tau " << in.V.taus.size() << std::endl;
       std::cout << " pos.size()=" << pos.size() << std::endl;
     }
-    
+   
     ok = false;
     VHbbCandidate temp=in;
     // require a tau and no electrons or muons
@@ -282,7 +282,7 @@ class VHbbCandidateTools {
     
     temp.V.p4 = temp.V.muons[0].p4+temp.V.mets[0].p4;
     temp.V.firstLeptonOrig=pos[0];
-
+    
     ok=true;
     return temp;
   }
