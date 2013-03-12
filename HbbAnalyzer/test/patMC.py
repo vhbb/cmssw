@@ -744,7 +744,7 @@ process.out.outputCommands = cms.untracked.vstring(
         "keep *_patType1CorrectedPFMet*_*_*",
         "keep *_patType1p2CorrectedPFMet*_*_*",
         "keep *_patMETsHT*_*_*",
-        "keep LHEEventProduct_source_*_LHE",
+        "keep LHEEventProduct_*_*_LHE",
        'keep patTriggerAlgorithms_patTrigger_*_*',
        'keep patTriggerConditions_patTrigger_*_*',
        'keep patTriggerObjects_patTrigger_*_*',
