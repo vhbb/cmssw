@@ -72,7 +72,8 @@ public:
      corr->setRho(rho);
      float scale=corr->getCorrection()*j.ptRaw/j.p4.Pt();
      c.p4= scale * j.p4 ;
-        return c;
+     c.jecunc=uncert(c,isMC,checkRef);   
+     return c;
 
   }
    float  uncert(float eta, float pt, bool isMC, bool checkRef = false)
@@ -131,7 +132,8 @@ public:
  
        } 
  //else {std::cout << "Check ok: " <<  c.p4.Pt() << " vs " <<  j.p4.Pt() << " raw "  << j.ptRaw << " new corr " << corr->getCorrection() << " old " <<  j.p4.Pt()/j.ptRaw << std::endl;}
-     return c;
+  c.jecunc=uncert(c,isMC,checkRef);
+  return c;
    }   
 
    std::vector<JetCorrectorParameters> parMC;
