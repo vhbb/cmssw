@@ -95,70 +95,6 @@ bool jsonContainsEvent (const std::vector< edm::LuminosityBlockRange > &jsonVec,
 
 }
 
-/*  
-template <> void LeptonInfo::setSpecific<VHbbEvent::ElectronInfo>(const VHbbEvent::ElectronInfo & i, int j,const VHbbEventAuxInfo & aux){
-  id80[j]=i.id80;
-  id95[j]=i.id95;
-  id80NoIso[j]=(i.innerHits ==0 && !(fabs(i.convDist)<0.02 && fabs(i.convDcot)<0.02) &&
-((i.isEB && i.sihih<0.01 && fabs(i.Dphi)<0.06 && fabs(i.Deta)<0.004) || (i.isEE && i.sihih<0.03 && fabs(i.Dphi)<0.03  && fabs(i.Deta)<0.007)));
-
-float mincor=0.0;
-float minrho=0.0;
-float rhoN = std::max(aux.puInfo.rhoNeutral,minrho);
-float eta=i.p4.Eta();
-float areagamma=0.5;
-float areaNH=0.5;
-float areaComb=0.5;
-if(fabs(eta) <= 1.0 ) {areagamma=0.081; areaNH=0.024; areaComb=0.10;}
-if(fabs(eta) > 1.0 &&  fabs(eta) <= 1.479 ) {areagamma=0.084; areaNH=0.037; areaComb=0.12;}
-if(fabs(eta) > 1.479 &&  fabs(eta) <= 2.0 ) {areagamma=0.048; areaNH=0.037; areaComb=0.085;}
-if(fabs(eta) > 2.0 &&  fabs(eta) <= 2.2 ) {areagamma=0.089; areaNH=0.023; areaComb=0.11;}
-if(fabs(eta) > 2.2 &&  fabs(eta) <= 2.3 ) {areagamma=0.092; areaNH=0.023; areaComb=0.12;}
-if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areagamma=0.097; areaNH=0.021; areaComb=0.12;}
-if(fabs(eta) > 2.4  ) {areagamma=0.11; areaNH=0.021; areaComb=0.13;}
-
-
-pfCorrIso[j] = (i.pfChaIso+ std::max(i.pfPhoIso-rhoN*areagamma,mincor )+std::max(i.pfNeuIso-rhoN*areaNH,mincor))/i.p4.Pt();
-
-id2012tight[j] = fabs(i.dxy) < 0.02  &&fabs(i.dz) < 0.1  &&(
-(i.isEE  &&fabs(i.Deta) < 0.005 &&fabs(i.Dphi) < 0.02 &&i.sihih < 0.03  &&i.HoE < 0.10  &&fabs(i.fMVAVar_IoEmIoP) < 0.05
-) ||
-(i.isEB  &&fabs(i.Deta) < 0.004 &&fabs(i.Dphi) < 0.03 &&i.sihih < 0.01  &&i.HoE < 0.12  &&fabs(i.fMVAVar_IoEmIoP) < 0.05
- ));
-float id=i.mvaOutTrig;
-float iso=pfCorrIso[j];
-wp70[j]=((fabs(eta) < 0.8 && id>0.977 && iso < 0.093) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.956 && iso < 0.095) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.966 && iso < 0.171));
-wp80[j]=((fabs(eta) < 0.8 && id>0.913 && iso < 0.105) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.964 && iso < 0.178) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.899 && iso < 0.150));
-wp85[j]=((fabs(eta) < 0.8 && id>0.929 && iso < 0.135) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.931 && iso < 0.159) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.805 && iso < 0.155));
-wp90[j]=((fabs(eta) < 0.8 && id>0.877 && iso < 0.177) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.794 && iso < 0.180) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.846 && iso < 0.244));
-wp95[j]=((fabs(eta) < 0.8 && id>0.858 && iso < 0.253) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.425 && iso < 0.225) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.759 && iso < 0.308));
-wpHWW[j]=((fabs(eta) < 0.8 && id>0.94 && iso < 0.15) ||  (fabs(eta) >= 0.8 && fabs(eta) < 1.479 && id>0.85 && iso < 0.15) || (fabs(eta) >= 1.479 && fabs(eta) < 2.5 && id>0.92 && iso < 0.15));
-
- idMVAnotrig[j]=i.mvaOut;
- idMVAtrig[j]=i.mvaOutTrig;
-
-}
-template <> void LeptonInfo::setSpecific<VHbbEvent::MuonInfo>(const VHbbEvent::MuonInfo & i, int j,const VHbbEventAuxInfo & aux){
-  dxy[j]=i.ipDb;
-  dz[j]=i.zPVPt;
-  vbtf[j]=( i.globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 && i.nHits > 10 && i.cat & 0x1 && i.cat & 0x2 && i.nMatches >=2 && i.ipDb<.2 &&
-        (i.pfChaIso+i.pfPhoIso+i.pfNeuIso)/i.p4.Pt()<.15  && fabs(i.p4.Eta())<2.4 && i.p4.Pt()>20 ) ;
-float mincor=0.0;
-float minrho=0.0;
-float rhoN = std::max(aux.puInfo.rhoNeutral,minrho);
-float eta=i.p4.Eta();
-float area=0.5;
-if(fabs(eta)>0.0 && fabs(eta) <= 1.0) {area=0.674;}
-if(fabs(eta)>1.0 && fabs(eta) <= 1.5) {area=0.565;}
-if(fabs(eta)>1.5 && fabs(eta) <= 2.0) {area=0.442;}
-if(fabs(eta)>2.0 && fabs(eta) <= 2.2) {area=0.515;}
-if(fabs(eta)>2.2 && fabs(eta) <= 2.3) {area=0.821;}
-if(fabs(eta)>2.3 && fabs(eta) <= 2.4) {area=0.660;}
-pfCorrIso[j] = (i.pfChaIso+ std::max(i.pfPhoIso+i.pfNeuIso-rhoN*area,mincor))/i.p4.Pt();
-id2012tight[j]= i.isPF && i. globChi2<10 && i.nPixelHits>= 1 && i.globNHits != 0 && i.nValidLayers > 5 &&         (i.cat & 0x2) && i.nMatches >=2 && i.ipDb<.2;
-}
-*/
-
 // Copied from electron selection and setSpecific
 float ElectronIso(const VHbbEvent::ElectronInfo &i,float rho) {
   float mincor=0.0;
@@ -169,6 +105,17 @@ float ElectronIso(const VHbbEvent::ElectronInfo &i,float rho) {
   float areaNH=0.5;
   float areaComb=0.5;
 
+  // new EA for electrons to use for Moriond 13
+  if(fabs(eta) <= 1.0 ) {areaComb=0.21;}
+  if(fabs(eta) > 1.0 &&  fabs(eta) <= 1.479 ) {areaComb=0.21;}
+  if(fabs(eta) > 1.479 &&  fabs(eta) <= 2.0 ) {areaComb=0.11;}
+  if(fabs(eta) > 2.0 &&  fabs(eta) <= 2.2 ) {areaComb=0.14;}
+  if(fabs(eta) > 2.2 &&  fabs(eta) <= 2.3 ) {areaComb=0.18;}
+  if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areaComb=0.19;}
+  if(fabs(eta) > 2.4  ) {areaComb=0.26;}
+
+
+  /*
   if(fabs(eta) <= 1.0 ) {areagamma=0.14; areaNH=0.044; areaComb=0.18;}
   if(fabs(eta) > 1.0 &&  fabs(eta) <= 1.479 ) {areagamma=0.13; areaNH=0.065; areaComb=0.20;}
   if(fabs(eta) > 1.479 &&  fabs(eta) <= 2.0 ) {areagamma=0.079; areaNH=0.068; areaComb=0.15;}
@@ -176,7 +123,7 @@ float ElectronIso(const VHbbEvent::ElectronInfo &i,float rho) {
   if(fabs(eta) > 2.2 &&  fabs(eta) <= 2.3 ) {areagamma=0.15; areaNH=0.058; areaComb=0.21;}
   if(fabs(eta) > 2.3 &&  fabs(eta) <= 2.4 ) {areagamma=0.16; areaNH=0.061; areaComb=0.22;}
   if(fabs(eta) > 2.4  ) {areagamma=0.18; areaNH=0.11; areaComb=0.29;}
-
+  */
 
   /*
   if(fabs(eta) <= 1.0 ) {areagamma=0.081; areaNH=0.024; areaComb=0.10;}
@@ -195,7 +142,12 @@ float ElectronIso(const VHbbEvent::ElectronInfo &i,float rho) {
       pho-=i.pfPhoIsoDoubleCounted;
     }
   
-  float pfCorrIso = (i.pfChaIso+ std::max(pho-rhoN*areagamma,mincor )+std::max(i.pfNeuIso-rhoN*areaNH,mincor))/i.p4.Pt();
+  // HCP 12
+  //  float pfCorrIso = (i.pfChaIso+ std::max(pho-rhoN*areagamma,mincor )+std::max(i.pfNeuIso-rhoN*areaNH,mincor))/i.p4.Pt();
+
+  // Moriond 13
+  float pfCorrIso = (i.pfChaIso+ std::max(pho+i.pfNeuIso-rho*areaComb,mincor))/i.p4.Pt();
+
   return pfCorrIso;
 }
 
@@ -275,6 +227,7 @@ bool ElectronWP(const VHbbEvent::ElectronInfo &i,float rho,int wp, bool requireI
 float muon2012PfCorrIso(const VHbbEvent::MuonInfo & i, float rho) {
   float mincor=0.0;
   float minrho=0.0;
+  float NoverCh=0.5;
   float rhoN = std::max(rho,minrho);
   float eta=i.p4.Eta();
   float area=0.5;
@@ -284,7 +237,13 @@ float muon2012PfCorrIso(const VHbbEvent::MuonInfo & i, float rho) {
   if(fabs(eta)>2.0 && fabs(eta) <= 2.2) {area=0.515;}
   if(fabs(eta)>2.2 && fabs(eta) <= 2.3) {area=0.821;}
   if(fabs(eta)>2.3 && fabs(eta) <= 2.4) {area=0.660;}
-  float pfCorrIso = (i.pfChaIso+ std::max(i.pfPhoIso+i.pfNeuIso-rhoN*area,mincor))/i.p4.Pt();
+
+  // EA Corrections
+  // pfCorrIso[j] = (i.pfChaIso+ std::max(i.pfPhoIso+i.pfNeuIso-rhoN*area,mincor))/i.p4.Pt();
+
+  // dBeta correction
+  float pfCorrIso = (i.pfChaIso+ std::max(i.pfPhoIso+i.pfNeuIso-NoverCh*i.pfChaPUIso,mincor))/i.p4.Pt();
+
   return pfCorrIso;
 }
 
@@ -415,8 +374,64 @@ int main(int argc, char* argv[])
   TDirectory * eleTrigDir = _outFile->mkdir("eleTrigDir");
   TDirectory *eleRecoDir = _outFile->mkdir("eleRecoDir");
   TDirectory *eleRecoIsoDir = _outFile->mkdir("eleRecoIsoDir");
+  TDirectory *extraDir = _outFile->mkdir("extraDir");
+
+  const Int_t MAX = 20;
+  typedef struct {
+    Int_t nj;
+    Float_t jpt[MAX];
+    Float_t jeta[MAX];
+    Int_t nmu;
+    Float_t mupt[MAX];
+    Float_t mueta[MAX];
+    Int_t nele;
+    Int_t hltEle27;
+    Int_t hltDiEle;
+    Float_t dielemass;
+    Float_t elept[MAX];
+    Float_t eleeta[MAX];
+    Int_t wp80[MAX];
+    Int_t wp95[MAX];
+    Float_t mva[MAX];
+    Float_t iso[MAX];
+    Float_t presel[MAX];
+    Float_t pfPhoIsoDoubleCounted[MAX];
+    Float_t nearestJetDR[MAX];
+  } extraStruct;
+
+  extraStruct es;
 
   int eventNumber, runNumber, lb;
+
+  int nTruePVs;
+
+  TTree *extraTree = new TTree("extraTree","extraTree"); extraTree->SetDirectory(extraDir);
+  extraTree->Branch("nj",&es.nj,"nj/I");
+  extraTree->Branch("jpt",es.jpt,"jpt[nj]/F");
+  extraTree->Branch("jeta",es.jeta,"jeta[nj]/F");
+  extraTree->Branch("nmu",&es.nmu,"nmu/I");
+  extraTree->Branch("mupt",es.mupt,"mupt[nmu]/F");
+  extraTree->Branch("mueta",es.mueta,"mueta[nmu]/F");
+  extraTree->Branch("nele",&es.nele,"nele/I");
+  extraTree->Branch("hltEle27",&es.hltEle27,"hltEle27/I");
+  extraTree->Branch("hltDiEle",&es.hltDiEle,"hltDiEle/I");
+  extraTree->Branch("dielemass",&es.dielemass,"dielemass/F");
+  extraTree->Branch("elept",es.elept,"elept[nele]/F");
+  extraTree->Branch("eleeta",es.eleeta,"eleeta[nele]/F");
+  extraTree->Branch("mva",es.mva,"mva[nele]/F");
+  extraTree->Branch("iso",es.iso,"iso[nele]/F");
+  extraTree->Branch("presel",es.presel,"presel[nele]/F");
+  extraTree->Branch("wp80",es.wp80,"wp80[nele]/I");
+  extraTree->Branch("wp95",es.wp95,"wp95[nele]/I");
+  extraTree->Branch("pfPhoIsoDoubleCounted",es.pfPhoIsoDoubleCounted,"pfPhoIsoDoubleCounted[nele]/F");
+  extraTree->Branch("nearestJetDR",es.nearestJetDR,"nearestJetDR[nele]/F");
+  extraTree->Branch("nPVs", &nPVs, "nPVs/I");
+  extraTree->Branch("eventNumber", &eventNumber, "eventNumber/I");
+  extraTree->Branch("runNumber", &runNumber, "runNumber/I");
+  extraTree->Branch("lb", &lb, "lb/I");
+  extraTree->Branch("PUweight",&PUweight,"PUweight/F");
+  extraTree->Branch("nTruePVs",&nTruePVs,"nTruePVs/I");
+
 
   float muTrigTree_tag_pt, muTrigTree_tag_eta, muTrigTree_probe_pt, muTrigTree_probe_eta, muTrigTree_mass, muTrigTree_tag_phi, muTrigTree_probe_phi;
   int muTrigTree_probe_passingIsoMu24L1, muTrigTree_probe_passingIsoMu24L2, muTrigTree_probe_passingIsoMu24L3, muTrigTree_probe_passingIsoMu24Iso;
@@ -873,7 +888,17 @@ int main(int argc, char* argv[])
       if(int(ev.id().run()) < runMin_ && runMin_ > 0) continue;
       if(int(ev.id().run()) > runMax_ && runMax_ > 0) continue;
 
-      if (ievt%1000==0) cout << " Entry=" << ievt << " event=" << ev.id().event() << " run=" << ev.id().run() << " lb=" << ev.id().luminosityBlock() << endl;
+      //      if (ievt%1000==0) cout << " Entry=" << ievt << " event=" << ev.id().event() << " run=" << ev.id().run() << " lb=" << ev.id().luminosityBlock() << endl;
+      if (ievt%1000==0) cout << " Entry=" << ievt << " event=" << ev.id().event() << " run=" << ev.id().run() << " lb=" << ev.id().luminosityBlock()
+                             << " jsonContainsEvent=" << jsonContainsEvent (jsonVector, ev) << endl;
+
+      if (!isMC_ && !jsonContainsEvent (jsonVector, ev)) {
+        if (verbose_) {
+          cout << "Skipping event because of JSON... ";
+          cout << " Entry=" << ievt << " event=" << ev.id().event() << " run=" << ev.id().run() << " lb=" << ev.id().luminosityBlock() << endl;
+        }
+        continue;
+      }
 
       lumiWeight = 1.;
 
@@ -901,7 +926,7 @@ int main(int argc, char* argv[])
       PUweight2011B=1.;
       PUweight1DObs=1.;
       if(isMC_){
-	cout << "truePU = " << aux.puInfo.truePU << endl;
+	if (verbose_) cout << "truePU = " << aux.puInfo.truePU << endl;
 	// PU weights // Run2011A
 	std::map<int, unsigned int>::const_iterator puit = aux.puInfo.pus.find(0);
 	int npu =puit->second ;
@@ -919,6 +944,9 @@ int main(int argc, char* argv[])
 //	lumiWeight = lumiWeights2011B.weight3D( puitm1->second, puit0->second,puitp1->second); 
 //	PUweight2011B = lumiWeights2011B.weight3D( puitm1->second, puit0->second,puitp1->second); 
 	PUweight1DObs = lumiWeights1DObs.weight( npu); 
+	nTruePVs = (int) aux.puInfo.truePU;
+      } else {
+	nTruePVs = 0;
       }
 
       if (verbose_) cout << "Weights: " << PUweight2011B << " " << PUweight1DObs << " " << PUweight << endl;
@@ -983,7 +1011,9 @@ int main(int argc, char* argv[])
 	std::string diEleName8 = "hltEle17TightIdLooseIsoEle8TightIdLooseIsoTrackIsoDoubleFilter";
 	std::string diEleNameDz = "hltEle17TightIdLooseIsoEle8TightIdLooseIsoTrackIsoDZ";
 
-        if (runNumber>= 193834) {
+	if (verbose_) std::cout << "runNumber: " << runNumber << std::endl;
+
+        if (runNumber>= 193834 || runNumber<100000 /*i.e. MC*/) {
           mu40name = "HLT_Mu40_v";
           mu40nameL1 = "hltL1sMu16";
           mu40nameL2 = "hltL2fL1sMu16L1f0L2Filtered16Q";
@@ -999,10 +1029,16 @@ int main(int argc, char* argv[])
         }
 
 
-	if (runNumber >= 194270) {
+	if (runNumber >= 194270  || runNumber<100000 /*i.e. MC*/) {
 	  mu20name = "HLT_IsoMu20_WCandPt80_v";
 	  mu20nameIso = "hltL3crIsoL1sMu16L1f0L2f16QL3f20QL3crIsoRhoFiltered0p15";
 	  mu20nameWCand = "hlt2IsoMu20PFMHTPt80";
+	}
+
+	if (runNumber >= 196046) {
+	  diMuName17 = "hltL3fL1DoubleMu10MuOpenOR3p5L1f0L2f10L3Filtered17";
+	  diMuName8 = "hltL3pfL1DoubleMu10MuOpenOR3p5L1f0L2pf0L3PreFiltered8";
+	  diMuNameDz = "hltDiMuonGlb17Glb8DzFiltered0p2"; // only in 2012C; none at all in 2012B
 	}
 
 
@@ -1365,7 +1401,7 @@ int main(int argc, char* argv[])
 	      muTrigTree_probe_passingDiMuL210 = 0;
 	      muTrigTree_probe_passingDiMu8 = 0;
 	      muTrigTree_probe_passingDiMu17 = 0;
-	      muTrigTree_probe_passingDiMuDz = 0;
+	      muTrigTree_probe_passingDiMuDz = (runNumber >= 193834 || runNumber < 199648); // No Dz filter for these runs, so just declare it passes!
               muTrigTree_probe_passingDiMuTkL1 = 0;
               muTrigTree_probe_passingDiMuTkL2 = 0;
               muTrigTree_probe_passingDiMuTk8 = 0;
@@ -2191,7 +2227,7 @@ int main(int argc, char* argv[])
             
 	  } // matched ele tag
 	} // potential ele tag
-        
+
 
 	/*
         for(size_t m=0;m<iEvent->eleInfo.size();m++) {
@@ -2255,7 +2291,49 @@ int main(int argc, char* argv[])
 	    }
 	  }
 	}
-	  
+
+	es.nj = 0;
+	for(size_t j=0; j< iEvent->simpleJets2.size(); j++) {
+	  es.jpt[es.nj] = iEvent->simpleJets2[j].p4.Pt();
+	  es.jeta[es.nj] = iEvent->simpleJets2[j].p4.Eta();
+	  es.nj++;
+	}
+	es.nmu = 0;
+        for(size_t m=0;m<iEvent->muInfo.size();m++) {
+          if (muonId2012Tight(iEvent->muInfo[m],rhoN)) {
+	    es.mupt[es.nmu] = iEvent->muInfo[m].p4.Pt();
+	    es.mueta[es.nmu] = iEvent->muInfo[m].p4.Eta();
+	    es.nmu++;
+	  }
+	}
+	es.nele = 0;
+	es.hltEle27 = (ele27HLT.size()>=1);
+	es.hltDiEle = (diEle8.size()>=1&&diEle17.size()>=1);
+	for(size_t m=0;m<iEvent->eleInfo.size();m++) {
+	  es.elept[es.nele] = iEvent->eleInfo[m].p4.Pt();
+	  es.eleeta[es.nele] = iEvent->eleInfo[m].p4.Eta();
+	  es.wp80[es.nele] = ElectronWP(iEvent->eleInfo[m],rhoForEleIso,80);
+	  es.wp95[es.nele] = ElectronWP(iEvent->eleInfo[m],rhoForEleIso,95);
+	  es.mva[es.nele] = iEvent->eleInfo[m].mvaOutTrig;
+	  es.presel[es.nele] = ElectronPresel(iEvent->eleInfo[m]);
+	  es.iso[es.nele] = ElectronIso(iEvent->eleInfo[m],rhoForEleIso);
+	  es.pfPhoIsoDoubleCounted[es.nele] = iEvent->eleInfo[m].pfPhoIsoDoubleCounted;
+	  for(size_t j=0; j< iEvent->simpleJets2.size(); j++) {
+	    es.nearestJetDR[m] = 999.;
+	    if (iEvent->simpleJets2[j].p4.Pt() > 20. && fabs(iEvent->simpleJets2[j].p4.Eta()) < 2.5) {
+	      float dr = iEvent->simpleJets2[j].p4.DeltaR(iEvent->eleInfo[m].p4);
+	      if (dr < es.nearestJetDR[m]) es.nearestJetDR[m] = dr;
+	    }
+	  }
+	  es.nele++;
+	}
+	if (es.nele == 2) {
+	  es.dielemass = (iEvent->eleInfo[0].p4 + iEvent->eleInfo[1].p4).M();
+	} else {
+	  es.dielemass = -999.;
+	}
+	extraTree->Fill();
+
 	  
 	} // closed event loop
 
@@ -2277,7 +2355,8 @@ int main(int argc, char* argv[])
   muRecoIsoDir->cd() ; muRecoIsoTree->Write();  
   eleTrigDir->cd();  eleTrigTree->Write();
   eleRecoDir->cd();  eleRecoTree->Write();
-    eleRecoIsoDir->cd() ; eleRecoIsoTree->Write();  
+  eleRecoIsoDir->cd() ; eleRecoIsoTree->Write();  
+  extraDir->cd() ; extraDir->Write();
   _outFile->Write();
   _outFile->Close();
   return 0;
