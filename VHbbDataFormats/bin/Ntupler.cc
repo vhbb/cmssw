@@ -327,7 +327,19 @@ typedef struct
   float momid;
 } genParticleInfo;
 
-
+genParticleInfo returnGenParticleInfo(const reco::Candidate *p)
+{
+  genParticleInfo pInfo;
+  TLorentzVector p_p4(p->px(), p->py(), p->pz(), p->energy());
+  pInfo.mass=p_p4.M();
+  pInfo.pt=p_p4.Pt();
+  pInfo.eta=p_p4.Eta();
+  pInfo.phi=p_p4.Phi();
+  pInfo.status=p->status();
+  pInfo.charge=p->charge();
+  pInfo.momid=p->mother(0)->pdgId();
+  return pInfo;
+} 
 
 typedef struct 
 
@@ -932,6 +944,7 @@ int main(int argc, char* argv[])
   HiggsInfo H,SVH,SimBsH;
   FatHiggsInfo FatH;
   genParticleInfo genZ, genZstar, genWstar, genW,  genH, genB, genBbar; //add here the fatjet higgs
+	genParticleInfo genX, genH1, genH1B, genH1Bbar, genH2, genH2B, genH2Bbar;
   genTopInfo genTop, genTbar;
   TrackInfo V;
   TrackInfo VTau;
@@ -1086,6 +1099,8 @@ int main(int argc, char* argv[])
   std::string Weight3DfileName_ = in.getParameter<std::string> ("Weight3DfileName") ;
   
   JECFWLite jec(ana.getParameter<std::string>("jecFolder"));
+	
+	bool isZbbHbbAnalysis_(ana.getParameter<bool>("isZbbHbbAnalysis"));
 
   bool isMC_( ana.getParameter<bool>("isMC") );  
   TriggerReader trigger(false);
@@ -1168,6 +1183,16 @@ int main(int argc, char* argv[])
 
   _outTree->Branch("genTop"		,  &genTop	            ,  "bmass/F:bpt/F:beta:bphi/F:bstatus/F:wdau1mass/F:wdau1pt/F:wdau1eta:wdau1phi/F:wdau1id/F:wdau2mass/F:wdau2pt/F:wdau2eta:wdau2phi/F:wdau2id/F");
   _outTree->Branch("genTbar"		,  &genTbar	            ,  "bmass/F:bpt/F:beta:bphi/F:bstatus/F:wdau1mass/F:wdau1pt/F:wdau1eta:wdau1phi/F:wdau1id/F:wdau2mass/F:wdau2pt/F:wdau2eta:wdau2phi/F:wdau2id/F");
+
+  // --- Souvik's addition for HbbHbb ---
+  _outTree->Branch("genX", &genX, "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+  _outTree->Branch("genH1", &genH1, "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+  _outTree->Branch("genH2", &genH2, "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+  _outTree->Branch("genH1B", &genH1B, "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+  _outTree->Branch("genH1Bbar", &genH1Bbar, "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+  _outTree->Branch("genH2B", &genH2B, "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+  _outTree->Branch("genH2Bbar", &genH2Bbar, "mass/F:pt/F:eta:phi/F:status/F:charge:momid/F");
+  // ------------------------------------
 
   _outTree->Branch("TkSharing", &TkSharing, "HiggsCSVtkSharing/b:HiggsIPtkSharing:HiggsSVtkSharing:FatHiggsCSVtkSharing:FatHiggsIPtkSharing:FatHiggsSVtkSharing");
 
@@ -1679,8 +1704,61 @@ int main(int argc, char* argv[])
       if(EVENT.run > runMax_ && runMax_ > 0) continue;
 
       count->Fill(1.);
-
-
+			
+      // Fill the ntuples with H(bb)H(bb) generator level information
+      if (isMC_)
+      {
+        fwlite::Handle <reco::GenParticleCollection> genParticlesHandle;
+	      genParticlesHandle.getByLabel(ev, "savedGenParticles");
+	      const reco::GenParticleCollection *genParticles=&(*genParticlesHandle.product());
+	
+        for (size_t i=0; i<genParticles->size(); ++i)
+        {
+          const reco::GenParticle *p=&((*genParticles).at(i));
+          int id=p->pdgId();
+          int st=p->status();
+          if (abs(id)==35 && st==3) // H0
+          {
+            genX=returnGenParticleInfo(p);
+            
+            const reco::Candidate *H1_cand=p->daughter(0);
+            if (H1_cand->pdgId()==25)
+            {
+              genH1=returnGenParticleInfo(H1_cand);
+              const reco::Candidate *H1B_cand=H1_cand->daughter(0);
+              if (H1B_cand->pdgId()==5)
+              {
+                genH1B=returnGenParticleInfo(H1B_cand);
+              }
+              else std::cout<<"ERROR: First h0's first daughter is not a b!"<<std::endl;
+              const reco::Candidate *H1Bbar_cand=H1_cand->daughter(1);
+              if (H1Bbar_cand->pdgId()==-5)
+              {
+                genH1Bbar=returnGenParticleInfo(H1Bbar_cand);
+              }
+              else std::cout<<"ERROR: First h0's second daughter is not a bbar!"<<std::endl;
+            }
+            else std::cout<<"ERROR: H0's first daughter is not an h0!"<<std::endl;
+            const reco::Candidate *H2_cand=p->daughter(1);
+            if (H2_cand->pdgId()==25)
+            {
+              genH2=returnGenParticleInfo(H2_cand);
+              const reco::Candidate *H2B_cand=H2_cand->daughter(0);
+              if (H2B_cand->pdgId()==5)
+              {
+                genH2B=returnGenParticleInfo(H2B_cand);
+              }
+              else std::cout<<"ERROR: Second h0's first daughter is not a b!"<<std::endl;
+              const reco::Candidate *H2Bbar_cand=H2_cand->daughter(1);
+              if (H2Bbar_cand->pdgId()==-5)
+              {
+                genH2Bbar=returnGenParticleInfo(H2Bbar_cand);
+              }
+              else std::cout<<"ERROR: Second h0's second daughter is not a bbar!"<<std::endl;
+            } else std::cout<<"ERROR: H0's second daughter is not an h0!"<<std::endl;
+          }
+        }
+      }
 
 /*
 Handle<std::vector< PileupSummaryInfo > >  PupInfo;
@@ -1950,7 +2028,7 @@ double MyWeight = LumiWeights_.weight( Tnpv );
  
             }  
 
-	    algoZ->run(iEvent,*candZlocal,aux);
+	    algoZ->run(iEvent,*candZlocal,aux, isZbbHbbAnalysis_);
 	    algoW->run(iEvent,*candWlocal,aux);
 
 

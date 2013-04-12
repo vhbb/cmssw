@@ -83,6 +83,7 @@ process.fwliteOutput = cms.PSet(
     )
 
 process.Analyzer = cms.PSet(
+    isZbbHbbAnalysis = cms.bool(False),
     triggers = cms.vstring(
 	"HLT_IsoMu17_v.*" , #0
 	"HLT_DoubleMu7_v.*", #1

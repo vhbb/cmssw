@@ -32,6 +32,13 @@ class VHbbCandidateTools {
     }
     return dphi;
   }
+	
+	VHbbCandidate getHZbbCandidate(const VHbbCandidate &in, bool &ok)
+	{
+	  if (verbose_) std::cout<<"In getHZbbCandidate(...)"<<std::endl;
+	  ok=true;
+	  return in;
+	}
   
   
   VHbbCandidate getHZtaumuCandidate(const VHbbCandidate & in, bool & ok, std::vector<unsigned int>& muPos, std::vector<unsigned int>& tauPos){
