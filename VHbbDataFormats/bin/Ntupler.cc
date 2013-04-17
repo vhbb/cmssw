@@ -1239,7 +1239,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("hJet_SoftLeptdR", hJets.SoftLeptdR , "SoftLeptdR[nhJets]/F");
   _outTree->Branch("hJet_SoftLeptptRel", hJets.SoftLeptptRel , "SoftLeptptRel[nhJets]/F");
   _outTree->Branch("hJet_SoftLeptRelCombIso", hJets.SoftLeptRelCombIso , "SoftLeptRelCombIso[nhJets]/F");
- _outTree->Branch("hJet_genPt",hJets.genPt ,"genPt[nhJets]/F");
+  _outTree->Branch("hJet_genPt",hJets.genPt ,"genPt[nhJets]/F");
   _outTree->Branch("hJet_genEta",hJets.genEta ,"genEta[nhJets]/F");
   _outTree->Branch("hJet_genPhi",hJets.genPhi ,"genPhi[nhJets]/F");
   _outTree->Branch("hJet_JECUnc",hJets.JECUnc ,"JECUnc[nhJets]/F");
@@ -1358,6 +1358,7 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_genPhi",aJets.genPhi ,"genPhi[naJets]/F");
   _outTree->Branch("aJet_JECUnc",aJets.JECUnc ,"JECUnc[naJets]/F");
   _outTree->Branch("aJet_vtxMass",aJets.vtxMass ,"vtxMass[naJets]/F");
+	_outTree->Branch("aJet_vtxPt",aJets.vtxPt ,"vtxPt[naJets]/F");
   _outTree->Branch("aJet_vtx3dL",aJets.vtx3dL ,"vtx3dL[naJets]/F");
   _outTree->Branch("aJet_vtx3deL",aJets.vtx3deL ,"vtx3deL[naJets]/F");
   _outTree->Branch("aJet_id",aJets.id ,"id[naJets]/b");
@@ -1367,6 +1368,8 @@ int main(int argc, char* argv[])
   _outTree->Branch("aJet_SF_CSVLerr",aJets.SF_CSVLerr ,"SF_CSVLerr[naJets]/b");
   _outTree->Branch("aJet_SF_CSVMerr",aJets.SF_CSVMerr ,"SF_CSVMerr[naJets]/b");
   _outTree->Branch("aJet_SF_CSVTerr",aJets.SF_CSVTerr ,"SF_CSVTerr[naJets]/b");
+	_outTree->Branch("aJet_ptRaw",aJets.ptRaw ,"ptRaw[naJets]/F");
+  _outTree->Branch("aJet_ptLeadTrack",aJets.ptLeadTrack ,"ptLeadTrack[naJets]/F");
 
   _outTree->Branch("naJetsFat"             ,  &naJetsFat                  ,  "naJetsFat/I");
   _outTree->Branch("aJetFat_pt",aJetsFat.pt ,"pt[naJetsFat]/F");
