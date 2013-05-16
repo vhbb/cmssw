@@ -1,6 +1,0 @@
-<use name="UserCode/EWKV"/>
-<use name="lhapdf"/>
-<environment>
-  <bin name="runTopAnalysis"  file="runTopAnalysis.cc"></bin> 
-</environment>
-<Flags CXXFLAGS="-g"/>
