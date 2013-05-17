@@ -1,6 +1,6 @@
 import operator
 import copy
-import math
+import math, os
 from ROOT import Math as ROOTmath, reco
 from CMGTools.RootTools.fwlite.Analyzer import Analyzer
 from CMGTools.RootTools.statistics.Counter import Counter, Counters
@@ -40,10 +40,10 @@ class WAnalyzer( Analyzer ):
         # MVAMet::MVAType  iType=kBaseline);
 
         self.mvamet.Initialize(0,
-                          '/afs/cern.ch/work/p/perrozzi/private/CMGTools/CMGTools/CMSSW_4_4_5/src/CMGTools/Utilities/data/mvaMET/gbrmet_42.root',
-                          '/afs/cern.ch/work/p/perrozzi/private/CMGTools/CMGTools/CMSSW_4_4_5/src/CMGTools/Utilities/data/mvaMET/gbrmetphi_42.root',
-                          '/afs/cern.ch/work/p/perrozzi/private/CMGTools/CMGTools/CMSSW_4_4_5/src/CMGTools/Utilities/data/mvaMET/gbrmetu1cov_42.root',
-                          '/afs/cern.ch/work/p/perrozzi/private/CMGTools/CMGTools/CMSSW_4_4_5/src/CMGTools/Utilities/data/mvaMET/gbrmetu2cov_42.root',
+                          os.environ['CMSSW_BASE'] + 'src/CMGTools/Utilities/data/mvaMET/gbrmet_42.root',
+                          os.environ['CMSSW_BASE'] + 'src/CMGTools/Utilities/data/mvaMET/gbrmetphi_42.root',
+                          os.environ['CMSSW_BASE'] + 'src/CMGTools/Utilities/data/mvaMET/gbrmetu1cov_42.root',
+                          os.environ['CMSSW_BASE'] + 'src/CMGTools/Utilities/data/mvaMET/gbrmetu2cov_42.root',
                           0
                           )
 
