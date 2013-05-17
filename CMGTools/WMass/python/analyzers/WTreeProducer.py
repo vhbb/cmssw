@@ -114,8 +114,8 @@ class WTreeProducer( TreeAnalyzerNumpy ):
       var( tr, 'noTrgMuonsLeadingPt', int)
 
       bookMET( tr, 'pfmet')
-      var( tr, 'MVAmet')
-      var( tr, 'MVAmet_phi')
+      # var( tr, 'MVAmet')
+      # var( tr, 'MVAmet_phi')
       
       bookW( tr, 'W')
       var( tr, 'W_mt')
@@ -169,8 +169,8 @@ class WTreeProducer( TreeAnalyzerNumpy ):
           fill(tr, 'MuIsTight', event.selMuonIsTight)
           fill(tr, 'MuRelIso', event.selMuons[0].relIso(0.5))
 
-          fill(tr, 'MVAmet', event.mvamet.pt())
-          fill(tr, 'MVAmet_phi', event.mvamet.phi())
+          # fill(tr, 'MVAmet', event.mvamet.pt())
+          # fill(tr, 'MVAmet_phi', event.mvamet.phi())
           
         if (event.savegenpW and self.cfg_comp.isMC) or event.WGoodEvent:
           fill( tr, 'run', event.run) 

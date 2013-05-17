@@ -8,7 +8,7 @@ from CMGTools.RootTools.fwlite.AutoHandle import AutoHandle
 from CMGTools.RootTools.physicsobjects.PhysicsObjects import Muon, Jet, GenParticle
 from CMGTools.RootTools.utils.TriggerMatching import triggerMatched
 from CMGTools.RootTools.utils.DeltaR import bestMatch, deltaR, deltaR2
-from CMGTools.Utilities.mvaMET.mvaMet import MVAMet, PFMET
+# from CMGTools.Utilities.mvaMET.mvaMet import MVAMet, PFMET
 
 class WAnalyzer( Analyzer ):
 
@@ -30,7 +30,7 @@ class WAnalyzer( Analyzer ):
         count.register('W pt<20')
         count.register('W Jet_leading_pt<30')
         
-        self.mvamet = MVAMet() # SHOULD BE MVAMet(0.1)
+        # self.mvamet = MVAMet() # SHOULD BE MVAMet(0.1)
 
         # void    Initialize(const edm::ParameterSet &iConfig, 
         # TString iU1Weights      ="$CMSSW_BASE/src/pharris/data/gbrmet_52.root",
@@ -39,13 +39,13 @@ class WAnalyzer( Analyzer ):
         # TString iCovU2Weights   ="$CMSSW_BASE/src/pharris/data/gbrcovu2_52.root",
         # MVAMet::MVAType  iType=kBaseline);
 
-        self.mvamet.Initialize(0,
-                          os.environ['CMSSW_BASE'] + 'src/CMGTools/Utilities/data/mvaMET/gbrmet_42.root',
-                          os.environ['CMSSW_BASE'] + 'src/CMGTools/Utilities/data/mvaMET/gbrmetphi_42.root',
-                          os.environ['CMSSW_BASE'] + 'src/CMGTools/Utilities/data/mvaMET/gbrmetu1cov_42.root',
-                          os.environ['CMSSW_BASE'] + 'src/CMGTools/Utilities/data/mvaMET/gbrmetu2cov_42.root',
-                          0
-                          )
+        # self.mvamet.Initialize(0,
+                          # os.environ['CMSSW_BASE'] + 'src/CMGTools/Utilities/data/mvaMET/gbrmet_42.root',
+                          # os.environ['CMSSW_BASE'] + 'src/CMGTools/Utilities/data/mvaMET/gbrmetphi_42.root',
+                          # os.environ['CMSSW_BASE'] + 'src/CMGTools/Utilities/data/mvaMET/gbrmetu1cov_42.root',
+                          # os.environ['CMSSW_BASE'] + 'src/CMGTools/Utilities/data/mvaMET/gbrmetu2cov_42.root',
+                          # 0
+                          # )
 
 
     def buildLeptons(self, cmgMuons, event):
@@ -251,69 +251,69 @@ class WAnalyzer( Analyzer ):
           
         # Clean various METs (but PUMET)
         
-        dummyVertex = ROOTmath.XYZPointD()
+        # dummyVertex = ROOTmath.XYZPointD()
         
-        cleanpfmetp4 = event.pfMetForRegression.p4() + event.selMuons[0].p4()
-        cleanpfmetsumet = event.pfMetForRegression.sumEt() - event.selMuons[0].pt()
-        event.cleanpfmet = PFMET(event.pfMetForRegression.getSpecific(),cleanpfmetsumet,cleanpfmetp4,dummyVertex)
+        # cleanpfmetp4 = event.pfMetForRegression.p4() + event.selMuons[0].p4()
+        # cleanpfmetsumet = event.pfMetForRegression.sumEt() - event.selMuons[0].pt()
+        # event.cleanpfmet = PFMET(event.pfMetForRegression.getSpecific(),cleanpfmetsumet,cleanpfmetp4,dummyVertex)
         
-        cleanpucmetp4 = event.pucmet.p4() + event.selMuons[0].p4()
-        cleanpucmetsumet = event.pucmet.sumEt() - event.selMuons[0].pt()
-        event.cleanpucmet = PFMET(event.pucmet.getSpecific(),cleanpucmetsumet,cleanpucmetp4,dummyVertex)
+        # cleanpucmetp4 = event.pucmet.p4() + event.selMuons[0].p4()
+        # cleanpucmetsumet = event.pucmet.sumEt() - event.selMuons[0].pt()
+        # event.cleanpucmet = PFMET(event.pucmet.getSpecific(),cleanpucmetsumet,cleanpucmetp4,dummyVertex)
         
-        cleantkmetp4 = event.tkmet.p4() + event.selMuons[0].p4()
-        cleantkmetsumet = event.tkmet.sumEt() - event.selMuons[0].pt()
-        event.cleantkmet = PFMET(event.tkmet.getSpecific(),cleantkmetsumet,cleantkmetp4,dummyVertex)
+        # cleantkmetp4 = event.tkmet.p4() + event.selMuons[0].p4()
+        # cleantkmetsumet = event.tkmet.sumEt() - event.selMuons[0].pt()
+        # event.cleantkmet = PFMET(event.tkmet.getSpecific(),cleantkmetsumet,cleantkmetp4,dummyVertex)
         
-        cleannopumetp4 = event.nopumet.p4() + event.selMuons[0].p4()
-        cleannopumetsumet = event.nopumet.sumEt() - event.selMuons[0].pt()
-        event.cleannopumet = PFMET(event.nopumet.getSpecific(),cleannopumetsumet,cleannopumetp4,dummyVertex)
+        # cleannopumetp4 = event.nopumet.p4() + event.selMuons[0].p4()
+        # cleannopumetsumet = event.nopumet.sumEt() - event.selMuons[0].pt()
+        # event.cleannopumet = PFMET(event.nopumet.getSpecific(),cleannopumetsumet,cleannopumetp4,dummyVertex)
 
-        iLeadJet = 0 # Leading jet (if any) from cmgPFBaseJetLead after cleaning
-        i2ndJet = 0 # Second leading jet (if any) from cmgPFBaseJetLead collection after cleaning
+        # iLeadJet = 0 # Leading jet (if any) from cmgPFBaseJetLead after cleaning
+        # i2ndJet = 0 # Second leading jet (if any) from cmgPFBaseJetLead collection after cleaning
         
-        event.jetLeadClean = [jet for jet in event.jetLead if \
-                                          deltaR(jet.eta(),jet.phi(),event.selMuons[0].eta(),event.selMuons[0].phi())<0.5 ]
+        # event.jetLeadClean = [jet for jet in event.jetLead if \
+                                          # deltaR(jet.eta(),jet.phi(),event.selMuons[0].eta(),event.selMuons[0].phi())<0.5 ]
                         
-        if(len(event.jetLeadClean)>0): iLeadJet = event.jetLeadClean[0].p4()
-        if(len(event.jetLeadClean)>1): i2ndJet = event.jetLeadClean[1].p4()
+        # if(len(event.jetLeadClean)>0): iLeadJet = event.jetLeadClean[0].p4()
+        # if(len(event.jetLeadClean)>1): i2ndJet = event.jetLeadClean[1].p4()
 
-        visObjectP4s_array = [event.selMuons[0].p4()] # Visual part of the signal (single muon for the W, dimuon for the Z)
+        # visObjectP4s_array = [event.selMuons[0].p4()] # Visual part of the signal (single muon for the W, dimuon for the Z)
         
-        # iJets struct from cmgPFJetSel without cleaning (if will be done afterwards)
-        iJets_p4 = []
-        iJets_mva = []
-        iJets_neutFrac = []
-        for jet in event.allJets:
-            if jet.looseJetId():
-                iJets_p4.append(jet.p4())
-                iJets_mva.append(jet.puMva('philv1'))
-                neutFrac=1
-                # DOES THIS HOLD ALSO IN 44X ???
-                if(math.fabs(jet.eta())<2.5): 
-                    neutFrac = jet.component(reco.PFCandidate.gamma).fraction() + jet.component(reco.PFCandidate.h0).fraction() + jet.component(reco.PFCandidate.egamma_HF).fraction()
-                iJets_neutFrac.append( neutFrac )
+        # # iJets struct from cmgPFJetSel without cleaning (if will be done afterwards)
+        # iJets_p4 = []
+        # iJets_mva = []
+        # iJets_neutFrac = []
+        # for jet in event.allJets:
+            # if jet.looseJetId():
+                # iJets_p4.append(jet.p4())
+                # iJets_mva.append(jet.puMva('philv1'))
+                # neutFrac=1
+                # # DOES THIS HOLD ALSO IN 44X ???
+                # if(math.fabs(jet.eta())<2.5): 
+                    # neutFrac = jet.component(reco.PFCandidate.gamma).fraction() + jet.component(reco.PFCandidate.h0).fraction() + jet.component(reco.PFCandidate.egamma_HF).fraction()
+                # iJets_neutFrac.append( neutFrac )
                 
-        self.mvamet.getMet(
-                           event.cleanpfmet, #iPFMet,
-                           event.cleantkmet, #iTKMet,
-                           event.cleannopumet, #iNoPUMet,
-                           event.pumet, #iPUMet,
-                           event.cleanpucmet, #iPUCMet,
-                           iLeadJet, #iLeadJet,
-                           i2ndJet,  #i2ndJet,
-                           event.NJetsGt30, #iNJetsGt30,
-                           event.nJetsPtGt1Clean, #iNJetsGt1,
-                           len(event.goodVertices), #iNGoodVtx,
-                           iJets_p4, #iJets,
-                           iJets_mva, #iJets,
-                           iJets_neutFrac, #iJets,
-                           False, #iPrintDebug,
-                           visObjectP4s_array #visObjectP4s
-                          )
+        # self.mvamet.getMet(
+                           # event.cleanpfmet, #iPFMet,
+                           # event.cleantkmet, #iTKMet,
+                           # event.cleannopumet, #iNoPUMet,
+                           # event.pumet, #iPUMet,
+                           # event.cleanpucmet, #iPUCMet,
+                           # iLeadJet, #iLeadJet,
+                           # i2ndJet,  #i2ndJet,
+                           # event.NJetsGt30, #iNJetsGt30,
+                           # event.nJetsPtGt1Clean, #iNJetsGt1,
+                           # len(event.goodVertices), #iNGoodVtx,
+                           # iJets_p4, #iJets,
+                           # iJets_mva, #iJets,
+                           # iJets_neutFrac, #iJets,
+                           # False, #iPrintDebug,
+                           # visObjectP4s_array #visObjectP4s
+                          # )
                           
-        event.mvamet = self.mvamet.GetMet_first();
-        event.GetMVAMet_second = self.mvamet.GetMet_second();
+        # event.mvamet = self.mvamet.GetMet_first();
+        # event.GetMVAMet_second = self.mvamet.GetMet_second();
         
         # print 'AFTER MVAmet_test'
         # print 'event.pfmet.pt() ', event.pfmet.pt()

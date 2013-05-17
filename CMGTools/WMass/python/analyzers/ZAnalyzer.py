@@ -7,7 +7,7 @@ from CMGTools.RootTools.fwlite.AutoHandle import AutoHandle
 from CMGTools.RootTools.physicsobjects.PhysicsObjects import Muon, Jet, GenParticle
 from CMGTools.RootTools.utils.TriggerMatching import triggerMatched
 from CMGTools.RootTools.utils.DeltaR import bestMatch, deltaR, deltaR2
-from CMGTools.Utilities.mvaMET.mvaMet import MVAMet
+# from CMGTools.Utilities.mvaMET.mvaMet import MVAMet
 
 class ZAnalyzer( Analyzer ):
 
@@ -31,7 +31,7 @@ class ZAnalyzer( Analyzer ):
         count.register('Z pt<20*MZ/MW')
         count.register('Z Jet_leading_pt<30')
 
-        self.mvamet = MVAMet() # SHOULD BE MVAMet(0.1)
+        # self.mvamet = MVAMet() # SHOULD BE MVAMet(0.1)
 
         # void    Initialize(const edm::ParameterSet &iConfig, 
         # TString iU1Weights      ="$CMSSW_BASE/src/pharris/data/gbrmet_52.root",
@@ -40,13 +40,13 @@ class ZAnalyzer( Analyzer ):
         # TString iCovU2Weights   ="$CMSSW_BASE/src/pharris/data/gbrcovu2_52.root",
         # MVAMet::MVAType  iType=kBaseline);
 
-        self.mvamet.Initialize(0,
-                          os.environ['CMSSW_BASE'] + '/src/CMGTools/Utilities/data/mvaMET/gbrmet_42.root',
-                          os.environ['CMSSW_BASE'] + '/src/CMGTools/Utilities/data/mvaMET/gbrmetphi_42.root',
-                          os.environ['CMSSW_BASE'] + '/src/CMGTools/Utilities/data/mvaMET/gbrmetu1cov_42.root',
-                          os.environ['CMSSW_BASE'] + '/src/CMGTools/Utilities/data/mvaMET/gbrmetu2cov_42.root',
-                          0
-                          )
+        # self.mvamet.Initialize(0,
+                          # os.environ['CMSSW_BASE'] + '/src/CMGTools/Utilities/data/mvaMET/gbrmet_42.root',
+                          # os.environ['CMSSW_BASE'] + '/src/CMGTools/Utilities/data/mvaMET/gbrmetphi_42.root',
+                          # os.environ['CMSSW_BASE'] + '/src/CMGTools/Utilities/data/mvaMET/gbrmetu1cov_42.root',
+                          # os.environ['CMSSW_BASE'] + '/src/CMGTools/Utilities/data/mvaMET/gbrmetu2cov_42.root',
+                          # 0
+                          # )
         
     def buildLeptons(self, cmgMuons, event):
         '''Creates python Leptons from the muons read from the disk.
@@ -237,8 +237,8 @@ class ZAnalyzer( Analyzer ):
                            # visObjectP4s_array #visObjectP4s
                           # )
                           
-        GetMet_first = self.mvamet.GetMet_first();
-        GetMet_second = self.mvamet.GetMet_second();
+        # GetMet_first = self.mvamet.GetMet_first();
+        # GetMet_second = self.mvamet.GetMet_second();
             
         # associate properly positive and negative muons
         if(event.BestZMuonPairList[1].charge()>0):
