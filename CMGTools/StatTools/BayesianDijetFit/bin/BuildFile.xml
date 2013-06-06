@@ -1,5 +1,0 @@
-<use   name="StatTools/BayesianDijetFit"/>
-<environment>
-  <bin   file="dijetStatsNewBackground.cc"></bin>
-  <bin   file="TTbarStats.cc"></bin>
-</environment>
