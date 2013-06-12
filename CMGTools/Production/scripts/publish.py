@@ -93,16 +93,20 @@ if __name__ == '__main__':
 	                 			default=False )
 	# If user wants to add multiple datasets from file
 	group.add_option("-M", "--multi",
-						action = "store_true",
-						dest="multi",
-						help="""Argument is now LFN to location of .txt file
-				Entries in the file should be on independant lines in the form: DatasetName Fileowner 'comment'
-				Comment is not compulsory, and if fileowner is not entered, $USER will be used as default.
-				Comment MUST be enclosed in speech marks
-				E.g.
-				/MuHad/Run2011A-05Aug2011-v1/AOD/V2 cmgtools 'comment'
-				Single or double speech marks are accepted""",
-				default = False)
+			 action = "store_true",
+			 dest="multi",
+			 help="""
+			 Argument is now LFN to location of .txt file
+			 Entries in the file should be on independant lines in the form:
+			       DatasetName Fileowner 'comment'
+			 Comment is not compulsory, and if fileowner is not entered,
+			 $USER will be used as default.
+			 Comment MUST be enclosed in speech marks
+			 E.g.
+			 /MuHad/Run2011A-05Aug2011-v1/AOD/V2 cmgtools 'comment'
+			 Single or double speech marks are accepted.""",
+			 default = False)
+	
 	parser.add_option_group(genGroup)
 	parser.add_option_group(group)
 	
@@ -118,7 +122,6 @@ if __name__ == '__main__':
 	if options.password is None:
 		print "Authentication Failed, exiting\n\n"
 		sys.exit(1)
-		
 	
 	# For multiple file input
 	if options.multi:

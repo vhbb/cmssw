@@ -2,6 +2,7 @@ from CMGTools.Production.ProductionTasks import Task
 from CMGTools.Production.publish import publish
 import os, sys
 
+
 class PublishTask(Task):
     """Publish the dataset in DBS, Savannah"""
     def __init__(self, dataset, user, options):
@@ -24,24 +25,24 @@ class PublishTask(Task):
                          help="Flag task as a test",
                          default=False )
         parser.add_option("--ns", "--nosavannah",
-                         action = "store_false",
-                         dest="savannah",
+                         action = "store_true",
+                         dest="nosavannah",
                          help="Do not publish to savannah",
-                         default=True )
+                         default=False )
         # If user wants to add their own comments
         parser.add_option("-C", "--comment",
                          action = "store",
                          dest="commented",
                          help="Take comment as an argument",
                          default = None)
-
-        # If user wants to add their own comments
-        #parser.add_option("-f", "--force",
-        #                 action = "store_true",
-        #                 dest="force",
-        #                 help="force publish without logger",
-        #                 default = False)
-        # If user wants to add their own comments
+        parser.add_option("-f", "--force",
+                          action = "store_true",
+                          dest="force",
+                          default=False, 
+                          help="""Force mode.
+                          Will publish even if the information on the number of jobs is missing,
+                          but just in case the dataset was produced on the GRID.
+                          """)
         parser.add_option("-G", "--groups",
                          action = "store_true",
                          dest="checkGroups",
@@ -79,9 +80,15 @@ class PublishTask(Task):
         username = os.getlogin()
         if self.password is None:
             self.password = self.getPassword()
-        return publish(self.dataset,self.options.fileown,\
-                    self.options.commented,self.options.test,\
-                    username,self.password,\
-                    self.options.savannah,self.options.primary,\
-                    (self.options.min_run, self.options.max_run), self.development )
+        return publish(self.dataset,
+                       self.options.fileown,
+                       self.options.commented,
+                       self.options.test,
+                       username,
+                       self.password,
+                       self.options.force,
+                       self.options.nosavannah,
+                       self.options.primary,
+                       (self.options.min_run, self.options.max_run),
+                       self.development )
 

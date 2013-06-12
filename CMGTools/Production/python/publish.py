@@ -10,16 +10,19 @@ from CMGTools.Production.castorBaseDir import getUserAndArea
 from CMGTools.Production.datasetInformation import DatasetInformation
 
 
-def publish(sampleName,fileown,comment,test,user,password, force, savannah,primary, run_range = None, development = False ):
+
+
+def publish(sampleName, fileown, comment, test, user, password,
+	    force, nosavannah, primary, run_range = None, development = False ):
 	"""Publish the given dataset to CMGDB and Savannah
-		
+	
 	'sampleName' takes the name of the dataset, in either format
 	'fileown' takes the NICE username of the space on EOS in which the dataset resides
 	'comment' takes a users comment for publishing to Savannah or None
 	'test' takes True/False on whether the posting is a test or not
 	'user' takes the NICE username of the person making the post
 	'password' takes the NICE password of the person making the post
-	'savannah' takes True/False on whether Savannah publish is desired
+	'nosavannah' takes True/False on whether Savannah publish is desired
 	'development'
 	"""
 	
@@ -72,7 +75,8 @@ def publish(sampleName,fileown,comment,test,user,password, force, savannah,prima
 		
 		
 		# Get DS Information
-		datasetDetails = DatasetInformation(sampleName, fileown ,comment ,force,test,primary, user, password, development)
+		datasetDetails = DatasetInformation(sampleName, fileown ,comment , force,
+						    test, primary, user, password, development)
 		
 		# Build all reports on the dataset
 		if datasetDetails is None: return None
@@ -86,8 +90,9 @@ def publish(sampleName,fileown,comment,test,user,password, force, savannah,prima
 		
 		## Savannah operations
 		print "\n------Savanah------\n"
-		
-		if savannah or datasetDetails.dataset_details['TaskID'] == None:
+
+		if (not nosavannah) or \
+		       datasetDetails.dataset_details['TaskID'] == None:
 			(datasetDetails.dataset_details['TaskID'], datasetDetails.dataset_details['ParentTaskID']) = publishController.savannahPublish(datasetDetails.dataset_details)
 		else:
 		    print "NO SAVANNAH PUBLISH REQUIRED"

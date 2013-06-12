@@ -21,6 +21,10 @@ from CMGTools.Production.edmIntegrityCheck import IntegrityCheck
 from CMGTools.Production.cmgdbToolsApi import CmgdbToolsApi
 from CMGTools.Production.findDSOnSav import *
 from CMGTools.Production.nameOps import *
+
+
+#COLIN Where is the following module used? Why isn't it used?
+
 from CMGTools.Production.dataset import *
 from datetime import *
 from CMGTools.Production.eostools import *
@@ -28,7 +32,8 @@ from CMGTools.Production.fileNameUtils import getFileGroup
 from time import strptime
 
 
-def isCrabFile(name):
+def isCrabFile(name): 
+    #COLIN What is this _ variable? If it's a dummy variable call it dummy. 
     _, fname = os.path.split(name)
     base, _ = os.path.splitext(fname)              #splits fname at the '.'
     pattern = "(^.*)(_\d+$)|(^.*)(_\d+_\d+_\w+$)"  #two possible patterns - cmsbatch and crab respectively
@@ -45,6 +50,8 @@ def isCrabFile(name):
         return False          #return unindexed name
 
 def removeIndex(name):
+    #COLIN I guess we're not removing only the index, but the whole crab mess.
+    # If the case, that's a bad name 
     _, fname = os.path.split(name)
     base, _ = os.path.splitext(fname)              #splits fname at the '.'
     pattern = "(^.*)(_\d+$)|(^.*)(_\d+_\d+_\w+$)"  #two possible patterns - cmsbatch and crab respectively
@@ -84,6 +91,12 @@ def createFileName(groupName, number, isCrab):
 def getFileName(name):
     return name.split("/")[-1]
 
+#COLIN I don't understand what's the goal of this class. The design can be improved and simplified a great deal
+#COLIN bad indents
+#COLIN lines too long (restrict yourself to default emacs window size)
+#COLIN too many useless comments
+#COLIN remove comments at the end of the line when they are useless / make the line too long. 
+
 class DatasetInformation(object):	
 	"""Class gives access to attributes of the dataset that are stored on disk"""
 		
@@ -96,7 +109,9 @@ class DatasetInformation(object):
 		'username' takes the username of the person submitting the sample
 		'password' takes that users password
 		'development' takes True/False depending on whether wants to publish on the official or the devdb11 database"""
-		
+
+		#COLIN why isn't self.dataset created here?
+                # why is the whole initialization needed?? 
 		self.dataset = None                                 #initializes the members
 		self._report = None
 		self._reportBuilt = False
@@ -107,7 +122,10 @@ class DatasetInformation(object):
 		self._logger_file = None
 		self._logger_tar_object = None
         	self.development = development
-		
+
+                self.sampleName = sampleName
+                self.fileOwner = fileOwner 
+                
 		self.dataset_details = {"SampleName":sampleName,
 					"ParentSampleName":None,
 					"CMGDBName":None,
@@ -143,6 +161,7 @@ class DatasetInformation(object):
 					"SavannahOptions":dict()
 					}
 		# Check if directory is valid
+                #COLIN: Dataset created inside the function below, wich has a very misleading name!!!
 		self.checkDatasetDirectoryExists(sampleName, fileOwner)
 		# Build the basic details report
 		self.buildBasicDetailsReport()
@@ -156,12 +175,21 @@ class DatasetInformation(object):
 		# Check if an EDM report exists
 		self.buildEDMReport()
 		# Divide the root files into separate groups
+
+                #COLIN : the file group dataset fraction is wrong: computed with duplicate files?
+                #I can't even find where the file group dataset fraction is computed.
+                #Why not in this class? 
 		self.createFileGroups()
+                
 	
 	def createFileGroups(self):
 		"""Builds a dictionary containing the different file groups within a directory"""
 		# First get the root files and divide them into file groups
+                #COLIN why are we creating the list of files here?
+                # this should be done when the dataset is created. In fact it's done in the dataset constructor!!
 		self.dataset.buildListOfFiles()
+                #COLIN dataset_details does not correspond to the dataset_details table? if not change this name!
+                #COLIN remove all the useless comments all over the place.
 		self.dataset_details['FileGroups'] = dict()    #So for the dataset_details dictionary at key 'FileGroups' we initialize a dictionary
 		# import pdb; pdb.set_trace()
 		for fileName in self.dataset.files:            #for each filename in dataset_files
@@ -191,6 +219,20 @@ class DatasetInformation(object):
 		# Sort the file groups
 		for file_group in self.dataset_details['FileGroups']:                    #for each filegroup key in the dictionary referenced by dataset_details['FileGroups']
 			self.dataset_details['FileGroups'][file_group]['Files'].sort(key=lambda x: int(getIndex(x)))     #sort its files
+
+## 	def createFileGroups(self):
+## 		"""Builds a dictionary containing the different file groups within a directory"""
+
+                
+## 		self.dataset_details['FileGroups'] = dict()    #So for the dataset_details dictionary at key 'FileGroups' we initialize a dictionary
+## 		# import pdb; pdb.set_trace()
+##                 group_prefixs = set( map( removeIndex, self.dataset.files ) )
+##                 for group_prefix in group_prefixs:
+##                     import pdb; pdb.set_trace()
+##                     pattern = ''.join([group_prefix, '.*root'])
+##                     group = Dataset( self.sampleName, self.fileOwner, pattern)
+##                     self.dataset_details['FileGroups'][group_prefix] = group
+
 	
 	def createFileGroupDetailString(self, group_name):
 		"""Build a string containing the important information pertaining to a file group
@@ -199,24 +241,29 @@ class DatasetInformation(object):
 		if self.dataset_details is None or 'FileGroups' not in self.dataset_details or group_name not in self.dataset_details['FileGroups']:
 			return None
 		string = "\t----"+group_name+"----\n"
-		if self.dataset_details['FileGroups'][group_name]['SizeInTB'] is not None:
-			string +="\tDataset size: "+str(self.dataset_details['FileGroups'][group_name]['SizeInTB'])+" TB\n"
 
-		if self.dataset_details['FileGroups'][group_name]['FileEntries'] is not None:
-			string +="\tDataset file entries: "+str(self.dataset_details['FileGroups'][group_name]['FileEntries'])+"\n"
+                #COLIN simplify notations by doing this kind of replacement.
+                #people want to be able to read the code. 
+                group = self.dataset_details['FileGroups'][group_name]
 
-		if self.dataset_details['FileGroups'][group_name]['PrimaryDatasetFraction'] is not None:
-			string +="\tFraction of primary dataset used: "+str(self.dataset_details['FileGroups'][group_name]['PrimaryDatasetFraction'])+"\n"
+		if group['SizeInTB'] is not None:
+			string +="\tDataset size: "+str(group['SizeInTB'])+" TB\n"
 
-		if self.dataset_details['FileGroups'][group_name]['NumberBadFiles'] is not None:
-			string +="\tNumber of bad files: "+str(self.dataset_details['FileGroups'][group_name]['NumberBadFiles'])+"\n"
-			if self.dataset_details['FileGroups'][group_name]['BadFiles']:
-				for i in self.dataset_details['FileGroups'][group_name]['BadFiles']:
+		if group['FileEntries'] is not None:
+			string +="\tDataset file entries: "+str(group['FileEntries'])+"\n"
+
+		if group['PrimaryDatasetFraction'] is not None:
+			string +="\tFraction of primary dataset used: "+str(group['PrimaryDatasetFraction'])+"\n"
+
+		if group['NumberBadFiles'] is not None:
+			string +="\tNumber of bad files: "+str(group['NumberBadFiles'])+"\n"
+			if group['BadFiles']:
+				for i in group['BadFiles']:
 					string +="\t-- "+i+"\n"
-		if self.dataset_details['FileGroups'][group_name]['NumberMissingFiles'] is not None:
-			string +="\tNumber of missing files: "+str(self.dataset_details['FileGroups'][group_name]['NumberMissingFiles'])+"\n"
-			if self.dataset_details['FileGroups'][group_name]['MissingFiles']:
-				for i in self.dataset_details['FileGroups'][group_name]['MissingFiles']:
+		if group['NumberMissingFiles'] is not None:
+			string +="\tNumber of missing files: "+str(group['NumberMissingFiles'])+"\n"
+			if group['MissingFiles']:
+				for i in group['MissingFiles']:
 					string +="\t-- "+i+"\n"
 		return string
 	
@@ -409,8 +456,10 @@ class DatasetInformation(object):
 			nJobsFile = self._logger_tar_object.extractfile("Logger/logger_jobs.txt")              #etract Logger/logger_jobs.txt if it exists    
 			nJobs = int(nJobsFile.read().split(": ")[1].split("\n")[0])                            #read job number from file
 		except:
+                    if not self._force:
 			raise NameError( "ERROR: No jobs file found in logger" )                               #raise NameError exception if no jobs file found in logger
-		
+                    else:
+                        print 'WARNING: No jobs file found in logger, setting number_total_jobs=-1'
 		# Set the class variable
 		if nJobs == None:
 			self.dataset_details['TotalJobs'] = -1
