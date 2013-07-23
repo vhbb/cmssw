@@ -1,5 +1,0 @@
-
- -- Profile Likelihood -- 
-p-value of background: 0.00504377
-       (Significance = 2.57281)
-Done in 0.29 min (cpu), 0.29 min (real)

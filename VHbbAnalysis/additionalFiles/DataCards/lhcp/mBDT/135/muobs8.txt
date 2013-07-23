@@ -1,6 +1,0 @@
-Error: minimization failed at r = 1.70019
-
- --- MaxLikelihoodFit ---
-Best fit r: 1.70019  -6.70019/+3.29981  (68% CL)
-nll S+B -> -44.9831  nll B -> -43.1903
-Done in 1.54 min (cpu), 1.58 min (real)
