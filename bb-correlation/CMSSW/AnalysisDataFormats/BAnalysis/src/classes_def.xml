@@ -1,0 +1,31 @@
+<lcgdict>
+
+   <class name="SimPrimaryVertex"/>
+   <class name="edm::Wrapper<SimPrimaryVertex>"/>
+   <class name="SimSecondaryVertex"/>
+   <class name="SimSecondaryVertexCollection"/>
+   <class name="SimSecondaryVertexRefProd"/>
+   <class name="SimSecondaryVertexRefVector"/>
+   <class name="edm::Wrapper<SimSecondaryVertexCollection>"/>
+   <class name="edm::Ptr<SimSecondaryVertex>"/>
+   <class name="edm::Ptr<reco::Jet>"/>
+   <class name="SimBHadron"/>
+   <class name="SimBHadronCollection"/>
+   <class name="SimBHadronRefProd"/>
+   <class name="SimBHadronRefVector"/>
+   <class name="edm::Wrapper<SimBHadronCollection>"/>
+   <class name="SimBEvent"/>
+   <class name="SimBEventCollection"/>
+   <class name="SimBEventRefProd"/>
+   <class name="SimBEventRefVector"/>
+   <class name="edm::Wrapper<SimBEvent>"/>
+   <class name="edm::Wrapper<SimBEventCollection>"/>
+   <class name="JetCollection"/>
+   <class name="edm::Wrapper<JetCollection>"/>
+   <class name="RecoBVertexCand"/>
+   <class name="RecoBVertexCandCollection"/>
+   <class name="RecoBVertexCandRefProd"/>
+   <class name="RecoBVertexCandRefVector"/>
+   <class name="edm::Wrapper<RecoBVertexCandCollection>"/>
+
+</lcgdict>

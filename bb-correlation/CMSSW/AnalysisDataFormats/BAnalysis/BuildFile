@@ -1,0 +1,16 @@
+<use name="DataFormats/JetReco">
+<use name="DataFormats/Math">
+<use name="DataFormats/TrackReco">
+<use name="DataFormats/HepMCCandidate">
+<use name="rootphysics">
+<use name="rootrflx">
+<export>
+  <use name="DataFormats/HepMCCandidate">
+  <use name="DataFormats/JetReco">
+  <use name="DataFormats/Math">
+  <use name="DataFormats/TrackReco">
+  <use name="rootphysics">
+  <use name="rootrflx">
+  <lib name="AnalysisDataFormatsBAnalysis">
+
+</export>
