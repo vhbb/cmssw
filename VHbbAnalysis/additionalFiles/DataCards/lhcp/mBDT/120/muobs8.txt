@@ -1,0 +1,6 @@
+0.249970    +0.00004  -0.00111    -0.000212
+
+ --- MaxLikelihoodFit ---
+Best fit r: 0.828957  -0.578947/+0.544081  (68% CL)
+nll S+B -> -53.2914  nll B -> -52.2724
+Done in 6.14 min (cpu), 6.17 min (real)
