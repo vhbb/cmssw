@@ -1,8 +1,0 @@
-<use   name="DataFormats/JetReco"/>
-<use   name="DataFormats/Math"/>
-<use   name="DataFormats/TrackReco"/>
-<use   name="SimDataFormats/Track"/>
-<use   name="rootphysics"/>
-<use   name="rootrflx"/>
-<export>
-</export>
