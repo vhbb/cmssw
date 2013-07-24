@@ -1,0 +1,14 @@
+<library   file="*.cc" name="BCandidateProducer">
+  <use   name="FWCore/Framework"/>
+  <use   name="FWCore/PluginManager"/>
+  <use   name="FWCore/ParameterSet"/>
+  <use   name="DataFormats/VertexReco"/>
+  <use   name="DataFormats/GeometryCommonDetAlgo"/>
+  <use   name="DataFormats/GeometryVector"/>
+  <use   name="DataFormats/Candidate"/>
+  <use   name="RecoBTag/SecondaryVertex"/>
+  <use   name="rootmath"/>
+  <use   name="rootcore"/>
+  <use   name="root"/>
+  <flags   EDM_PLUGIN="1"/>
+</library>
