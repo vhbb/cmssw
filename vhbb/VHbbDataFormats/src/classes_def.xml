@@ -1,0 +1,44 @@
+<lcgdict>
+
+      <class name="VHbbEvent"/>
+      <class name="VHbbEventAuxInfo"/>
+  <class name="edm::Wrapper<VHbbEvent>"/>
+  <class name="edm::Wrapper<VHbbEventAuxInfo>"/>
+
+<class name="VHbbEvent::METInfo"/>
+<class name="VHbbEventAuxInfo::PUInfo"/>
+<class name="VHbbEventAuxInfo::ParticleMCInfo"/>
+<class name="std::vector<VHbbEventAuxInfo::ParticleMCInfo>"/>
+<class name="VHbbEventAuxInfo::PrimaryVertexInfo"/>
+<class name="VHbbEvent::DiElectronInfo"/>
+
+<class name="VHbbEvent::DiMuonInfo"/>
+
+<class name="VHbbEvent::ElectronInfo"/>
+
+<class name="VHbbEvent::HardJet"/>
+
+<class name="VHbbEvent::MuonInfo"/>
+<class name="VHbbEvent::SimpleJet"/>
+<class name="TVector2"/>
+<class name="VHbbEvent::TauInfo"/>
+
+<class name="std::vector<VHbbEvent::DiElectronInfo>"/>
+<class name="std::vector<VHbbEvent::DiMuonInfo>"/>
+<class name="std::vector<VHbbEvent::ElectronInfo>"/>
+<class name="std::vector<VHbbEvent::HardJet>"/>
+<class name="std::vector<VHbbEvent::METInfo>"/>
+<class name="std::vector<VHbbEvent::MuonInfo>"/>
+<class name="std::vector<VHbbEvent::SimpleJet>"/>
+<class name="std::vector<VHbbEvent::TauInfo>"/>
+<class name="std::vector<TLorentzVector>"/>
+<class name="std::map <int, unsigned int>"/>
+
+<class name="VHbbCandidate"/>
+<class name="std::vector<VHbbCandidate>"/>
+<class name="edm::Wrapper<std::vector<VHbbCandidate> >"/>
+
+<class name="VHbbCandidate::HiggsCandidate"/>
+<class name="VHbbCandidate::VectorCandidate"/>
+
+</lcgdict>
