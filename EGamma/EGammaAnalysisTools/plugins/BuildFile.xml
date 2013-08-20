@@ -1,0 +1,9 @@
+<library name="EGammaEGammaAnalysisToolsPlugins" file="*.cc">
+<use name="FWCore/Framework"/>
+<use name="FWCore/ParameterSet"/>
+<use name="FWCore/MessageLogger"/>
+<use name="DataFormats/EgammaCandidates"/>
+<use name="CommonTools/Utils"/>
+<use name="HLTrigger/HLTcore"/>
+<use name="EGamma/EGammaAnalysisTools"/>
+</library>
