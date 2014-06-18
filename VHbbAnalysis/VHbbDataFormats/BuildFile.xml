@@ -1,0 +1,17 @@
+<flags   CXXFLAGS="-O0 -g -DDEBUG"/>
+<use   name="FWCore/Framework"/>
+<use   name="FWCore/PluginManager"/>
+<use   name="FWCore/ParameterSet"/>
+<use   name="FWCore/ServiceRegistry"/>
+<use   name="DataFormats/Candidate"/>
+<use   name="DataFormats/PatCandidates"/>
+<use   name="PhysicsTools/UtilAlgos"/>
+<use   name="DataFormats/BeamSpot"/>
+<use   name="root"/>
+<use name="fastjet"/>
+  <flags CXXFLAGS="-Wno-error=reorder -Wno-reorder -Wno-error=unused-variable -Wno-error=unused-but-set-variable -Wno-unused-but-set-variable -Wno-error=maybe-uninitialized"/>
+<export>
+  <flags CXXFLAGS="-Wno-error=reorder -Wno-reorder -Wno-error=unused-variable -Wno-error=unused-but-set-variable -Wno-unused-but-set-variable -Wno-error=maybe-uninitialized"/>
+  <lib   name="1"/>
+</export>
+

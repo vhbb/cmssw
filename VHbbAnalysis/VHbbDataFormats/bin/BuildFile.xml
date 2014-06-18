@@ -1,0 +1,24 @@
+<use   name="root"/>
+<use   name="roottmva"/>
+<use   name="boost"/>
+<use   name="fastjet"/>
+<use   name="rootcintex"/>
+<use   name="FWCore/FWLite"/>
+<use   name="DataFormats/FWLite"/>
+<use   name="DataFormats/Luminosity"/>
+<use   name="FWCore/PythonParameterSet"/>
+<use   name="CommonTools/Utils"/>
+<use   name="PhysicsTools/FWLite"/>
+<use   name="PhysicsTools/Utilities"/>
+<use   name="PhysicsTools/SelectorUtils"/>
+<use   name="RecoBTag/SecondaryVertex"/>
+<use   name="lhapdf"/>
+<use   name="CondFormats/JetMETObjects"/>
+<use   name="VHbbAnalysis/HbbAnalyzer"/>
+<environment>
+<flags CXXFLAGS="-Wno-error=reorder -Wno-reorder -Wno-error=unused-variable -Wno-error=unused-but-set-variable -Wno-unused-but-set-variable -Wno-error=maybe-uninitialized -g"/>
+
+  <bin  file="Ntupler_onlyHbbev.cc"></bin>
+  <bin  file="Ntupler_tom.cc"></bin>
+
+</environment>
