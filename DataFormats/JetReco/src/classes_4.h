@@ -37,6 +37,7 @@
 #include "DataFormats/Common/interface/Ptr.h"
 
 #include "DataFormats/JetReco/interface/CATopJetTagInfo.h"
+#include "DataFormats/JetReco/interface/HTTTopJetTagInfo.h"
 
 namespace DataFormats_JetReco {
   struct dictionary4 {
@@ -178,7 +179,6 @@ namespace DataFormats_JetReco {
     edm::Wrapper<edm::Association<reco::FFTCaloJetCollection> > w_a_gj_fft_2;
 
 
-
     reco::CATopJetProperties                                            catopjetp;
     std::pair<edm::RefToBase<reco::Jet>, reco::CATopJetProperties>      catopjetp_p;
 
@@ -190,6 +190,19 @@ namespace DataFormats_JetReco {
     edm::Wrapper<reco::CATopJetTagInfoCollection>                       catopjet_wc;
     edm::reftobase::Holder<reco::BaseTagInfo, reco::CATopJetTagInfoRef> rb_catopjet;
     edm::reftobase::RefHolder<reco::CATopJetTagInfoRef>                 rbh_catopjet; 
+
+
+    reco::HTTTopJetProperties                                            htttopjetp;
+    std::pair<edm::RefToBase<reco::Jet>, reco::HTTTopJetProperties>      htttopjetp_p;
+
+    reco::HTTTopJetTagInfo                                               htttopjet;
+    reco::HTTTopJetTagInfoCollection                                     htttopjet_c;
+    reco::HTTTopJetTagInfoRef                                            htttopjet_r;
+    reco::HTTTopJetTagInfoRefProd                                        htttopjet_rp;
+    reco::HTTTopJetTagInfoRefVector                                      htttopjet_rv;
+    edm::Wrapper<reco::HTTTopJetTagInfoCollection>                       htttopjet_wc;
+    edm::reftobase::Holder<reco::BaseTagInfo, reco::HTTTopJetTagInfoRef> rb_htttopjet;
+    edm::reftobase::RefHolder<reco::HTTTopJetTagInfoRef>                 rbh_htttopjet; 
 
   };
 }
