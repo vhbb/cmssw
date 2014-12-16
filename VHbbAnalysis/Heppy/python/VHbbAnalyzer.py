@@ -54,8 +54,8 @@ class VHbbAnalyzer( Analyzer ):
 
     def doHiggs3cj(self,event) :
         event.H3cj = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
-        event.hJets3cj = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
-        event.aJets3cj = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
+        event.hJets3cj = []
+        event.aJets3cj = []
 	event.hjidx3cj = []         
 	event.ajidx3cj = []         
         event.minDr3 = 0         

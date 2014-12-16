@@ -59,8 +59,9 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("neHEF", lambda x : x.neutralHadronEnergyFraction(), float, mcOnly = False,help="neutralHadronEnergyFraction (relative to uncorrected jet energy)"),
     NTupleVariable("chEmEF", lambda x : x.chargedEmEnergyFraction(), float, mcOnly = False,help="chargedEmEnergyFraction (relative to uncorrected jet energy)"),
     NTupleVariable("neEmEF", lambda x : x.neutralEmEnergyFraction(), float, mcOnly = False,help="neutralEmEnergyFraction (relative to uncorrected jet energy)"),
-    NTupleVariable("chMult", lambda x : x.chargedMultiplicity(), int, mcOnly = False,help="chargedMultiplicity from PFJet.h")
-
+    NTupleVariable("chMult", lambda x : x.chargedMultiplicity(), int, mcOnly = False,help="chargedMultiplicity from PFJet.h"),
+    NTupleVariable("leadTrackPt", lambda x : leadTrackPt(x) , float, mcOnly = False, help="pt of the lead\
+ing track in the jet"),   
 
  ])
 
@@ -109,3 +110,11 @@ heavyFlavourHadronType = NTupleObjectType("heavyFlavourHadron", baseObjectTypes 
 ])
 
 
+
+def leadTrackPt(self):
+    tracks = filter ( lambda x : x.charge()!=0, self.daughterPtrVector() )
+    if len(tracks)>0:
+        leadtrack = max( tracks , key = lambda x : x.pt() )
+        return max(0., leadtrack.pt() )
+    else:
+        return 0.
