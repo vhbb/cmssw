@@ -115,6 +115,6 @@ def leadTrackPt(self):
     tracks = filter ( lambda x : x.charge()!=0, self.daughterPtrVector() )
     if len(tracks)>0:
         leadtrack = max( tracks , key = lambda x : x.pt() )
-        return max(0., leadtrack.pt() )
+        return leadtrack.pt() 
     else:
         return 0.
