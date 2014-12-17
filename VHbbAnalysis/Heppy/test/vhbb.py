@@ -104,19 +104,28 @@ VHbb= cfg.Analyzer(
 
 from PhysicsTools.Heppy.analyzers.core.TriggerBitAnalyzer import TriggerBitAnalyzer
 TrigAna= cfg.Analyzer(
-    verbose=False,
-    class_object=TriggerBitAnalyzer,
-    triggerBits={
-    "METBTAG":["HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDLoose_BTagCSV0p7_v*"],
-    "MET":["HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDLoose_v*","HLT_PFMET120_PFMHT120_IDLoose_v1"],
-    "DIELE" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v1"],
-    "ELE": ["HLT_Ele35_eta2p1_WP85_Gsf_v1","HLT_Ele40_eta2p1_WP85_Gsf_v1","HLT_Ele25_eta2p1_WP85_Gsf_PFMET80_boostedW_v1"],
-    "DIMU" : ["HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v1","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v1"],
-    "MU" : ["HLT_IsoTkMu24_eta2p1_IterTrk02_v1","HLT_IsoTkMu27_IterTrk02_v1","HLT_IsoMu27_IterTrk02_v1","HLT_IsoMu16_eta2p1_CaloMET30_v1"],
-    "TAU": ["HLT_LooseIsoPFTau50_Trk30_eta2p1_v1"],
-    },
+   verbose=False,
+   class_object=TriggerBitAnalyzer,
+   triggerBits={
+   "METBTAG":["HLT_PFMET120_NoiseCleaned_BTagCSV07_v*"],
+   "MET":["HLT_PFMET170_NoiseCleaned_v*"],
+   "DIELE" : ["HLT_Ele23_Ele12_CaloId_TrackId_Iso_v*"],
+   "ELE": ["HLT_Ele32_eta2p1_WP85_Gsf_v*","HLT_Ele32_eta2p1_WP85_Gsf_v*"],
+   "DIMU" : ["HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*"],
+   "MU" : ["HLT_IsoTkMu24_eta2p1_IterTrk02_v*","HLT_IsoTkMu24_IterTrk02_v*"],
+   "TAU": ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v*"],
+   },
 #   processName='HLT',
 #   outprefix='HLT'
+   )
+
+from PhysicsTools.HeppyCore.framework.services.tfile import TFileService 
+output_service = cfg.Service(
+      TFileService,
+      'outputfile',
+      name="outputfile",
+      fname='tree.root',
+      option='recreate'
     )
 
 
@@ -159,18 +168,18 @@ selectedComponents = [sample]
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
 config = cfg.Config( components = selectedComponents,
                      sequence = sequence, 
-		     services = [],
+		     services = [output_service],
                      events_class = Events)
 
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
     looper = Looper( 'Loop', config, nPrint = 5, nEvents = 2000)
-    import time
-    import cProfile
-    p = cProfile.Profile(time.clock)
-    p.runcall(looper.loop)
-    p.print_stats()
+#    import time
+#    import cProfile
+#    p = cProfile.Profile(time.clock)
+#    p.runcall(looper.loop)
+#    p.print_stats()
 
-#    looper.loop()
+    looper.loop()
     looper.write()
