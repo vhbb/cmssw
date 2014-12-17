@@ -14,7 +14,10 @@ class VHbbAnalyzer( Analyzer ):
 
     def beginLoop(self,setup):
         super(VHbbAnalyzer,self).beginLoop(setup)
-    
+        if "outputfile" in setup.services :
+            setup.services["outputfile"].file.cd()
+            self.inputCounter = ROOT.TH1F("Count","Count",1,0,2)
+ 
     def makeJets(self,event):
 	inputs=ROOT.std.vector(ROOT.heppy.ReclusterJets.LorentzVector)()
 	for pf in event.pfCands :
@@ -159,6 +162,7 @@ class VHbbAnalyzer( Analyzer ):
 
     def process(self, event):
         self.readCollections( event.input )
+        self.inputCounter.Fill(1)
 #	event.pfCands = self.handles['pfCands'].product()
 # 	met = event.met
 	
