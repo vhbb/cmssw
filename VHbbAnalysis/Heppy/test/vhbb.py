@@ -12,7 +12,7 @@ treeProducer= cfg.Analyzer(
 	class_object=AutoFillTreeProducer, 
 	verbose=False, 
 	vectorTree = True,
-        globalVariables	= {
+        globalVariables	= [
 		 NTupleVariable("Vtype", lambda ev : ev.Vtype, help="Event classification"),
 		 NTupleVariable("VtypeSim", lambda ev : ev.VtypeSim, help="Event classification",mcOnly=True),
 		 NTupleVariable("VMt", lambda ev : ev.V.Mt(), help="Transverse mass of the vector boson"),
@@ -23,7 +23,7 @@ treeProducer= cfg.Analyzer(
                  NTupleVariable("minDr3",    lambda ev: ev.minDr3, help="dR of closest jets for 3 jest case"),
 
  
-	},
+	],
 	globalObjects = {
 	        "met"    : NTupleObject("met",     metType, help="PF E_{T}^{miss}, after default type 1 corrections"),
 	        "fakeMET"    : NTupleObject("fakeMET", fourVectorType, help="fake MET in Zmumu event obtained removing the muons"),
@@ -102,10 +102,29 @@ VHbb= cfg.Analyzer(
     zMuSelection = lambda x : x.pt() > 20 and x.muonID("POG_ID_Tight"),
     )
 
+from PhysicsTools.Heppy.analyzers.core.TriggerBitAnalyzer import TriggerBitAnalyzer
+TrigAna= cfg.Analyzer(
+    verbose=False,
+    class_object=TriggerBitAnalyzer,
+    triggerBits={
+    "METBTAG":["HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDLoose_BTagCSV0p7_v*"],
+    "MET":["HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDLoose_v*","HLT_PFMET120_PFMHT120_IDLoose_v1"],
+    "DIELE" : ["HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v1"],
+    "ELE": ["HLT_Ele35_eta2p1_WP85_Gsf_v1","HLT_Ele40_eta2p1_WP85_Gsf_v1","HLT_Ele25_eta2p1_WP85_Gsf_PFMET80_boostedW_v1"],
+    "DIMU" : ["HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v1","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v1"],
+    "MU" : ["HLT_IsoTkMu24_eta2p1_IterTrk02_v1","HLT_IsoTkMu27_IterTrk02_v1","HLT_IsoMu27_IterTrk02_v1","HLT_IsoMu16_eta2p1_CaloMET30_v1"],
+    "TAU": ["HLT_LooseIsoPFTau50_Trk30_eta2p1_v1"],
+    },
+#   processName='HLT',
+#   outprefix='HLT'
+    )
 
+
+
+#should be fixed in heppy:
 JetAna.doQG = False
 
-sequence = [GenAna,VHGenAna,VertexAna,LepAna,TauAna,PhoAna,JetAna,METAna,VHbb,treeProducer]
+sequence = [GenAna,VHGenAna,TrigAna,VertexAna,LepAna,TauAna,PhoAna,JetAna,METAna,VHbb,treeProducer]
 
 
 from PhysicsTools.Heppy.utils.miniAodFiles import miniAodFiles
@@ -118,7 +137,7 @@ sample = cfg.Component(
 #       'root://eoscms//eos/cms//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/PU20bx25_POSTLS170_V5-v1/00000/BAEE7255-AE09-E411-8F9F-00266CFFBF88.root',
 #       'root://eoscms//eos/cms//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/PU20bx25_POSTLS170_V5-v1/00000/D600138D-AD09-E411-917F-00266CFFBF88.root'],
 
-"root://xrootd.ba.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/141029_PU40bx50_PLS170_V6AN2-v1/00000/226BB247-A565-E411-91CF-00266CFF0AF4.root",
+"/tmp/arizzi.root"
 #"root://xrootd.ba.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/#141029_PU40bx50_PLS170_V6AN2-v1/10000/80161D59-6665-E411-9B4F-C4346BB25698.root",
 #"root://xrootd.ba.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/141029_PU40bx50_PLS170_V6AN2-v1/10000/8A345C56-6665-E411-9C25-1CC1DE04DF20.root",
 #"root://xrootd.ba.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/141029_PU40bx50_PLS170_V6AN2-v1/10000/9C477248-6665-E411-A9A6-1CC1DE1D0600.root",
@@ -146,12 +165,12 @@ config = cfg.Config( components = selectedComponents,
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 5, nEvents = 10)
-#    import time
-#    import cProfile
-#    p = cProfile.Profile(time.clock)
-#    p.runcall(looper.loop)
-#    p.print_stats()
+    looper = Looper( 'Loop', config, nPrint = 5, nEvents = 2000)
+    import time
+    import cProfile
+    p = cProfile.Profile(time.clock)
+    p.runcall(looper.loop)
+    p.print_stats()
 
-    looper.loop()
+#    looper.loop()
     looper.write()
