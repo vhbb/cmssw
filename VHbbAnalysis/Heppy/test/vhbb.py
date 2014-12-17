@@ -130,8 +130,6 @@ output_service = cfg.Service(
 
 
 
-#should be fixed in heppy:
-JetAna.doQG = False
 
 sequence = [GenAna,VHGenAna,TrigAna,VertexAna,LepAna,TauAna,PhoAna,JetAna,METAna,VHbb,treeProducer]
 
