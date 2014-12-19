@@ -101,14 +101,14 @@ class VHbbAnalyzer( Analyzer ):
 			#to be added: WtoTauNu
 
 		if len(event.genvbosons)>1:
-			print 'more than one W/Zbosons?'
+			#print 'more than one W/Zbosons?'
 			event.VtypeSim = -2
-		if event.VtypeSim == -1:
-			print '===================================='
-			print ' --------- Debug VtypeSim -1 --------'
-			print '# genVbosons: ',len(event.genvbosons), '| #daughters ', event.genvbosons[0].numberOfDaughters()
-			for i in xrange (0, event.genvbosons[0].numberOfDaughters() ) :
-				print 'daughter ',i ,'| pdgId', event.genvbosons[0].daughter(i).pdgId()	
+#		if event.VtypeSim == -1:
+#			print '===================================='
+#			print ' --------- Debug VtypeSim -1 --------'
+#			print '# genVbosons: ',len(event.genvbosons), '| #daughters ', event.genvbosons[0].numberOfDaughters()
+#			for i in xrange (0, event.genvbosons[0].numberOfDaughters() ) :
+#				print 'daughter ',i ,'| pdgId', event.genvbosons[0].daughter(i).pdgId()	
 
     def classifyEvent(self,event):
 	#assign events to analysis (Vtype)
