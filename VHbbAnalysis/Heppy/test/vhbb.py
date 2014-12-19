@@ -130,8 +130,12 @@ output_service = cfg.Service(
 
 
 
+from PhysicsTools.Heppy.analyzers.core.TriggerBitAnalyzer import TriggerBitAnalyzer
+FlagsAna = TriggerBitAnalyzer.defaultEventFlagsConfig
 
-sequence = [GenAna,VHGenAna,TrigAna,VertexAna,LepAna,TauAna,PhoAna,JetAna,METAna,VHbb,treeProducer]
+#TrigAna.unrollbits=True
+
+sequence = [FlagsAna, GenAna,VHGenAna,TrigAna,VertexAna,LepAna,TauAna,PhoAna,JetAna,METAna,VHbb,treeProducer]
 
 
 from PhysicsTools.Heppy.utils.miniAodFiles import miniAodFiles
@@ -173,11 +177,10 @@ config = cfg.Config( components = selectedComponents,
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
     looper = Looper( 'Loop', config, nPrint = 5, nEvents = 2000)
-#    import time
-#    import cProfile
-#    p = cProfile.Profile(time.clock)
-#    p.runcall(looper.loop)
-#    p.print_stats()
-
-    looper.loop()
+    import time
+    import cProfile
+    p = cProfile.Profile(time.clock)
+    p.runcall(looper.loop)
+    p.print_stats()
+#    looper.loop()
     looper.write()
