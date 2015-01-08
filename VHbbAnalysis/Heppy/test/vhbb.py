@@ -82,6 +82,8 @@ TauAna = TauAnalyzer.defaultConfig
 from PhysicsTools.Heppy.analyzers.objects.JetAnalyzer import JetAnalyzer
 JetAna = JetAnalyzer.defaultConfig
 
+from PhysicsTools.Heppy.analyzers.gen.LHEAnalyzer import LHEAnalyzer 
+LHEAna = LHEAnalyzer.defaultConfig
 
 from PhysicsTools.Heppy.analyzers.gen.GeneratorAnalyzer import GeneratorAnalyzer 
 GenAna = GeneratorAnalyzer.defaultConfig
@@ -135,7 +137,7 @@ FlagsAna = TriggerBitAnalyzer.defaultEventFlagsConfig
 
 #TrigAna.unrollbits=True
 
-sequence = [FlagsAna, GenAna,VHGenAna,TrigAna,VertexAna,LepAna,TauAna,PhoAna,JetAna,METAna,VHbb,treeProducer]
+sequence = [LHEAna,FlagsAna, GenAna,VHGenAna,TrigAna,VertexAna,LepAna,TauAna,PhoAna,JetAna,METAna,VHbb,treeProducer]
 
 
 from PhysicsTools.Heppy.utils.miniAodFiles import miniAodFiles
@@ -148,9 +150,11 @@ sample = cfg.Component(
 #       'root://eoscms//eos/cms//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/PU20bx25_POSTLS170_V5-v1/00000/BAEE7255-AE09-E411-8F9F-00266CFFBF88.root',
 #       'root://eoscms//eos/cms//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/PU20bx25_POSTLS170_V5-v1/00000/D600138D-AD09-E411-917F-00266CFFBF88.root'],
 
-"/tmp/arizzi.root"
+"32ABFE4A-916B-E411-B2FA-00266CFFBC60.root" #Hbb
+#"04860BAA-B673-E411-8B20-002481E0D50C.root" #DY 600
+#"root://xrootd.ba.infn.it//store/mc/Phys14DR/ZH_HToBB_ZToNuNu_M-125_13TeV_powheg-herwigpp/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v1/00000/32ABFE4A-916B-E411-B2FA-00266CFFBC60.root"
 #"root://xrootd.ba.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/#141029_PU40bx50_PLS170_V6AN2-v1/10000/80161D59-6665-E411-9B4F-C4346BB25698.root",
-#"root://xrootd.ba.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/141029_PU40bx50_PLS170_V6AN2-v1/10000/8A345C56-6665-E411-9C25-1CC1DE04DF20.root",
+##"root://xrootd.ba.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/141029_PU40bx50_PLS170_V6AN2-v1/10000/8A345C56-6665-E411-9C25-1CC1DE04DF20.root",
 #"root://xrootd.ba.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/141029_PU40bx50_PLS170_V6AN2-v1/10000/9C477248-6665-E411-A9A6-1CC1DE1D0600.root",
 #"root://xrootd.ba.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/141029_PU40bx50_PLS170_V6AN2-v1/10000/C6D4D875-6665-E411-9E35-00266CF91A18.root"
 ],
@@ -176,7 +180,7 @@ config = cfg.Config( components = selectedComponents,
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 5, nEvents = 2000)
+    looper = Looper( 'Loop', config, nPrint = 5, nEvents = 600)
     import time
     import cProfile
     p = cProfile.Profile(time.clock)
