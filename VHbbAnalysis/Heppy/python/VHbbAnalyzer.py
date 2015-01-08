@@ -154,7 +154,7 @@ class VHbbAnalyzer( Analyzer ):
 	event.V=sum(map(lambda x:x.p4(), event.vLeptons),ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.))
 	
 	if event.Vtype > 1 :	
-		event.V+=event.met.p4()
+		event.V+=ROOT.reco.Particle.LorentzVector(event.met.p4().x(),event.met.p4().y(),0,event.met.p4().pt())
 
 	event.aLeptons = [x for x in event.inclusiveLeptons if x not in event.vLeptons]
 
