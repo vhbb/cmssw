@@ -38,7 +38,7 @@ treeProducer= cfg.Analyzer(
 	collections = {
 		#standard dumping of objects
    	        "selectedLeptons" : NTupleCollection("selLeptons", leptonTypeVHbb, 8, help="Leptons after the preselection"),
-   	        "inclusiveLeptons" : NTupleCollection("incLeptons", leptonTypeVHbb, 8, help="Leptons after the preselection"),
+#   	        "inclusiveLeptons" : NTupleCollection("incLeptons", leptonTypeVHbb, 8, help="Leptons after the preselection"),
 		#old style stuff
    	        "vLeptons" : NTupleCollection("vLeptons", leptonTypeVHbb, 8, help="Leptons after the preselection"),
    	        "aLeptons" : NTupleCollection("aLeptons", leptonTypeVHbb, 8, help="Additional leptons, not passing the preselection"),
@@ -47,7 +47,7 @@ treeProducer= cfg.Analyzer(
 
 # uncomment the following to use indices instead of old-style hJets+aJets
                 "hjidx"       : NTupleCollection("hJidx",    objectInt, 2,help="Higgs jet indices"),
-                "hjidxDiJetPtByCSV"       : NTupleCollection("hJidx",    objectInt, 2,help="Higgs jet indices within hJets with CSV sorting "),
+                "hjidxDiJetPtByCSV"       : NTupleCollection("hJidx_sortcsv",    objectInt, 2,help="Higgs jet indices within hJets with CSV sorting "),
         "ajidx"       : NTupleCollection("aJidx",    objectInt, 2,help="additional jet indices"),
        "hjidxCSV"       : NTupleCollection("hJCidx",    objectInt, 2,help="Higgs jet indices CSV"),
          "ajidxCSV"       : NTupleCollection("aJCidx",    objectInt, 2,help="additional jet indices CSV"),
@@ -112,6 +112,8 @@ VHbb= cfg.Analyzer(
     zMuSelection = lambda x : x.pt() > 10 and x.muonID("POG_ID_Loose"),
     zLeadingElePt = 20,
     zLeadingMuPt = 20,
+    higgsJetsPreSelection = lambda x:  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') ,
+
     )
 
 from PhysicsTools.Heppy.analyzers.core.TriggerBitAnalyzer import TriggerBitAnalyzer

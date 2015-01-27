@@ -38,7 +38,7 @@ class VHbbAnalyzer( Analyzer ):
 
     def doHiggsHighCSV(self,event) :
         #leading csv interpretation
-        event.hJetsCSV=sorted(event.cleanJets,key = lambda jet : jet.btag('combinedSecondaryVertexBJetTags'), reverse=True)[0:2]
+        event.hJetsCSV=sorted(event.jetsForHiggs,key = lambda jet : jet.btag('combinedSecondaryVertexBJetTags'), reverse=True)[0:2]
         event.aJetsCSV = [x for x in event.cleanJets if x not in event.hJetsCSV]
         event.hjidxCSV=[event.cleanJets.index(x) for x in event.hJetsCSV ]
         event.ajidxCSV=[event.cleanJets.index(x) for x in event.aJetsCSV ]
@@ -47,7 +47,7 @@ class VHbbAnalyzer( Analyzer ):
 
     def doHiggsHighPt(self,event) :
         #highest pair interpretations
-        event.hJets=list(max(itertools.combinations(event.cleanJets,2), key = lambda x : (x[0].p4()+x[1].p4()).pt() ))
+        event.hJets=list(max(itertools.combinations(event.jetsForHiggs,2), key = lambda x : (x[0].p4()+x[1].p4()).pt() ))
         event.aJets = [x for x in event.cleanJets if x not in event.hJets]
         event.hjidx=[event.cleanJets.index(x) for x in event.hJets ]
         event.ajidx=[event.cleanJets.index(x) for x in event.aJets ]
@@ -65,8 +65,8 @@ class VHbbAnalyzer( Analyzer ):
 	event.ajidx3cj = []         
         event.minDr3 = 0         
         #3 jets interpretations, for the closest 3 central jets
-        if (len(event.cleanJets) > 2 and event.cleanJets[2] > 15.): 
-           event.hJets3cj=list(min(itertools.combinations(event.cleanJets,3), key = lambda x : ( x[2]>15 and (deltaR( x[0].eta(), x[0].phi(), x[2].eta(), x[2].phi()) +  deltaR( x[1].eta(), x[1].phi(), x[2].eta(), x[2].phi()) ) ) ))
+        if (len(event.jetsForHiggs) > 2 and event.jetsForHiggs[2] > 15.): 
+           event.hJets3cj=list(min(itertools.combinations(event.jetsForHiggs,3), key = lambda x : ( x[2]>15 and (deltaR( x[0].eta(), x[0].phi(), x[2].eta(), x[2].phi()) +  deltaR( x[1].eta(), x[1].phi(), x[2].eta(), x[2].phi()) ) ) ))
            event.aJets3cj = [x for x in event.cleanJets if x not in event.hJets3cj]
            event.hjidx3cj=[event.cleanJets.index(x) for x in event.hJets3cj ]
            event.ajidx3cj=[event.cleanJets.index(x) for x in event.aJets3cj ]
@@ -127,7 +127,7 @@ class VHbbAnalyzer( Analyzer ):
         zMuons.sort(key=lambda x:x.pt(),reverse=True)
         zElectrons.sort(key=lambda x:x.pt(),reverse=True)
 	if len(zMuons) >=  2 :
-              print  zMuons[0].pt()
+#              print  zMuons[0].pt()
               if zMuons[0].pt() > self.cfg_ana.zLeadingMuPt :
 		    for i in xrange(1,len(zMuons)):
 			if zMuons[0].charge()*zMuons[i].charge()<0 :
@@ -178,7 +178,8 @@ class VHbbAnalyzer( Analyzer ):
 	#substructure threshold, make configurable
 	ssTrheshold = 200.
 	# filter events with less than 2 jets with pt 20
-	if not   (len(event.cleanJets) >= 2 and event.cleanJets[1] > 20.) : # or(len(event.cleanJets) == 1 and event.cleanJets[0] > ssThreshold ) ) :
+        event.jetsForHiggs = [x for x in event.cleanJets if self.cfg_ana.higgsJetsPreSelection(x) ]
+	if not   (len(event.jetsForHiggs) >= 2 and event.jetsForHiggs[1] > 20.) : # or(len(event.cleanJets) == 1 and event.cleanJets[0] > ssThreshold ) ) :
 		return False
 
 	if not self.classifyEvent(event) :
