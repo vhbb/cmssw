@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_HEPPY_V4_001'
-config.General.workArea = 'crab_projects_V4'
+config.General.requestName = 'VHBB_HEPPY_V6_001'
+config.General.workArea = 'crab_projects_V6'
 
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
@@ -19,9 +19,9 @@ config.Data.inputDataset = '/WH_HToBB_WToLNu_M-125_13TeV_powheg-herwigpp/Phys14D
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 12
-config.Data.outLFN = '/store/user/arizzi/VHBBHeppyTest/'
+config.Data.outLFN = '/store/user/arizzi/VHBBHeppyV6/'
 config.Data.publication = True
-config.Data.publishDataName = 'VHBB_HEPPY_V4'
+config.Data.publishDataName = 'VHBB_HEPPY_V6'
 
 config.section_("Site")
 config.Site.storageSite = "T2_IT_Pisa"

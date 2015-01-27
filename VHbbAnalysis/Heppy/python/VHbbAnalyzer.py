@@ -1,7 +1,7 @@
 from PhysicsTools.Heppy.analyzers.core.Analyzer import Analyzer
 from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
 from PhysicsTools.HeppyCore.utils.deltar import deltaR
-
+from math import *
 import itertools
 import ROOT
 class VHbbAnalyzer( Analyzer ):
@@ -52,6 +52,8 @@ class VHbbAnalyzer( Analyzer ):
         event.hjidx=[event.cleanJets.index(x) for x in event.hJets ]
         event.ajidx=[event.cleanJets.index(x) for x in event.aJets ]
         event.aJets+=event.cleanJetsFwd
+        hJetsByCSV = sorted(event.hJets , key =  lambda jet : jet.btag('combinedSecondaryVertexBJetTags'), reverse=True)
+        event.hjidxDiJetPtByCSV = [event.cleanJets.index(x) for x in hJetsByCSV]
         event.H = event.hJets[0].p4()+event.hJets[1].p4()
 
 
@@ -122,8 +124,11 @@ class VHbbAnalyzer( Analyzer ):
 	zElectrons=[x for x in event.selectedElectrons if self.cfg_ana.zEleSelection(x) ]
 	zMuons=[x for x in event.selectedMuons if self.cfg_ana.zMuSelection(x) ]
 
-
+        zMuons.sort(key=lambda x:x.pt(),reverse=True)
+        zElectrons.sort(key=lambda x:x.pt(),reverse=True)
 	if len(zMuons) >=  2 :
+              print  zMuons[0].pt()
+              if zMuons[0].pt() > self.cfg_ana.zLeadingMuPt :
 		    for i in xrange(1,len(zMuons)):
 			if zMuons[0].charge()*zMuons[i].charge()<0 :
 	                      event.Vtype = 0
@@ -132,6 +137,7 @@ class VHbbAnalyzer( Analyzer ):
 	elif len(zElectrons) >=  2 :
 #	    for i in zElectrons[0].electronIDs()  :
 #			print i.first,i.second
+              if zElectrons[0].pt() > self.cfg_ana.zLeadingElePt :
 		    for i in xrange(1,len(zElectrons)):
 			if zElectrons[0].charge()*zElectrons[i].charge()<0 :
 	                      event.Vtype = 1
@@ -152,9 +158,12 @@ class VHbbAnalyzer( Analyzer ):
 
 
 	event.V=sum(map(lambda x:x.p4(), event.vLeptons),ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.))
-	
 	if event.Vtype > 1 :	
 		event.V+=ROOT.reco.Particle.LorentzVector(event.met.p4().x(),event.met.p4().y(),0,event.met.p4().pt())
+        if event.V.Et() > event.V.pt() :
+           event.V.goodMt = sqrt(event.V.Et()**2-event.V.pt()**2)
+        else :
+           event.V.goodMt = -sqrt(-event.V.Et()**2+event.V.pt()**2)
 
 	event.aLeptons = [x for x in event.inclusiveLeptons if x not in event.vLeptons]
 
