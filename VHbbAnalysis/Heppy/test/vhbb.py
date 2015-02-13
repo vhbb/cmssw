@@ -8,6 +8,12 @@ from VHbbAnalysis.Heppy.vhbbobj import *
 from PhysicsTools.HeppyCore.utils.deltar import deltaPhi
 from PhysicsTools.Heppy.analyzers.core.AutoFillTreeProducer  import * 
 
+import logging
+logging.basicConfig(level=logging.ERROR)
+
+
+cfg.Analyzer.nosubdir = True
+
 treeProducer= cfg.Analyzer(
 	class_object=AutoFillTreeProducer, 
 	verbose=False, 
@@ -19,7 +25,7 @@ treeProducer= cfg.Analyzer(
 		 NTupleVariable("HVdPhi", lambda ev : deltaPhi(ev.V.phi(),ev.H.phi()), help="Delta phi between Higgs and Z/W"),
 		 NTupleVariable("fakeMET_sumet", lambda ev : ev.fakeMET.sumet, help="Fake SumET from Zmumu events removing muons"),
 		 NTupleVariable("rho",  lambda ev: ev.rho, float, help="kt6PFJets rho"),
-		 NTupleVariable("deltaR_jj",  lambda ev: deltaR(ev.hJets[0].eta(),ev.hJets[0].phi(),ev.hJets[1].eta(),ev.hJets[1].phi()), float, help="deltaR higgsJets"),
+		 NTupleVariable("deltaR_jj",  lambda ev: deltaR(ev.hJets[0].eta(),ev.hJets[0].phi(),ev.hJets[1].eta(),ev.hJets[1].phi()) if len(ev.hJets) > 1 else -1, float, help="deltaR higgsJets"),
                  NTupleVariable("minDr3",    lambda ev: ev.minDr3, help="dR of closest jets for 3 jest case"),
 		 NTupleVariable("lheNj",  lambda ev: ev.lheNj, float,mcOnly=True, help="number of jets at LHE level"),
 		 NTupleVariable("lheV_pt",  lambda ev: ev.lheV_pt, float,mcOnly=True, help="Vector pT at LHE level"),
@@ -52,7 +58,7 @@ treeProducer= cfg.Analyzer(
                 "ajidxCSV"       : NTupleCollection("aJCidx",    objectInt, 2,help="additional jet indices CSV"),
                 "hjidx3cj"       : NTupleCollection("hJ3Cidx",    objectInt, 2,help="Higgs jet indices 3 cen jets"),
                 "ajidx3cj"       : NTupleCollection("aJ3Cidx",    objectInt, 2,help="additional jet indices 3 cen  jets"),
-                "cleanJetsAll"       : NTupleCollection("Jet",     jetTypeVHbb, 8, help="Cental+fwd jets after full selection and cleaning, sorted by b-tag"),
+                "cleanJetsAll"       : NTupleCollection("Jet",     jetTypeVHbb, 15, help="Cental+fwd jets after full selection and cleaning, sorted by b-tag"),
                 "selectedTaus"    : NTupleCollection("TauGood", tauType, 3, help="Taus after the preselection"),
 
 		#dump of gen objects
@@ -102,6 +108,8 @@ PUAna = PileUpAnalyzer.defaultConfig
 
 
 from VHbbAnalysis.Heppy.VHbbAnalyzer import VHbbAnalyzer
+JetAna.jetPt = 15
+
 VHbb= cfg.Analyzer(
     verbose=False,
     class_object=VHbbAnalyzer,
@@ -111,9 +119,13 @@ VHbb= cfg.Analyzer(
     zMuSelection = lambda x : x.pt() > 10 and x.muonID("POG_ID_Loose"),
     zLeadingElePt = 20,
     zLeadingMuPt = 20,
-    higgsJetsPreSelection = lambda x:  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') ,
+    higgsJetsPreSelection = lambda x:  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') and x.pt() >  15 ,
+    passall=True,
 
     )
+
+#from VHbbAnalysis.Heppy.HeppyShell import HeppyShell
+#sh = cfg.Analyzer( class_object=HeppyShell)
 
 from PhysicsTools.Heppy.analyzers.core.TriggerBitAnalyzer import TriggerBitAnalyzer
 TrigAna= cfg.Analyzer(
@@ -148,7 +160,7 @@ FlagsAna = TriggerBitAnalyzer.defaultEventFlagsConfig
 
 #TrigAna.unrollbits=True
 
-sequence = [LHEAna,FlagsAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,TauAna,PhoAna,JetAna,METAna,VHbb,treeProducer]
+sequence = [LHEAna,FlagsAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,TauAna,PhoAna,JetAna,METAna,VHbb,treeProducer]#,sh]
 
 
 from PhysicsTools.Heppy.utils.miniAodFiles import miniAodFiles
@@ -166,7 +178,9 @@ sample = cfg.MCComponent(
 "ZLL-8A345C56-6665-E411-9C25-1CC1DE04DF20.root" #Hbb Zll
 #"root://xrootd.ba.infn.it//store/mc/Phys14DR/ZH_HToBB_ZToNuNu_M-125_13TeV_powheg-herwigpp/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v1/00000/32ABFE4A-916B-E411-B2FA-00266CFFBC60.root"
 #"root://xrootd.ba.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/#141029_PU40bx50_PLS170_V6AN2-v1/10000/80161D59-6665-E411-9B4F-C4346BB25698.root",
-#"root://xrootd.ba.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/141029_PU40bx50_PLS170_V6AN2-v1/10000/8A345C56-6665-E411-9C25-1CC1DE04DF20.root",
+#"root://xrootd.ba.infn.it:1194//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/141029_PU40bx50_PLS170_V6AN2-v1/10000/8A345C56-6665-E411-9C25-1CC1DE04DF20.root",
+#"root://stormgf1.pi.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/141029_PU40bx50_PLS170_V6AN2-v1/10000/8A345C56-6665-E411-9C25-1CC1DE04DF20.root",
+#"/gpfs/ddn/srm/cms/store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/141029_PU40bx50_PLS170_V6AN2-v1/10000/8A345C56-6665-E411-9C25-1CC1DE04DF20.root",
 #"root://xrootd.ba.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/141029_PU40bx50_PLS170_V6AN2-v1/10000/9C477248-6665-E411-A9A6-1CC1DE1D0600.root",
 #"root://xrootd.ba.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/141029_PU40bx50_PLS170_V6AN2-v1/10000/C6D4D875-6665-E411-9E35-00266CF91A18.root"
 ],
@@ -189,10 +203,16 @@ config = cfg.Config( components = selectedComponents,
 		     services = [output_service],
                      events_class = Events)
 
+class TestFilter(logging.Filter):
+    def filter(self, record):
+        print record
+
+
+
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 5, nEvents = 1000)
+    looper = Looper( 'Loop', config, nPrint = 20, nEvents = 1000)
     import time
     import cProfile
     p = cProfile.Profile(time.clock)
