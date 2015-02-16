@@ -182,7 +182,8 @@ class MCComponent( Component ):
 class Config( object ):
     '''Main configuration object, holds a sequence of analyzers, and
     a list of components.'''
-    def __init__(self, components, sequence, services, events_class):
+    def __init__(self, components, sequence, services, events_class,preprocessor=None):
+        self.preprocessor = preprocessor
         self.components = components
         self.sequence = sequence
         self.services = services
@@ -195,35 +196,3 @@ class Config( object ):
         return '\n'.join([comp, sequence, services])
 
 
-if __name__ == '__main__':
-
-    from PhysicsTools.HeppyCore.framework.chain import Chain as Events
-    from PhysicsTools.HeppyCore.analyzers.Printer import Printer
-
-    class Ana1(object):
-        pass
-    ana1 = Analyzer(
-        Ana1,
-        toto = '1',
-        tata = 'a'
-        )
-    ana2 = Analyzer(
-        Printer,
-        'instance1'
-        )
-    sequence = Sequence( [ana1, ana2] )
-
-    DYJets = MCComponent(
-        name = 'DYJets',
-        files ='blah_mc.root',
-        xSection = 3048.,
-        nGenEvents = 34915945,
-        triggers = ['HLT_MC'],
-        vertexWeight = 1.,
-        effCorrFactor = 1 )
-    selectedComponents = [DYJets]
-    sequence = [ana1, ana2]
-    config = Config( components = selectedComponents,
-                     sequence = sequence, 
-                     events_class = Events )
-    print config
