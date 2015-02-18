@@ -120,7 +120,7 @@ VHbb= cfg.Analyzer(
     zLeadingElePt = 20,
     zLeadingMuPt = 20,
     higgsJetsPreSelection = lambda x:  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') and x.pt() >  15 ,
-    passall=True,
+    passall=False,
 
     )
 
