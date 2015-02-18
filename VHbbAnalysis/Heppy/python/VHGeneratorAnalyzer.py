@@ -211,6 +211,7 @@ class GeneratorAnalyzer( Analyzer ):
             #questo blocco viene eseguito quando c'e' almeno un higgs
             #event.genHiggsBoson = higgsBosons[-1]
             event.genHiggsBoson = GenParticle(higgsBosons[-1])
+            event.genHiggsBosons = higgsBosons
             event.genHiggsDecayMode = abs( event.genHiggsBoson.daughter(0).pdgId() )
             self.fillTopQuarks( event )
             self.countBPartons( event )
