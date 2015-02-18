@@ -1,9 +1,24 @@
 from PhysicsTools.Heppy.analyzers.core.Analyzer import Analyzer
 from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
 from PhysicsTools.HeppyCore.utils.deltar import deltaR
+from copy import deepcopy
 from math import *
 import itertools
 import ROOT
+def Boost(self,boost):
+   bx=boost.X()
+   by=boost.Y()
+   bz=boost.Z()
+   b2 = bx*bx + by*by + bz*bz; 
+   gamma = 1.0 / sqrt(1.0 - b2);
+   bp = bx*self.X() + by*self.Y() + bz*self.Z();
+   gamma2 =  (gamma - 1.0)/b2 if b2 >0 else  0.0;
+   #print gamma2,gamma,bp,self.X(),self.Y(),self.Z(),self.T()
+   self.SetXYZT(self.X() + gamma2*bp*bx + gamma*bx*self.T(),
+   self.Y() + gamma2*bp*by + gamma*by*self.T(),
+   self.Z() + gamma2*bp*bz + gamma*bz*self.T(),
+   (gamma*(self.T() + bp)))
+   return self
 class VHbbAnalyzer( Analyzer ):
     '''Analyze VH events
     '''
@@ -19,18 +34,40 @@ class VHbbAnalyzer( Analyzer ):
             setup.services["outputfile"].file.cd()
             self.inputCounter = ROOT.TH1F("Count","Count",1,0,2)
  
-    def makeJets(self,event):
+    def makeJets(self,event,b):
 	inputs=ROOT.std.vector(ROOT.heppy.ReclusterJets.LorentzVector)()
         event.pfCands = list(self.handles['pfCands'].product())
+#        print "original jets pt,eta,phi \t\t",map(lambda x:"%s,%s,%s --"%(x.pt(),x.eta(),x.phi()),event.cleanJets)
+#        print "BquarksFromH pt,eta,phi \t\t",map(lambda x:"%s,%s,%s -- "%(x.pt(),x.eta(),x.phi()),event.genbquarksFromH)
+#        print "Inv mass",(event.genbquarksFromH[0].p4()+event.genbquarksFromH[1].p4()).M()
+#        print "pt from sum ",(event.genbquarksFromH[0].p4()+event.genbquarksFromH[1].p4()).Pt()
+#        print "pt from h",event.genHiggsBoson[0].pt()
+
+        copyhb=map(lambda x: deepcopy(x.p4()),event.genbquarksFromH)
+        map(lambda x: Boost(x,b),copyhb)
+#        print "BquarksFromH(boost) pt,eta,phi,p \t\t",map(lambda x:"%s,%s,%s,%s -- "%(x.pt(),x.eta(),x.phi(),x.P()),copyhb)
+#        print "Inv mass (boost)",(copyhb[0]+copyhb[1]).M()
+#        print "pt  (boost)",(copyhb[0]+copyhb[1]).Pt()
+      # print "boost",b.X(),b.Y(),b.Z(),"phi",b.Phi()
 	for pf in event.pfCands :
-	     if pf.fromPV() :
-		inputs.push_back(pf.p4())
+	     if pf.fromPV() or pf.charge()==0 :
+                p4copy=ROOT.heppy.ReclusterJets.LorentzVector(pf.p4())
+                bst=Boost(p4copy,b)
+       #        if bst.pt() > 20 : 
+       #          print "   candidate orig,boost",pf.pt(),bst.pt(),pf.phi(),bst.phi()
+		inputs.push_back(bst)
 	clusterizer=ROOT.heppy.ReclusterJets(inputs,-1,0.1)
-	jets = clusterizer.getGrouping(30)
+	jets = clusterizer.getGrouping(10)
         #event.jee = list(self.handles['jee'].product())
-	#for j in list(jets)[0:3]:
-	#	print j.pt(),
-	#print " "
+#        print "Boosted jets:",
+	for j in list(jets):
+		oldpt=j.pt()
+		oldeta=j.eta()
+		oldphi=j.phi()
+                Boost(j,-b)
+ #               if j.pt() > 20 :
+ #                   print oldpt,oldeta,oldphi," -> ",j.pt(),j.eta(),j.phi(),"|",
+#	print " "
     def doFakeMET(self,event):
 	#fake MET from Zmumu
 	event.fakeMET = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
@@ -247,10 +284,22 @@ class VHbbAnalyzer( Analyzer ):
 	# MET corrections (in MET analyzer)
   	# trigger flags
 		
-
-#	self.makeJets(event)
+       # Hbalance = ROOT.TLorentzVector()
+       # Hbalance.SetPtEtaPhiM(event.V.pt(),0,event.V.phi(),125.)
+       # hh=event.genHiggsBoson[0]
+       # Hbalance2 = ROOT.TLorentzVector()
+       # Hbalance2.SetPtEtaPhiM(hh.pt(),hh.eta(),hh.phi(),125.)
+       # print "Hbalance pt,e,phi",Hbalance.Pt(),Hbalance.E(),Hbalance.Phi()
+       # print "gen H    pt,e,phi",hh.pt(),hh.p4().E(),hh.phi()
+       # print "Hbalance2 pt,e,phi",Hbalance2.Pt(),Hbalance2.E(),Hbalance2.Phi()
+       # print "boostVector:",Hbalance.BoostVector().X(),Hbalance.BoostVector().Y(),Hbalance.BoostVector().Z()
+       # print "boostVector2:",Hbalance2.BoostVector().X(),Hbalance2.BoostVector().Y(),Hbalance2.BoostVector().Z()
+        #print "Unboosted Hbalance",Boost(Hbalance,-Hbalance.BoostVector()).Pt()
+#       print "hbalance boost vector",Hbalance.BoostVector()
+       # hhh=deepcopy(Hbalance2)
+       # Boost(hhh,-Hbalance2.BoostVector())
+       # print "unboosted pt",hhh.Pt()
+#	self.makeJets(event,-Hbalance2.BoostVector())
         return True
-
-
 
 
