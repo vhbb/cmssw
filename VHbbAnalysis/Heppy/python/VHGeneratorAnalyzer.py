@@ -103,7 +103,7 @@ class GeneratorAnalyzer( Analyzer ):
             dau = GenParticle(h.daughter(i))
             if abs(dau.pdgId()) == 5:
                     event.genbquarksFromH.append( dau )
-                    if day.numberOfDaughters() == 1 :
+                    if dau.numberOfDaughters() == 1 :
                          event.genbquarksFromHafterISR.append( GenParticle(dau.daughter(0)))
 
 
