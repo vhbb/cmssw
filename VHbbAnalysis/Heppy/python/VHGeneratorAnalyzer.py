@@ -103,7 +103,8 @@ class GeneratorAnalyzer( Analyzer ):
             dau = GenParticle(h.daughter(i))
             if abs(dau.pdgId()) == 5:
                     event.genbquarksFromH.append( dau )
-
+                    if dau.numberOfDaughters() == 1 :
+                         event.genbquarksFromHafterISR.append( GenParticle(dau.daughter(0)))
 
 
     def fillTopQuarks(self, event):
@@ -148,6 +149,7 @@ class GeneratorAnalyzer( Analyzer ):
         event.gentaus    = []
         event.genbquarksFromTop  = []
         event.genbquarksFromH  = []
+        event.genbquarksFromHafterISR = []
         event.genallbquarks = []
         event.genwzquarks = []
         event.gentopquarks  = []

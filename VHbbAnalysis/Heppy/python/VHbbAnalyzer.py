@@ -27,6 +27,20 @@ class VHbbAnalyzer( Analyzer ):
         super(VHbbAnalyzer, self).declareHandles()
 #        self.handles['pfCands'] =  AutoHandle( 'packedPFCandidates', 'std::vector<pat::PackedCandidate>' )
 #        self.handles['jee'] =  AutoHandle( 'ak5PFJetsCHS', 'std::vector<reco::PFJet>' )
+        #self.handles['btag'] = AutoHandle( ("combinedInclusiveSecondaryVertexV2BJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+        #self.handles['btagcsv'] = AutoHandle( ("combinedSecondaryVertexBJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+    def addNewBTag(self,event):
+        newtags =  self.handles['btag'].product()
+        for i in xrange(0,len(newtags)) :
+             for j in event.cleanJets :
+                if j.physObj == newtags.key(i).get() :
+                    j.btagnew=newtags.value(i)
+        newtags =  self.handles['btagcsv'].product()
+        for i in xrange(0,len(newtags)) :
+             for j in event.cleanJets :
+                if j.physObj == newtags.key(i).get() :
+                    j.btagcsv=newtags.value(i)
+
 
     def beginLoop(self,setup):
         super(VHbbAnalyzer,self).beginLoop(setup)
@@ -194,11 +208,13 @@ class VHbbAnalyzer( Analyzer ):
 		if abs(event.selectedLeptons[0].pdgId())==11 :
 			event.Vtype = 3
 			event.vLeptons =event.selectedLeptons
+        elif len(zElectrons) + len(zMuons) > 0 :
+                event.Vtype = 5 #there are some loose (Z selection) leptons but not matching the W/Z above requirements
 	else :
-		event.Vtype = 4	
+		event.Vtype = 4	#no leptons at all, apply MET cut
 		#apply MET cut
-		if  event.met.pt() < 50 :
-			 return False
+		if  event.met.pt() < 80 :
+                         event.Vtype = -1
 
 
 	event.V=sum(map(lambda x:x.p4(), event.vLeptons),ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.))
@@ -241,9 +257,9 @@ class VHbbAnalyzer( Analyzer ):
         self.initOutputs(event)
 #	event.pfCands = self.handles['pfCands'].product()
 # 	met = event.met
-	
+        #self.addNewBTag(event)
    	self.classifyMCEvent(event)
-	passClassify = self.classifyEvent(event) 
+	self.classifyEvent(event) 
 	self.doFakeMET(event)
 
 	#substructure threshold, make configurable
@@ -252,7 +268,7 @@ class VHbbAnalyzer( Analyzer ):
         event.jetsForHiggs = [x for x in event.cleanJets if self.cfg_ana.higgsJetsPreSelection(x) ]
 	if not   len(event.jetsForHiggs) >= 2 : # and event.jetsForHiggs[1] > 20.) : # or(len(event.cleanJets) == 1 and event.cleanJets[0] > ssThreshold ) ) :
 		return self.cfg_ana.passall
-        if not passClassify:
+        if event.Vtype < 0 and not ( sum(x.pt() > 30 for x in event.jetsForHiggs) >= 4 or sum(x.pt() for x in event.jetsForHiggs[:4]) > 160 ):
                 return self.cfg_ana.passall
 
 	self.doHiggsHighCSV(event)

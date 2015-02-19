@@ -46,7 +46,10 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
 ##------------------------------------------  
 
 jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables = [
-#    NTupleVariable("btagCMVA",   lambda x : x.btag('combinedMVABJetTags'), help="CSV discriminator"),
+    NTupleVariable("btagProb", lambda x : x.btag('jetProbabilityBJetTags') , help="btag of nearest jet"),
+    NTupleVariable("btagBProb", lambda x : x.btag('jetBProbabilityBJetTags') , help="btag of nearest jet"),
+    NTupleVariable("btagnew",   lambda x : getattr(x,"btagnew",-2), help="newest btag discriminator"),
+    NTupleVariable("btagCSVV0",   lambda x : getattr(x,"btagcsv",-2), help="should be the old CSV discriminator"),
    # NTupleVariable("mcMatchId",    lambda x : x.mcMatchId,   int, mcOnly=True, help="Match to source from hard scatter (25 for H, 6 for t, 23/24 for W/Z)"),
    # NTupleVariable("puId", lambda x : x.puJetIdPassed, int,     mcOnly=False, help="puId (full MVA, loose WP, 5.3.X training on AK5PFchs: the only thing that is available now)"),
    # NTupleVariable("id",    lambda x : x.jetID("POG_PFID") , int, mcOnly=False,help="POG Loose jet ID"),
