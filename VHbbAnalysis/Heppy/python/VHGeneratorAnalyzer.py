@@ -207,8 +207,8 @@ class GeneratorAnalyzer( Analyzer ):
                 self.fillWZQuarks(event, b, isWZ=True, sourceId=abs(b.pdgId()))
 		"""
         else:
-            if len(higgsBosons) > 1: 
-                print "More than one higgs? \n%s\n" % higgsBosons
+#            if len(higgsBosons) > 1: 
+#                print "More than one higgs? \n%s\n" % higgsBosons
 
             #questo blocco viene eseguito quando c'e' almeno un higgs
             #event.genHiggsBoson = higgsBosons[-1]
@@ -219,7 +219,8 @@ class GeneratorAnalyzer( Analyzer ):
             self.countBPartons( event )
             #self.fillWZQuarks(   event, event.genHiggsBoson )
             #self.fillWZQuarks(   event, event.protons[0], sourceId=2212) : non serve, quando c'e' higgs non ci sn quarks da WZ
-            self.fillHiggsBQuarks(   event, event.genHiggsBoson )
+            for h in event.genHiggsBosons :
+                self.fillHiggsBQuarks(   event, h)
             event.genHiggsBoson = [GenParticle(higgsBosons[-1])]
             #self.fillGenLeptons( event, event.genHiggsBoson, sourceId=25 )
             #if self.cfg_ana.verbose:
