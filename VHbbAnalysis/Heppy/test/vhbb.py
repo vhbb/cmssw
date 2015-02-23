@@ -69,7 +69,7 @@ treeProducer= cfg.Analyzer(
                 "genwzquarks"     : NTupleCollection("GenWZQuark",   genParticleType, 6, help="Generated quarks from W/Z decays"),
                 "genleps"         : NTupleCollection("GenLep",     genParticleType, 2, help="Generated leptons from W/Z decays"),
                 "gentauleps"      : NTupleCollection("GenLepFromTau", genParticleType, 6, help="Generated leptons from decays of taus from W/Z decays"),
-		"genHiggsBoson"   : NTupleCollection("GenHiggsBoson", genParticleType, 1, help="Generated Higgs boson "),
+		"genHiggsBoson"   : NTupleCollection("GenHiggsBoson", genParticleType, 2, help="Generated Higgs boson "),
 		#"genZbosonsToLL"  : NTupleCollection("GenZbosonsToLL", genParticleType, 6, help="Generated W or Z bosons decaying to LL"),
 		#"genWbosonsToLL"  : NTupleCollection("GenWbosonsToLL", genParticleType, 6, help="Generated W or Z bosons decaying to LL"),
 		"genvbosons"       : NTupleCollection("GenVbosons", genParticleType, 6, help="Generated W or Z bosons, mass > 30"),
@@ -121,7 +121,7 @@ VHbb= cfg.Analyzer(
     zLeadingElePt = 20,
     zLeadingMuPt = 20,
     higgsJetsPreSelection = lambda x:  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') and x.pt() >  15 ,
-    passall=False,
+    passall=True,
 
     )
 
@@ -140,6 +140,8 @@ TrigAna= cfg.Analyzer(
    "DIMU" : ["HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*"],
    "MU" : ["HLT_IsoTkMu24_eta2p1_IterTrk02_v*","HLT_IsoTkMu24_IterTrk02_v*"],
    "TAU": ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v*"],
+   "HH4bQuad":["HLT_QuadJet45_TripleCSV0p5_v*"],
+   "HH4bDouble":["HLT_DoubleJet90_Double30_TripleCSV0p5_v*"], 		
    },
 #   processName='HLT',
 #   outprefix='HLT'
@@ -176,7 +178,7 @@ sample = cfg.MCComponent(
 #'root://xrootd.ba.infn.it//store/mc/Phys14DR/WH_HToBB_WToLNu_M-125_13TeV_powheg-herwigpp/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v1/00000/12328AE8-796B-E411-9D32-002590A831B4.root'
 #"32ABFE4A-916B-E411-B2FA-00266CFFBC60.root" #Hbb
 #"04860BAA-B673-E411-8B20-002481E0D50C.root" #DY 600
-"TTPU20-007B37D4-8B70-E411-BC2D-0025905A6066.root" # 
+"root://xrootd.ba.infn.it//store/user/sdas/glugluToX300ToHHTobbbb_13TeV_width1MeV_GEN_SIM_RECO_HLT/glugluToX300ToHHTobbbb_13TeV_width1MeV_PAT/eed6537107126ba67370b15f62982633/glugluToX300ToHHTobbbb_8TeV_MINIAOD_100_1_TcF.root"
 #"root://xrootd.ba.infn.it//store/mc/Phys14DR/ZH_HToBB_ZToNuNu_M-125_13TeV_powheg-herwigpp/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v1/00000/32ABFE4A-916B-E411-B2FA-00266CFFBC60.root"
 #"root://xrootd.ba.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/#141029_PU40bx50_PLS170_V6AN2-v1/10000/80161D59-6665-E411-9B4F-C4346BB25698.root",
 #"root://xrootd.ba.infn.it:1194//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/141029_PU40bx50_PLS170_V6AN2-v1/10000/8A345C56-6665-E411-9C25-1CC1DE04DF20.root",
