@@ -18,8 +18,9 @@ class PDFWeightsAnalyzer( Analyzer ):
     def declareHandles(self):
         super(PDFWeightsAnalyzer, self).declareHandles()
 
-        if self.doPDFWeights:
-            self.mchandles['pdfstuff'] = AutoHandle( 'generator', 'GenEventInfoProduct' )
+        #if self.doPDFWeights:
+        #    self.mchandles['pdfstuff'] = AutoHandle( 'generator', 'GenEventInfoProduct' )
+        self.mchandles['pdfstuff'] = AutoHandle( 'generator', 'GenEventInfoProduct' )
 
     def beginLoop(self, setup):
         super(PDFWeightsAnalyzer,self).beginLoop(setup)
@@ -34,7 +35,7 @@ class PDFWeightsAnalyzer( Analyzer ):
 
     def makePDFWeights(self, event):
         if not self.pdfWeightInit: self.initPDFWeights()
-        self.pdfWeightTool.processEvent(self.mchandles['pdfstuff'].product())
+        self.pdfWeightTool.processEvent(self.genInfo)
         event.pdfWeights = {}
         for pdf in self.cfg_ana.PDFWeights:
             ws = self.pdfWeightTool.getWeights(pdf+".LHgrid")
@@ -47,8 +48,15 @@ class PDFWeightsAnalyzer( Analyzer ):
         if not self.cfg_comp.isMC: 
             return True
 
+        self.genInfo = self.mchandles['pdfstuff'].product()
         if self.doPDFWeights:
             self.makePDFWeights(event)
+        event.pdf_x1 = self.genInfo.pdf().x.first
+        event.pdf_x2 = self.genInfo.pdf().x.second
+        event.pdf_id1 = self.genInfo.pdf().id.first
+        event.pdf_id2 = self.genInfo.pdf().id.second
+        event.pdf_scale = self.genInfo.pdf().scalePDF
+
         return True
 
 setattr(PDFWeightsAnalyzer,"defaultConfig",
