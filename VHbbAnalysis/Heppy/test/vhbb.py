@@ -19,7 +19,7 @@ cfg.Analyzer.nosubdir = True
 
 treeProducer= cfg.Analyzer(
 	class_object=AutoFillTreeProducer, 
-	verbose=True, 
+	verbose=False, 
 	vectorTree = True,
         globalVariables	= [
 		 NTupleVariable("Vtype", lambda ev : ev.Vtype, help="Event classification"),
