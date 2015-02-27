@@ -12,7 +12,7 @@ config.JobType.psetName = 'heppy_crab_fake_pset.py'
 config.JobType.scriptExe = 'heppy_crab_script.sh'
 import os
 os.system("tar czf python.tar.gz --dereference --directory $CMSSW_BASE python")
-config.JobType.inputFiles = ['heppy_config.py','heppy_crab_script.py','python.tar.gz','MVAJetTags_620SLHCX_Phase1And2Upgrade.db','newbtag.py']
+config.JobType.inputFiles = ['heppy_config.py','heppy_crab_script.py','python.tar.gz','MVAJetTags_620SLHCX_Phase1And2Upgrade.db','newbtag.py','../vhbb.py']
 #config.JobType.outputFiles = ['tree.root']
 
 config.section_("Data")
