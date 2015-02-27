@@ -47,8 +47,9 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
 
 jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables = [
     NTupleVariable("hadronFlavour", lambda x : x.mcFlavour, int,     mcOnly=True, help="match to heavy hadrons"),
-    NTupleVariable("btagProb", lambda x : x.btag('jetProbabilityBJetTags') , help="btag of nearest jet"),
-    NTupleVariable("btagBProb", lambda x : x.btag('jetBProbabilityBJetTags') , help="btag of nearest jet"),
+    NTupleVariable("btagBDT", lambda x : getattr(x,"btagBDT",-99), help="btag"),
+    NTupleVariable("btagProb", lambda x : x.btag('jetProbabilityBJetTags') , help="btag"),
+    NTupleVariable("btagBProb", lambda x : x.btag('jetBProbabilityBJetTags') , help="btag"),
     NTupleVariable("btagnew",   lambda x : getattr(x,"btagnew",-2), help="newest btag discriminator"),
     NTupleVariable("btagCSVV0",   lambda x : getattr(x,"btagcsv",-2), help="should be the old CSV discriminator"),
    # NTupleVariable("mcMatchId",    lambda x : x.mcMatchId,   int, mcOnly=True, help="Match to source from hard scatter (25 for H, 6 for t, 23/24 for W/Z)"),
