@@ -151,6 +151,8 @@ TrigAna= cfg.Analyzer(
    "DIMU" : ["HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*"],
    "MU" : ["HLT_IsoTkMu24_eta2p1_IterTrk02_v*","HLT_IsoTkMu24_IterTrk02_v*"],
    "TAU": ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v*"],
+   "HH4bQuad":["HLT_QuadJet45_TripleCSV0p5_v*"],
+   "HH4bDouble":["HLT_DoubleJet90_Double30_TripleCSV0p5_v*"],  
    },
 #   processName='HLT',
 #   outprefix='HLT'
