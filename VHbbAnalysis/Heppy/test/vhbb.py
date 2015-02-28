@@ -83,8 +83,10 @@ treeProducer= cfg.Analyzer(
 	)
 
 #Create shifted MET Ntuples
-shifted_met_keys = ["met_shifted_{0}".format(n) for n in range(14)]
-shifted_mets = {mk: NTupleObject(mk, metType, help="PF E_{T}^{miss}, after default type 1 corrections, shifted with %s" %mk) for mk in shifted_met_keys}
+metNames={y:x for x,y in ROOT.pat.MET.__dict__.items() if y >= 0 and y < 13 and (x[-2:]=="Up" or x[-4:]=="Down")}
+shifted_met_keys = ["met_shifted_{0}".format(n) for n in range(12)] #we do not need noShift I gueess
+shifted_met_names = ["met_shifted_%s"%metNames[n] for n in range(12)] #we do not need noShift I gueess
+shifted_mets = {mk: NTupleObject(nm, shiftedMetType, help="PF E_{T}^{miss}, after default type 1 corrections, shifted with %s" %mk) for mk,nm in zip(shifted_met_keys,shifted_met_names)}
 treeProducer.globalObjects.update(shifted_mets)
 
 # Lepton Analyzer, take its default config

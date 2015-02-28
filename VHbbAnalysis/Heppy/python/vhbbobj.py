@@ -4,7 +4,7 @@ from math import *
 import ROOT
 #from CMGTools.TTHAnalysis.signedSip import *
 from PhysicsTools.Heppy.analyzers.objects.autophobj import *
-
+import copy
 
 
 leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonType ], variables = [
@@ -122,8 +122,9 @@ heavyFlavourHadronType = NTupleObjectType("heavyFlavourHadron", baseObjectTypes 
     NTupleVariable("jetPt",  lambda x : x.jet.pt() if x.jet != None else 0, help="Jet: pT"),
     NTupleVariable("jetBTag",  lambda x : x.jet.btag('combinedSecondaryVertexBJetTags') if x.jet != None else -99, help="CSV b-tag of associated jet"),
 ])
-
-
+shiftedMetType= NTupleObjectType("shiftedMetType", baseObjectTypes=[twoVectorType], variables=[
+    NTupleVariable("sumEt", lambda x : x.sumEt() ),
+])
 
 def ptRel(p4,axis):
     a=ROOT.TVector3(axis.Vect().X(),axis.Vect().Y(),axis.Vect().Z())
