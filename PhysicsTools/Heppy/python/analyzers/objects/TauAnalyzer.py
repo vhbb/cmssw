@@ -6,9 +6,7 @@ from PhysicsTools.HeppyCore.utils.deltar import deltaR, matchObjectCollection3
 
 import PhysicsTools.HeppyCore.framework.config as cfg
 
- 
 class TauAnalyzer( Analyzer ):
-
     
     def __init__(self, cfg_ana, cfg_comp, looperName ):
         super(TauAnalyzer,self).__init__(cfg_ana,cfg_comp,looperName)
@@ -18,8 +16,8 @@ class TauAnalyzer( Analyzer ):
     #----------------------------------------
     def declareHandles(self):
         super(TauAnalyzer, self).declareHandles()
-        self.handles['taus'] = AutoHandle( ('slimmedTaus',''),'std::vector<pat::Tau>')
-
+        self.handles['taus'] = AutoHandle( ('slimmedTaus',''), 'std::vector<pat::Tau>' )
+        self.handles['jets'] = AutoHandle( ('slimmedJets',''), 'std::vector<pat::Jet>' )
 
     def beginLoop(self, setup):
         super(TauAnalyzer,self).beginLoop(setup)
@@ -58,9 +56,9 @@ class TauAnalyzer( Analyzer ):
                 if tau.lepVeto: continue
             if self.cfg_ana.vetoLeptonsPOG:
                 if not tau.tauID(self.cfg_ana.tauAntiMuonID):
-                        tau.lepVeto = True
+                    tau.lepVeto = True
                 if not tau.tauID(self.cfg_ana.tauAntiElectronID):
-                        tau.lepVeto = True
+                    tau.lepVeto = True
                 if tau.lepVeto: continue
 
             if tau.pt() < self.cfg_ana.ptMin: continue
@@ -84,8 +82,19 @@ class TauAnalyzer( Analyzer ):
             tau.idMVANewDM = id6(tau, "by%sIsolationMVA3newDMwLT")
             tau.idCI3hit = id3(tau, "by%sCombinedIsolationDeltaBetaCorr3Hits")
             tau.idAntiMu = tau.tauID("againstMuonLoose") + tau.tauID("againstMuonTight")
-            tau.idAntiE = id5(tau, "againstElectron%sMVA5")
+            tau.idAntiE = id5(tau, "againstElectron%sMVA5")            
             #print "Tau pt %5.1f: idMVA2 %d, idCI3hit %d, %s, %s" % (tau.pt(), tau.idMVA2, tau.idCI3hit, tau.tauID(self.cfg_ana.tauID), tau.tauID(self.cfg_ana.tauLooseID))
+
+            idxJet_matched = -1
+            dRmin = 1.e+3
+            for idxJet in range(len(event.jets)):
+                jet = event.jets[idxJet]
+                dR = deltaR(tau.eta(), tau.phi(), jet.eta(), jet.phi())
+                if dR < 0.5 and dR < dRmin:
+                    idxJet_matched = idxJet
+                    dRmin = dR
+            tau.idxJetMatch = idxJet_matched
+            
             if tau.tauID(self.cfg_ana.tauID):
                 event.selectedTaus.append(tau)
                 event.inclusiveTaus.append(tau)
@@ -125,7 +134,7 @@ class TauAnalyzer( Analyzer ):
 # http://cmslxr.fnal.gov/lxr/source/PhysicsTools/PatAlgos/python/producersLayer1/tauProducer_cfi.py
 
 setattr(TauAnalyzer,"defaultConfig",cfg.Analyzer(
-    class_object=TauAnalyzer,
+    class_object = TauAnalyzer,
     ptMin = 20,
     etaMax = 9999,
     dxyMax = 1000.,
