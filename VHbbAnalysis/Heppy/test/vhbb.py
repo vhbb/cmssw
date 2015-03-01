@@ -151,22 +151,28 @@ TTHtoTauTauGen = cfg.Analyzer(
 #sh = cfg.Analyzer( class_object=HeppyShell)
 
 from PhysicsTools.Heppy.analyzers.core.TriggerBitAnalyzer import TriggerBitAnalyzer
-TrigAna= cfg.Analyzer(
-   verbose=False,
-   class_object=TriggerBitAnalyzer,
-   triggerBits={
-   "METBTAG":["HLT_PFMET120_NoiseCleaned_BTagCSV07_v*"],
-   "MET":["HLT_PFMET170_NoiseCleaned_v*"],
-   "DIELE" : ["HLT_Ele23_Ele12_CaloId_TrackId_Iso_v*"],
-   "ELE": ["HLT_Ele32_eta2p1_WP85_Gsf_v*","HLT_Ele32_eta2p1_WP85_Gsf_v*"],
-   "DIMU" : ["HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*","HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*"],
-   "MU" : ["HLT_IsoTkMu24_eta2p1_IterTrk02_v*","HLT_IsoTkMu24_IterTrk02_v*"],
-   "TAU": ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v*"],
-   "HH4bQuad":["HLT_QuadJet45_TripleCSV0p5_v*"],
-   "HH4bDouble":["HLT_DoubleJet90_Double30_TripleCSV0p5_v*"],  
+TrigAna = cfg.Analyzer(
+    verbose = False,
+    class_object = TriggerBitAnalyzer,
+    triggerBits = {
+        "METBTAG" : [ "HLT_PFMET120_NoiseCleaned_BTagCSV07_v*" ],
+        "MET"     : [ "HLT_PFMET170_NoiseCleaned_v*" ],
+        "DIELE"   : [ "HLT_Ele23_Ele12_CaloId_TrackId_Iso_v*" ],
+        "ELE"     : [ "HLT_Ele32_eta2p1_WP85_Gsf_v*", "HLT_Ele32_eta2p1_WP85_Gsf_v*" ],
+        "DIMU"    : [ "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*" ],
+        "MU"      : [ "HLT_IsoTkMu24_eta2p1_IterTrk02_v*", "HLT_IsoTkMu24_IterTrk02_v*" ],
+        "TAU"     : ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v*"],
+        "HH4bQuad":["HLT_QuadJet45_TripleCSV0p5_v*"],
+        "HH4bDouble":["HLT_DoubleJet90_Double30_TripleCSV0p5_v*"],  
+        "MUE"     : [ "HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v*" ],
+        "EMU"     : [ "HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v*" ],
+        "METTAU"  : [ "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v*" ],
+        "ELETAU"  : [ "HLT_Ele22_eta2p1_WP85_Gsf_LooseIsoPFTau20_v*" ],
+        "MUTAU"   : [ "HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v*" ],
+        "DiTAU"   : [ "HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v*" ],
    },
-#   processName='HLT',
-#   outprefix='HLT'
+#   processName = 'HLT',
+#   outprefix = 'HLT'
    )
 
 from PhysicsTools.HeppyCore.framework.services.tfile import TFileService 
