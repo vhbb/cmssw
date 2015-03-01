@@ -294,7 +294,7 @@ class GeneratorAnalyzer( Analyzer ):
         return True
 
 setattr(GeneratorAnalyzer,"defaultConfig",cfg.Analyzer(
-    class_object=GeneratorAnalyzer,
+    class_object = GeneratorAnalyzer,
     filterHiggsDecays = False, 
     verbose = False,
     PDFWeights = []
