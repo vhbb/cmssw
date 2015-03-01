@@ -6,7 +6,6 @@ import ROOT
 from PhysicsTools.Heppy.analyzers.objects.autophobj import *
 import copy
 
-
 leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonType ], variables = [
     # Loose id 
     NTupleVariable("looseIdSusy", lambda x : x.looseIdSusy if hasattr(x, 'looseIdSusy') else -1, int, help="Loose ID for Susy ntuples (always true on selected leptons)"),
@@ -48,10 +47,20 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
 ])
 
 ##------------------------------------------  
+## TAU
+##------------------------------------------  
+
+tauTypeVHbb = NTupleObjectType("tauTypeVHbb", baseObjectTypes = [ tauType ], variables = [
+    NTupleVariable("idxJetMatch", lambda x : x.jetIdx, int, help="index of the matching jet"),
+    NTupleVariable("genMatchType", lambda x : x.genMatchType, int,mcOnly=True, help="..FILLME PLEASE..")
+])
+
+##------------------------------------------  
 ## JET
 ##------------------------------------------  
 
 jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables = [
+    NTupleVariable("idxFirstTauMatch", lambda x : x.tauIdxs[0] if len(x.tauIdxs) > 0 else -1, int,help='index of the first matching tau'),
     NTupleVariable("hadronFlavour", lambda x : x.mcFlavour, int,     mcOnly=True, help="match to heavy hadrons"),
     NTupleVariable("btagBDT", lambda x : getattr(x,"btagBDT",-99), help="btag"),
     NTupleVariable("btagProb", lambda x : x.btag('jetProbabilityBJetTags') , help="btag"),

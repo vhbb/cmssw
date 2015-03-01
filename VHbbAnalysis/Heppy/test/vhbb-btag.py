@@ -10,7 +10,7 @@ preprocessor = CmsswPreprocessor("newbtag.py")
 config.preprocessor=preprocessor
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 20, nEvents = 300)
+    looper = Looper( 'Loop', config, nPrint = 20, nEvents = 3000)
     import time
     import cProfile
     p = cProfile.Profile(time.clock)
