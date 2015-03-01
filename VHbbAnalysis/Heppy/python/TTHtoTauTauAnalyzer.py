@@ -43,7 +43,7 @@ class TTHtoTauTauAnalyzer( Analyzer ):
       return genMatchType
 
    def process(self, event):
-      print "<TTHtoTauTauAnalyzer::process>:"
+      #print "<TTHtoTauTauAnalyzer::process>:"
       
       self.readCollections( event.input )
 
@@ -52,13 +52,13 @@ class TTHtoTauTauAnalyzer( Analyzer ):
       taus_modified = []
       for idxTau in range(len(taus)):
          tau = Tau(taus[idxTau])
-         print "processing tau #%i: Pt = %1.2f, eta = %1.2f, phi = %1.2f" % (idxTau, tau.pt(), tau.eta(), tau.phi())
+         #print "processing tau #%i: Pt = %1.2f, eta = %1.2f, phi = %1.2f" % (idxTau, tau.pt(), tau.eta(), tau.phi())
          # if not MC, nothing to do
          if self.cfg_comp.isMC:
             tau.genMatchType = self.addTau_genMatchType(event, tau)
          else:
             tau.genMatchType = -1
-         print " genMatchType = %i" % tau.genMatchType
+         #print " genMatchType = %i" % tau.genMatchType
          taus_modified.append(tau)
 
       event.selectedTaus = taus_modified

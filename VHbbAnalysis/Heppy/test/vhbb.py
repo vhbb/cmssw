@@ -8,7 +8,6 @@ import ROOT
 from DataFormats.FWLite import *
 import PhysicsTools.HeppyCore.framework.config as cfg
 from VHbbAnalysis.Heppy.vhbbobj import *
-from VHbbAnalysis.Heppy.tthobj import *
 from PhysicsTools.HeppyCore.utils.deltar import deltaPhi
 from PhysicsTools.Heppy.analyzers.core.AutoFillTreeProducer  import * 
 
@@ -199,7 +198,7 @@ if doPDFVars:
 
 #TrigAna.unrollbits=True
 
-sequence = [LHEAna,FlagsAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,JetAna,TauAna,METAna,PdfAna,VHbb,TTHtoTauTau,TTHtoTauTauGen,treeProducer]#,sh]
+sequence = [LHEAna,FlagsAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,TauAna,JetAna,METAna,PdfAna,VHbb,TTHtoTauTau,TTHtoTauTauGen,treeProducer]#,sh]
 
 
 from PhysicsTools.Heppy.utils.miniAodFiles import miniAodFiles
@@ -252,7 +251,7 @@ class TestFilter(logging.Filter):
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 100)
+    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 400)
 
     import time
     import cProfile

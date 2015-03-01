@@ -228,6 +228,13 @@ class VHbbAnalyzer( Analyzer ):
 	event.aLeptons = [x for x in event.inclusiveLeptons if x not in event.vLeptons]
 
 	return True
+
+    def fillTauIndices(self,event) :
+        for j in event.cleanJetsAll :
+            j.tauIdxs = [event.selectedTaus.index(x) for x in j.taus if j.taus in event.selectedTaus]
+        for t in event.selectedTaus :
+            t.jetIdx =  event.cleanJetsAll.index(t.jet) if t.jet in event.cleanJetsAll else -1 
+
     def initOutputs (self,event) : 
         event.hJets = []
         event.aJets = []
@@ -274,7 +281,7 @@ class VHbbAnalyzer( Analyzer ):
 	self.doHiggsHighCSV(event)
 	self.doHiggsHighPt(event)
         self.doHiggs3cj(event)
-
+        self.fillTauIndices(event)
 
 
     #    event.jee = list(self.handles['jee'].product())
