@@ -124,6 +124,8 @@ PUAna = PileUpAnalyzer.defaultConfig
 
 from VHbbAnalysis.Heppy.VHbbAnalyzer import VHbbAnalyzer
 JetAna.jetPt = 15
+JetAna.doQG=True
+JetAna.QGpath="pdfQG_AK4chs_antib_13TeV_v1.root"
 
 VHbb = cfg.Analyzer(
     verbose=False,
