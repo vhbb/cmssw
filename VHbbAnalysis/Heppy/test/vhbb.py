@@ -66,6 +66,7 @@ treeProducer= cfg.Analyzer(
                 "ajidx3cj"       : NTupleCollection("aJ3Cidx",    objectInt, 2,help="additional jet indices 3 cen  jets"),
                 "cleanJetsAll"       : NTupleCollection("Jet",     jetTypeVHbb, 15, help="Cental+fwd jets after full selection and cleaning, sorted by b-tag"),
                 "selectedTaus"    : NTupleCollection("TauGood", tauTypeVHbb, 3, help="Taus after the preselection"),
+#                "softActivityJets"    : NTupleCollection("softActivityJets", fourVectorType, 5, help="jets made for soft activity"),
 
 		#dump of gen objects
                 "genJets"    : NTupleCollection("GenJet",   genParticleType, 15, help="Generated top quarks from hard scattering",filter=lambda x: x.pt() > 20,mcOnly=True),
@@ -138,6 +139,7 @@ VHbb = cfg.Analyzer(
     zLeadingMuPt = 20,
     higgsJetsPreSelection = lambda x:  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') and x.pt() >  15 ,
     passall=False,
+    doSoftActivity=False
 )
 
 from VHbbAnalysis.Heppy.TTHtoTauTauAnalyzer import TTHtoTauTauAnalyzer

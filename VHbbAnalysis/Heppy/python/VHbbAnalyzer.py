@@ -25,7 +25,8 @@ class VHbbAnalyzer( Analyzer ):
 
     def declareHandles(self):
         super(VHbbAnalyzer, self).declareHandles()
-#        self.handles['pfCands'] =  AutoHandle( 'packedPFCandidates', 'std::vector<pat::PackedCandidate>' )
+        if getattr(self.cfg_ana,"doSoftActivity", False) :
+            self.handles['pfCands'] =  AutoHandle( 'packedPFCandidates', 'std::vector<pat::PackedCandidate>' )
 #        self.handles['jee'] =  AutoHandle( 'ak5PFJetsCHS', 'std::vector<reco::PFJet>' )
         #self.handles['btag'] = AutoHandle( ("combinedInclusiveSecondaryVertexV2BJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
         #self.handles['btagcsv'] = AutoHandle( ("combinedSecondaryVertexBJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
@@ -47,7 +48,26 @@ class VHbbAnalyzer( Analyzer ):
         if "outputfile" in setup.services :
             setup.services["outputfile"].file.cd()
             self.inputCounter = ROOT.TH1F("Count","Count",1,0,2)
- 
+
+    def doSoftActivity(self,event) :
+        event.pfCands = list(self.handles['pfCands'].product())
+        inputs=ROOT.std.vector(ROOT.heppy.ReclusterJets.LorentzVector)() 
+        used=[]
+        for j in event.jetsForHiggs :
+            used.extend(j.daughterPtrVector())
+        #print "used",len(used)
+        remainingPF = [x for x in event.pfCands if x.charge() != 0 and x.fromPV() >=2 and x not in used] 
+        #print "remain",len(remainingPF)
+        etaMin = min(event.jetsForHiggs,key=lambda x:x.eta()).eta()+0.4
+        etaMax = max(event.jetsForHiggs,key=lambda x:x.eta()).eta()-0.4
+        for pf in remainingPF :
+             #FIXME: add ellipses veto
+             if pf.eta() > etaMin and pf.eta() < etaMax:
+                inputs.push_back(pf.p4())
+        clusterizer=ROOT.heppy.ReclusterJets(inputs,-1,0.1)
+        event.softActivityJets = list(clusterizer.getGrouping(1))[:5]
+        for j in event.softActivityJets :
+            print j.eta(),j.pt()
     def makeJets(self,event,b):
 	inputs=ROOT.std.vector(ROOT.heppy.ReclusterJets.LorentzVector)()
         event.pfCands = list(self.handles['pfCands'].product())
@@ -257,7 +277,7 @@ class VHbbAnalyzer( Analyzer ):
         event.minDr3=-1
         event.V.goodMt=0
         event.hjidxDiJetPtByCSV = []
-
+        event.softActivityJets=[]
     def process(self, event):
         self.readCollections( event.input )
         self.inputCounter.Fill(1)
@@ -282,7 +302,8 @@ class VHbbAnalyzer( Analyzer ):
 	self.doHiggsHighPt(event)
         self.doHiggs3cj(event)
         self.fillTauIndices(event)
-
+        if getattr(self.cfg_ana,"doSoftActivity", False) :
+            self.doSoftActivity(event)
 
     #    event.jee = list(self.handles['jee'].product())
 	#for j in list(jets)[0:3]:
