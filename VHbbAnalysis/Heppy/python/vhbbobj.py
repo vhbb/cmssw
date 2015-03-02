@@ -90,8 +90,13 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("vtx3DSig",   lambda x : x.userFloat("vtx3DSig"), mcOnly=False, help="decay len significance of vertex from btag"),
     NTupleVariable("vtx3DVal",   lambda x : x.userFloat("vtx3DVal"), mcOnly=False, help="decay len of vertex from btag"),
     NTupleVariable("vtxPosX",   lambda x : x.userFloat("vtxPosX"), mcOnly=False, help="X coord of vertex from btag"),
-    NTupleVariable("vtxPosY",   lambda x : x.userFloat("vtxPosY"), mcOnly=False, help="Y coord of vertex from btag"),
+    NTupleVariable("vtxPosY",   lambda x : x.userFloat("vtxPosY"), mcOnly=False, help="Y coord of vertex from btag"), 
     NTupleVariable("vtxPosZ",   lambda x : x.userFloat("vtxPosZ"), mcOnly=False, help="Z coord of vertex from btag"),
+   # QG variables:
+    NTupleVariable("qgl",   lambda x : getattr(x,'qgl', 0) , float, mcOnly=False,help="QG Likelihood"),
+    NTupleVariable("ptd",   lambda x : getattr(x,'ptd', 0), float, mcOnly=False,help="QG input variable: ptD"),
+    NTupleVariable("axis2",   lambda x : getattr(x,'axis2', 0) , float, mcOnly=False,help="QG input variable: axis2"),
+    NTupleVariable("mult",   lambda x : getattr(x,'mult', 0) , int, mcOnly=False,help="QG input variable: total multiplicity"),
  ])
 
 
