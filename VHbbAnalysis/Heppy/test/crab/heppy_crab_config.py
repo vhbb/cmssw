@@ -19,7 +19,7 @@ config.section_("Data")
 config.Data.inputDataset = '/WH_HToBB_WToLNu_M-125_13TeV_powheg-herwigpp/Phys14DR-PU40bx25_PHYS14_25_V1-v1/MINIAODSIM'
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 10
+config.Data.unitsPerJob = 8
 config.Data.outLFN = '/store/user/arizzi/VHBBHeppyV10/'
 config.Data.publication = True
 config.Data.publishDataName = 'VHBB_HEPPY_V10'

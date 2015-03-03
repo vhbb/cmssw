@@ -37,7 +37,8 @@ treeProducer= cfg.Analyzer(
                  NTupleVariable("lheNl",  lambda ev: ev.lheNl, float,mcOnly=True, help="number of light(uds) jets at LHE level"),
 		 NTupleVariable("lheV_pt",  lambda ev: ev.lheV_pt, float,mcOnly=True, help="Vector pT at LHE level"),
                  NTupleVariable("lheHT",  lambda ev: ev.lheHT, float,mcOnly=True, help="HT at LHE level"),
-                 NTupleVariable("genTTHtoTauTauDecayMode", lambda ev: ev.genTTHtoTauTauDecayMode, int, help="gen level ttH, H -> tautau decay mode")        
+                 NTupleVariable("genTTHtoTauTauDecayMode", lambda ev: ev.genTTHtoTauTauDecayMode, int,mcOnly=True, help="gen level ttH, H -> tautau decay mode"),        
+                 NTupleVariable("totSoftActivityJets", lambda ev: len(ev.softActivityJets), int, help="gen level ttH, H -> tautau decay mode"),
 	],
 	globalObjects = {
           "met"    : NTupleObject("met",     metType, help="PF E_{T}^{miss}, after default type 1 corrections"),
@@ -66,7 +67,7 @@ treeProducer= cfg.Analyzer(
                 "ajidx3cj"       : NTupleCollection("aJ3Cidx",    objectInt, 2,help="additional jet indices 3 cen  jets"),
                 "cleanJetsAll"       : NTupleCollection("Jet",     jetTypeVHbb, 15, help="Cental+fwd jets after full selection and cleaning, sorted by b-tag"),
                 "selectedTaus"    : NTupleCollection("TauGood", tauTypeVHbb, 3, help="Taus after the preselection"),
-#                "softActivityJets"    : NTupleCollection("softActivityJets", fourVectorType, 5, help="jets made for soft activity"),
+                "softActivityJets"    : NTupleCollection("softActivityJets", fourVectorType, 5, help="jets made for soft activity"),
 
 		#dump of gen objects
                 "genJets"    : NTupleCollection("GenJet",   genParticleType, 15, help="Generated top quarks from hard scattering",filter=lambda x: x.pt() > 20,mcOnly=True),
@@ -139,7 +140,7 @@ VHbb = cfg.Analyzer(
     zLeadingMuPt = 20,
     higgsJetsPreSelection = lambda x:  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') and x.pt() >  15 ,
     passall=False,
-    doSoftActivity=False
+    doSoftActivity=True
 )
 
 from VHbbAnalysis.Heppy.TTHtoTauTauAnalyzer import TTHtoTauTauAnalyzer
@@ -263,7 +264,7 @@ class TestFilter(logging.Filter):
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 400)
+    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 1400)
 
     import time
     import cProfile

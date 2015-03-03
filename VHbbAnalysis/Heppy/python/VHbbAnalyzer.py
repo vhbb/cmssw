@@ -27,9 +27,6 @@ class VHbbAnalyzer( Analyzer ):
         super(VHbbAnalyzer, self).declareHandles()
         if getattr(self.cfg_ana,"doSoftActivity", False) :
             self.handles['pfCands'] =  AutoHandle( 'packedPFCandidates', 'std::vector<pat::PackedCandidate>' )
-#        self.handles['jee'] =  AutoHandle( 'ak5PFJetsCHS', 'std::vector<reco::PFJet>' )
-        #self.handles['btag'] = AutoHandle( ("combinedInclusiveSecondaryVertexV2BJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
-        #self.handles['btagcsv'] = AutoHandle( ("combinedSecondaryVertexBJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
     def addNewBTag(self,event):
         newtags =  self.handles['btag'].product()
         for i in xrange(0,len(newtags)) :
@@ -50,24 +47,38 @@ class VHbbAnalyzer( Analyzer ):
             self.inputCounter = ROOT.TH1F("Count","Count",1,0,2)
 
     def doSoftActivity(self,event) :
+        event.jetsForVBF = [x for x in event.cleanJetsAll if self.cfg_ana.higgsJetsPreSelection(x) ]
+        #compute SoftActivity only for events passing VBF selection
+        if len(event.jetsForVBF) < 4 or  event.jetsForVBF[0] < 70 or  event.jetsForVBF[1] < 55 or  event.jetsForVBF[2] < 35 or  event.jetsForVBF[3] < 20 :
+            return 
+        event.jetsForVBF.sort(key=lambda x:x.pt(),reverse=True)
+        event.jetsForVBF=event.jetsForVBF[:4]
+        event.bJetsForVBF=sorted(event.jetsForVBF,key = lambda jet : jet.btag('combinedInclusiveSecondaryVertexV2BJetTags'), reverse=True)[:2]
+        j1=event.bJetsForVBF[0]
+        j2=event.bJetsForVBF[1]
         event.pfCands = list(self.handles['pfCands'].product())
         inputs=ROOT.std.vector(ROOT.heppy.ReclusterJets.LorentzVector)() 
         used=[]
-        for j in event.jetsForHiggs :
+        for j in event.jetsForVBF :
             used.extend(j.daughterPtrVector())
-        #print "used",len(used)
-        remainingPF = [x for x in event.pfCands if x.charge() != 0 and x.fromPV() >=2 and x not in used] 
-        #print "remain",len(remainingPF)
-        etaMin = min(event.jetsForHiggs,key=lambda x:x.eta()).eta()+0.4
-        etaMax = max(event.jetsForHiggs,key=lambda x:x.eta()).eta()-0.4
+        remainingPF = [x for x in event.pfCands if x.charge() != 0 and abs(x.eta()) < 2.5 and  x.pt() > 0.3 and x.fromPV() >=2 and x not in used] 
+        etaMin = min(event.jetsForVBF,key=lambda x:x.eta()).eta()+0.4
+        etaMax = max(event.jetsForVBF,key=lambda x:x.eta()).eta()-0.4
+        focalDistance = deltaR(j1.eta(),j1.phi(),j2.eta(),j2.phi())
+        ellipseBhalf = 0.4
+        ellipseDis = 2.*sqrt(ellipseBhalf**2+focalDistance/2.)
         for pf in remainingPF :
-             #FIXME: add ellipses veto
              if pf.eta() > etaMin and pf.eta() < etaMax:
-                inputs.push_back(pf.p4())
-        clusterizer=ROOT.heppy.ReclusterJets(inputs,-1,0.1)
-        event.softActivityJets = list(clusterizer.getGrouping(1))[:5]
-        for j in event.softActivityJets :
-            print j.eta(),j.pt()
+                dr1=deltaR(j1.eta(),j1.phi(),pf.eta(),pf.phi())               
+                dr2=deltaR(j2.eta(),j2.phi(),pf.eta(),pf.phi())               
+                if dr1+dr2 > ellipseDis:
+                   inputs.push_back(pf.p4())
+        clusterizer=ROOT.heppy.ReclusterJets(inputs,-1,0.4)
+        jets=clusterizer.getGrouping(1)
+        event.softActivityJets =  [ ROOT.reco.Particle.LorentzVector(p4) for p4 in jets ]
+        event.softActivityJets.sort(key=lambda x:x.pt(), reverse=True)
+
+
     def makeJets(self,event,b):
 	inputs=ROOT.std.vector(ROOT.heppy.ReclusterJets.LorentzVector)()
         event.pfCands = list(self.handles['pfCands'].product())
@@ -90,7 +101,7 @@ class VHbbAnalyzer( Analyzer ):
        #        if bst.pt() > 20 : 
        #          print "   candidate orig,boost",pf.pt(),bst.pt(),pf.phi(),bst.phi()
 		inputs.push_back(bst)
-	clusterizer=ROOT.heppy.ReclusterJets(inputs,-1,0.1)
+	clusterizer=ROOT.heppy.ReclusterJets(inputs,-1,0.4)
 	jets = clusterizer.getGrouping(10)
         #event.jee = list(self.handles['jee'].product())
 #        print "Boosted jets:",
