@@ -98,7 +98,32 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("axis2",   lambda x : getattr(x,'axis2', 0) , float, mcOnly=False,help="QG input variable: axis2"),
     NTupleVariable("mult",   lambda x : getattr(x,'mult', 0) , int, mcOnly=False,help="QG input variable: total multiplicity"),
  ])
+ 
+##------------------------------------------  
+## FAT JET
+##------------------------------------------  
 
+# Four Vector + Nsubjettiness
+
+fatjetType = NTupleObjectType("fatjet",  baseObjectTypes = [ fourVectorType ], variables = [
+    NTupleVariable("tau1",  lambda x : x.tau1, help="Nsubjettiness (1 axis)"),
+    NTupleVariable("tau2",  lambda x : x.tau2, help="Nsubjettiness (2 axes)"),
+    NTupleVariable("tau3",  lambda x : x.tau3, help="Nsubjettiness (3 axes)"),
+    ])
+
+
+##------------------------------------------  
+## HEPTopTagger Candidate
+##------------------------------------------  
+
+# Four Vector + fW + Rmin + RminExp
+
+httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variables = [
+    NTupleVariable("fW",  lambda x : x.fW, help="relative W width"),
+    NTupleVariable("Rmin",  lambda x : x.Rmin, help="optimal value of R"),
+    NTupleVariable("RminExpected",  lambda x : x.RminExpected, help="expected value of R"),
+    ])
+   
 
 ##------------------------------------------  
 ## SECONDARY VERTEX CANDIDATE
