@@ -1,3 +1,14 @@
+""" combined_cmssw.py
+cmsRun config file to be used with the CmsswPreprocessor for Heppy-Ntupelizing.
+Schedules:
+ - b-tagging
+ - boosted variables
+"""
+
+########################################
+# Imports/Setup
+########################################
+
 import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("EX")
@@ -12,6 +23,61 @@ process.OUT = cms.OutputModule("PoolOutputModule",
 )
 process.endpath= cms.EndPath(process.OUT)
 
+# Let CMSSW take care of scheduling 
+process.options = cms.untracked.PSet(     
+    wantSummary = cms.untracked.bool(True),
+    allowUnscheduled = cms.untracked.bool(True)
+)
+
+
+########################################
+# B-Tagging
+########################################
+
+# As tracks are not stored in miniAOD, and b-tag fwk for CMSSW < 72X does not accept candidates
+# we need to recreate tracks and pv for btagging in standard reco format:
+process.load('RecoBTag.Configuration.RecoBTag_cff')
+process.load('RecoJets.Configuration.RecoJetAssociations_cff')
+process.load('PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi')
+process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+process.load('Configuration.StandardSequences.Geometry_cff')
+process.load('Configuration.StandardSequences.MagneticField_38T_cff')
+
+#process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
+process.GlobalTag.globaltag = 'PLS170_V7AN1::All'
+
+process.ak4JetTracksAssociatorAtVertexPF.jets = cms.InputTag("slimmedJets")
+process.ak4JetTracksAssociatorAtVertexPF.tracks = cms.InputTag("unpackedTracksAndVertices")
+process.impactParameterTagInfos.primaryVertex = cms.InputTag("unpackedTracksAndVertices")
+process.inclusiveSecondaryVertexFinderTagInfos.extSVCollection = cms.InputTag("unpackedTracksAndVertices","secondary","")
+process.combinedSecondaryVertex.trackMultiplicityMin = 1
+
+process.combinedSecondaryVertexV2.calibrationRecords = cms.vstring(
+'CombinedSVV2MVA_RecoVertex',
+'CombinedSVV2MVA_PseudoVertex',
+'CombinedSVV2MVA_NoVertex'
+)
+
+process.load("Configuration.StandardSequences.MagneticField_cff")
+process.load("CondCore.DBCommon.CondDBSetup_cfi")
+process.BTauMVAJetTagComputerRecord = cms.ESSource("PoolDBESSource",
+process.CondDBSetup,
+timetype = cms.string('runnumber'),
+toGet = cms.VPSet(cms.PSet(
+record = cms.string('BTauGenericMVAJetTagComputerRcd'),
+                tag = cms.string('MVAJetTags_620SLHCX')
+)),
+connect = cms.string('sqlite_file:MVAJetTags_620SLHCX_Phase1And2Upgrade.db'),
+BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService')
+)
+process.es_prefer_BTauMVAJetTagComputerRecord = cms.ESPrefer("PoolDBESSource","BTauMVAJetTagComputerRecord")
+
+process.OUT.outputCommands.append("keep *_combinedInclusiveSecondaryVertexV2BJetTags_*_EX")
+process.OUT.outputCommands.append("keep *_combinedSecondaryVertexBJetTags_*_EX")
+
+########################################
+# Boosted Substructure
+########################################
 
 # Import some jet clustering defaults
 from RecoJets.JetProducers.AnomalousCellParameters_cfi import *
@@ -68,13 +134,6 @@ process.ca15PFTrimmedJetsCHS = process.ca15PFJetsCHS.clone(
     trimPtFracMin = cms.double(0.06),
     useExplicitGhosts = cms.bool(True))
 
-# Let CMSSW take care of scheduling 
-process.options = cms.untracked.PSet(     
-        allowUnscheduled = cms.untracked.bool(True)
-)
-
-
-# Write all outputs
 process.OUT.outputCommands.append("keep *_ca15PFJetsCHS_*_EX")
 process.OUT.outputCommands.append("keep *_ca15PFJetsCHSNSubjettiness_*_EX")
 process.OUT.outputCommands.append("keep *_ca15PFTrimmedJetsCHS_*_EX")
