@@ -125,17 +125,17 @@ class TauAnalyzer( Analyzer ):
 
 setattr(TauAnalyzer,"defaultConfig",cfg.Analyzer(
     class_object=TauAnalyzer,
-    ptMin = 18.,
-    etaMax = 2.5,
+    ptMin = 20,
+    etaMax = 9999,
     dxyMax = 1000.,
-    dzMax = 0.4,
-    vetoLeptons = False,
+    dzMax = 0.2,
+    vetoLeptons = True,
     leptonVetoDR = 0.4,
     decayModeID = "decayModeFindingNewDMs", # ignored if not set or ""
-    tauID = "decayModeFindingNewDMs",
+    tauID = "byLooseCombinedIsolationDeltaBetaCorr3Hits",
     vetoLeptonsPOG = False, # If True, the following two IDs are required
-    tauAntiMuonID = "",
-    tauAntiElectronID = "",
-    tauLooseID = "decayModeFindingNewDMs",
+    tauAntiMuonID = "againstMuonLoose3",
+    tauAntiElectronID = "againstElectronLooseMVA5",
+    tauLooseID = "decayModeFinding",
   )
 )
