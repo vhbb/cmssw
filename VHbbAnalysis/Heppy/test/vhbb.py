@@ -129,6 +129,9 @@ from VHbbAnalysis.Heppy.VHbbAnalyzer import VHbbAnalyzer
 JetAna.jetPt = 15
 JetAna.doQG=True
 JetAna.QGpath="pdfQG_AK4chs_antib_13TeV_v1.root"
+JetAna.recalibrateJets=True
+JetAna.jecPath="jec"
+JetAna.mcGT="PHYS14_V4_MC"
 
 VHbb = cfg.Analyzer(
     verbose=False,
