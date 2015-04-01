@@ -28,7 +28,6 @@ treeProducer.collections["httCandidates"] = NTupleCollection("httCandidates",
                                                              10,
                                                              help="MultiR HEPTopTagger Candidates")
 
-
 # Add b-Tagging Information
 
 btagana=cfg.Analyzer(
@@ -37,6 +36,16 @@ btagana=cfg.Analyzer(
 )
 sequence.insert(sequence.index(VHbb),btagana)
 
+# Add Information on generator level hadronic tau decays
+
+from VHbbAnalysis.Heppy.TauGenJetAnalyzer import TauGenJetAnalyzer
+TauGenJet = cfg.Analyzer(
+    verbose = False,
+    class_object = TauGenJetAnalyzer,
+)
+sequence.insert(sequence.index(VHbb),TauGenJet)
+
+treeProducer.collections["tauGenJets"] = NTupleCollection("GenHadTaus", genTauJetType, 15, help="Generator level hadronic tau decays")
 
 # Run Everything
 
@@ -44,7 +53,7 @@ preprocessor = CmsswPreprocessor("combined_cmssw.py")
 config.preprocessor=preprocessor
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 200)
+    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 1000)
     import time
     import cProfile
     p = cProfile.Profile(time.clock)

@@ -20,7 +20,6 @@ class TauAnalyzer( Analyzer ):
         super(TauAnalyzer, self).declareHandles()
         self.handles['taus'] = AutoHandle( ('slimmedTaus',''),'std::vector<pat::Tau>')
 
-
     def beginLoop(self, setup):
         super(TauAnalyzer,self).beginLoop(setup)
         self.counters.addCounter('events')
@@ -92,6 +91,7 @@ class TauAnalyzer( Analyzer ):
             elif tau.tauID(self.cfg_ana.tauLooseID):
                 event.looseTaus.append(tau)
                 event.inclusiveTaus.append(tau)
+        event.looseTaus.extend(event.selectedTaus)
 
         event.selectedTaus.sort(key = lambda l : l.pt(), reverse = True)
         event.looseTaus.sort(key = lambda l : l.pt(), reverse = True)
@@ -100,7 +100,6 @@ class TauAnalyzer( Analyzer ):
         if len(event.selectedTaus): self.counters.counter('events').inc('has >=1 selected taus')
         if len(event.looseTaus): self.counters.counter('events').inc('has >=1 loose taus')
         if len(event.inclusiveTaus): self.counters.counter('events').inc('has >=1 inclusive taus')
-
 
     def matchTaus(self, event):
         match = matchObjectCollection3(event.inclusiveTaus, event.gentaus, deltaRMax = 0.5)
