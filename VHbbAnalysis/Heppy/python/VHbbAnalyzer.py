@@ -56,6 +56,7 @@ class VHbbAnalyzer( Analyzer ):
         event.bJetsForVBF=sorted(event.jetsForVBF,key = lambda jet : jet.btag('combinedInclusiveSecondaryVertexV2BJetTags'), reverse=True)[:2]
         j1=event.bJetsForVBF[0]
         j2=event.bJetsForVBF[1]
+        dRbb = deltaR(j1.eta(),j1.phi(),j2.eta(),j2.phi())
         event.pfCands = list(self.handles['pfCands'].product())
         inputs=ROOT.std.vector(ROOT.heppy.ReclusterJets.LorentzVector)() 
         used=[]
@@ -64,14 +65,12 @@ class VHbbAnalyzer( Analyzer ):
         remainingPF = [x for x in event.pfCands if x.charge() != 0 and abs(x.eta()) < 2.5 and  x.pt() > 0.3 and x.fromPV() >=2 and x not in used] 
         etaMin = min(event.jetsForVBF,key=lambda x:x.eta()).eta()+0.4
         etaMax = max(event.jetsForVBF,key=lambda x:x.eta()).eta()-0.4
-        focalDistance = deltaR(j1.eta(),j1.phi(),j2.eta(),j2.phi())
-        ellipseBhalf = 0.4
-        ellipseDis = 2.*sqrt(ellipseBhalf**2+focalDistance/2.)
+        dR0=0.4
         for pf in remainingPF :
-             if pf.eta() > etaMin and pf.eta() < etaMax:
+#             if pf.eta() > etaMin and pf.eta() < etaMax:
                 dr1=deltaR(j1.eta(),j1.phi(),pf.eta(),pf.phi())               
                 dr2=deltaR(j2.eta(),j2.phi(),pf.eta(),pf.phi())               
-                if dr1+dr2 > ellipseDis:
+                if dr1+dr2 > dRbb + 2*dR0: 
                    inputs.push_back(pf.p4())
         clusterizer=ROOT.heppy.ReclusterJets(inputs,-1,0.4)
         jets=clusterizer.getGrouping(1)
