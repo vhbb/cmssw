@@ -261,9 +261,19 @@ class VHbbAnalyzer( Analyzer ):
 
     def fillTauIndices(self,event) :
         for j in event.cleanJetsAll :
-            j.tauIdxs = [event.selectedTaus.index(x) for x in j.taus if j.taus in event.selectedTaus]
-        for t in event.selectedTaus :
-            t.jetIdx =  event.cleanJetsAll.index(t.jet) if t.jet in event.cleanJetsAll else -1 
+            j.tauIdxs = [event.inclusiveTaus.index(x) for x in j.taus if j.taus in event.inclusiveTaus]
+        for t in event.inclusiveTaus :
+            dRmin = 1.e+3
+            t.jetIdx = -1
+            for jIdx, j in enumerate(event.cleanJetsAll) :
+                dR = None
+                if t.isPFTau():
+                   dR = deltaR(t.p4Jet().eta(),t.p4Jet().phi(),j.eta(),j.phi())
+                else:
+                   dR = deltaR(t.pfEssential().p4CorrJet_.eta(),t.pfEssential().p4CorrJet_.phi(),j.eta(),j.phi())
+                if dR < 0.3 and dR < dRmin :
+                    t.jetIdx = jIdx
+                    dRmin = dR
 
     def initOutputs (self,event) : 
         event.hJets = []
