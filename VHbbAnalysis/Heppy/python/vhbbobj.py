@@ -176,6 +176,14 @@ shiftedMetType= NTupleObjectType("shiftedMetType", baseObjectTypes=[twoVectorTyp
     NTupleVariable("sumEt", lambda x : x.sumEt() ),
 ])
 
+primaryVertexType = NTupleObjectType("primaryVertex", variables = [
+    NTupleVariable("x",    lambda x : x.x()),
+    NTupleVariable("y",   lambda x : x.y()),
+    NTupleVariable("z",   lambda x : x.z()),
+#    NTupleVariable("score",  lambda x : x.mass()), # to be added for 74X
+])
+
+
 def ptRel(p4,axis):
     a=ROOT.TVector3(axis.Vect().X(),axis.Vect().Y(),axis.Vect().Z())
     o=ROOT.TLorentzVector(p4.Px(),p4.Py(),p4.Pz(),p4.E())
