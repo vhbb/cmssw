@@ -32,6 +32,10 @@ echo "Which edmProvDump"
 which edmProvDump
 edmProvDump
 
-
+# Move JEC files into flace
+mkdir jec
+mv PHYS14_V4_MC_L1FastJet_AK4PFchs.txt jec/
+mv PHYS14_V4_MC_L2Relative_AK4PFchs.txt jec/
+mv PHYS14_V4_MC_L3Absolute_AK4PFchs.txt jec/
 
 python heppy_crab_script.py $1
