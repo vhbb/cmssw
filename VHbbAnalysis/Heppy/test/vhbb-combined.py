@@ -30,7 +30,6 @@ treeProducer.collections["httCandidates"] = NTupleCollection("httCandidates",
                                                              10,
                                                              help="MultiR HEPTopTagger Candidates")
 
-
 # Add b-Tagging Information
 
 btagana=cfg.Analyzer(
@@ -39,6 +38,16 @@ btagana=cfg.Analyzer(
 )
 sequence.insert(sequence.index(VHbb),btagana)
 
+# Add Information on generator level hadronic tau decays
+
+from VHbbAnalysis.Heppy.TauGenJetAnalyzer import TauGenJetAnalyzer
+TauGenJet = cfg.Analyzer(
+    verbose = False,
+    class_object = TauGenJetAnalyzer,
+)
+sequence.insert(sequence.index(VHbb),TauGenJet)
+
+treeProducer.collections["tauGenJets"] = NTupleCollection("GenHadTaus", genTauJetType, 15, help="Generator level hadronic tau decays")
 
 # Run Everything
 

@@ -139,3 +139,12 @@ process.OUT.outputCommands.append("keep *_ca15PFJetsCHSNSubjettiness_*_EX")
 process.OUT.outputCommands.append("keep *_ca15PFTrimmedJetsCHS_*_EX")
 process.OUT.outputCommands.append("keep *_looseMultiRHTT_*_EX")
 
+########################################
+# Generator level hadronic tau decays
+########################################
+
+process.load("PhysicsTools.JetMCAlgos.TauGenJets_cfi")
+process.tauGenJets.GenParticles = cms.InputTag('prunedGenParticles')
+process.load("PhysicsTools.JetMCAlgos.TauGenJetsDecayModeSelectorAllHadrons_cfi")
+
+process.OUT.outputCommands.append("keep *_tauGenJetsSelectorAllHadrons_*_EX")
