@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_HEPPY_V10_001'
-config.General.workArea = 'crab_projects_V10_001'
+config.General.requestName = 'VHBB_HEPPY_V11_001'
+config.General.workArea = 'crab_projects_V11_001'
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -30,10 +30,10 @@ config.section_("Data")
 config.Data.inputDataset = '/WH_HToBB_WToLNu_M-125_13TeV_powheg-herwigpp/Phys14DR-PU40bx25_PHYS14_25_V1-v1/MINIAODSIM'
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 8
-config.Data.outLFN = '/store/user/arizzi/VHBBHeppyV10/'
+config.Data.unitsPerJob = 5
+config.Data.outLFN = '/store/user/arizzi/VHBBHeppyV11/'
 config.Data.publication = True
-config.Data.publishDataName = 'VHBB_HEPPY_V10'
+config.Data.publishDataName = 'VHBB_HEPPY_V11'
 
 config.section_("Site")
 config.Site.storageSite = "T2_IT_Pisa"
