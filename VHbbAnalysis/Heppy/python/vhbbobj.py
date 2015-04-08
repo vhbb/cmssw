@@ -121,13 +121,32 @@ fatjetType = NTupleObjectType("fatjet",  baseObjectTypes = [ fourVectorType ], v
 ## HEPTopTagger Candidate
 ##------------------------------------------  
 
-# Four Vector + fW + Rmin + RminExp
+# Four Vector + fW + Rmin + RminExp + Subjets
+
+# The W/non-W assignment is done using the mass ratio in the HTT
 
 httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variables = [
+
     NTupleVariable("fRec",  lambda x : x.fRec, help="relative W width"),
     NTupleVariable("Ropt",  lambda x : x.Ropt, help="optimal value of R"),
     NTupleVariable("RoptCalc",  lambda x : x.RoptCalc, help="expected value of optimal R"),
     NTupleVariable("ptForRoptCalc",  lambda x : x.ptForRoptCalc, help="pT used for calculation of RoptCalc"),
+
+    # Leading W Subjet (pt)
+    NTupleVariable("sjW1pt",   lambda x : x.sjW1pt,   help = "Leading W Subjet pT"),
+    NTupleVariable("sjW1eta",  lambda x : x.sjW1eta,  help = "Leading W Subjet eta"),
+    NTupleVariable("sjW1phi",  lambda x : x.sjW1phi,  help = "Leading W Subjet phi"),
+    NTupleVariable("sjW1mass", lambda x : x.sjW1mass, help = "Leading W Subjet mass"),
+    # Second Subjet (pt)
+    NTupleVariable("sjW2pt",   lambda x : x.sjW2pt,   help = "Second Subjet pT"),
+    NTupleVariable("sjW2eta",  lambda x : x.sjW2eta,  help = "Second Subjet eta"),
+    NTupleVariable("sjW2phi",  lambda x : x.sjW2phi,  help = "Second Subjet phi"),
+    NTupleVariable("sjW2mass", lambda x : x.sjW2mass, help = "Second Subjet mass"),
+    # Non-W Subjet (pt)
+    NTupleVariable("sjNonWpt",   lambda x : x.sjNonWpt,   help = "Non-W Subjet pT"),
+    NTupleVariable("sjNonWeta",  lambda x : x.sjNonWeta,  help = "Non-W Subjet eta"),
+    NTupleVariable("sjNonWphi",  lambda x : x.sjNonWphi,  help = "Non-W Subjet phi"),
+    NTupleVariable("sjNonWmass", lambda x : x.sjNonWmass, help = "Non-W Subjet mass"),
     ])
    
 
