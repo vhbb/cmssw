@@ -48,7 +48,7 @@ class TTHtoTauTauAnalyzer( Analyzer ):
       self.readCollections( event.input )
 
       ##taus = list( self.handles['taus'].product() )
-      taus = event.selectedTaus
+      taus = event.inclusiveTaus
       taus_modified = []
       for idxTau in range(len(taus)):
          tau = Tau(taus[idxTau])
@@ -61,6 +61,6 @@ class TTHtoTauTauAnalyzer( Analyzer ):
          #print " genMatchType = %i" % tau.genMatchType
          taus_modified.append(tau)
 
-      event.selectedTaus = taus_modified
+      event.inclusiveTaus = taus_modified
 
       return True
