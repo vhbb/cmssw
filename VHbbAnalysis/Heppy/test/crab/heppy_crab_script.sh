@@ -32,6 +32,11 @@ echo "Which edmProvDump"
 which edmProvDump
 edmProvDump
 
+# Update library path
+# Needed so recompiled modules are found
+export LD_LIBRARY_PATH=./lib/slc6_amd64_gcc481:$LD_LIBRARY_PATH 
+
+
 # Move JEC files into flace
 mkdir jec
 mv PHYS14_V4_MC_L1FastJet_AK4PFchs.txt jec/
