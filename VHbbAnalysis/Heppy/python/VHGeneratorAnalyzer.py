@@ -73,7 +73,7 @@ class GeneratorAnalyzer( Analyzer ):
             dau.sourceId = sourceId
             dau.isTau = isTau
             id = abs(dau.pdgId())
-            moid = abs(dau.mother().pdgId())
+            moid = abs(dau.mother().pdgId()) if dau.mother() else 2212 #if no mom, let say it is a proton (consistent with CMSSW < 74X)
             if id in [11,13]:
                 if isTau: event.gentauleps.append(dau)
                 else:     event.genleps.append(dau)
