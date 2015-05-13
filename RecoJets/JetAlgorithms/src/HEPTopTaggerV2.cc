@@ -515,10 +515,10 @@ void HEPTopTaggerV2::run() {
     //_qweight = htt.q_weight();
     _HEPTopTaggerV2_opt = _HEPTopTaggerV2[_Ropt];
   } else {
-    _qjet_def = fastjet::JetDefinition(&_qjet_plugin);
-    vector<fastjet::PseudoJet> _q_constits;
-    ClusterSequence* _qjet_seq;
-    PseudoJet _qjet;
+    //_qjet_def = fastjet::JetDefinition(&_qjet_plugin);
+    //vector<fastjet::PseudoJet> _q_constits;
+    //ClusterSequence* _qjet_seq;
+    //PseudoJet _qjet;
     const ClusterSequence* _seq;
     _seq = _initial_jet.validated_cluster_sequence();
 //    if (_do_qjets){
