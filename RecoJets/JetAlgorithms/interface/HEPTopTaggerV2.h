@@ -10,7 +10,6 @@
 #include "fastjet/tools/Filter.hh"
 #include "fastjet/contrib/Njettiness.hh"
 #include "fastjet/contrib/Nsubjettiness.hh"
-#include "QjetsPlugin.h"
 #include "CLHEP/Random/RandomEngine.h"
 
 // Allow putting evertything into a separate namepsace
@@ -45,7 +44,7 @@ public:
   void run();
 
   //settings
-  void do_qjets(bool qjets) {_do_qjets = qjets;}
+  //void do_qjets(bool qjets) {_do_qjets = qjets;}
 
   void set_mass_drop_threshold(double x) {_mass_drop_threshold = x;}
   void set_max_subjet_mass(double x) {_max_subjet_mass = x;}
@@ -70,10 +69,10 @@ public:
   void set_pruning_rcut_factor(double rcut_factor) {_rcut_factor = rcut_factor;}
 
   void set_debug(bool debug) {_debug = debug;}
-  void set_qjets(double q_zcut, double q_dcut_fctr, double q_exp_min, double q_exp_max, double q_rigidity, double q_truncation_fctr) {
-    _q_zcut = q_zcut; _q_dcut_fctr = q_dcut_fctr; _q_exp_min = q_exp_min; _q_exp_max = q_exp_max; _q_rigidity =  q_rigidity; _q_truncation_fctr =  q_truncation_fctr;
-  }
-  void set_qjets_rng(CLHEP::HepRandomEngine* engine){ _rnEngine = engine;}
+  //void set_qjets(double q_zcut, double q_dcut_fctr, double q_exp_min, double q_exp_max, double q_rigidity, double q_truncation_fctr) {
+  //  _q_zcut = q_zcut; _q_dcut_fctr = q_dcut_fctr; _q_exp_min = q_exp_min; _q_exp_max = q_exp_max; _q_rigidity =  q_rigidity; _q_truncation_fctr =  q_truncation_fctr;
+  //}
+  //void set_qjets_rng(CLHEP::HepRandomEngine* engine){ _rnEngine = engine;}
 
   //get information
   bool is_maybe_top() const {return _is_maybe_top;}
@@ -107,7 +106,7 @@ public:
   double q_weight() {return _qweight;}
    
 private:
-  bool _do_qjets;
+  //bool _do_qjets;
 
   PseudoJet _jet;
   PseudoJet _initial_jet;
@@ -279,15 +278,15 @@ public:
   void set_pruning_rcut_factor(double rcut_factor) {_rcut_factor = rcut_factor;}
 
   void set_debug(bool debug) {_debug = debug;}
-  void do_qjets(bool qjets) {_do_qjets = qjets;}
-  void set_qjets(double q_zcut, double q_dcut_fctr, double q_exp_min, double q_exp_max, double q_rigidity, double q_truncation_fctr) {
-    _q_zcut = q_zcut; _q_dcut_fctr = q_dcut_fctr; _q_exp_min = q_exp_min; _q_exp_max = q_exp_max; _q_rigidity =  q_rigidity; _q_truncation_fctr =  q_truncation_fctr;
-  }
-  void set_qjets_rng(CLHEP::HepRandomEngine* engine){ _rnEngine = engine;}
+  //void do_qjets(bool qjets) {_do_qjets = qjets;}
+  //void set_qjets(double q_zcut, double q_dcut_fctr, double q_exp_min, double q_exp_max, double q_rigidity, double q_truncation_fctr) {
+  //  _q_zcut = q_zcut; _q_dcut_fctr = q_dcut_fctr; _q_exp_min = q_exp_min; _q_exp_max = q_exp_max; _q_rigidity =  q_rigidity; _q_truncation_fctr =  q_truncation_fctr;
+  //}
+  //void set_qjets_rng(CLHEP::HepRandomEngine* engine){ _rnEngine = engine;}
 
    
 private:
-  bool _do_optimalR, _do_qjets;
+  bool _do_optimalR;
  
   PseudoJet _jet;
   PseudoJet _initial_jet;
