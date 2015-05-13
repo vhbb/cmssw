@@ -153,7 +153,7 @@ HEPTopTaggerV2_fixed_R::HEPTopTaggerV2_fixed_R() : _mass_drop_threshold(0.8), _m
   _top_subjets.clear();
   _top_hadrons.clear();
   _top_parts.clear();
-  _qweight= -1.;
+  //_qweight= -1.;
   
 }
 						
@@ -485,8 +485,8 @@ void HEPTopTaggerV2::run() {
   int maxR = int(_max_fatjet_R * 10);
   int minR = int(_min_fatjet_R * 10);
   int stepR = int(_step_R * 10);
-  _qweight=-1;
-  _qjet_plugin.SetRNEngine(_rnEngine);
+  //_qweight=-1;
+  //_qjet_plugin.SetRNEngine(_rnEngine);
 
   if (!_do_optimalR) {
     HEPTopTaggerV2_fixed_R htt(_jet);   
@@ -512,7 +512,7 @@ void HEPTopTaggerV2::run() {
     
     _HEPTopTaggerV2[maxR] = htt;
     _Ropt = maxR;
-    _qweight = htt.q_weight();
+    //_qweight = htt.q_weight();
     _HEPTopTaggerV2_opt = _HEPTopTaggerV2[_Ropt];
   } else {
     _qjet_def = fastjet::JetDefinition(&_qjet_plugin);

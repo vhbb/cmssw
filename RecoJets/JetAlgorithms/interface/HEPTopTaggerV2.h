@@ -103,7 +103,7 @@ public:
   void get_info() const;
 
   double nsub(fastjet::PseudoJet jet, int order, fastjet::contrib::Njettiness::AxesMode axes = fastjet::contrib::Njettiness::kt_axes, double beta = 1., double R0 = 1.);
-  double q_weight() {return _qweight;}
+  //double q_weight() {return _qweight;}
    
 private:
   //bool _do_qjets;
@@ -161,7 +161,7 @@ private:
   std::vector<PseudoJet> _top_parts;
 
   static bool _first_time;
-  double _qweight;
+  //double _qweight;
   
   //internal functions
   void FindHardSubst(const PseudoJet& jet, std::vector<fastjet::PseudoJet>& t_parts);
@@ -230,7 +230,7 @@ public:
   void get_setting() const {return _HEPTopTaggerV2_opt.get_setting();};
   void get_info() const {return _HEPTopTaggerV2_opt.get_info();};
   
-  double q_weight() {return _qweight;}
+  //double q_weight() {return _qweight;}
   
   //settings
   void do_optimalR(bool optimalR) {_do_optimalR = optimalR;}
@@ -333,7 +333,7 @@ private:
   CLHEP::HepRandomEngine* _rnEngine;
   
   bool _debug;
-  double _qweight;
+  //double _qweight;
 
   void UnclusterFatjets(const vector<fastjet::PseudoJet> & big_fatjets, vector<fastjet::PseudoJet> & small_fatjets, const ClusterSequence & cs, const double small_radius);
 

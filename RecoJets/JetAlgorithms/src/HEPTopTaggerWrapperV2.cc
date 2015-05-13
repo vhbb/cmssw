@@ -107,57 +107,57 @@ PseudoJet HEPTopTaggerV2::result(const PseudoJet & jet) const{
   double Qepsilon = -1;
   double QsigmaM  = -1;
 
-  if (DoQjets_){
-    
-    int niter(100);
-    double q_zcut(0.1);
-    double q_dcut_fctr(0.5);
-    double q_exp_min(0.);
-    double q_exp_max(0.);
-    double q_rigidity(0.1);
-    double q_truncation_fctr(0.0);
-           
-    double weight_q1 = -1.;
-    double m_sum = 0.;
-    double m2_sum = 0.;
-    int qtags = 0;
-
-    tagger.set_qjets(q_zcut,
-		     q_dcut_fctr,
-		     q_exp_min,
-		     q_exp_max,
-		     q_rigidity,
-		     q_truncation_fctr);
-    tagger.set_qjets_rng(engine_);    
-    tagger.do_qjets(true);
+//  if (DoQjets_){
+//    
+//    int niter(100);
+//    double q_zcut(0.1);
+//    double q_dcut_fctr(0.5);
+//    double q_exp_min(0.);
+//    double q_exp_max(0.);
+//    double q_rigidity(0.1);
+//    double q_truncation_fctr(0.0);
+//           
+//    double weight_q1 = -1.;
+//    double m_sum = 0.;
+//    double m2_sum = 0.;
+//    int qtags = 0;
+//
+//    tagger.set_qjets(q_zcut,
+//		     q_dcut_fctr,
+//		     q_exp_min,
+//		     q_exp_max,
+//		     q_rigidity,
+//		     q_truncation_fctr);
+//    tagger.set_qjets_rng(engine_);    
+//    tagger.do_qjets(true);
+//    tagger.run();
+//
+//    for (int iq = 0; iq < niter; iq++) {
+//      tagger.run();
+//      if (tagger.is_tagged()) {
+//	qtags++;
+//	m_sum += tagger.t().m();
+//	m2_sum += tagger.t().m() * tagger.t().m();
+//	if (tagger.q_weight() > weight_q1)
+//	  best_tagger = tagger;
+//	  weight_q1=tagger.q_weight();             
+//      }
+//    }
+//    
+//    tagger = best_tagger;
+//    Qweight = weight_q1;
+//    Qepsilon = float(qtags)/float(niter);
+//    
+//    // calculate width of tagged mass distribution if we have at least one candidate
+//    if (qtags > 0){
+//      double mean_m = m_sum / qtags;
+//      double mean_m2 = m2_sum / qtags;
+//      QsigmaM = sqrt(mean_m2 - mean_m*mean_m);
+//    }
+//  }
+//  else{
     tagger.run();
-
-    for (int iq = 0; iq < niter; iq++) {
-      tagger.run();
-      if (tagger.is_tagged()) {
-	qtags++;
-	m_sum += tagger.t().m();
-	m2_sum += tagger.t().m() * tagger.t().m();
-	if (tagger.q_weight() > weight_q1)
-	  best_tagger = tagger;
-	  weight_q1=tagger.q_weight();             
-      }
-    }
-    
-    tagger = best_tagger;
-    Qweight = weight_q1;
-    Qepsilon = float(qtags)/float(niter);
-    
-    // calculate width of tagged mass distribution if we have at least one candidate
-    if (qtags > 0){
-      double mean_m = m_sum / qtags;
-      double mean_m2 = m2_sum / qtags;
-      QsigmaM = sqrt(mean_m2 - mean_m*mean_m);
-    }
-  }
-  else{
-    tagger.run();
-  }
+//  }
 
   // Requires:
   //   - top mass window
