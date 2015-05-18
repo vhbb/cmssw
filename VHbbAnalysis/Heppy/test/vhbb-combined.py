@@ -3,7 +3,7 @@
 from PhysicsTools.Heppy.utils.cmsswPreprocessor import CmsswPreprocessor
 
 from vhbb import *
-from VHbbAnalysis.Heppy.AdditionalBTag import AdditionalBTag
+# from VHbbAnalysis.Heppy.AdditionalBTag import AdditionalBTag
 from VHbbAnalysis.Heppy.AdditionalBoost import AdditionalBoost
 
 
@@ -28,15 +28,15 @@ treeProducer.collections["trimmedFatjets"] = NTupleCollection("trimmedFatjets",
 treeProducer.collections["httCandidates"] = NTupleCollection("httCandidates",
                                                              httType,
                                                              10,
-                                                             help="MultiR HEPTopTagger Candidates")
+                                                             help="OptimalR HEPTopTagger Candidates")
 
-# Add b-Tagging Information
-
-btagana=cfg.Analyzer(
-    verbose=False,
-    class_object=AdditionalBTag,
-)
-sequence.insert(sequence.index(VHbb),btagana)
+# # Add b-Tagging Information
+# 
+# btagana=cfg.Analyzer(
+#     verbose=False,
+#     class_object=AdditionalBTag,
+# )
+# sequence.insert(sequence.index(VHbb),btagana)
 
 # Add Information on generator level hadronic tau decays
 

@@ -124,9 +124,10 @@ fatjetType = NTupleObjectType("fatjet",  baseObjectTypes = [ fourVectorType ], v
 # Four Vector + fW + Rmin + RminExp
 
 httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variables = [
-    NTupleVariable("fW",  lambda x : x.fW, help="relative W width"),
-    NTupleVariable("Rmin",  lambda x : x.Rmin, help="optimal value of R"),
-    NTupleVariable("RminExpected",  lambda x : x.RminExpected, help="expected value of R"),
+    NTupleVariable("fRec",  lambda x : x.fRec, help="relative W width"),
+    NTupleVariable("Ropt",  lambda x : x.Ropt, help="optimal value of R"),
+    NTupleVariable("RoptCalc",  lambda x : x.RoptCalc, help="expected value of optimal R"),
+    NTupleVariable("ptForRoptCalc",  lambda x : x.ptForRoptCalc, help="pT used for calculation of RoptCalc"),
     ])
    
 
