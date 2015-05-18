@@ -18,8 +18,8 @@ class AdditionalBoost( Analyzer ):
         self.handles['tau2'] = AutoHandle( ("ca15PFJetsCHSNSubjettiness","tau2","EX"), "edm::ValueMap<float>")
         self.handles['tau3'] = AutoHandle( ("ca15PFJetsCHSNSubjettiness","tau3","EX"), "edm::ValueMap<float>")
 
-        self.handles['httCandJets'] = AutoHandle(   ("looseMultiRHTT","","EX"), "std::vector<reco::BasicJet>")
-        self.handles['httCandInfos'] = AutoHandle(   ("looseMultiRHTT","","EX"), "vector<reco::HTTTopJetTagInfo>")
+        self.handles['httCandJets'] = AutoHandle(   ("looseOptRHTT","","EX"), "std::vector<reco::BasicJet>")
+        self.handles['httCandInfos'] = AutoHandle(   ("looseOptRHTT","","EX"), "vector<reco::HTTTopJetTagInfo>")
 
     def process(self, event):
 
@@ -56,10 +56,10 @@ class AdditionalBoost( Analyzer ):
         event.httCandidates = map(PhysicsObject, candJets) 
 
         for i in xrange(0, len(candJets)):            
-            event.httCandidates[i].fW = candInfos[i].properties().fW
-            event.httCandidates[i].Rmin = candInfos[i].properties().Rmin
-            event.httCandidates[i].RminExpected = candInfos[i].properties().RminExpected
-
+            event.httCandidates[i].fRec = candInfos[i].properties().fRec
+            event.httCandidates[i].Ropt = candInfos[i].properties().Ropt
+            event.httCandidates[i].RoptCalc = candInfos[i].properties().RoptCalc
+            event.httCandidates[i].ptForRoptCalc = candInfos[i].properties().ptForRoptCalc
 
         return True
 

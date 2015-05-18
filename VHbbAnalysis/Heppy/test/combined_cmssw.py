@@ -30,50 +30,50 @@ process.options = cms.untracked.PSet(
 )
 
 
-########################################
-# B-Tagging
-########################################
-
-# As tracks are not stored in miniAOD, and b-tag fwk for CMSSW < 72X does not accept candidates
-# we need to recreate tracks and pv for btagging in standard reco format:
-process.load('RecoBTag.Configuration.RecoBTag_cff')
-process.load('RecoJets.Configuration.RecoJetAssociations_cff')
-process.load('PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi')
-process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-process.load('Configuration.StandardSequences.Geometry_cff')
-process.load('Configuration.StandardSequences.MagneticField_38T_cff')
-
-#process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
-process.GlobalTag.globaltag = 'PLS170_V7AN1::All'
-
-process.ak4JetTracksAssociatorAtVertexPF.jets = cms.InputTag("slimmedJets")
-process.ak4JetTracksAssociatorAtVertexPF.tracks = cms.InputTag("unpackedTracksAndVertices")
-process.impactParameterTagInfos.primaryVertex = cms.InputTag("unpackedTracksAndVertices")
-process.inclusiveSecondaryVertexFinderTagInfos.extSVCollection = cms.InputTag("unpackedTracksAndVertices","secondary","")
-process.combinedSecondaryVertex.trackMultiplicityMin = 1
-
-process.combinedSecondaryVertexV2.calibrationRecords = cms.vstring(
-'CombinedSVV2MVA_RecoVertex',
-'CombinedSVV2MVA_PseudoVertex',
-'CombinedSVV2MVA_NoVertex'
-)
-
-process.load("Configuration.StandardSequences.MagneticField_cff")
-process.load("CondCore.DBCommon.CondDBSetup_cfi")
-process.BTauMVAJetTagComputerRecord = cms.ESSource("PoolDBESSource",
-process.CondDBSetup,
-timetype = cms.string('runnumber'),
-toGet = cms.VPSet(cms.PSet(
-record = cms.string('BTauGenericMVAJetTagComputerRcd'),
-                tag = cms.string('MVAJetTags_620SLHCX')
-)),
-connect = cms.string('sqlite_file:MVAJetTags_620SLHCX_Phase1And2Upgrade.db'),
-BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService')
-)
-process.es_prefer_BTauMVAJetTagComputerRecord = cms.ESPrefer("PoolDBESSource","BTauMVAJetTagComputerRecord")
-
-process.OUT.outputCommands.append("keep *_combinedInclusiveSecondaryVertexV2BJetTags_*_EX")
-process.OUT.outputCommands.append("keep *_combinedSecondaryVertexBJetTags_*_EX")
+# ########################################
+# # B-Tagging
+# ########################################
+# 
+# # As tracks are not stored in miniAOD, and b-tag fwk for CMSSW < 72X does not accept candidates
+# # we need to recreate tracks and pv for btagging in standard reco format:
+# process.load('RecoBTag.Configuration.RecoBTag_cff')
+# process.load('RecoJets.Configuration.RecoJetAssociations_cff')
+# process.load('PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi')
+# process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+# process.load('Configuration.StandardSequences.Geometry_cff')
+# process.load('Configuration.StandardSequences.MagneticField_38T_cff')
+# 
+# #process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
+# process.GlobalTag.globaltag = 'PLS170_V7AN1::All'
+# 
+# process.ak4JetTracksAssociatorAtVertexPF.jets = cms.InputTag("slimmedJets")
+# process.ak4JetTracksAssociatorAtVertexPF.tracks = cms.InputTag("unpackedTracksAndVertices")
+# process.impactParameterTagInfos.primaryVertex = cms.InputTag("unpackedTracksAndVertices")
+# process.inclusiveSecondaryVertexFinderTagInfos.extSVCollection = cms.InputTag("unpackedTracksAndVertices","secondary","")
+# process.combinedSecondaryVertex.trackMultiplicityMin = 1
+# 
+# process.combinedSecondaryVertexV2.calibrationRecords = cms.vstring(
+# 'CombinedSVV2MVA_RecoVertex',
+# 'CombinedSVV2MVA_PseudoVertex',
+# 'CombinedSVV2MVA_NoVertex'
+# )
+# 
+# process.load("Configuration.StandardSequences.MagneticField_cff")
+# process.load("CondCore.DBCommon.CondDBSetup_cfi")
+# process.BTauMVAJetTagComputerRecord = cms.ESSource("PoolDBESSource",
+# process.CondDBSetup,
+# timetype = cms.string('runnumber'),
+# toGet = cms.VPSet(cms.PSet(
+# record = cms.string('BTauGenericMVAJetTagComputerRcd'),
+#                 tag = cms.string('MVAJetTags_620SLHCX')
+# )),
+# connect = cms.string('sqlite_file:MVAJetTags_620SLHCX_Phase1And2Upgrade.db'),
+# BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService')
+# )
+# process.es_prefer_BTauMVAJetTagComputerRecord = cms.ESPrefer("PoolDBESSource","BTauMVAJetTagComputerRecord")
+# 
+# process.OUT.outputCommands.append("keep *_combinedInclusiveSecondaryVertexV2BJetTags_*_EX")
+# process.OUT.outputCommands.append("keep *_combinedSecondaryVertexBJetTags_*_EX")
 
 ########################################
 # Boosted Substructure
@@ -87,11 +87,11 @@ from RecoJets.JetProducers.PFJetParameters_cfi import *
 process.chs = cms.EDFilter("CandPtrSelector", src = cms.InputTag("packedPFCandidates"), cut = cms.string("fromPV"))
 
 # HEPTopTagger (MultiR)
-process.looseMultiRHTT = cms.EDProducer(
+process.looseOptRHTT = cms.EDProducer(
     "HTTTopJetProducer",
     PFJetParameters,
     AnomalousCellParameters,
-    multiR         = cms.bool(True),
+    optimalR       = cms.bool(True),
     algorithm      = cms.int32(1),
     jetAlgorithm   = cms.string("CambridgeAachen"),
     rParam         = cms.double(1.5),
@@ -106,8 +106,8 @@ process.looseMultiRHTT = cms.EDProducer(
     minM23Cut      = cms.double(0.),
     minM13Cut      = cms.double(0.),
     maxM13Cut      = cms.double(2.))
-process.looseMultiRHTT.src = cms.InputTag("chs")
-process.looseMultiRHTT.jetPtMin = cms.double(200.)
+process.looseOptRHTT.src = cms.InputTag("chs")
+process.looseOptRHTT.jetPtMin = cms.double(200.)
 
 # CA, R=1.5, pT > 200 GeV
 process.ca15PFJetsCHS = cms.EDProducer(
@@ -124,8 +124,18 @@ process.ca15PFJetsCHS.jetPtMin = cms.double(200.)
 process.ca15PFJetsCHSNSubjettiness  = cms.EDProducer("NjettinessAdder",
                                                      src=cms.InputTag("ca15PFJetsCHS"),
                                                      cone=cms.double(1.5),
-                                                     Njets = cms.vuint32(1,2,3)
+                                                     Njets = cms.vuint32(1,2,3),
+                                                     # variables for measure definition : 
+                                                     measureDefinition = cms.uint32( 0 ), # CMS default is normalized measure
+                                                     beta = cms.double(1.0),              # CMS default is 1
+                                                     R0 = cms.double(1.5),                # CMS default is jet cone size
+                                                     Rcutoff = cms.double( -999.0),       # not used by default
+                                                     # variables for axes definition :
+                                                     axesDefinition = cms.uint32( 6 ),    # CMS default is 1-pass KT axes
+                                                     nPass = cms.int32(-999),             # not used by default
+                                                     akAxesR0 = cms.double(-999.0)        # not used by default
 )
+
 
 # Apply trimming to CA R=1.5 jets
 process.ca15PFTrimmedJetsCHS = process.ca15PFJetsCHS.clone(
@@ -137,7 +147,7 @@ process.ca15PFTrimmedJetsCHS = process.ca15PFJetsCHS.clone(
 process.OUT.outputCommands.append("keep *_ca15PFJetsCHS_*_EX")
 process.OUT.outputCommands.append("keep *_ca15PFJetsCHSNSubjettiness_*_EX")
 process.OUT.outputCommands.append("keep *_ca15PFTrimmedJetsCHS_*_EX")
-process.OUT.outputCommands.append("keep *_looseMultiRHTT_*_EX")
+process.OUT.outputCommands.append("keep *_looseOptRHTT_*_EX")
 
 ########################################
 # Generator level hadronic tau decays
