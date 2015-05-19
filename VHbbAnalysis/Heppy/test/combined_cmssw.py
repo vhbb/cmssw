@@ -248,7 +248,6 @@ for fatjet_name in ["ak08PFJetsCHS", "ca15PFJetsCHS"]:
     getattr(process, isv_info_name).vertexCuts.maxDeltaRToJetAxis = cms.double(delta_r)
     getattr(process, isv_info_name).jetAlgorithm = cms.string(jetAlgo)
     getattr(process, isv_info_name).fatJets  =  cms.InputTag(fatjet_name)
-    getattr(process, isv_info_name).groomedFatJets  =  cms.InputTag(fatjet_name)
 
     # SOFT MUON
     setattr(process,
