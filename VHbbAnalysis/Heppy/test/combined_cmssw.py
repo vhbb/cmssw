@@ -232,7 +232,7 @@ for fatjet_name in ["ak08PFJetsCHS", "ca15PFJetsCHS"]:
                 maxDeltaR = cms.double(delta_r),
                 jets = cms.InputTag(fatjet_name),
             ))
-    getattr(process, impact_info_name).explicitJTA = cms.bool(True)
+    getattr(process, impact_info_name).explicitJTA = cms.bool(False)
 
     # ISV
     setattr(process,
@@ -241,13 +241,12 @@ for fatjet_name in ["ak08PFJetsCHS", "ca15PFJetsCHS"]:
                extSVCollection               = cms.InputTag('slimmedSecondaryVertices'),
                trackIPTagInfos               = cms.InputTag(impact_info_name),                
             ))
-    getattr(process, isv_info_name).useSVClustering = cms.bool(True)
+    getattr(process, isv_info_name).useSVClustering = cms.bool(False)
     getattr(process, isv_info_name).rParam = cms.double(delta_r)
     getattr(process, isv_info_name).extSVDeltaRToJet = cms.double(delta_r)
     getattr(process, isv_info_name).trackSelection.jetDeltaRMax = cms.double(delta_r)
     getattr(process, isv_info_name).vertexCuts.maxDeltaRToJetAxis = cms.double(delta_r)
     getattr(process, isv_info_name).jetAlgorithm = cms.string(jetAlgo)
-    getattr(process, isv_info_name).fatJets  =  cms.InputTag(fatjet_name)
 
     # SOFT MUON
     setattr(process,
