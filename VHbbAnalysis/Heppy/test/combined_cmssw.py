@@ -31,52 +31,6 @@ process.options = cms.untracked.PSet(
     allowUnscheduled = cms.untracked.bool(True)
 )
 
-
-# ########################################
-# # B-Tagging
-# ########################################
-# 
-# # As tracks are not stored in miniAOD, and b-tag fwk for CMSSW < 72X does not accept candidates
-# # we need to recreate tracks and pv for btagging in standard reco format:
-# process.load('RecoBTag.Configuration.RecoBTag_cff')
-# process.load('RecoJets.Configuration.RecoJetAssociations_cff')
-# process.load('PhysicsTools.PatAlgos.slimming.unpackedTracksAndVertices_cfi')
-# process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
-# process.load('Configuration.StandardSequences.Geometry_cff')
-# process.load('Configuration.StandardSequences.MagneticField_38T_cff')
-# 
-# #process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
-# process.GlobalTag.globaltag = 'PLS170_V7AN1::All'
-# 
-# process.ak4JetTracksAssociatorAtVertexPF.jets = cms.InputTag("slimmedJets")
-# process.ak4JetTracksAssociatorAtVertexPF.tracks = cms.InputTag("unpackedTracksAndVertices")
-# process.impactParameterTagInfos.primaryVertex = cms.InputTag("unpackedTracksAndVertices")
-# process.inclusiveSecondaryVertexFinderTagInfos.extSVCollection = cms.InputTag("unpackedTracksAndVertices","secondary","")
-# process.combinedSecondaryVertex.trackMultiplicityMin = 1
-# 
-# process.combinedSecondaryVertexV2.calibrationRecords = cms.vstring(
-# 'CombinedSVV2MVA_RecoVertex',
-# 'CombinedSVV2MVA_PseudoVertex',
-# 'CombinedSVV2MVA_NoVertex'
-# )
-# 
-# process.load("Configuration.StandardSequences.MagneticField_cff")
-# process.load("CondCore.DBCommon.CondDBSetup_cfi")
-# process.BTauMVAJetTagComputerRecord = cms.ESSource("PoolDBESSource",
-# process.CondDBSetup,
-# timetype = cms.string('runnumber'),
-# toGet = cms.VPSet(cms.PSet(
-# record = cms.string('BTauGenericMVAJetTagComputerRcd'),
-#                 tag = cms.string('MVAJetTags_620SLHCX')
-# )),
-# connect = cms.string('sqlite_file:MVAJetTags_620SLHCX_Phase1And2Upgrade.db'),
-# BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService')
-# )
-# process.es_prefer_BTauMVAJetTagComputerRecord = cms.ESPrefer("PoolDBESSource","BTauMVAJetTagComputerRecord")
-# 
-# process.OUT.outputCommands.append("keep *_combinedInclusiveSecondaryVertexV2BJetTags_*_EX")
-# process.OUT.outputCommands.append("keep *_combinedSecondaryVertexBJetTags_*_EX")
-
 ########################################
 # Boosted Substructure
 ########################################
@@ -170,7 +124,10 @@ process.ak08PFPrunedJetsCHS = process.ak08PFJetsCHS.clone(
     nFilt = cms.int32(2),
     zcut = cms.double(0.1),
     rcut_factor = cms.double(0.5),
-    useExplicitGhosts = cms.bool(True))
+    useExplicitGhosts = cms.bool(True),
+    writeCompound = cms.bool(True), # Also write subjets for pruned fj
+    jetCollInstanceName=cms.string("SubJets",)
+)
 
 # Apply softdrop to AK R=0.8 jets
 process.ak08PFSoftdropJetsCHS = process.ak08PFJetsCHS.clone(
@@ -186,7 +143,10 @@ process.ca15PFPrunedJetsCHS = process.ca15PFJetsCHS.clone(
     nFilt = cms.int32(2),
     zcut = cms.double(0.1),
     rcut_factor = cms.double(0.5),
-    useExplicitGhosts = cms.bool(True))
+    useExplicitGhosts = cms.bool(True),
+    writeCompound = cms.bool(True), # Also write subjets for pruned fj
+    jetCollInstanceName=cms.string("SubJets"),
+)
 
 # Apply softdrop to CA R=1.5 jets
 process.ca15PFSoftdropJetsCHS = process.ca15PFJetsCHS.clone(
