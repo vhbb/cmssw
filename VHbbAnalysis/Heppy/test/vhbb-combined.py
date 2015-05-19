@@ -36,10 +36,21 @@ treeProducer.collections["ak08pruned"] = NTupleCollection("FatjetAK08pruned",
                                                             10,
                                                             help="AK, R=0.8, pT > 200 GeV, pruned zcut=0.1, rcut=0.5, n=2")
 
+treeProducer.collections["ak08prunedsubjets"] = NTupleCollection("SubjetAK08pruned",
+                                                                 subjetType,
+                                                                 10,
+                                                                 help="Subjets of AK, R=0.8, pT > 200 GeV, pruned zcut=0.1, rcut=0.5, n=2")
+
 treeProducer.collections["ca15pruned"] = NTupleCollection("FatjetCA15pruned",
                                                             fourVectorType,
                                                             10,
                                                             help="CA, R=1.5, pT > 200 GeV, pruned zcut=0.1, rcut=0.5, n=2")
+
+treeProducer.collections["ca15prunedsubjets"] = NTupleCollection("SubjetCA15pruned",
+                                                                 subjetType,
+                                                                 10,
+                                                                 help="Subjets of AK, R=1.5, pT > 200 GeV, pruned zcut=0.1, rcut=0.5, n=2")
+
 
 treeProducer.collections["ca15trimmed"] = NTupleCollection("FatjetCA15trimmed",
                                                             fourVectorType,

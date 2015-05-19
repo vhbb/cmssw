@@ -196,10 +196,12 @@ for fatjet_name in ["ak08PFJetsCHS", "ca15PFJetsCHS"]:
         delta_r = 0.8
         maxSVDeltaRToJet = 0.7
         weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BoostedDoubleSV_AK8_BDT.weights.xml.gz')
+        jetAlgo = "AntiKt"
     elif fatjet_name == "ca15PFJetsCHS":        
         delta_r = 1.5
         maxSVDeltaRToJet = 1.3
         weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BoostedDoubleSV_CA15_BDT.weights.xml.gz')
+        jetAlgo = "CambridgeAachen"
     else:
         print "Invalid fatjet for b-tagging: ", fatjet_name
         sys.exit()
@@ -238,7 +240,7 @@ for fatjet_name in ["ak08PFJetsCHS", "ca15PFJetsCHS"]:
     getattr(process, isv_info_name).extSVDeltaRToJet = cms.double(delta_r)
     getattr(process, isv_info_name).trackSelection.jetDeltaRMax = cms.double(delta_r)
     getattr(process, isv_info_name).vertexCuts.maxDeltaRToJetAxis = cms.double(delta_r)
-    getattr(process, isv_info_name).jetAlgorithm = cms.string("AntiKt")
+    getattr(process, isv_info_name).jetAlgorithm = cms.string(jetAlgo)
     getattr(process, isv_info_name).fatJets  =  cms.InputTag(fatjet_name)
     getattr(process, isv_info_name).groomedFatJets  =  cms.InputTag(fatjet_name)
 
@@ -284,6 +286,76 @@ for fatjet_name in ["ak08PFJetsCHS", "ca15PFJetsCHS"]:
     # Produce the output
     process.OUT.outputCommands.append("keep *_{0}_*_EX".format(tag_name))
     
+
+########################################
+# Subjet b-tagging
+########################################
+
+for fatjet_name in ["ak08PFPrunedJetsCHS", "ca15PFPrunedJetsCHS"]:
+    
+    if fatjet_name == "ak08PFPrunedJetsCHS":        
+        delta_r = 0.8
+        jetAlgo = "AntiKt"
+    elif fatjet_name == "ca15PFPrunedJetsCHS":        
+        delta_r = 1.5
+        jetAlgo = "CambridgeAachen"
+    else:
+        print "Invalid fatjet for subjet b-tagging: ", fatjet_name
+        sys.exit()
+
+    # Define the module names
+    impact_info_name          = fatjet_name + "ImpactParameterTagInfos"
+    isv_info_name             = fatjet_name + "pfInclusiveSecondaryVertexFinderTagInfos"        
+    csvv2_computer_name       = fatjet_name + "combinedSecondaryVertexV2Computer"
+    csvv2ivf_name             = fatjet_name + "pfCombinedInclusiveSecondaryVertexV2BJetTags"        
+
+    # Setup the modules
+    # IMPACT PARAMETER
+    setattr(process, 
+            impact_info_name, 
+            process.pfImpactParameterTagInfos.clone(
+                primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices"),
+                candidates = cms.InputTag("packedPFCandidates"),
+                computeProbabilities = cms.bool(False),
+                computeGhostTrack = cms.bool(False),
+                maxDeltaR = cms.double(delta_r),
+                jets = cms.InputTag(fatjet_name, "SubJets"),
+            ))
+    getattr(process, impact_info_name).explicitJTA = cms.bool(True)
+
+    # ISV
+    setattr(process,
+            isv_info_name,                
+            process.pfInclusiveSecondaryVertexFinderTagInfos.clone(
+               extSVCollection               = cms.InputTag('slimmedSecondaryVertices'),
+               trackIPTagInfos               = cms.InputTag(impact_info_name),                
+            ))
+    getattr(process, isv_info_name).useSVClustering = cms.bool(True)
+    getattr(process, isv_info_name).rParam = cms.double(delta_r)
+    getattr(process, isv_info_name).extSVDeltaRToJet = cms.double(delta_r)
+    getattr(process, isv_info_name).trackSelection.jetDeltaRMax = cms.double(delta_r)
+    getattr(process, isv_info_name).vertexCuts.maxDeltaRToJetAxis = cms.double(delta_r)
+    getattr(process, isv_info_name).jetAlgorithm = cms.string(jetAlgo)
+    getattr(process, isv_info_name).fatJets  =  cms.InputTag(fatjet_name.replace("Pruned",""))
+    getattr(process, isv_info_name).groomedFatJets  =  cms.InputTag(fatjet_name)
+
+    # CSV V2 COMPUTER
+    setattr(process,
+            csvv2_computer_name,
+            process.candidateCombinedSecondaryVertexV2Computer.clone())
+
+    # CSV IVF V2
+    setattr(process,
+            csvv2ivf_name,
+            process.pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
+                tagInfos = cms.VInputTag(cms.InputTag(impact_info_name),
+                                         cms.InputTag(isv_info_name)),
+                jetTagComputer = cms.string(csvv2_computer_name,)
+            ))
+
+    # Produce the output
+    process.OUT.outputCommands.append("keep *_{0}_*_EX".format(csvv2ivf_name))
+
 
 ########################################
 # Generator level hadronic tau decays

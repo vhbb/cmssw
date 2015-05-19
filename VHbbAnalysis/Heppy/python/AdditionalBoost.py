@@ -40,6 +40,13 @@ class AdditionalBoost( Analyzer ):
         self.handles['ca15bbtag'] = AutoHandle( ("ca15PFJetsCHSpfBoostedDoubleSecondaryVertexBJetTags","","EX"), 
                                                 "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
 
+        self.handles['ak08prunedsubjetbtag'] = AutoHandle( ("ak08PFPrunedJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags","","EX"), 
+                                                           "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+
+        self.handles['ca15prunedsubjetbtag'] = AutoHandle( ("ca15PFPrunedJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags","","EX"), 
+                                                           "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+
+
     def process(self, event):
 
         self.readCollections( event.input )
@@ -85,9 +92,12 @@ class AdditionalBoost( Analyzer ):
 
         for fj_name in ['ak08pruned','ca15pruned']:
             setattr(event, fj_name + "subjets", map(PhysicsObject, self.handles[fj_name+"subjets"].product()))
-
-            for j in getattr(event, fj_name+"subjets"):
-                j.btag = -42
+            
+            newtags =  self.handles[fj_name+'subjetbtag'].product()
+            for i in xrange(0,len(newtags)) :
+                for j in getattr(event, fj_name+"subjets"):
+                    if  j.physObj == newtags.key(i).get():
+                        j.btag = newtags.value(i)
 
 
         ######## 
