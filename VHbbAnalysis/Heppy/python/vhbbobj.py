@@ -114,6 +114,7 @@ fatjetType = NTupleObjectType("fatjet",  baseObjectTypes = [ fourVectorType ], v
     NTupleVariable("tau1",  lambda x : x.tau1, help="Nsubjettiness (1 axis)"),
     NTupleVariable("tau2",  lambda x : x.tau2, help="Nsubjettiness (2 axes)"),
     NTupleVariable("tau3",  lambda x : x.tau3, help="Nsubjettiness (3 axes)"),
+    NTupleVariable("bbtag",  lambda x : x.bbtag, help="Hbb b-tag score"),
     ])
 
 

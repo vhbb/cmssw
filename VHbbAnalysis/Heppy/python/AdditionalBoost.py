@@ -32,6 +32,12 @@ class AdditionalBoost( Analyzer ):
         self.handles['httCandJets']  = AutoHandle( ("looseOptRHTT","","EX"), "std::vector<reco::BasicJet>")
         self.handles['httCandInfos'] = AutoHandle( ("looseOptRHTT","","EX"), "vector<reco::HTTTopJetTagInfo>")
 
+        self.handles['ak08bbtag'] = AutoHandle( ("ak08PFJetsCHSpfBoostedDoubleSecondaryVertexBJetTags","","EX"), 
+                                                "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+
+        self.handles['ca15bbtag'] = AutoHandle( ("ca15PFJetsCHSpfBoostedDoubleSecondaryVertexBJetTags","","EX"), 
+                                                "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+
     def process(self, event):
 
         self.readCollections( event.input )
@@ -42,8 +48,10 @@ class AdditionalBoost( Analyzer ):
 
         for prefix in ["ak08", "ca15"]:
 
+            # Four Vector
             setattr(event, prefix+"ungroomed", map(PhysicsObject, self.handles[prefix+'ungroomed'].product()))
 
+            # N-Subjettiness
             tau1 = self.handles[prefix+'tau1'].product()
             tau2 = self.handles[prefix+'tau2'].product()
             tau3 = self.handles[prefix+'tau3'].product()
@@ -52,6 +60,14 @@ class AdditionalBoost( Analyzer ):
                 getattr(event, prefix+"ungroomed")[i].tau1 = tau1.get(i)
                 getattr(event, prefix+"ungroomed")[i].tau2 = tau2.get(i)
                 getattr(event, prefix+"ungroomed")[i].tau3 = tau3.get(i)
+
+            # Double b-tag
+            newtags =  self.handles[prefix+'bbtag'].product()
+            for i in xrange(0,len(newtags)) :
+                for j in getattr(event, prefix+"ungroomed"):
+                    if  j.physObj == newtags.key(i).get():
+                        j.bbtag = newtags.value(i)
+
                 
 
         ######## 
@@ -96,6 +112,8 @@ class AdditionalBoost( Analyzer ):
             event.httCandidates[i].sjNonWeta  = sj_nonw.eta() 
             event.httCandidates[i].sjNonWphi  = sj_nonw.phi() 
             event.httCandidates[i].sjNonWmass = sj_nonw.mass()
+
+
 
         return True
 
