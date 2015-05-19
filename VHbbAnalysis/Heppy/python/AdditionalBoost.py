@@ -12,40 +12,54 @@ class AdditionalBoost( Analyzer ):
     def declareHandles(self):
         super(AdditionalBoost, self).declareHandles()
         
-        self.handles['ungroomedFatjets'] = AutoHandle( ("ca15PFJetsCHS","","EX"), "std::vector<reco::PFJet>")
-        self.handles['trimmedFatjets'] = AutoHandle(   ("ca15PFTrimmedJetsCHS","","EX"), "std::vector<reco::PFJet>")
-        
-        self.handles['tau1'] = AutoHandle( ("ca15PFJetsCHSNSubjettiness","tau1","EX"), "edm::ValueMap<float>")
-        self.handles['tau2'] = AutoHandle( ("ca15PFJetsCHSNSubjettiness","tau2","EX"), "edm::ValueMap<float>")
-        self.handles['tau3'] = AutoHandle( ("ca15PFJetsCHSNSubjettiness","tau3","EX"), "edm::ValueMap<float>")
+        self.handles['ak08ungroomed'] = AutoHandle( ("ak08PFJetsCHS","","EX"), "std::vector<reco::PFJet>")
+        self.handles['ak08softdrop']  = AutoHandle( ("ak08PFSoftdropJetsCHS","","EX"), "std::vector<reco::PFJet>")
+        self.handles['ak08pruned']    = AutoHandle( ("ak08PFPrunedJetsCHS","","EX"), "std::vector<reco::PFJet>")
 
-        self.handles['httCandJets'] = AutoHandle(   ("looseOptRHTT","","EX"), "std::vector<reco::BasicJet>")
-        self.handles['httCandInfos'] = AutoHandle(   ("looseOptRHTT","","EX"), "vector<reco::HTTTopJetTagInfo>")
+        self.handles['ca15ungroomed'] = AutoHandle( ("ca15PFJetsCHS","","EX"), "std::vector<reco::PFJet>")
+        self.handles['ca15trimmed']   = AutoHandle( ("ca15PFTrimmedJetsCHS","","EX"), "std::vector<reco::PFJet>")
+        self.handles['ca15softdrop']  = AutoHandle( ("ca15PFSoftdropJetsCHS","","EX"), "std::vector<reco::PFJet>")
+        self.handles['ca15pruned']    = AutoHandle( ("ca15PFPrunedJetsCHS","","EX"), "std::vector<reco::PFJet>")
+
+        self.handles['ak08tau1'] = AutoHandle( ("ak08PFJetsCHSNSubjettiness","tau1","EX"), "edm::ValueMap<float>")
+        self.handles['ak08tau2'] = AutoHandle( ("ak08PFJetsCHSNSubjettiness","tau2","EX"), "edm::ValueMap<float>")
+        self.handles['ak08tau3'] = AutoHandle( ("ak08PFJetsCHSNSubjettiness","tau3","EX"), "edm::ValueMap<float>")
+        
+        self.handles['ca15tau1'] = AutoHandle( ("ca15PFJetsCHSNSubjettiness","tau1","EX"), "edm::ValueMap<float>")
+        self.handles['ca15tau2'] = AutoHandle( ("ca15PFJetsCHSNSubjettiness","tau2","EX"), "edm::ValueMap<float>")
+        self.handles['ca15tau3'] = AutoHandle( ("ca15PFJetsCHSNSubjettiness","tau3","EX"), "edm::ValueMap<float>")
+
+        self.handles['httCandJets']  = AutoHandle( ("looseOptRHTT","","EX"), "std::vector<reco::BasicJet>")
+        self.handles['httCandInfos'] = AutoHandle( ("looseOptRHTT","","EX"), "vector<reco::HTTTopJetTagInfo>")
 
     def process(self, event):
 
         self.readCollections( event.input )
 
         ######## 
-        # Trimmed Fatjets
-        ########
-        event.trimmedFatjets = map(PhysicsObject, self.handles['trimmedFatjets'].product()) 
-
-        ######## 
         # Ungroomed Fatjets + NSubjettiness
         ########
-        event.ungroomedFatjets = map(PhysicsObject, self.handles['ungroomedFatjets'].product()) 
 
-        tau1 = self.handles['tau1'].product()
-        tau2 = self.handles['tau2'].product()
-        tau3 = self.handles['tau3'].product()
+        for prefix in ["ak08", "ca15"]:
+
+            setattr(event, prefix+"ungroomed", map(PhysicsObject, self.handles[prefix+'ungroomed'].product()))
+
+            tau1 = self.handles[prefix+'tau1'].product()
+            tau2 = self.handles[prefix+'tau2'].product()
+            tau3 = self.handles[prefix+'tau3'].product()
     
-        for i in xrange(0, len(tau1)):
+            for i in xrange(0, len(tau1)):
+                getattr(event, prefix+"ungroomed")[i].tau1 = tau1.get(i)
+                getattr(event, prefix+"ungroomed")[i].tau2 = tau2.get(i)
+                getattr(event, prefix+"ungroomed")[i].tau3 = tau3.get(i)
+                
 
-            event.ungroomedFatjets[i].tau1 = tau1.get(i)
-            event.ungroomedFatjets[i].tau2 = tau2.get(i)
-            event.ungroomedFatjets[i].tau3 = tau3.get(i)
+        ######## 
+        # Groomed Fatjets
+        ########
 
+        for fj_name in ['ak08softdrop', 'ak08pruned', 'ca15trimmed', 'ca15softdrop', 'ca15pruned']:
+            setattr(event, fj_name, map(PhysicsObject, self.handles[fj_name].product()))
 
         ######## 
         # HEPTopTagger
