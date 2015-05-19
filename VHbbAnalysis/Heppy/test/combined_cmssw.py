@@ -31,6 +31,8 @@ process.options = cms.untracked.PSet(
     allowUnscheduled = cms.untracked.bool(True)
 )
 
+skip_ca15 = False
+
 ########################################
 # Boosted Substructure
 ########################################
@@ -42,29 +44,6 @@ from RecoJets.JetProducers.PFJetParameters_cfi import *
 # Select candidates that would pass CHS requirements
 process.chs = cms.EDFilter("CandPtrSelector", src = cms.InputTag("packedPFCandidates"), cut = cms.string("fromPV"))
 
-# HEPTopTagger (MultiR)
-process.looseOptRHTT = cms.EDProducer(
-    "HTTTopJetProducer",
-    PFJetParameters,
-    AnomalousCellParameters,
-    optimalR       = cms.bool(True),
-    algorithm      = cms.int32(1),
-    jetAlgorithm   = cms.string("CambridgeAachen"),
-    rParam         = cms.double(1.5),
-    mode           = cms.int32(4),
-    minFatjetPt    = cms.double(200.),
-    minCandPt      = cms.double(200.),
-    minSubjetPt    = cms.double(30.),
-    writeCompound  = cms.bool(True),
-    minCandMass    = cms.double(0.),
-    maxCandMass    = cms.double(1000),
-    massRatioWidth = cms.double(100.),
-    minM23Cut      = cms.double(0.),
-    minM13Cut      = cms.double(0.),
-    maxM13Cut      = cms.double(2.))
-process.looseOptRHTT.src = cms.InputTag("chs")
-process.looseOptRHTT.jetPtMin = cms.double(200.)
-
 # AntiKt, R=0.8, pT > 200 GeV
 process.ak08PFJetsCHS = cms.EDProducer(
         "FastjetJetProducer",
@@ -74,33 +53,6 @@ process.ak08PFJetsCHS = cms.EDProducer(
         rParam       = cms.double(0.8))
 process.ak08PFJetsCHS.src = cms.InputTag("chs")
 process.ak08PFJetsCHS.jetPtMin = cms.double(200.)
-
-# CA, R=1.5, pT > 200 GeV
-process.ca15PFJetsCHS = cms.EDProducer(
-        "FastjetJetProducer",
-        PFJetParameters,
-        AnomalousCellParameters,
-        jetAlgorithm = cms.string("CambridgeAachen"),
-        rParam       = cms.double(1.5))
-process.ca15PFJetsCHS.src = cms.InputTag("chs")
-process.ca15PFJetsCHS.jetPtMin = cms.double(200.)
-
-
-# Calculate tau1, tau2 and tau3 for ungroomed CA R=1.5 jets
-process.ca15PFJetsCHSNSubjettiness  = cms.EDProducer("NjettinessAdder",
-                                                     src=cms.InputTag("ca15PFJetsCHS"),
-                                                     cone=cms.double(1.5),
-                                                     Njets = cms.vuint32(1,2,3),
-                                                     # variables for measure definition : 
-                                                     measureDefinition = cms.uint32( 0 ), # CMS default is normalized measure
-                                                     beta = cms.double(1.0),              # CMS default is 1
-                                                     R0 = cms.double(1.5),                # CMS default is jet cone size
-                                                     Rcutoff = cms.double( -999.0),       # not used by default
-                                                     # variables for axes definition :
-                                                     axesDefinition = cms.uint32( 6 ),    # CMS default is 1-pass KT axes
-                                                     nPass = cms.int32(-999),             # not used by default
-                                                     akAxesR0 = cms.double(-999.0)        # not used by default
-)
 
 # Calculate tau1, tau2 and tau3 for ungroomed AK R=0.8 jets
 process.ak08PFJetsCHSNSubjettiness  = cms.EDProducer("NjettinessAdder",
@@ -137,42 +89,94 @@ process.ak08PFSoftdropJetsCHS = process.ak08PFJetsCHS.clone(
     R0 = cms.double(0.8),
     useExplicitGhosts = cms.bool(True))
 
-# Apply pruning to CA R=1.5 jets
-process.ca15PFPrunedJetsCHS = process.ca15PFJetsCHS.clone(
-    usePruning = cms.bool(True),
-    nFilt = cms.int32(2),
-    zcut = cms.double(0.1),
-    rcut_factor = cms.double(0.5),
-    useExplicitGhosts = cms.bool(True),
-    writeCompound = cms.bool(True), # Also write subjets for pruned fj
-    jetCollInstanceName=cms.string("SubJets"),
-)
-
-# Apply softdrop to CA R=1.5 jets
-process.ca15PFSoftdropJetsCHS = process.ca15PFJetsCHS.clone(
-    useSoftDrop = cms.bool(True),
-    zcut = cms.double(0.1),
-    beta = cms.double(0.0),
-    R0 = cms.double(1.5),
-    useExplicitGhosts = cms.bool(True))
-
-# Apply trimming to CA R=1.5 jets
-process.ca15PFTrimmedJetsCHS = process.ca15PFJetsCHS.clone(
-    useTrimming = cms.bool(True),
-    rFilt = cms.double(0.2),
-    trimPtFracMin = cms.double(0.06),
-    useExplicitGhosts = cms.bool(True))
-
 process.OUT.outputCommands.append("keep *_ak08PFJetsCHS_*_EX")
-process.OUT.outputCommands.append("keep *_ca15PFJetsCHS_*_EX")
 process.OUT.outputCommands.append("keep *_ak08PFPrunedJetsCHS_*_EX")
-process.OUT.outputCommands.append("keep *_ca15PFPrunedJetsCHS_*_EX")
 process.OUT.outputCommands.append("keep *_ak08PFSoftdropJetsCHS_*_EX")
-process.OUT.outputCommands.append("keep *_ca15PFSoftdropJetsCHS_*_EX")
-process.OUT.outputCommands.append("keep *_ca15PFTrimmedJetsCHS_*_EX")
 process.OUT.outputCommands.append("keep *_ak08PFJetsCHSNSubjettiness_*_EX")
-process.OUT.outputCommands.append("keep *_ca15PFJetsCHSNSubjettiness_*_EX")
-process.OUT.outputCommands.append("keep *_looseOptRHTT_*_EX")
+
+
+if not skip_ca15:
+    # CA, R=1.5, pT > 200 GeV
+    process.ca15PFJetsCHS = cms.EDProducer(
+            "FastjetJetProducer",
+            PFJetParameters,
+            AnomalousCellParameters,
+            jetAlgorithm = cms.string("CambridgeAachen"),
+            rParam       = cms.double(1.5))
+    process.ca15PFJetsCHS.src = cms.InputTag("chs")
+    process.ca15PFJetsCHS.jetPtMin = cms.double(200.)
+
+    # Calculate tau1, tau2 and tau3 for ungroomed CA R=1.5 jets
+    process.ca15PFJetsCHSNSubjettiness  = cms.EDProducer("NjettinessAdder",
+                                                         src=cms.InputTag("ca15PFJetsCHS"),
+                                                         cone=cms.double(1.5),
+                                                         Njets = cms.vuint32(1,2,3),
+                                                         # variables for measure definition : 
+                                                         measureDefinition = cms.uint32( 0 ), # CMS default is normalized measure
+                                                         beta = cms.double(1.0),              # CMS default is 1
+                                                         R0 = cms.double(1.5),                # CMS default is jet cone size
+                                                         Rcutoff = cms.double( -999.0),       # not used by default
+                                                         # variables for axes definition :
+                                                         axesDefinition = cms.uint32( 6 ),    # CMS default is 1-pass KT axes
+                                                         nPass = cms.int32(-999),             # not used by default
+                                                         akAxesR0 = cms.double(-999.0)        # not used by default
+    )
+
+    # Apply pruning to CA R=1.5 jets
+    process.ca15PFPrunedJetsCHS = process.ca15PFJetsCHS.clone(
+        usePruning = cms.bool(True),
+        nFilt = cms.int32(2),
+        zcut = cms.double(0.1),
+        rcut_factor = cms.double(0.5),
+        useExplicitGhosts = cms.bool(True),
+        writeCompound = cms.bool(True), # Also write subjets for pruned fj
+        jetCollInstanceName=cms.string("SubJets"),
+    )
+
+    # Apply softdrop to CA R=1.5 jets
+    process.ca15PFSoftdropJetsCHS = process.ca15PFJetsCHS.clone(
+        useSoftDrop = cms.bool(True),
+        zcut = cms.double(0.1),
+        beta = cms.double(0.0),
+        R0 = cms.double(1.5),
+        useExplicitGhosts = cms.bool(True))
+
+    # Apply trimming to CA R=1.5 jets
+    process.ca15PFTrimmedJetsCHS = process.ca15PFJetsCHS.clone(
+        useTrimming = cms.bool(True),
+        rFilt = cms.double(0.2),
+        trimPtFracMin = cms.double(0.06),
+        useExplicitGhosts = cms.bool(True))
+
+    # HEPTopTagger (MultiR)
+    process.looseOptRHTT = cms.EDProducer(
+        "HTTTopJetProducer",
+        PFJetParameters,
+        AnomalousCellParameters,
+        optimalR       = cms.bool(True),
+        algorithm      = cms.int32(1),
+        jetAlgorithm   = cms.string("CambridgeAachen"),
+        rParam         = cms.double(1.5),
+        mode           = cms.int32(4),
+        minFatjetPt    = cms.double(200.),
+        minCandPt      = cms.double(200.),
+        minSubjetPt    = cms.double(30.),
+        writeCompound  = cms.bool(True),
+        minCandMass    = cms.double(0.),
+        maxCandMass    = cms.double(1000),
+        massRatioWidth = cms.double(100.),
+        minM23Cut      = cms.double(0.),
+        minM13Cut      = cms.double(0.),
+        maxM13Cut      = cms.double(2.))
+    process.looseOptRHTT.src = cms.InputTag("chs")
+    process.looseOptRHTT.jetPtMin = cms.double(200.)
+
+    process.OUT.outputCommands.append("keep *_ca15PFJetsCHS_*_EX")
+    process.OUT.outputCommands.append("keep *_ca15PFPrunedJetsCHS_*_EX")
+    process.OUT.outputCommands.append("keep *_ca15PFSoftdropJetsCHS_*_EX")
+    process.OUT.outputCommands.append("keep *_ca15PFTrimmedJetsCHS_*_EX")
+    process.OUT.outputCommands.append("keep *_ca15PFJetsCHSNSubjettiness_*_EX")
+    process.OUT.outputCommands.append("keep *_looseOptRHTT_*_EX")
 
 
 ########################################
@@ -189,8 +193,10 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc')
 
-
 for fatjet_name in ["ak08PFJetsCHS", "ca15PFJetsCHS"]:
+
+    if skip_ca15 and fatjet_name == "ca15PFJetsCHS":
+        continue
     
     if fatjet_name == "ak08PFJetsCHS":        
         delta_r = 0.8
@@ -293,6 +299,9 @@ for fatjet_name in ["ak08PFJetsCHS", "ca15PFJetsCHS"]:
 
 for fatjet_name in ["ak08PFPrunedJetsCHS", "ca15PFPrunedJetsCHS"]:
     
+    if skip_ca15 and fatjet_name == "ca15PFPrunedJetsCHS":
+        continue
+
     if fatjet_name == "ak08PFPrunedJetsCHS":        
         delta_r = 0.8
         jetAlgo = "AntiKt"
