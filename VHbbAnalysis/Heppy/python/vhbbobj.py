@@ -108,7 +108,7 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
 ## FAT JET
 ##------------------------------------------  
 
-# Four Vector + Nsubjettiness
+# Four Vector + Nsubjettiness + Hbb-Tag
 
 fatjetType = NTupleObjectType("fatjet",  baseObjectTypes = [ fourVectorType ], variables = [
     NTupleVariable("tau1",  lambda x : x.tau1, help="Nsubjettiness (1 axis)"),
@@ -116,6 +116,16 @@ fatjetType = NTupleObjectType("fatjet",  baseObjectTypes = [ fourVectorType ], v
     NTupleVariable("tau3",  lambda x : x.tau3, help="Nsubjettiness (3 axes)"),
     NTupleVariable("bbtag",  lambda x : x.bbtag, help="Hbb b-tag score"),
     ])
+
+
+##------------------------------------------  
+## Subjet
+##------------------------------------------  
+
+# Four Vector + b-Tag
+
+subjetType = NTupleObjectType("subjet",  baseObjectTypes = [ fourVectorType ], variables = [
+    NTupleVariable("btag",  lambda x : x.btag, help="CVS IVF V2 btag-score")])
 
 
 ##------------------------------------------  

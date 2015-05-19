@@ -12,14 +12,16 @@ class AdditionalBoost( Analyzer ):
     def declareHandles(self):
         super(AdditionalBoost, self).declareHandles()
         
-        self.handles['ak08ungroomed'] = AutoHandle( ("ak08PFJetsCHS","","EX"), "std::vector<reco::PFJet>")
-        self.handles['ak08softdrop']  = AutoHandle( ("ak08PFSoftdropJetsCHS","","EX"), "std::vector<reco::PFJet>")
-        self.handles['ak08pruned']    = AutoHandle( ("ak08PFPrunedJetsCHS","","EX"), "std::vector<reco::PFJet>")
+        self.handles['ak08ungroomed']     = AutoHandle( ("ak08PFJetsCHS","","EX"), "std::vector<reco::PFJet>")
+        self.handles['ak08softdrop']      = AutoHandle( ("ak08PFSoftdropJetsCHS","","EX"), "std::vector<reco::PFJet>")
+        self.handles['ak08pruned']        = AutoHandle( ("ak08PFPrunedJetsCHS","","EX"), "std::vector<reco::BasicJet>")
+        self.handles['ak08prunedsubjets'] = AutoHandle( ("ak08PFPrunedJetsCHS","SubJets","EX"), "std::vector<reco::PFJet>")
 
-        self.handles['ca15ungroomed'] = AutoHandle( ("ca15PFJetsCHS","","EX"), "std::vector<reco::PFJet>")
-        self.handles['ca15trimmed']   = AutoHandle( ("ca15PFTrimmedJetsCHS","","EX"), "std::vector<reco::PFJet>")
-        self.handles['ca15softdrop']  = AutoHandle( ("ca15PFSoftdropJetsCHS","","EX"), "std::vector<reco::PFJet>")
-        self.handles['ca15pruned']    = AutoHandle( ("ca15PFPrunedJetsCHS","","EX"), "std::vector<reco::PFJet>")
+        self.handles['ca15ungroomed']     = AutoHandle( ("ca15PFJetsCHS","","EX"), "std::vector<reco::PFJet>")
+        self.handles['ca15trimmed']       = AutoHandle( ("ca15PFTrimmedJetsCHS","","EX"), "std::vector<reco::PFJet>")
+        self.handles['ca15softdrop']      = AutoHandle( ("ca15PFSoftdropJetsCHS","","EX"), "std::vector<reco::PFJet>")
+        self.handles['ca15pruned']        = AutoHandle( ("ca15PFPrunedJetsCHS","","EX"), "std::vector<reco::BasicJet>")
+        self.handles['ca15prunedsubjets'] = AutoHandle( ("ca15PFPrunedJetsCHS","SubJets","EX"), "std::vector<reco::PFJet>")
 
         self.handles['ak08tau1'] = AutoHandle( ("ak08PFJetsCHSNSubjettiness","tau1","EX"), "edm::ValueMap<float>")
         self.handles['ak08tau2'] = AutoHandle( ("ak08PFJetsCHSNSubjettiness","tau2","EX"), "edm::ValueMap<float>")
@@ -68,14 +70,25 @@ class AdditionalBoost( Analyzer ):
                     if  j.physObj == newtags.key(i).get():
                         j.bbtag = newtags.value(i)
 
-                
-
+                                                                
         ######## 
         # Groomed Fatjets
         ########
 
         for fj_name in ['ak08softdrop', 'ak08pruned', 'ca15trimmed', 'ca15softdrop', 'ca15pruned']:
             setattr(event, fj_name, map(PhysicsObject, self.handles[fj_name].product()))
+
+
+        ######## 
+        # Subjets 
+        ########
+
+        for fj_name in ['ak08pruned','ca15pruned']:
+            setattr(event, fj_name + "subjets", map(PhysicsObject, self.handles[fj_name+"subjets"].product()))
+
+            for j in getattr(event, fj_name+"subjets"):
+                j.btag = -42
+
 
         ######## 
         # HEPTopTagger
