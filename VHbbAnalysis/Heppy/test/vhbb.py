@@ -177,11 +177,28 @@ TTHtoTauTauGen = cfg.Analyzer(
 #sh = cfg.Analyzer( class_object=HeppyShell)
 
 from PhysicsTools.Heppy.analyzers.core.TriggerBitAnalyzer import TriggerBitAnalyzer
-from VHbbAnalysis.Heppy.TriggerTable import triggerTable
 TrigAna = cfg.Analyzer(
     verbose = False,
     class_object = TriggerBitAnalyzer,
-    triggerBits = triggerTable,
+    triggerBits = {
+        "METBTAG" : [ "HLT_PFMET120_NoiseCleaned_BTagCSV07_v*" ],
+        "MET"     : [ "HLT_PFMET170_NoiseCleaned_v*" ],
+        "DIELE"   : [ "HLT_Ele23_Ele12_CaloId_TrackId_Iso_v*" ],
+        "ELE"     : [ "HLT_Ele32_eta2p1_WP85_Gsf_v*", "HLT_Ele32_eta2p1_WP85_Gsf_v*" ],
+        "DIMU"    : [ "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*", "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*" ],
+        "MU"      : [ "HLT_IsoTkMu24_eta2p1_IterTrk02_v*", "HLT_IsoTkMu24_IterTrk02_v*" ],
+        "TAU"     : ["HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v*"],
+        "HH4bQuad":["HLT_QuadJet45_TripleCSV0p5_v*"],
+        "HH4bDouble":["HLT_DoubleJet90_Double30_TripleCSV0p5_v*"],  
+        "MUE"     : [ "HLT_Mu23_TrkIsoVVL_Ele12_Gsf_CaloId_TrackId_Iso_MediumWP_v*" ],
+        "EMU"     : [ "HLT_Mu8_TrkIsoVVL_Ele23_Gsf_CaloId_TrackId_Iso_MediumWP_v*" ],
+        "METTAU"  : [ "HLT_LooseIsoPFTau50_Trk30_eta2p1_MET120_v*" ],
+        "ELETAU"  : [ "HLT_Ele22_eta2p1_WP85_Gsf_LooseIsoPFTau20_v*" ],
+        "MUTAU"   : [ "HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v*" ],
+        "DiTAU"   : [ "HLT_DoubleMediumIsoPFTau40_Trk1_eta2p1_Reg_v*" ],
+   },
+#   processName = 'HLT',
+#   outprefix = 'HLT'
    )
 
 from PhysicsTools.HeppyCore.framework.services.tfile import TFileService 
@@ -228,9 +245,7 @@ sample = cfg.MCComponent(
 #'root://xrootd.ba.infn.it//store/mc/Phys14DR/WH_HToBB_WToLNu_M-125_13TeV_powheg-herwigpp/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v1/00000/12328AE8-796B-E411-9D32-002590A831B4.root'
 #"32ABFE4A-916B-E411-B2FA-00266CFFBC60.root" #Hbb
 #"04860BAA-B673-E411-8B20-002481E0D50C.root" #DY 600
-#"TTbar_PU25ns_MCRUN2_74_V9.root"
-"TTbar_722_PU25ns_MCRUN2_72_V1.root"
-#"TTPU20-007B37D4-8B70-E411-BC2D-0025905A6066.root" # 
+"TTPU20-007B37D4-8B70-E411-BC2D-0025905A6066.root" # 
 #"root://xrootd.ba.infn.it//store/mc/Phys14DR/ZH_HToBB_ZToNuNu_M-125_13TeV_powheg-herwigpp/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v1/00000/32ABFE4A-916B-E411-B2FA-00266CFFBC60.root"
 ##"root://xrootd.ba.infn.it//store/mc/Phys14DR/ZH_HToBB_ZToNuNu_M-125_13TeV_powheg-herwigpp/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v1/00000/32ABFE4A-916B-E411-B2FA-00266CFFBC60.root"
 #"root://xrootd.ba.infn.it//store/mc/Spring14miniaod/ZH_HToBB_ZToLL_M-125_13TeV_powheg-herwigpp/MINIAODSIM/#141029_PU40bx50_PLS170_V6AN2-v1/10000/80161D59-6665-E411-9B4F-C4346BB25698.root",
