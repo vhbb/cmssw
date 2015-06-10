@@ -148,16 +148,19 @@ httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variabl
     NTupleVariable("sjW1eta",  lambda x : x.sjW1eta,  help = "Leading W Subjet eta"),
     NTupleVariable("sjW1phi",  lambda x : x.sjW1phi,  help = "Leading W Subjet phi"),
     NTupleVariable("sjW1mass", lambda x : x.sjW1mass, help = "Leading W Subjet mass"),
-    # Second Subjet (pt)
+    NTupleVariable("sjW1btag", lambda x : x.sjW1btag, help = "Leading W Subjet btag"),
+    # Second W Subjet (pt)
     NTupleVariable("sjW2pt",   lambda x : x.sjW2pt,   help = "Second Subjet pT"),
     NTupleVariable("sjW2eta",  lambda x : x.sjW2eta,  help = "Second Subjet eta"),
     NTupleVariable("sjW2phi",  lambda x : x.sjW2phi,  help = "Second Subjet phi"),
     NTupleVariable("sjW2mass", lambda x : x.sjW2mass, help = "Second Subjet mass"),
-    # Non-W Subjet (pt)
+    NTupleVariable("sjW2btag", lambda x : x.sjW2btag, help = "Second Subjet btag"),
+    # Non-W Subjet
     NTupleVariable("sjNonWpt",   lambda x : x.sjNonWpt,   help = "Non-W Subjet pT"),
     NTupleVariable("sjNonWeta",  lambda x : x.sjNonWeta,  help = "Non-W Subjet eta"),
     NTupleVariable("sjNonWphi",  lambda x : x.sjNonWphi,  help = "Non-W Subjet phi"),
     NTupleVariable("sjNonWmass", lambda x : x.sjNonWmass, help = "Non-W Subjet mass"),
+    NTupleVariable("sjNonWbtag", lambda x : x.sjNonWbtag, help = "Non-W Subjet btag"),
     ])
    
 

@@ -43,12 +43,16 @@ class AdditionalBoost( Analyzer ):
             self.handles['httCandJets']  = AutoHandle( ("looseOptRHTT","","EX"), "std::vector<reco::BasicJet>")
             self.handles['httCandInfos'] = AutoHandle( ("looseOptRHTT","","EX"), "vector<reco::HTTTopJetTagInfo>")
 
+
+            self.handles['httSubjetBtags'] = AutoHandle( ("looseOptRHTTpfCombinedInclusiveSecondaryVertexV2BJetTags","","EX"), 
+                                                         "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+            
+
             self.handles['ca15bbtag'] = AutoHandle( ("ca15PFJetsCHSpfBoostedDoubleSecondaryVertexBJetTags","","EX"), 
                                                     "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
 
             self.handles['ca15prunedsubjetbtag'] = AutoHandle( ("ca15PFPrunedJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags","","EX"), 
                                                                "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
-
 
     def process(self, event):
 
@@ -123,6 +127,7 @@ class AdditionalBoost( Analyzer ):
             candInfos = self.handles['httCandInfos'].product()
 
             event.httCandidates = map(PhysicsObject, candJets) 
+            sjbtags = self.handles['httSubjetBtags'].product()
 
             for i in xrange(0, len(candJets)):            
 
@@ -135,23 +140,39 @@ class AdditionalBoost( Analyzer ):
                 # Could be improved by b-tagging if we run into a problem
 
                 [sj_w1, sj_w2, sj_nonw] = [con.__deref__() for con in candJets[i].getJetConstituents() if not con.isNull()]
-
+            
                 event.httCandidates[i].sjW1pt   = sj_w1.pt()
                 event.httCandidates[i].sjW1eta  = sj_w1.eta()
                 event.httCandidates[i].sjW1phi  = sj_w1.phi()
                 event.httCandidates[i].sjW1mass = sj_w1.mass()
+
+                # Get the correct b-tag
+                for ib in xrange(0, len(sjbtags)) :
+                    if  sj_w1 == sjbtags.key(ib).get():
+                        event.httCandidates[i].sjW1btag = sjbtags.value(ib)
+
 
                 event.httCandidates[i].sjW2pt   = sj_w2.pt()  
                 event.httCandidates[i].sjW2eta  = sj_w2.eta() 
                 event.httCandidates[i].sjW2phi  = sj_w2.phi() 
                 event.httCandidates[i].sjW2mass = sj_w2.mass()
 
+
+                # Get the correct b-tag
+                for ib in xrange(0, len(sjbtags)) :
+                    if  sj_w2 == sjbtags.key(ib).get():
+                        event.httCandidates[i].sjW2btag = sjbtags.value(ib)
+
                 event.httCandidates[i].sjNonWpt   = sj_nonw.pt()  
                 event.httCandidates[i].sjNonWeta  = sj_nonw.eta() 
                 event.httCandidates[i].sjNonWphi  = sj_nonw.phi() 
                 event.httCandidates[i].sjNonWmass = sj_nonw.mass()
 
-    
+                # Get the correct b-tag
+                for ib in xrange(0, len(sjbtags)) :
+                    if  sj_nonw == sjbtags.key(ib).get():
+                        event.httCandidates[i].sjNonWbtag = sjbtags.value(ib)
+
         return True
 
 
