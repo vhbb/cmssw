@@ -89,6 +89,7 @@ process.ak08PFSoftdropJetsCHS = process.ak08PFJetsCHS.clone(
     R0 = cms.double(0.8),
     useExplicitGhosts = cms.bool(True))
 
+
 process.OUT.outputCommands.append("keep *_ak08PFJetsCHS_*_EX")
 process.OUT.outputCommands.append("keep *_ak08PFPrunedJetsCHS_*_EX")
 process.OUT.outputCommands.append("keep *_ak08PFSoftdropJetsCHS_*_EX")
@@ -153,6 +154,9 @@ if not skip_ca15:
         "HTTTopJetProducer",
         PFJetParameters,
         AnomalousCellParameters,
+        jetCollInstanceName=cms.string("SubJets"),
+        useExplicitGhosts = cms.bool(True),
+        writeCompound  = cms.bool(True), 
         optimalR       = cms.bool(True),
         algorithm      = cms.int32(1),
         jetAlgorithm   = cms.string("CambridgeAachen"),
@@ -161,7 +165,6 @@ if not skip_ca15:
         minFatjetPt    = cms.double(200.),
         minCandPt      = cms.double(200.),
         minSubjetPt    = cms.double(30.),
-        writeCompound  = cms.bool(True),
         minCandMass    = cms.double(0.),
         maxCandMass    = cms.double(1000),
         massRatioWidth = cms.double(100.),
@@ -195,7 +198,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc')
 
 for fatjet_name in ["ak08PFJetsCHS", "ca15PFJetsCHS"]:
 
-    if skip_ca15 and fatjet_name == "ca15PFJetsCHS":
+    if skip_ca15 and (fatjet_name in ["ca15PFJetsCHS"]):
         continue
     
     if fatjet_name == "ak08PFJetsCHS":        
@@ -295,15 +298,19 @@ for fatjet_name in ["ak08PFJetsCHS", "ca15PFJetsCHS"]:
 # Subjet b-tagging
 ########################################
 
-for fatjet_name in ["ak08PFPrunedJetsCHS", "ca15PFPrunedJetsCHS"]:
-    
-    if skip_ca15 and fatjet_name == "ca15PFPrunedJetsCHS":
+
+for fatjet_name in ["ak08PFPrunedJetsCHS", "ca15PFPrunedJetsCHS", "looseOptRHTT"]:
+
+    if skip_ca15 and (fatjet_name in ["ca15PFPrunedJetsCHS", "looseOptRHTT"]):
         continue
 
     if fatjet_name == "ak08PFPrunedJetsCHS":        
         delta_r = 0.8
         jetAlgo = "AntiKt"
     elif fatjet_name == "ca15PFPrunedJetsCHS":        
+        delta_r = 1.5
+        jetAlgo = "CambridgeAachen"
+    elif fatjet_name == "looseOptRHTT":
         delta_r = 1.5
         jetAlgo = "CambridgeAachen"
     else:
@@ -343,7 +350,7 @@ for fatjet_name in ["ak08PFPrunedJetsCHS", "ca15PFPrunedJetsCHS"]:
     getattr(process, isv_info_name).trackSelection.jetDeltaRMax = cms.double(delta_r)
     getattr(process, isv_info_name).vertexCuts.maxDeltaRToJetAxis = cms.double(delta_r)
     getattr(process, isv_info_name).jetAlgorithm = cms.string(jetAlgo)
-    getattr(process, isv_info_name).fatJets  =  cms.InputTag(fatjet_name.replace("Pruned",""))
+    getattr(process, isv_info_name).fatJets  =  cms.InputTag(fatjet_name.replace("Pruned","").replace("looseOptRHTT","ca15PFJetsCHS"))
     getattr(process, isv_info_name).groomedFatJets  =  cms.InputTag(fatjet_name)
 
     # CSV V2 COMPUTER
@@ -362,7 +369,6 @@ for fatjet_name in ["ak08PFPrunedJetsCHS", "ca15PFPrunedJetsCHS"]:
 
     # Produce the output
     process.OUT.outputCommands.append("keep *_{0}_*_EX".format(csvv2ivf_name))
-
 
 ########################################
 # Generator level hadronic tau decays
