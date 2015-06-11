@@ -15,15 +15,8 @@ boostana=cfg.Analyzer(
 )
 sequence.insert(sequence.index(VHbb),boostana)
 
-treeProducer.collections["ak08ungroomed"] = NTupleCollection("FatjetAK08ungroomed",  fatjetType,  10,
-                                                             help = "AK, R=0.8, pT > 200 GeV, no grooming")
-
-
-treeProducer.collections["ak08softdrop"] = NTupleCollection("FatjetAK08softdrop",
-                                                            fourVectorType,
-                                                            10,
-                                                            help="AK, R=0.8, pT > 200 GeV, softdrop zcut=0.1, beta=0")
-
+treeProducer.collections["ak08"] = NTupleCollection("FatjetAK08ungroomed",  ak8FatjetType,  10,
+                                                    help = "AK, R=0.8, pT > 200 GeV, no grooming")
 
 treeProducer.collections["ak08pruned"] = NTupleCollection("FatjetAK08pruned",
                                                             fourVectorType,

@@ -44,56 +44,26 @@ from RecoJets.JetProducers.PFJetParameters_cfi import *
 # Select candidates that would pass CHS requirements
 process.chs = cms.EDFilter("CandPtrSelector", src = cms.InputTag("packedPFCandidates"), cut = cms.string("fromPV"))
 
-# AntiKt, R=0.8, pT > 200 GeV
-process.ak08PFJetsCHS = cms.EDProducer(
-        "FastjetJetProducer",
-        PFJetParameters,
-        AnomalousCellParameters,
-        jetAlgorithm = cms.string("AntiKt"),
-        rParam       = cms.double(0.8))
-process.ak08PFJetsCHS.src = cms.InputTag("chs")
-process.ak08PFJetsCHS.jetPtMin = cms.double(200.)
-
-# Calculate tau1, tau2 and tau3 for ungroomed AK R=0.8 jets
-process.ak08PFJetsCHSNSubjettiness  = cms.EDProducer("NjettinessAdder",
-                                                     src=cms.InputTag("ak08PFJetsCHS"),
-                                                     cone=cms.double(0.8),
-                                                     Njets = cms.vuint32(1,2,3),
-                                                     # variables for measure definition : 
-                                                     measureDefinition = cms.uint32( 0 ), # CMS default is normalized measure
-                                                     beta = cms.double(1.0),              # CMS default is 1
-                                                     R0 = cms.double(0.8),                # CMS default is jet cone size
-                                                     Rcutoff = cms.double( -999.0),       # not used by default
-                                                     # variables for axes definition :
-                                                     axesDefinition = cms.uint32( 6 ),    # CMS default is 1-pass KT axes
-                                                     nPass = cms.int32(-999),             # not used by default
-                                                     akAxesR0 = cms.double(-999.0)        # not used by default
-)
-
 # Apply pruning to AK R=0.8 jets
-process.ak08PFPrunedJetsCHS = process.ak08PFJetsCHS.clone(
+process.ak08PFPrunedJetsCHS = cms.EDProducer(
+    "FastjetJetProducer",
+    PFJetParameters,
+    AnomalousCellParameters,
+    jetAlgorithm = cms.string("AntiKt"),
+    rParam       = cms.double(0.8),
     usePruning = cms.bool(True),
     nFilt = cms.int32(2),
     zcut = cms.double(0.1),
     rcut_factor = cms.double(0.5),
     useExplicitGhosts = cms.bool(True),
     writeCompound = cms.bool(True), # Also write subjets for pruned fj
-    jetCollInstanceName=cms.string("SubJets",)
+    jetCollInstanceName=cms.string("SubJets")
 )
+process.ak08PFPrunedJetsCHS.src = cms.InputTag("chs")
+process.ak08PFPrunedJetsCHS.jetPtMin = cms.double(200.)
 
-# Apply softdrop to AK R=0.8 jets
-process.ak08PFSoftdropJetsCHS = process.ak08PFJetsCHS.clone(
-    useSoftDrop = cms.bool(True),
-    zcut = cms.double(0.1),
-    beta = cms.double(0.0),
-    R0 = cms.double(0.8),
-    useExplicitGhosts = cms.bool(True))
-
-
-process.OUT.outputCommands.append("keep *_ak08PFJetsCHS_*_EX")
+process.OUT.outputCommands.append("keep *_slimmedJetsAK8_*_PAT")
 process.OUT.outputCommands.append("keep *_ak08PFPrunedJetsCHS_*_EX")
-process.OUT.outputCommands.append("keep *_ak08PFSoftdropJetsCHS_*_EX")
-process.OUT.outputCommands.append("keep *_ak08PFJetsCHSNSubjettiness_*_EX")
 
 
 if not skip_ca15:
@@ -196,12 +166,12 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc')
 
-for fatjet_name in ["ak08PFJetsCHS", "ca15PFJetsCHS"]:
+for fatjet_name in ["slimmedJetsAK8", "ca15PFJetsCHS"]:
 
     if skip_ca15 and (fatjet_name in ["ca15PFJetsCHS"]):
         continue
     
-    if fatjet_name == "ak08PFJetsCHS":        
+    if fatjet_name == "slimmedJetsAK8":        
         delta_r = 0.8
         maxSVDeltaRToJet = 0.7
         weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BoostedDoubleSV_AK8_BDT.weights.xml.gz')
@@ -350,7 +320,7 @@ for fatjet_name in ["ak08PFPrunedJetsCHS", "ca15PFPrunedJetsCHS", "looseOptRHTT"
     getattr(process, isv_info_name).trackSelection.jetDeltaRMax = cms.double(delta_r)
     getattr(process, isv_info_name).vertexCuts.maxDeltaRToJetAxis = cms.double(delta_r)
     getattr(process, isv_info_name).jetAlgorithm = cms.string(jetAlgo)
-    getattr(process, isv_info_name).fatJets  =  cms.InputTag(fatjet_name.replace("Pruned","").replace("looseOptRHTT","ca15PFJetsCHS"))
+    getattr(process, isv_info_name).fatJets  =  cms.InputTag(fatjet_name.replace("ak08PFPrunedJetsCHS","slimmedJetsAK8").replace("looseOptRHTT","ca15PFJetsCHS"))
     getattr(process, isv_info_name).groomedFatJets  =  cms.InputTag(fatjet_name)
 
     # CSV V2 COMPUTER
