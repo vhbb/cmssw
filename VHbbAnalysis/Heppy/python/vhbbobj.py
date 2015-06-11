@@ -103,6 +103,7 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("axis2",   lambda x : getattr(x,'axis2', 0) , float, mcOnly=False,help="QG input variable: axis2"),
     NTupleVariable("mult",   lambda x : getattr(x,'mult', 0) , int, mcOnly=False,help="QG input variable: total multiplicity"),
  ])
+
  
 ##------------------------------------------  
 ## FAT JET
@@ -114,6 +115,26 @@ fatjetType = NTupleObjectType("fatjet",  baseObjectTypes = [ fourVectorType ], v
     NTupleVariable("tau1",  lambda x : x.tau1, help="Nsubjettiness (1 axis)"),
     NTupleVariable("tau2",  lambda x : x.tau2, help="Nsubjettiness (2 axes)"),
     NTupleVariable("tau3",  lambda x : x.tau3, help="Nsubjettiness (3 axes)"),
+    NTupleVariable("bbtag",  lambda x : x.bbtag, help="Hbb b-tag score"),
+    ])
+
+
+##------------------------------------------  
+## Extended FAT JET
+##------------------------------------------  
+
+# Four Vector + Nsubjettiness + masses + Hbb-Tag
+
+ak8FatjetType = NTupleObjectType("ak8fatjet",  baseObjectTypes = [ fourVectorType ], variables = [
+    NTupleVariable("tau1",  lambda x : x.userFloat("NjettinessAK8:tau1"), help="Nsubjettiness (1 axis)"),
+    NTupleVariable("tau2",  lambda x : x.userFloat("NjettinessAK8:tau2"), help="Nsubjettiness (2 axes)"),
+    NTupleVariable("tau3",  lambda x : x.userFloat("NjettinessAK8:tau3"), help="Nsubjettiness (3 axes)"),
+
+    NTupleVariable("msoftdrop",  lambda x : x.userFloat("ak8PFJetsCHSSoftDropMass"),  help="Softdrop Mass"),
+    NTupleVariable("mpruned",    lambda x : x.userFloat("ak8PFJetsCHSPrunedMass"),    help="Pruned Mass"),
+    NTupleVariable("mtrimmed",   lambda x : x.userFloat("ak8PFJetsCHSTrimmedMass"),   help="Trimmed Mass"),
+    NTupleVariable("mfiltered",  lambda x : x.userFloat("ak8PFJetsCHSFilteredMass"),  help="Filtered Mass"),
+
     NTupleVariable("bbtag",  lambda x : x.bbtag, help="Hbb b-tag score"),
     ])
 

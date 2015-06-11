@@ -14,16 +14,12 @@ class AdditionalBoost( Analyzer ):
     def declareHandles(self):
         super(AdditionalBoost, self).declareHandles()
         
-        self.handles['ak08ungroomed']     = AutoHandle( ("ak08PFJetsCHS","","EX"), "std::vector<reco::PFJet>")
-        self.handles['ak08softdrop']      = AutoHandle( ("ak08PFSoftdropJetsCHS","","EX"), "std::vector<reco::PFJet>")
+        self.handles['ak08']     = AutoHandle( ("slimmedJetsAK8","","PAT"), "std::vector<pat::Jet>")
+
         self.handles['ak08pruned']        = AutoHandle( ("ak08PFPrunedJetsCHS","","EX"), "std::vector<reco::BasicJet>")
         self.handles['ak08prunedsubjets'] = AutoHandle( ("ak08PFPrunedJetsCHS","SubJets","EX"), "std::vector<reco::PFJet>")
 
-        self.handles['ak08tau1'] = AutoHandle( ("ak08PFJetsCHSNSubjettiness","tau1","EX"), "edm::ValueMap<float>")
-        self.handles['ak08tau2'] = AutoHandle( ("ak08PFJetsCHSNSubjettiness","tau2","EX"), "edm::ValueMap<float>")
-        self.handles['ak08tau3'] = AutoHandle( ("ak08PFJetsCHSNSubjettiness","tau3","EX"), "edm::ValueMap<float>")
-
-        self.handles['ak08bbtag'] = AutoHandle( ("ak08PFJetsCHSpfBoostedDoubleSecondaryVertexBJetTags","","EX"), 
+        self.handles['ak08bbtag'] = AutoHandle( ("slimmedJetsAK8pfBoostedDoubleSecondaryVertexBJetTags","","EX"), 
                                                 "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
 
         self.handles['ak08prunedsubjetbtag'] = AutoHandle( ("ak08PFPrunedJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags","","EX"), 
@@ -59,10 +55,27 @@ class AdditionalBoost( Analyzer ):
         self.readCollections( event.input )
 
         ######## 
+        # AK8 Jets from MiniAOD + Subjet btags
+        ########
+
+        # Add the bb tag as an additional property to the ak08 jets                    
+        enhanced_jets = []
+        newtags =  self.handles['ak08bbtag'].product()
+        for i in xrange(0,len(newtags)) :
+            for j in self.handles['ak08'].product():
+                if  j == newtags.key(i).get():
+                    j.bbtag = newtags.value(i)
+                    enhanced_jets.append(j)
+
+        # No the object has all the properties we need to create an ak8FatjetType 
+        setattr(event, "ak08", map(PhysicsObject, enhanced_jets))
+
+
+        ######## 
         # Ungroomed Fatjets + NSubjettiness
         ########
 
-        for prefix in ["ak08", "ca15"]:
+        for prefix in ["ca15"]:
 
             if AdditionalBoost.skip_ca15 and ("ca15" in prefix):
                 continue
@@ -92,7 +105,7 @@ class AdditionalBoost( Analyzer ):
         # Groomed Fatjets
         ########
 
-        for fj_name in ['ak08softdrop', 'ak08pruned', 'ca15trimmed', 'ca15softdrop', 'ca15pruned']:
+        for fj_name in ['ak08pruned', 'ca15trimmed', 'ca15softdrop', 'ca15pruned']:
             
             if AdditionalBoost.skip_ca15 and ("ca15" in fj_name):
                 continue
