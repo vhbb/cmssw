@@ -23,8 +23,8 @@ process.OUT = cms.OutputModule("PoolOutputModule",
 )
 process.endpath= cms.EndPath(process.OUT)
 
-# Let CMSSW take care of scheduling 
-process.options = cms.untracked.PSet(     
+# Let CMSSW take care of scheduling
+process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(True),
     allowUnscheduled = cms.untracked.bool(True)
 )
@@ -33,7 +33,7 @@ process.options = cms.untracked.PSet(
 # ########################################
 # # B-Tagging
 # ########################################
-# 
+#
 # # As tracks are not stored in miniAOD, and b-tag fwk for CMSSW < 72X does not accept candidates
 # # we need to recreate tracks and pv for btagging in standard reco format:
 # process.load('RecoBTag.Configuration.RecoBTag_cff')
@@ -42,22 +42,22 @@ process.options = cms.untracked.PSet(
 # process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 # process.load('Configuration.StandardSequences.Geometry_cff')
 # process.load('Configuration.StandardSequences.MagneticField_38T_cff')
-# 
+#
 # #process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
 # process.GlobalTag.globaltag = 'PLS170_V7AN1::All'
-# 
+#
 # process.ak4JetTracksAssociatorAtVertexPF.jets = cms.InputTag("slimmedJets")
 # process.ak4JetTracksAssociatorAtVertexPF.tracks = cms.InputTag("unpackedTracksAndVertices")
 # process.impactParameterTagInfos.primaryVertex = cms.InputTag("unpackedTracksAndVertices")
 # process.inclusiveSecondaryVertexFinderTagInfos.extSVCollection = cms.InputTag("unpackedTracksAndVertices","secondary","")
 # process.combinedSecondaryVertex.trackMultiplicityMin = 1
-# 
+#
 # process.combinedSecondaryVertexV2.calibrationRecords = cms.vstring(
 # 'CombinedSVV2MVA_RecoVertex',
 # 'CombinedSVV2MVA_PseudoVertex',
 # 'CombinedSVV2MVA_NoVertex'
 # )
-# 
+#
 # process.load("Configuration.StandardSequences.MagneticField_cff")
 # process.load("CondCore.DBCommon.CondDBSetup_cfi")
 # process.BTauMVAJetTagComputerRecord = cms.ESSource("PoolDBESSource",
@@ -71,7 +71,7 @@ process.options = cms.untracked.PSet(
 # BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService')
 # )
 # process.es_prefer_BTauMVAJetTagComputerRecord = cms.ESPrefer("PoolDBESSource","BTauMVAJetTagComputerRecord")
-# 
+#
 # process.OUT.outputCommands.append("keep *_combinedInclusiveSecondaryVertexV2BJetTags_*_EX")
 # process.OUT.outputCommands.append("keep *_combinedSecondaryVertexBJetTags_*_EX")
 
@@ -125,7 +125,7 @@ process.ca15PFJetsCHSNSubjettiness  = cms.EDProducer("NjettinessAdder",
                                                      src=cms.InputTag("ca15PFJetsCHS"),
                                                      cone=cms.double(1.5),
                                                      Njets = cms.vuint32(1,2,3),
-                                                     # variables for measure definition : 
+                                                     # variables for measure definition :
                                                      measureDefinition = cms.uint32( 0 ), # CMS default is normalized measure
                                                      beta = cms.double(1.0),              # CMS default is 1
                                                      R0 = cms.double(1.5),                # CMS default is jet cone size
@@ -143,6 +143,62 @@ process.ca15PFTrimmedJetsCHS = process.ca15PFJetsCHS.clone(
     rFilt = cms.double(0.2),
     trimPtFracMin = cms.double(0.06),
     useExplicitGhosts = cms.bool(True))
+
+###
+### GenHFHadronMatcher
+###
+process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+
+genParticleCollection = 'prunedGenParticles'
+genJetInputParticleCollection = 'packedGenParticles'
+
+from RecoJets.JetProducers.ak4GenJets_cfi import ak4GenJets
+process.ak4GenJetsCustom = ak4GenJets.clone(
+    src = genJetInputParticleCollection,
+    rParam = cms.double(0.4),
+    jetAlgorithm = cms.string("AntiKt")
+)
+genJetCollection = "ak4GenJetsCustom"
+
+# Ghost particle collection used for Hadron-Jet association
+# MUST use proper input particle collection
+from PhysicsTools.JetMCAlgos.HadronAndPartonSelector_cfi import selectedHadronsAndPartons
+process.selectedHadronsAndPartons = selectedHadronsAndPartons.clone(
+    particles = genParticleCollection
+)
+
+# Input particle collection for matching to gen jets (partons + leptons)
+# MUST use use proper input jet collection: the jets to which hadrons should be associated
+# rParam and jetAlgorithm MUST match those used for jets to be associated with hadrons
+# More details on the tool: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#New_jet_flavour_definition
+from PhysicsTools.JetMCAlgos.sequences.GenHFHadronMatching_cff import genJetFlavourPlusLeptonInfos
+process.genJetFlavourPlusLeptonInfos = genJetFlavourPlusLeptonInfos.clone(
+    jets = genJetCollection,
+    rParam = cms.double(0.4),
+    jetAlgorithm = cms.string("AntiKt")
+)
+
+
+# Plugin for analysing B hadrons
+# MUST use the same particle collection as in selectedHadronsAndPartons
+from PhysicsTools.JetMCAlgos.sequences.GenHFHadronMatching_cff import matchGenBHadron
+process.matchGenBHadron = matchGenBHadron.clone(
+    genParticles = genParticleCollection
+)
+
+# Plugin for analysing C hadrons
+# MUST use the same particle collection as in selectedHadronsAndPartons
+from PhysicsTools.JetMCAlgos.sequences.GenHFHadronMatching_cff import matchGenCHadron
+process.matchGenCHadron = matchGenCHadron.clone(
+    genParticles = genParticleCollection
+)
+
+
+process.OUT.outputCommands.append("keep *_matchGenBHadron__EX")
+process.OUT.outputCommands.append("keep *_matchGenCHadron__EX")
+process.OUT.outputCommands.append("keep *_matchGenBHadron_*_EX")
+process.OUT.outputCommands.append("keep *_matchGenCHadron_*_EX")
+process.OUT.outputCommands.append("keep *_ak4GenJetsCustom_*_EX")
 
 process.OUT.outputCommands.append("keep *_ca15PFJetsCHS_*_EX")
 process.OUT.outputCommands.append("keep *_ca15PFJetsCHSNSubjettiness_*_EX")

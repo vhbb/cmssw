@@ -5,6 +5,7 @@ from PhysicsTools.Heppy.utils.cmsswPreprocessor import CmsswPreprocessor
 from vhbb import *
 # from VHbbAnalysis.Heppy.AdditionalBTag import AdditionalBTag
 from VHbbAnalysis.Heppy.AdditionalBoost import AdditionalBoost
+from VHbbAnalysis.Heppy.GenHFHadronMatcher import GenHFHadronMatcher
 
 
 # Add Boosted Information
@@ -15,8 +16,15 @@ boostana=cfg.Analyzer(
 )
 sequence.insert(sequence.index(VHbb),boostana)
 
-treeProducer.collections["ungroomedFatjets"] = NTupleCollection("ungroomedFatjets", 
-                                                                fatjetType, 
+genhfana=cfg.Analyzer(
+    verbose=False,
+    class_object=GenHFHadronMatcher,
+)
+sequence.insert(sequence.index(VHbb),genhfana)
+
+
+treeProducer.collections["ungroomedFatjets"] = NTupleCollection("ungroomedFatjets",
+                                                                fatjetType,
                                                                 10,
                                                                 help = "CA, R=1.5, pT > 200 GeV, no grooming")
 
@@ -31,7 +39,7 @@ treeProducer.collections["httCandidates"] = NTupleCollection("httCandidates",
                                                              help="OptimalR HEPTopTagger Candidates")
 
 # # Add b-Tagging Information
-# 
+#
 # btagana=cfg.Analyzer(
 #     verbose=False,
 #     class_object=AdditionalBTag,
@@ -54,7 +62,7 @@ treeProducer.collections["tauGenJets"] = NTupleCollection("GenHadTaus", genTauJe
 preprocessor = CmsswPreprocessor("combined_cmssw.py")
 config.preprocessor=preprocessor
 if __name__ == '__main__':
-    from PhysicsTools.HeppyCore.framework.looper import Looper 
+    from PhysicsTools.HeppyCore.framework.looper import Looper
     looper = Looper( 'Loop', config, nPrint = 1, nEvents = 1000)
     import time
     import cProfile

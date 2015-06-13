@@ -9,7 +9,7 @@ from DataFormats.FWLite import *
 import PhysicsTools.HeppyCore.framework.config as cfg
 from VHbbAnalysis.Heppy.vhbbobj import *
 from PhysicsTools.HeppyCore.utils.deltar import deltaPhi
-from PhysicsTools.Heppy.analyzers.core.AutoFillTreeProducer  import * 
+from PhysicsTools.Heppy.analyzers.core.AutoFillTreeProducer  import *
 
 import logging
 logging.basicConfig(level=logging.ERROR)
@@ -18,9 +18,9 @@ logging.basicConfig(level=logging.ERROR)
 cfg.Analyzer.nosubdir = True
 
 treeProducer= cfg.Analyzer(
-	class_object=AutoFillTreeProducer, 
+	class_object=AutoFillTreeProducer,
 	defaultFloatType = "F",
-	verbose=False, 
+	verbose=False,
 	vectorTree = True,
         globalVariables	= [
                  NTupleVariable("nPU0", lambda ev : [bx.nPU() for bx in  ev.pileUpInfo if bx.getBunchCrossing()==0][0], help="nPU in BX=0"),
@@ -40,8 +40,9 @@ treeProducer= cfg.Analyzer(
                  NTupleVariable("lheNl",  lambda ev: ev.lheNl, float,mcOnly=True, help="number of light(uds) jets at LHE level"),
 		 NTupleVariable("lheV_pt",  lambda ev: ev.lheV_pt, float,mcOnly=True, help="Vector pT at LHE level"),
                  NTupleVariable("lheHT",  lambda ev: ev.lheHT, float,mcOnly=True, help="HT at LHE level"),
-                 NTupleVariable("genTTHtoTauTauDecayMode", lambda ev: ev.genTTHtoTauTauDecayMode, int,mcOnly=True, help="gen level ttH, H -> tautau decay mode"),        
+                 NTupleVariable("genTTHtoTauTauDecayMode", lambda ev: ev.genTTHtoTauTauDecayMode, int,mcOnly=True, help="gen level ttH, H -> tautau decay mode"),
                  NTupleVariable("totSoftActivityJets", lambda ev: len([ x for x in ev.softActivityJets if x.pt()> 2 ] ), int, help="number of jets from soft activity with pt>2Gev"),
+                 NTupleVariable("ttCls",  lambda ev: getattr(ev, "ttbarCls", -1), float,mcOnly=True, help="ttbar classification via GeNHFHadronMatcher"),
 	],
 	globalObjects = {
           "met"    : NTupleObject("met",     metType, help="PF E_{T}^{miss}, after default type 1 corrections"),
@@ -76,7 +77,8 @@ treeProducer= cfg.Analyzer(
                 "goodVertices"    : NTupleCollection("primaryVertices", primaryVertexType, 4, help="first four PVs"),
 
 		#dump of gen objects
-                "genJets"    : NTupleCollection("GenJet",   genParticleType, 15, help="Generated top quarks from hard scattering",filter=lambda x: x.pt() > 20,mcOnly=True),
+                "genJetsHadronMatcher"    : NTupleCollection("GenJet",   genJetType, 15, help="Generated jets with hadron matching, sorted by pt descending",filter=lambda x: x.pt() > 20,mcOnly=True),
+                #"genJets"    : NTupleCollection("GenJet",   genParticleType, 15, help="Generated jets with hadron matching, sorted by pt descending",filter=lambda x: x.pt() > 20,mcOnly=True),
                 "gentopquarks"    : NTupleCollection("GenTop",     genParticleType, 4, help="Generated top quarks from hard scattering"),
                 "gennusFromTop"    : NTupleCollection("GenNuFromTop",     genParticleType, 4, help="Generated neutrino from t->W decay"),
                 "genbquarksFromH"      : NTupleCollection("GenBQuarkFromH",  genParticleType, 4, help="Generated bottom quarks from Higgs decays"),
@@ -90,7 +92,7 @@ treeProducer= cfg.Analyzer(
 		#"genZbosonsToLL"  : NTupleCollection("GenZbosonsToLL", genParticleType, 6, help="Generated W or Z bosons decaying to LL"),
 		#"genWbosonsToLL"  : NTupleCollection("GenWbosonsToLL", genParticleType, 6, help="Generated W or Z bosons decaying to LL"),
 		"genvbosons"       : NTupleCollection("GenVbosons", genParticleType, 6, help="Generated W or Z bosons, mass > 30"),
-              
+
 	}
 	)
 
@@ -100,6 +102,26 @@ shifted_met_keys = ["met_shifted_{0}".format(n) for n in range(12)] #we do not n
 shifted_met_names = ["met_shifted_%s"%metNames[n] for n in range(12)] #we do not need noShift I gueess
 shifted_mets = {mk: NTupleObject(nm, shiftedMetType, help="PF E_{T}^{miss}, after default type 1 corrections, shifted with %s" %mk) for mk,nm in zip(shifted_met_keys,shifted_met_names)}
 treeProducer.globalObjects.update(shifted_mets)
+
+#Set up b-tag re-weighting
+from PhysicsTools.Heppy.physicsutils.BTagWeightCalculator import BTagWeightCalculator
+bweightcalc = BTagWeightCalculator("csv/csv_rwt_hf_IT_FlatSF.root", "csv/csv_rwt_lf_IT_FlatSF.root")
+btag_weights = {}
+for syst in ["JES", "LF", "HF", "Stats1", "Stats2"]:
+	for sdir in ["Up", "Down"]:
+		name = "bTagWeight"+syst+sdir
+		btag_weights[name] = NTupleVariable("bTagWeight_" + syst + sdir,
+			lambda ev, sname=syst+sdir: bweightcalc.calcEventWeight(
+				ev.cleanJetsAll, kind="final", systematic=sname
+			), float, mcOnly=True, help="b-tag CSV weight, variating "+syst+" "+sdir
+		)
+btag_weights["bTagWeight"] = NTupleVariable("bTagWeight",
+	lambda ev: bweightcalc.calcEventWeight(
+		ev.cleanJetsAll, kind="final", systematic="nominal"
+	), float ,mcOnly=True, help="b-tag CSV weight, nominal"
+)
+#print list(btag_weights.values())
+treeProducer.globalVariables += list(btag_weights.values())
 
 # Lepton Analyzer, take its default config
 from PhysicsTools.Heppy.analyzers.objects.LeptonAnalyzer import LeptonAnalyzer
@@ -129,10 +151,10 @@ TauAna.inclusive_tauLooseID = "decayModeFindingNewDMs"
 from PhysicsTools.Heppy.analyzers.objects.JetAnalyzer import JetAnalyzer
 JetAna = JetAnalyzer.defaultConfig
 
-from PhysicsTools.Heppy.analyzers.gen.LHEAnalyzer import LHEAnalyzer 
+from PhysicsTools.Heppy.analyzers.gen.LHEAnalyzer import LHEAnalyzer
 LHEAna = LHEAnalyzer.defaultConfig
 
-from PhysicsTools.Heppy.analyzers.gen.GeneratorAnalyzer import GeneratorAnalyzer 
+from PhysicsTools.Heppy.analyzers.gen.GeneratorAnalyzer import GeneratorAnalyzer
 GenAna = GeneratorAnalyzer.defaultConfig
 from VHbbAnalysis.Heppy.VHGeneratorAnalyzer import GeneratorAnalyzer as  VHGeneratorAnalyzer
 VHGenAna = VHGeneratorAnalyzer.defaultConfig
@@ -184,12 +206,12 @@ from VHbbAnalysis.Heppy.TriggerTable import triggerTable
 TrigAna = cfg.Analyzer(
     verbose = False,
     class_object = TriggerBitAnalyzer,
-    triggerBits = triggerTable, 
+    triggerBits = triggerTable,
 #   processName = 'HLT',
 #   outprefix = 'HLT'
    )
 
-from PhysicsTools.HeppyCore.framework.services.tfile import TFileService 
+from PhysicsTools.HeppyCore.framework.services.tfile import TFileService
 output_service = cfg.Service(
       TFileService,
       'outputfile',
@@ -242,7 +264,7 @@ sample.isMC=True
 selectedComponents = [sample]
 from PhysicsTools.HeppyCore.framework.eventsfwlite import Events
 config = cfg.Config( components = selectedComponents,
-                     sequence = sequence, 
+                     sequence = sequence,
 		     services = [output_service],
                      events_class = Events)
 
@@ -250,9 +272,9 @@ class TestFilter(logging.Filter):
     def filter(self, record):
         print record
 
-# and the following runs the process directly 
+# and the following runs the process directly
 if __name__ == '__main__':
-    from PhysicsTools.HeppyCore.framework.looper import Looper 
+    from PhysicsTools.HeppyCore.framework.looper import Looper
     looper = Looper( 'Loop', config, nPrint = 1, nEvents = 1000)
 
     import time

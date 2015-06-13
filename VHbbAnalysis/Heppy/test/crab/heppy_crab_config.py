@@ -20,9 +20,12 @@ config.JobType.inputFiles = ['heppy_config.py',
                              '../vhbb.py',
                              'TMVAClassification_BDT.weights.xml',
                              'pdfQG_AK4chs_antib_13TeV_v1.root',
-                             '../jec/PHYS14_V4_MC_L1FastJet_AK4PFchs.txt',  
-                             '../jec/PHYS14_V4_MC_L2Relative_AK4PFchs.txt',  
+                             '../jec/PHYS14_V4_MC_L1FastJet_AK4PFchs.txt',
+                             '../jec/PHYS14_V4_MC_L2Relative_AK4PFchs.txt',
                              '../jec/PHYS14_V4_MC_L3Absolute_AK4PFchs.txt',
+                             '../jec/Uncertainty_FAKE.txt',
+                             '../csv/csv_rwt_hf_IT_FlatSF.root',
+                             '../csv/csv_rwt_lf_IT_FlatSF.root',
 ]
 #config.JobType.outputFiles = ['tree.root']
 
