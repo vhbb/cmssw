@@ -23,8 +23,8 @@ process.OUT = cms.OutputModule("PoolOutputModule",
 )
 process.endpath= cms.EndPath(process.OUT)
 
-# Let CMSSW take care of scheduling
-process.options = cms.untracked.PSet(
+# Let CMSSW take care of scheduling 
+process.options = cms.untracked.PSet(     
     wantSummary = cms.untracked.bool(True),
     allowUnscheduled = cms.untracked.bool(True)
 )
@@ -33,7 +33,7 @@ process.options = cms.untracked.PSet(
 # ########################################
 # # B-Tagging
 # ########################################
-#
+# 
 # # As tracks are not stored in miniAOD, and b-tag fwk for CMSSW < 72X does not accept candidates
 # # we need to recreate tracks and pv for btagging in standard reco format:
 # process.load('RecoBTag.Configuration.RecoBTag_cff')
@@ -42,22 +42,22 @@ process.options = cms.untracked.PSet(
 # process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 # process.load('Configuration.StandardSequences.Geometry_cff')
 # process.load('Configuration.StandardSequences.MagneticField_38T_cff')
-#
+# 
 # #process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
 # process.GlobalTag.globaltag = 'PLS170_V7AN1::All'
-#
+# 
 # process.ak4JetTracksAssociatorAtVertexPF.jets = cms.InputTag("slimmedJets")
 # process.ak4JetTracksAssociatorAtVertexPF.tracks = cms.InputTag("unpackedTracksAndVertices")
 # process.impactParameterTagInfos.primaryVertex = cms.InputTag("unpackedTracksAndVertices")
 # process.inclusiveSecondaryVertexFinderTagInfos.extSVCollection = cms.InputTag("unpackedTracksAndVertices","secondary","")
 # process.combinedSecondaryVertex.trackMultiplicityMin = 1
-#
+# 
 # process.combinedSecondaryVertexV2.calibrationRecords = cms.vstring(
 # 'CombinedSVV2MVA_RecoVertex',
 # 'CombinedSVV2MVA_PseudoVertex',
 # 'CombinedSVV2MVA_NoVertex'
 # )
-#
+# 
 # process.load("Configuration.StandardSequences.MagneticField_cff")
 # process.load("CondCore.DBCommon.CondDBSetup_cfi")
 # process.BTauMVAJetTagComputerRecord = cms.ESSource("PoolDBESSource",
@@ -71,7 +71,7 @@ process.options = cms.untracked.PSet(
 # BlobStreamerName = cms.untracked.string('TBufferBlobStreamingService')
 # )
 # process.es_prefer_BTauMVAJetTagComputerRecord = cms.ESPrefer("PoolDBESSource","BTauMVAJetTagComputerRecord")
-#
+# 
 # process.OUT.outputCommands.append("keep *_combinedInclusiveSecondaryVertexV2BJetTags_*_EX")
 # process.OUT.outputCommands.append("keep *_combinedSecondaryVertexBJetTags_*_EX")
 
@@ -125,7 +125,7 @@ process.ca15PFJetsCHSNSubjettiness  = cms.EDProducer("NjettinessAdder",
                                                      src=cms.InputTag("ca15PFJetsCHS"),
                                                      cone=cms.double(1.5),
                                                      Njets = cms.vuint32(1,2,3),
-                                                     # variables for measure definition :
+                                                     # variables for measure definition : 
                                                      measureDefinition = cms.uint32( 0 ), # CMS default is normalized measure
                                                      beta = cms.double(1.0),              # CMS default is 1
                                                      R0 = cms.double(1.5),                # CMS default is jet cone size
