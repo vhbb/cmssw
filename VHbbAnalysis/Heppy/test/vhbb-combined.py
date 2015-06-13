@@ -5,6 +5,7 @@ from PhysicsTools.Heppy.utils.cmsswPreprocessor import CmsswPreprocessor
 from vhbb import *
 # from VHbbAnalysis.Heppy.AdditionalBTag import AdditionalBTag
 from VHbbAnalysis.Heppy.AdditionalBoost import AdditionalBoost
+from VHbbAnalysis.Heppy.GenHFHadronMatcher import GenHFHadronMatcher
 
 
 # Add Boosted Information
@@ -59,7 +60,7 @@ if not AdditionalBoost.skip_ca15:
 
 
 # # Add b-Tagging Information
-# 
+#
 # btagana=cfg.Analyzer(
 #     verbose=False,
 #     class_object=AdditionalBTag,
@@ -82,7 +83,7 @@ treeProducer.collections["tauGenJets"] = NTupleCollection("GenHadTaus", genTauJe
 preprocessor = CmsswPreprocessor("combined_cmssw.py")
 config.preprocessor=preprocessor
 if __name__ == '__main__':
-    from PhysicsTools.HeppyCore.framework.looper import Looper 
+    from PhysicsTools.HeppyCore.framework.looper import Looper
     looper = Looper( 'Loop', config, nPrint = 1, nEvents = 1000)
     import time
     import cProfile

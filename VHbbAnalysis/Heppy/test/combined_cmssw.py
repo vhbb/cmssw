@@ -25,8 +25,8 @@ process.OUT = cms.OutputModule("PoolOutputModule",
 )
 process.endpath= cms.EndPath(process.OUT)
 
-# Let CMSSW take care of scheduling 
-process.options = cms.untracked.PSet(     
+# Let CMSSW take care of scheduling
+process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(True),
     allowUnscheduled = cms.untracked.bool(True)
 )
