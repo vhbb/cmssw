@@ -20,10 +20,6 @@ def Boost(self,boost):
    self.Z() + gamma2*bp*bz + gamma*bz*self.T(),
    (gamma*(self.T() + bp)))
    return self
-def ptRel(p4,axis):
-    a=ROOT.TVector3(axis.Vect().X(),axis.Vect().Y(),axis.Vect().Z())
-    o=ROOT.TLorentzVector(p4.Px(),p4.Py(),p4.Pz(),p4.E())
-    return o.Perp(a)
 class VHbbAnalyzer( Analyzer ):
     '''Analyze VH events
     '''
