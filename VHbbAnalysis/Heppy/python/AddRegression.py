@@ -1,4 +1,5 @@
 from PhysicsTools.Heppy.analyzers.core.Analyzer import Analyzer
+from VHbbAnalysis.Heppy.vhbbobj import ptRel
 from math import *
 import ROOT
 import array
