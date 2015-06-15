@@ -97,10 +97,16 @@ class GenHFHadronMatcher( Analyzer ):
                     d[sel]["afterTop"] = 0
                 setattr(gj, fl+"HadMatch", d)
 
+        #get b-hadrons not coming from W, save the ones that are before the top
         for had in bhads:
             if had.jetIndex < 0:
                 continue
+
+            #rare b from W
+            if abs(had.flavour) == 24:
+                continue
             isTop = abs(had.flavour) == 6
+
             had.genJet = genJets[had.jetIndex]
 
             if isTop:
@@ -117,6 +123,7 @@ class GenHFHadronMatcher( Analyzer ):
                 else:
                     had.genJet.bHadMatch["pteta"]["beforeTop"] += 1
 
+        #get c-hadrons not coming from W
         for had in chads:
             if had.bHadronIdx >= 0:
                 continue
@@ -130,6 +137,7 @@ class GenHFHadronMatcher( Analyzer ):
                 continue
             had.genJet.cHadMatch["pteta"]["beforeTop"] += 1
 
+        #save gen jets that contain an interesting b/c hadron
         bBeforeTop = []
         bAfterTop = []
         cBeforeTop = []
@@ -148,9 +156,12 @@ class GenHFHadronMatcher( Analyzer ):
                 cBeforeTop += [gj]
 
 
+        #get the number of b/c hadrons per jets
         nh = [gj.bHadMatch["pteta"]["beforeTop"] for gj in bBeforeTop]
+        nhc = [gj.cHadMatch["pteta"]["beforeTop"] for gj in cBeforeTop]
+
         cls = -1
-        if len(bBeforeTop) == 2:
+        if len(bBeforeTop) >= 2:
             if max(nh) == 1:
                 cls = 53 #two b-jets with one b hadron each
             elif min(nh)==1 and max(nh)>1:
@@ -163,24 +174,20 @@ class GenHFHadronMatcher( Analyzer ):
             else:
                 cls = 52 #one b jet with two b hadrons
         elif len(bBeforeTop) == 0:
-            nhc = [gj.cHadMatch["pteta"]["beforeTop"] for gj in cBeforeTop]
-            if len(bAfterTop) > 0:
-                cls = 56
-            else:
-                if len(cBeforeTop) == 1:
-                    if max(nhc) == 1:
-                        cls = 41 #1 c jet, 1 c hadron
-                    else:
-                        cls = 42 #1 c jet, 2 c hadrons
-                elif len(cBeforeTop) > 1:
-                    if max(nhc) == 1:
-                        cls = 43 #2 c jets, 1 c hadron
-                    elif min(nhc)==1 and max(nhc)>1:
-                        cls = 44 #2 c jets, one with one and the other with two c hadrons
-                    elif min(nhc)>1:
-                        cls = 45 #2 c jets, 2 c hadrons
+            if len(cBeforeTop) == 1:
+                if max(nhc) == 1:
+                    cls = 41 #1 c jet, 1 c hadron
                 else:
-                    cls = 0
+                    cls = 42 #1 c jet, 2 c hadrons
+            elif len(cBeforeTop) > 1:
+                if max(nhc) == 1:
+                    cls = 43 #2 c jets, 1 c hadron
+                elif min(nhc)==1 and max(nhc)>1:
+                    cls = 44 #2 c jets, one with one and the other with two c hadrons
+                elif min(nhc)>1:
+                    cls = 45 #2 c jets, 2 c hadrons
+            else:
+                cls = 0
 
         for gj in genJets:
             gj.numBHadronsBeforeTop = gj.bHadMatch["pteta"]["beforeTop"]
