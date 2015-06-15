@@ -5,6 +5,16 @@ from PhysicsTools.Heppy.utils.cmsswPreprocessor import CmsswPreprocessor
 from vhbb import *
 # from VHbbAnalysis.Heppy.AdditionalBTag import AdditionalBTag
 from VHbbAnalysis.Heppy.AdditionalBoost import AdditionalBoost
+from VHbbAnalysis.Heppy.AddRegression import AddRegression
+
+
+#Add Regression for b-jet (VH)
+
+regana = cfg.Analyzer(
+    verbose=False,
+    class_object=AddRegression,
+)
+sequence.insert(sequence.index(VHbb),regana)
 
 
 # Add Boosted Information
@@ -14,6 +24,8 @@ boostana=cfg.Analyzer(
     class_object=AdditionalBoost,
 )
 sequence.insert(sequence.index(VHbb),boostana)
+
+
 
 treeProducer.collections["ungroomedFatjets"] = NTupleCollection("ungroomedFatjets", 
                                                                 fatjetType, 
