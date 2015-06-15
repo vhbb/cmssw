@@ -5,6 +5,7 @@ from copy import deepcopy
 from math import *
 import itertools
 import ROOT
+import array
 def Boost(self,boost):
    bx=boost.X()
    by=boost.Y()
@@ -19,6 +20,10 @@ def Boost(self,boost):
    self.Z() + gamma2*bp*bz + gamma*bz*self.T(),
    (gamma*(self.T() + bp)))
    return self
+def ptRel(p4,axis):
+    a=ROOT.TVector3(axis.Vect().X(),axis.Vect().Y(),axis.Vect().Z())
+    o=ROOT.TLorentzVector(p4.Px(),p4.Py(),p4.Pz(),p4.E())
+    return o.Perp(a)
 class VHbbAnalyzer( Analyzer ):
     '''Analyze VH events
     '''
@@ -78,6 +83,7 @@ class VHbbAnalyzer( Analyzer ):
         event.softActivityJets.sort(key=lambda x:x.pt(), reverse=True)
 
 
+
     def makeJets(self,event,b):
 	inputs=ROOT.std.vector(ROOT.heppy.ReclusterJets.LorentzVector)()
         event.pfCands = list(self.handles['pfCands'].product())
@@ -119,6 +125,87 @@ class VHbbAnalyzer( Analyzer ):
 	if event.Vtype == 0 :
 		event.fakeMET=event.met.p4() + event.V
                 event.fakeMET.sumet = event.met.sumEt() - event.V.pt()
+     
+
+
+    def doRegression(self,event):
+	reader = ROOT.TMVA.Reader()
+        self.Jet_pt =array.array('f',[0])
+        self.Jet_rawPt = array.array('f',[0])
+        self.rho = array.array('f',[0])
+        self.Jet_eta = array.array('f',[0])
+        self.Jet_mt = array.array('f',[0])
+        self.Jet_leadTrackPt = array.array('f',[0])
+        self.Jet_leptonPtRel = array.array('f',[0])
+        self.Jet_leptonPt =  array.array('f',[0])
+        self.Jet_leptonDeltaR = array.array('f',[0])
+        self.Jet_chEmEF = array.array('f',[0])
+        self.Jet_chHEF = array.array('f',[0])
+        self.Jet_neHEF = array.array('f',[0])
+        self.Jet_neEmEF = array.array('f',[0])
+        self.Jet_chMult = array.array('f',[0])
+        self.Jet_vtxPt = array.array('f',[0])
+        self.Jet_vtxMass = array.array('f',[0])
+        self.Jet_vtx3dL = array.array('f',[0])
+        self.Jet_vtxNtrk = array.array('f',[0])
+        self.Jet_vtx3deL = array.array('f',[0])
+        reader.AddVariable("Jet_pt",self.Jet_pt)
+        reader.AddVariable("Jet_rawPt",self.Jet_rawPt)
+        reader.AddVariable("rho",self.rho)
+        reader.AddVariable("Jet_eta",self.Jet_eta)
+        reader.AddVariable("Jet_mt",self.Jet_mt)
+        reader.AddVariable("Jet_leadTrackPt",self.Jet_leadTrackPt)
+        reader.AddVariable("Jet_leptonPtRel",self.Jet_leptonPtRel)
+        reader.AddVariable("Jet_leptonPt",self.Jet_leptonPt)
+        reader.AddVariable("Jet_leptonDeltaR",self.Jet_leptonDeltaR)
+        reader.AddVariable("Jet_chEmEF",self.Jet_chEmEF)
+        reader.AddVariable("Jet_chHEF",self.Jet_chHEF)
+        reader.AddVariable("Jet_neHEF",self.Jet_neHEF)
+        reader.AddVariable("Jet_neEmEF",self.Jet_neEmEF)
+        reader.AddVariable("Jet_chMult",self.Jet_chMult)
+        reader.AddVariable("Jet_vtxPt",self.Jet_vtxPt)
+        reader.AddVariable("Jet_vtxMass",self.Jet_vtxMass)
+        reader.AddVariable("Jet_vtx3dL",self.Jet_vtx3dL)
+        reader.AddVariable("Jet_vtxNtrk",self.Jet_vtxNtrk)
+        reader.AddVariable("Jet_vtx3deL",self.Jet_vtx3deL)
+        if event.Vtype<2 :
+                reader.BookMVA("jet0Regression","../weights/Zll_weights_phys14.xml")
+        elif event.Vtype <4 :
+                reader.BookMVA("jet0Regression","../weights/Wln_weights_phys14.xml")
+        elif event.Vtype ==4:
+                reader.BookMVA("jet0Regression","../weights/Znn_weights_phys14.xml")
+        self.reader=reader
+        self.rho[0] = event.rho
+        for j in event.jetsForHiggs :
+            self.Jet_pt[0] = j.pt()
+            self.Jet_eta[0] = j.eta()
+            self.Jet_rawPt[0] = j.pt()*j.rawFactor()
+            self.Jet_mt[0] = j.mt()
+            self.Jet_leadTrackPt[0] = j.leadTrackPt()
+            if len(j.leptons) > 0	:    
+			self.Jet_leptonPtRel[0] = ptRel(j.leptons[0].p4(),j.p4())
+			self.Jet_leptonPt[0] =  j.leptons[0].pt()
+			self.Jet_leptonDeltaR[0] = deltaR(j.leptons[0].p4().eta(),j.leptons[0].p4().phi(),j.p4().eta(),j.p4().phi()) 
+	    else:
+			 self.Jet_leptonPtRel[0] = -99	
+			 self.Jet_leptonPt[0] =  -99
+			 self.Jet_leptonDeltaR[0] =-99
+            self.Jet_chEmEF[0] = j.chargedEmEnergyFraction()
+            self.Jet_chHEF[0] = j.chargedHadronEnergyFraction()
+            self.Jet_neHEF[0] = j.neutralHadronEnergyFraction()
+            self.Jet_neEmEF[0] = j.neutralEmEnergyFraction()
+            self.Jet_chMult[0] = j.chargedMultiplicity()
+            self.Jet_vtxPt[0] = sqrt(j.userFloat("vtxPx")**2 + j.userFloat("vtxPy")**2)
+            self.Jet_vtxMass[0] = j.userFloat("vtxMass")
+            self.Jet_vtx3dL[0] = j.userFloat("vtx3dL")
+            self.Jet_vtxNtrk[0] = j.userFloat("vtxNtrk")
+            self.Jet_vtx3deL[0] = j.userFloat("vtx3deL")
+            if event.Vtype <5 and event.Vtype>0 :
+		j.pt_reg = self.reader.EvaluateRegression( "jet0Regression" )[0]
+
+
+
+
 
     def doHiggsHighCSV(self,event) :
         #leading csv interpretation
@@ -128,6 +215,11 @@ class VHbbAnalyzer( Analyzer ):
         event.ajidxCSV=[event.cleanJets.index(x) for x in event.aJetsCSV ]
         event.aJetsCSV+=event.cleanJetsFwd
         event.HCSV = event.hJetsCSV[0].p4()+event.hJetsCSV[1].p4()
+	hJetCSV_reg0 =ROOT.TLorentzVector()
+	hJetCSV_reg1  = ROOT.TLorentzVector()
+	hJetCSV_reg0.SetPtEtaPhiM(event.hJetsCSV[0].pt_reg, event.hJetsCSV[0].Pt(),  event.hJetsCSV[0].Eta(),  event.hJetsCSV[0].M())
+	hJetCSV_reg1.SetPtEtaPhiM(event.hJetsCSV[1].pt_reg, event.hJetsCSV[1].Pt(),  event.hJetsCSV[1].Eta(),  event.hJetsCSV[1].M())
+	event.HCSV_reg = hJetCSV_reg0.p4()+hJetCSV_reg1.p4()
 
     def doHiggsHighPt(self,event) :
         #highest pair interpretations
@@ -139,6 +231,11 @@ class VHbbAnalyzer( Analyzer ):
         hJetsByCSV = sorted(event.hJets , key =  lambda jet : jet.btag('combinedInclusiveSecondaryVertexV2BJetTags'), reverse=True)
         event.hjidxDiJetPtByCSV = [event.cleanJets.index(x) for x in hJetsByCSV]
         event.H = event.hJets[0].p4()+event.hJets[1].p4()
+	hJet_reg0.SetPtEtaPhiM(event.hJets[0].pt_reg, event.hJets[0].Pt(),  event.hJets[0].Eta(),  event.hJets[0].M())
+        hJet_reg1.SetPtEtaPhiM(event.hJets[1].pt_reg, event.hJets[1].Pt(),  event.hJets[1].Eta(),  event.hJets[1].M())
+        event.H_reg = hJet_reg0.p4()+hJet_reg1.p4()
+
+	
 
 
     def doHiggs3cj(self,event) :
@@ -292,6 +389,8 @@ class VHbbAnalyzer( Analyzer ):
         event.vLeptons = []
         event.H = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.HCSV = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
+	event.H_reg = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
+        event.HCSV_reg = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.H3cj = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.V = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.minDr3=-1
@@ -317,7 +416,7 @@ class VHbbAnalyzer( Analyzer ):
 		return self.cfg_ana.passall
         if event.Vtype < 0 and not ( sum(x.pt() > 30 for x in event.jetsForHiggs) >= 4 or sum(x.pt() for x in event.jetsForHiggs[:4]) > 160 ):
                 return self.cfg_ana.passall
-
+	self.doRegression(event)
 	self.doHiggsHighCSV(event)
 	self.doHiggsHighPt(event)
         self.doHiggs3cj(event)
