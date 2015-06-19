@@ -27,6 +27,8 @@ class VHbbAnalyzer( Analyzer ):
         super(VHbbAnalyzer, self).declareHandles()
         if getattr(self.cfg_ana,"doSoftActivity", False) :
             self.handles['pfCands'] =  AutoHandle( 'packedPFCandidates', 'std::vector<pat::PackedCandidate>' )
+        if self.cfg_comp.isMC:
+            self.handles['GenInfo'] = AutoHandle( ('generator','',''), 'GenEventInfoProduct' )
     def addNewBTag(self,event):
         newtags =  self.handles['btag'].product()
         for i in xrange(0,len(newtags)) :
@@ -45,6 +47,8 @@ class VHbbAnalyzer( Analyzer ):
         if "outputfile" in setup.services :
             setup.services["outputfile"].file.cd()
             self.inputCounter = ROOT.TH1F("Count","Count",1,0,2)
+            self.inputCounterPosWeight = ROOT.TH1F("CountPosWeight","Count genWeight>0",1,0,2)
+            self.inputCounterNegWeight = ROOT.TH1F("CountNegWeight","Count genWeight<0",1,0,2)
 
     def doSoftActivity(self,event) :
         event.jetsForVBF = [x for x in event.cleanJetsAll if self.cfg_ana.higgsJetsPreSelection(x) ]
@@ -301,6 +305,12 @@ class VHbbAnalyzer( Analyzer ):
     def process(self, event):
         self.readCollections( event.input )
         self.inputCounter.Fill(1)
+        if self.cfg_comp.isMC:
+            genWeight = self.handles['GenInfo'].product().weight()
+            if genWeight > 0:
+                self.inputCounterPosWeight.Fill(1)
+            elif genWeight < 0:
+                self.inputCounterNegWeight.Fill(1)
         self.initOutputs(event)
 #	event.pfCands = self.handles['pfCands'].product()
 # 	met = event.met
