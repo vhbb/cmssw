@@ -103,9 +103,6 @@ shifted_met_names = ["met_shifted_%s"%metNames[n] for n in range(12)] #we do not
 shifted_mets = {mk: NTupleObject(nm, shiftedMetType, help="PF E_{T}^{miss}, after default type 1 corrections, shifted with %s" %mk) for mk,nm in zip(shifted_met_keys,shifted_met_names)}
 treeProducer.globalObjects.update(shifted_mets)
 
-#Set up b-tag re-weighting
-from PhysicsTools.Heppy.physicsutils.BTagWeightCalculator import BTagWeightCalculator
-bweightcalc = BTagWeightCalculator("csv/csv_rwt_hf_IT_FlatSF.root", "csv/csv_rwt_lf_IT_FlatSF.root")
 btag_weights = {}
 for syst in ["JES", "LF", "HF", "Stats1", "Stats2"]:
 	for sdir in ["Up", "Down"]:
