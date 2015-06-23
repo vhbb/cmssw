@@ -74,6 +74,10 @@ class TTHtoTauTauGeneratorAnalyzer( Analyzer ):
                 tbar = genParticle
             if pdgId in [ 25, 35, 36 ] and not H:
                 H = genParticle
+            H_decayMode = None
+            for pdgIds in [ [ +5, -5 ], [ +24, -24 ], [ 21, 21 ], [ +15, -15 ], [ 23, 23 ], [ +4, -4 ], [ 22, 22 ], [ 23, 22 ] ]:
+                if self.findFirstDaughterGivenPdgId(H, [ pdgIds[0] ]) and self.findFirstDaughterGivenPdgId(H, [ pdgIds[1] ]):
+                    event.genH_decayMode = pdgIds[0]*pdgIds[1]
 
         numElectrons_or_Muons_fromH = 0
         numHadTaus_fromH = 0
