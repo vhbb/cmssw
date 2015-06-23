@@ -69,7 +69,7 @@ class VHbbAnalyzer( Analyzer ):
     def doSoftActivityVH(self,event) :
         j1=event.hJetsCSV[0]
         j2=event.hJetsCSV[1]
-        event.softActivityVHJets=self.softActivity(event,j1,j2,event.hJetsCSV)
+        event.softActivityVHJets=self.softActivity(event,j1,j2,event.hJetsCSV+event.vLeptons)
 
 
     def softActivity(self,event,j1,j2,excludedJets) :
@@ -79,9 +79,12 @@ class VHbbAnalyzer( Analyzer ):
         inputs=ROOT.std.vector(ROOT.heppy.ReclusterJets.LorentzVector)() 
         used=[]
         for j in excludedJets :
-            used.extend(j.daughterPtrVector())
-        remainingPF = [x for x in event.pfCands if x.charge() != 0 and abs(x.eta()) < 2.5 and  x.pt() > 0.3 and x.fromPV() >=2 and x not in used] 
-
+	    for i in xrange(0,j.numberOfSourceCandidatePtrs()) :
+		    if j.sourceCandidatePtr(i).isAvailable() :
+	                used.append(j.sourceCandidatePtr(i))
+	#get the pointed objects
+ 	used =  [x.get() for x in used]
+	remainingPF = [x for x in event.pfCands if x.charge() != 0 and abs(x.eta()) < 2.5 and  x.pt() > 0.3 and x.fromPV() >=2 and x not in used] 
         dR0=0.4
         dRbb = deltaR(j1.eta(),j1.phi(),j2.eta(),j2.phi())
 	map(lambda x:inputs.push_back(x.p4()), remainingPF)
