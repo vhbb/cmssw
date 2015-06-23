@@ -294,6 +294,10 @@ genJetType = NTupleObjectType("genJet", baseObjectTypes = [ genParticleType ], v
     NTupleVariable("numCHadronsFromTop", lambda x : x.numCHadronsFromTop, int, mcOnly=True, help="number of matched c hadrons from top quark decay"),
     NTupleVariable("numBHadronsAfterTop", lambda x : x.numBHadronsAfterTop, int, mcOnly=True, help="number of matched b hadrons after top quark decay"),
     NTupleVariable("numCHadronsAfterTop", lambda x : x.numCHadronsAfterTop, int, mcOnly=True, help="number of matched c hadrons after top quark decay"),
+    NTupleVariable("wNuPt", lambda x : (x.p4()+x.nu).pt() if hasattr(x,"nu") else x.p4().pt() ,float, mcOnly=True, help="pt of jet adding back the neutrinos"),
+    NTupleVariable("wNuEta", lambda x : (x.p4()+x.nu).eta() if hasattr(x,"nu") else x.p4().eta() ,float, mcOnly=True, help="eta of jet adding back the neutrinos"),
+    NTupleVariable("wNuPhi", lambda x : (x.p4()+x.nu).phi() if hasattr(x,"nu") else x.p4().phi() ,float, mcOnly=True, help="phi of jet adding back the neutrinos"),
+
 ])
 
 softActivityType = NTupleObjectType("softActivity", baseObjectTypes = [  ], variables = [
