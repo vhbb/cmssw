@@ -12,6 +12,9 @@
 <use name="rootmath"/>
 <use name="fastjet"/>
 <use name="fastjet-contrib"/>
+
+<Flags LCG_DICT_HEADER="classes.h">
+<Flag LCG_DICT_XML="classes_def.xml">
 <export>
   <lib name="1"/>
 </export>

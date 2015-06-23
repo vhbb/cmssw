@@ -261,7 +261,11 @@ for fatjet_name in ["slimmedJetsAK8", "ca15PFJetsCHS"]:
     
 
     # Produce the output
-    process.OUT.outputCommands.append("keep *_{0}_*_EX".format(tag_name))
+    for object_name in [impact_info_name, isv_info_name,
+                        sm_info_name, se_info_name,          
+                        bb_comp_name, tag_name]:
+
+        process.OUT.outputCommands.append("keep *_{0}_*_EX".format(object_name))
     
 
 ########################################
