@@ -70,14 +70,19 @@ class VHbbAnalyzer( Analyzer ):
         etaMin = min(event.jetsForVBF,key=lambda x:x.eta()).eta()+0.4
         etaMax = max(event.jetsForVBF,key=lambda x:x.eta()).eta()-0.4
         dR0=0.4
-        for pf in remainingPF :
+	if False :
+          for pf in remainingPF :
 #             if pf.eta() > etaMin and pf.eta() < etaMax:
                 dr1=deltaR(j1.eta(),j1.phi(),pf.eta(),pf.phi())               
                 dr2=deltaR(j2.eta(),j2.phi(),pf.eta(),pf.phi())               
                 if dr1+dr2 > dRbb + 2*dR0: 
                    inputs.push_back(pf.p4())
-        clusterizer=ROOT.heppy.ReclusterJets(inputs,-1,0.4)
-        jets=clusterizer.getGrouping(1)
+          clusterizer=ROOT.heppy.ReclusterJets(inputs,-1,0.4)
+          jets=clusterizer.getGrouping(1)
+        else :
+	  softActivity=ROOT.heppy.FastSoftActivity(inputs,-1,0.4,j1.p4(),j2.p4(),dRbb+2*dR0)
+          jets=softActivity.getGrouping(1)
+
         event.softActivityJets =  [ ROOT.reco.Particle.LorentzVector(p4) for p4 in jets ]
         event.softActivityJets.sort(key=lambda x:x.pt(), reverse=True)
 
