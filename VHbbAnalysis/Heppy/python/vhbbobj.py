@@ -111,6 +111,22 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("mult",   lambda x : getattr(x,'mult', 0) , int, mcOnly=False,help="QG input variable: total multiplicity"),
     NTupleVariable("numberOfDaughters",   lambda x : x.numberOfDaughters(), int, mcOnly=False,help="number of daughters"),
  ])
+
+#add per-jet b-tag systematic weight
+from PhysicsTools.Heppy.physicsutils.BTagWeightCalculator import BTagWeightCalculator
+bweightcalc = BTagWeightCalculator("csv/csv_rwt_hf_IT_FlatSF.root", "csv/csv_rwt_lf_IT_FlatSF.root")
+for syst in ["JES", "LF", "HF", "Stats1", "Stats2"]:
+    for sdir in ["Up", "Down"]:
+        jetTypeVHbb.variables += [NTupleVariable("bTagWeight"+syst+sdir,
+            lambda jet, sname=syst+sdir,bweightcalc=bweightcalc: bweightcalc.calcJetWeight(
+                jet, kind="final", systematic=sname
+            ), float, mcOnly=True, help="b-tag CSV weight, variating "+syst + " "+sdir
+        )]
+jetTypeVHbb.variables += [NTupleVariable("bTagWeight",
+    lambda jet, bweightcalc=bweightcalc: bweightcalc.calcJetWeight(
+        jet, kind="final", systematic="nominal",
+    ), float, mcOnly=True, help="b-tag CSV weight, nominal"
+)]
  
 ##------------------------------------------  
 ## FAT JET
