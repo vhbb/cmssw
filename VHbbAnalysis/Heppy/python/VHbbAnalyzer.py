@@ -54,9 +54,13 @@ class VHbbAnalyzer( Analyzer ):
         event.jetsForVBF = [x for x in event.cleanJetsAll if self.cfg_ana.higgsJetsPreSelection(x) ]
         #compute SoftActivity only for events passing VBF selection
         if len(event.jetsForVBF) < 4 or  event.jetsForVBF[0] < 70 or  event.jetsForVBF[1] < 55 or  event.jetsForVBF[2] < 35 or  event.jetsForVBF[3] < 20 :
-            return 
+            return
         event.jetsForVBF.sort(key=lambda x:x.pt(),reverse=True)
         event.jetsForVBF=event.jetsForVBF[:4]
+
+	#compute QGL here for VBF jets if passing VBF pre-selection 
+        map(lambda x :x.qgl(),event.jetsForVBF)
+
         event.bJetsForVBF=sorted(event.jetsForVBF,key = lambda jet : jet.btag('combinedInclusiveSecondaryVertexV2BJetTags'), reverse=True)[:2]
         j1=event.bJetsForVBF[0]
         j2=event.bJetsForVBF[1]
