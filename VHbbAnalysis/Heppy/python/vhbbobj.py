@@ -251,6 +251,12 @@ genJetType = NTupleObjectType("genJet", baseObjectTypes = [ genParticleType ], v
     NTupleVariable("numCHadronsAfterTop", lambda x : x.numCHadronsAfterTop, int, mcOnly=True, help="number of matched c hadrons after top quark decay"),
 ])
 
+softActivityType = NTupleObjectType("softActivity", baseObjectTypes = [  ], variables = [
+                 NTupleVariable("njets2", lambda sajets: len([ x for x in sajets if x.pt()> 2 ] ), int, help="number of jets from soft activity with pt>2Gev"),
+                 NTupleVariable("njets5", lambda sajets: len([ x for x in sajets if x.pt()> 5 ] ), int, help="number of jets from soft activity with pt>5Gev"),
+                 NTupleVariable("njets10", lambda sajets: len([ x for x in sajets if x.pt()> 10 ] ), int, help="number of jets from soft activity with pt>10Gev"),
+                 NTupleVariable("HT", lambda sajets: sum([x.pt() for x in sajets],0.0), float, help="sum pt of sa jets"),
+])
 
 def ptRel(p4,axis):
     a=ROOT.TVector3(axis.Vect().X(),axis.Vect().Y(),axis.Vect().Z())
