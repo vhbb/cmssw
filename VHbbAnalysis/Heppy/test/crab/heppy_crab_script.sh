@@ -57,3 +57,5 @@ edmPluginDump | grep -i CandidateBoostedDoubleSecondaryVertexESProduce
 echo "------ End edmPluginDump | grep -i CandidateBoostedDoubleSecondaryVertexESProducer"
 
 python heppy_crab_script.py $1
+echo "======================== CMSRUN LOG ============================"
+cat Output/cmsRun.log 
