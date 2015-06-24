@@ -28,19 +28,32 @@ EOF
 
 chmod +x $CMSSW_BASE/bin/$SCRAM_ARCH/edmProvDump
 
+
 echo "Which edmProvDump"
 which edmProvDump
 edmProvDump
 
 # Update library path
-# Needed so recompiled modules are found
+# Needed so recompiled modules are found 
 export LD_LIBRARY_PATH=./lib/slc6_amd64_gcc481:$LD_LIBRARY_PATH 
 
 
-# Move JEC files into flace
+export ROOT_INCLUDE_PATH=.:./src:$ROOT_INCLUDE_PATH
+
+# Move JEC files into place
 mkdir jec
 mv PHYS14_V4_MC_L1FastJet_AK4PFchs.txt jec/
 mv PHYS14_V4_MC_L2Relative_AK4PFchs.txt jec/
 mv PHYS14_V4_MC_L3Absolute_AK4PFchs.txt jec/
+mv Uncertainty_FAKE.txt jec/
+
+mkdir csv
+mv csv_rwt_hf_IT_FlatSF.root csv/
+mv csv_rwt_lf_IT_FlatSF.root csv/
+
+# Verify plugins
+echo "------ Begin: edmPluginDump | grep -i CandidateBoostedDoubleSecondaryVertexESProducer"
+edmPluginDump | grep -i CandidateBoostedDoubleSecondaryVertexESProduce
+echo "------ End edmPluginDump | grep -i CandidateBoostedDoubleSecondaryVertexESProducer"
 
 python heppy_crab_script.py $1
