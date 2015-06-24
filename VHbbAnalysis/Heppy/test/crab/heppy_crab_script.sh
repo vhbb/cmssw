@@ -34,8 +34,10 @@ edmProvDump
 
 # Update library path
 # Needed so recompiled modules are found
-export LD_LIBRARY_PATH=./lib/slc6_amd64_gcc481:$LD_LIBRARY_PATH 
-
+#export LD_LIBRARY_PATH=./lib/slc6_amd64_gcc481:$LD_LIBRARY_PATH 
+eval `scram runtime -sh`
+echo "LD LIBRARY PATH IS"
+echo $LD_LIBRARY_PATH
 
 # Move JEC files into flace
 mkdir jec
@@ -45,3 +47,5 @@ mv PHYS14_V4_MC_L3Absolute_AK4PFchs.txt jec/
 mkdir csv
 mv csv*root csv/
 python heppy_crab_script.py $1
+echo "======================== CMSRUN LOG ============================"
+cat Output/cmsRun.log 

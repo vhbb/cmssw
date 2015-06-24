@@ -52,6 +52,12 @@ FastSoftActivity::FastSoftActivity(const std::vector<LorentzVector> & objects, d
 std::vector<math::XYZTLorentzVector> FastSoftActivity::makeP4s(const std::vector<fastjet::PseudoJet> &jets) {
   std::vector<math::XYZTLorentzVector> JetObjectsAll;
   for (const fastjet::PseudoJet & pj : jets) {
+/*    std::vector<fastjet::PseudoJet> constituents = pj.constituents();
+    std::cout << "Constituents for " << pj.pt() << " " ;
+    for (unsigned j = 0; j < constituents.size(); j++) {
+		std::cout << constituents[j].user_index() << " ";
+    }
+    std::cout << std::endl;*/
     JetObjectsAll.push_back( LorentzVector( pj.px(), pj.py(), pj.pz(), pj.e() ) );
   }
   return JetObjectsAll;

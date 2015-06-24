@@ -2,7 +2,7 @@ import math, os
 from PhysicsTools.Heppy.analyzers.core.Analyzer import Analyzer
 from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
 from PhysicsTools.Heppy.physicsobjects.PhysicsObjects import Jet
-from PhysicsTools.HeppyCore.utils.deltar import deltaR2, deltaPhi, matchObjectCollection, matchObjectCollection2, bestMatch
+from PhysicsTools.HeppyCore.utils.deltar import deltaR2, deltaPhi, matchObjectCollection, matchObjectCollection2, bestMatch,matchObjectCollection3
 from PhysicsTools.Heppy.physicsutils.JetReCalibrator import JetReCalibrator
 import PhysicsTools.HeppyCore.framework.config as cfg
 
@@ -208,7 +208,16 @@ class JetAnalyzer( Analyzer ):
             
             if self.cfg_ana.cleanGenJetsFromPhoton:
                 self.cleanGenJets = cleanNearestJetOnly(self.cleanGenJets, photons, self.jetLepDR)
-
+	    if hasattr(self.cfg_ana,"genNuSelection") :
+		jetNus=[x for x in event.genParticles if abs(x.pdgId()) in [12,14,16] and self.cfg_ana.genNuSelection(x) ]
+	 	pairs= matchObjectCollection3 ( self.cleanGenJets, jetNus, 0.4)
+		for (genJet,nu) in pairs.iteritems() :
+		     if nu is not None :
+			if not hasattr(genJet,"nu") :
+				genJet.nu=nu.p4()
+			else :
+				genJet.nu+=nu.p4()
+			
             
             #event.nGenJets25 = 0
             #event.nGenJets25Cen = 0
@@ -366,6 +375,7 @@ setattr(JetAnalyzer,"defaultConfig", cfg.Analyzer(
     alwaysCleanPhotons = False,
     jecPath = "",
     cleanGenJetsFromPhoton = False,
+    genNuSelection = lambda nu : True, #FIXME: add here check for ispromptfinalstate
     collectionPostFix = ""
     )
 )
