@@ -35,11 +35,12 @@ edmProvDump
 
 # Update library path
 # Needed so recompiled modules are found 
-# the architecture is now (CMSSW 743) gcc491
-export LD_LIBRARY_PATH=./lib/slc6_amd64_gcc491:$LD_LIBRARY_PATH 
+export LD_LIBRARY_PATH=./lib/slc6_amd64_gcc481:$LD_LIBRARY_PATH 
+
+
 export ROOT_INCLUDE_PATH=.:./src:$ROOT_INCLUDE_PATH
 
-# Move JEC files into flace
+# Move JEC files into place
 mkdir jec
 mv PHYS14_V4_MC_L1FastJet_AK4PFchs.txt jec/
 mv PHYS14_V4_MC_L2Relative_AK4PFchs.txt jec/
