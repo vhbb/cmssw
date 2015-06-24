@@ -174,8 +174,9 @@ def calcBBTagVariables(jet,
                 tau_dot = (currentAxes[0].px()*flightDir_0.x()+currentAxes[0].py()*flightDir_0.y()+currentAxes[0].pz()*flightDir_0.z())/(math.sqrt(currentAxes[0].modp2())*flightDir_0.mag())                            
         # end cont==1
 
-        if cont==2:                       
-            SV_EnergyRatio_1 = vertexSum.E() / allSum.E()
+        if cont==2:         
+            if not allSum.E() == 0:
+                SV_EnergyRatio_1 = vertexSum.E() / allSum.E()
             flightDir_1 = svTagInfo.flightDirection(index)
             SV_p4_1 = vertex.p4()
             z_ratio = math.sqrt(deltaR2(flightDir_0,flightDir_1))*SV_pt_0/(SV_p4_0+SV_p4_1).mass()
