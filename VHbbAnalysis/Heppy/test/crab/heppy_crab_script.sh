@@ -35,7 +35,9 @@ edmProvDump
 # Update library path
 # Needed so recompiled modules are found
 #export LD_LIBRARY_PATH=./lib/slc6_amd64_gcc481:$LD_LIBRARY_PATH 
+cd $CMSSW_BASE
 eval `scram runtime -sh`
+cd -
 echo "LD LIBRARY PATH IS"
 echo $LD_LIBRARY_PATH
 
