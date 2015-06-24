@@ -162,7 +162,8 @@ def calcBBTagVariables(jet,
 
         if cont==1:
             SV_mass_0 = vertex.p4().mass()
-            SV_EnergyRatio_0 = vertexSum.E() / allSum.E()
+            if not allSum.E() == 0:
+                SV_EnergyRatio_0 = vertexSum.E() / allSum.E()
             SV_pt_0 = vertex.p4().pt()
             flightDir_0 = svTagInfo.flightDirection(index)
             SV_p4_0 = vertex.p4()
