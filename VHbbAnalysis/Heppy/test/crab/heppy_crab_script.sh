@@ -1,4 +1,4 @@
-ls -lR
+#s -lR
 tar xvzf python.tar.gz --directory $CMSSW_BASE 
 ls -lR .
 echo "ENV..................................."
@@ -10,6 +10,17 @@ echo $CMSSW_BASE
 echo $PYTHON_PATH
 echo $PWD 
 cp lib/slc*/* $CMSSW_BASE/lib/slc*
+cp lib/slc*/.* $CMSSW_BASE/lib/slc*
+echo "AFTER COPY content of $CMSSW_BASE/lib/slc*"
+ls -lR  $CMSSW_BASE/lib/slc*
+
+cp -r interface/* $CMSSW_BASE/interface/
+echo "AFTER COPY content of $CMSSW_BASE/interface"
+ls -lR  $CMSSW_BASE/interface/
+
+cp -r src/* $CMSSW_BASE/src/
+echo "AFTER COPY content of $CMSSW_BASE/src"
+ls -lR  $CMSSW_BASE/src/
 
 PROXYFILE=`grep "BEGIN CERTIFICATE" * | perl -pe 's/:.*//'  | grep -v heppy | tail -n 1`
 export X509_USER_PROXY=$PWD/$PROXYFILE
@@ -32,15 +43,8 @@ echo "Which edmProvDump"
 which edmProvDump
 edmProvDump
 
-# Update library path
-# Needed so recompiled modules are found
-#export LD_LIBRARY_PATH=./lib/slc6_amd64_gcc481:$LD_LIBRARY_PATH 
-cd $CMSSW_BASE
-eval `scram runtime -sh`
-cd -
-echo "LD LIBRARY PATH IS"
-echo $LD_LIBRARY_PATH
-
+#echo PLUGIN DUMP 
+#edmPluginDump -f  | grep -A2 -B2 HTTTopJetProducer
 # Move JEC files into flace
 mkdir jec
 mv PHYS14_V4_MC_L1FastJet_AK4PFchs.txt jec/
@@ -48,6 +52,7 @@ mv PHYS14_V4_MC_L2Relative_AK4PFchs.txt jec/
 mv PHYS14_V4_MC_L3Absolute_AK4PFchs.txt jec/
 mkdir csv
 mv csv*root csv/
+mv Uncertainty_FAKE.txt jec/
 python heppy_crab_script.py $1
 echo "======================== CMSRUN LOG ============================"
-cat Output/cmsRun.log 
+tail -n 200 Output/cmsRun.log 
