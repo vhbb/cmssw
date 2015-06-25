@@ -1,4 +1,4 @@
-ls -lR
+#s -lR
 tar xvzf python.tar.gz --directory $CMSSW_BASE 
 ls -lR .
 echo "ENV..................................."
@@ -10,6 +10,17 @@ echo $CMSSW_BASE
 echo $PYTHON_PATH
 echo $PWD 
 cp lib/slc*/* $CMSSW_BASE/lib/slc*
+cp lib/slc*/.* $CMSSW_BASE/lib/slc*
+echo "AFTER COPY content of $CMSSW_BASE/lib/slc*"
+ls -lR  $CMSSW_BASE/lib/slc*
+
+cp -r interface/* $CMSSW_BASE/interface/
+echo "AFTER COPY content of $CMSSW_BASE/interface"
+ls -lR  $CMSSW_BASE/interface/
+
+cp -r src/* $CMSSW_BASE/src/
+echo "AFTER COPY content of $CMSSW_BASE/src"
+ls -lR  $CMSSW_BASE/src/
 
 PROXYFILE=`grep "BEGIN CERTIFICATE" * | perl -pe 's/:.*//'  | grep -v heppy | tail -n 1`
 export X509_USER_PROXY=$PWD/$PROXYFILE
@@ -58,4 +69,4 @@ echo "------ End edmPluginDump | grep -i CandidateBoostedDoubleSecondaryVertexES
 
 python heppy_crab_script.py $1
 echo "======================== CMSRUN LOG ============================"
-cat Output/cmsRun.log 
+tail -n 200 Output/cmsRun.log 
