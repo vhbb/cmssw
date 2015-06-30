@@ -142,7 +142,6 @@ class VHbbAnalyzer( Analyzer ):
     def doHtMhtJets30(self,event):
         ## with Central Jets
         objects30 = [ j for j in event.cleanJets if j.pt() > 30 ] + event.selectedLeptons
-
         event.htJet30 = sum([x.pt() for x in objects30])
         event.mhtJet30vec = ROOT.reco.Particle.LorentzVector(-1.*(sum([x.px() for x in objects30])) , -1.*(sum([x.py() for x in objects30])), 0, 0 )             
         event.mhtJet30 = event.mhtJet30vec.pt()
