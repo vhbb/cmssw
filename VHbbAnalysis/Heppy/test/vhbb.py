@@ -60,10 +60,6 @@ treeProducer= cfg.Analyzer(
 	],
 	globalObjects = {
           "met"    : NTupleObject("met",     metType, help="PF E_{T}^{miss}, after default type 1 corrections"),
-#          "metPuppi"    : NTupleObject("metPuppi",     metType, help="PF E_{T}^{miss} from Puppi, after default type 1 corrections"),
-#          "metNoPU"    : NTupleObject("metNoPU",     metType, help="PFnoPU E_{T}^{miss}, after default type 1 corrections"),
-#          "tkMet"    : NTupleObject("tkMet",     fourVectorType, help="E_{T}^{miss} evaluated with tracks"),
-#          "tkMetPVchs"    : NTupleObject("tkMetPVchs",     fourVectorType, help="E_{T}^{miss} evaluated with tracks"),
           "fakeMET"    : NTupleObject("fakeMET", fourVectorType, help="fake MET in Zmumu event obtained removing the muons"),
           "H"    : NTupleObject("H", fourVectorType, help="higgs"),
           "HCSV"    : NTupleObject("HCSV", fourVectorType, help="higgs CSV selection"),
@@ -195,8 +191,7 @@ PUAna = PileUpAnalyzer.defaultConfig
 
 from VHbbAnalysis.Heppy.VHbbAnalyzer import VHbbAnalyzer
 JetAna.jetPt = 15
-#JetAna.doQG=True
-JetAna.doQG=False
+JetAna.doQG=True
 JetAna.QGpath="pdfQG_AK4chs_antib_13TeV_v1.root"
 JetAna.recalibrateJets=True
 JetAna.jecPath="jec"
@@ -308,7 +303,7 @@ class TestFilter(logging.Filter):
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 1000)
+    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 10)
 
     import time
     import cProfile
