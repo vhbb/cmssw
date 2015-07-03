@@ -133,11 +133,12 @@ def calcBBTagVariables(jet,
     # typedef Global3DVector GlobalVector;
     # typedef Vector3DBase< float, GlobalTag>    Global3DVector;
     # Since there is no dict for GlobalVector build it directly from the template
-    flightDir_0 = ROOT.Vector3DBase(float, ROOT.GlobalTag)()
-    flightDir_1 = ROOT.Vector3DBase(float, ROOT.GlobalTag)()
-
-    SV_p4_0 = ROOT.reco.Candidate.LorentzVector()
-    SV_p4_1 = ROOT.reco.Candidate.LorentzVector()
+    #
+    # Commented out constructors to prevent mem-leak
+    # flightDir_0 = ROOT.Vector3DBase(float, ROOT.GlobalTag)()
+    # flightDir_1 = ROOT.Vector3DBase(float, ROOT.GlobalTag)()
+    # SV_p4_0 = ROOT.reco.Candidate.LorentzVector()
+    # SV_p4_1 = ROOT.reco.Candidate.LorentzVector()
 
     for mass in reversed(sorted(VTXmass.keys())):
         cont += 1
