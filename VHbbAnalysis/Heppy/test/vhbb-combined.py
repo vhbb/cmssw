@@ -29,6 +29,11 @@ treeProducer.collections["ak08prunedsubjets"] = NTupleCollection("SubjetAK08prun
                                                                  10,
                                                                  help="Subjets of AK, R=0.8, pT > 200 GeV, pruned zcut=0.1, rcut=0.5, n=2")
 
+treeProducer.collections["ak0softdropsubjets"] = NTupleCollection("SubjetAK08softdrop",
+                                                                 patSubjetType,
+                                                                 10,
+                                                                 help="Subjets of AK, R=0.8 softdrop")
+
 if not AdditionalBoost.skip_ca15:
     treeProducer.collections["ca15ungroomed"] = NTupleCollection("FatjetCA15ungroomed",  fatjetType,  10,
                                                                  help = "CA, R=1.5, pT > 200 GeV, no grooming")
