@@ -252,6 +252,8 @@ class AdditionalBoost( Analyzer ):
         self.handles['ak08pruned']        = AutoHandle( ("ak08PFPrunedJetsCHS","","EX"), "std::vector<reco::BasicJet>")
         self.handles['ak08prunedsubjets'] = AutoHandle( ("ak08PFPrunedJetsCHS","SubJets","EX"), "std::vector<reco::PFJet>")
 
+        self.handles['ak08softdropsubjets'] = AutoHandle( ("slimmedJetsAK8PFCHSSoftDropPacked","SubJets","PAT"), "std::vector<pat::Jet>")
+
         self.handles['ak08bbtag'] = AutoHandle( ("slimmedJetsAK8pfBoostedDoubleSecondaryVertexBJetTags","","EX"), 
                                                 "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
 
@@ -315,6 +317,8 @@ class AdditionalBoost( Analyzer ):
         ########
 
         setattr(event, "ak08", map(PhysicsObject, self.handles["ak08"].product()))
+
+        setattr(event, "ak0softdropsubjets", map(PhysicsObject, self.handles["ak08softdropsubjets"].product()))
 
         # bb-tag Output
         newtags =  self.handles['ak08bbtag'].product()

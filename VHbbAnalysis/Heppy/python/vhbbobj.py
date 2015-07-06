@@ -206,6 +206,15 @@ ak8FatjetType = NTupleObjectType("ak8fatjet",  baseObjectTypes = [ fourVectorTyp
 subjetType = NTupleObjectType("subjet",  baseObjectTypes = [ fourVectorType ], variables = [
     NTupleVariable("btag",  lambda x : x.btag, help="CVS IVF V2 btag-score")])
 
+##------------------------------------------  
+## PAT Subjet
+##------------------------------------------  
+
+# Four Vector + b-Tag from PAT
+
+patSubjetType = NTupleObjectType("patsubjet",  baseObjectTypes = [ fourVectorType ], variables = [
+    NTupleVariable("btag",  lambda x : x.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"), help="CVS IVF V2 btag-score")])
+
 
 ##------------------------------------------  
 ## HEPTopTagger Candidate
