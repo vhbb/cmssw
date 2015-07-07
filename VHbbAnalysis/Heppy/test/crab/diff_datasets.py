@@ -2,7 +2,8 @@ import sys,os
 
 # REMOVE DATASET NAMES CONTAINING:
 
-remove = ['http','prime','Grav','SUSY','QstarTo','RSGluonTo','WRTo','TstarTstar','Unpart','LQTo','Radion','BstarTo',
+remove = ['http','prime','GravToZZ','GravitonToGluonGluon','GravitonToQuarkQuark','GravToGG','GravToWW','ToHHTo2B',
+          'SUSY','QstarTo','RSGluonTo','WRTo','TstarTstar','Unpart','LQTo','BstarTo',
           'HToZZ','HToWW','HToG','HToT','/ADD','GJet','GluGluToZZ','TTbarDM','HToInvisible','WToENu_M','WToMuNu_M','WToTauNu_M',
           'ttHJetToGG','ttHJetToNonbb','ttHJetToTT','Muminus_Pt','/Muplus','Photon','SinglePion','ZZTo4L','DoubleElectron',
           'SingleEta','tGamma','JPsiToMuMu','JpsiToMuMu','mtop1','BdToJpsiKs','tZq_','GG_M',
