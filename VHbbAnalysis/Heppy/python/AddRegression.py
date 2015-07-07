@@ -1,14 +1,12 @@
-from PhysicsTools.Heppy.analyzers.core.Analyzer import Analyzer
 from VHbbAnalysis.Heppy.vhbbobj import ptRel
 from math import *
 import ROOT
 import array
 
-class AddRegression( Analyzer ):
+def AddRegression(self, event):
 
 
 
-   def declareHandles(self):
         reader = ROOT.TMVA.Reader()
         self.Jet_pt =array.array('f',[0])
         self.Jet_rawPt = array.array('f',[0])
@@ -55,10 +53,9 @@ class AddRegression( Analyzer ):
         elif event.Vtype ==4:
                 reader.BookMVA("jet0Regression","../weights/Znn_weights_phys14.xml")
         self.reader=reader
-   def process(self, event):
 	self.readCollections( event.input )
         self.rho[0] = event.rho
-        for j in event.cleanJets :
+        for j in event.jetsForHiggs :
             self.Jet_pt[0] = j.pt()
             self.Jet_eta[0] = j.eta()
             self.Jet_rawPt[0] = j.pt()*j.rawFactor()
