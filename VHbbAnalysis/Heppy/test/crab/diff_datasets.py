@@ -25,6 +25,10 @@ remove = [
 das_valid = os.popen('python ./das_client.py --limit=0 --query="dataset=/*/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9*/MINIAODSIM"').read().split('\n')
 das_valid = filter(None, das_valid)
 
+if len(das_valid)<1: 
+  print "ERROR WHILE EVALUATING VALID DATASETS, EMPTY LIST, ABORTING"
+  sys.exit(1)
+  
 # FILELIST OF AVAILABLE DATASETS ON DAS AS PRODUCTION
 
 das_production = os.popen('python ./das_client.py --limit=0 --query="dataset dataset=/*/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9*/MINIAODSIM status=PRODUCTION"').read().split('\n')
@@ -64,8 +68,8 @@ print '\nDATASETS INCLUDED IN THE HBB LIST AND STILL IN PRODUCTION\n'
 for line in vhbb_prod:
     print line
 
-print '\nDATASETS INCLUDED IN THE HBB LIST NOT IN PRODUCTION NOR IN VALID state\n'
-for line in vhbb_prod:
+print '\nDATASETS INCLUDED IN THE HBB LIST NOT IN PRODUCTION NOR IN VALID STATE (i.e. REMOVE FROM THE LIST!!!) \n'
+for line in filter(None, vhbb_all.split('\n')):
   if (line not in das_production) and (line not in das_valid):
     print line
 
