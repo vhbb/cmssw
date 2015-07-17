@@ -91,7 +91,7 @@ class VHbbAnalyzer( Analyzer ):
         dR0=0.4
         dRbb = deltaR(j1.eta(),j1.phi(),j2.eta(),j2.phi())
 	map(lambda x:inputs.push_back(x.p4()), remainingPF)
-	softActivity=ROOT.heppy.FastSoftActivity(inputs,-1,0.4,j1.p4(),j2.p4(),dRbb+2*dR0)
+	softActivity=ROOT.heppy.FastSoftActivity(inputs,-1,0.4,j1.p4(),j2.p4(),0)
         jets=softActivity.getGrouping(1)
         softActivityJets =  [ ROOT.reco.Particle.LorentzVector(p4) for p4 in jets ]
         softActivityJets.sort(key=lambda x:x.pt(), reverse=True)
