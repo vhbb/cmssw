@@ -139,6 +139,15 @@ class VHbbAnalyzer( Analyzer ):
 		event.fakeMET=event.met.p4() + event.V
                 event.fakeMET.sumet = event.met.sumEt() - event.V.pt()
 
+    def doHtMhtJets30(self,event):
+        ## with Central Jets
+        objects30 = [ j for j in event.cleanJets if j.pt() > 30 ] + event.selectedLeptons
+        event.htJet30 = sum([x.pt() for x in objects30])
+        event.mhtJet30vec = ROOT.reco.Particle.LorentzVector(-1.*(sum([x.px() for x in objects30])) , -1.*(sum([x.py() for x in objects30])), 0, 0 )             
+        event.mhtJet30 = event.mhtJet30vec.pt()
+        event.mhtPhiJet30 = event.mhtJet30vec.phi()
+
+
     def doHiggsHighCSV(self,event) :
         #leading csv interpretation
         event.hJetsCSV=sorted(event.jetsForHiggs,key = lambda jet : jet.btag('pfCombinedInclusiveSecondaryVertexV2BJetTags'), reverse=True)[0:2]
@@ -334,6 +343,7 @@ class VHbbAnalyzer( Analyzer ):
    	self.classifyMCEvent(event)
 	self.classifyEvent(event) 
 	self.doFakeMET(event)
+	self.doHtMhtJets30(event)
 
 	#substructure threshold, make configurable
 	ssTrheshold = 200.

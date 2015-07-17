@@ -11,6 +11,7 @@ from VHbbAnalysis.Heppy.vhbbobj import *
 from PhysicsTools.HeppyCore.utils.deltar import deltaPhi
 from PhysicsTools.Heppy.analyzers.core.AutoFillTreeProducer  import * 
 
+
 import logging
 logging.basicConfig(level=logging.ERROR)
 
@@ -46,6 +47,16 @@ treeProducer= cfg.Analyzer(
  #                NTupleVariable("totSoftActivityJets5", lambda ev: len([ x for x in ev.softActivityJets if x.pt()> 5 ] ), int, help="number of jets from soft activity with pt>5Gev"),
   #               NTupleVariable("totSoftActivityJets10", lambda ev: len([ x for x in ev.softActivityJets if x.pt()> 10 ] ), int, help="number of jets from soft activity with pt>10Gev"),
                  NTupleVariable("ttCls",  lambda ev: getattr(ev, "ttbarCls", -1), float,mcOnly=True, help="ttbar classification via GeNHFHadronMatcher"),
+		 NTupleVariable("mhtJet30",  lambda ev : ev.mhtJet30, help="mht with jets30"),
+		 NTupleVariable("mhtPhiJet30",  lambda ev : ev.mhtPhiJet30, help="mht phi with jets30"),
+		 NTupleVariable("htJet30",  lambda ev : ev.htJet30, help="ht  with jets30"),
+		 NTupleVariable("met_rawpt",  lambda ev : ev.met.uncorrectedPt(), help="raw met"),
+		 NTupleVariable("metPuppi_pt",  lambda ev : ev.metPuppi.pt(), help="met from Puppi"),
+		 NTupleVariable("metPuppi_rawpt",  lambda ev : ev.metPuppi.uncorrectedPt(), help="raw met from Puppi"),
+		 NTupleVariable("metType1p2_pt",  lambda ev : ev.met.shiftedPt(12,2), help="type1type2met from Puppi"),
+		 NTupleVariable("metNoPU_pt",  lambda ev : ev.metNoPU.pt(), help="PFnoPU E_{T}^{miss}"),
+		 NTupleVariable("tkMet_pt",  lambda ev : ev.tkMet.pt(), help="E_{T}^{miss} from tracks"),
+		 NTupleVariable("tkMetPVchs_pt",  lambda ev : ev.tkMetPVchs.pt(), help="E_{T}^{miss} from tracks"),
 	],
 	globalObjects = {
           "met"    : NTupleObject("met",     metType, help="PF E_{T}^{miss}, after default type 1 corrections"),
@@ -163,6 +174,17 @@ VHGenAna = VHGeneratorAnalyzer.defaultConfig
 
 from PhysicsTools.Heppy.analyzers.objects.METAnalyzer import METAnalyzer
 METAna = METAnalyzer.defaultConfig
+METAna.doTkMet = True
+METAna.doMetNoPU = True
+
+METPuppiAna = copy.copy(METAna)
+METPuppiAna.metCollection     = "slimmedMETsPuppi"
+METPuppiAna.doMetNoPU = False
+METPuppiAna.recalibrate = False
+METPuppiAna.collectionPostFix = "Puppi"
+METPuppiAna.copyMETsByValue = True
+
+
 
 from PhysicsTools.Heppy.analyzers.core.PileUpAnalyzer import PileUpAnalyzer
 PUAna = PileUpAnalyzer.defaultConfig
@@ -243,7 +265,7 @@ if doPDFVars:
 
 TrigAna.unrollbits=True
 
-sequence = [LHEAna,FlagsAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,TauAna,JetAna,METAna,PdfAna,VHbb,TTHtoTauTau,TTHtoTauTauGen,treeProducer]#,sh]
+sequence = [LHEAna,FlagsAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,TauAna,JetAna,METAna, METPuppiAna, PdfAna, VHbb,TTHtoTauTau,TTHtoTauTauGen,treeProducer]#,sh]
 
 
 from PhysicsTools.Heppy.utils.miniAodFiles import miniAodFiles
@@ -251,8 +273,9 @@ sample = cfg.MCComponent(
     files = [
      #74X miniaod needed
      #"root://xrootd.ba.infn.it//store/relval/CMSSW_7_4_1/RelValTTbar_13/MINIAODSIM/PU50ns_MCRUN2_74_V8_gensim71X-v1/00000/6689A5C1-8AEC-E411-AD73-003048FFD756.root",
-     #"root://xrootd.unl.edu//store/mc/Phys14DR/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/00C90EFC-3074-E411-A845-002590DB9262.root"
-     "root://xrootd.unl.edu//store/mc/Phys14DR/TTbarH_M-125_13TeV_amcatnlo-pythia8-tauola/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v2/00000/FC4E6E16-5C7F-E411-8843-002590200AE4.root"
+    #"root://xrootd.unl.edu//store/mc/Phys14DR/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/00C90EFC-3074-E411-A845-002590DB9262.root"
+#     "root://xrootd.unl.edu//store/mc/Phys14DR/TTbarH_M-125_13TeV_amcatnlo-pythia8-tauola/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v2/00000/FC4E6E16-5C7F-E411-8843-002590200AE4.root"
+   "root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/00000/0AB045B5-BB0C-E511-81FD-0025905A60B8.root"
 ],
 
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
