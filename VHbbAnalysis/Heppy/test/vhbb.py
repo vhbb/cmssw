@@ -92,7 +92,7 @@ treeProducer= cfg.Analyzer(
                 "goodVertices"    : NTupleCollection("primaryVertices", primaryVertexType, 4, help="first four PVs"),
 
 		#dump of gen objects
-                #"genJets"    : NTupleCollection("GenJet",   genParticleType, 15, help="Generated jets with hadron matching, sorted by pt descending",filter=lambda x: x.pt() > 20,mcOnly=True),
+                "generatorSummary"    : NTupleCollection("GenSummary", genParticleWithLinksType, 30, help="Generator summary, see description in Heppy GeneratorAnalyzer",mcOnly=True),
                 "gentopquarks"    : NTupleCollection("GenTop",     genParticleType, 4, help="Generated top quarks from hard scattering"),
                 "gennusFromTop"    : NTupleCollection("GenNuFromTop",     genParticleType, 4, help="Generated neutrino from t->W decay"),
                 "genbquarksFromH"      : NTupleCollection("GenBQuarkFromH",  genParticleType, 4, help="Generated bottom quarks from Higgs decays"),
@@ -100,6 +100,7 @@ treeProducer= cfg.Analyzer(
                 "genbquarksFromHafterISR"      : NTupleCollection("GenBQuarkFromHafterISR",  genParticleType, 4, help="Generated bottom quarks from Higgs decays"),
                 "genwzquarks"     : NTupleCollection("GenWZQuark",   genParticleType, 6, help="Generated quarks from W/Z decays"),
                 "genleps"         : NTupleCollection("GenLep",     genParticleType, 4, help="Generated leptons from W/Z decays"),
+                "gentauleps"         : NTupleCollection("GenTaus",     genParticleType, 4, help="Generated taus"),
                 "genlepsFromTop"         : NTupleCollection("GenLepFromTop",     genParticleType, 4, help="Generated leptons from t->W decays"),
                 "gentauleps"      : NTupleCollection("GenLepFromTau", genParticleType, 6, help="Generated leptons from decays of taus from W/Z decays"),
 		"genHiggsBosons"   : NTupleCollection("GenHiggsBoson", genParticleType, 4, help="Generated Higgs boson "),
@@ -204,7 +205,7 @@ VHbb = cfg.Analyzer(
     zMuSelection = lambda x : x.pt() > 10 and x.muonID("POG_ID_Loose"),
     zLeadingElePt = 20,
     zLeadingMuPt = 20,
-    higgsJetsPreSelection = lambda x:  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') and x.pt() >  15 ,
+    higgsJetsPreSelection = lambda x:  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') and x.pt() >  20 ,
     passall=False,
     doSoftActivityVH=True,
     doVBF=True,
@@ -273,7 +274,7 @@ sample = cfg.MCComponent(
      #"root://xrootd.ba.infn.it//store/relval/CMSSW_7_4_1/RelValTTbar_13/MINIAODSIM/PU50ns_MCRUN2_74_V8_gensim71X-v1/00000/6689A5C1-8AEC-E411-AD73-003048FFD756.root",
     #"root://xrootd.unl.edu//store/mc/Phys14DR/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/00C90EFC-3074-E411-A845-002590DB9262.root"
 #     "root://xrootd.unl.edu//store/mc/Phys14DR/TTbarH_M-125_13TeV_amcatnlo-pythia8-tauola/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v2/00000/FC4E6E16-5C7F-E411-8843-002590200AE4.root"
-   "root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/00000/0AB045B5-BB0C-E511-81FD-0025905A60B8.root"
+   "/scratch/arizzi/0E132828-B218-E511-9983-3417EBE6453D.root"
 ],
 
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
