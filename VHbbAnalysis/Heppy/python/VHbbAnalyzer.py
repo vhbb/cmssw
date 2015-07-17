@@ -1,6 +1,6 @@
 from PhysicsTools.Heppy.analyzers.core.Analyzer import Analyzer
 from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
-from PhysicsTools.HeppyCore.utils.deltar import deltaR
+from PhysicsTools.HeppyCore.utils.deltar import deltaR,deltaPhi
 from copy import deepcopy
 from math import *
 import itertools
@@ -96,7 +96,14 @@ class VHbbAnalyzer( Analyzer ):
         softActivityJets =  [ ROOT.reco.Particle.LorentzVector(p4) for p4 in jets ]
         softActivityJets.sort(key=lambda x:x.pt(), reverse=True)
 	return softActivityJets
-
+    def searchISRforVH(self,event):
+        p4VH=event.HCSV+event.V
+        if p4VH.pt() > 30 :
+              phi=pi+p4VH.phi()
+              matchedJets=[(x,deltaPhi(phi,x.phi())) for x in event.cleanJetsAll if deltaPhi(phi,x.phi()) < 0.4 and  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') and x not in event.hJetsCSV ] 
+              if len(matchedJets) > 0 :
+                  event.isrJetVH=event.cleanJetsAll.index(sorted(matchedJets, key=lambda x:x[1])[0][0])
+                
     def makeJets(self,event,b):
 	inputs=ROOT.std.vector(ROOT.heppy.ReclusterJets.LorentzVector)()
         event.pfCands = list(self.handles['pfCands'].product())
@@ -321,6 +328,7 @@ class VHbbAnalyzer( Analyzer ):
         event.ajidxaddJetsdR08 = []
         event.aLeptons = []
         event.vLeptons = []
+        event.isrJetVH=-1
         event.H = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.HCSV = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.HaddJetsdR08 = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
