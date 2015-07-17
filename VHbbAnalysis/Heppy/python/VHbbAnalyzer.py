@@ -61,7 +61,7 @@ class VHbbAnalyzer( Analyzer ):
 	#compute QGL here for VBF jets if passing VBF pre-selection 
         map(lambda x :x.qgl(),event.jetsForVBF)
 
-        event.bJetsForVBF=sorted(event.jetsForVBF,key = lambda jet : jet.btag('pfCombinedInclusiveSecondaryVertexV2BJetTags'), reverse=True)[:2]
+        event.bJetsForVBF=sorted(event.jetsForVBF,key = lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')), reverse=True)[:2]
         j1=event.bJetsForVBF[0]
         j2=event.bJetsForVBF[1]
 #print "VBF"
@@ -150,7 +150,7 @@ class VHbbAnalyzer( Analyzer ):
 
     def doHiggsHighCSV(self,event) :
         #leading csv interpretation
-        event.hJetsCSV=sorted(event.jetsForHiggs,key = lambda jet : jet.btag('pfCombinedInclusiveSecondaryVertexV2BJetTags'), reverse=True)[0:2]
+        event.hJetsCSV=sorted(event.jetsForHiggs,key = lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')), reverse=True)[0:2]
         event.aJetsCSV = [x for x in event.cleanJets if x not in event.hJetsCSV]
         event.hjidxCSV=[event.cleanJetsAll.index(x) for x in event.hJetsCSV ]
         event.ajidxCSV=[event.cleanJetsAll.index(x) for x in event.aJetsCSV ]
@@ -164,7 +164,7 @@ class VHbbAnalyzer( Analyzer ):
         event.hjidx=[event.cleanJetsAll.index(x) for x in event.hJets ]
         event.ajidx=[event.cleanJetsAll.index(x) for x in event.aJets ]
         event.aJets+=event.cleanJetsFwd
-        hJetsByCSV = sorted(event.hJets , key =  lambda jet : jet.btag('pfCombinedInclusiveSecondaryVertexV2BJetTags'), reverse=True)
+        hJetsByCSV = sorted(event.hJets , key =  lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')), reverse=True)
         event.hjidxDiJetPtByCSV = [event.cleanJetsAll.index(x) for x in hJetsByCSV]
         event.H = event.hJets[0].p4()+event.hJets[1].p4()
 
@@ -364,6 +364,11 @@ class VHbbAnalyzer( Analyzer ):
         if getattr(self.cfg_ana,"doSoftActivityVH", False) :
             self.doSoftActivityVH(event)
 
+        #Add CSV ranking
+        csvSortedJets=sorted(event.cleanJetsAll, key =  lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')),reverse=True)
+        for j in event.cleanJetsAll:
+              j.btagIdx=csvSortedJets.index(j)
+      
     #    event.jee = list(self.handles['jee'].product())
 	#for j in list(jets)[0:3]:
 	#	print j.pt(),

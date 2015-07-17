@@ -116,8 +116,8 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("ptd",   lambda x : getattr(x,'ptd', 0), float, mcOnly=False,help="QG input variable: ptD"),
     NTupleVariable("axis2",   lambda x : getattr(x,'axis2', 0) , float, mcOnly=False,help="QG input variable: axis2"),
     NTupleVariable("mult",   lambda x : getattr(x,'mult', 0) , int, mcOnly=False,help="QG input variable: total multiplicity"),
-
     NTupleVariable("numberOfDaughters",   lambda x : x.numberOfDaughters(), int, mcOnly=False,help="number of daughters"),
+    NTupleVariable("btagIdx",   lambda x : x.btagIdx, int, mcOnly=False,help="ranking in btag "),
  ])
 
 
@@ -322,6 +322,7 @@ genJetType = NTupleObjectType("genJet", baseObjectTypes = [ genParticleType ], v
     NTupleVariable("wNuPt", lambda x : (x.p4()+x.nu).pt() if hasattr(x,"nu") else x.p4().pt() ,float, mcOnly=True, help="pt of jet adding back the neutrinos"),
     NTupleVariable("wNuEta", lambda x : (x.p4()+x.nu).eta() if hasattr(x,"nu") else x.p4().eta() ,float, mcOnly=True, help="eta of jet adding back the neutrinos"),
     NTupleVariable("wNuPhi", lambda x : (x.p4()+x.nu).phi() if hasattr(x,"nu") else x.p4().phi() ,float, mcOnly=True, help="phi of jet adding back the neutrinos"),
+    NTupleVariable("wNuM", lambda x : (x.p4()+x.nu).M() if hasattr(x,"nu") else x.p4().phi() ,float, mcOnly=True, help="mass of jet adding back the neutrinos"),
 
 ])
 
