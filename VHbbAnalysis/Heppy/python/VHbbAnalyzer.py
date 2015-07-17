@@ -72,10 +72,13 @@ class VHbbAnalyzer( Analyzer ):
         j1=event.hJetsCSV[0]
         j2=event.hJetsCSV[1]
 #print "VH"
-        event.softActivityVHJets=self.softActivity(event,j1,j2,event.hJetsCSV+event.selectedElectrons+event.selectedMuons)
+        excludedJets=event.hJetsCSV+event.selectedElectrons+event.selectedMuons
+        if event.isrJetVH >= 0 :
+            excludedJets+=[event.cleanJetsAll[event.isrJetVH]]
+        event.softActivityVHJets=self.softActivity(event,j1,j2,excludedJets,-1000)
 
 
-    def softActivity(self,event,j1,j2,excludedJets) :
+    def softActivity(self,event,j1,j2,excludedJets,dR0=0.4) :
 	if not hasattr(event,"pfCands") :
 	        event.pfCands = list(self.handles['pfCands'].product())
 
@@ -88,10 +91,9 @@ class VHbbAnalyzer( Analyzer ):
 	#get the pointed objects
  	used =  [x.get() for x in used]
 	remainingPF = [x for x in event.pfCands if x.charge() != 0 and abs(x.eta()) < 2.5 and  x.pt() > 0.3 and x.fromPV() >=2 and x not in used] 
-        dR0=0.4
         dRbb = deltaR(j1.eta(),j1.phi(),j2.eta(),j2.phi())
 	map(lambda x:inputs.push_back(x.p4()), remainingPF)
-	softActivity=ROOT.heppy.FastSoftActivity(inputs,-1,0.4,j1.p4(),j2.p4(),0)
+	softActivity=ROOT.heppy.FastSoftActivity(inputs,-1,0.4,j1.p4(),j2.p4(),dRbb+2*dR0)
         jets=softActivity.getGrouping(1)
         softActivityJets =  [ ROOT.reco.Particle.LorentzVector(p4) for p4 in jets ]
         softActivityJets.sort(key=lambda x:x.pt(), reverse=True)
