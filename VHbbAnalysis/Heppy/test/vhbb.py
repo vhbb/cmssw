@@ -48,6 +48,8 @@ treeProducer= cfg.Analyzer(
           "fakeMET"    : NTupleObject("fakeMET", fourVectorType, help="fake MET in Zmumu event obtained removing the muons"),
           "H"    : NTupleObject("H", fourVectorType, help="higgs"),
           "HCSV"    : NTupleObject("HCSV", fourVectorType, help="higgs CSV selection"),
+	  "H_reg"    : NTupleObject("H_reg", fourVectorType, help="regressed higgs"),
+          "HCSV_reg"    : NTupleObject("HCSV_reg", fourVectorType, help="regresses higgs CSV selection"),
           "H3cj"    : NTupleObject("H3cj", fourVectorType, help="higgs 3 cen jets selection"),
           "V"    : NTupleObject("V", fourVectorType, help="z or w"),
         },
