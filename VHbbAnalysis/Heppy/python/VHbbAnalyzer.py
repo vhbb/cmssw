@@ -1,6 +1,7 @@
 from PhysicsTools.Heppy.analyzers.core.Analyzer import Analyzer
 from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
 from PhysicsTools.HeppyCore.utils.deltar import deltaR
+from AddRegression import *
 from copy import deepcopy
 from math import *
 import itertools
@@ -131,11 +132,6 @@ class VHbbAnalyzer( Analyzer ):
         event.ajidxCSV=[event.cleanJets.index(x) for x in event.aJetsCSV ]
         event.aJetsCSV+=event.cleanJetsFwd
         event.HCSV = event.hJetsCSV[0].p4()+event.hJetsCSV[1].p4()
-	#hJetCSV_reg0 =ROOT.TLorentzVector()
-	#hJetCSV_reg1  = ROOT.TLorentzVector()
-	#hJetCSV_reg0.SetPtEtaPhiM(event.hJetsCSV[0].pt_reg, event.hJetsCSV[0].Pt(),  event.hJetsCSV[0].Eta(),  event.hJetsCSV[0].M())
-	#hJetCSV_reg1.SetPtEtaPhiM(event.hJetsCSV[1].pt_reg, event.hJetsCSV[1].Pt(),  event.hJetsCSV[1].Eta(),  event.hJetsCSV[1].M())
-	#event.HCSV_reg = hJetCSV_reg0.p4()+hJetCSV_reg1.p4()
 
     def doHiggsHighPt(self,event) :
         #highest pair interpretations
@@ -147,9 +143,6 @@ class VHbbAnalyzer( Analyzer ):
         hJetsByCSV = sorted(event.hJets , key =  lambda jet : jet.btag('combinedInclusiveSecondaryVertexV2BJetTags'), reverse=True)
         event.hjidxDiJetPtByCSV = [event.cleanJets.index(x) for x in hJetsByCSV]
         event.H = event.hJets[0].p4()+event.hJets[1].p4()
-	#hJet_reg0.SetPtEtaPhiM(event.hJets[0].pt_reg, event.hJets[0].Pt(),  event.hJets[0].Eta(),  event.hJets[0].M())
-        #hJet_reg1.SetPtEtaPhiM(event.hJets[1].pt_reg, event.hJets[1].Pt(),  event.hJets[1].Eta(),  event.hJets[1].M())
-        #event.H_reg = hJet_reg0.p4()+hJet_reg1.p4()
 
 	
 
@@ -335,6 +328,7 @@ class VHbbAnalyzer( Analyzer ):
 	self.doHiggsHighCSV(event)
 	self.doHiggsHighPt(event)
         self.doHiggs3cj(event)
+	self.AddRegHiggs(event)
         self.fillTauIndices(event)
         if getattr(self.cfg_ana,"doSoftActivity", False) :
             self.doSoftActivity(event)

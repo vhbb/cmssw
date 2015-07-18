@@ -3,9 +3,11 @@ from math import *
 import ROOT
 import array
 
-def AddRegression(self, event):
+def LoadRegression(self):	
 
-
+      weights = { "../weights/Zll_weights_phys14.xml" , "../weights/Wln_weights_phys14.xml", "../weights/Znn_weights_phys14.xml"}		
+      reader_name = {"jet0Regression_zll", "jet0Regression_wln","jet0Regression_znn"}	
+      for i in range(0,3)
 
         reader = ROOT.TMVA.Reader()
         self.Jet_pt =array.array('f',[0])
@@ -46,12 +48,10 @@ def AddRegression(self, event):
         reader.AddVariable("Jet_vtx3dL",self.Jet_vtx3dL)
         reader.AddVariable("Jet_vtxNtrk",self.Jet_vtxNtrk)
         reader.AddVariable("Jet_vtx3deL",self.Jet_vtx3deL)
-        if event.Vtype<2 :
-                reader.BookMVA("jet0Regression","../weights/Zll_weights_phys14.xml")
-        elif event.Vtype <4 :
-                reader.BookMVA("jet0Regression","../weights/Wln_weights_phys14.xml")
-        elif event.Vtype ==4:
-                reader.BookMVA("jet0Regression","../weights/Znn_weights_phys14.xml")
+        reader.BookMVA(reader_name[i],weights[i])
+
+
+def EvaluateRegression(self, event)
         self.reader=reader
 	self.readCollections( event.input )
         self.rho[0] = event.rho
@@ -81,9 +81,28 @@ def AddRegression(self, event):
             self.Jet_vtx3deL[0] = j.userFloat("vtx3deL")
 
 
-        if event.Vtype <5 and event.Vtype>0 :
-                j.pt_reg = self.reader.EvaluateRegression( "jet0Regression" )[0]
+        if event.Vtype <2 :
+                j.pt_reg = self.reader.EvaluateRegression( "jet0Regression_zll" )[0]
+	elif event.Vtype <4 :
+		j.pt_reg = self.reader.EvaluateRegression( "jet0Regression_wln" )[0]
+	 elif event.Vtype ==4:
+		j.pt_reg = self.reader.EvaluateRegression( "jet0Regression_znn" )[0]
+
+def AddRegHiggs(self, event) 
+	self.EvaluateRegression(event)
+	hJetCSV_reg0 =ROOT.TLorentzVector()
+        hJetCSV_reg1  = ROOT.TLorentzVector()
+        hJetCSV_reg0.SetPtEtaPhiM(event.hJetsCSV[0].pt_reg, event.hJetsCSV[0].Pt(),  event.hJetsCSV[0].Eta(),  event.hJetsCSV[0].M())
+        hJetCSV_reg1.SetPtEtaPhiM(event.hJetsCSV[1].pt_reg, event.hJetsCSV[1].Pt(),  event.hJetsCSV[1].Eta(),  event.hJetsCSV[1].M())
+        event.HCSV_reg = hJetCSV_reg0.p4()+hJetCSV_reg1.p4()
 	
+	
+	hJet_reg0=ROOT.TLorentzVector()
+	hJet_reg1= ROOT.TLorentzVector()
+	hJet_reg0.SetPtEtaPhiM(event.hJets[0].pt_reg, event.hJets[0].Pt(),  event.hJets[0].Eta(),  event.hJets[0].M())
+        hJet_reg1.SetPtEtaPhiM(event.hJets[1].pt_reg, event.hJets[1].Pt(),  event.hJets[1].Eta(),  event.hJets[1].M())
+        event.H_reg = hJet_reg0.p4()+hJet_reg1.p4()
+
 
 
 
