@@ -177,6 +177,9 @@ from PhysicsTools.Heppy.analyzers.objects.METAnalyzer import METAnalyzer
 METAna = METAnalyzer.defaultConfig
 METAna.doTkMet = True
 METAna.doMetNoPU = True
+METAna.doTkGenMet = False
+METAna.includeTkMetPVLoose = False
+METAna.includeTkMetPVTight = False
 
 METPuppiAna = copy.copy(METAna)
 METPuppiAna.metCollection     = "slimmedMETsPuppi"
@@ -184,6 +187,8 @@ METPuppiAna.doMetNoPU = False
 METPuppiAna.recalibrate = False
 METPuppiAna.collectionPostFix = "Puppi"
 METPuppiAna.copyMETsByValue = True
+METPuppiAna.doTkMet = False
+METPuppiAna.doMetNoPU = False
 
 
 
@@ -279,7 +284,7 @@ sample = cfg.MCComponent(
 #   "/scratch/arizzi/0E132828-B218-E511-9983-3417EBE6453D.root"
      #"root://xrootd.unl.edu//store/mc/Phys14DR/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/00C90EFC-3074-E411-A845-002590DB9262.root"
 #     "root://xrootd.unl.edu//store/mc/Phys14DR/TTbarH_M-125_13TeV_amcatnlo-pythia8-tauola/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v2/00000/FC4E6E16-5C7F-E411-8843-002590200AE4.root"
-     "root://xrootd.unl.edu//store/mc/RunIISpring15DR74/ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/60000/0210194C-2F18-E511-9A70-A0369F3102F6.root"
+     "/scratch/arizzi/0E132828-B218-E511-9983-3417EBE6453D.root"
 ],
 
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
