@@ -184,6 +184,7 @@ METPuppiAna.doMetNoPU = False
 METPuppiAna.recalibrate = False
 METPuppiAna.collectionPostFix = "Puppi"
 METPuppiAna.copyMETsByValue = True
+METPuppiAna.doTkMet = False
 
 
 
