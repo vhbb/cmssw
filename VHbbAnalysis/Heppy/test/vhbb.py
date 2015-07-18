@@ -176,6 +176,9 @@ from PhysicsTools.Heppy.analyzers.objects.METAnalyzer import METAnalyzer
 METAna = METAnalyzer.defaultConfig
 METAna.doTkMet = True
 METAna.doMetNoPU = True
+METAna.doTkGenMet = False
+METAna.includeTkMetPVLoose = False
+METAna.includeTkMetPVTight = False
 
 METPuppiAna = copy.copy(METAna)
 METPuppiAna.metCollection     = "slimmedMETsPuppi"
@@ -183,6 +186,8 @@ METPuppiAna.doMetNoPU = False
 METPuppiAna.recalibrate = False
 METPuppiAna.collectionPostFix = "Puppi"
 METPuppiAna.copyMETsByValue = True
+METPuppiAna.doTkMet = False
+METPuppiAna.doMetNoPU = False
 
 
 

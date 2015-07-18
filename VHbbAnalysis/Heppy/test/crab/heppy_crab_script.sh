@@ -69,4 +69,4 @@ echo "------ End edmPluginDump | grep -i CandidateBoostedDoubleSecondaryVertexES
 
 python heppy_crab_script.py $1
 echo "======================== CMSRUN LOG ============================"
-tail -n 200 Output/cmsRun.log 
+cat Output/cmsRun.log 
