@@ -56,37 +56,37 @@ def EvaluateRegression(self, event)
 	self.readCollections( event.input )
 	self.rho[0] = event.rho
 	for j in event.jetsForHiggs :
-	self.Jet_pt[0] = j.pt()
-	self.Jet_eta[0] = j.eta()
-	self.Jet_rawPt[0] = j.pt()*j.rawFactor()
-	self.Jet_mt[0] = j.mt()
-	self.Jet_leadTrackPt[0] = j.leadTrackPt()
-	if len(j.leptons) > 0       :
-		self.Jet_leptonPtRel[0] = ptRel(j.leptons[0].p4(),j.p4())
-		self.Jet_leptonPt[0] =  j.leptons[0].pt()
-		self.Jet_leptonDeltaR[0] = deltaR(j.leptons[0].p4().eta(),j.leptons[0].p4().phi(),j.p4().eta(),j.p4().phi())
-	else:
-		self.Jet_leptonPtRel[0] = -99
-		self.Jet_leptonPt[0] =  -99
-		self.Jet_leptonDeltaR[0] =-99
-	self.Jet_chEmEF[0] = j.chargedEmEnergyFraction()
-	self.Jet_chHEF[0] = j.chargedHadronEnergyFraction()
-	self.Jet_neHEF[0] = j.neutralHadronEnergyFraction()
-	self.Jet_neEmEF[0] = j.neutralEmEnergyFraction()
-	self.Jet_chMult[0] = j.chargedMultiplicity()
-	self.Jet_vtxPt[0] = sqrt(j.userFloat("vtxPx")**2 + j.userFloat("vtxPy")**2)
-	self.Jet_vtxMass[0] = j.userFloat("vtxMass")
-	self.Jet_vtx3dL[0] = j.userFloat("vtx3dL")
-	self.Jet_vtxNtrk[0] = j.userFloat("vtxNtrk")
-	self.Jet_vtx3deL[0] = j.userFloat("vtx3deL")
+		self.Jet_pt[0] = j.pt()
+		self.Jet_eta[0] = j.eta()
+		self.Jet_rawPt[0] = j.pt()*j.rawFactor()
+		self.Jet_mt[0] = j.mt()
+		self.Jet_leadTrackPt[0] = j.leadTrackPt()
+		if len(j.leptons) > 0       :
+			self.Jet_leptonPtRel[0] = ptRel(j.leptons[0].p4(),j.p4())
+			self.Jet_leptonPt[0] =  j.leptons[0].pt()
+			self.Jet_leptonDeltaR[0] = deltaR(j.leptons[0].p4().eta(),j.leptons[0].p4().phi(),j.p4().eta(),j.p4().phi())
+		else:
+			self.Jet_leptonPtRel[0] = -99
+			self.Jet_leptonPt[0] =  -99
+			self.Jet_leptonDeltaR[0] =-99
+		self.Jet_chEmEF[0] = j.chargedEmEnergyFraction()
+		self.Jet_chHEF[0] = j.chargedHadronEnergyFraction()
+		self.Jet_neHEF[0] = j.neutralHadronEnergyFraction()
+		self.Jet_neEmEF[0] = j.neutralEmEnergyFraction()
+		self.Jet_chMult[0] = j.chargedMultiplicity()
+		self.Jet_vtxPt[0] = sqrt(j.userFloat("vtxPx")**2 + j.userFloat("vtxPy")**2)
+		self.Jet_vtxMass[0] = j.userFloat("vtxMass")
+		self.Jet_vtx3dL[0] = j.userFloat("vtx3dL")
+		self.Jet_vtxNtrk[0] = j.userFloat("vtxNtrk")
+		self.Jet_vtx3deL[0] = j.userFloat("vtx3deL")
 
 
-	if event.Vtype <2 :
-		j.pt_reg = self.reader.EvaluateRegression( "jet0Regression_zll" )[0]
-	elif event.Vtype <4 :
-		j.pt_reg = self.reader.EvaluateRegression( "jet0Regression_wln" )[0]
-	elif event.Vtype ==4:
-		j.pt_reg = self.reader.EvaluateRegression( "jet0Regression_znn" )[0]
+		if event.Vtype <2 :
+			j.pt_reg = self.reader.EvaluateRegression( "jet0Regression_zll" )[0]
+		elif event.Vtype <4 :
+			j.pt_reg = self.reader.EvaluateRegression( "jet0Regression_wln" )[0]
+		elif event.Vtype ==4:
+			j.pt_reg = self.reader.EvaluateRegression( "jet0Regression_znn" )[0]
 
 def AddRegHiggs(self, event) 
 	self.EvaluateRegression(event)

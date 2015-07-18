@@ -296,10 +296,10 @@ class VHbbAnalyzer( Analyzer ):
         event.ajidx3cj = []
         event.aLeptons = []
         event.vLeptons = []
-        event.H = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
-        event.HCSV = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
+	event.H = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
+	event.HCSV = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
 	event.H_reg = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
-        event.HCSV_reg = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
+	event.HCSV_reg = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.H3cj = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.V = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.minDr3=-1
@@ -327,7 +327,7 @@ class VHbbAnalyzer( Analyzer ):
                 return self.cfg_ana.passall
 	self.doHiggsHighCSV(event)
 	self.doHiggsHighPt(event)
-        self.doHiggs3cj(event)
+	self.doHiggs3cj(event)
 	self.AddRegHiggs(event)
         self.fillTauIndices(event)
         if getattr(self.cfg_ana,"doSoftActivity", False) :
