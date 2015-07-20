@@ -210,9 +210,9 @@ class JetAnalyzer( Analyzer ):
                 self.cleanGenJets = cleanNearestJetOnly(self.cleanGenJets, photons, self.jetLepDR)
 	    if hasattr(self.cfg_ana,"genNuSelection") :
 		jetNus=[x for x in event.genParticles if abs(x.pdgId()) in [12,14,16] and self.cfg_ana.genNuSelection(x) ]
-	 	pairs= matchObjectCollection3 ( self.cleanGenJets, jetNus, 0.4)
-		for (genJet,nu) in pairs.iteritems() :
-		     if nu is not None :
+	 	pairs= matchObjectCollection (jetNus, self.cleanGenJets, 0.4)
+		for (nu,genJet) in pairs.iteritems() :
+		     if genJet is not None :
 			if not hasattr(genJet,"nu") :
 				genJet.nu=nu.p4()
 			else :

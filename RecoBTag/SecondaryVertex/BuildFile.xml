@@ -1,12 +1,19 @@
 <use name="FWCore/ParameterSet"/>
 <use name="FWCore/Utilities"/>
+<use name="CommonTools/Utils"/>
 <use name="DataFormats/Math"/>
 <use name="DataFormats/TrackReco"/>
 <use name="DataFormats/VertexReco"/>
 <use name="DataFormats/BTauReco"/>
 <use name="DataFormats/PatCandidates"/>
 <use name="RecoVertex/VertexTools"/>
+<use name="RecoBTau/JetTagComputer"/>
 <use name="rootmath"/>
+<use name="fastjet"/>
+<use name="fastjet-contrib"/>
+
+<Flags LCG_DICT_HEADER="classes.h">
+<Flag LCG_DICT_XML="classes_def.xml">
 <export>
   <lib name="1"/>
 </export>
