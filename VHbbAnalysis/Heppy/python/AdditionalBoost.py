@@ -283,12 +283,17 @@ class AdditionalBoost( Analyzer ):
             self.handles['ca15ungroomed']     = AutoHandle( ("ca15PFJetsCHS","","EX"), "std::vector<reco::PFJet>")
             self.handles['ca15trimmed']       = AutoHandle( ("ca15PFTrimmedJetsCHS","","EX"), "std::vector<reco::PFJet>")
             self.handles['ca15softdrop']      = AutoHandle( ("ca15PFSoftdropJetsCHS","","EX"), "std::vector<reco::PFJet>")
+            self.handles['ca15softdropz2b1']  = AutoHandle( ("ca15PFSoftdropZ2B1JetsCHS","","EX"), "std::vector<reco::PFJet>")
             self.handles['ca15pruned']        = AutoHandle( ("ca15PFPrunedJetsCHS","","EX"), "std::vector<reco::BasicJet>")
             self.handles['ca15prunedsubjets'] = AutoHandle( ("ca15PFPrunedJetsCHS","SubJets","EX"), "std::vector<reco::PFJet>")
 
             self.handles['ca15tau1'] = AutoHandle( ("ca15PFJetsCHSNSubjettiness","tau1","EX"), "edm::ValueMap<float>")
             self.handles['ca15tau2'] = AutoHandle( ("ca15PFJetsCHSNSubjettiness","tau2","EX"), "edm::ValueMap<float>")
             self.handles['ca15tau3'] = AutoHandle( ("ca15PFJetsCHSNSubjettiness","tau3","EX"), "edm::ValueMap<float>")
+
+            self.handles['ca15softdropz2b1tau1'] = AutoHandle( ("ca15PFSoftdropZ2B1JetsCHSNSubjettiness","tau1","EX"), "edm::ValueMap<float>")
+            self.handles['ca15softdropz2b1tau2'] = AutoHandle( ("ca15PFSoftdropZ2B1JetsCHSNSubjettiness","tau2","EX"), "edm::ValueMap<float>")
+            self.handles['ca15softdropz2b1tau3'] = AutoHandle( ("ca15PFSoftdropZ2B1JetsCHSNSubjettiness","tau3","EX"), "edm::ValueMap<float>")
 
             self.handles['httCandJets']  = AutoHandle( ("looseOptRHTT","","EX"), "std::vector<reco::BasicJet>")
             self.handles['httCandInfos'] = AutoHandle( ("looseOptRHTT","","EX"), "vector<reco::HTTTopJetTagInfo>")
@@ -351,7 +356,7 @@ class AdditionalBoost( Analyzer ):
 
 
         ######## 
-        # Ungroomed Fatjets + NSubjettiness
+        # Ungroomed Fatjets + NSubjettiness + Hbb Tagging
         ########
 
         for prefix in ["ca15"]:
@@ -398,6 +403,34 @@ class AdditionalBoost( Analyzer ):
                                    maxSVDeltaRToJet = 1.3)
                                     
             # end of loop over jets
+
+        ######## 
+        # Softdrop Fatjets + NSubjettiness
+        ########
+
+        for fj_name in ["ca15softdropz2b1"]:
+
+            if AdditionalBoost.skip_ca15 and ("ca15" in fj_name):
+                continue
+                
+            # Set the four-vector
+            setattr(event, fj_name, map(PhysicsObject, self.handles[fj_name].product()))
+
+            # N-Subjettiness
+            tau1 = self.handles[fj_name+'tau1'].product()
+            tau2 = self.handles[fj_name+'tau2'].product()
+            tau3 = self.handles[fj_name+'tau3'].product()
+
+            # Loop over jets                        
+            for ij, jet in enumerate(getattr(event, fj_name)):
+
+                # Fill N-Subjettiness
+                jet.tau1 = tau1.get(ij)
+                jet.tau2 = tau2.get(ij)
+                jet.tau3 = tau3.get(ij)
+                                    
+            # end of loop over jets
+
 
 
                                                                 

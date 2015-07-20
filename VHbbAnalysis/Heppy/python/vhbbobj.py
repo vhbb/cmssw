@@ -148,6 +148,7 @@ fatjetType = NTupleObjectType("fatjet",  baseObjectTypes = [ fourVectorType ], v
     NTupleVariable("vertexNTracks",    lambda x : x.vertexNTracks, help="number of tracks for vertex (for bb-tag)"),    
     ])
 
+
 ##------------------------------------------  
 ## Extended FAT JET
 ##------------------------------------------  

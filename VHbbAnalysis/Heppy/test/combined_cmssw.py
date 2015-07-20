@@ -112,12 +112,37 @@ if not skip_ca15:
         R0 = cms.double(1.5),
         useExplicitGhosts = cms.bool(True))
 
+    # Apply softdrop z=0.2, beta=1 to CA R=1.5 jets
+    process.ca15PFSoftdropZ2B1JetsCHS = process.ca15PFJetsCHS.clone(
+        useSoftDrop = cms.bool(True),
+        zcut = cms.double(0.2),
+        beta = cms.double(0.1),
+        R0 = cms.double(1.5),
+        useExplicitGhosts = cms.bool(True))
+
     # Apply trimming to CA R=1.5 jets
     process.ca15PFTrimmedJetsCHS = process.ca15PFJetsCHS.clone(
         useTrimming = cms.bool(True),
         rFilt = cms.double(0.2),
         trimPtFracMin = cms.double(0.06),
         useExplicitGhosts = cms.bool(True))
+
+    # Calculate tau1, tau2 and tau3 for softdrop (z=0.2, beta=1) CA R=1.5 jets
+    process.ca15PFSoftdropZ2B1JetsCHSNSubjettiness  = cms.EDProducer("NjettinessAdder",
+                                                                     src=cms.InputTag("ca15PFSoftdropZ2B1JetsCHS"),
+                                                                     cone=cms.double(1.5),
+                                                                     Njets = cms.vuint32(1,2,3),
+                                                                     # variables for measure definition : 
+                                                                     measureDefinition = cms.uint32( 0 ), # CMS default is normalized measure
+                                                                     beta = cms.double(1.0),              # CMS default is 1
+                                                                     R0 = cms.double(1.5),                # CMS default is jet cone size
+                                                                     Rcutoff = cms.double( -999.0),       # not used by default
+                                                                     # variables for axes definition :
+                                                                     axesDefinition = cms.uint32( 6 ),    # CMS default is 1-pass KT axes
+                                                                     nPass = cms.int32(-999),             # not used by default
+                                                                     akAxesR0 = cms.double(-999.0)        # not used by default
+    )
+
 
     # HEPTopTagger (MultiR)
     process.looseOptRHTT = cms.EDProducer(
@@ -147,8 +172,10 @@ if not skip_ca15:
     process.OUT.outputCommands.append("keep *_ca15PFJetsCHS_*_EX")
     process.OUT.outputCommands.append("keep *_ca15PFPrunedJetsCHS_*_EX")
     process.OUT.outputCommands.append("keep *_ca15PFSoftdropJetsCHS_*_EX")
+    process.OUT.outputCommands.append("keep *_ca15PFSoftdropZ2B1JetsCHS_*_EX")
     process.OUT.outputCommands.append("keep *_ca15PFTrimmedJetsCHS_*_EX")
     process.OUT.outputCommands.append("keep *_ca15PFJetsCHSNSubjettiness_*_EX")
+    process.OUT.outputCommands.append("keep *_ca15PFSoftdropZ2B1JetsCHSNSubjettiness_*_EX")
     process.OUT.outputCommands.append("keep *_looseOptRHTT_*_EX")
 
 
