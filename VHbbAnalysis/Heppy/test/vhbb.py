@@ -63,6 +63,8 @@ treeProducer= cfg.Analyzer(
           "fakeMET"    : NTupleObject("fakeMET", fourVectorType, help="fake MET in Zmumu event obtained removing the muons"),
           "H"    : NTupleObject("H", fourVectorType, help="higgs"),
           "HCSV"    : NTupleObject("HCSV", fourVectorType, help="higgs CSV selection"),
+          "H_reg"    : NTupleObject("H_reg", fourVectorType, help="regressed higgs"),
+          "HCSV_reg"    : NTupleObject("HCSV_reg", fourVectorType, help="regresses higgs CSV selection"),
           "HaddJetsdR08"    : NTupleObject("HaddJetsdR08", fourVectorType, help="higgs with cen jets added if dR<0.8 from hJetsCSV selection"),
           "V"    : NTupleObject("V", fourVectorType, help="z or w"),
           "softActivityJets"    : NTupleObject("softActivity", softActivityType, help="VBF soft activity variables"),
@@ -216,6 +218,11 @@ VHbb = cfg.Analyzer(
     passall=False,
     doSoftActivityVH=True,
     doVBF=True,
+    regressions = [
+        {"weight":"Zll_weights_phys14.xml", "name":"jet0Regression_zll", "vtypes":[0,1]},
+        {"weight":"Wln_weights_phys14.xml", "name":"jet0Regression_wln", "vtypes":[2,3]},
+        {"weight":"Znn_weights_phys14.xml", "name":"jet0Regression_znn", "vtypes":[4,5,-1]}
+    ],
 )
 
 from VHbbAnalysis.Heppy.TTHtoTauTauAnalyzer import TTHtoTauTauAnalyzer
