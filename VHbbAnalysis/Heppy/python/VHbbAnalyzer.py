@@ -50,7 +50,9 @@ class VHbbAnalyzer( Analyzer ):
             self.inputCounter = ROOT.TH1F("Count","Count",1,0,2)
             self.inputCounterPosWeight = ROOT.TH1F("CountPosWeight","Count genWeight>0",1,0,2)
             self.inputCounterNegWeight = ROOT.TH1F("CountNegWeight","Count genWeight<0",1,0,2)
+        self.regressions={}
         for re in self.cfg_ana.regressions :
+            print "Initialize regression ",re
             regression = JetRegression(re["weight"],re["name"])              
             for i in re["vtypes"] :
                 self.regressions[i] = regression
@@ -204,18 +206,19 @@ class VHbbAnalyzer( Analyzer ):
         
         event.HaddJetsdR08 = sum(map(lambda x:x.p4(), event.hJetsaddJetsdR08), ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)) 
 
-    def doVHRegression(self, event)
+    def doVHRegression(self, event):
         self.regressions[event.Vtype].evaluateRegression(event)
-        hJetCSV_reg0 =ROOT.TLorentzVector()
-        hJetCSV_reg1  = ROOT.TLorentzVector()
-        hJetCSV_reg0.SetPtEtaPhiM(event.hJetsCSV[0].pt_reg, event.hJetsCSV[0].Eta(),  event.hJetsCSV[0].Phi(),  event.hJetsCSV[0].M()) #fixme: M should be fixed?
-        hJetCSV_reg1.SetPtEtaPhiM(event.hJetsCSV[1].pt_reg, event.hJetsCSV[1].Eta(),  event.hJetsCSV[1].Phi(),  event.hJetsCSV[1].M()) #fixme: M should be fixed?
-        event.HCSV_reg = hJetCSV_reg0.p4()+hJetCSV_reg1.p4()
-        hJet_reg0=ROOT.TLorentzVector()
-        hJet_reg1= ROOT.TLorentzVector()
-        hJet_reg0.SetPtEtaPhiM(event.hJets[0].pt_reg, event.hJets[0].Eta(),  event.hJets[0].Phi(),  event.hJets[0].M())
-        hJet_reg1.SetPtEtaPhiM(event.hJets[1].pt_reg, event.hJets[1].Eta(),  event.hJets[1].Phi(),  event.hJets[1].M())
-        event.H_reg = hJet_reg0.p4()+hJet_reg1.p4()
+        hJetCSV_reg0 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[0].p4())
+        hJetCSV_reg1 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[1].p4())
+        hJetCSV_reg0*=event.hJetsCSV[0].pt_reg/event.hJetsCSV[0].pt()
+        hJetCSV_reg1*=event.hJetsCSV[0].pt_reg/event.hJetsCSV[1].pt()
+        event.HCSV_reg = hJetCSV_reg0+hJetCSV_reg1
+
+        hJet_reg0=ROOT.reco.Particle.LorentzVector(event.hJets[0].p4())
+        hJet_reg1=ROOT.reco.Particle.LorentzVector(event.hJets[1].p4())
+        hJet_reg0*=event.hJets[0].pt_reg/event.hJets[0].pt()
+        hJet_reg1*=event.hJets[0].pt_reg/event.hJets[0].pt()
+        event.H_reg = hJet_reg0+hJet_reg1
 
 
 
