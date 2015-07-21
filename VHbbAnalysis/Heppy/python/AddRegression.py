@@ -92,15 +92,15 @@ def AddRegHiggs(self, event)
 	self.EvaluateRegression(event)
 	hJetCSV_reg0 =ROOT.TLorentzVector()
 	hJetCSV_reg1  = ROOT.TLorentzVector()
-	hJetCSV_reg0.SetPtEtaPhiM(event.hJetsCSV[0].pt_reg, event.hJetsCSV[0].Pt(),  event.hJetsCSV[0].Eta(),  event.hJetsCSV[0].M())
-	hJetCSV_reg1.SetPtEtaPhiM(event.hJetsCSV[1].pt_reg, event.hJetsCSV[1].Pt(),  event.hJetsCSV[1].Eta(),  event.hJetsCSV[1].M())
+	hJetCSV_reg0.SetPtEtaPhiM(event.hJetsCSV[0].pt_reg, event.hJetsCSV[0].Eta(),  event.hJetsCSV[0].Phi(),  event.hJetsCSV[0].M())
+	hJetCSV_reg1.SetPtEtaPhiM(event.hJetsCSV[1].pt_reg, event.hJetsCSV[1].Eta(),  event.hJetsCSV[1].Phi(),  event.hJetsCSV[1].M())
 	event.HCSV_reg = hJetCSV_reg0.p4()+hJetCSV_reg1.p4()
 
 
 	hJet_reg0=ROOT.TLorentzVector()
 	hJet_reg1= ROOT.TLorentzVector()
-	hJet_reg0.SetPtEtaPhiM(event.hJets[0].pt_reg, event.hJets[0].Pt(),  event.hJets[0].Eta(),  event.hJets[0].M())
-	hJet_reg1.SetPtEtaPhiM(event.hJets[1].pt_reg, event.hJets[1].Pt(),  event.hJets[1].Eta(),  event.hJets[1].M())
+	hJet_reg0.SetPtEtaPhiM(event.hJets[0].pt_reg, event.hJets[0].Eta(),  event.hJets[0].Phi(),  event.hJets[0].M())
+	hJet_reg1.SetPtEtaPhiM(event.hJets[1].pt_reg, event.hJets[1].Eta(),  event.hJets[1].Phi(),  event.hJets[1].M())
 	event.H_reg = hJet_reg0.p4()+hJet_reg1.p4()
 
 
