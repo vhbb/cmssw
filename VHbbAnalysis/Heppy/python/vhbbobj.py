@@ -136,6 +136,20 @@ jetTypeVHbb.variables += [NTupleVariable("bTagWeight",
         jet, kind="final", systematic="nominal",
     ), float, mcOnly=True, help="b-tag CSV weight, nominal"
 )]
+
+
+##------------------------------------------  
+## FAT JET + Tau
+##------------------------------------------  
+
+# Four Vector + Nsubjettiness
+
+fatjetTauType = NTupleObjectType("fatjettau",  baseObjectTypes = [ fourVectorType ], variables = [
+    NTupleVariable("tau1",  lambda x : x.tau1, help="Nsubjettiness (1 axis)"),
+    NTupleVariable("tau2",  lambda x : x.tau2, help="Nsubjettiness (2 axes)"),
+    NTupleVariable("tau3",  lambda x : x.tau3, help="Nsubjettiness (3 axes)"),
+])
+
  
 ##------------------------------------------  
 ## FAT JET
@@ -163,6 +177,7 @@ fatjetType = NTupleObjectType("fatjet",  baseObjectTypes = [ fourVectorType ], v
     NTupleVariable("nSL",              lambda x : x.nSL, help="number of soft leptons (for bb-tag)"),    
     NTupleVariable("vertexNTracks",    lambda x : x.vertexNTracks, help="number of tracks for vertex (for bb-tag)"),    
     ])
+
 
 ##------------------------------------------  
 ## Extended FAT JET

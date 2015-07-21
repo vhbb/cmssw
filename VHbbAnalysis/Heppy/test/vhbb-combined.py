@@ -50,6 +50,12 @@ if not AdditionalBoost.skip_ca15:
                                                                 10,
                                                                 help="CA, R=1.5, pT > 200 GeV, softdrop zcut=0.1, beta=0")
 
+    # four-vector + n-subjettiness
+    treeProducer.collections["ca15softdropz2b1"] = NTupleCollection("FatjetCA15softdropz2b1",
+                                                                    fatjetTauType,
+                                                                    10,
+                                                                    help="CA, R=1.5, pT > 200 GeV, softdrop zcut=0.2, beta=1")
+
     treeProducer.collections["ca15trimmed"] = NTupleCollection("FatjetCA15trimmed",
                                                                 fourVectorType,
                                                                 10,
