@@ -118,6 +118,7 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("mult",   lambda x : getattr(x,'mult', 0) , int, mcOnly=False,help="QG input variable: total multiplicity"),
     NTupleVariable("numberOfDaughters",   lambda x : x.numberOfDaughters(), int, mcOnly=False,help="number of daughters"),
     NTupleVariable("btagIdx",   lambda x : x.btagIdx, int, mcOnly=False,help="ranking in btag "),
+    NTupleVariable("pt_reg",lambda x : getattr(x,"pt_reg",-99), help="Regression"),
  ])
 
 

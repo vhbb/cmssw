@@ -1,4 +1,6 @@
 from VHbbAnalysis.Heppy.vhbbobj import ptRel
+from PhysicsTools.HeppyCore.utils.deltar import deltaR,deltaPhi
+
 from math import *
 import ROOT
 import array
@@ -50,7 +52,7 @@ class JetRegression :
         self.reader=reader
         self.name=name
 
-    def evaluateRegression(self, event)
+    def evaluateRegression(self, event):
 #self.readCollections( event.input )
 	self.rho[0] = event.rho
 	for j in event.jetsForHiggs :
