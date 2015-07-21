@@ -216,6 +216,11 @@ VHbb = cfg.Analyzer(
     passall=False,
     doSoftActivityVH=True,
     doVBF=True,
+    regressions = [
+        {weight="Zll_weights_phys14.xml", name="jet0Regression_zll", vtypes=[0,1]}
+        {weight="Wln_weights_phys14.xml", name="jet0Regression_wln", vtypes=[2,3]}
+        {weight="Znn_weights_phys14.xml", name="jet0Regression_znn", vtypes=[4,5,-1]}
+    ],
 )
 
 from VHbbAnalysis.Heppy.TTHtoTauTauAnalyzer import TTHtoTauTauAnalyzer

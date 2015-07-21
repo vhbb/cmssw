@@ -3,6 +3,7 @@ from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
 from PhysicsTools.HeppyCore.utils.deltar import deltaR,deltaPhi
 from copy import deepcopy
 from math import *
+from JetRegression import JetRegression
 import itertools
 import ROOT
 def Boost(self,boost):
@@ -49,6 +50,11 @@ class VHbbAnalyzer( Analyzer ):
             self.inputCounter = ROOT.TH1F("Count","Count",1,0,2)
             self.inputCounterPosWeight = ROOT.TH1F("CountPosWeight","Count genWeight>0",1,0,2)
             self.inputCounterNegWeight = ROOT.TH1F("CountNegWeight","Count genWeight<0",1,0,2)
+        for re in self.cfg_ana.regressions :
+            regression = JetRegression(re["weight"],re["name"])              
+            for i in re["vtypes"] :
+                self.regressions[i] = regression
+
 
     def doVBF(self,event) :
         event.jetsForVBF = [x for x in event.cleanJetsAll if self.cfg_ana.higgsJetsPreSelection(x) ]
@@ -198,6 +204,18 @@ class VHbbAnalyzer( Analyzer ):
         
         event.HaddJetsdR08 = sum(map(lambda x:x.p4(), event.hJetsaddJetsdR08), ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)) 
 
+    def doVHRegression(self, event)
+        self.regressions[event.Vtype].evaluateRegression(event)
+        hJetCSV_reg0 =ROOT.TLorentzVector()
+        hJetCSV_reg1  = ROOT.TLorentzVector()
+        hJetCSV_reg0.SetPtEtaPhiM(event.hJetsCSV[0].pt_reg, event.hJetsCSV[0].Eta(),  event.hJetsCSV[0].Phi(),  event.hJetsCSV[0].M()) #fixme: M should be fixed?
+        hJetCSV_reg1.SetPtEtaPhiM(event.hJetsCSV[1].pt_reg, event.hJetsCSV[1].Eta(),  event.hJetsCSV[1].Phi(),  event.hJetsCSV[1].M()) #fixme: M should be fixed?
+        event.HCSV_reg = hJetCSV_reg0.p4()+hJetCSV_reg1.p4()
+        hJet_reg0=ROOT.TLorentzVector()
+        hJet_reg1= ROOT.TLorentzVector()
+        hJet_reg0.SetPtEtaPhiM(event.hJets[0].pt_reg, event.hJets[0].Eta(),  event.hJets[0].Phi(),  event.hJets[0].M())
+        hJet_reg1.SetPtEtaPhiM(event.hJets[1].pt_reg, event.hJets[1].Eta(),  event.hJets[1].Phi(),  event.hJets[1].M())
+        event.H_reg = hJet_reg0.p4()+hJet_reg1.p4()
 
 
 
@@ -334,11 +352,15 @@ class VHbbAnalyzer( Analyzer ):
         event.H = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.HCSV = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.HaddJetsdR08 = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
+        event.H_reg = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
+        event.HCSV_reg = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.V = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.minDr3=-1
         event.V.goodMt=0
         event.hjidxDiJetPtByCSV = []
         event.softActivityJets=[]
+
+
     def process(self, event):
 	#print "Event number",event.iEv
         self.readCollections( event.input )
@@ -372,6 +394,8 @@ class VHbbAnalyzer( Analyzer ):
 	self.doHiggsHighPt(event)
         self.searchISRforVH(event)
         self.doHiggsAddJetsdR08(event)
+        self.doVHRegression(event)
+
         self.fillTauIndices(event)
 	if getattr(self.cfg_ana,"doVBF", True) :
 	    self.doVBF(event)
