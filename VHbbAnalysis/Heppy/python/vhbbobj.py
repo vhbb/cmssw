@@ -42,6 +42,7 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
     NTupleVariable("pixelLayers", lambda x : (x.track() if abs(x.pdgId())==13 else x.gsfTrack()).hitPattern().pixelLayersWithMeasurement(), int, help="Pixel Layers"),
     # TTH-id related variables
     NTupleVariable("mvaTTH",     lambda lepton : lepton.mvaValue if hasattr(lepton,'mvaValue') else -1, help="Lepton MVA (ttH version)"),
+    NTupleVariable("jetOverlapIdx", lambda lepton : getattr(lepton, "jetOverlapIdx", -1), int, help="index of jet with overlapping PF constituents. If idx>=1000, then idx = idx-1000 and refers to discarded jets."),
     NTupleVariable("jetPtRatio", lambda lepton : lepton.pt()/lepton.jet.pt() if hasattr(lepton,'jet') else -1, help="pt(lepton)/pt(nearest jet)"),
     NTupleVariable("jetBTagCSV", lambda lepton : lepton.jet.btag('pfCombinedInclusiveSecondaryVertexV2BJetTags') if hasattr(lepton,'jet') and hasattr(lepton.jet, 'btag') else -99, help="btag of nearest jet"),
     NTupleVariable("jetDR",      lambda lepton : deltaR(lepton.eta(),lepton.phi(),lepton.jet.eta(),lepton.jet.phi()) if hasattr(lepton,'jet') else -1, help="deltaR(lepton, nearest jet)"),
@@ -70,7 +71,7 @@ tauTypeVHbb = NTupleObjectType("tauTypeVHbb", baseObjectTypes = [ tauType ], var
 ##------------------------------------------  
 
 jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables = [
-    NTupleVariable("idxFirstTauMatch", lambda x : x.tauIdxs[0] if len(x.tauIdxs) > 0 else -1, int,help='index of the first matching tau'),
+    NTupleVariable("idxFirstTauMatch", lambda x : x.tauIdxs[0] if len(getattr(x, "tauIdxs", [])) > 0 else -1, int,help='index of the first matching tau'),
     NTupleVariable("hadronFlavour", lambda x : x.mcFlavour, int,     mcOnly=True, help="match to heavy hadrons"),
     NTupleVariable("btagBDT", lambda x : getattr(x,"btagBDT",-99), help="btag"),
     NTupleVariable("btagProb", lambda x : x.btag('jetProbabilityBJetTags') , help="btag"),
@@ -118,6 +119,7 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("mult",   lambda x : getattr(x,'mult', 0) , int, mcOnly=False,help="QG input variable: total multiplicity"),
     NTupleVariable("numberOfDaughters",   lambda x : x.numberOfDaughters(), int, mcOnly=False,help="number of daughters"),
     NTupleVariable("btagIdx",   lambda x : x.btagIdx, int, mcOnly=False,help="ranking in btag "),
+    NTupleVariable("pt_reg",lambda x : getattr(x,"pt_reg",-99), help="Regression"),
  ])
 
 
@@ -136,6 +138,20 @@ jetTypeVHbb.variables += [NTupleVariable("bTagWeight",
         jet, kind="final", systematic="nominal",
     ), float, mcOnly=True, help="b-tag CSV weight, nominal"
 )]
+
+
+##------------------------------------------  
+## FAT JET + Tau
+##------------------------------------------  
+
+# Four Vector + Nsubjettiness
+
+fatjetTauType = NTupleObjectType("fatjettau",  baseObjectTypes = [ fourVectorType ], variables = [
+    NTupleVariable("tau1",  lambda x : x.tau1, help="Nsubjettiness (1 axis)"),
+    NTupleVariable("tau2",  lambda x : x.tau2, help="Nsubjettiness (2 axes)"),
+    NTupleVariable("tau3",  lambda x : x.tau3, help="Nsubjettiness (3 axes)"),
+])
+
  
 ##------------------------------------------  
 ## FAT JET
@@ -163,6 +179,7 @@ fatjetType = NTupleObjectType("fatjet",  baseObjectTypes = [ fourVectorType ], v
     NTupleVariable("nSL",              lambda x : x.nSL, help="number of soft leptons (for bb-tag)"),    
     NTupleVariable("vertexNTracks",    lambda x : x.vertexNTracks, help="number of tracks for vertex (for bb-tag)"),    
     ])
+
 
 ##------------------------------------------  
 ## Extended FAT JET
