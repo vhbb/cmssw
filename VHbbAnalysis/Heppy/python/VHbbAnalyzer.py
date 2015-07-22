@@ -409,6 +409,8 @@ class VHbbAnalyzer( Analyzer ):
         csvSortedJets=sorted(event.cleanJetsAll, key =  lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')),reverse=True)
         for j in event.cleanJetsAll:
               j.btagIdx=csvSortedJets.index(j)
+        for j in event.discardedJets:
+              j.btagIdx=-1
       
     #    event.jee = list(self.handles['jee'].product())
 	#for j in list(jets)[0:3]:
