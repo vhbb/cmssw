@@ -144,6 +144,7 @@ class GeneratorAnalyzer( Analyzer ):
                 print ""
 
         event.genHiggsBoson = []
+        event.genHiggsSisters = []
         event.genleps    = []
         event.gentauleps = []
         event.gentaus    = []
@@ -175,6 +176,10 @@ class GeneratorAnalyzer( Analyzer ):
 
 
         higgsBosons = [ p for p in event.genParticles if (p.pdgId() == 25) and p.numberOfDaughters() > 0 and abs(p.daughter(0).pdgId()) != 25 ]
+        higgsBosonsFirst = [ p for p in event.genParticles if (p.pdgId() == 25) and p.numberOfMothers() > 0 and abs(p.mother(0).pdgId()) != 25 ]
+        higgsMothers = [x.mother(0) for x in higgsBosonsFirst]
+        #print higgsMothers
+        event.genHiggsSisters = [p for p in event.genParticles if p.mother(0) in higgsMothers  and p.pdgId() != 25 ]
 
         if len(higgsBosons) == 0:
             event.genHiggsDecayMode = 0
