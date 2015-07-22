@@ -83,7 +83,7 @@ class VHbbAnalyzer( Analyzer ):
         excludedJets=event.hJetsCSV+event.selectedElectrons+event.selectedMuons
         if event.isrJetVH >= 0 :
             excludedJets+=[event.cleanJetsAll[event.isrJetVH]]
-        event.softActivityVHJets=self.softActivity(event,j1,j2,excludedJets,-1000)
+        event.softActivityVHJets=[x for x in self.softActivity(event,j1,j2,excludedJets,-1000) if x.pt() > 2.0 ]
 
 
     def softActivity(self,event,j1,j2,excludedJets,dR0=0.4) :
