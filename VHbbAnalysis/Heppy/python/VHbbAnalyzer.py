@@ -193,7 +193,7 @@ class VHbbAnalyzer( Analyzer ):
 	event.hjidxaddJetsdR08 = [x for x in event.hjidxCSV]         
 	event.ajidxaddJetsdR08 = [x for x in event.ajidxCSV]         
          #multiple jets interpretations, for central jets closest to dR<0.8 from higgs jets
-        jetsForHiggsAddJetsdR08 = [x for x in event.jetsForHiggs if (x.pt()>15 and abs(x.eta())<3.0) ]
+        jetsForHiggsAddJetsdR08 = [x for x in event.cleanJetsAll if (x.pt()>15 and abs(x.eta())<3.0 and x.puJetId() > 0 and x.jetID('POG_PFID_Loose') ) ]
         if (len(jetsForHiggsAddJetsdR08) > 2): 
            addJetsForHiggs = [x for x in jetsForHiggsAddJetsdR08 if ( x not in event.hJetsCSV  and  min(deltaR( x.eta(), x.phi(), event.hJetsCSV[0].eta(), event.hJetsCSV[0].phi()),deltaR( x.eta(), x.phi(), event.hJetsCSV[1].eta(), event.hJetsCSV[1].phi()))<0.8 ) ]
            for x in addJetsForHiggs:
