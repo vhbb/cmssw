@@ -137,16 +137,10 @@ class JetAnalyzer( Analyzer ):
             leps_with_overlaps = []
             for i in range(jet.numberOfSourceCandidatePtrs()):
                 p1 = jet.sourceCandidatePtr(i) #Ptr<Candidate> p1
-                if not p1.isAvailable():
-                    continue
                 for lep in leptons:
                     for j in range(lep.numberOfSourceCandidatePtrs()):
                         p2 = lep.sourceCandidatePtr(j)
-                        if not p2.isAvailable():
-                            continue
-                        #for some reason, this does not work.
-                        #has_overlaps = p1.refCore() == p2.refCore() and p1.key() == p2.key()
-                        has_overlaps = p1.p4() == p2.p4() and p1.charge() == p2.charge()
+                        has_overlaps = p1.key() == p2.key() and p1.refCore().id().productIndex() == p2.refCore().id().productIndex() and p1.refCore().id().processIndex() == p2.refCore().id().processIndex()
                         if has_overlaps:
                             leps_with_overlaps += [lep]
             if len(leps_with_overlaps)>0:
