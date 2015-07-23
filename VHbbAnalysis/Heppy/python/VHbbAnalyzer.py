@@ -64,10 +64,10 @@ class VHbbAnalyzer( Analyzer ):
         if len(event.jetsForVBF) < 4 or  event.jetsForVBF[0] < 70 or  event.jetsForVBF[1] < 55 or  event.jetsForVBF[2] < 35 or  event.jetsForVBF[3] < 20 :
             return
         event.jetsForVBF.sort(key=lambda x:x.pt(),reverse=True)
+        map(lambda x :x.qgl(),event.jetsForVBF[:6])
         event.jetsForVBF=event.jetsForVBF[:4]
 
 	#compute QGL here for VBF jets if passing VBF pre-selection 
-        map(lambda x :x.qgl(),event.jetsForVBF)
 
         event.bJetsForVBF=sorted(event.jetsForVBF,key = lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')), reverse=True)[:2]
         j1=event.bJetsForVBF[0]
@@ -392,7 +392,9 @@ class VHbbAnalyzer( Analyzer ):
         if event.Vtype < 0 and not ( sum(x.pt() > 30 for x in event.jetsForHiggs) >= 4 or sum(x.pt() for x in event.jetsForHiggs[:4]) > 160 ):
                 return self.cfg_ana.passall
 
-        map(lambda x :x.qgl(),event.jetsForHiggs[:4])
+        map(lambda x :x.qgl(),event.jetsForHiggs[:6])
+        map(lambda x :x.qgl(),(x for x in event.jetsForHiggs if x.pt() > 30) )
+
 	self.doHiggsHighCSV(event)
 	self.doHiggsHighPt(event)
         self.searchISRforVH(event)
