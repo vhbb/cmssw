@@ -3,15 +3,16 @@ import sys,os
 # REMOVE DATASET NAMES CONTAINING:
 
 remove = [
-          'http','prime','GravToZZ','GravitonToGluonGluon','GravitonToQuarkQuark','GravToGG','GravToWW','ToHHTo2B',
+          'prime','GravToZZ','GravitonToGluonGluon','GravitonToQuarkQuark','GravToGG','GravToWW','ToHHTo2B',
           'SUSY','QstarTo','RSGluonTo','WRTo','TstarTstar','Unpart','LQTo','BstarTo','WpWpJJ','WZTo3LNu',
           'HToZZ','HToWW','HToG','HToT','/ADD','/GJet','GluGluToZZ','TTbarDM','HToInvisible','WToENu_M','WToMuNu_M','WToTauNu_M',
           'ttHJetToGG','ttHJetToTT','Muminus_Pt','/Muplus','Photon','SinglePion','ZZTo4L','DoubleElectron',
           'SingleEta','tGamma','JPsiToMuMu','JpsiToMuMu','mtop1','BdToJpsiKs','tZq_','GG_M','HToNonbb',
           'DYJetsToLL_M-1000to1500','DYJetsToLL_M-100to200','DYJetsToLL_M-10to50','DYJetsToLL_M-1500to2000',
           'DYJetsToLL_M-2000to3000','DYJetsToLL_M-400to500','DYJetsToLL_M-500to700','DYJetsToLL_M-500to700',
-          'DYJetsToLL_M-200to400','DYJetsToLL_M-700to800','DYJetsToLL_M-800to1000','BuToJpsiK','GluGluHToZG',
-          'GGJets','Monotop_S','TTJets_Mtt-','TT_Mtt-',
+          'DYJetsToLL_M-200to400','DYJetsToLL_M-700to800','DYJetsToLL_M-800to1000','BuToJpsiK','GluGluHToZG','ZZTo2L2Nu',
+          'GGJets','Monotop_S','TTJets_Mtt-','TT_Mtt-','BBbarDM','DarkMatter','GluGlu_LFV','WW_DoubleScattering','HToMuMu',
+          'UpsilonMuMu','BsToJpsiPhi',
           '/ttHJetToNonbb_M120_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v3/MINIAODSIM',
