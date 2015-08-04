@@ -18,7 +18,7 @@ remove = [
           'BulkGravTohhTohbbhbb_narrow_M-4000','BulkGravTohhTohtatahbb_narrow_M-1600',
           'BulkGravTohhTohtatahbb_narrow_M-2000','BulkGravTohhTohtatahbb_narrow_M-2500','BulkGravTohhTohtatahbb_narrow_M-1800',
           'BulkGravTohhTohtatahbb_narrow_M-3000','BulkGravTohhTohtatahbb_narrow_M-3500','BulkGravTohhTohtatahbb_narrow_M-4000',
-          'BulkGravTohhTohtatahbb_narrow_M-4500',
+          'BulkGravTohhTohtatahbb_narrow_M-4500','HToEMu',
           '/ttHJetToNonbb_M120_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v3/MINIAODSIM',
