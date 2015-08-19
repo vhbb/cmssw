@@ -55,10 +55,12 @@ triggerTable = {
         "HLT_Ele27_eta2p1_WPLoose_Gsf_CentralPFJet30_BTagCSV07_v*",
         "HLT_Ele105_CaloIdVT_GsfTrkIdT_v*",
         "HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50_v*",
+        "HLT_Ele27_WPLoose_Gsf_WHbbBoost_v1",
     ],
     "WenHbbHighLumi" : [
         "HLT_Ele32_eta2p1_WPLoose_Gsf_v*",
         "HLT_Ele27_eta2p1_WPLoose_Gsf_HT200_v*",
+        "HLT_Ele27_WPLoose_Gsf_WHbbBoost_v1",
     ],
     "WenHbbLowLumi" : [
         "HLT_Ele27_eta2p1_WPTight_Gsf_v*",
