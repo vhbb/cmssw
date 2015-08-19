@@ -208,5 +208,14 @@ triggerTable = {
     "hadronic" : [
         "HLT_PFHT750_4Jet_v*",
         "HLT_PFHT900_v*",
+        "HLT_PFJet40_v*",
+        "HLT_PFJet60_v*",
+        "HLT_PFJet80_v*",
+        "HLT_PFJet140_v*",
+        "HLT_PFJet200_v*",
+        "HLT_PFJet260_v*",
+        "HLT_PFJet320_v*",
+        "HLT_PFJet400_v*",
+        "HLT_PFJet450_v*",
     ],
 }
