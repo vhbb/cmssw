@@ -10,6 +10,10 @@
 #include "RecoJets/JetProducers/interface/BackgroundEstimator.h"
 #include "RecoJets/JetProducers/interface/VirtualJetProducerHelper.h"
 
+#include "DataFormats/Common/interface/RefProd.h"
+#include "DataFormats/Common/interface/Ref.h"
+#include "DataFormats/Common/interface/RefVector.h"
+
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -61,7 +65,7 @@ namespace reco {
 }                                                                                        
 
 //______________________________________________________________________________
-const char *VirtualJetProducer::JetType::names[] = {
+const char *const VirtualJetProducer::JetType::names[] = {
   "BasicJet","GenJet","CaloJet","PFJet","TrackJet","PFClusterJet"
 };
 
@@ -70,7 +74,7 @@ const char *VirtualJetProducer::JetType::names[] = {
 VirtualJetProducer::JetType::Type
 VirtualJetProducer::JetType::byName(const string &name)
 {
-  const char **pos = std::find(names, names + LastJetType, name);
+  const char *const *pos = std::find(names, names + LastJetType, name);
   if (pos == names + LastJetType) {
     std::string errorMessage="Requested jetType not supported: "+name+"\n";
     throw cms::Exception("Configuration",errorMessage);
@@ -136,6 +140,7 @@ VirtualJetProducer::VirtualJetProducer(const edm::ParameterSet& iConfig)
   , jetCollInstanceName_ ("")
   , writeCompound_ ( false )
   , verbosity_(0)
+  , fromHTTTopJetProducer_(0)
 {
   anomalousTowerDef_ = std::auto_ptr<AnomalousTower>(new AnomalousTower(iConfig));
 
@@ -418,6 +423,13 @@ void VirtualJetProducer::produce(edm::Event& iEvent,const edm::EventSetup& iSetu
   output( iEvent, iSetup );
   LogDebug("VirtualJetProducer") << "Wrote jets\n";
   
+  // Clear the work vectors so that memory is free for other modules.
+  // Use the trick of swapping with an empty vector so that the memory
+  // is actually given back rather than silently kept.
+  decltype(fjInputs_)().swap(fjInputs_);
+  decltype(fjJets_)().swap(fjJets_);
+  decltype(inputs_)().swap(inputs_);  
+
   return;
 }
 
@@ -851,5 +863,11 @@ void VirtualJetProducer::writeCompoundJets(  edm::Event & iEvent, edm::EventSetu
   }
 
   // put hard jets into event record
-  iEvent.put( jetCollection);
+  // Store the Orphan handle for adding HTT information
+  edm::OrphanHandle<reco::BasicJetCollection>  oh = iEvent.put( jetCollection);
+
+  if (fromHTTTopJetProducer_){
+    addHTTTopJetTagInfoCollection( iEvent, iSetup, oh);
+  }
+
 }
