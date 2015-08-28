@@ -106,6 +106,8 @@ class PileUpAnalyzer( Analyzer ):
 
         event.vertexWeight = 1
         event.nPU = None
+        event.pileUpVertex_z = []
+        event.pileUpVertex_ptHat = []
         if self.cfg_comp.isMC:
             event.pileUpInfo = map( PileUpSummaryInfo,
                                     self.mchandles['pusi'].product() )
@@ -127,7 +129,7 @@ class PileUpAnalyzer( Analyzer ):
                     pileUpVertex_z = ptHat_zPositions[:]
                     for i in range(len(pileUpVertex_z)):
                         pileUpVertex_z[i]=pileUpVertex_z[i][1]
-                        pileUpVertex_ptHat[i]=pileUpVertex_ptHat[i][0]
+                        pileUpVertex_ptHat[i]=pileUpVertex_z[i][0]
                     
                     event.pileUpVertex_z = pileUpVertex_z[:]
                     event.pileUpVertex_ptHat = pileUpVertex_ptHat[:]
