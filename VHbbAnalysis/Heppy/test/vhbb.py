@@ -245,11 +245,14 @@ TTHtoTauTauGen = cfg.Analyzer(
 #sh = cfg.Analyzer( class_object=HeppyShell)
 
 from PhysicsTools.Heppy.analyzers.core.TriggerBitAnalyzer import TriggerBitAnalyzer
+
 from VHbbAnalysis.Heppy.TriggerTable import triggerTable
+from VHbbAnalysis.Heppy.TriggerTableData import triggerTableData
+
 TrigAna = cfg.Analyzer(
     verbose = False,
     class_object = TriggerBitAnalyzer,
-    triggerBits = triggerTable, 
+    triggerBits = triggerTable,  #default is MC, use the triggerTableData in -data.py files
 #   processName = 'HLT',
 #   outprefix = 'HLT'
    )
