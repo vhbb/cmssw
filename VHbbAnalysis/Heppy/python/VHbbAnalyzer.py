@@ -85,6 +85,67 @@ class VHbbAnalyzer( Analyzer ):
             excludedJets+=[event.cleanJetsAll[event.isrJetVH]]
         event.softActivityVHJets=[x for x in self.softActivity(event,j1,j2,excludedJets,-1000) if x.pt() > 2.0 ]
 
+   
+    def computePullVector(self,event,jet) :
+        # this function is computing the pull vector (a TVector2) per each input jet. The pull vector is a varibale sensitive to the color flow connections.
+
+        #variables initialisation
+        t_Vect=ROOT.TVector2()
+        t_Vect.Set(0.,0.)
+        tVector=ROOT.TVector2()
+        r=ROOT.TVector2()
+        pi=ROOT.TLorentzVector()
+        J=ROOT.TLorentzVector()
+        nOfconst=0
+
+        # loading the particle flow candidates
+        if not hasattr(event,"pfCands"):
+          event.pfCands = list(self.handles['pfCands'].product())
+        
+        # need to reconstruct the jet pt using only the charged tracks
+        for i in range(0,jet.numberOfSourceCandidatePtrs()): # loop over the pf candidates
+            pfCand=jet.sourceCandidatePtr(i) # pick one candidate at the time
+            if not pfCand.isAvailable(): continue # check if it is available (?)
+            if pfCand.charge() == 0: continue  # calculating a tvector using only charged tracks. This is how it was in the Run1 analysis.
+            pi.SetPtEtaPhiE( pfCand.pt(), pfCand.eta(), pfCand.phi(), pfCand.energy() );
+            J += pi #building the jet using only yhe chared pf candidates four momentum
+            nOfconst+=1 # count the number of charge constituents
+
+        # if there are not more than one track there is no way to calculate the pullAngle.
+        if nOfconst<2: 
+          return t_Vect # return the t_Vector initialized to 0,0 
+        
+        #now calculating the actual pull vector
+        for i in range(0,jet.numberOfSourceCandidatePtrs()): # loop over the pf cadidates
+            pfCand=jet.sourceCandidatePtr(i) # get pf candidates one by one
+            if not pfCand.isAvailable(): continue # check if the candidate is available
+            if pfCand.charge() == 0: continue # calculating a tvector using only charged tracks. This is how it was in the Run1 analysis.
+            pfCand_pt = pfCand.pt() 
+            pi.SetPtEtaPhiE(pfCand.pt(),pfCand.eta(),pfCand.phi(),pfCand.energy())
+            r.Set( pi.Rapidity() - J.Rapidity(), deltaPhi( pfCand.phi(), J.Phi() ) );
+            r_mag = r.Mod();
+            t_Vect += ( pfCand_pt / J.Pt() ) * r_mag * r;
+        # here I need to create a new property on the jet class
+        return t_Vect
+
+
+    def addPullVector(self,event) :
+        #'The function add the pull angle to the jet collection for each jet.'
+        t_vect=ROOT.TVector2()
+        # calculating the pull angle only for higgs jets. 
+        # @todo: expland it to all jets.
+        for j in event.jetsForHiggs:
+          t_vect=self.computePullVector(event,j)
+          print("t_vect phi = ", t_vect.Phi() )
+          # here we can either store the tvector2 coordinated which gives the possibility to development at the tree level
+          # or we can calcualre the pullAngle for all jets
+          # think for development we could add pullAngle to all jets.
+          # look here for the definition of the pullAngle: 
+          # https://github.com/vhbb/vhbb/blob/cf8f2381e63644af44fc5b6c0b7e2f4fa4017ddb/VHbbDataFormats/interface/VHbbCandidateTools.h#L330
+          # for the moment I just store the coordinates of the pull vector (phi and eta)
+          j.pullVectorPhi=t_vect.Phi()
+          j.pullVectorMag=t_vect.Mod() # if there are less than 2 charged of candidates then the magnitude will be 0.
+
 
     def softActivity(self,event,j1,j2,excludedJets,dR0=0.4) :
 	if not hasattr(event,"pfCands") :
@@ -402,6 +463,8 @@ class VHbbAnalyzer( Analyzer ):
         self.doVHRegression(event)
 
         self.fillTauIndices(event)
+        self.addPullVector(event)
+
 	if getattr(self.cfg_ana,"doVBF", True) :
 	    self.doVBF(event)
         if getattr(self.cfg_ana,"doSoftActivityVH", False) :
