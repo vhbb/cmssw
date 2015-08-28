@@ -126,10 +126,9 @@ class PileUpAnalyzer( Analyzer ):
                     ptHat_zPositions = zip(puInfo.getPU_pT_hats(),puInfo.getPU_zpositions())
                     ptHat_zPositions.sort()
                     ptHat_zPositions.reverse()
-                    pileUpVertex_z = ptHat_zPositions[:]
-                    for i in range(len(pileUpVertex_z)):
-                        pileUpVertex_z[i]=pileUpVertex_z[i][1]
-                        pileUpVertex_ptHat[i]=pileUpVertex_z[i][0]
+                    for ptHat_zPosition in ptHat_zPositions:
+                        pileUpVertex_z.append(ptHat_zPosition[1])
+                        pileUpVertex_ptHat.append(ptHat_zPosition[0])
                     
                     event.pileUpVertex_z = pileUpVertex_z[:]
                     event.pileUpVertex_ptHat = pileUpVertex_ptHat[:]
