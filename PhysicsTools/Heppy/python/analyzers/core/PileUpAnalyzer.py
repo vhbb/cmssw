@@ -125,8 +125,12 @@ class PileUpAnalyzer( Analyzer ):
                     ptHat_zPositions.sort()
                     ptHat_zPositions.reverse()
                     pileUpVertex_z = ptHat_zPositions[:]
-                    for i in range(len(pileUpVertex_z)): pileUpVertex_z[i]=pileUpVertex_z[i][1]
+                    for i in range(len(pileUpVertex_z)):
+                        pileUpVertex_z[i]=pileUpVertex_z[i][1]
+                        pileUpVertex_ptHat[i]=pileUpVertex_ptHat[i][0]
+                    
                     event.pileUpVertex_z = pileUpVertex_z[:]
+                    event.pileUpVertex_ptHat = pileUpVertex_ptHat[:]
             
             if event.nPU is None:
                 raise ValueError('nPU cannot be None! means that no pu info has been found for bunch crossing 0.')
