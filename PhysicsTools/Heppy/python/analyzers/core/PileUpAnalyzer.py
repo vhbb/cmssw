@@ -83,9 +83,11 @@ class PileUpAnalyzer( Analyzer ):
     def declareHandles(self):
         super(PileUpAnalyzer, self).declareHandles()
         self.mchandles['pusi'] =  AutoHandle(
-            'addPileupInfo',
-            'std::vector<PileupSummaryInfo>' 
+            'slimmedAddPileupInfo',
+            'std::vector<PileupSummaryInfo>',
+            fallbackLabel="addPileupInfo"
             ) 
+
         if self.allVertices == '_AUTO_':
             self.handles['vertices'] =  AutoHandle( "offlineSlimmedPrimaryVertices", 'std::vector<reco::Vertex>', fallbackLabel="offlinePrimaryVertices" ) 
         else:
@@ -118,6 +120,14 @@ class PileUpAnalyzer( Analyzer ):
                     if self.doHists:
                         self.rawmcpileup.hist.Fill( event.nPU )
 
+                    ##get z position of on-time pile-up sorted by pt-hat
+                    ptHat_zPositions = zip(puInfo.getPU_pT_hats(),puInfo.getPU_zpositions())
+                    ptHat_zPositions.sort()
+                    ptHat_zPositions.reverse()
+                    pileUpVertex_z = ptHat_zPositions[:]
+                    for i in range(len(pileUpVertex_z)): pileUpVertex_z[i]=pileUpVertex_z[i][1]
+                    event.pileUpVertex_z = pileUpVertex_z[:]
+            
             if event.nPU is None:
                 raise ValueError('nPU cannot be None! means that no pu info has been found for bunch crossing 0.')
         elif self.cfg_comp.isEmbed:
