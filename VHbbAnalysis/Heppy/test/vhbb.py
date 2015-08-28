@@ -15,6 +15,7 @@ from PhysicsTools.Heppy.analyzers.core.AutoFillTreeProducer  import *
 import logging
 logging.basicConfig(level=logging.ERROR)
 
+import os
 
 cfg.Analyzer.nosubdir = True
 
@@ -206,7 +207,7 @@ JetAna.jetPt = 15
 JetAna.doQG=True
 JetAna.QGpath="pdfQG_AK4chs_antib_13TeV_v1.root"
 JetAna.recalibrateJets=True
-JetAna.jecPath="jec"
+JetAna.jecPath=os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/jec"
 JetAna.mcGT="PHYS14_V4_MC"
 JetAna.dataGT = "Summer15_50nsV4_DATA"
 
@@ -247,7 +248,7 @@ TTHtoTauTauGen = cfg.Analyzer(
 from PhysicsTools.Heppy.analyzers.core.TriggerBitAnalyzer import TriggerBitAnalyzer
 
 from VHbbAnalysis.Heppy.TriggerTable import triggerTable
-from VHbbAnalysis.Heppy.TriggerTableData import triggerTableData
+from VHbbAnalysis.Heppy.TriggerTableData import triggerTable as triggerTableData
 
 TrigAna = cfg.Analyzer(
     verbose = False,
