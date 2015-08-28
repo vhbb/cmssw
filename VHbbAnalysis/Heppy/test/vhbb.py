@@ -24,7 +24,7 @@ treeProducer= cfg.Analyzer(
 	verbose=False, 
 	vectorTree = True,
         globalVariables	= [
-                 NTupleVariable("nPU0", lambda ev : [bx.nPU() for bx in  ev.pileUpInfo if bx.getBunchCrossing()==0][0], help="nPU in BX=0"),
+                 NTupleVariable("nPU0", lambda ev : [bx.nPU() for bx in  ev.pileUpInfo if bx.getBunchCrossing()==0][0], help="nPU in BX=0",mcOnly=True),
                  NTupleVariable("nPVs", lambda ev : len(ev.goodVertices), help="total number of good PVs"),
 		 NTupleVariable("Vtype", lambda ev : ev.Vtype, help="Event classification"),
 		 NTupleVariable("VtypeSim", lambda ev : ev.VtypeSim, help="Event classification",mcOnly=True),
@@ -208,6 +208,7 @@ JetAna.QGpath="pdfQG_AK4chs_antib_13TeV_v1.root"
 JetAna.recalibrateJets=True
 JetAna.jecPath="jec"
 JetAna.mcGT="PHYS14_V4_MC"
+JetAna.dataGT = "Summer15_50nsV4_DATA"
 
 VHbb = cfg.Analyzer(
     verbose=False,
