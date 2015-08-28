@@ -104,9 +104,10 @@ class JetAnalyzer( Analyzer ):
             self.jetReCalibrator.correctAll(allJets, rho, delta=self.shiftJEC, metShift=self.deltaMetFromJEC)
 
         for delta, shift in [(1.0, "JECUp"), (0.0, ""), (-1.0, "JECDown")]:
-            for j1 in allJets:
-                corr = self.jetReCalibrator.getCorrection(j1, rho, delta, self.deltaMetFromJEC)
-                setattr(j1, "corr"+shift, corr)
+            if self.doJEC:
+		for j1 in allJets:
+                	corr = self.jetReCalibrator.getCorrection(j1, rho, delta, self.deltaMetFromJEC)
+                	setattr(j1, "corr"+shift, corr)
 
         self.allJetsUsedForMET = allJets
 #        print "after. rho",self.rho,self.cfg_ana.collectionPostFix,'allJets len ',len(allJets),'pt', [j.pt() for j in allJets]

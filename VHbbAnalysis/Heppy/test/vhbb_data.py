@@ -175,6 +175,7 @@ from VHbbAnalysis.Heppy.VHbbAnalyzer import VHbbAnalyzer
 JetAna.jetPt = 15
 JetAna.doQG=False
 JetAna.QGpath="pdfQG_AK4chs_antib_13TeV_v1.root"
+print "ISMC",ISMC
 if ISMC == False:
    JetAna.recalibrateJets= False
    JetAna.smearJets= False
@@ -196,6 +197,12 @@ VHbb = cfg.Analyzer(
     passall=False,
     doSoftActivityVH=False,
     doVBF=False,
+    regressions = [
+        {"weight":"Zll_weights_phys14.xml", "name":"jet0Regression_zll", "vtypes":[0,1]},
+        {"weight":"Wln_weights_phys14.xml", "name":"jet0Regression_wln", "vtypes":[2,3]},
+        {"weight":"Znn_weights_phys14.xml", "name":"jet0Regression_znn", "vtypes":[4,5,-1]}
+    ],
+
 )
 
 from VHbbAnalysis.Heppy.TTHtoTauTauAnalyzer import TTHtoTauTauAnalyzer
@@ -213,7 +220,7 @@ TTHtoTauTauGen = cfg.Analyzer(
 #sh = cfg.Analyzer( class_object=HeppyShell)
 
 from PhysicsTools.Heppy.analyzers.core.TriggerBitAnalyzer import TriggerBitAnalyzer
-from VHbbAnalysis.Heppy.TriggerTable import triggerTable
+from VHbbAnalysis.Heppy.TriggerTableData import triggerTable
 TrigAna = cfg.Analyzer(
     verbose = False,
     class_object = TriggerBitAnalyzer,
@@ -263,7 +270,8 @@ sample = cfg.MCComponent(
      #"root://xrootd.unl.edu//store/mc/Phys14DR/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/00C90EFC-3074-E411-A845-002590DB9262.root"
 #     "root://xrootd.unl.edu//store/mc/Phys14DR/TTbarH_M-125_13TeV_amcatnlo-pythia8-tauola/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v2/00000/FC4E6E16-5C7F-E411-8843-002590200AE4.root"
 #"root://xrootd.unl.edu//store/data/Run2015B/SingleMuon/MINIAOD/PromptReco-v1/000/251/162/00000/160C08A3-4227-E511-B829-02163E01259F.root"
-			"root://xrootd.unl.edu//store/mc/RunIISpring15DR74/ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/60000/0210194C-2F18-E511-9A70-A0369F3102F6.root"
+	"root://xrootd.ba.infn.it///store/data/Run2015B/SingleElectron/MINIAOD/PromptReco-v1/000/251/643/00000/7077210E-8F2C-E511-97D5-02163E0138EC.root"
+	#		"root://xrootd.unl.edu//store/mc/RunIISpring15DR74/ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/60000/0210194C-2F18-E511-9A70-A0369F3102F6.root"
 ],
 
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
