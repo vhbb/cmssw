@@ -105,6 +105,8 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("vtxPosX",   lambda x : x.userFloat("vtxPosX"), mcOnly=False, help="X coord of vertex from btag"),
     NTupleVariable("vtxPosY",   lambda x : x.userFloat("vtxPosY"), mcOnly=False, help="Y coord of vertex from btag"), 
     NTupleVariable("vtxPosZ",   lambda x : x.userFloat("vtxPosZ"), mcOnly=False, help="Z coord of vertex from btag"),
+    NTupleVariable("pullVectorPhi", lambda x : getattr(x,"pullVectorPhi",-99), mcOnly=False, help="pull angle phi in the phi eta plane"),
+    NTupleVariable("pullVectorMag", lambda x : getattr(x,"pullVectorMag",-99), mcOnly=False, help="pull angle magnitude"),
    # QG variables:
 # this computes for all
 #    NTupleVariable("qgl",   lambda x :x.qgl() , float, mcOnly=False,help="QG Likelihood"),
