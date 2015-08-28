@@ -110,9 +110,9 @@ class VHbbAnalyzer( Analyzer ):
         p4VH=event.HCSV+event.V
         if p4VH.pt() > 30 :
               phi=pi+p4VH.phi()
-              matchedJets=[(x,deltaPhi(phi,x.phi())) for x in event.cleanJetsAll if deltaPhi(phi,x.phi()) < 0.4 and  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') and x not in event.hJetsCSV ] 
+              matchedJets=[x for x in event.cleanJetsAll if abs(deltaPhi(phi,x.phi())) < 0.4 and  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') and x not in event.hJetsCSV ] 
               if len(matchedJets) > 0 :
-                  event.isrJetVH=event.cleanJetsAll.index(sorted(matchedJets, key=lambda x:x[1])[0][0])
+                  event.isrJetVH=event.cleanJetsAll.index(sorted(matchedJets, key=lambda x:x.pt(),reverse=True)[0])
                 
     def makeJets(self,event,b):
 	inputs=ROOT.std.vector(ROOT.heppy.ReclusterJets.LorentzVector)()
