@@ -45,6 +45,9 @@ class GeneratorAnalyzer( Analyzer ):
        event.genwzquarks and event.genbquarks, might have overlaps 
        event.genbquarksFromTop and event.genbquarksFromH are all contained in event.genbquarks
        
+       In addition to genParticles, if makeLHEweights is set to True, the list WeightsInfo objects of the LHE branch
+       is stored in event.LHE_weights
+       
        """
 
     def __init__(self, cfg_ana, cfg_comp, looperName ):
@@ -54,10 +57,13 @@ class GeneratorAnalyzer( Analyzer ):
         self.makeAllGenParticles   = cfg_ana.makeAllGenParticles
         self.makeSplittedGenLists  = cfg_ana.makeSplittedGenLists
         self.allGenTaus            = cfg_ana.allGenTaus if self.makeSplittedGenLists else False
+	self.makeLHEweights  = cfg_ana.makeLHEweights
  
     def declareHandles(self):
         super(GeneratorAnalyzer, self).declareHandles()
         self.mchandles['genParticles'] = AutoHandle( 'prunedGenParticles', 'std::vector<reco::GenParticle>' )
+	if self.makeLHEweights:
+		self.mchandles['LHEweights'] = AutoHandle( 'source', 'LHEEventProduct', mayFail = True, lazy = False )
 
     def beginLoop(self,setup):
         super(GeneratorAnalyzer,self).beginLoop(setup)
@@ -187,6 +193,8 @@ class GeneratorAnalyzer( Analyzer ):
             event.genbquarksFromTop = []
             event.genbquarksFromH   = []
             event.genlepsFromTop = []
+            event.genvertex = 0
+            if len(event.generatorSummary)>2: event.genvertex=event.generatorSummary[2].vertex().z()
             for p in event.generatorSummary:
                 id = abs(p.pdgId())
                 if id == 25: 
@@ -239,6 +247,13 @@ class GeneratorAnalyzer( Analyzer ):
                 if id <= 5 and any([abs(m.pdgId()) in {23,24} for m in realGenMothers(p)]):
                     event.genwzquarks.append(p)
 
+        #Add LHE weight info
+	event.LHE_weights = []
+	if self.makeLHEweights:
+	    if self.mchandles['LHEweights'].isValid():
+	    	for w in self.mchandles['LHEweights'].product().weights():
+	        	event.LHE_weights.append(w)
+
     def process(self, event):
         self.readCollections( event.input )
 
@@ -263,6 +278,8 @@ setattr(GeneratorAnalyzer,"defaultConfig",
         # Make also the splitted lists
         makeSplittedGenLists = True,
         allGenTaus = False, 
+        # Save LHE weights in LHEEventProduct
+        makeLHEweights = True,
         # Print out debug information
         verbose = False,
     )
