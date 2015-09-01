@@ -18,15 +18,15 @@ remove = [
           'BulkGravTohhTohbbhbb_narrow_M-4000','BulkGravTohhTohtatahbb_narrow_M-1600','BulkGravTohhTohbbhbb_narrow_M-1800',
           'BulkGravTohhTohtatahbb_narrow_M-2000','BulkGravTohhTohtatahbb_narrow_M-2500','BulkGravTohhTohtatahbb_narrow_M-1800',
           'BulkGravTohhTohtatahbb_narrow_M-3000','BulkGravTohhTohtatahbb_narrow_M-3500','BulkGravTohhTohtatahbb_narrow_M-4000',
-          'BulkGravTohhTohtatahbb_narrow_M-4500','HToEMu','X53X53_M','LongLivedChi0','RadionTo','SMS-T1','WZTo1L3Nu',
+          'BulkGravTohhTohtatahbb_narrow_M-4500','HToEMu','X53X53_M','LongLivedChi0','SMS-T1','WZTo1L3Nu',
           'ZToEE_NNPDF30_13TeV-powheg_M_6000','ZToMuMu_NNPDF30_13TeV-powheg_M_800','ZToEE_NNPDF30_13TeV-powheg_M_1400',
           'ZToEE_NNPDF30_13TeV-powheg_M_3500','ZToEE_NNPDF30_13TeV-powheg_M_400','ZToMuMu_NNPDF30_13TeV-powheg_M_120',
           'ZToMuMu_NNPDF30_13TeV-powheg_M_4500','ZToMuMu_NNPDF30_13TeV-powheg_M_50','ZToMuMu_NNPDF30_13TeV-powheg_M_6000',
+          'scaledown','scaleup','WGToLNuG','RadionToZZ','RadionToWW',
           '/ttHJetToNonbb_M120_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v3/MINIAODSIM',
-          '/ttHJetToNonbb_M130_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
-
+          '/ttHJetToNonbb_M130_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM'
           ]
 
 # FILELIST OF AVAILABLE DATASETS ON DAS AS VALID
