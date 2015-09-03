@@ -106,7 +106,7 @@ class VHbbAnalyzer( Analyzer ):
         for i in range(0,jet.numberOfSourceCandidatePtrs()): # loop over the pf candidates
             pfCand=jet.sourceCandidatePtr(i) # pick one candidate at the time
             if not pfCand.isAvailable(): continue # check if it is available (?)
-            if pfCand.charge() == 0: continue  # calculating a tvector using only charged tracks. This is how it was in the Run1 analysis.
+            if pfCand.charge() == 0 or pfCand.pt()<1. : continue  # calculating a tvector using only charged tracks. This is how it was in the Run1 analysis.
             pi.SetPtEtaPhiE( pfCand.pt(), pfCand.eta(), pfCand.phi(), pfCand.energy() );
             J += pi #building the jet using only yhe chared pf candidates four momentum
             nOfconst+=1 # count the number of charge constituents
@@ -136,7 +136,7 @@ class VHbbAnalyzer( Analyzer ):
         # @todo: expland it to all jets.
         for j in event.jetsForHiggs:
           t_vect=self.computePullVector(event,j)
-          print("t_vect phi = ", t_vect.Phi() )
+          #print("t_vect phi = ", t_vect.Phi() )
           # here we can either store the tvector2 coordinated which gives the possibility to development at the tree level
           # or we can calcualre the pullAngle for all jets
           # think for development we could add pullAngle to all jets.
