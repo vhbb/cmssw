@@ -39,7 +39,7 @@ class GenHFHadronMatcher( Analyzer ):
 
     def declareHandles(self):
         super(GenHFHadronMatcher, self).declareHandles()
-
+        self.genJetsSrc = "slimmedGenJets"
         self.keys_b = [
             "genBHadIndex",
             "genBHadJetIndex",
@@ -64,7 +64,7 @@ class GenHFHadronMatcher( Analyzer ):
                 ("matchGenCHadron",x,"EX"), "std::vector<int>"
             )
         self.handles['genBHadJetIndex'] = AutoHandle( ("matchGenBHadron","genBHadJetIndex","EX"), "std::vector<int>")
-        self.handles['ak4GenJetsCustom'] = AutoHandle( ("ak4GenJetsCustom","","EX"), "std::vector<reco::GenJet>")
+        self.handles['genJets'] = AutoHandle( self.genJetsSrc, "std::vector<reco::GenJet>")
 
         self.genJetMinPt = 20
         self.genJetMaxEta = 2.4
@@ -77,7 +77,7 @@ class GenHFHadronMatcher( Analyzer ):
 
         self.readCollections( event.input )
 
-        genJets = [gj for gj in self.handles['ak4GenJetsCustom'].product()]
+        genJets = [gj for gj in self.handles['genJets'].product()]
         arrs_b = {k: self.handles[k].product() for k in self.keys_b}
         arrs_c = {k: self.handles[k].product() for k in self.keys_c}
 
