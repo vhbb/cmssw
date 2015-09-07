@@ -22,15 +22,16 @@ remove = [
           'ZToEE_NNPDF30_13TeV-powheg_M_6000','ZToMuMu_NNPDF30_13TeV-powheg_M_800','ZToEE_NNPDF30_13TeV-powheg_M_1400',
           'ZToEE_NNPDF30_13TeV-powheg_M_3500','ZToEE_NNPDF30_13TeV-powheg_M_400','ZToMuMu_NNPDF30_13TeV-powheg_M_120',
           'ZToMuMu_NNPDF30_13TeV-powheg_M_4500','ZToMuMu_NNPDF30_13TeV-powheg_M_50','ZToMuMu_NNPDF30_13TeV-powheg_M_6000',
-          'scaledown','scaleup','WGToLNuG','RadionToZZ','RadionToWW','ZToEE_NNPDF30_13TeV-powheg_M_200',
+          'scaledown','scaleup','WGToLNuG','RadionToZZ','RadionToWW','ZToEE_NNPDF30_13TeV-powheg_M_200','WWTo2L2Nu',
           'ZToEE_NNPDF30_13TeV-powheg_M_2300','ZToEE_NNPDF30_13TeV-powheg_M_800','ZToMuMu_NNPDF30_13TeV-powheg_M_200',
           'ZToMuMu_NNPDF30_13TeV-powheg_M_3500','ZToMuMu_NNPDF30_13TeV-powheg_M_400','RadionTohhTohVVhbb','ChargedHiggs',
           'RadionTohhTohaahbb','/RadionTohhTohtatahbb','ZToMuMu_NNPDF30_13TeV-powheg_M_1400','TGJets','WWJJToLNuQQ',
-          'ZToEE_NNPDF30_13TeV-powheg_M_120',
+          'ZToEE_NNPDF30_13TeV-powheg_M_120','ZToEE_NNPDF30_13TeV-powheg_M_4500','VVTo2L2Nu','ZToMuMu_NNPDF30_13TeV-powheg_M_2300',
           '/ttHJetToNonbb_M120_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v3/MINIAODSIM',
-          '/ttHJetToNonbb_M130_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM'
+          '/ttHJetToNonbb_M130_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
+          'AToZhToLLTauTau','RPVresonantToEMu'
           ]
 
 # FILELIST OF AVAILABLE DATASETS ON DAS AS VALID
