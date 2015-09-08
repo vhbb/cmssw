@@ -18,7 +18,11 @@ vars_to_plot = [
     "Jet_bTagWeightStats1Up",
     "Jet_bTagWeightStats1Down",
     "Jet_bTagWeightStats2Up",
-    "Jet_bTagWeightStats2Down"
+    "Jet_bTagWeightStats2Down",
+    "nGenJet",
+    "GenJet_pt",
+    "GenJet_numBHadrons",
+    "GenJet_numCHadrons",
 ]
 
 def process_dir(d):
@@ -36,7 +40,7 @@ def process_dir(d):
     for v in vars_to_plot:
         tt.Draw(v + " >> h")
         h = tf.Get("h")
-        print v, h.Integral(), h.GetMean(), h.GetRMS() 
+        print v, round(h.Integral(), 2), round(h.GetMean(), 2), round(h.GetRMS(), 2) 
 
 for d in dirs:
     process_dir(d)
