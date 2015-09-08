@@ -98,7 +98,6 @@ if sample.isMC:
     sequence.insert(sequence.index(VHbb),TauGenJet)
 
     treeProducer.collections["tauGenJets"] = NTupleCollection("GenHadTaus", genTauJetType, 15, help="Generator level hadronic tau decays")
-    treeProducer.collections["genJetsHadronMatcher"] = NTupleCollection("GenJet",   genJetType, 15, help="Generated jets with hadron matching, sorted by pt descending",filter=lambda x: x.pt() > 20,mcOnly=True)
 
 # Run Everything
 preprocessor = CmsswPreprocessor("combined_cmssw.py", options = {"isMC":sample.isMC})
