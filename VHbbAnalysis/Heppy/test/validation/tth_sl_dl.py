@@ -5,14 +5,14 @@ from vhbb_combined import *
 components = [
     cfg.MCComponent(
         files = [
-            "/shome/jpata/tth_spring15_miniaod.root"
+            "root://xrootd-cms.infn.it///store/mc/RunIISpring15DR74/ttHTobb_M125_13TeV_powheg_pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/00000/141B9915-1F08-E511-B9FF-001E675A6AB3.root"
         ],
         name = "tth_hbb",
         isMC = True
     ),
     cfg.MCComponent(
         files = [
-            "root://xrootd.unl.edu//store/mc/RunIISpring15DR74/TT_TuneCUETP8M1_13TeV-amcatnlo-pythia8/MINIAODSIM/Asympt50ns_MCRUN2_74_V9A-v1/30000/009A8083-EC2E-E511-ABB1-3417EBE64B91.root"
+            "root://xrootd-cms.infn.it///store/mc/RunIISpring15DR74/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/00000/0AB045B5-BB0C-E511-81FD-0025905A60B8.root"
         ],
         name = "ttjets",
         isMC = True
@@ -22,7 +22,8 @@ components = [
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper
     for comp in components:
-        looper = Looper( 'Loop_validation_tth_sl_dl_' + comp.name, config, nPrint = 0, nEvents = 1000)
+        print "processing",comp
         config.components = [comp] 
+        looper = Looper( 'Loop_validation_tth_sl_dl_' + comp.name, config, nPrint = 0, nEvents = 1000)
         looper.loop()
         looper.write()
