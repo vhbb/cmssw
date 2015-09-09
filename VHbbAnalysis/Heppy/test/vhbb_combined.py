@@ -89,8 +89,7 @@ if not AdditionalBoost.skip_ca15:
 # sequence.insert(sequence.index(VHbb),btagana)
 
 # Add Information on generator level hadronic tau decays
-if not sample.isMC:
-    print "Running on data. NOT scheduling the TauGenJetAnalyzer"
+if sample.isMC:   
     from VHbbAnalysis.Heppy.TauGenJetAnalyzer import TauGenJetAnalyzer
     TauGenJet = cfg.Analyzer(
         verbose = False,
