@@ -70,7 +70,11 @@ process.ak08PFPrunedJetsCHS = cms.EDProducer(
 process.ak08PFPrunedJetsCHS.src = cms.InputTag("chs")
 process.ak08PFPrunedJetsCHS.jetPtMin = cms.double(200.)
 
-process.OUT.outputCommands.append("keep *_slimmedJetsAK8_*_PAT")
+if isMC:
+    process.OUT.outputCommands.append("keep *_slimmedJetsAK8_*_PAT")
+else:
+    process.OUT.outputCommands.append("keep *_slimmedJetsAK8_*_RECO")
+
 process.OUT.outputCommands.append("keep *_ak08PFPrunedJetsCHS_*_EX")
 
 
