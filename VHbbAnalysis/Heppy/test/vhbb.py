@@ -210,7 +210,7 @@ JetAna.doQG=True
 JetAna.QGpath="pdfQG_AK4chs_antib_13TeV_v1.root"
 JetAna.recalibrateJets=True
 JetAna.jecPath=os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/jec"
-JetAna.mcGT="PHYS14_V4_MC"
+JetAna.mcGT="MCRUN2_74_V9D"
 JetAna.dataGT = "Summer15_50nsV4_DATA"
 
 VHbb = cfg.Analyzer(
