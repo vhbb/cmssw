@@ -10,8 +10,16 @@ Schedules:
 ########################################
 
 import sys
-
 import FWCore.ParameterSet.Config as cms
+
+# Decide if MC or Data is being processed
+# This works because the combined_cmssw.py script is not executed by
+# cmsRun but imported as a module by the initial python process.
+isMC = True
+if sys.argv[0] == "vhbb_combined_data.py":
+    isMC = False
+    print "The preprocessor expects to see data!"
+
 
 process = cms.Process("EX")
 process.source = cms.Source("PoolSource",
@@ -376,70 +384,70 @@ for fatjet_name in ["ak08PFPrunedJetsCHS", "ca15PFPrunedJetsCHS", "looseOptRHTT"
 
 
 
+
 ###
 ### GenHFHadronMatcher
 ###
-process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+if isMC:
+    process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 
-genParticleCollection = 'prunedGenParticles'
-genJetInputParticleCollection = 'packedGenParticles'
+    genParticleCollection = 'prunedGenParticles'
+    genJetInputParticleCollection = 'packedGenParticles'
 
-from RecoJets.JetProducers.ak4GenJets_cfi import ak4GenJets
-process.ak4GenJetsCustom = ak4GenJets.clone(
-    src = genJetInputParticleCollection,
-    rParam = cms.double(0.4),
-    jetAlgorithm = cms.string("AntiKt")
-)
-genJetCollection = "ak4GenJetsCustom"
+    from RecoJets.JetProducers.ak4GenJets_cfi import ak4GenJets
+    process.ak4GenJetsCustom = ak4GenJets.clone(
+        src = genJetInputParticleCollection,
+        rParam = cms.double(0.4),
+        jetAlgorithm = cms.string("AntiKt")
+    )
+    genJetCollection = "ak4GenJetsCustom"
 
-# Ghost particle collection used for Hadron-Jet association
-# MUST use proper input particle collection
-from PhysicsTools.JetMCAlgos.HadronAndPartonSelector_cfi import selectedHadronsAndPartons
-process.selectedHadronsAndPartons = selectedHadronsAndPartons.clone(
-    particles = genParticleCollection
-)
+    # Ghost particle collection used for Hadron-Jet association
+    # MUST use proper input particle collection
+    from PhysicsTools.JetMCAlgos.HadronAndPartonSelector_cfi import selectedHadronsAndPartons
+    process.selectedHadronsAndPartons = selectedHadronsAndPartons.clone(
+        particles = genParticleCollection
+    )
 
-# Input particle collection for matching to gen jets (partons + leptons)
-# MUST use use proper input jet collection: the jets to which hadrons should be associated
-# rParam and jetAlgorithm MUST match those used for jets to be associated with hadrons
-# More details on the tool: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#New_jet_flavour_definition
-from PhysicsTools.JetMCAlgos.sequences.GenHFHadronMatching_cff import genJetFlavourPlusLeptonInfos
-process.genJetFlavourPlusLeptonInfos = genJetFlavourPlusLeptonInfos.clone(
-    jets = genJetCollection,
-    rParam = cms.double(0.4),
-    jetAlgorithm = cms.string("AntiKt")
-)
-
-
-# Plugin for analysing B hadrons
-# MUST use the same particle collection as in selectedHadronsAndPartons
-from PhysicsTools.JetMCAlgos.sequences.GenHFHadronMatching_cff import matchGenBHadron
-process.matchGenBHadron = matchGenBHadron.clone(
-    genParticles = genParticleCollection
-)
-
-# Plugin for analysing C hadrons
-# MUST use the same particle collection as in selectedHadronsAndPartons
-from PhysicsTools.JetMCAlgos.sequences.GenHFHadronMatching_cff import matchGenCHadron
-process.matchGenCHadron = matchGenCHadron.clone(
-    genParticles = genParticleCollection
-)
+    # Input particle collection for matching to gen jets (partons + leptons)
+    # MUST use use proper input jet collection: the jets to which hadrons should be associated
+    # rParam and jetAlgorithm MUST match those used for jets to be associated with hadrons
+    # More details on the tool: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#New_jet_flavour_definition
+    from PhysicsTools.JetMCAlgos.sequences.GenHFHadronMatching_cff import genJetFlavourPlusLeptonInfos
+    process.genJetFlavourPlusLeptonInfos = genJetFlavourPlusLeptonInfos.clone(
+        jets = genJetCollection,
+        rParam = cms.double(0.4),
+        jetAlgorithm = cms.string("AntiKt")
+    )
 
 
-process.OUT.outputCommands.append("keep *_matchGenBHadron__EX")
-process.OUT.outputCommands.append("keep *_matchGenCHadron__EX")
-process.OUT.outputCommands.append("keep *_matchGenBHadron_*_EX")
-process.OUT.outputCommands.append("keep *_matchGenCHadron_*_EX")
-process.OUT.outputCommands.append("keep *_ak4GenJetsCustom_*_EX")
+    # Plugin for analysing B hadrons
+    # MUST use the same particle collection as in selectedHadronsAndPartons
+    from PhysicsTools.JetMCAlgos.sequences.GenHFHadronMatching_cff import matchGenBHadron
+    process.matchGenBHadron = matchGenBHadron.clone(
+        genParticles = genParticleCollection
+    )
 
+    # Plugin for analysing C hadrons
+    # MUST use the same particle collection as in selectedHadronsAndPartons
+    from PhysicsTools.JetMCAlgos.sequences.GenHFHadronMatching_cff import matchGenCHadron
+    process.matchGenCHadron = matchGenCHadron.clone(
+        genParticles = genParticleCollection
+    )
+
+
+    process.OUT.outputCommands.append("keep *_matchGenBHadron__EX")
+    process.OUT.outputCommands.append("keep *_matchGenCHadron__EX")
+    process.OUT.outputCommands.append("keep *_matchGenBHadron_*_EX")
+    process.OUT.outputCommands.append("keep *_matchGenCHadron_*_EX")
+    process.OUT.outputCommands.append("keep *_ak4GenJetsCustom_*_EX")
 
 
 ########################################
 # Generator level hadronic tau decays
 ########################################
-
-process.load("PhysicsTools.JetMCAlgos.TauGenJets_cfi")
-process.tauGenJets.GenParticles = cms.InputTag('prunedGenParticles')
-process.load("PhysicsTools.JetMCAlgos.TauGenJetsDecayModeSelectorAllHadrons_cfi")
-
-process.OUT.outputCommands.append("keep *_tauGenJetsSelectorAllHadrons_*_EX")
+if isMC:
+    process.load("PhysicsTools.JetMCAlgos.TauGenJets_cfi")
+    process.tauGenJets.GenParticles = cms.InputTag('prunedGenParticles')
+    process.load("PhysicsTools.JetMCAlgos.TauGenJetsDecayModeSelectorAllHadrons_cfi")
+    process.OUT.outputCommands.append("keep *_tauGenJetsSelectorAllHadrons_*_EX")
