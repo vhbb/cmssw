@@ -10,8 +10,16 @@ Schedules:
 ########################################
 
 import sys
-
 import FWCore.ParameterSet.Config as cms
+
+# Decide if MC or Data is being processed
+# This works because the combined_cmssw.py script is not executed by
+# cmsRun but imported as a module by the initial python process.
+isMC = True
+if sys.argv[0] == "vhbb_combined_data.py":
+    isMC = False
+    print "The preprocessor expects to see data!"
+
 
 process = cms.Process("EX")
 process.source = cms.Source("PoolSource",
@@ -374,9 +382,8 @@ for fatjet_name in ["ak08PFPrunedJetsCHS", "ca15PFPrunedJetsCHS", "looseOptRHTT"
 ########################################
 # Generator level hadronic tau decays
 ########################################
-
-process.load("PhysicsTools.JetMCAlgos.TauGenJets_cfi")
-process.tauGenJets.GenParticles = cms.InputTag('prunedGenParticles')
-process.load("PhysicsTools.JetMCAlgos.TauGenJetsDecayModeSelectorAllHadrons_cfi")
-
-process.OUT.outputCommands.append("keep *_tauGenJetsSelectorAllHadrons_*_EX")
+if isMC:
+    process.load("PhysicsTools.JetMCAlgos.TauGenJets_cfi")
+    process.tauGenJets.GenParticles = cms.InputTag('prunedGenParticles')
+    process.load("PhysicsTools.JetMCAlgos.TauGenJetsDecayModeSelectorAllHadrons_cfi")
+    process.OUT.outputCommands.append("keep *_tauGenJetsSelectorAllHadrons_*_EX")

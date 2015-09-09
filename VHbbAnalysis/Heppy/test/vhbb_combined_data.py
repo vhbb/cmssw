@@ -1,12 +1,20 @@
 #! /usr/bin/env python
 
-from vhbb_combined import *
+# First import basic vhbb so we have the sample available
+# Need to set sample.isMC/isData correctly before importing vhbb_combined
+# so vhbb_combined knows which modules to schedule 
+
+from vhbb import *
 
 sample.isMC=False
 sample.isData=True
+
+from vhbb_combined import *
+
 sample.files=[
  "root://xrootd.unl.edu//store/data/Run2015B/SingleMuon/MINIAOD/PromptReco-v1/000/251/162/00000/160C08A3-4227-E511-B829-02163E01259F.root"
 ]
+
 FlagsAna.processName='RECO'
 TrigAna.triggerBits = triggerTableData
 
