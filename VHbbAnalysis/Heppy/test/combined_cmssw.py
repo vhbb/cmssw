@@ -12,40 +12,7 @@ Schedules:
 import sys
 import FWCore.ParameterSet.Config as cms
 
-# Decide if MC or Data is being processed
-# This works because the combined_cmssw.py script is not executed by
-# cmsRun but imported as a module by the initial python process.
-isMC = True
-if sys.argv[0] == "vhbb_combined_data.py":
-    isMC = False
-    print "The preprocessor expects to see data!"
-
-
-process = cms.Process("EX")
-process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring("file:///scratch/gregor/TTJets_MSDecaysCKM_central_Tune4C_13TeV_MiniAOD.root")
-)
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
-
-process.OUT = cms.OutputModule("PoolOutputModule",
-    fileName = cms.untracked.string('test.root'),
-    outputCommands = cms.untracked.vstring(['drop *'])
-)
-process.endpath= cms.EndPath(process.OUT)
-
-# Let CMSSW take care of scheduling 
-process.options = cms.untracked.PSet(     
-    wantSummary = cms.untracked.bool(True),
-    allowUnscheduled = cms.untracked.bool(True)
-)
-
-skip_ca15 = False
-
-########################################
-# Boosted Substructure
-########################################
-
-# Import some jet clustering defaults
+# Jet Clustering Defaults
 from RecoJets.JetProducers.AnomalousCellParameters_cfi import *
 from RecoJets.JetProducers.PFJetParameters_cfi import *
 
@@ -201,118 +168,10 @@ process.load("RecoBTag.Configuration.RecoBTag_cff") # this loads all available b
 from RecoBTag.SoftLepton.softPFMuonTagInfos_cfi import *
 from RecoBTag.SoftLepton.softPFElectronTagInfos_cfi import *
 
-process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc')
-
-for fatjet_name in ["slimmedJetsAK8", "ca15PFJetsCHS"]:
-
-    if skip_ca15 and (fatjet_name in ["ca15PFJetsCHS"]):
-        continue
-    
-    if fatjet_name == "slimmedJetsAK8":        
-        delta_r = 0.8
-        maxSVDeltaRToJet = 0.7
-        weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BoostedDoubleSV_AK8_BDT.weights.xml.gz')
-        jetAlgo = "AntiKt"
-    elif fatjet_name == "ca15PFJetsCHS":        
-        delta_r = 1.5
-        maxSVDeltaRToJet = 1.3
-        weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BoostedDoubleSV_CA15_BDT.weights.xml.gz')
-        jetAlgo = "CambridgeAachen"
-    else:
-        print "Invalid fatjet for b-tagging: ", fatjet_name
-        sys.exit()
-
-    # Define the module names
-    impact_info_name          = fatjet_name + "ImpactParameterTagInfos"
-    isv_info_name             = fatjet_name + "pfInclusiveSecondaryVertexFinderTagInfos"        
-    sm_info_name              = fatjet_name + "softPFMuonsTagInfos"
-    se_info_name              = fatjet_name + "softPFElectronsTagInfos"
-    bb_comp_name              = fatjet_name + "candidateBoostedDoubleSecondaryVertexComputer"
-    tag_name                  = fatjet_name + "pfBoostedDoubleSecondaryVertexBJetTags"
-
-    # Setup the modules
-    # IMPACT PARAMETER
-    setattr(process, 
-            impact_info_name, 
-            process.pfImpactParameterTagInfos.clone(
-                primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices"),
-                candidates = cms.InputTag("packedPFCandidates"),
-                computeProbabilities = cms.bool(False),
-                computeGhostTrack = cms.bool(False),
-                maxDeltaR = cms.double(delta_r),
-                jets = cms.InputTag(fatjet_name),
-            ))
-    getattr(process, impact_info_name).explicitJTA = cms.bool(False)
-
-    # ISV
-    setattr(process,
-            isv_info_name,                
-            process.pfInclusiveSecondaryVertexFinderTagInfos.clone(
-               extSVCollection               = cms.InputTag('slimmedSecondaryVertices'),
-               trackIPTagInfos               = cms.InputTag(impact_info_name),                
-            ))
-    getattr(process, isv_info_name).useSVClustering = cms.bool(False)
-    getattr(process, isv_info_name).rParam = cms.double(delta_r)
-    getattr(process, isv_info_name).extSVDeltaRToJet = cms.double(delta_r)
-    getattr(process, isv_info_name).trackSelection.jetDeltaRMax = cms.double(delta_r)
-    getattr(process, isv_info_name).vertexCuts.maxDeltaRToJetAxis = cms.double(delta_r)
-    getattr(process, isv_info_name).jetAlgorithm = cms.string(jetAlgo)
-
-    # SOFT MUON
-    setattr(process,
-            sm_info_name,
-            softPFMuonsTagInfos.clone(
-                jets = cms.InputTag(fatjet_name),
-                muons = cms.InputTag("slimmedMuons"),
-                primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices")                
-            ))
-    
-    # SOFT ELECTRON
-    setattr(process,
-            se_info_name,
-            softPFElectronsTagInfos.clone(
-                jets = cms.InputTag(fatjet_name),
-                electrons = cms.InputTag("slimmedElectrons"),
-                primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices"),                
-                DeltaRElectronJet=cms.double(delta_r),
-            ))
-
-    # DOUBLE B COMPUTER
-    setattr(process,
-            bb_comp_name,
-            cms.ESProducer("CandidateBoostedDoubleSecondaryVertexESProducer",
-                           beta = cms.double(1.0),
-                           R0 = cms.double(delta_r),
-                           maxSVDeltaRToJet = cms.double(maxSVDeltaRToJet),
-                           weightFile = weightFile))
-
-    # TAGS
-    setattr(process,
-            tag_name, 
-            cms.EDProducer("JetTagProducer",
-                           jetTagComputer = cms.string(bb_comp_name),
-                           tagInfos = cms.VInputTag(cms.InputTag(impact_info_name),
-                                                    cms.InputTag(isv_info_name),
-                                                    cms.InputTag(sm_info_name),
-                                                    cms.InputTag(se_info_name))))
-    
-
-    # Produce the output
-    for object_name in [impact_info_name, isv_info_name,
-                        sm_info_name, se_info_name,          
-                        bb_comp_name, tag_name]:
-
-        process.OUT.outputCommands.append("keep *_{0}_*_EX".format(object_name))
-    
-
-########################################
-# Subjet b-tagging
-########################################
-
-
-for fatjet_name in ["ak08PFPrunedJetsCHS", "ca15PFPrunedJetsCHS", "looseOptRHTT"]:
+# This function is called by the cmsswPreprocessor 
+# (has to be named initialize, can have arbitrary arguments as long as
+# all have a default value)
+def initialize(isMC=True):
 
     if skip_ca15 and (fatjet_name in ["ca15PFPrunedJetsCHS", "looseOptRHTT"]):
         continue
