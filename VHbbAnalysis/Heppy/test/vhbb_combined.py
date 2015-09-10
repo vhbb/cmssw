@@ -101,7 +101,7 @@ if sample.isMC:
     treeProducer.collections["genJetsHadronMatcher"] = NTupleCollection("GenJet",   genJetType, 15, help="Generated jets with hadron matching, sorted by pt descending",filter=lambda x: x.pt() > 20,mcOnly=True)
 
 # Run Everything
-preprocessor = CmsswPreprocessor("combined_cmssw.py")
+preprocessor = CmsswPreprocessor("combined_cmssw.py", options = {"isMC":sample.isMC})
 config.preprocessor=preprocessor
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
