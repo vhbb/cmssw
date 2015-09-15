@@ -124,8 +124,7 @@ class PileUpAnalyzer( Analyzer ):
 
                     ##get z position of on-time pile-up sorted by pt-hat
                     ptHat_zPositions = zip(puInfo.getPU_pT_hats(),puInfo.getPU_zpositions())
-                    ptHat_zPositions.sort()
-                    ptHat_zPositions.reverse()
+                    ptHat_zPositions.sort(reverse=True)
                     for ptHat_zPosition in ptHat_zPositions:
                         event.pileUpVertex_z.append(ptHat_zPosition[1])
                         event.pileUpVertex_ptHat.append(ptHat_zPosition[0])
