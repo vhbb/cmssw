@@ -2,7 +2,10 @@
 
 from PhysicsTools.Heppy.utils.cmsswPreprocessor import CmsswPreprocessor
 
+# If vhbb_combined is imported from vhbb_combined_data than the next
+# line will have no effect (as vhbb is already imported there)
 from vhbb import *
+
 # from VHbbAnalysis.Heppy.AdditionalBTag import AdditionalBTag
 from VHbbAnalysis.Heppy.AdditionalBoost import AdditionalBoost
 from VHbbAnalysis.Heppy.GenHFHadronMatcher import GenHFHadronMatcher
@@ -86,20 +89,19 @@ if not AdditionalBoost.skip_ca15:
 # sequence.insert(sequence.index(VHbb),btagana)
 
 # Add Information on generator level hadronic tau decays
+if sample.isMC:   
+    from VHbbAnalysis.Heppy.TauGenJetAnalyzer import TauGenJetAnalyzer
+    TauGenJet = cfg.Analyzer(
+        verbose = False,
+        class_object = TauGenJetAnalyzer,
+    )
+    sequence.insert(sequence.index(VHbb),TauGenJet)
 
-from VHbbAnalysis.Heppy.TauGenJetAnalyzer import TauGenJetAnalyzer
-TauGenJet = cfg.Analyzer(
-    verbose = False,
-    class_object = TauGenJetAnalyzer,
-)
-sequence.insert(sequence.index(VHbb),TauGenJet)
-
-treeProducer.collections["tauGenJets"] = NTupleCollection("GenHadTaus", genTauJetType, 15, help="Generator level hadronic tau decays")
-treeProducer.collections["genJetsHadronMatcher"] = NTupleCollection("GenJet",   genJetType, 15, help="Generated jets with hadron matching, sorted by pt descending",filter=lambda x: x.pt() > 20,mcOnly=True)
+    treeProducer.collections["tauGenJets"] = NTupleCollection("GenHadTaus", genTauJetType, 15, help="Generator level hadronic tau decays")
+    treeProducer.collections["genJetsHadronMatcher"] = NTupleCollection("GenJet",   genJetType, 15, help="Generated jets with hadron matching, sorted by pt descending",filter=lambda x: x.pt() > 20,mcOnly=True)
 
 # Run Everything
-
-preprocessor = CmsswPreprocessor("combined_cmssw.py")
+preprocessor = CmsswPreprocessor("combined_cmssw.py", options = {"isMC":sample.isMC})
 config.preprocessor=preprocessor
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
