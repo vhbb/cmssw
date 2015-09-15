@@ -15,6 +15,7 @@ from PhysicsTools.Heppy.analyzers.core.AutoFillTreeProducer  import *
 import logging
 logging.basicConfig(level=logging.ERROR)
 
+import os
 
 cfg.Analyzer.nosubdir = True
 
@@ -24,7 +25,7 @@ treeProducer= cfg.Analyzer(
 	verbose=False, 
 	vectorTree = True,
         globalVariables	= [
-                 NTupleVariable("nPU0", lambda ev : [bx.nPU() for bx in  ev.pileUpInfo if bx.getBunchCrossing()==0][0], help="nPU in BX=0"),
+                 NTupleVariable("nPU0", lambda ev : [bx.nPU() for bx in  ev.pileUpInfo if bx.getBunchCrossing()==0][0], help="nPU in BX=0",mcOnly=True),
                  NTupleVariable("nPVs", lambda ev : len(ev.goodVertices), help="total number of good PVs"),
 		 NTupleVariable("Vtype", lambda ev : ev.Vtype, help="Event classification"),
 		 NTupleVariable("VtypeSim", lambda ev : ev.VtypeSim, help="Event classification",mcOnly=True),
@@ -206,8 +207,9 @@ JetAna.jetPt = 15
 JetAna.doQG=True
 JetAna.QGpath="pdfQG_AK4chs_antib_13TeV_v1.root"
 JetAna.recalibrateJets=True
-JetAna.jecPath="jec"
+JetAna.jecPath=os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/jec"
 JetAna.mcGT="PHYS14_V4_MC"
+JetAna.dataGT = "Summer15_50nsV4_DATA"
 
 VHbb = cfg.Analyzer(
     verbose=False,
@@ -244,11 +246,14 @@ TTHtoTauTauGen = cfg.Analyzer(
 #sh = cfg.Analyzer( class_object=HeppyShell)
 
 from PhysicsTools.Heppy.analyzers.core.TriggerBitAnalyzer import TriggerBitAnalyzer
+
 from VHbbAnalysis.Heppy.TriggerTable import triggerTable
+from VHbbAnalysis.Heppy.TriggerTableData import triggerTable as triggerTableData
+
 TrigAna = cfg.Analyzer(
     verbose = False,
     class_object = TriggerBitAnalyzer,
-    triggerBits = triggerTable, 
+    triggerBits = triggerTable,  #default is MC, use the triggerTableData in -data.py files
 #   processName = 'HLT',
 #   outprefix = 'HLT'
    )

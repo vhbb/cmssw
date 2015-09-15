@@ -1,4 +1,6 @@
-from vhbb import *
+#! /usr/bin/env python
+
+from vhbb_combined import *
 
 sample.isMC=False
 sample.isData=True
