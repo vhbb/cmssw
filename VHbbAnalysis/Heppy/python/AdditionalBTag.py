@@ -5,7 +5,7 @@ from copy import deepcopy
 from math import *
 import itertools
 import ROOT
-import array
+import array, os
 class AdditionalBTag( Analyzer ):
 
     def declareHandles(self):
@@ -28,7 +28,7 @@ class AdditionalBTag( Analyzer ):
             reader.AddVariable(var, getattr(self, var))
         
         #https://github.com/cms-data/RecoBTag-Combined/blob/master/CombinedMVAV2_13_07_2015.weights.xml.gz
-        self.weightfile = "CombinedMVAV2_13_07_2015.weights.xml"
+        self.weightfile = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/btag/CombinedMVAV2_13_07_2015.weights.xml"
         print "booking BDT from {0}".format(self.weightfile)  
         reader.BookMVA("bdt", self.weightfile)
         self.reader=reader
