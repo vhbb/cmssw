@@ -7,6 +7,7 @@ vars_to_plot = [
     "Jet_pt",
     "Jet_eta",
     "Jet_btagCSV",
+    "Jet_btagBDT",
     "Jet_mcFlavour",
     "Jet_bTagWeight",
     "Jet_bTagWeightJESUp",
