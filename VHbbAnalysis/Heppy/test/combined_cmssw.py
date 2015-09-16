@@ -395,15 +395,8 @@ def initialize(isMC=True):
         process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 
         genParticleCollection = 'prunedGenParticles'
-        genJetInputParticleCollection = 'packedGenParticles'
 
-        from RecoJets.JetProducers.ak4GenJets_cfi import ak4GenJets
-        process.ak4GenJetsCustom = ak4GenJets.clone(
-            src = genJetInputParticleCollection,
-            rParam = cms.double(0.4),
-            jetAlgorithm = cms.string("AntiKt")
-        )
-        genJetCollection = "ak4GenJetsCustom"
+        genJetCollection = "slimmedGenJets"
 
         # Ghost particle collection used for Hadron-Jet association
         # MUST use proper input particle collection
@@ -443,7 +436,6 @@ def initialize(isMC=True):
         process.OUT.outputCommands.append("keep *_matchGenCHadron__EX")
         process.OUT.outputCommands.append("keep *_matchGenBHadron_*_EX")
         process.OUT.outputCommands.append("keep *_matchGenCHadron_*_EX")
-        process.OUT.outputCommands.append("keep *_ak4GenJetsCustom_*_EX")
 
 
     ########################################
