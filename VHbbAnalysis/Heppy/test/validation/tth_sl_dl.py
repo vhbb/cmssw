@@ -24,6 +24,6 @@ if __name__ == '__main__':
     for comp in components:
         print "processing",comp
         config.components = [comp] 
-        looper = Looper( 'Loop_validation_tth_sl_dl_' + comp.name, config, nPrint = 0, nEvents = 1000)
+        looper = Looper( 'Loop_validation_tth_sl_dl_' + comp.name, config, nPrint = 0, nEvents = 10)
         looper.loop()
         looper.write()

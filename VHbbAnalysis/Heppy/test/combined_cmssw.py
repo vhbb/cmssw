@@ -12,23 +12,9 @@ Schedules:
 import sys
 import FWCore.ParameterSet.Config as cms
 
-<<<<<<< Updated upstream
 # Jet Clustering Defaults
 from RecoJets.JetProducers.AnomalousCellParameters_cfi import *
 from RecoJets.JetProducers.PFJetParameters_cfi import *
-=======
-process = cms.Process("EX")
-process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring("root://xrootd-cms.infn.it///store/mc/RunIISpring15DR74/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/00000/0AB045B5-BB0C-E511-81FD-0025905A60B8.root")
-)
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
-
-process.OUT = cms.OutputModule("PoolOutputModule",
-    fileName = cms.untracked.string('test.root'),
-    outputCommands = cms.untracked.vstring(['drop *'])
-)
-process.endpath= cms.EndPath(process.OUT)
->>>>>>> Stashed changes
 
 # Select candidates that would pass CHS requirements
 process.chs = cms.EDFilter("CandPtrSelector", src = cms.InputTag("packedPFCandidates"), cut = cms.string("fromPV"))
