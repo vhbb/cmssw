@@ -12,23 +12,9 @@ Schedules:
 import sys
 import FWCore.ParameterSet.Config as cms
 
-<<<<<<< Updated upstream
 # Jet Clustering Defaults
 from RecoJets.JetProducers.AnomalousCellParameters_cfi import *
 from RecoJets.JetProducers.PFJetParameters_cfi import *
-=======
-process = cms.Process("EX")
-process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring("root://xrootd-cms.infn.it///store/mc/RunIISpring15DR74/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/00000/0AB045B5-BB0C-E511-81FD-0025905A60B8.root")
-)
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
-
-process.OUT = cms.OutputModule("PoolOutputModule",
-    fileName = cms.untracked.string('test.root'),
-    outputCommands = cms.untracked.vstring(['drop *'])
-)
-process.endpath= cms.EndPath(process.OUT)
->>>>>>> Stashed changes
 
 # B-Tagging
 from RecoBTag.SoftLepton.softPFMuonTagInfos_cfi import *
@@ -88,7 +74,6 @@ def initialize(isMC=True):
     if isMC:
         process.OUT.outputCommands.append("keep *_slimmedJetsAK8_*_PAT")
     else:
-<<<<<<< Updated upstream
         process.OUT.outputCommands.append("keep *_slimmedJetsAK8_*_RECO")
 
     process.OUT.outputCommands.append("keep *_ak08PFPrunedJetsCHS_*_EX")
@@ -481,137 +466,4 @@ def initialize(isMC=True):
 # (luckily for us cmsRun also counts as direct call)
 if __name__ == "__main__":
     process = initialize()
-=======
-        print "Invalid fatjet for subjet b-tagging: ", fatjet_name
-        sys.exit()
-
-    # Define the module names
-    impact_info_name          = fatjet_name + "ImpactParameterTagInfos"
-    isv_info_name             = fatjet_name + "pfInclusiveSecondaryVertexFinderTagInfos"        
-    csvv2_computer_name       = fatjet_name + "combinedSecondaryVertexV2Computer"
-    csvv2ivf_name             = fatjet_name + "pfCombinedInclusiveSecondaryVertexV2BJetTags"        
-
-    # Setup the modules
-    # IMPACT PARAMETER
-    setattr(process, 
-            impact_info_name, 
-            process.pfImpactParameterTagInfos.clone(
-                primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices"),
-                candidates = cms.InputTag("packedPFCandidates"),
-                computeProbabilities = cms.bool(False),
-                computeGhostTrack = cms.bool(False),
-                maxDeltaR = cms.double(delta_r),
-                jets = cms.InputTag(fatjet_name, "SubJets"),
-            ))
-    getattr(process, impact_info_name).explicitJTA = cms.bool(True)
-
-    # ISV
-    setattr(process,
-            isv_info_name,                
-            process.pfInclusiveSecondaryVertexFinderTagInfos.clone(
-               extSVCollection               = cms.InputTag('slimmedSecondaryVertices'),
-               trackIPTagInfos               = cms.InputTag(impact_info_name),                
-            ))
-    getattr(process, isv_info_name).useSVClustering = cms.bool(True)
-    getattr(process, isv_info_name).rParam = cms.double(delta_r)
-    getattr(process, isv_info_name).extSVDeltaRToJet = cms.double(delta_r)
-    getattr(process, isv_info_name).trackSelection.jetDeltaRMax = cms.double(delta_r)
-    getattr(process, isv_info_name).vertexCuts.maxDeltaRToJetAxis = cms.double(delta_r)
-    getattr(process, isv_info_name).jetAlgorithm = cms.string(jetAlgo)
-    getattr(process, isv_info_name).fatJets  =  cms.InputTag(fatjet_name.replace("ak08PFPrunedJetsCHS","slimmedJetsAK8").replace("looseOptRHTT","ca15PFJetsCHS"))
-    getattr(process, isv_info_name).groomedFatJets  =  cms.InputTag(fatjet_name)
-
-    # CSV V2 COMPUTER
-    setattr(process,
-            csvv2_computer_name,
-            process.candidateCombinedSecondaryVertexV2Computer.clone())
-
-    # CSV IVF V2
-    setattr(process,
-            csvv2ivf_name,
-            process.pfCombinedInclusiveSecondaryVertexV2BJetTags.clone(
-                tagInfos = cms.VInputTag(cms.InputTag(impact_info_name),
-                                         cms.InputTag(isv_info_name)),
-                jetTagComputer = cms.string(csvv2_computer_name,)
-            ))
-
-    
-    # Produce the output
-    process.OUT.outputCommands.append("keep *_{0}_*_EX".format(csvv2ivf_name))
-
-
-
-###
-### GenHFHadronMatcher
-###
-process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
-
-genParticleCollection = 'prunedGenParticles'
-genJetCollection = "slimmedGenJets"
-
-# Ghost particle collection used for Hadron-Jet association
-# MUST use proper input particle collection
-from PhysicsTools.JetMCAlgos.HadronAndPartonSelector_cfi import selectedHadronsAndPartons
-process.selectedHadronsAndPartons = selectedHadronsAndPartons.clone(
-    particles = genParticleCollection
-)
-
-# Input particle collection for matching to gen jets (partons + leptons)
-# MUST use use proper input jet collection: the jets to which hadrons should be associated
-# rParam and jetAlgorithm MUST match those used for jets to be associated with hadrons
-# More details on the tool: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#New_jet_flavour_definition
-from PhysicsTools.JetMCAlgos.sequences.GenHFHadronMatching_cff import genJetFlavourPlusLeptonInfos
-process.genJetFlavourPlusLeptonInfos = genJetFlavourPlusLeptonInfos.clone(
-    jets = genJetCollection,
-    rParam = cms.double(0.4),
-    jetAlgorithm = cms.string("AntiKt")
-)
-
-
-# Plugin for analysing B hadrons
-# MUST use the same particle collection as in selectedHadronsAndPartons
-from PhysicsTools.JetMCAlgos.sequences.GenHFHadronMatching_cff import matchGenBHadron
-process.matchGenBHadron = matchGenBHadron.clone(
-    genParticles = genParticleCollection
-)
-
-# Plugin for analysing C hadrons
-# MUST use the same particle collection as in selectedHadronsAndPartons
-from PhysicsTools.JetMCAlgos.sequences.GenHFHadronMatching_cff import matchGenCHadron
-process.matchGenCHadron = matchGenCHadron.clone(
-    genParticles = genParticleCollection
-)
-
-from RecoJets.JetProducers.ak4PFJets_cfi import ak4PFJets
-from RecoJets.JetProducers.ak4GenJets_cfi import ak4GenJets
-
-from PhysicsTools.PatAlgos.tools.jetTools import *
-
-process.softPFElectronsTagInfos.jets = cms.InputTag("slimmedJets")
-process.softPFElectronsTagInfos.electrons = cms.InputTag("slimmedElectrons")
-process.softPFElectronsTagInfos.primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices")
-
-process.softPFMuonsTagInfos.jets = cms.InputTag("slimmedJets")
-process.softPFMuonsTagInfos.muons = cms.InputTag("slimmedMuons")
-process.softPFMuonsTagInfos.primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices")
-
-process.OUT.outputCommands.append("keep *_matchGenBHadron__EX")
-process.OUT.outputCommands.append("keep *_matchGenCHadron__EX")
-process.OUT.outputCommands.append("keep *_matchGenBHadron_*_EX")
-process.OUT.outputCommands.append("keep *_matchGenCHadron_*_EX")
-process.OUT.outputCommands.append("keep *_softPFElectronsTagInfos_*_*")
-process.OUT.outputCommands.append("keep *_softPFMuonsTagInfos_*_*")
-process.OUT.outputCommands.append("keep *_softPFElectronBJetTags_*_EX")
-process.OUT.outputCommands.append("keep *_softPFMuonBJetTags_*_EX")
-
-
-
-########################################
-# Generator level hadronic tau decays
-########################################
-
-process.load("PhysicsTools.JetMCAlgos.TauGenJets_cfi")
-process.tauGenJets.GenParticles = cms.InputTag('prunedGenParticles')
-process.load("PhysicsTools.JetMCAlgos.TauGenJetsDecayModeSelectorAllHadrons_cfi")
->>>>>>> Stashed changes
 
