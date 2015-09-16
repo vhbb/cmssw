@@ -4,7 +4,7 @@ from math import *
 import ROOT
 #from CMGTools.TTHAnalysis.signedSip import *
 from PhysicsTools.Heppy.analyzers.objects.autophobj import *
-import copy
+import copy, os
 
 leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonType ], variables = [
     # Loose id 
@@ -125,7 +125,12 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
 
 #add per-jet b-tag systematic weight
 from PhysicsTools.Heppy.physicsutils.BTagWeightCalculator import BTagWeightCalculator
-bweightcalc = BTagWeightCalculator("csv/csv_rwt_hf_IT_FlatSF.root", "csv/csv_rwt_lf_IT_FlatSF.root")
+csvpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/csv"
+bweightcalc = BTagWeightCalculator(
+    csvpath + "/csv_rwt_hf_IT_FlatSF_2015_07_27.root",
+    csvpath + "/csv_rwt_lf_IT_FlatSF_2015_07_27.root"
+)
+
 for syst in ["JES", "LF", "HF", "Stats1", "Stats2"]:
     for sdir in ["Up", "Down"]:
         jetTypeVHbb.variables += [NTupleVariable("bTagWeight"+syst+sdir,
