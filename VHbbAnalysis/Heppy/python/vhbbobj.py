@@ -4,7 +4,7 @@ from math import *
 import ROOT
 #from CMGTools.TTHAnalysis.signedSip import *
 from PhysicsTools.Heppy.analyzers.objects.autophobj import *
-import copy
+import copy, os
 
 leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonType ], variables = [
     # Loose id 
@@ -42,6 +42,7 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
     NTupleVariable("pixelLayers", lambda x : (x.track() if abs(x.pdgId())==13 else x.gsfTrack()).hitPattern().pixelLayersWithMeasurement(), int, help="Pixel Layers"),
     # TTH-id related variables
     NTupleVariable("mvaTTH",     lambda lepton : lepton.mvaValue if hasattr(lepton,'mvaValue') else -1, help="Lepton MVA (ttH version)"),
+    NTupleVariable("jetOverlapIdx", lambda lepton : getattr(lepton, "jetOverlapIdx", -1), int, help="index of jet with overlapping PF constituents. If idx>=1000, then idx = idx-1000 and refers to discarded jets."),
     NTupleVariable("jetPtRatio", lambda lepton : lepton.pt()/lepton.jet.pt() if hasattr(lepton,'jet') else -1, help="pt(lepton)/pt(nearest jet)"),
     NTupleVariable("jetBTagCSV", lambda lepton : lepton.jet.btag('pfCombinedInclusiveSecondaryVertexV2BJetTags') if hasattr(lepton,'jet') and hasattr(lepton.jet, 'btag') else -99, help="btag of nearest jet"),
     NTupleVariable("jetDR",      lambda lepton : deltaR(lepton.eta(),lepton.phi(),lepton.jet.eta(),lepton.jet.phi()) if hasattr(lepton,'jet') else -1, help="deltaR(lepton, nearest jet)"),
@@ -70,7 +71,7 @@ tauTypeVHbb = NTupleObjectType("tauTypeVHbb", baseObjectTypes = [ tauType ], var
 ##------------------------------------------  
 
 jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables = [
-    NTupleVariable("idxFirstTauMatch", lambda x : x.tauIdxs[0] if len(x.tauIdxs) > 0 else -1, int,help='index of the first matching tau'),
+    NTupleVariable("idxFirstTauMatch", lambda x : x.tauIdxs[0] if len(getattr(x, "tauIdxs", [])) > 0 else -1, int,help='index of the first matching tau'),
     NTupleVariable("hadronFlavour", lambda x : x.mcFlavour, int,     mcOnly=True, help="match to heavy hadrons"),
     NTupleVariable("btagBDT", lambda x : getattr(x,"btagBDT",-99), help="btag"),
     NTupleVariable("btagProb", lambda x : x.btag('jetProbabilityBJetTags') , help="btag"),
@@ -116,13 +117,20 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("ptd",   lambda x : getattr(x,'ptd', 0), float, mcOnly=False,help="QG input variable: ptD"),
     NTupleVariable("axis2",   lambda x : getattr(x,'axis2', 0) , float, mcOnly=False,help="QG input variable: axis2"),
     NTupleVariable("mult",   lambda x : getattr(x,'mult', 0) , int, mcOnly=False,help="QG input variable: total multiplicity"),
-
     NTupleVariable("numberOfDaughters",   lambda x : x.numberOfDaughters(), int, mcOnly=False,help="number of daughters"),
+    NTupleVariable("btagIdx",   lambda x : x.btagIdx, int, mcOnly=False,help="ranking in btag "),
+    NTupleVariable("pt_reg",lambda x : getattr(x,"pt_reg",-99), help="Regression"),
  ])
+
 
 #add per-jet b-tag systematic weight
 from PhysicsTools.Heppy.physicsutils.BTagWeightCalculator import BTagWeightCalculator
-bweightcalc = BTagWeightCalculator("csv/csv_rwt_hf_IT_FlatSF.root", "csv/csv_rwt_lf_IT_FlatSF.root")
+csvpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/csv"
+bweightcalc = BTagWeightCalculator(
+    csvpath + "/csv_rwt_hf_IT_FlatSF_2015_07_27.root",
+    csvpath + "/csv_rwt_lf_IT_FlatSF_2015_07_27.root"
+)
+
 for syst in ["JES", "LF", "HF", "Stats1", "Stats2"]:
     for sdir in ["Up", "Down"]:
         jetTypeVHbb.variables += [NTupleVariable("bTagWeight"+syst+sdir,
@@ -135,18 +143,99 @@ jetTypeVHbb.variables += [NTupleVariable("bTagWeight",
         jet, kind="final", systematic="nominal",
     ), float, mcOnly=True, help="b-tag CSV weight, nominal"
 )]
+
+
+##------------------------------------------  
+## FAT JET + Tau
+##------------------------------------------  
+
+# Four Vector + Nsubjettiness
+
+fatjetTauType = NTupleObjectType("fatjettau",  baseObjectTypes = [ fourVectorType ], variables = [
+    NTupleVariable("tau1",  lambda x : x.tau1, help="Nsubjettiness (1 axis)"),
+    NTupleVariable("tau2",  lambda x : x.tau2, help="Nsubjettiness (2 axes)"),
+    NTupleVariable("tau3",  lambda x : x.tau3, help="Nsubjettiness (3 axes)"),
+])
+
  
 ##------------------------------------------  
 ## FAT JET
 ##------------------------------------------  
 
-# Four Vector + Nsubjettiness
+# Four Vector + Nsubjettiness + Hbb-Tag
 
 fatjetType = NTupleObjectType("fatjet",  baseObjectTypes = [ fourVectorType ], variables = [
     NTupleVariable("tau1",  lambda x : x.tau1, help="Nsubjettiness (1 axis)"),
     NTupleVariable("tau2",  lambda x : x.tau2, help="Nsubjettiness (2 axes)"),
     NTupleVariable("tau3",  lambda x : x.tau3, help="Nsubjettiness (3 axes)"),
+    
+    # bb-tag output variable
+    NTupleVariable("bbtag",  lambda x : x.bbtag, help="Hbb b-tag score"),
+
+    # bb-tag input variables
+    NTupleVariable("PFLepton_ptrel",   lambda x : x.PFLepton_ptrel, help="pt-rel of e/mu (for bb-tag)"),    
+    NTupleVariable("z_ratio",          lambda x : x.z_ratio, help="z-ratio (for bb-tag)"),    
+    NTupleVariable("tau_dot",          lambda x : x.tau_dot, help="tau_dot (for bb-tag)"),    
+    NTupleVariable("SV_mass_0",        lambda x : x.SV_mass_0, help="secondary vertex mass (for bb-tag)"),    
+    NTupleVariable("SV_EnergyRatio_0", lambda x : x.SV_EnergyRatio_0, help="secondary vertex mass energy ratio 0 (for bb-tag)"),    
+    NTupleVariable("SV_EnergyRatio_1", lambda x : x.SV_EnergyRatio_1, help="secondary vertex mass energy ratio 1 (for bb-tag)"),    
+    NTupleVariable("PFLepton_IP2D",    lambda x : x.PFLepton_IP2D, help="lepton IP2D (for bb-tag)"),    
+    NTupleVariable("tau_21",           lambda x : x.tau_21, help="nsubjettiness tau2/tau1 (for bb-tag)"),    
+    NTupleVariable("nSL",              lambda x : x.nSL, help="number of soft leptons (for bb-tag)"),    
+    NTupleVariable("vertexNTracks",    lambda x : x.vertexNTracks, help="number of tracks for vertex (for bb-tag)"),    
     ])
+
+
+##------------------------------------------  
+## Extended FAT JET
+##------------------------------------------  
+
+# Four Vector + Nsubjettiness + masses + Hbb-Tag
+
+ak8FatjetType = NTupleObjectType("ak8fatjet",  baseObjectTypes = [ fourVectorType ], variables = [
+    NTupleVariable("tau1",  lambda x : x.userFloat("NjettinessAK8:tau1"), help="Nsubjettiness (1 axis)"),
+    NTupleVariable("tau2",  lambda x : x.userFloat("NjettinessAK8:tau2"), help="Nsubjettiness (2 axes)"),
+    NTupleVariable("tau3",  lambda x : x.userFloat("NjettinessAK8:tau3"), help="Nsubjettiness (3 axes)"),
+
+    NTupleVariable("msoftdrop",  lambda x : x.userFloat("ak8PFJetsCHSSoftDropMass"),  help="Softdrop Mass"),
+    NTupleVariable("mpruned",    lambda x : x.userFloat("ak8PFJetsCHSPrunedMass"),    help="Pruned Mass"),
+    NTupleVariable("mtrimmed",   lambda x : x.userFloat("ak8PFJetsCHSTrimmedMass"),   help="Trimmed Mass"),
+    NTupleVariable("mfiltered",  lambda x : x.userFloat("ak8PFJetsCHSFilteredMass"),  help="Filtered Mass"),
+
+    NTupleVariable("bbtag",  lambda x : x.bbtag, help="Hbb b-tag score"),
+
+    # bb-tag input variables
+    NTupleVariable("PFLepton_ptrel",   lambda x : x.PFLepton_ptrel, help="pt-rel of e/mu (for bb-tag)"),    
+    NTupleVariable("z_ratio",          lambda x : x.z_ratio, help="z-ratio (for bb-tag)"),    
+    NTupleVariable("tau_dot",          lambda x : x.tau_dot, help="tau_dot (for bb-tag)"),    
+    NTupleVariable("SV_mass_0",        lambda x : x.SV_mass_0, help="secondary vertex mass (for bb-tag)"),    
+    NTupleVariable("SV_EnergyRatio_0", lambda x : x.SV_EnergyRatio_0, help="secondary vertex mass energy ratio 0 (for bb-tag)"),    
+    NTupleVariable("SV_EnergyRatio_1", lambda x : x.SV_EnergyRatio_1, help="secondary vertex mass energy ratio 1 (for bb-tag)"),    
+    NTupleVariable("PFLepton_IP2D",    lambda x : x.PFLepton_IP2D, help="lepton IP2D (for bb-tag)"),    
+    NTupleVariable("tau_21",           lambda x : x.tau_21, help="nsubjettiness tau2/tau1 (for bb-tag)"),    
+    NTupleVariable("nSL",              lambda x : x.nSL, help="number of soft leptons (for bb-tag)"),    
+    NTupleVariable("vertexNTracks",    lambda x : x.vertexNTracks, help="number of tracks for vertex (for bb-tag)"),    
+
+    ])
+
+
+##------------------------------------------  
+## Subjet
+##------------------------------------------  
+
+# Four Vector + b-Tag
+
+subjetType = NTupleObjectType("subjet",  baseObjectTypes = [ fourVectorType ], variables = [
+    NTupleVariable("btag",  lambda x : x.btag, help="CVS IVF V2 btag-score")])
+
+##------------------------------------------  
+## PAT Subjet
+##------------------------------------------  
+
+# Four Vector + b-Tag from PAT
+
+patSubjetType = NTupleObjectType("patsubjet",  baseObjectTypes = [ fourVectorType ], variables = [
+    NTupleVariable("btag",  lambda x : x.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"), help="CVS IVF V2 btag-score")])
 
 
 ##------------------------------------------  
@@ -169,16 +258,19 @@ httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variabl
     NTupleVariable("sjW1eta",  lambda x : x.sjW1eta,  help = "Leading W Subjet eta"),
     NTupleVariable("sjW1phi",  lambda x : x.sjW1phi,  help = "Leading W Subjet phi"),
     NTupleVariable("sjW1mass", lambda x : x.sjW1mass, help = "Leading W Subjet mass"),
-    # Second Subjet (pt)
+    NTupleVariable("sjW1btag", lambda x : x.sjW1btag, help = "Leading W Subjet btag"),
+    # Second W Subjet (pt)
     NTupleVariable("sjW2pt",   lambda x : x.sjW2pt,   help = "Second Subjet pT"),
     NTupleVariable("sjW2eta",  lambda x : x.sjW2eta,  help = "Second Subjet eta"),
     NTupleVariable("sjW2phi",  lambda x : x.sjW2phi,  help = "Second Subjet phi"),
     NTupleVariable("sjW2mass", lambda x : x.sjW2mass, help = "Second Subjet mass"),
-    # Non-W Subjet (pt)
+    NTupleVariable("sjW2btag", lambda x : x.sjW2btag, help = "Second Subjet btag"),
+    # Non-W Subjet
     NTupleVariable("sjNonWpt",   lambda x : x.sjNonWpt,   help = "Non-W Subjet pT"),
     NTupleVariable("sjNonWeta",  lambda x : x.sjNonWeta,  help = "Non-W Subjet eta"),
     NTupleVariable("sjNonWphi",  lambda x : x.sjNonWphi,  help = "Non-W Subjet phi"),
     NTupleVariable("sjNonWmass", lambda x : x.sjNonWmass, help = "Non-W Subjet mass"),
+    NTupleVariable("sjNonWbtag", lambda x : x.sjNonWbtag, help = "Non-W Subjet btag"),
     ])
    
 
@@ -252,6 +344,7 @@ genJetType = NTupleObjectType("genJet", baseObjectTypes = [ genParticleType ], v
     NTupleVariable("wNuPt", lambda x : (x.p4()+x.nu).pt() if hasattr(x,"nu") else x.p4().pt() ,float, mcOnly=True, help="pt of jet adding back the neutrinos"),
     NTupleVariable("wNuEta", lambda x : (x.p4()+x.nu).eta() if hasattr(x,"nu") else x.p4().eta() ,float, mcOnly=True, help="eta of jet adding back the neutrinos"),
     NTupleVariable("wNuPhi", lambda x : (x.p4()+x.nu).phi() if hasattr(x,"nu") else x.p4().phi() ,float, mcOnly=True, help="phi of jet adding back the neutrinos"),
+    NTupleVariable("wNuM", lambda x : (x.p4()+x.nu).M() if hasattr(x,"nu") else x.p4().phi() ,float, mcOnly=True, help="mass of jet adding back the neutrinos"),
 
 ])
 
