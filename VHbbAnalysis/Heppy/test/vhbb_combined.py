@@ -6,7 +6,7 @@ from PhysicsTools.Heppy.utils.cmsswPreprocessor import CmsswPreprocessor
 # line will have no effect (as vhbb is already imported there)
 from vhbb import *
 
-# from VHbbAnalysis.Heppy.AdditionalBTag import AdditionalBTag
+from VHbbAnalysis.Heppy.AdditionalBTag import AdditionalBTag
 from VHbbAnalysis.Heppy.AdditionalBoost import AdditionalBoost
 from VHbbAnalysis.Heppy.GenHFHadronMatcher import GenHFHadronMatcher
 
