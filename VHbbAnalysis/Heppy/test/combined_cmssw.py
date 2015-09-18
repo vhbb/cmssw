@@ -431,6 +431,19 @@ def initialize(isMC=True):
             genParticles = genParticleCollection
         )
 
+        #Schedule to run soft muon and electron taggers on miniAOD
+        process.softPFElectronsTagInfos.jets = cms.InputTag("slimmedJets")
+        process.softPFElectronsTagInfos.electrons = cms.InputTag("slimmedElectrons")
+        process.softPFElectronsTagInfos.primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices")
+            
+        process.softPFMuonsTagInfos.jets = cms.InputTag("slimmedJets")
+        process.softPFMuonsTagInfos.muons = cms.InputTag("slimmedMuons")
+        process.softPFMuonsTagInfos.primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices")
+        
+        process.OUT.outputCommands.append("keep *_softPFElectronsTagInfos_*_*")
+        process.OUT.outputCommands.append("keep *_softPFMuonsTagInfos_*_*")
+        process.OUT.outputCommands.append("keep *_softPFElectronBJetTags_*_EX")
+        process.OUT.outputCommands.append("keep *_softPFMuonBJetTags_*_EX")
 
         process.OUT.outputCommands.append("keep *_matchGenBHadron__EX")
         process.OUT.outputCommands.append("keep *_matchGenCHadron__EX")

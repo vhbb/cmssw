@@ -5,54 +5,68 @@ from copy import deepcopy
 from math import *
 import itertools
 import ROOT
-import array
+import array, os
 class AdditionalBTag( Analyzer ):
 
     def declareHandles(self):
         super(AdditionalBTag, self).declareHandles()
-        self.handles['btag'] = AutoHandle( ("combinedInclusiveSecondaryVertexV2BJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
-        self.handles['btagcsv'] = AutoHandle( ("combinedSecondaryVertexBJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+        #self.handles['btagnew'] = AutoHandle( ("combinedInclusiveSecondaryVertexV2BJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+        #self.handles['btagcsv'] = AutoHandle( ("combinedSecondaryVertexBJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+        self.handles['btagSoftEl'] = AutoHandle( ("softPFElectronBJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+        self.handles['btagSoftMu'] = AutoHandle( ("softPFMuonBJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+        
+        self.bdtVars = ["Jet_CSV", "Jet_CSVIVF", "Jet_JP", "Jet_JBP", "Jet_SoftMu", "Jet_SoftEl"] 
         reader = ROOT.TMVA.Reader()
-        self.Jet_btagCSV = array.array('f',[0]) 
-        self.Jet_btagCMVA = array.array('f',[0]) 
-        self.Jet_btagProb = array.array('f',[0]) 
-        self.Jet_btagBProb = array.array('f',[0]) 
-        self.Jet_pt = array.array('f',[0]) 
-        self.Jet_eta = array.array('f',[0]) 
-        reader.AddVariable("Jet_btagCSV",self.Jet_btagCSV)
-        reader.AddVariable("Jet_btagCMVA",self.Jet_btagCMVA)
-        reader.AddVariable("Jet_btagProb",self.Jet_btagProb)
-        reader.AddVariable("Jet_btagBProb",self.Jet_btagBProb)
-        reader.AddSpectator("Jet_pt",self.Jet_pt)
-        reader.AddSpectator("Jet_eta",self.Jet_eta)
-        reader.BookMVA("BDT","TMVAClassification_BDT.weights.xml")
+        self.Jet_CSV = array.array('f',[0]) 
+        self.Jet_CSVIVF = array.array('f',[0]) 
+        self.Jet_JP = array.array('f',[0]) 
+        self.Jet_JBP = array.array('f',[0]) 
+        self.Jet_SoftMu = array.array('f',[0]) 
+        self.Jet_SoftEl = array.array('f',[0]) 
+        
+        for var in self.bdtVars: 
+            reader.AddVariable(var, getattr(self, var))
+        
+        #https://github.com/cms-data/RecoBTag-Combined/blob/master/CombinedMVAV2_13_07_2015.weights.xml.gz
+        self.weightfile = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/btag/CombinedMVAV2_13_07_2015.weights.xml"
+        print "booking BDT from {0}".format(self.weightfile)  
+        reader.BookMVA("bdt", self.weightfile)
         self.reader=reader
+
+    def readTag(self, event, name):
+        newtags =  self.handles[name].product()
+        for i in xrange(0,len(newtags)) :
+             for j in event.cleanJets :
+                if j.physObj == newtags.key(i).get() :
+                    setattr(j, name, newtags.value(i))
+
     def addNewBTag(self,event):
-        newtags =  self.handles['btag'].product()
-        for i in xrange(0,len(newtags)) :
-             for j in event.cleanJets :
-                if j.physObj == newtags.key(i).get() :
-                    j.btagnew=newtags.value(i)
-        newtags =  self.handles['btagcsv'].product()
-        for i in xrange(0,len(newtags)) :
-             for j in event.cleanJets :
-                if j.physObj == newtags.key(i).get() :
-                    j.btagcsv=newtags.value(i)
+        #self.readTag(event, "btagnew")
+        #self.readTag(event, "btagcsv")
+        self.readTag(event, "btagSoftEl")
+        self.readTag(event, "btagSoftMu")
 
-
+    def normalize(self, varname):
+        v = getattr(self, varname)
+        if v[0] <=0:
+            v[0] = 0
+        setattr(self, varname, v)
     def process(self, event):
 
         self.readCollections( event.input )
         self.addNewBTag(event)
-        for j in event.cleanJets :
-            self.Jet_btagCSV[0]=j.btag('combinedInclusiveSecondaryVertexV2BJetTags') 
-            self.Jet_btagCMVA[0]=j.btag('combinedMVABJetTags') 
-            self.Jet_btagProb[0]=j.btag('jetProbabilityBJetTags') 
-            self.Jet_btagBProb[0]=j.btag('jetBProbabilityBJetTags') 
-            self.Jet_pt[0] = j.pt()
-            self.Jet_eta[0] = j.eta()         
-            j.btagBDT = self.reader.EvaluateMVA("BDT")
-#            print self.Jet_btagCSV, self.Jet_btagCMVA, self.Jet_btagProb, self.Jet_btagBProb, self.Jet_pt, self.Jet_eta,j.btagBDT
+        for j in event.cleanJets:
+
+            self.Jet_CSV[0]=j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") 
+            self.Jet_CSVIVF[0]=j.btag("pfCombinedSecondaryVertexV2BJetTags") 
+            self.Jet_JP[0]=j.btag("pfJetProbabilityBJetTags") 
+            self.Jet_JBP[0]=j.btag("pfJetBProbabilityBJetTags") 
+            self.Jet_SoftMu[0]=j.btagSoftMu
+            self.Jet_SoftEl[0]=j.btagSoftEl
+            
+            for var in self.bdtVars:
+                self.normalize(var)
+            j.btagBDT = self.reader.EvaluateMVA("bdt")
         return True
 
 

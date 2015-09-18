@@ -82,11 +82,11 @@ if not AdditionalBoost.skip_ca15:
 
 # # Add b-Tagging Information
 # 
-# btagana=cfg.Analyzer(
-#     verbose=False,
-#     class_object=AdditionalBTag,
-# )
-# sequence.insert(sequence.index(VHbb),btagana)
+btagana=cfg.Analyzer(
+    verbose=False,
+    class_object=AdditionalBTag,
+)
+sequence.insert(sequence.index(VHbb),btagana)
 
 # Add Information on generator level hadronic tau decays
 if sample.isMC:   
