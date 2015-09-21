@@ -64,10 +64,10 @@ class VHbbAnalyzer( Analyzer ):
         if len(event.jetsForVBF) < 4 or  event.jetsForVBF[0] < 70 or  event.jetsForVBF[1] < 55 or  event.jetsForVBF[2] < 35 or  event.jetsForVBF[3] < 20 :
             return
         event.jetsForVBF.sort(key=lambda x:x.pt(),reverse=True)
+        map(lambda x :x.qgl(),event.jetsForVBF[:6])
         event.jetsForVBF=event.jetsForVBF[:4]
 
 	#compute QGL here for VBF jets if passing VBF pre-selection 
-        map(lambda x :x.qgl(),event.jetsForVBF)
 
         event.bJetsForVBF=sorted(event.jetsForVBF,key = lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')), reverse=True)[:2]
         j1=event.bJetsForVBF[0]
@@ -110,9 +110,9 @@ class VHbbAnalyzer( Analyzer ):
         p4VH=event.HCSV+event.V
         if p4VH.pt() > 30 :
               phi=pi+p4VH.phi()
-              matchedJets=[(x,deltaPhi(phi,x.phi())) for x in event.cleanJetsAll if deltaPhi(phi,x.phi()) < 0.4 and  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') and x not in event.hJetsCSV ] 
+              matchedJets=[x for x in event.cleanJetsAll if abs(deltaPhi(phi,x.phi())) < 0.4 and  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') and x not in event.hJetsCSV and x not in event.hJetsaddJetsdR08] 
               if len(matchedJets) > 0 :
-                  event.isrJetVH=event.cleanJetsAll.index(sorted(matchedJets, key=lambda x:x[1])[0][0])
+                  event.isrJetVH=event.cleanJetsAll.index(sorted(matchedJets, key=lambda x:x.pt(),reverse=True)[0])
                 
     def makeJets(self,event,b):
 	inputs=ROOT.std.vector(ROOT.heppy.ReclusterJets.LorentzVector)()
@@ -193,7 +193,7 @@ class VHbbAnalyzer( Analyzer ):
 	event.hjidxaddJetsdR08 = [x for x in event.hjidxCSV]         
 	event.ajidxaddJetsdR08 = [x for x in event.ajidxCSV]         
          #multiple jets interpretations, for central jets closest to dR<0.8 from higgs jets
-        jetsForHiggsAddJetsdR08 = [x for x in event.jetsForHiggs if (x.pt()>15 and abs(x.eta())<3.0) ]
+        jetsForHiggsAddJetsdR08 = [x for x in event.cleanJetsAll if (x.pt()>15 and abs(x.eta())<3.0 and x.puJetId() > 0 and x.jetID('POG_PFID_Loose') ) ]
         if (len(jetsForHiggsAddJetsdR08) > 2): 
            addJetsForHiggs = [x for x in jetsForHiggsAddJetsdR08 if ( x not in event.hJetsCSV  and  min(deltaR( x.eta(), x.phi(), event.hJetsCSV[0].eta(), event.hJetsCSV[0].phi()),deltaR( x.eta(), x.phi(), event.hJetsCSV[1].eta(), event.hJetsCSV[1].phi()))<0.8 ) ]
            for x in addJetsForHiggs:
@@ -392,11 +392,13 @@ class VHbbAnalyzer( Analyzer ):
         if event.Vtype < 0 and not ( sum(x.pt() > 30 for x in event.jetsForHiggs) >= 4 or sum(x.pt() for x in event.jetsForHiggs[:4]) > 160 ):
                 return self.cfg_ana.passall
 
-        map(lambda x :x.qgl(),event.jetsForHiggs[:4])
+        map(lambda x :x.qgl(),event.jetsForHiggs[:6])
+        map(lambda x :x.qgl(),(x for x in event.jetsForHiggs if x.pt() > 30) )
+
 	self.doHiggsHighCSV(event)
 	self.doHiggsHighPt(event)
-        self.searchISRforVH(event)
         self.doHiggsAddJetsdR08(event)
+        self.searchISRforVH(event)
         self.doVHRegression(event)
 
         self.fillTauIndices(event)
