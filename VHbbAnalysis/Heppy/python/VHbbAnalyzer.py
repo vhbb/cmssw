@@ -4,6 +4,7 @@ from PhysicsTools.HeppyCore.utils.deltar import deltaR,deltaPhi
 from copy import deepcopy
 from math import *
 from JetRegression import JetRegression
+from VBFblikelihood import VBFblikelihood
 import itertools
 import ROOT
 def Boost(self,boost):
@@ -56,6 +57,9 @@ class VHbbAnalyzer( Analyzer ):
             regression = JetRegression(re["weight"],re["name"])              
             for i in re["vtypes"] :
                 self.regressions[i] = regression
+        blike=self.cfg_ana.VBFblikelihood
+        print "Initialize VBF blikelihood ", blike
+        self.blikelihood = VBFblikelihood(blike["weight"],blike["name"])
 
 
     def doVBF(self,event) :
@@ -72,6 +76,7 @@ class VHbbAnalyzer( Analyzer ):
         event.bJetsForVBF=sorted(event.jetsForVBF,key = lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')), reverse=True)[:2]
         j1=event.bJetsForVBF[0]
         j2=event.bJetsForVBF[1]
+        self.blikelihood.evaluateBlikelihood(event)
 #print "VBF"
 #print event.selectedElectrons,event.selectedMuons,
 	event.softActivityJets=self.softActivity(event,j1,j2,event.jetsForVBF+event.selectedElectrons+event.selectedMuons)

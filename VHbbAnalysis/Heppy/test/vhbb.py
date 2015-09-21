@@ -230,6 +230,7 @@ VHbb = cfg.Analyzer(
         {"weight":"Wln_weights_phys14.xml", "name":"jet0Regression_wln", "vtypes":[2,3]},
         {"weight":"Znn_weights_phys14.xml", "name":"jet0Regression_znn", "vtypes":[4,5,-1]}
     ],
+    VBFblikelihood = {"weight":"TMVA_blikelihood_vbf_singlebtag.xml", "name":"BDGT"}
 )
 
 from VHbbAnalysis.Heppy.TTHtoTauTauAnalyzer import TTHtoTauTauAnalyzer
