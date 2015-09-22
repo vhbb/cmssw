@@ -26,17 +26,13 @@ class VBFblikelihood :
 
 
   def evaluateBlikelihood(self, event) :
-    nJet=len(event.jetsForHiggs)
-    for index,j in enumerate(event.jetsForHiggs,start=0) :
+    nJet=len(event.jets)
+    for index,j in enumerate(event.jets,start=0) :
       j.blike_VBF=-2
-      #if j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") >1 :  
-        #j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") =1
-      #if j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") <0 :
-      #  j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") =0
     if (nJet>=4):
-      if ((event.jetsForHiggs[0].pt()>92.) and (event.jetsForHiggs[1].pt()>76.) and (event.jetsForHiggs[2].pt()>64) and (event.jetsForHiggs[3].pt()>30)):
-        jetsForHiggs4=[jet for index,jet in enumerate(event.jetsForHiggs) if (jet.jetID("POG_PFID_Loose")>0) and (index<4) and (jet.pt()>20)]#jetID ,any arguments?
-        jetsForHiggs4btag=[jet.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") for index,jet in enumerate(event.jetsForHiggs) if (jet.jetID("POG_PFID_Loose")>0) and (index<4) and (jet.pt()>20)]
+      if ((event.jets[0].pt()>92.) and (event.jets[1].pt()>76.) and (event.jets[2].pt()>64) and (event.jets[3].pt()>30)):
+        jetsForHiggs4=[jet for index,jet in enumerate(event.jets) if (jet.jetID("POG_PFID_Loose")>0) and (index<4) and (jet.pt()>20)]
+        jetsForHiggs4btag=[jet.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") for index,jet in enumerate(event.jets) if (jet.jetID("POG_PFID_Loose")>0) and (index<4) and (jet.pt()>20)]
         btag_max1=max(jetsForHiggs4btag)
         btag_max1_idx=jetsForHiggs4btag.index(btag_max1)   
         if btag_max1>0.7:
@@ -62,23 +58,22 @@ class VBFblikelihood :
             qqDeltaEta=abs(qjets[0].eta()-qjets[1].eta())
 
             if (Mqq>460) and(qqDeltaEta>4.1)and (bbDeltaPhi<1.6) :
-              if (HLT_BIT_HLT_QuadPFJet_SingleBTagCSV_VBF_Mqq460_v==1) : #the name of the trigger variable, how to set it to True, when I run the python vhbb.py it gives a print of triggers and for vbf trigger there are false
+              #if (HLT_BIT_HLT_QuadPFJet_SingleBTagCSV_VBF_Mqq460_v==1) : #the name of the trigger variable, how to set it to True, when I run the python vhbb.py it gives a print of triggers and for vbf trigger there are false
 
-                loopMaxJet=7
-                if nJet<7 : loopMaxJet=nJet  
-                jetsForHiggsMax=[jet for index,jet in enumerate(event.jetsForHiggs) if (jet.jetID("POG_PFID_Loose")) and (index<loopMaxJet) and (jet.pt()>20)]
-                jetsEtaIdx=[sorted(range(len(jetsForHiggsMax)),key=lambda x:abs(jetsForHiggsMax[x].eta()))]
-                jetsBtagIdx=[sorted(range(len(jetsForHiggsMax)),key=lambda x:abs(jetsForHiggsMax[x].btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")))]
+              loopMaxJet=7
+              if nJet<7 : loopMaxJet=nJet  
+              jetsForHiggsMax=[jet for index,jet in enumerate(event.jets) if (jet.jetID("POG_PFID_Loose")) and (index<loopMaxJet) and (jet.pt()>20)]
+              jetsEtaIdx=[sorted(range(len(jetsForHiggsMax)),key=lambda x:abs(jetsForHiggsMax[x].eta()))]
+              jetsBtagIdx=[sorted(range(len(jetsForHiggsMax)),key=lambda x:abs(jetsForHiggsMax[x].btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")))]
 
-                for i  in range(0,loopMaxJet) :
-                  j=jetsForHiggsMax[i]
-                  if (j.pt()<20) : continue #jetID ,any arguments?
-                  if not (j.jetID("POG_PFID_Loose")) : continue   
-                  self.Jet_pt[0]=j.pt()# [0] or [i]?
-                  self.Jet_eta[0]=abs(j.eta())
-                  self.Jet_btagCSV[0]=j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
-                  self.Jet_pt_idx[0]=i
-                  self.Jet_eta_idx[0]=jetsEtaIdx[i]
-                  self.Jet_btagCSV_idx[0]=jetsBtagIdx[i]
-                  j.blike_VBF=self.reader.EvaluateMVA(self.name)
-
+              for i  in range(0,loopMaxJet) :
+                j=jetsForHiggsMax[i]
+                if (j.pt()<20) : continue ?
+                if not (j.jetID("POG_PFID_Loose")) : continue   
+                self.Jet_pt[0]=j.pt()
+                self.Jet_eta[0]=abs(j.eta())
+                self.Jet_btagCSV[0]=j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
+                self.Jet_pt_idx[0]=i
+                self.Jet_eta_idx[0]=jetsEtaIdx[i]
+                self.Jet_btagCSV_idx[0]=jetsBtagIdx[i]
+                j.blike_VBF=self.reader.EvaluateMVA(self.name)[0]
