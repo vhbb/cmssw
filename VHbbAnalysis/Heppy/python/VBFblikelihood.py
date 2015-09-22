@@ -29,7 +29,6 @@ class VBFblikelihood :
     nJet=len(event.jetsForHiggs)
     for index,j in enumerate(event.jetsForHiggs,start=0) :
       j.blike_VBF=-2
-      j.blike_VBF = j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
       #if j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") >1 :  
         #j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") =1
       #if j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") <0 :
@@ -37,7 +36,7 @@ class VBFblikelihood :
     if (nJet>=4):
       if ((event.jetsForHiggs[0].pt()>92.) and (event.jetsForHiggs[1].pt()>76.) and (event.jetsForHiggs[2].pt()>64) and (event.jetsForHiggs[3].pt()>30)):
         jetsForHiggs4=[jet for index,jet in enumerate(event.jetsForHiggs) if (jet.jetID("POG_PFID_Loose")>0) and (index<4) and (jet.pt()>20)]#jetID ,any arguments?
-        btag_max1=max(jetsForHiggs4.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags"))        
+        btag_max1=max(event.jetsForHiggs4.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags"))        
         if btag_max1>0.7:
           bjet1=jetsForHiggs4[jetsForHiggs4.index.max(jetsForHiggs4.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags"))]
           other3jets=[jet for index,jet in enumerate(jetsForHiggs4) if index!= btag_max1]
