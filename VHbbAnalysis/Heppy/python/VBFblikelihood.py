@@ -26,21 +26,20 @@ class VBFblikelihood :
 
 
   def evaluateBlikelihood(self, event) :
-    nJet=len(event.jetsForHiggs)#I havent found nJet variable, should I do like this?
+    nJet=len(event.jetsForHiggs)
     for index,j in enumerate(event.jetsForHiggs,start=0) :
       j.blike_VBF=-2
-      if j.btag >1 : #how is btag called?  
-        j.btag =1
-      if j.btag <0 :
-        j.btag =0
-    if ((event.jetsForHiggs[0].pt()>92.) and (event.jetsForHiggs[1].pt()>76.) and (event.jetsForHiggs[2].pt()>64) and (event.jetsForHiggs[3].pt()>30)):
-      if (nJet>=4):
-        jetsForHiggs4=[]
-        jetsForHiggs4=[jet for index,jet in enumerate(event.jetsForHiggs) if (jet.jetID()>0) and (index<4) and (jet.pt()>20)]#jetID ,any arguments?
-        btag_max1=max(jetsForHiggs4.btag)        
+      j.blike_VBF = j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
+      #if j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") >1 :  
+        #j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") =1
+      #if j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") <0 :
+      #  j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") =0
+    if (nJet>=4):
+      if ((event.jetsForHiggs[0].pt()>92.) and (event.jetsForHiggs[1].pt()>76.) and (event.jetsForHiggs[2].pt()>64) and (event.jetsForHiggs[3].pt()>30)):
+        jetsForHiggs4=[jet for index,jet in enumerate(event.jetsForHiggs) if (jet.jetID("POG_PFID_Loose")>0) and (index<4) and (jet.pt()>20)]#jetID ,any arguments?
+        btag_max1=max(jetsForHiggs4.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags"))        
         if btag_max1>0.7:
-          bjet1=jetsForHiggs4[jetsForHiggs4.index.max(jetsForHiggs4.btag)]
-          other3jets=[]
+          bjet1=jetsForHiggs4[jetsForHiggs4.index.max(jetsForHiggs4.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags"))]
           other3jets=[jet for index,jet in enumerate(jetsForHiggs4) if index!= btag_max1]
           maxEta1, maxEta2 = None, None
           maxDeltaEta = -1
@@ -66,18 +65,19 @@ class VBFblikelihood :
 
                 loopMaxJet=7
                 if nJet<7 : loopMaxJet=nJet  
-                jetsForHiggsMax=[jet for index,jet in enumerate(event.jetsForHiggs) if (jet.id>0) and (index<loopMaxJet) and (jet.pt()>20)]
+                jetsForHiggsMax=[jet for index,jet in enumerate(event.jetsForHiggs) if (jet.jetID("POG_PFID_Loose")) and (index<loopMaxJet) and (jet.pt()>20)]
                 jetsEtaIdx=[sorted(range(len(jetsForHiggsMax)),key=lambda x:abs(jetsForHiggsMax[x].eta()))]
-                jetsBtagIdx=[sorted(range(len(jetsForHiggsMax)),key=lambda x:abs(jetsForHiggsMax[x].btag))]
+                jetsBtagIdx=[sorted(range(len(jetsForHiggsMax)),key=lambda x:abs(jetsForHiggsMax[x].btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")))]
 
                 for i  in range(0,loopMaxJet) :
                   j=jetsForHiggsMax[i]
-                  if (j.jetID()<=0) or (j.pt()<20) : continue #jetID ,any arguments?
-                  self.Jet_pt[i]=j.pt()# [0] or [i]?
-                  self.Jet_eta[i]=abs(j.eta())
-                  self.Jet_btagCSV[i]=j.btag
-                  self.Jet_pt_idx[i]=i
-                  self.Jet_eta_idx[i]=jetsEtaIdx[i]
-                  self.Jet_btagCSV_idx[i]=jetsBtagIdx[i]
-                  j.blike_VBF=self.reader.EvaluateMVA(self.name)#[0] is needed?
+                  if (j.pt()<20) : continue #jetID ,any arguments?
+                  if not (j.jetID("POG_PFID_Loose")) : continue   
+                  self.Jet_pt[0]=j.pt()# [0] or [i]?
+                  self.Jet_eta[0]=abs(j.eta())
+                  self.Jet_btagCSV[0]=j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
+                  self.Jet_pt_idx[0]=i
+                  self.Jet_eta_idx[0]=jetsEtaIdx[i]
+                  self.Jet_btagCSV_idx[0]=jetsBtagIdx[i]
+                  j.blike_VBF=self.reader.EvaluateMVA(self.name)
 
