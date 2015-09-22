@@ -68,7 +68,7 @@ class VBFblikelihood :
 
               for i  in range(0,loopMaxJet) :
                 j=jetsForHiggsMax[i]
-                if (j.pt()<20) : continue ?
+                if (j.pt()<20) : continue
                 if not (j.jetID("POG_PFID_Loose")) : continue   
                 self.Jet_pt[0]=j.pt()
                 self.Jet_eta[0]=abs(j.eta())
