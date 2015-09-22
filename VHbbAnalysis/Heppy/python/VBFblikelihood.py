@@ -36,10 +36,12 @@ class VBFblikelihood :
     if (nJet>=4):
       if ((event.jetsForHiggs[0].pt()>92.) and (event.jetsForHiggs[1].pt()>76.) and (event.jetsForHiggs[2].pt()>64) and (event.jetsForHiggs[3].pt()>30)):
         jetsForHiggs4=[jet for index,jet in enumerate(event.jetsForHiggs) if (jet.jetID("POG_PFID_Loose")>0) and (index<4) and (jet.pt()>20)]#jetID ,any arguments?
-        btag_max1=max(event.jetsForHiggs4.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags"))        
+        jetsForHiggs4btag=[jet.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") for index,jet in enumerate(event.jetsForHiggs) if (jet.jetID("POG_PFID_Loose")>0) and (index<4) and (jet.pt()>20)]
+        btag_max1=max(jetsForHiggs4btag)
+        btag_max1_idx=jetsForHiggs4btag.index(btag_max1)   
         if btag_max1>0.7:
-          bjet1=jetsForHiggs4[jetsForHiggs4.index.max(jetsForHiggs4.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags"))]
-          other3jets=[jet for index,jet in enumerate(jetsForHiggs4) if index!= btag_max1]
+          bjet1=jetsForHiggs4[btag_max1_idx]
+          other3jets=[jet for index,jet in enumerate(jetsForHiggs4) if index!= btag_max1_idx]
           maxEta1, maxEta2 = None, None
           maxDeltaEta = -1
 
@@ -56,7 +58,7 @@ class VBFblikelihood :
             bjet2=leftBjets[0]
 
             Mqq=(qjets[0].p4()+qjets[1].p4()).M()
-            bbDeltaPhi=abs(qjets[0].phi(),qjets[1].phi())
+            bbDeltaPhi=abs(deltaPhi(qjets[0].phi(),qjets[1].phi()))
             qqDeltaEta=abs(qjets[0].eta()-qjets[1].eta())
 
             if (Mqq>460) and(qqDeltaEta>4.1)and (bbDeltaPhi<1.6) :
