@@ -58,22 +58,21 @@ class VBFblikelihood :
             qqDeltaEta=abs(qjets[0].eta()-qjets[1].eta())
 
             if (Mqq>460) and(qqDeltaEta>4.1)and (bbDeltaPhi<1.6) :
-              #if (HLT_BIT_HLT_QuadPFJet_SingleBTagCSV_VBF_Mqq460_v==1) : #the name of the trigger variable, how to set it to True, when I run the python vhbb.py it gives a print of triggers and for vbf trigger there are false
+              if (event.HLT_BIT_HLT_QuadPFJet_SingleBTagCSV_VBF_Mqq460_v) : 
+                loopMaxJet=7
+                if nJet<7 : loopMaxJet=nJet  
+                jetsForHiggsMax=[jet for index,jet in enumerate(event.jetsForHiggs) if (jet.jetID("POG_PFID_Loose")) and (index<loopMaxJet) and (jet.pt()>20)]
+                jetsEtaIdx=[idx for idx in sorted(range(len(jetsForHiggsMax)),key=lambda x:abs(jetsForHiggsMax[x].eta()))]
+                jetsBtagIdx=[idx for idx in sorted(range(len(jetsForHiggsMax)),key=lambda x:abs(jetsForHiggsMax[x].btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")))]
 
-              loopMaxJet=7
-              if nJet<7 : loopMaxJet=nJet  
-              jetsForHiggsMax=[jet for index,jet in enumerate(event.jetsForHiggs) if (jet.jetID("POG_PFID_Loose")) and (index<loopMaxJet) and (jet.pt()>20)]
-              jetsEtaIdx=[idx for idx in sorted(range(len(jetsForHiggsMax)),key=lambda x:abs(jetsForHiggsMax[x].eta()))]
-              jetsBtagIdx=[idx for idx in sorted(range(len(jetsForHiggsMax)),key=lambda x:abs(jetsForHiggsMax[x].btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")))]
-
-              for i  in range(0,loopMaxJet) :
-                j=jetsForHiggsMax[i]
-                if (j.pt()<20) : continue
-                if not (j.jetID("POG_PFID_Loose")) : continue   
-                self.Jet_pt[0]=j.pt()
-                self.Jet_eta[0]=abs(j.eta())
-                self.Jet_btagCSV[0]=j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
-                self.Jet_pt_idx[0]=i
-                self.Jet_eta_idx[0]=jetsEtaIdx[i]
-                self.Jet_btagCSV_idx[0]=jetsBtagIdx[i]
-                j.blike_VBF=self.reader.EvaluateMVA(self.name)
+                for i  in range(0,loopMaxJet) :
+                  j=jetsForHiggsMax[i]
+                  if (j.pt()<20) : continue
+                  if not (j.jetID("POG_PFID_Loose")) : continue   
+                  self.Jet_pt[0]=j.pt()
+                  self.Jet_eta[0]=abs(j.eta())
+                  self.Jet_btagCSV[0]=j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
+                  self.Jet_pt_idx[0]=i
+                  self.Jet_eta_idx[0]=jetsEtaIdx[i]
+                  self.Jet_btagCSV_idx[0]=jetsBtagIdx[i]
+                  j.blike_VBF=self.reader.EvaluateMVA(self.name)

@@ -2,14 +2,14 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_HEPPY_V12_001'
-config.General.workArea = 'crab_projects_V12_001'
+config.General.requestName = 'vhbb_heppy_blike'
+config.General.workArea = 'crab_projects_blike'
 config.General.transferLogs=True
 
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = 'heppy_crab_fake_pset.py'
-config.JobType.scriptExe = 'heppy_crab_script.sh'
+#config.JobType.scriptExe = 'heppy_crab_script.sh'
 import os
 os.system("tar czf python.tar.gz --dereference --directory $CMSSW_BASE python")
 config.JobType.inputFiles = ['heppy_config.py',
@@ -29,20 +29,21 @@ config.JobType.inputFiles = ['heppy_config.py',
                              'Wln_weights_phys14.xml',
                              'Zll_weights_phys14.xml',
                              'Znn_weights_phys14.xml',
+										'TMVA_blikelihood_vbf_singlebtag.xml'
 ]
 #config.JobType.outputFiles = ['tree.root']
 
 config.section_("Data")
-config.Data.inputDataset = '/ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'
+config.Data.inputDataset = '/VBFHToBB_M-125_13TeV_powheg_pythia8_weightfix/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 3
 #config.Data.totalUnits = 1
-config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyV12/'
-config.Data.publication = True
-config.Data.publishDataName = 'VHBB_HEPPY_V12'
+config.Data.outLFNDirBase = '/store/user/nchernya/vhbb_blike/'
+config.Data.publication = False
+config.Data.publishDataName = 'VHBB_heppy_blike'
 
 config.section_("Site")
-config.Site.storageSite = "T2_IT_Pisa"
+config.Site.storageSite = "T2_AT_Vienna"
 
 #config.Data.ignoreLocality = True
