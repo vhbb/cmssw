@@ -189,7 +189,10 @@ triggerTable = {
         "HLT_QuadJet45_TripleCSV0p5_v*",
         "HLT_DoubleJet90_Double30_TripleCSV0p5_v*",
     ],
-
+    "ttHleptonic" : [
+        "HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
+        "HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v*",
+    ],
     "ttHhardonicAll" : [
         "HLT_PFHT450_SixJet40_PFBTagCSV_v*",
         "HLT_PFHT450_SixJet40_v*",
