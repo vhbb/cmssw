@@ -66,7 +66,7 @@ class VHbbAnalyzer( Analyzer ):
 
     def doVBF(self,event) :
         event.jetsForVBF = [x for x in event.cleanJetsAll if self.cfg_ana.higgsJetsPreSelection(x) ]
-	self.regressionVBF[event.Vtype].evaluateRegressionVBF(event)
+	self.regressionVBF[event.Vtype].evaluateRegression(event,"pt_regVBF")
         #compute only for events passing VBF selection
         if len(event.jetsForVBF) < 4 or  event.jetsForVBF[0] < 70 or  event.jetsForVBF[1] < 55 or  event.jetsForVBF[2] < 35 or  event.jetsForVBF[3] < 20 :
             return
