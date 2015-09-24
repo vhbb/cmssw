@@ -51,6 +51,12 @@ class VHbbAnalyzer( Analyzer ):
             self.inputCounterPosWeight = ROOT.TH1F("CountPosWeight","Count genWeight>0",1,0,2)
             self.inputCounterNegWeight = ROOT.TH1F("CountNegWeight","Count genWeight<0",1,0,2)
         self.regressions={}
+	self.regressionVBF={}
+	for re in self.cfg_ana.regressionVBF :
+		print "Initialize regression ",re
+		regression_VBF = JetRegression(re["weight"],re["name"])
+		for i in re["vtypes"] :
+                self.regressionVBF[i] = regression_VBF
         for re in self.cfg_ana.regressions :
             print "Initialize regression ",re
             regression = JetRegression(re["weight"],re["name"])              
@@ -60,6 +66,7 @@ class VHbbAnalyzer( Analyzer ):
 
     def doVBF(self,event) :
         event.jetsForVBF = [x for x in event.cleanJetsAll if self.cfg_ana.higgsJetsPreSelection(x) ]
+	self.regressionVBF[event.Vtype].evaluateRegressionVBF(event)
         #compute only for events passing VBF selection
         if len(event.jetsForVBF) < 4 or  event.jetsForVBF[0] < 70 or  event.jetsForVBF[1] < 55 or  event.jetsForVBF[2] < 35 or  event.jetsForVBF[3] < 20 :
             return
@@ -219,8 +226,6 @@ class VHbbAnalyzer( Analyzer ):
         hJet_reg0*=event.hJets[0].pt_reg/event.hJets[0].pt()
         hJet_reg1*=event.hJets[0].pt_reg/event.hJets[0].pt()
         event.H_reg = hJet_reg0+hJet_reg1
-
-
 
 
     def classifyMCEvent(self,event):
