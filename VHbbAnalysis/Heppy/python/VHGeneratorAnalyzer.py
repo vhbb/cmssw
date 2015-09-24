@@ -154,6 +154,7 @@ class GeneratorAnalyzer( Analyzer ):
         event.genallbquarks = []
         event.genwzquarks = []
         event.gentopquarks  = []
+        event.genallstatus2bhadrons = [ p for p in event.genParticles if p.status ==2 and hasBottom(p.pdgId()) ]
         event.genallcquarks = [ p for p in event.genParticles if abs(p.pdgId()) == 4 and ( p.numberOfDaughters() == 0 or abs(p.daughter(0).pdgId()) != 4) ]
 
 		# aggiunti da me
@@ -243,6 +244,15 @@ class GeneratorAnalyzer( Analyzer ):
                 if getattr(p, 'sourceId', 0) == 0:
                     p.sourceId = 99
 
+    def hasBottom(self,pdgId):
+      code1=0;
+      code2=0;
+      tmpHasBottom = false;
+      code1 = (int)( ( abs(pdgId) / 100)%10 );
+      code2 = (int)( ( abs(pdgId) /1000)%10 );
+      if ( code1 == 5 or code2 == 5): tmpHasBottom = true;
+      return tmpHasBottom;
+      
     def countBPartons(self,event):
         event.allBPartons = [ q for q in event.genParticles if abs(q.pdgId()) == 5 and abs(q.status()) == 2 and abs(q.pt()) > 15 ]
         event.allBPartons.sort(key = lambda q : q.pt(), reverse = True)
