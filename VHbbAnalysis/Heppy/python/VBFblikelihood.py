@@ -65,10 +65,8 @@ class VBFblikelihood :
                 jetsEtaIdx=[idx for idx in sorted(range(len(jetsForHiggsMax)),key=lambda x:abs(jetsForHiggsMax[x].eta()))]
                 jetsBtagIdx=[idx for idx in sorted(range(len(jetsForHiggsMax)),key=lambda x:abs(jetsForHiggsMax[x].btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")))]
 
-                for i  in range(0,loopMaxJet) :
+                for i  in range(len(jetsForHiggsMax)) :
                   j=jetsForHiggsMax[i]
-                  if (j.pt()<20) : continue
-                  if not (j.jetID("POG_PFID_Loose")) : continue   
                   self.Jet_pt[0]=j.pt()
                   self.Jet_eta[0]=abs(j.eta())
                   self.Jet_btagCSV[0]=j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
