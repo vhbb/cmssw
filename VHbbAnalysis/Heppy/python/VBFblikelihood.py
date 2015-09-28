@@ -31,8 +31,8 @@ class VBFblikelihood :
       j.blike_VBF=-2
     if (nJet>=4):
       if ((event.jets[0].pt()>92.) and (event.jets[1].pt()>76.) and (event.jets[2].pt()>64) and (event.jets[3].pt()>30)):
-        jetsForHiggs4=[jet for index,jet in enumerate(event.jets) if (jet.jetID("POG_PFID_Loose")>0) and (index<4) and (jet.pt()>20)]
-        jetsForHiggs4btag=[jet.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") for index,jet in enumerate(event.jets) if (jet.jetID("POG_PFID_Loose")>0) and (index<4) and (jet.pt()>20)]
+        jetsForHiggs4=[jet for index,jet in enumerate(event.jets) if (jet.jetID("POG_PFID_Loose")>0) and (index<4)]
+        jetsForHiggs4btag=[jet.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") for index,jet in enumerate(event.jets) if (jet.jetID("POG_PFID_Loose")>0) and (index<4) ]
         btag_max1=max(jetsForHiggs4btag)
         btag_max1_idx=jetsForHiggs4btag.index(btag_max1)   
         if btag_max1>0.7:
@@ -63,13 +63,16 @@ class VBFblikelihood :
                 if nJet<7 : loopMaxJet=nJet  
                 jetsForHiggsMax=[jet for index,jet in enumerate(event.jets) if (jet.jetID("POG_PFID_Loose")) and (index<loopMaxJet) and (jet.pt()>20)]
                 jetsEtaIdx=[idx for idx in sorted(range(len(jetsForHiggsMax)),key=lambda x:abs(jetsForHiggsMax[x].eta()))]
-                jetsBtagIdx=[idx for idx in sorted(range(len(jetsForHiggsMax)),key=lambda x:abs(jetsForHiggsMax[x].btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")))]
+                jetsBtagIdx=[idx for idx in sorted(range(len(jetsForHiggsMax)),key=lambda x:jetsForHiggsMax[x].btag("pfCombinedInclusiveSecondaryVertexV2BJetTags"), reverse=True)]
 
                 for i  in range(len(jetsForHiggsMax)) :
                   j=jetsForHiggsMax[i]
                   self.Jet_pt[0]=j.pt()
                   self.Jet_eta[0]=abs(j.eta())
-                  self.Jet_btagCSV[0]=j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
+                  btag = j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
+                  if btag < 0 : btag = 0
+                  if btag > 1 : btag = 1
+                  self.Jet_btagCSV[0]=btag
                   self.Jet_pt_idx[0]=i
                   self.Jet_eta_idx[0]=jetsEtaIdx[i]
                   self.Jet_btagCSV_idx[0]=jetsBtagIdx[i]
