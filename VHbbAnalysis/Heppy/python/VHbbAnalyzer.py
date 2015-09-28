@@ -77,6 +77,8 @@ class VHbbAnalyzer( Analyzer ):
 	event.softActivityJets=self.softActivity(event,j1,j2,event.jetsForVBF+event.selectedElectrons+event.selectedMuons)
 
     def doSoftActivityVH(self,event) :
+        if not   len(event.jetsForHiggs) >= 2 :
+           return
         j1=event.hJetsCSV[0]
         j2=event.hJetsCSV[1]
 #print "VH"
@@ -362,6 +364,7 @@ class VHbbAnalyzer( Analyzer ):
         event.V.goodMt=0
         event.hjidxDiJetPtByCSV = []
         event.softActivityJets=[]
+        event.softActivityVHJets=[]
 
 
     def process(self, event):
@@ -383,6 +386,15 @@ class VHbbAnalyzer( Analyzer ):
 	self.doFakeMET(event)
 	self.doHtMhtJets30(event)
 
+        self.fillTauIndices(event)
+
+        #Add CSV ranking
+        csvSortedJets=sorted(event.cleanJetsAll, key =  lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')),reverse=True)
+        for j in event.cleanJetsAll:
+              j.btagIdx=csvSortedJets.index(j)
+        for j in event.discardedJets:
+              j.btagIdx=-1
+      
 	#substructure threshold, make configurable
 	ssTrheshold = 200.
 	# filter events with less than 2 jets with pt 20
@@ -401,19 +413,11 @@ class VHbbAnalyzer( Analyzer ):
         self.searchISRforVH(event)
         self.doVHRegression(event)
 
-        self.fillTauIndices(event)
 	if getattr(self.cfg_ana,"doVBF", True) :
 	    self.doVBF(event)
         if getattr(self.cfg_ana,"doSoftActivityVH", False) :
             self.doSoftActivityVH(event)
 
-        #Add CSV ranking
-        csvSortedJets=sorted(event.cleanJetsAll, key =  lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')),reverse=True)
-        for j in event.cleanJetsAll:
-              j.btagIdx=csvSortedJets.index(j)
-        for j in event.discardedJets:
-              j.btagIdx=-1
-      
     #    event.jee = list(self.handles['jee'].product())
 	#for j in list(jets)[0:3]:
 	#	print j.pt(),
