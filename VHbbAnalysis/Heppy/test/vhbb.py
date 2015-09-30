@@ -309,6 +309,8 @@ sample = cfg.MCComponent(
 
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
     name="ZHLL125", isEmbed=False,
+    puFileMC="puStartup2015.root",
+    puFileData="puData.root", 
     splitFactor = 5
     )
 sample.isMC=True
