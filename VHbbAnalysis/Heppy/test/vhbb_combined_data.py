@@ -10,7 +10,7 @@ sample.isMC=False
 sample.isData=True
 
 from vhbb_combined import *
-
+sample.json="json.txt"
 sample.files=[
  "root://xrootd.unl.edu//store/data/Run2015B/SingleMuon/MINIAOD/PromptReco-v1/000/251/162/00000/160C08A3-4227-E511-B829-02163E01259F.root"
 ]
