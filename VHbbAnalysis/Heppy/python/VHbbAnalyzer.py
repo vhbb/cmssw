@@ -56,7 +56,7 @@ class VHbbAnalyzer( Analyzer ):
 		print "Initialize regression ",re
 		regression_VBF = JetRegression(re["weight"],re["name"])
 		for i in re["vtypes"] :
-                self.regressionVBF[i] = regression_VBF
+                  self.regressionVBF[i] = regression_VBF
         for re in self.cfg_ana.regressions :
             print "Initialize regression ",re
             regression = JetRegression(re["weight"],re["name"])              
