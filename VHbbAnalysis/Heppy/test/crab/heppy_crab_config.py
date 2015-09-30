@@ -22,6 +22,7 @@ config.JobType.inputFiles = ['heppy_config.py',
                              'pdfQG_AK4chs_antib_13TeV_v1.root',
                              'puData.root',
                              'puMC.root',
+                              'json.txt',
 #                             '../jec/PHYS14_V4_MC_L1FastJet_AK4PFchs.txt',  
 #                             '../jec/PHYS14_V4_MC_L2Relative_AK4PFchs.txt',  
 #                             '../jec/PHYS14_V4_MC_L3Absolute_AK4PFchs.txt',
@@ -39,7 +40,7 @@ config.Data.inputDataset = '/ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pyth
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 1
-#config.Data.totalUnits = 1
+config.Data.totalUnits = 2
 config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyT13/'
 config.Data.publication = True
 config.Data.publishDataName = 'VHBB_HEPPY_T13'
