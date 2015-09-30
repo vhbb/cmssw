@@ -48,6 +48,7 @@ class VHbbAnalyzer( Analyzer ):
         if "outputfile" in setup.services :
             setup.services["outputfile"].file.cd()
             self.inputCounter = ROOT.TH1F("Count","Count",1,0,2)
+            self.inputCounterWeighted = ROOT.TH1F("Count","Count with gen weight and pu weight",1,0,2)
             self.inputCounterPosWeight = ROOT.TH1F("CountPosWeight","Count genWeight>0",1,0,2)
             self.inputCounterNegWeight = ROOT.TH1F("CountNegWeight","Count genWeight<0",1,0,2)
         self.regressions={}
@@ -440,6 +441,7 @@ class VHbbAnalyzer( Analyzer ):
         self.inputCounter.Fill(1)
         if self.cfg_comp.isMC:
             genWeight = self.handles['GenInfo'].product().weight()
+            self.inputCounterweight.Fill(genWeight*event.puWeight)
             if genWeight > 0:
                 self.inputCounterPosWeight.Fill(1)
             elif genWeight < 0:
