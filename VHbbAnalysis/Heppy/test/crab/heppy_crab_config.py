@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_HEPPY_T13_001'
-config.General.workArea = 'crab_projects_T13_001'
+config.General.requestName = 'VHBB_HEPPY_T13_002'
+config.General.workArea = 'crab_projects_T13_002'
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -18,6 +18,7 @@ config.JobType.inputFiles = ['heppy_config.py',
                              'MVAJetTags_620SLHCX_Phase1And2Upgrade.db',
                              'combined_cmssw.py',
                              '../vhbb.py',
+                              '../vhbb_combined.py',
                              'TMVAClassification_BDT.weights.xml',
                              'pdfQG_AK4chs_antib_13TeV_v1.root',
                              'puData.root',
