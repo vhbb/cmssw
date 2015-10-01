@@ -156,6 +156,7 @@ LepAna = LeptonAnalyzer.defaultConfig
 
 from PhysicsTools.Heppy.analyzers.objects.VertexAnalyzer import VertexAnalyzer
 VertexAna = VertexAnalyzer.defaultConfig
+VertexAna.keepFailingEvents = True
 
 from PhysicsTools.Heppy.analyzers.objects.PhotonAnalyzer import PhotonAnalyzer
 PhoAna = PhotonAnalyzer.defaultConfig
@@ -314,7 +315,8 @@ sample = cfg.MCComponent(
 #   "/scratch/arizzi/0E132828-B218-E511-9983-3417EBE6453D.root"
      #"root://xrootd.unl.edu//store/mc/Phys14DR/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/00C90EFC-3074-E411-A845-002590DB9262.root"
 #     "root://xrootd.unl.edu//store/mc/Phys14DR/TTbarH_M-125_13TeV_amcatnlo-pythia8-tauola/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v2/00000/FC4E6E16-5C7F-E411-8843-002590200AE4.root"
-     "root://xrootd.ba.infn.it//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/00000/06B5178E-F008-E511-A2CF-00261894390B.root"
+"root://cms-xrd-global.cern.ch//store/mc/RunIISpring15DR74/WH_HToBB_WToLNu_M125_13TeV_amcatnloFXFX_madspin_pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/20000/20215761-9728-E511-BCB2-001E67A3F92F.root"
+#     "root://xrootd.ba.infn.it//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/00000/06B5178E-F008-E511-A2CF-00261894390B.root"
 ],
 
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
