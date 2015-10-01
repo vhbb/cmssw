@@ -155,6 +155,7 @@ LepAna = LeptonAnalyzer.defaultConfig
 
 from PhysicsTools.Heppy.analyzers.objects.VertexAnalyzer import VertexAnalyzer
 VertexAna = VertexAnalyzer.defaultConfig
+VertexAna.keepFailingEvents = True
 
 from PhysicsTools.Heppy.analyzers.objects.PhotonAnalyzer import PhotonAnalyzer
 PhoAna = PhotonAnalyzer.defaultConfig

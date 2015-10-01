@@ -364,10 +364,10 @@ class VHbbAnalyzer( Analyzer ):
 	elif len(wElectrons) + len(wMuons) == 1: 
 		if abs(event.selectedLeptons[0].pdgId())==13 :
 			event.Vtype = 2
-			event.vLeptons =event.selectedLeptons
+			event.vLeptons =wMuons
 		if abs(event.selectedLeptons[0].pdgId())==11 :
 			event.Vtype = 3
-			event.vLeptons =event.selectedLeptons
+			event.vLeptons =wElectrons
         elif len(zElectrons) + len(zMuons) > 0 :
                 event.Vtype = 5 #there are some loose (Z selection) leptons but not matching the W/Z above requirements
 	else :
