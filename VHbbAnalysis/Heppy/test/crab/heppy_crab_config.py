@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'vhbb_heppy_blike_corrected2'
-config.General.workArea = 'crab_projects_blike_corrected2'
+config.General.requestName = 'vhbb_heppy_blike_debug_final_3'
+config.General.workArea = 'crab_projects_blike_debug_final_3'
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -29,7 +29,7 @@ config.JobType.inputFiles = ['heppy_config.py',
                              'Wln_weights_phys14.xml',
                              'Zll_weights_phys14.xml',
                              'Znn_weights_phys14.xml',
-										'TMVA_blikelihood_vbf_singlebtag.xml'
+										'TMVA_blikelihood_vbf_singlebtag_fixed.xml'
 ]
 #config.JobType.outputFiles = ['tree.root']
 
@@ -38,10 +38,10 @@ config.Data.inputDataset = '/VBFHToBB_M-125_13TeV_powheg_pythia8_weightfix/RunII
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 1
-config.Data.totalUnits = 1
-config.Data.outLFNDirBase = '/store/user/nchernya/vhbb_corrected2/'
+#config.Data.totalUnits = 6
+config.Data.outLFNDirBase = '/store/user/nchernya/vhbb_debug_final_3/'
 config.Data.publication = False
-config.Data.publishDataName = 'VHBB_heppy_blike'
+config.Data.publishDataName = 'VHBB_heppy_blike_final_3'
 
 config.section_("Site")
 config.Site.storageSite = "T2_IT_Rome"
