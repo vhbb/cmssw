@@ -76,7 +76,6 @@ class VHbbAnalyzer( Analyzer ):
         event.bJetsForVBF=sorted(event.jetsForVBF,key = lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')), reverse=True)[:2]
         j1=event.bJetsForVBF[0]
         j2=event.bJetsForVBF[1]
-        self.blikelihood.evaluateBlikelihood(event)
 #print "VBF"
 #print event.selectedElectrons,event.selectedMuons,
 	event.softActivityJets=self.softActivity(event,j1,j2,event.jetsForVBF+event.selectedElectrons+event.selectedMuons)
@@ -224,6 +223,9 @@ class VHbbAnalyzer( Analyzer ):
         hJet_reg0*=event.hJets[0].pt_reg/event.hJets[0].pt()
         hJet_reg1*=event.hJets[0].pt_reg/event.hJets[0].pt()
         event.H_reg = hJet_reg0+hJet_reg1
+
+    def doVBFblikelihood(self, event):
+        self.blikelihood.evaluateBlikelihood(event)
 
 
 
@@ -405,6 +407,7 @@ class VHbbAnalyzer( Analyzer ):
         self.doHiggsAddJetsdR08(event)
         self.searchISRforVH(event)
         self.doVHRegression(event)
+        self.doVBFblikelihood(event)
 
         self.fillTauIndices(event)
 	if getattr(self.cfg_ana,"doVBF", True) :
