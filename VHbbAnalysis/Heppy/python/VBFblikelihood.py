@@ -26,7 +26,6 @@ class VBFblikelihood :
 
 
   def evaluateBlikelihood(self, event) :
-    #print 'evaluate blikelihood is ok'
     nJet=len(event.cleanJetsAll)
     for index,j in enumerate(event.cleanJetsAll,start=0) :
       j.blike_VBF=-2
@@ -36,15 +35,7 @@ class VBFblikelihood :
         jetsForHiggs4btag=[jet.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") for index,jet in enumerate(event.cleanJetsAll) if (jet.jetID("POG_PFID_Loose")) and (index<4) ]
         btag_max1=max(jetsForHiggs4btag)
         btag_max1_idx=jetsForHiggs4btag.index(btag_max1)
-        event.cleanJetsAll[0].VBF_btagMax=btag_max1
-        event.cleanJetsAll[0].VBF_btagMaxIdx=btag_max1_idx
-        event.cleanJetsAll[0].VBF_nJet=jetsForHiggs4btag[3]
-        event.cleanJetsAll[0].VBF_4Len0=event.cleanJetsAll[0].btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
-        event.cleanJetsAll[0].VBF_4Len1=event.cleanJetsAll[1].btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
-        event.cleanJetsAll[0].VBF_4Len2=event.cleanJetsAll[2].btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
-        event.cleanJetsAll[0].VBF_4Len3=event.cleanJetsAll[3].btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
 
-        event.cleanJetsAll[0].VBF_4btagLen=len(jetsForHiggs4btag)
         if btag_max1>0.7:
           bjet1=jetsForHiggs4[btag_max1_idx]
           other3jets=[jet for index,jet in enumerate(jetsForHiggs4) if index!= btag_max1_idx]
@@ -67,11 +58,6 @@ class VBFblikelihood :
             bbDeltaPhi=abs(deltaPhi(bjet1.phi(),bjet2.phi()))
             qqDeltaEta=abs(qjets[0].eta()-qjets[1].eta())
            
-            event.cleanJetsAll[0].VBF_phi1=qjets[0].phi()
-            event.cleanJetsAll[1].VBF_phi2=qjets[1].phi()
-            event.cleanJetsAll[0].VBF_q1Idx=maxEta1
-            event.cleanJetsAll[1].VBF_q2Idx=maxEta2
-
             if (Mqq>460) :
               if (qqDeltaEta>4.1) : 
                 if (bbDeltaPhi<1.6) :
@@ -86,8 +72,6 @@ class VBFblikelihood :
                     jetsForHiggsMaxBtagSorted=sorted(range(len(jetsForHiggsMaxBtag)),key=lambda x:jetsForHiggsMaxBtag[x], reverse=True)
                     jetsBtagIdx=sorted(range(len(jetsForHiggsMaxBtag)),key=lambda x:jetsForHiggsMaxBtagSorted[x])
                     
-                    event.cleanJetsAll[0].VBF_loopJet=loopMaxJet
-                    event.cleanJetsAll[0].VBF_JetMaxlen=len(jetsForHiggsMax)
                     for i  in range(len(jetsForHiggsMax)) :
                       j=jetsForHiggsMax[i]
                       self.Jet_pt[0]=j.pt()
@@ -100,18 +84,4 @@ class VBFblikelihood :
                       self.Jet_eta_idx[0]=jetsEtaIdx[i]
                       self.Jet_btagCSV_idx[0]=jetsBtagIdx[i]
                       j.blike_VBF=self.reader.EvaluateMVA(self.name)
-                      event.cleanJetsAll[i].VBFetaIdx=jetsEtaIdx[i]
-                      event.cleanJetsAll[i].VBFbtagIdx=jetsBtagIdx[i]
-                      event.cleanJetsAll[i].VBFptIdx=i
-                      event.cleanJetsAll[i].VBFpt=j.pt()
-                      event.cleanJetsAll[i].VBFbtag=btag
-                      event.cleanJetsAll[i].VBFeta=abs(j.eta())
-                  else :  event.cleanJetsAll[0].cut_debug=8
-                else :  event.cleanJetsAll[0].cut_debug=7
-              else : event.cleanJetsAll[0].cut_debug=6
-            else : event.cleanJetsAll[0].cut_debug=5
-          else : event.cleanJetsAll[0].cut_debug=4
-        else : event.cleanJetsAll[0].cut_debug=3
-      else : event.cleanJetsAll[0].cut_debug=2
-    else : event.cleanJetsAll[0].cut_debug=1
     
