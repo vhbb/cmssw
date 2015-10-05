@@ -57,8 +57,8 @@ class AdditionalBTag( Analyzer ):
         self.addNewBTag(event)
         for j in event.cleanJets:
 
-            self.Jet_CSV[0]=j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") 
-            self.Jet_CSVIVF[0]=j.btag("pfCombinedSecondaryVertexV2BJetTags") 
+            self.Jet_CSV[0]=j.btag("pfCombinedSecondaryVertexV2BJetTags") 
+            self.Jet_CSVIVF[0]=j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") 
             self.Jet_JP[0]=j.btag("pfJetProbabilityBJetTags") 
             self.Jet_JBP[0]=j.btag("pfJetBProbabilityBJetTags") 
             self.Jet_SoftMu[0]=j.btagSoftMu

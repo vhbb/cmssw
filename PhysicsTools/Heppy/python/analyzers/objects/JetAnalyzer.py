@@ -96,6 +96,10 @@ class JetAnalyzer( Analyzer ):
           allJets = map(lambda j:Jet(ROOT.pat.Jet(j)), self.handles['jets'].product()) #copy-by-value is safe if JetAnalyzer is ran more than once
         else: 
           allJets = map(Jet, self.handles['jets'].product()) 
+       
+        #set dummy MC flavour for all jets in case we want to ntuplize discarded jets later
+        for jet in allJets:
+            jet.mcFlavour = 0
 
         #store jets with corr<0
         badjets = []
@@ -179,7 +183,7 @@ class JetAnalyzer( Analyzer ):
         self.cleanJetsAll, cleanLeptons = cleanJetsAndLeptons(self.jets, leptons, self.jetLepDR, self.jetLepArbitration)
         self.cleanJets    = [j for j in self.cleanJetsAll if abs(j.eta()) <  self.cfg_ana.jetEtaCentral ]
         self.cleanJetsFwd = [j for j in self.cleanJetsAll if abs(j.eta()) >= self.cfg_ana.jetEtaCentral ]
-        self.discardedJets = [j for j in self.jets if j not in self.cleanJetsAll]
+        self.discardedJets = [j for j in allJets if j not in self.cleanJetsAll]
         if hasattr(event, 'selectedLeptons') and self.cfg_ana.cleanSelectedLeptons:
             event.discardedLeptons = [ l for l in leptons if l not in cleanLeptons ]
             event.selectedLeptons  = [ l for l in event.selectedLeptons if l not in event.discardedLeptons ]

@@ -13,10 +13,8 @@ remove = [
           'DYJetsToLL_M-200to400','DYJetsToLL_M-700to800','DYJetsToLL_M-800to1000','BuToJpsiK','GluGluHToZG','ZZTo2L2Nu',
           'GGJets','Monotop_S','TTJets_Mtt-','TT_Mtt-','BBbarDM','DarkMatter','GluGlu_LFV','WW_DoubleScattering','HToMuMu',
           'UpsilonMuMu','BsToJpsiPhi','HToMuTau','HToZG','SingleMuMinusFlatPt','DYJetsToLL_M-5to50','HToETau',
-          'BulkGravTohhTohbbhbb_narrow_M-1600','BulkGravTohhTohbbhbb_narrow_M-2000','BulkGravTohhTohbbhbb_narrow_M-3000',
-          'BulkGravTohhTohbbhbb_narrow_M-3500','BulkGravTohhTohbbhbb_narrow_M-4500','BulkGravTohhTohbbhbb_narrow_M-2500',
-          'BulkGravTohhTohbbhbb_narrow_M-4000','BulkGravTohhTohtatahbb_narrow_M-1600','BulkGravTohhTohbbhbb_narrow_M-1800',
-          'BulkGravTohhTohtatahbb_narrow_M-2000','BulkGravTohhTohtatahbb_narrow_M-2500','BulkGravTohhTohtatahbb_narrow_M-1800',
+          'BulkGravTohhTohtatahbb_narrow_M-1600','BulkGravTohhTohtatahbb_narrow_M-2000',
+          'BulkGravTohhTohtatahbb_narrow_M-2500','BulkGravTohhTohtatahbb_narrow_M-1800',
           'BulkGravTohhTohtatahbb_narrow_M-3000','BulkGravTohhTohtatahbb_narrow_M-3500','BulkGravTohhTohtatahbb_narrow_M-4000',
           'BulkGravTohhTohtatahbb_narrow_M-4500','HToEMu','X53X53_M','LongLivedChi0','SMS-T1','WZTo1L3Nu',
           'ZToEE_NNPDF30_13TeV-powheg_M_6000','ZToMuMu_NNPDF30_13TeV-powheg_M_800','ZToEE_NNPDF30_13TeV-powheg_M_1400',
@@ -27,11 +25,13 @@ remove = [
           'ZToMuMu_NNPDF30_13TeV-powheg_M_3500','ZToMuMu_NNPDF30_13TeV-powheg_M_400','RadionTohhTohVVhbb','ChargedHiggs',
           'RadionTohhTohaahbb','/RadionTohhTohtatahbb','ZToMuMu_NNPDF30_13TeV-powheg_M_1400','TGJets','WWJJToLNuQQ',
           'ZToEE_NNPDF30_13TeV-powheg_M_120','ZToEE_NNPDF30_13TeV-powheg_M_4500','VVTo2L2Nu','ZToMuMu_NNPDF30_13TeV-powheg_M_2300',
-          '/ttHJetToNonbb_M120_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
-          '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
-          '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v3/MINIAODSIM',
-          '/ttHJetToNonbb_M130_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
-          'AToZhToLLTauTau','RPVresonantToEMu'
+          'AToZhToLLTauTau','RPVresonantToEMu','XXTo4J','Taustar_TauG','DM_Pseudoscalar','DM_Scalar','InclusivectoMu',
+          'BdToKstarMuMu','Estar_EG','ZGTo2LG','Mustar_MuG','Estar_EG','InclusivebtoMu','GluGluHToEEG','InclusiveBtoJpsi',
+          '/DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',
+          # '/ttHJetToNonbb_M120_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
+          # '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
+          # '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v3/MINIAODSIM',
+          # '/ttHJetToNonbb_M130_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           ]
 
 # FILELIST OF AVAILABLE DATASETS ON DAS AS VALID
