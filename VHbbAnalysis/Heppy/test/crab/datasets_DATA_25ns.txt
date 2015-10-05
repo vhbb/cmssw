@@ -7,3 +7,4 @@
 /MuonEG/Run2015C-PromptReco-v1/MINIAOD
 /SingleElectron/Run2015C-PromptReco-v1/MINIAOD
 /SingleMuon/Run2015C-PromptReco-v1/MINIAOD
+/BTagCSV/Run2015C-PromptReco-v1/MINIAOD
