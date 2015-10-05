@@ -18,17 +18,16 @@ config.JobType.inputFiles = ['heppy_config.py',
                              'MVAJetTags_620SLHCX_Phase1And2Upgrade.db',
                              'combined_cmssw.py',
                              '../vhbb.py',
+                              '../vhbb_combined.py',
                              'TMVAClassification_BDT.weights.xml',
                              'pdfQG_AK4chs_antib_13TeV_v1.root',
-#                             '../jec/PHYS14_V4_MC_L1FastJet_AK4PFchs.txt',  
-#                             '../jec/PHYS14_V4_MC_L2Relative_AK4PFchs.txt',  
-#                             '../jec/PHYS14_V4_MC_L3Absolute_AK4PFchs.txt',
-#                             '../jec/Uncertainty_FAKE.txt',
-#                             '../csv/csv_rwt_hf_IT_FlatSF_2015_07_27.root',
-#                             '../csv/csv_rwt_lf_IT_FlatSF_2015_07_27.root',
-                             'Wln_weights_phys14.xml',
-                             'Zll_weights_phys14.xml',
-                             'Znn_weights_phys14.xml',
+                             'puData.root',
+                             'puMC.root',
+                              'json.txt',
+                              "../Zll-spring15.weights.xml",
+                              "../Wln-spring15.weights.xml",
+                              "../Znn-spring15.weights.xml",
+                              "../VBF-spring15.weights.xml",
 										'TMVA_blikelihood_vbf_singlebtag_fixed.xml'
 ]
 #config.JobType.outputFiles = ['tree.root']
@@ -37,6 +36,7 @@ config.section_("Data")
 config.Data.inputDataset = '/VBFHToBB_M-125_13TeV_powheg_pythia8_weightfix/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
+<<<<<<< HEAD
 config.Data.unitsPerJob = 1
 #config.Data.totalUnits = 6
 config.Data.outLFNDirBase = '/store/user/nchernya/vhbb_final_teset/'
