@@ -239,7 +239,7 @@ VHbb = cfg.Analyzer(
     regressionVBF = [ 		
 	{"weight":"VBF-spring15.weights.xml", "name":"jet0Regression_vbf", "vtypes":[0,1,2,3,4,5,-1]}
     ],
-    VBFblikelihood = {"weight":"TMVA_blikelihood_vbf_singlebtag_fixed.xml", "name":"BDGT"}
+    VBFblikelihood = {"weight":"TMVA_blikelihood_vbf_singlebtag_v13.xml", "name":"BDGT"}
 )
 
 from VHbbAnalysis.Heppy.TTHtoTauTauAnalyzer import TTHtoTauTauAnalyzer
