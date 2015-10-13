@@ -51,10 +51,10 @@ treeProducer= cfg.Analyzer(
 		 NTupleVariable("mhtJet30",  lambda ev : ev.mhtJet30, help="mht with jets30"),
 		 NTupleVariable("mhtPhiJet30",  lambda ev : ev.mhtPhiJet30, help="mht phi with jets30"),
 		 NTupleVariable("htJet30",  lambda ev : ev.htJet30, help="ht  with jets30"),
-		 NTupleVariable("met_rawpt",  lambda ev : ev.met.uncorrectedPt(), help="raw met"),
+		 NTupleVariable("met_rawpt",  lambda ev : ev.met.uncorPt(), help="raw met"),
 		 NTupleVariable("metPuppi_pt",  lambda ev : ev.metPuppi.pt(), help="met from Puppi"),
 		 NTupleVariable("metPuppi_phi",  lambda ev : ev.metPuppi.phi(), help="met phi from Puppi"),
-		 NTupleVariable("metPuppi_rawpt",  lambda ev : ev.metPuppi.uncorrectedPt(), help="raw met from Puppi"),
+		 NTupleVariable("metPuppi_rawpt",  lambda ev : ev.metPuppi.uncorPt(), help="raw met from Puppi"),
 		 NTupleVariable("metType1p2_pt",  lambda ev : ev.met.shiftedPt(12,2), help="type1type2met from Puppi"),
 		 NTupleVariable("metNoPU_pt",  lambda ev : ev.metNoPU.pt(), help="PFnoPU E_{T}^{miss}"),
 		 NTupleVariable("metNoPU_phi",  lambda ev : ev.metNoPU.phi(), help="phi of PFnoPU E_{T}^{miss}"),
@@ -128,6 +128,7 @@ treeProducer= cfg.Analyzer(
 
 #Create shifted MET Ntuples
 metNames={y.__get__(ROOT.pat.MET):x for x,y in ROOT.pat.MET.__dict__.items() if  (x[-2:]=="Up" or x[-4:]=="Down")}
+print "met Names", metNames
 shifted_met_keys = ["met_shifted_{0}".format(n) for n in range(12)] #we do not need noShift I gueess
 shifted_met_names = ["met_shifted_%s"%metNames[n] for n in range(12)] #we do not need noShift I gueess
 shifted_mets = {mk: NTupleObject(nm, shiftedMetType, help="PF E_{T}^{miss}, after default type 1 corrections, shifted with %s" %mk) for mk,nm in zip(shifted_met_keys,shifted_met_names)}
@@ -221,9 +222,9 @@ JetAna.dataGT = "Summer15_50nsV4_DATA"
 VHbb = cfg.Analyzer(
     verbose=False,
     class_object=VHbbAnalyzer,
-    wEleSelection = lambda x : x.pt() > 25 and x.electronID("cutBasedElectronID-CSA14-PU20bx25-V0-standalone-tight"),
+    wEleSelection = lambda x : x.pt() > 25 and x.electronID("mvaEleID-Spring15-25ns-nonTrig-V1-wp80"),
     wMuSelection = lambda x : x.pt() > 25 and x.muonID("POG_ID_Tight"),
-    zEleSelection = lambda x : x.pt() > 15 and x.electronID("cutBasedElectronID-CSA14-PU20bx25-V0-standalone-loose"),
+    zEleSelection = lambda x : x.pt() > 15 and x.electronID("mvaEleID-Spring15-25ns-nonTrig-V1-wp90"),
     zMuSelection = lambda x : x.pt() > 10 and x.muonID("POG_ID_Loose"),
     zLeadingElePt = 20,
     zLeadingMuPt = 20,
@@ -315,7 +316,7 @@ sample = cfg.MCComponent(
 #   "/scratch/arizzi/0E132828-B218-E511-9983-3417EBE6453D.root"
      #"root://xrootd.unl.edu//store/mc/Phys14DR/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/00C90EFC-3074-E411-A845-002590DB9262.root"
 #     "root://xrootd.unl.edu//store/mc/Phys14DR/TTbarH_M-125_13TeV_amcatnlo-pythia8-tauola/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v2/00000/FC4E6E16-5C7F-E411-8843-002590200AE4.root"
-"root://cms-xrd-global.cern.ch//store/mc/RunIISpring15DR74/WH_HToBB_WToLNu_M125_13TeV_amcatnloFXFX_madspin_pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/20000/20215761-9728-E511-BCB2-001E67A3F92F.root"
+"root://cms-xrd-global.cern.ch//store/mc/RunIISpring15MiniAODv2/ggZH_HToBB_ZToNuNu_M125_13TeV_amcatnlo_pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/10000/008BD758-C26D-E511-ACDB-002590DB92C4.root"
 #     "root://xrootd.ba.infn.it//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/00000/06B5178E-F008-E511-A2CF-00261894390B.root"
 ],
 
