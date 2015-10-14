@@ -212,6 +212,7 @@ PUAna = PileUpAnalyzer.defaultConfig
 
 from VHbbAnalysis.Heppy.VHbbAnalyzer import VHbbAnalyzer
 JetAna.jetPt = 15
+JetAna.jetEta = 4.7
 JetAna.doQG=True
 JetAna.QGpath=os.environ['CMSSW_BASE']+"/src/PhysicsTools/Heppy/data/pdfQG_AK4chs_13TeV_v2b.root"
 JetAna.recalibrateJets=True
