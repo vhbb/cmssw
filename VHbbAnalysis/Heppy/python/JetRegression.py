@@ -52,7 +52,7 @@ class JetRegression :
         self.reader=reader
         self.name=name
 
-    def evaluateRegression(self, event):
+    def evaluateRegression(self, event, attrName="pt_reg"):
 #self.readCollections( event.input )
 	self.rho[0] = event.rho
 	for j in event.jetsForHiggs :
@@ -79,7 +79,10 @@ class JetRegression :
 		self.Jet_vtx3dL[0] = j.userFloat("vtx3dL")
 		self.Jet_vtxNtrk[0] = j.userFloat("vtxNtrk")
 		self.Jet_vtx3deL[0] = j.userFloat("vtx3deL")
-                j.pt_reg = self.reader.EvaluateRegression(self.name)[0]
+		setattr(j,attrName,self.reader.EvaluateRegression(self.name)[0])
+
+                #j.pt_reg = self.reader.EvaluateRegression(self.name)[0]
+		
 
 
 

@@ -48,9 +48,16 @@ class VHbbAnalyzer( Analyzer ):
         if "outputfile" in setup.services :
             setup.services["outputfile"].file.cd()
             self.inputCounter = ROOT.TH1F("Count","Count",1,0,2)
+            self.inputCounterWeighted = ROOT.TH1F("CountWeighted","Count with gen weight and pu weight",1,0,2)
             self.inputCounterPosWeight = ROOT.TH1F("CountPosWeight","Count genWeight>0",1,0,2)
             self.inputCounterNegWeight = ROOT.TH1F("CountNegWeight","Count genWeight<0",1,0,2)
         self.regressions={}
+	self.regressionVBF={}
+	for re in self.cfg_ana.regressionVBF :
+		print "Initialize regression ",re
+		regression_VBF = JetRegression(re["weight"],re["name"])
+		for i in re["vtypes"] :
+                  self.regressionVBF[i] = regression_VBF
         for re in self.cfg_ana.regressions :
             print "Initialize regression ",re
             regression = JetRegression(re["weight"],re["name"])              
@@ -60,6 +67,8 @@ class VHbbAnalyzer( Analyzer ):
 
     def doVBF(self,event) :
         event.jetsForVBF = [x for x in event.cleanJetsAll if self.cfg_ana.higgsJetsPreSelection(x) ]
+        if event.Vtype in self.regressionVBF :
+            self.regressionVBF[event.Vtype].evaluateRegression(event,"pt_regVBF")
         #compute only for events passing VBF selection
         if len(event.jetsForVBF) < 4 or  event.jetsForVBF[0] < 70 or  event.jetsForVBF[1] < 55 or  event.jetsForVBF[2] < 35 or  event.jetsForVBF[3] < 20 :
             return
@@ -77,6 +86,8 @@ class VHbbAnalyzer( Analyzer ):
 	event.softActivityJets=self.softActivity(event,j1,j2,event.jetsForVBF+event.selectedElectrons+event.selectedMuons)
 
     def doSoftActivityVH(self,event) :
+        if not   len(event.jetsForHiggs) >= 2 :
+           return
         j1=event.hJetsCSV[0]
         j2=event.hJetsCSV[1]
 #print "VH"
@@ -171,7 +182,7 @@ class VHbbAnalyzer( Analyzer ):
         p4VH=event.HCSV+event.V
         if p4VH.pt() > 30 :
               phi=pi+p4VH.phi()
-              matchedJets=[x for x in event.cleanJetsAll if abs(deltaPhi(phi,x.phi())) < 0.4 and  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') and x not in event.hJetsCSV ] 
+              matchedJets=[x for x in event.cleanJetsAll if abs(deltaPhi(phi,x.phi())) < 0.4 and  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') and x not in event.hJetsCSV and x not in event.hJetsaddJetsdR08] 
               if len(matchedJets) > 0 :
                   event.isrJetVH=event.cleanJetsAll.index(sorted(matchedJets, key=lambda x:x.pt(),reverse=True)[0])
                 
@@ -272,16 +283,14 @@ class VHbbAnalyzer( Analyzer ):
         hJetCSV_reg0 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[0].p4())
         hJetCSV_reg1 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[1].p4())
         hJetCSV_reg0*=event.hJetsCSV[0].pt_reg/event.hJetsCSV[0].pt()
-        hJetCSV_reg1*=event.hJetsCSV[0].pt_reg/event.hJetsCSV[1].pt()
+        hJetCSV_reg1*=event.hJetsCSV[1].pt_reg/event.hJetsCSV[1].pt()
         event.HCSV_reg = hJetCSV_reg0+hJetCSV_reg1
 
         hJet_reg0=ROOT.reco.Particle.LorentzVector(event.hJets[0].p4())
         hJet_reg1=ROOT.reco.Particle.LorentzVector(event.hJets[1].p4())
         hJet_reg0*=event.hJets[0].pt_reg/event.hJets[0].pt()
-        hJet_reg1*=event.hJets[0].pt_reg/event.hJets[0].pt()
+        hJet_reg1*=event.hJets[1].pt_reg/event.hJets[1].pt()
         event.H_reg = hJet_reg0+hJet_reg1
-
-
 
 
     def classifyMCEvent(self,event):
@@ -355,10 +364,10 @@ class VHbbAnalyzer( Analyzer ):
 	elif len(wElectrons) + len(wMuons) == 1: 
 		if abs(event.selectedLeptons[0].pdgId())==13 :
 			event.Vtype = 2
-			event.vLeptons =event.selectedLeptons
+			event.vLeptons =wMuons
 		if abs(event.selectedLeptons[0].pdgId())==11 :
 			event.Vtype = 3
-			event.vLeptons =event.selectedLeptons
+			event.vLeptons =wElectrons
         elif len(zElectrons) + len(zMuons) > 0 :
                 event.Vtype = 5 #there are some loose (Z selection) leptons but not matching the W/Z above requirements
 	else :
@@ -423,6 +432,7 @@ class VHbbAnalyzer( Analyzer ):
         event.V.goodMt=0
         event.hjidxDiJetPtByCSV = []
         event.softActivityJets=[]
+        event.softActivityVHJets=[]
 
 
     def process(self, event):
@@ -431,6 +441,7 @@ class VHbbAnalyzer( Analyzer ):
         self.inputCounter.Fill(1)
         if self.cfg_comp.isMC:
             genWeight = self.handles['GenInfo'].product().weight()
+            self.inputCounterWeighted.Fill(genWeight*event.vertexWeight)
             if genWeight > 0:
                 self.inputCounterPosWeight.Fill(1)
             elif genWeight < 0:
@@ -444,6 +455,15 @@ class VHbbAnalyzer( Analyzer ):
 	self.doFakeMET(event)
 	self.doHtMhtJets30(event)
 
+        self.fillTauIndices(event)
+
+        #Add CSV ranking
+        csvSortedJets=sorted(event.cleanJetsAll, key =  lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')),reverse=True)
+        for j in event.cleanJetsAll:
+              j.btagIdx=csvSortedJets.index(j)
+        for j in event.discardedJets:
+              j.btagIdx=-1
+      
 	#substructure threshold, make configurable
 	ssTrheshold = 200.
 	# filter events with less than 2 jets with pt 20
@@ -458,8 +478,8 @@ class VHbbAnalyzer( Analyzer ):
 
 	self.doHiggsHighCSV(event)
 	self.doHiggsHighPt(event)
-        self.searchISRforVH(event)
         self.doHiggsAddJetsdR08(event)
+        self.searchISRforVH(event)
         self.doVHRegression(event)
 
         self.fillTauIndices(event)
@@ -470,13 +490,6 @@ class VHbbAnalyzer( Analyzer ):
         if getattr(self.cfg_ana,"doSoftActivityVH", False) :
             self.doSoftActivityVH(event)
 
-        #Add CSV ranking
-        csvSortedJets=sorted(event.cleanJetsAll, key =  lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')),reverse=True)
-        for j in event.cleanJetsAll:
-              j.btagIdx=csvSortedJets.index(j)
-        for j in event.discardedJets:
-              j.btagIdx=-1
-      
     #    event.jee = list(self.handles['jee'].product())
 	#for j in list(jets)[0:3]:
 	#	print j.pt(),

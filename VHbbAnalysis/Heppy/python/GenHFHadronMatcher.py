@@ -39,7 +39,7 @@ class GenHFHadronMatcher( Analyzer ):
 
     def declareHandles(self):
         super(GenHFHadronMatcher, self).declareHandles()
-
+        #self.genJetsSrc = "slimmedGenJets"
         self.keys_b = [
             "genBHadIndex",
             "genBHadJetIndex",
@@ -64,7 +64,7 @@ class GenHFHadronMatcher( Analyzer ):
                 ("matchGenCHadron",x,"EX"), "std::vector<int>"
             )
         self.handles['genBHadJetIndex'] = AutoHandle( ("matchGenBHadron","genBHadJetIndex","EX"), "std::vector<int>")
-        self.handles['ak4GenJetsCustom'] = AutoHandle( ("ak4GenJetsCustom","","EX"), "std::vector<reco::GenJet>")
+        #self.handles['genJets'] = AutoHandle( self.genJetsSrc, "std::vector<reco::GenJet>")
 
         self.genJetMinPt = 20
         self.genJetMaxEta = 2.4
@@ -77,7 +77,9 @@ class GenHFHadronMatcher( Analyzer ):
 
         self.readCollections( event.input )
 
-        genJets = [gj for gj in self.handles['ak4GenJetsCustom'].product()]
+        genJets = event.genJets
+        genJetsIndexed = {gj.index: gj for gj in genJets}
+
         arrs_b = {k: self.handles[k].product() for k in self.keys_b}
         arrs_c = {k: self.handles[k].product() for k in self.keys_c}
 
@@ -107,7 +109,7 @@ class GenHFHadronMatcher( Analyzer ):
                 continue
             isTop = abs(had.flavour) == 6
 
-            had.genJet = genJets[had.jetIndex]
+            had.genJet = genJetsIndexed[had.jetIndex]
 
             if isTop:
                 had.genJet.bHadMatch["nosel"]["fromTop"] += 1
@@ -131,7 +133,7 @@ class GenHFHadronMatcher( Analyzer ):
                 continue
             if had.jetIndex < 0:
                 continue
-            had.genJet = genJets[had.jetIndex]
+            had.genJet = genJetsIndexed[had.jetIndex]
 
             if not self.jetCut(had.genJet):
                 continue
@@ -197,7 +199,7 @@ class GenHFHadronMatcher( Analyzer ):
             gj.numBHadronsFromTop = gj.bHadMatch["pteta"]["fromTop"]
             gj.numCHadronsFromTop = gj.cHadMatch["pteta"]["fromTop"]
 
-        event.genJetsHadronMatcher = sorted(genJets, key=lambda j: j.pt(), reverse=True)
+        #event.genJetsHadronMatcher = sorted(genJets, key=lambda j: j.pt(), reverse=True)
 
         event.ttbarCls = cls
 
