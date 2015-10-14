@@ -1,5 +1,11 @@
 import sys,os
 
+# miniaod_version = "RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9*"
+# filename = 'datasets_MCRUN2_25ns.txt'
+
+miniaod_version = "RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v*"
+filename = 'datasets_MCRUN2_25ns_RunIISpring15MiniAODv2.txt'
+
 # REMOVE DATASET NAMES CONTAINING:
 
 remove = [
@@ -28,6 +34,7 @@ remove = [
           'AToZhToLLTauTau','RPVresonantToEMu','XXTo4J','Taustar_TauG','DM_Pseudoscalar','DM_Scalar','InclusivectoMu',
           'BdToKstarMuMu','Estar_EG','ZGTo2LG','Mustar_MuG','Estar_EG','InclusivebtoMu','GluGluHToEEG','InclusiveBtoJpsi',
           '/DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',
+          'BlackHole_','DMS_','DMV_','/DsTo','AxialMonoW_Mphi','X53X53To2L2Nu','VectorMono','AxialMono',
           # '/ttHJetToNonbb_M120_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           # '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           # '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v3/MINIAODSIM',
@@ -37,7 +44,7 @@ remove = [
 # FILELIST OF AVAILABLE DATASETS ON DAS AS VALID
 
 # das_valid = [line.rstrip('\n').rstrip('\r') for line in open('all_datasets_MCRUN2_25ns.txt')]
-das_valid = os.popen('python ./das_client.py --limit=0 --query="dataset=/*/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9*/MINIAODSIM"').read().split('\n')
+das_valid = os.popen('python ./das_client.py --limit=0 --query="dataset=/*/'+miniaod_version+'/MINIAODSIM"').read().split('\n')
 das_valid = filter(None, das_valid)
 
 if len(das_valid)<1: 
@@ -46,7 +53,7 @@ if len(das_valid)<1:
   
 # FILELIST OF AVAILABLE DATASETS ON DAS AS PRODUCTION
 
-das_production = os.popen('python ./das_client.py --limit=0 --query="dataset dataset=/*/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9*/MINIAODSIM status=PRODUCTION"').read().split('\n')
+das_production = os.popen('python ./das_client.py --limit=0 --query="dataset dataset=/*/'+miniaod_version+'/MINIAODSIM status=PRODUCTION"').read().split('\n')
 das_production = filter(None, das_production)
 
 # FILTER DATASETS WITH REMOVE LIST
@@ -61,7 +68,6 @@ print '\nfiltered lists contain',len(das_valid),'datasets in VALID state,',len(d
 
 # CHECK EXISTING LIST OF DATASETS TO BE PROCESSED
 
-filename = 'datasets_MCRUN2_25ns.txt'
 vhbb_all = open(filename).read()
 
 print 'HBB filelist ',filename,'contains',len(filter(None, vhbb_all.split('\n'))),'datasets'
