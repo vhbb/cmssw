@@ -218,6 +218,7 @@ JetAna.recalibrateJets=True
 JetAna.jecPath=os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/jec"
 JetAna.mcGT="MCRUN2_74_V9D"
 JetAna.dataGT = "Summer15_50nsV4_DATA"
+JetAna.addJECShifts=True
 
 VHbb = cfg.Analyzer(
     verbose=False,
