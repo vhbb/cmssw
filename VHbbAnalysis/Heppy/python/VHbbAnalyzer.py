@@ -110,8 +110,8 @@ class VHbbAnalyzer( Analyzer ):
         nOfconst=0
 
         # loading the particle flow candidates
-        if not hasattr(event,"pfCands"):
-          event.pfCands = list(self.handles['pfCands'].product())
+        #if not hasattr(event,"pfCands"):
+        #  event.pfCands = list(self.handles['pfCands'].product())
         
         # need to reconstruct the jet pt using only the charged tracks
         for i in range(0,jet.numberOfSourceCandidatePtrs()): # loop over the pf candidates
