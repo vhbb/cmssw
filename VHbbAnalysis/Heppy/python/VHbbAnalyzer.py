@@ -70,14 +70,14 @@ class VHbbAnalyzer( Analyzer ):
 
 
     def doVBF(self,event) :
-        event.jetsForVBF = [x for x in event.cleanJetsAll if self.cfg_ana.higgsJetsPreSelection(x) ]
+        event.jetsForVBF = [x for x in event.cleanJetsAll ]
         if event.Vtype in self.regressionVBF :
             self.regressionVBF[event.Vtype].evaluateRegression(event,"pt_regVBF")
         #compute only for events passing VBF selection
         if len(event.jetsForVBF) < 4 or  event.jetsForVBF[0] < 70 or  event.jetsForVBF[1] < 55 or  event.jetsForVBF[2] < 35 or  event.jetsForVBF[3] < 20 :
             return
         event.jetsForVBF.sort(key=lambda x:x.pt(),reverse=True)
-        map(lambda x :x.qgl(),event.jetsForVBF[:6])
+        #map(lambda x :x.qgl(),event.jetsForVBF[:6])
         event.jetsForVBF=event.jetsForVBF[:4]
 
 	#compute QGL here for VBF jets if passing VBF pre-selection 
@@ -419,8 +419,9 @@ class VHbbAnalyzer( Analyzer ):
         if event.Vtype < 0 and not ( sum(x.pt() > 30 for x in event.jetsForHiggs) >= 4 or sum(x.pt() for x in event.jetsForHiggs[:4]) > 160 ):
                 return self.cfg_ana.passall
 
-        map(lambda x :x.qgl(),event.jetsForHiggs[:6])
-        map(lambda x :x.qgl(),(x for x in event.jetsForHiggs if x.pt() > 30) )
+        #map(lambda x :x.qgl(),event.jetsForHiggs[:6])
+        #map(lambda x :x.qgl(),(x for x in event.jetsForHiggs if x.pt() > 30) )
+        map(lambda x :x.qgl(),(x for x in event.cleanJetsAll if x.pt()>20))
 
 	self.doHiggsHighCSV(event)
 	self.doHiggsHighPt(event)

@@ -31,12 +31,14 @@ class VBFblikelihood :
       j.blike_VBF=-2
     if (nJet>=4):
       if ((event.cleanJetsAll[0].pt()>92.) and (event.cleanJetsAll[1].pt()>76.) and (event.cleanJetsAll[2].pt()>64) and (event.cleanJetsAll[3].pt()>30)):
-        jetsForHiggs4=[jet for index,jet in enumerate(event.cleanJetsAll)  if (jet.jetID("POG_PFID_Loose")) and (index<4)]
-        jetsForHiggs4btag=[jet.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") for index,jet in enumerate(event.cleanJetsAll) if (jet.jetID("POG_PFID_Loose")) and (index<4) ]
+    #    jetsForHiggs4=[jet for index,jet in enumerate(event.cleanJetsAll)  if (jet.jetID("POG_PFID_Loose")) and (index<4)] #uncomment if jet_id is working properly
+        jetsForHiggs4=[jet for index,jet in enumerate(event.cleanJetsAll)  if (index<4)]
+    #    jetsForHiggs4btag=[jet.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") for index,jet in enumerate(event.cleanJetsAll) if (jet.jetID("POG_PFID_Loose")) and (index<4) ]
+        jetsForHiggs4btag=[jet.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") for index,jet in enumerate(event.cleanJetsAll) if (index<4) ]
         btag_max1=max(jetsForHiggs4btag)
         btag_max1_idx=jetsForHiggs4btag.index(btag_max1)
 
-        if btag_max1>0.7:
+        if btag_max1>0.0:
           bjet1=jetsForHiggs4[btag_max1_idx]
           other3jets=[jet for index,jet in enumerate(jetsForHiggs4) if index!= btag_max1_idx]
           if len(other3jets)==3 :
@@ -65,22 +67,23 @@ class VBFblikelihood :
                     if (event.HLT_BIT_HLT_QuadPFJet_SingleBTagCSV_VBF_Mqq460_v) : 
                       loopMaxJet=7
                       if nJet<7 : loopMaxJet=nJet  
-                      jetsForHiggsMax=[jet for index,jet in enumerate(event.cleanJetsAll) if (jet.jetID("POG_PFID_Loose")) and (index<loopMaxJet) and (jet.pt()>20)]
+                   #   jetsForHiggsMax=[jet for index,jet in enumerate(event.cleanJetsAll) if (jet.jetID("POG_PFID_Loose")) and (index<loopMaxJet) and (jet.pt()>20)]
+                      jetsForHiggsMax=[jet for index,jet in enumerate(event.cleanJetsAll) if (index<loopMaxJet) and (jet.pt()>20)]
                       jetsForHiggsMaxEta=[abs(jet.eta()) for jet in jetsForHiggsMax]
                       jetsForHiggsMaxEtaSorted=sorted(range(len(jetsForHiggsMaxEta)),key=lambda x:jetsForHiggsMaxEta[x])
                       jetsEtaIdx=sorted(range(len(jetsForHiggsMaxEta)),key=lambda x:jetsForHiggsMaxEtaSorted[x])
                       jetsForHiggsMaxBtag=[jet.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") for jet in jetsForHiggsMax]
+                      for jet_btag in jetsForHiggsMaxBtag :
+                        if jet_btag > 1 : jet_btag = 1
+                        if jet_btag < 0 : jet_btag = 0
                       jetsForHiggsMaxBtagSorted=sorted(range(len(jetsForHiggsMaxBtag)),key=lambda x:jetsForHiggsMaxBtag[x], reverse=True)
                       jetsBtagIdx=sorted(range(len(jetsForHiggsMaxBtag)),key=lambda x:jetsForHiggsMaxBtagSorted[x])
                     
                       for i  in range(len(jetsForHiggsMax)) :
                         j=jetsForHiggsMax[i]
                         self.Jet_pt[0]=j.pt()
-                        self.Jet_eta[0]=abs(j.eta())
-                        btag = j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
-                        if btag < 0 : btag = 0
-                        if btag > 1 : btag = 1
-                        self.Jet_btagCSV[0]=btag
+                        self.Jet_eta[0]=jetsForHiggsMaxEta[i]
+                        self.Jet_btagCSV[0]=jetsForHiggsMaxBtag[i]
                         self.Jet_pt_idx[0]=i
                         self.Jet_eta_idx[0]=jetsEtaIdx[i]
                         self.Jet_btagCSV_idx[0]=jetsBtagIdx[i]

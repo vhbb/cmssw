@@ -212,7 +212,7 @@ PUAna = PileUpAnalyzer.defaultConfig
 from VHbbAnalysis.Heppy.VHbbAnalyzer import VHbbAnalyzer
 JetAna.jetPt = 15
 JetAna.doQG=True
-JetAna.QGpath="pdfQG_AK4chs_antib_13TeV_v1.root"
+JetAna.QGpath="pdfQG_AK4chs_13TeV_v2b.root"
 JetAna.recalibrateJets=True
 JetAna.jecPath=os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/jec"
 JetAna.mcGT="MCRUN2_74_V9D"
@@ -239,7 +239,7 @@ VHbb = cfg.Analyzer(
     regressionVBF = [ 		
 	{"weight":"VBF-spring15.weights.xml", "name":"jet0Regression_vbf", "vtypes":[0,1,2,3,4,5,-1]}
     ],
-    VBFblikelihood = {"weight":"TMVA_blikelihood_vbf_singlebtag_v13.xml", "name":"BDGT"}
+    VBFblikelihood = {"weight":"TMVA_blikelihood_vbf_singlebtag_v13_id.xml", "name":"BDGT"}
 )
 
 from VHbbAnalysis.Heppy.TTHtoTauTauAnalyzer import TTHtoTauTauAnalyzer
@@ -347,7 +347,7 @@ class TestFilter(logging.Filter):
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 1000)
+    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 300)
 
     import time
     import cProfile
