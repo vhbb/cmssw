@@ -55,7 +55,10 @@ treeProducer= cfg.Analyzer(
 		 NTupleVariable("metPuppi_pt",  lambda ev : ev.metPuppi.pt(), help="met from Puppi"),
 		 NTupleVariable("metPuppi_phi",  lambda ev : ev.metPuppi.phi(), help="met phi from Puppi"),
 		 NTupleVariable("metPuppi_rawpt",  lambda ev : ev.metPuppi.uncorPt(), help="raw met from Puppi"),
-		 NTupleVariable("metType1p2_pt",  lambda ev : ev.met.shiftedPt(12,2), help="type1type2met from Puppi"),
+		 NTupleVariable("metNoHF_pt",  lambda ev : ev.metNoHF.pt(), help="met from NoHF"),
+		 NTupleVariable("metNoHF_phi",  lambda ev : ev.metNoHF.phi(), help="met phi from NoHF"),
+		 NTupleVariable("metNoHF_rawpt",  lambda ev : ev.metNoHF.uncorPt(), help="raw met from NoHF"),
+		 NTupleVariable("metType1p2_pt",  lambda ev : ev.met.shiftedPt(12,2), help="type1type2met"),
 		 NTupleVariable("metNoPU_pt",  lambda ev : ev.metNoPU.pt(), help="PFnoPU E_{T}^{miss}"),
 		 NTupleVariable("metNoPU_phi",  lambda ev : ev.metNoPU.phi(), help="phi of PFnoPU E_{T}^{miss}"),
 		 NTupleVariable("tkMet_pt",  lambda ev : ev.tkMet.pt(), help="E_{T}^{miss} from tracks"),
@@ -206,6 +209,17 @@ METPuppiAna.doTkMet = False
 METPuppiAna.doMetNoPU = False
 
 
+METNoHFAna = copy.copy(METPuppiAna)
+METNoHFAna.metCollection     = "slimmedMETsNoHF"
+METNoHFAna.doMetNoPU = False
+METNoHFAna.recalibrate = False
+METNoHFAna.collectionPostFix = "NoHF"
+METNoHFAna.copyMETsByValue = True
+METNoHFAna.doTkMet = False
+METNoHFAna.doMetNoPU = False
+
+
+
 
 from PhysicsTools.Heppy.analyzers.core.PileUpAnalyzer import PileUpAnalyzer
 PUAna = PileUpAnalyzer.defaultConfig
@@ -217,8 +231,8 @@ JetAna.doQG=True
 JetAna.QGpath=os.environ['CMSSW_BASE']+"/src/PhysicsTools/Heppy/data/pdfQG_AK4chs_13TeV_v2b.root"
 JetAna.recalibrateJets=True
 JetAna.jecPath=os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/jec"
-JetAna.mcGT="MCRUN2_74_V9D"
-JetAna.dataGT = "Summer15_50nsV4_DATA"
+JetAna.mcGT="74X_mcRun2_asymptotic_v2"
+JetAna.dataGT = "74X_dataRun2_reMiniAOD_v0"
 JetAna.addJECShifts=True
 
 VHbb = cfg.Analyzer(
@@ -307,7 +321,7 @@ jsonAna = cfg.Analyzer(JSONAnalyzer,
       passAll=True
       )
 
-sequence = [jsonAna,LHEAna,FlagsAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,TauAna,JetAna,METAna, METPuppiAna, PdfAna, VHbb,TTHtoTauTau,TTHtoTauTauGen,treeProducer]#,sh]
+sequence = [jsonAna,LHEAna,FlagsAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,TauAna,JetAna,METAna, METPuppiAna, METNoHFAna, PdfAna, VHbb,TTHtoTauTau,TTHtoTauTauGen,treeProducer]#,sh]
 
 
 from PhysicsTools.Heppy.utils.miniAodFiles import miniAodFiles
