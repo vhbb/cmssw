@@ -1256,7 +1256,6 @@ class ConfigBuilder(object):
 
     def prepare_ALCA(self, sequence = None, workflow = 'full'):
         """ Enrich the process with alca streams """
-	print 'DL enriching',workflow,sequence
         alcaConfig=self.loadDefaultOrSpecifiedCFF(sequence,self.ALCADefaultCFF)
         sequence = sequence.split('.')[-1]
 
@@ -1607,6 +1606,12 @@ class ConfigBuilder(object):
 	    #self.renameInputTagsInSequence(sequence)
             return
 
+    def prepare_PATFILTER(self, sequence=None):
+            self.loadAndRemember("PhysicsTools/PatAlgos/slimming/metFilterPaths_cff")
+	    from PhysicsTools.PatAlgos.slimming.metFilterPaths_cff import allMetFilterPaths
+	    for filt in allMetFilterPaths:
+		    self.schedule.append(getattr(self.process,'Flag_'+filt))
+
     def prepare_L1HwVal(self, sequence = 'L1HwVal'):
         ''' Enrich the schedule with L1 HW validation '''
         self.loadDefaultOrSpecifiedCFF(sequence,self.L1HwValDefaultCFF)
@@ -1675,6 +1680,7 @@ class ConfigBuilder(object):
 
     def prepare_PAT(self, sequence = "miniAOD"):
         ''' Enrich the schedule with PAT '''
+	self.prepare_PATFILTER(self)
         self.loadDefaultOrSpecifiedCFF(sequence,self.PATDefaultCFF,1) #this is unscheduled
 	if not self._options.runUnscheduled:	
 		raise Exception("MiniAOD production can only run in unscheduled mode, please run cmsDriver with --runUnscheduled")
@@ -1955,9 +1961,8 @@ class ConfigBuilder(object):
 
     def prepare_HARVESTING(self, sequence = None):
         """ Enrich the process with harvesting step """
-        self.EDMtoMECFF='Configuration/StandardSequences/EDMtoME'+self._options.harvesting+'_cff'
-        self.loadAndRemember(self.EDMtoMECFF)
-	self.scheduleSequence('EDMtoME','edmtome_step')
+        self.DQMSaverCFF='Configuration/StandardSequences/DQMSaver'+self._options.harvesting+'_cff'
+        self.loadAndRemember(self.DQMSaverCFF)
 
         harvestingConfig = self.loadDefaultOrSpecifiedCFF(sequence,self.HARVESTINGDefaultCFF)
         sequence = sequence.split('.')[-1]
