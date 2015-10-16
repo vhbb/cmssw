@@ -83,15 +83,39 @@ def customiseFor7794(process):
     return process
 
 
+# Removal of L1 Stage 1 unpacker configuration from config (PR #10234 aka 10163/10087)
+def customiseFor10234(process):
+    if hasattr(process, 'hltCaloStage1Digis'):
+        if hasattr(process.hltCaloStage1Digis, 'FWId'):
+            delattr(process.hltCaloStage1Digis, 'FWId')
+        if hasattr(process.hltCaloStage1Digis, 'FedId'):
+            delattr(process.hltCaloStage1Digis, 'FedId')
+    return process
+
+
+# migrate RPCPointProducer to a global::EDProducer (PR #10927)
+def customiseFor10927(process):
+    if any(module.type_() is 'RPCPointProducer' for module in process.producers.itervalues()):
+        if not hasattr(process, 'CSCObjectMapESProducer'):
+            process.CSCObjectMapESProducer = cms.ESProducer( 'CSCObjectMapESProducer' )
+        if not hasattr(process, 'DTObjectMapESProducer'):
+            process.DTObjectMapESProducer = cms.ESProducer( 'DTObjectMapESProducer' )
+    return process
+
+
 # CMSSW version specific customizations
-def customiseHLTforCMSSW(process,menuType="GRun",fastSim=False):
+def customiseHLTforCMSSW(process, menuType="GRun", fastSim=False):
     import os
     cmsswVersion = os.environ['CMSSW_VERSION']
 
     if cmsswVersion >= "CMSSW_7_5":
+        process = customiseFor9232(process)
         process = customiseFor8679(process)
         process = customiseFor8356(process)
         process = customiseFor7966(process)
         process = customiseFor7794(process)
+    if cmsswVersion >= "CMSSW_7_4":
+        process = customiseFor10234(process)
+        process = customiseFor10927(process)
 
     return process

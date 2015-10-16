@@ -66,7 +66,7 @@ class VHbbAnalyzer( Analyzer ):
 
 
     def doVBF(self,event) :
-        event.jetsForVBF = [x for x in event.cleanJetsAll if self.cfg_ana.higgsJetsPreSelection(x) ]
+        event.jetsForVBF = [x for x in event.cleanJetsAll if self.cfg_ana.higgsJetsPreSelectionVBF(x) ]
         if event.Vtype in self.regressionVBF :
             self.regressionVBF[event.Vtype].evaluateRegression(event,"pt_regVBF")
         #compute only for events passing VBF selection
@@ -380,7 +380,7 @@ class VHbbAnalyzer( Analyzer ):
         self.inputCounter.Fill(1)
         if self.cfg_comp.isMC:
             genWeight = self.handles['GenInfo'].product().weight()
-            self.inputCounterWeighted.Fill(genWeight*event.vertexWeight)
+            self.inputCounterWeighted.Fill(1,copysign(1.0,genWeight)*event.vertexWeight)
             if genWeight > 0:
                 self.inputCounterPosWeight.Fill(1)
             elif genWeight < 0:
