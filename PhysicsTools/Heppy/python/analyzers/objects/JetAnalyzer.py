@@ -152,9 +152,6 @@ class JetAnalyzer( Analyzer ):
             if len(leps_with_overlaps)>0:
                 for lep in leps_with_overlaps:
                     lep.jetOverlap = jet
-            if(self.cfg_ana.doQG):
-                jet.qgl_calc =  self.qglcalc.computeQGLikelihood
-                jet.qgl_rho =  rho
             if self.testJetNoID( jet ): 
                 self.jetsAllNoID.append(jet) 
                 if(self.cfg_ana.doQG):
