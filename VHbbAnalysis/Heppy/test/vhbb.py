@@ -51,11 +51,14 @@ treeProducer= cfg.Analyzer(
 		 NTupleVariable("mhtJet30",  lambda ev : ev.mhtJet30, help="mht with jets30"),
 		 NTupleVariable("mhtPhiJet30",  lambda ev : ev.mhtPhiJet30, help="mht phi with jets30"),
 		 NTupleVariable("htJet30",  lambda ev : ev.htJet30, help="ht  with jets30"),
-		 NTupleVariable("met_rawpt",  lambda ev : ev.met.uncorrectedPt(), help="raw met"),
+		 NTupleVariable("met_rawpt",  lambda ev : ev.met.uncorPt(), help="raw met"),
 		 NTupleVariable("metPuppi_pt",  lambda ev : ev.metPuppi.pt(), help="met from Puppi"),
 		 NTupleVariable("metPuppi_phi",  lambda ev : ev.metPuppi.phi(), help="met phi from Puppi"),
-		 NTupleVariable("metPuppi_rawpt",  lambda ev : ev.metPuppi.uncorrectedPt(), help="raw met from Puppi"),
-		 NTupleVariable("metType1p2_pt",  lambda ev : ev.met.shiftedPt(12,2), help="type1type2met from Puppi"),
+		 NTupleVariable("metPuppi_rawpt",  lambda ev : ev.metPuppi.uncorPt(), help="raw met from Puppi"),
+		 NTupleVariable("metNoHF_pt",  lambda ev : ev.metNoHF.pt(), help="met from NoHF"),
+		 NTupleVariable("metNoHF_phi",  lambda ev : ev.metNoHF.phi(), help="met phi from NoHF"),
+		 NTupleVariable("metNoHF_rawpt",  lambda ev : ev.metNoHF.uncorPt(), help="raw met from NoHF"),
+		 NTupleVariable("metType1p2_pt",  lambda ev : ev.met.shiftedPt(12,2), help="type1type2met"),
 		 NTupleVariable("metNoPU_pt",  lambda ev : ev.metNoPU.pt(), help="PFnoPU E_{T}^{miss}"),
 		 NTupleVariable("metNoPU_phi",  lambda ev : ev.metNoPU.phi(), help="phi of PFnoPU E_{T}^{miss}"),
 		 NTupleVariable("tkMet_pt",  lambda ev : ev.tkMet.pt(), help="E_{T}^{miss} from tracks"),
@@ -128,6 +131,7 @@ treeProducer= cfg.Analyzer(
 
 #Create shifted MET Ntuples
 metNames={y.__get__(ROOT.pat.MET):x for x,y in ROOT.pat.MET.__dict__.items() if  (x[-2:]=="Up" or x[-4:]=="Down")}
+print "met Names", metNames
 shifted_met_keys = ["met_shifted_{0}".format(n) for n in range(12)] #we do not need noShift I gueess
 shifted_met_names = ["met_shifted_%s"%metNames[n] for n in range(12)] #we do not need noShift I gueess
 shifted_mets = {mk: NTupleObject(nm, shiftedMetType, help="PF E_{T}^{miss}, after default type 1 corrections, shifted with %s" %mk) for mk,nm in zip(shifted_met_keys,shifted_met_names)}
@@ -205,29 +209,44 @@ METPuppiAna.doTkMet = False
 METPuppiAna.doMetNoPU = False
 
 
+METNoHFAna = copy.copy(METPuppiAna)
+METNoHFAna.metCollection     = "slimmedMETsNoHF"
+METNoHFAna.doMetNoPU = False
+METNoHFAna.recalibrate = False
+METNoHFAna.collectionPostFix = "NoHF"
+METNoHFAna.copyMETsByValue = True
+METNoHFAna.doTkMet = False
+METNoHFAna.doMetNoPU = False
+
+
+
 
 from PhysicsTools.Heppy.analyzers.core.PileUpAnalyzer import PileUpAnalyzer
 PUAna = PileUpAnalyzer.defaultConfig
 
 from VHbbAnalysis.Heppy.VHbbAnalyzer import VHbbAnalyzer
 JetAna.jetPt = 15
+JetAna.jetEta = 4.7
 JetAna.doQG=True
-JetAna.QGpath="pdfQG_AK4chs_13TeV_v2b.root"
+JetAna.QGpath=os.environ['CMSSW_BASE']+"/src/PhysicsTools/Heppy/data/pdfQG_AK4chs_13TeV_v2b.root"
 JetAna.recalibrateJets=True
 JetAna.jecPath=os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/jec"
-JetAna.mcGT="MCRUN2_74_V9D"
-JetAna.dataGT = "Summer15_50nsV4_DATA"
+JetAna.mcGT="74X_mcRun2_asymptotic_v2"
+JetAna.dataGT = "74X_dataRun2_reMiniAOD_v0"
+JetAna.addJECShifts=True
 
 VHbb = cfg.Analyzer(
     verbose=False,
     class_object=VHbbAnalyzer,
-    wEleSelection = lambda x : x.pt() > 25 and x.electronID("cutBasedElectronID-CSA14-PU20bx25-V0-standalone-tight"),
+    wEleSelection = lambda x : x.pt() > 25 and x.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"),
     wMuSelection = lambda x : x.pt() > 25 and x.muonID("POG_ID_Tight"),
-    zEleSelection = lambda x : x.pt() > 15 and x.electronID("cutBasedElectronID-CSA14-PU20bx25-V0-standalone-loose"),
+    zEleSelection = lambda x : x.pt() > 15 and x.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"),
     zMuSelection = lambda x : x.pt() > 10 and x.muonID("POG_ID_Loose"),
     zLeadingElePt = 20,
     zLeadingMuPt = 20,
-    higgsJetsPreSelection = lambda x:  x.puJetId() > 0 and x.jetID('POG_PFID_Loose') and x.pt() >  20 ,
+    higgsJetsPreSelection = lambda x: (( x.puJetId() > 0 and x.jetID('POG_PFID_Loose')) or abs(x.eta())>3.0 ) and x.pt() >  20 ,
+    higgsJetsPreSelectionVBF = lambda x: x.pt() >  20 ,
+#    higgsJetsPreSelectionVBF = lambda x: (( x.puJetId() > 0 and x.jetID('POG_PFID_Loose')) or abs(x.eta())>3.0 ) and x.pt() >  20,
     passall=False,
     doSoftActivityVH=True,
     doVBF=True,
@@ -303,7 +322,7 @@ jsonAna = cfg.Analyzer(JSONAnalyzer,
       passAll=True
       )
 
-sequence = [jsonAna,LHEAna,FlagsAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,TauAna,JetAna,METAna, METPuppiAna, PdfAna, VHbb,TTHtoTauTau,TTHtoTauTauGen,treeProducer]#,sh]
+sequence = [jsonAna,LHEAna,FlagsAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,TauAna,JetAna,METAna, METPuppiAna, METNoHFAna, PdfAna, VHbb,TTHtoTauTau,TTHtoTauTauGen,treeProducer]#,sh]
 
 
 from PhysicsTools.Heppy.utils.miniAodFiles import miniAodFiles
@@ -316,8 +335,9 @@ sample = cfg.MCComponent(
 #   "/scratch/arizzi/0E132828-B218-E511-9983-3417EBE6453D.root"
      #"root://xrootd.unl.edu//store/mc/Phys14DR/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/00C90EFC-3074-E411-A845-002590DB9262.root"
 #     "root://xrootd.unl.edu//store/mc/Phys14DR/TTbarH_M-125_13TeV_amcatnlo-pythia8-tauola/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v2/00000/FC4E6E16-5C7F-E411-8843-002590200AE4.root"
-     #"/scratch/arizzi/0E132828-B218-E511-9983-3417EBE6453D.root"
-		"root://xrootd.unl.edu//store/mc/RunIISpring15DR74/VBFHToBB_M-125_13TeV_powheg_pythia8_weightfix/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v1/10000/12523103-EE5F-E511-9E79-0025905A6118.root"
+#"root://cms-xrd-global.cern.ch//store/mc/RunIISpring15MiniAODv2/ggZH_HToBB_ZToNuNu_M125_13TeV_amcatnlo_pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/10000/008BD758-C26D-E511-ACDB-002590DB92C4.root"
+"root://cms-xrd-global.cern.ch//store/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/50000/009AE141-CA6D-E511-A060-002590A3716C.root"
+#     "root://xrootd.ba.infn.it//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/00000/06B5178E-F008-E511-A2CF-00261894390B.root"
 ],
 
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
@@ -347,7 +367,7 @@ class TestFilter(logging.Filter):
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 300)
+    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 1000)
 
     import time
     import cProfile

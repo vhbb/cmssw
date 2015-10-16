@@ -70,6 +70,9 @@ HLTSusyExoValSeq = cms.Sequence(SUSY_HLT_HT_MET +
                                 SUSY_HLT_Razor_Main_RsqMR240 + 
                                 SUSY_HLT_Razor_QuadJet_RsqMR240 +
                                 SUSY_HLT_Razor_DM_Rsq0p25 + 
+                                SUSY_HLT_Razor_Main_Calo_RsqMR240 + 
+                                SUSY_HLT_Razor_QuadJet_Calo_RsqMR240 +
+                                SUSY_HLT_Razor_DM_Calo_Rsq0p25 + 
                                 SUSY_HLT_CaloHT200 +
                                 SUSY_HLT_CaloHT250 +
                                 SUSY_HLT_CaloHT300 +
@@ -81,6 +84,12 @@ HLTSusyExoValSeq = cms.Sequence(SUSY_HLT_HT_MET +
                                 SUSY_HLT_HT_MuEle +
                                 SUSY_HLT_Muon_BJet +
                                 SUSY_HLT_Electron_BJet +
+                                SUSY_HLT_HT200_alphaT0p51 +
+                                SUSY_HLT_HT200_alphaT0p57 +
+                                SUSY_HLT_HT250_alphaT0p55 +
+                                SUSY_HLT_HT300_alphaT0p53 +
+                                SUSY_HLT_HT350_alphaT0p52 +
+                                SUSY_HLT_HT400_alphaT0p51 +
                                 SUSY_HLT_HT200_alphaT0p63 +
                                 SUSY_HLT_HT250_alphaT0p58 +
                                 SUSY_HLT_HT300_alphaT0p54 +
@@ -125,6 +134,9 @@ HLTSusyExoValSeq_FastSim = cms.Sequence(SUSY_HLT_HT_MET_FASTSIM +
                                         SUSY_HLT_Razor_Main_RsqMR240_FASTSIM + 
                                         SUSY_HLT_Razor_QuadJet_RsqMR240_FASTSIM +
                                         SUSY_HLT_Razor_DM_Rsq0p25_FASTSIM + 
+                                        SUSY_HLT_Razor_Main_Calo_RsqMR240_FASTSIM + 
+                                        SUSY_HLT_Razor_QuadJet_Calo_RsqMR240_FASTSIM +
+                                        SUSY_HLT_Razor_DM_Calo_Rsq0p25_FASTSIM + 
                                         SUSY_HLT_CaloHT200_FASTSIM +
                                         SUSY_HLT_CaloHT250_FASTSIM +
                                         SUSY_HLT_CaloHT300_FASTSIM +

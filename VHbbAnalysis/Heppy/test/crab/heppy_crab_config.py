@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'vhbb_heppy_blike_final_v13_v2b_id_sig'
-config.General.workArea = 'crab_projects_blike_final_v13_v2b_id_sig'
+config.General.requestName = 'VHBB_HEPPY_V13_001'
+config.General.workArea = 'crab_projects_V13_001'
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -20,10 +20,9 @@ config.JobType.inputFiles = ['heppy_config.py',
                              '../vhbb.py',
                               '../vhbb_combined.py',
                              'TMVAClassification_BDT.weights.xml',
-                             '../pdfQG_AK4chs_13TeV_v2b.root',
                              'puData.root',
                              'puMC.root',
-                              '../json.txt',
+                              'json.txt',
                               "../Zll-spring15.weights.xml",
                               "../Wln-spring15.weights.xml",
                               "../Znn-spring15.weights.xml",
@@ -33,17 +32,16 @@ config.JobType.inputFiles = ['heppy_config.py',
 #config.JobType.outputFiles = ['tree.root']
 
 config.section_("Data")
-config.Data.inputDataset = '/VBFHToBB_M-125_13TeV_powheg_pythia8_weightfix/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'
-#config.Data.inputDataset = '/QCD_HT300to500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM'
+config.Data.inputDataset = '/ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 1
-#config.Data.totalUnits = 6
-config.Data.outLFNDirBase = '/store/user/nchernya/vhbb_final_v13_0_v2b_id_sig/'
-config.Data.publication = False
-config.Data.publishDataName = 'VHBB_heppy_blike_v2bsig'
+config.Data.unitsPerJob = 2
+#config.Data.totalUnits = 2
+config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyV13/'
+config.Data.publication = True
+config.Data.publishDataName = 'VHBB_HEPPY_V13'
 
 config.section_("Site")
-config.Site.storageSite = "T2_IT_Rome"
+config.Site.storageSite = "T2_IT_Pisa"
 
 #config.Data.ignoreLocality = True

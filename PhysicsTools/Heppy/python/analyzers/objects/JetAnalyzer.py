@@ -157,6 +157,9 @@ class JetAnalyzer( Analyzer ):
                 jet.qgl_rho =  rho
             if self.testJetNoID( jet ): 
                 self.jetsAllNoID.append(jet) 
+                if(self.cfg_ana.doQG):
+                    jet.qgl_calc =  self.qglcalc.computeQGLikelihood
+                    jet.qgl_rho =  rho
                 # temporary fix since the jetID it's not good for eta>3
                 if abs(jet.eta()) <3:
                     if self.testJetID (jet ):
