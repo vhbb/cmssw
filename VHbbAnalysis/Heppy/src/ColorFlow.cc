@@ -1,72 +1,70 @@
+// author : Pierluigi Bortignon
+// email : pierluigi.bortignon@gmail.com
+// date : 16.10.2015 - Fermilab
+// version : 0
+
 //#include "PhysicsTools/Heppy/interface/ReclusterJets.h"
 #include "VHbbAnalysis/Heppy/interface/ColorFlow.h"
 #include "FWCore/Utilities/interface/Exception.h"
-#include "fastjet/tools/Pruner.hh"
 #include "DataFormats/GeometryVector/interface/VectorUtil.h"
-using namespace std;
 
-//using namespace std;
-using namespace fastjet;
+using namespace std;
 
 namespace heppy{
 
-ColorFlow::ColorFlow(const std::vector<LorentzVector> & objects, double ktpower, double rparam,
-     const LorentzVector &j1,const LorentzVector &j2,double sumDeltaRMin) : 
-    ktpower_(ktpower), rparam_(rparam), j1_(j1),j2_(j2),sumDeltaRMin_(sumDeltaRMin)
-{
-  // define jet inputs
-  fjInputs_.clear();
-  int index=0;
-  for (const LorentzVector &o : objects) {
-    double dr1=Geom::deltaR(o,j1);
-    double dr2=Geom::deltaR(o,j2);
-    if(dr1+dr2>sumDeltaRMin) {
-     fastjet::PseudoJet j(o.Px(),o.Py(),o.Pz(),o.E());
-     j.set_user_index(index);  // in case we want to know which piece ended where
-     fjInputs_.push_back(j);
-    }
-    index++;
-  }
+  // ColorFlow::ColorFlow(const std::vector<pat::Jet> &jets):
+  // jets_(jets)
 
-  // choose a jet definition
-  fastjet::JetDefinition jet_def;
+  ColorFlow::ColorFlow(boost::python::object *jets)
+    {
+      // initialisation - for the moment here, then I'll move it out.
+      max_pfCand_pt = 1;
 
-  // prepare jet def 
-  if (ktpower_ == 1.0) {
-    jet_def = JetDefinition(kt_algorithm, rparam_);
-  }  else if (ktpower_ == 0.0) {
-    jet_def = JetDefinition(cambridge_algorithm, rparam_);
-  }  else if (ktpower_ == -1.0) {
-    jet_def = JetDefinition(antikt_algorithm, rparam_);
-  }  else {
-    throw cms::Exception("InvalidArgument", "Unsupported ktpower value");
-  }
-  
-  // print out some infos
-  //  cout << "Clustering with " << jet_def.description() << endl;
-  ///
-  // define jet clustering sequence
-  fjClusterSeq_ = ClusterSequencePtr( new fastjet::ClusterSequence( fjInputs_, jet_def)); 
-}
+      // loop over the jets
+      for( unsigned int i = 0; i<jets->attr("size"); i++ ){
+        // get the number of pfCandidates of a jet
+        unsigned int nOfCands = boost::python::extract<unsigned int>(jets->attr("at")(i).attr("numberOfSourceCandidatePtrs"));
+        // loop over the PF candidate of a jet
+        for ( unsigned int cand_j=0; cand_j < nOfCands; cand_j++){
+          // get a pf candidate
+          reco::CandidatePtr pfCand = boost::python::extract<reco::CandidatePtr> (jets->attr("at")(i).attr("sourceCandidatePtr")(cand_j));
+          if (!pfCand) continue; // check if it is available (?)
+          if (pfCand->charge()==0 or pfCand->pt() < max_pfCand_pt) continue; // calculating a tvector using only charged tracks. This is how it was in the Run1 analysis.
 
-std::vector<math::XYZTLorentzVector> ColorFlow::makeP4s(const std::vector<fastjet::PseudoJet> &jets) {
-  std::vector<math::XYZTLorentzVector> JetObjectsAll;
-  for (const fastjet::PseudoJet & pj : jets) {
-/*    std::vector<fastjet::PseudoJet> constituents = pj.constituents();
-    std::cout << "Constituents for " << pj.pt() << " " ;
-    for (unsigned j = 0; j < constituents.size(); j++) {
-		std::cout << constituents[j].user_index() << " ";
-    }
-    std::cout << std::endl;*/
-    JetObjectsAll.push_back( LorentzVector( pj.px(), pj.py(), pj.pz(), pj.e() ) );
-  }
-  return JetObjectsAll;
-}
-std::vector<math::XYZTLorentzVector> ColorFlow::getGrouping(double ptMin) {
-  // recluster jet
-  inclusiveJets_ = fastjet::sorted_by_pt(fjClusterSeq_->inclusive_jets(ptMin));
-  // return
-  return makeP4s(inclusiveJets_);
-}
+          pi_.SetPtEtaPhiE( pfCand->pt(), pfCand->eta(), pfCand->phi(), pfCand->energy() );
+          J_+=pi_; // building the jet using only yhe chared pf candidates four momentum
+          nOfConst_+=1; // count the number of charge constituents
 
-}
+        } // candidate loop
+        
+        //if there are no more than 2 consituents there is no way to calculate the pull Angle - maybe in the future this can be revised.
+        if (nOfConst_ < 2) t_vector_.Set(0.,0.);
+        else{ // else calculate the t_vector
+
+          for ( unsigned int cand_j=0; cand_j < nOfCands; cand_j++){
+          // get a pf candidate
+          reco::CandidatePtr pfCand = boost::python::extract<reco::CandidatePtr> (jets->attr("at")(i).attr("sourceCandidatePtr")(cand_j));
+          //reco::CandidatePtr pfCand = jets->at(i).sourceCandidatePtr(cand_j);
+          if (!pfCand) continue; // check if it is available (?)
+          if (pfCand->charge()==0 or pfCand->pt() < max_pfCand_pt) continue; // calculating a tvector using only charged tracks. This is how it was in the Run1 analysis.
+
+          pfCand_pt_ = pfCand->pt();
+          pi_.SetPtEtaPhiE(pfCand->pt(),pfCand->eta(),pfCand->phi(),pfCand->energy());
+          r_.Set( pi_.Rapidity() - J_.Rapidity(), deltaPhi( pfCand->phi(), J_.Phi() ) );
+          r_mag_ = r_.Mod();
+          t_vector_ += ( pfCand_pt_ / J_.Pt() ) * r_mag_ * r_;
+
+          } // candidate loop
+
+        } // else
+
+        // now fill the jet information
+        // here I have to ind a way to add the property to the jets from the c++. which kind of objects are these?
+
+      } // jet loop
+
+    } // constructor
+
+
+} // namespace heppy
+

@@ -1,3 +1,8 @@
+// author : Pierluigi Bortignon
+// email : pierluigi.bortignon@gmail.com
+// date : 16.10.2015 - Fermilab
+// version : 0
+
 #ifndef PhysicsTools_Heppy_ColorFlow_h
 #define PhysicsTools_Heppy_ColorFlow_h
 
@@ -7,8 +12,9 @@
 #include <TVector2.h>
 #include <TLorentzVector.h>
 #include <TMath.h>
+#include <boost/python.hpp>
 
-#include "DataFormats/PatCandidates/interfce/Jet.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 
 
@@ -23,14 +29,15 @@ class ColorFlow {
  // The interface suggests to use the phi of the pull vector (in the rapidity-phi plane) and its magnitude as sensitive variables to color connection.
 
 
- ColorFlow(const std::vector<pat::Jet> &jets);
+// ColorFlow(const std::vector<pat::Jet> &jets);
+ ColorFlow(boost::python::object *jets);
  
  float getPullVectorPhi() { return r_mag_; };
  float getPullVectorMag() { return r_phi_; };
 
 private:
 
-  reco::PFCandidateCollections & pfCands;
+  reco::PFCandidateCollection * pfCands;
 
   TVector2 calculate_pull_vector_(const std::vector<pat::Jet> &jets) ;
 
@@ -38,13 +45,18 @@ private:
   TVector2 null_;
   TVector2 ci_;
   TVector2 r_;
+  TVector2 t_vector_;
   TLorentzVector pi_;
   TLorentzVector J_;
   float r_mag_;
   float r_phi_;
-  double patJetpfcPt_;
+  float patJetpfcPt_;
+  float max_pfCand_pt;
+  float pfCand_pt_;
   unsigned int nOfConst_;
 
+//  const std::vector<pat::Jet> jets_;
+  
 };
 }
 #endif   
