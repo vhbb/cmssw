@@ -413,10 +413,10 @@ class JetAnalyzer( Analyzer ):
                    setattr(jet, "corrJER", ptscale )
                    factorJERUp= shiftJERfactor(1, aeta)
                    ptscaleJERUp = max(0.0, (jetpt + (factorJERUp-1)*(jetpt-genpt))/jetpt)
-                   setattr(jet, "corrJERUp", ptscaleJERUp )
+                   setattr(jet, "corrJERUp", ptscaleJERUp)
                    factorJERDown= shiftJERfactor(-1, aeta)
                    ptscaleJERDown = max(0.0, (jetpt + (factorJERDown-1)*(jetpt-genpt))/jetpt)
-                   setattr(jet, "corrJERDown", ptscaleJERDown )
+                   setattr(jet, "corrJERDown", ptscaleJERDown)
 
 
 
