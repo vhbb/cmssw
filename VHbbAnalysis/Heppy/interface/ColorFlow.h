@@ -1,7 +1,7 @@
 // author : Pierluigi Bortignon
 // email : pierluigi.bortignon@gmail.com
 // date : 16.10.2015 - Fermilab
-// version : 0
+// version : 1.0
 
 #ifndef PhysicsTools_Heppy_ColorFlow_h
 #define PhysicsTools_Heppy_ColorFlow_h
@@ -12,50 +12,45 @@
 #include <TVector2.h>
 #include <TLorentzVector.h>
 #include <TMath.h>
-#include <boost/python.hpp>
 
-#include "DataFormats/PatCandidates/interface/Jet.h"
-#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/Math/interface/LorentzVector.h"
 
 
 namespace heppy{
 class ColorFlow {
-    
- public:
- // This class cluster a set of variables that could have sensitivity to color flow connection between two jets
+
+ // The ColorFlow class groups a set of variables that could be sensitive to the color flow connection between two jets.
  // The variable is inspired from this paper: http://arxiv.org/abs/1001.5027
  //
  // The class defines a 2D vector (a pull vector) per each jet. The pull vector represents the direction of the radiation in the rapiity-phi plane.
- // The interface suggests to use the phi of the pull vector (in the rapidity-phi plane) and its magnitude as sensitive variables to color connection.
+ // The interface suggests to use the phi of the pull vector (in the phi-rapidity plane) and its magnitude as sensitive variables to color connection.
+    
+public:
 
-
-// ColorFlow(const std::vector<pat::Jet> &jets);
- ColorFlow(boost::python::object *jets);
+  ColorFlow(std::vector<math::XYZTLorentzVector> pfCands);
  
- float getPullVectorPhi() { return r_mag_; };
- float getPullVectorMag() { return r_phi_; };
+  TVector2 get_pull_vector() { return pull_vector_; };
+
+  float get_pull_vector_phi() { return pull_vector_.Phi(); };
+
+  float get_pull_vector_mag() { return pull_vector_.Mod(); };
 
 private:
 
-  reco::PFCandidateCollection * pfCands;
+  void init();
 
-  TVector2 calculate_pull_vector_(const std::vector<pat::Jet> &jets) ;
+  // It return the 4-momentum sum of pfCands.
+  TLorentzVector CalculateJetDirection( std::vector<math::XYZTLorentzVector> pfCands_ );
 
-  TVector2 pull_;
-  TVector2 null_;
-  TVector2 ci_;
-  TVector2 r_;
-  TVector2 t_vector_;
+  std::vector<math::XYZTLorentzVector> pfCands_;
+  TVector2 pull_vector_;
   TLorentzVector pi_;
   TLorentzVector J_;
+  TVector2 r_; 
   float r_mag_;
   float r_phi_;
-  float patJetpfcPt_;
-  float max_pfCand_pt;
-  float pfCand_pt_;
-  unsigned int nOfConst_;
-
-//  const std::vector<pat::Jet> jets_;
+  float pf_cand_pt_;
+  unsigned int n_of_pf_cands_;
   
 };
 }

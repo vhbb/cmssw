@@ -96,84 +96,37 @@ class VHbbAnalyzer( Analyzer ):
             excludedJets+=[event.cleanJetsAll[event.isrJetVH]]
         event.softActivityVHJets=[x for x in self.softActivity(event,j1,j2,excludedJets,-1000) if x.pt() > 2.0 ]
 
-   
-   ## PULL VECTOR
-   ## This is the old python implementation of the pull vector computation
-#    def computePullVector(self,event,jet) :
-#        # this function is computing the pull vector (a TVector2) per each input jet. The pull vector is a varibale sensitive to the color flow connections.
-#
-#        #variables initialisation
-#        t_Vect=ROOT.TVector2()
-#        t_Vect.Set(0.,0.)
-#        tVector=ROOT.TVector2()
-#        r=ROOT.TVector2()
-#        pi=ROOT.TLorentzVector()
-#        J=ROOT.TLorentzVector()
-#        nOfconst=0
-#
-#        # loading the particle flow candidates
-#        #if not hasattr(event,"pfCands"):
-#        #  event.pfCands = list(self.handles['pfCands'].product())
-#        
-#        # need to reconstruct the jet pt using only the charged tracks
-#        for i in range(0,jet.numberOfSourceCandidatePtrs()): # loop over the pf candidates
-#            pfCand=jet.sourceCandidatePtr(i) # pick one candidate at the time
-#            if not pfCand.isAvailable(): continue # check if it is available (?)
-#            if pfCand.charge() == 0 or pfCand.pt()<1. : continue  # calculating a tvector using only charged tracks. This is how it was in the Run1 analysis.
-#            pi.SetPtEtaPhiE( pfCand.pt(), pfCand.eta(), pfCand.phi(), pfCand.energy() );
-#            J += pi #building the jet using only yhe chared pf candidates four momentum
-#            nOfconst+=1 # count the number of charge constituents
-#
-#        # if there are not more than one track there is no way to calculate the pullAngle.
-#        if nOfconst<2: 
-#          return t_Vect # return the t_Vector initialized to 0,0 
-#        
-#        #now calculating the actual pull vector
-#        for i in range(0,jet.numberOfSourceCandidatePtrs()): # loop over the pf cadidates
-#            pfCand=jet.sourceCandidatePtr(i) # get pf candidates one by one
-#            if not pfCand.isAvailable(): continue # check if the candidate is available
-#            if pfCand.charge() == 0: continue # calculating a tvector using only charged tracks. This is how it was in the Run1 analysis.
-#            pfCand_pt = pfCand.pt() 
-#            pi.SetPtEtaPhiE(pfCand.pt(),pfCand.eta(),pfCand.phi(),pfCand.energy())
-#            r.Set( pi.Rapidity() - J.Rapidity(), deltaPhi( pfCand.phi(), J.Phi() ) );
-#            r_mag = r.Mod();
-#            t_Vect += ( pfCand_pt / J.Pt() ) * r_mag * r;
-#        # here I need to create a new property on the jet class
-#        return t_Vect
-#
 
     def addPullVector(self,event) :
+      """ Add color flow properties to the jetsForHiggs jet collections.
 
+      It calculates the pull angle for each jet of jetsForHiggs jet collection.
+      It stores the phi angle and the magnitude of the pull angle as property of a jet.
 
-      # this is using a c++ implementation.
-      # the c++ implementation can either take a signle jet and then return the t_vector_phi and magnitude:
-      # in this case you would profit from the fastert loop over the candidate
-      # otherwise you could pass the full jet collection and let add all jets variables. This would profit much more because you move 2 loops on the c++ implementation.
-      # it is also true that the number of jets that you shuold loop over is ~5 so there is probably not a huge gain ? is that true? I can test both.
-      for j in event.jetsForHiggs:
-        print(type(j))
-      colorFlow = ROOT.heppy.ColorFlow(event.jetsForHiggs)
+      Contact: pierluigi.bortignon@gmail.ch 
+      Args: event: the event.
+      Returns: nothing.      
 
-      #j.pullVectorPhi = colorFlow.getPullVectorPhi()
-      #j.pullVectorMag = colorFlow.getPullVectorMag()
-      return true
+      """
+      # the pull vector (t_vect) is a 2D vector living in a (Phi,Rapidity) plane.
+      t_vect=ROOT.TVector2()
+      # pt threashold for PFCandidates to be considered in the pull angle calculation
+      min_pfCands_pt = 0.3
 
-## this is the old python implementation
-#        #'The function add the pull angle to the jet collection for each jet.'
-#        t_vect=ROOT.TVector2()
-#        # calculating the pull angle only for higgs jets. 
-#        # @todo: expland it to all jets.
-#        for j in event.jetsForHiggs:
-#          t_vect=self.computePullVector(event,j)
-#          #print("t_vect phi = ", t_vect.Phi() )
-#          # here we can either store the tvector2 coordinated which gives the possibility to development at the tree level
-#          # or we can calcualre the pullAngle for all jets
-#          # think for development we could add pullAngle to all jets.
-#          # look here for the definition of the pullAngle: 
-#          # https://github.com/vhbb/vhbb/blob/cf8f2381e63644af44fc5b6c0b7e2f4fa4017ddb/VHbbDataFormats/interface/VHbbCandidateTools.h#L330
-#          # for the moment I just store the coordinates of the pull vector (phi and eta)
-#          j.pullVectorPhi=t_vect.Phi()
-#          j.pullVectorMag=t_vect.Mod() # if there are less than 2 charged of candidates then the magnitude will be 0.
+      pfCandsForColorFlow=ROOT.std.vector(ROOT.reco.Particle.LorentzVector)()
+      for jet in event.jetsForHiggs:
+        # The color flow is calculated using only charged PFCandidates over a certain threashold of pt
+        pfCands=[jet.sourceCandidatePtr(i) for i in range(0,jet.numberOfSourceCandidatePtrs())]
+        goodPFCands = [pfCand for pfCand in pfCands if pfCand.charge() != 0 and pfCand.pt() > min_pfCands_pt ] 
+
+        # put goodPFCandidates in a vector of LorentzVector and pass it to the C++ wrapper (colorFlow). The C++ wrapper improves the speed of the algorithm by about a fator 4.
+        map(lambda x:pfCandsForColorFlow.push_back(x.p4()), goodPFCands)
+        colorFlow = ROOT.heppy.ColorFlow(pfCandsForColorFlow)
+        t_vect=colorFlow.get_pull_vector()
+
+        # add to the jets properties the pull vector phi angle and magnitude.
+        jet.pullVectorPhi=t_vect.Phi()
+        jet.pullVectorMag=t_vect.Mod() # if there are less than 2 charged of candidates then the magnitude will be 0.
 
 
     def softActivity(self,event,j1,j2,excludedJets,dR0=0.4) :

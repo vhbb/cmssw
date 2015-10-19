@@ -1,5 +1,4 @@
 <lcgdict>
   <class name="heppy::FastSoftActivity"/>
-  <class name="heppy::ColorFlow" />
-
+  <class name="heppy::ColorFlow"/>
 </lcgdict>
