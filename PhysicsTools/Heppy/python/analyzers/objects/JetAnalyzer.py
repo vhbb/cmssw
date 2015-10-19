@@ -133,6 +133,7 @@ class JetAnalyzer( Analyzer ):
             leptons = leptons[:] + event.selectedTaus
         if self.cfg_ana.cleanJetsFromIsoTracks and hasattr(event, 'selectedIsoCleanTrack'):
             leptons = leptons[:] + event.selectedIsoCleanTrack
+
 	## Apply jet selection
         self.jets = []
         self.jetsFailId = []
@@ -170,15 +171,6 @@ class JetAnalyzer( Analyzer ):
                     self.jets.append(jet)
             elif self.testJetID (jet ):
                 self.jetsIdOnly.append(jet)
-
-        ## Clean Jets from leptons
-        leptons = []
-        if hasattr(event, 'selectedLeptons'):
-            leptons = [ l for l in event.selectedLeptons if l.pt() > self.lepPtMin and self.lepSelCut(l) ]
-        if self.cfg_ana.cleanJetsFromTaus and hasattr(event, 'selectedTaus'):
-            leptons = leptons[:] + event.selectedTaus
-        if self.cfg_ana.cleanJetsFromIsoTracks and hasattr(event, 'selectedIsoCleanTrack'):
-            leptons = leptons[:] + event.selectedIsoCleanTrack
 
         jetsEtaCut = [j for j in self.jets if abs(j.eta()) <  self.cfg_ana.jetEta ]
         self.cleanJetsAll, cleanLeptons = cleanJetsAndLeptons(jetsEtaCut, leptons, self.jetLepDR, self.jetLepArbitration)
@@ -221,14 +213,13 @@ class JetAnalyzer( Analyzer ):
             self.cleanJetsAll = self.gamma_cleanJetsAll
             self.cleanJetsFwd = self.gamma_cleanJetsFwd
 
-        ## Associate jets to leptons
-        leptons = event.inclusiveLeptons if hasattr(event, 'inclusiveLeptons') else event.selectedLeptons
-        jlpairs = matchObjectCollection( leptons, allJets, self.jetLepDR**2)
+        ## Associate jets to inclusive leptons
+        incleptons = event.inclusiveLeptons if hasattr(event, 'inclusiveLeptons') else event.selectedLeptons
+        jlpairs = matchObjectCollection( incleptons, allJets, self.jetLepDR**2)
 
         for jet in allJets:
             jet.leptons = [l for l in jlpairs if jlpairs[l] == jet ]
-
-        for lep in leptons:
+        for lep in incleptons:
             jet = jlpairs[lep]
             if jet is None:
                 setattr(lep,"jet"+self.cfg_ana.collectionPostFix,lep)
@@ -255,9 +246,11 @@ class JetAnalyzer( Analyzer ):
             
             if self.cfg_ana.cleanGenJetsFromPhoton:
                 self.cleanGenJets = cleanNearestJetOnly(self.cleanGenJets, photons, self.jetLepDR)
+
 	    if hasattr(self.cfg_ana,"genNuSelection") :
 		jetNus=[x for x in event.genParticles if abs(x.pdgId()) in [12,14,16] and self.cfg_ana.genNuSelection(x) ]
-	 	pairs= matchObjectCollection (jetNus, self.cleanGenJets, 0.4)
+	 	pairs= matchObjectCollection (jetNus, self.genJets, 0.4**2)
+                
 		for (nu,genJet) in pairs.iteritems() :
 		     if genJet is not None :
 			if not hasattr(genJet,"nu") :
