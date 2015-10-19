@@ -233,6 +233,7 @@ JetAna.jecPath=os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/jec"
 JetAna.mcGT="74X_mcRun2_asymptotic_v2"
 JetAna.dataGT = "74X_dataRun2_reMiniAOD_v0"
 JetAna.addJECShifts=True
+JetAna.addJERShifts=True
 
 VHbb = cfg.Analyzer(
     verbose=False,
