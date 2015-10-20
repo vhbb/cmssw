@@ -34,7 +34,7 @@ remove = [
           'AToZhToLLTauTau','RPVresonantToEMu','XXTo4J','Taustar_TauG','DM_Pseudoscalar','DM_Scalar','InclusivectoMu',
           'BdToKstarMuMu','Estar_EG','ZGTo2LG','Mustar_MuG','Estar_EG','InclusivebtoMu','GluGluHToEEG','InclusiveBtoJpsi',
           '/DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',
-          'BlackHole_','DMS_','DMV_','/DsTo','AxialMonoW_Mphi','X53X53To2L2Nu','VectorMono','AxialMono',
+          'BlackHole_','DMS_','DMV_','/DsTo','AxialMonoW_Mphi','X53X53To2L2Nu','VectorMono','AxialMono','StringBall',
           # '/ttHJetToNonbb_M120_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           # '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           # '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v3/MINIAODSIM',
@@ -72,7 +72,8 @@ vhbb_all = open(filename).read()
 
 print 'HBB filelist ',filename,'contains',len(filter(None, vhbb_all.split('\n'))),'datasets'
 
-print '\nDATASETS AVAILABLE ON DAS AS VALID AND NOT (YET) INCLUDED IN THE HBB LIST\n'
+print '\n=======================================================================\n'
+print 'DATASETS AVAILABLE ON DAS AS VALID AND NOT (YET) INCLUDED IN THE HBB LIST\n'
 for line in das_valid:
   if line not in vhbb_all:
     print line
@@ -85,11 +86,13 @@ for line in das_production:
   if line in vhbb_all:
     vhbb_prod.append(line)
 
-print '\nDATASETS INCLUDED IN THE HBB LIST AND STILL IN PRODUCTION\n'
+print '\n=========================================================\n'
+print 'DATASETS INCLUDED IN THE HBB LIST AND STILL IN PRODUCTION\n'
 for line in vhbb_prod:
     print line
 
-print '\nDATASETS INCLUDED IN THE HBB LIST NOT IN PRODUCTION NOR IN VALID STATE (i.e. REMOVE FROM THE LIST!!!) \n'
+print '\n======================================================================================================\n'
+print 'DATASETS INCLUDED IN THE HBB LIST NOT IN PRODUCTION NOR IN VALID STATE (i.e. REMOVE FROM THE LIST!!!) \n'
 for line in filter(None, vhbb_all.split('\n')):
   if (line not in das_production) and (line not in das_valid):
     print line
