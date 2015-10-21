@@ -121,8 +121,8 @@ def pass_event(ev):
 
 ntuple_version = "Pre-V14"
 
-sample_name    = "ZH_test"
-#sample_name    = "ttH"
+#sample_name    = "ZH_test"
+sample_name    = "ttH"
 
 #path   = "dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat///store/t3groups/ethz-higgs/run2/V12/"
 #path   = "dcap://t3se01.psi.ch:22125///pnfs/psi.ch/cms/trivcat///store/t3groups/ethz-higgs/run2/VHBBHeppyV13/"
@@ -130,8 +130,8 @@ path    = "root://cms-xrd-global.cern.ch//store/group/cmst3/user/degrutto/VHBBHe
 
 #sample = "ZH_HToBB_ZToLL_M125_13TeV_powheg_pythia8/VHBB_HEPPY_V13_ZH_HToBB_ZToLL_M125_13TeV_powheg_pythia8__RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/151002_083741/0000/" 
 #sample = "TT_TuneCUETP8M1_13TeV-powheg-pythia8/VHBB_HEPPY_V13_TT_TuneCUETP8M1_13TeV-powheg-pythia8__RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext3-v1/151002_060637/0000/"
-sample  = "ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pythia8/VHBB_HEPPY_R14_TEST_ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pythia8__RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/151020_184306/0000/"
-#sample  = "ttHTobb_M125_13TeV_powheg_pythia8/VHBB_HEPPY_R14_TEST_ttHTobb_M125_13TeV_powheg_pythia8__RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/151020_184403/0000"
+#sample  = "ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pythia8/VHBB_HEPPY_R14_TEST_ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pythia8__RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/151020_184306/0000/"
+sample  = "ttHTobb_M125_13TeV_powheg_pythia8/VHBB_HEPPY_R14_TEST_ttHTobb_M125_13TeV_powheg_pythia8__RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/151020_184403/0000"
 
 file_names = [
     "tree_1.root",
@@ -628,7 +628,7 @@ for k in hists.keys():
 out.cd()
 
 print chain.GetEntries()
-for iev in range( min(10000, chain.GetEntries()) ):
+for iev in range( min(20000, chain.GetEntries()) ):
 
     chain.GetEntry(iev)
     ev = chain
@@ -796,9 +796,10 @@ for iev in range( min(10000, chain.GetEntries()) ):
                 hists["BJet"]["NumBHadrons"][binEta].Fill(numBHadrons)
                 if binEta in ["Bin0", "Bin1"]:
                     hists["BJet"]["Btag_weight_2D"]   [binEta+"_"+binPt].Fill( max(ev.Jet_btagCSV[j], -0.1), ev.Jet_bTagWeight[j], weight(ev) )
-                    for syst in ["JES", "LF", "Stats1", "Stats2"]:
+                    for syst in ["JES", "LF", "HF", "Stats1", "Stats2"]:
                         for shift in ["Up", "Down"]: 
                             hists["BJet"]["Btag_weight"+syst+"_2D"][binEta+"_"+binPt].Fill( max(ev.Jet_btagCSV[j], -0.1), getattr(ev,"Jet_bTagWeight"+syst+shift)[j], weight(ev))
+                            #print syst+shift, ": ", getattr(ev,"Jet_bTagWeight"+syst+shift)[j]
 
             elif abs(hadronFlavour)==4:
                 if pt_mc>0.:
