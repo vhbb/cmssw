@@ -139,7 +139,7 @@ shifted_mets = {mk: NTupleObject(nm, shiftedMetType, help="PF E_{T}^{miss}, afte
 treeProducer.globalObjects.update(shifted_mets)
 
 btag_weights = {}
-for syst in ["JES", "LF", "HF", "Stats1", "Stats2"]:
+for syst in ["JES", "LF", "HF", "Stats1", "Stats2", "cErr1", "cErr2"]:
 	for sdir in ["Up", "Down"]:
 		name = "bTagWeight"+syst+sdir
 		btag_weights[name] = NTupleVariable("bTagWeight_" + syst + sdir,
@@ -369,7 +369,7 @@ class TestFilter(logging.Filter):
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 1000)
+    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 200)
 
     import time
     import cProfile
