@@ -138,7 +138,7 @@ shifted_mets = {mk: NTupleObject(nm, shiftedMetType, help="PF E_{T}^{miss}, afte
 treeProducer.globalObjects.update(shifted_mets)
 
 btag_weights = {}
-for syst in ["JES", "LF", "HF", "Stats1", "Stats2"]:
+for syst in ["JES", "LF", "HF", "Stats1", "Stats2", "cErr1", "cErr2"]:
 	for sdir in ["Up", "Down"]:
 		name = "bTagWeight"+syst+sdir
 		btag_weights[name] = NTupleVariable("bTagWeight_" + syst + sdir,
@@ -337,8 +337,11 @@ sample = cfg.MCComponent(
      #"root://xrootd.unl.edu//store/mc/Phys14DR/TTJets_MSDecaysCKM_central_Tune4C_13TeV-madgraph-tauola/MINIAODSIM/PU20bx25_PHYS14_25_V1-v1/00000/00C90EFC-3074-E411-A845-002590DB9262.root"
 #     "root://xrootd.unl.edu//store/mc/Phys14DR/TTbarH_M-125_13TeV_amcatnlo-pythia8-tauola/MINIAODSIM/PU20bx25_tsg_PHYS14_25_V1-v2/00000/FC4E6E16-5C7F-E411-8843-002590200AE4.root"
 #"root://cms-xrd-global.cern.ch//store/mc/RunIISpring15MiniAODv2/ggZH_HToBB_ZToNuNu_M125_13TeV_amcatnlo_pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/10000/008BD758-C26D-E511-ACDB-002590DB92C4.root"
-"root://cms-xrd-global.cern.ch//store/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/50000/009AE141-CA6D-E511-A060-002590A3716C.root"
-#     "root://xrootd.ba.infn.it//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/00000/06B5178E-F008-E511-A2CF-00261894390B.root"
+     #"root://xrootd.ba.infn.it//store/mc/RunIISpring15DR74/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/Asympt25ns_MCRUN2_74_V9-v2/00000/06B5178E-F008-E511-A2CF-00261894390B.root"
+		#"dcap://t3se01.psi.ch:22125///pnfs/psi.ch/cms/trivcat///store/t3groups/ethz-higgs/run2/VHBBHeppyV13/ZH_HToBB_ZToLL_M125_13TeV_powheg_pythia8/VHBB_HEPPY_V13_ZH_HToBB_ZToLL_M125_13TeV_powheg_pythia8__RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/151002_083741/0000/"
+
+		"root://cms-xrd-global.cern.ch//store/mc/RunIISpring15MiniAODv2/DYJetsToLL_M-50_HT-100to200_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/50000/009AE141-CA6D-E511-A060-002590A3716C.root"
+#		"/scratch/bianchi/009AE141-CA6D-E511-A060-002590A3716C.root"
 ],
 
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
@@ -368,7 +371,7 @@ class TestFilter(logging.Filter):
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 1000)
+    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 200)
 
     import time
     import cProfile
