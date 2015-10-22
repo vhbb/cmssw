@@ -162,6 +162,21 @@ chain.SetBranchStatus("H_*",       True)
 chain.SetBranchStatus("puWeight",  True)
 chain.SetBranchStatus("genWeight", True)
 chain.SetBranchStatus("bTagWeight*", True)
+for filt in [ "HBHENoiseFilter", 
+              "CSCTightHaloFilter", 
+              "hcalLaserEventFilter",
+              "EcalDeadCellTriggerPrimitiveFilter",
+              "goodVertices",
+              "trackingFailureFilter" ,
+              "eeBadScFilter" ,
+              "METFilters",
+              "trkPOGFilters",
+              "ecalLaserCorrFilter", 
+              "trkPOG_manystripclus53X",
+              "trkPOG_toomanystripclus53X",
+              "trkPOG_logErrorTooManyClusters"]:
+    chain.SetBranchStatus("Flag_"+filt, True)    
+    
 
 if not "plots_JetMetValidation_"+ntuple_version+"_"+sample_name in os.listdir("./"):
     os.mkdir("./plots_JetMetValidation_"+ntuple_version+"_"+sample_name)
@@ -188,6 +203,23 @@ hists = {
             "cErr2Up"     :  hist1D("BTagWeight_cErr2Up",     "BTagWeight event weight (cErr2Up)",    "Weight", 40, 0., 3) ,
             "cErr2Down"   :  hist1D("BTagWeight_cErr2Down", "BTagWeight event weight (cErr2Down)",  "Weight", 40, 0., 3) ,
             },
+        
+        "Filters" : {
+            "EcalDeadCellTriggerPrimitiveFilter" : hist1D("Flag_EcalDeadCellTriggerPrimitiveFilter",   "EcalDeadCellTriggerPrimitiveFilter",  "pass", 2, -0.5, 1.5) , 
+            "trkPOG_manystripclus53X" : hist1D("Flag_trkPOG_manystripclus53X",   "trkPOG_manystripclus53X",  "pass", 2, -0.5, 1.5) , 
+            "ecalLaserCorrFilter" : hist1D("Flag_ecalLaserCorrFilter",   "ecalLaserCorrFilter",  "pass", 2, -0.5, 1.5) , 
+            "trkPOG_toomanystripclus53X" : hist1D("Flag_trkPOG_toomanystripclus53X",   "trkPOG_toomanystripclus53X",  "pass", 2, -0.5, 1.5) , 
+            "hcalLaserEventFilter" : hist1D("Flag_hcalLaserEventFilter",   "hcalLaserEventFilter",  "pass", 2, -0.5, 1.5) , 
+            "trkPOG_logErrorTooManyClusters" : hist1D("Flag_trkPOG_logErrorTooManyClusters",   "trkPOG_logErrorTooManyClusters",  "pass", 2, -0.5, 1.5) , 
+            "trkPOGFilters" : hist1D("Flag_trkPOGFilters",   "trkPOGFilters",  "pass", 2, -0.5, 1.5) , 
+            "METFilters" : hist1D("Flag_METFilters",   "METFilters",  "pass", 2, -0.5, 1.5) , 
+            "trackingFailureFilter" : hist1D("Flag_trackingFailureFilter",   "trackingFailureFilter",  "pass", 2, -0.5, 1.5) , 
+            "CSCTightHaloFilter" : hist1D("Flag_CSCTightHaloFilter",   "CSCTightHaloFilter",  "pass", 2, -0.5, 1.5) , 
+            "HBHENoiseFilter" : hist1D("Flag_HBHENoiseFilter",   "HBHENoiseFilter",  "pass", 2, -0.5, 1.5) ,
+            "goodVertices" : hist1D("Flag_goodVertices",   "goodVertices",  "pass", 2, -0.5, 1.5) , 
+            "eeBadScFilter" : hist1D("Flag_eeBadScFilter",   "eeBadScFilter",  "pass", 2, -0.5, 1.5) , 
+            }
+
         },
 
     "MET" : {
@@ -262,9 +294,9 @@ hists = {
             "noPU_100toinf":  hist1D("MET_Pt_Resolution_NoPU_2", "NoPU MET p_{T} resolution, 100<gen E_{T}^{miss} GeV",    "Reco/Gen", 40, 0, 3) ,
             },
         "PxPy_correlation" : {
-            "type1_0to50"    :  hist2D("MET_Pxy_Correlation_type1_0", "Type1 MET #Deltap_{x.y} correlation,  0<gen E_{T}^{miss}<50  GeV", "(Reco-Gen)_{x}", 40, -100, 100, "(Reco-Gen)_{y}", 40, -100, 100) ,
-            "type1_50to100"  :  hist2D("MET_Pxy_Correlation_type1_1", "Type1 MET #Deltap_{x.y} correlation, 50<gen E_{T}^{miss}<100 GeV", "(Reco-Gen)_{x}", 40, -100, 100, "(Reco-Gen)_{y}", 40, -100, 100) ,
-            "type1_100toinf" :  hist2D("MET_Pxy_Correlation_type1_2", "Type1 MET #Deltap_{x.y} correlation, 100<gen E_{T}^{miss} GeV",    "(Reco-Gen)_{x}", 40, -100, 100, "(Reco-Gen)_{y}", 40, -100, 100) ,
+            "type1_0to50"    :  hist2D("MET_PxPy_Correlation_type1_0", "Type1 MET #Deltap_{x.y} correlation,  0<gen E_{T}^{miss}<50  GeV", "(Reco-Gen)_{x}", 40, -100, 100, "(Reco-Gen)_{y}", 40, -100, 100) ,
+            "type1_50to100"  :  hist2D("MET_PxPy_Correlation_type1_1", "Type1 MET #Deltap_{x.y} correlation, 50<gen E_{T}^{miss}<100 GeV", "(Reco-Gen)_{x}", 40, -100, 100, "(Reco-Gen)_{y}", 40, -100, 100) ,
+            "type1_100toinf" :  hist2D("MET_PxPy_Correlation_type1_2", "Type1 MET #Deltap_{x.y} correlation, 100<gen E_{T}^{miss} GeV",    "(Reco-Gen)_{x}", 40, -100, 100, "(Reco-Gen)_{y}", 40, -100, 100) ,
             },
         "Phi_resolution_2D" : {
             "type1" :  hist2D("MET_Phi_Resolution_type1", "Type1 MET #phi resolution", "Gen p_{T}", 40, 0, 200, "(Reco-Gen)", 40, -2., 2.) ,
@@ -739,6 +771,21 @@ for iev in range( min(20000, chain.GetEntries()) ):
         for shift in ["Up", "Down"]: 
             hists["Event"]["BTagWeight"][syst+shift].Fill( min( getattr(ev, "bTagWeight_"+syst+shift), 2.99) )
 
+    for filt in [ "HBHENoiseFilter", 
+                  "CSCTightHaloFilter", 
+                  "hcalLaserEventFilter",
+                  "EcalDeadCellTriggerPrimitiveFilter",
+                  "goodVertices",
+                  "trackingFailureFilter" ,
+                  "eeBadScFilter" ,
+                  "METFilters",
+                  "trkPOGFilters",
+                  "ecalLaserCorrFilter", 
+                  "trkPOG_manystripclus53X",
+                  "trkPOG_toomanystripclus53X",
+                  "trkPOG_logErrorTooManyClusters"]:
+         hists["Event"]["Filters"][filt].Fill( getattr(ev,"Flag_"+filt) )
+
     count_genjet_b  = 0
     count_genjet_2b = 0
     count_genjet_c  = 0
@@ -943,7 +990,7 @@ for k in hists.keys():
             out.cd(k+"/"+k2)
             if not ("_2D" in k2 or "_2D" in k3):
                 h.Write("", ROOT.TObject.kOverwrite)
-                save_snapshot(h, ntuple_version, sample_name, "PE" if not "correlation" in h.GetName() else "COLZ", True)
+                save_snapshot(h, ntuple_version, sample_name, "PE" if not "Correlation" in h.GetName() else "COLZ", True)
                 continue
             hp = h.ProfileX("_pfx", 1, -1, "")   
             hp.GetYaxis().SetTitle( "mean of ("+h.GetYaxis().GetTitle()+")" )
