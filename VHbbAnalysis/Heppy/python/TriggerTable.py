@@ -198,6 +198,7 @@ triggerTable = {
         "HLT_PFHT450_SixJet40_v*",
         "HLT_PFHT400_SixJet30_BTagCSV0p5_2PFBTagCSV_v*",
         "HLT_PFHT400_SixJet30_v*",
+        "HLT_PFHT350_v*", 
     ],
     "ttHhardonicHighLumi" : [
         "HLT_PFHT400_SixJet30_BTagCSV0p5_2PFBTagCSV_v*",
