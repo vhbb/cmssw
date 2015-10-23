@@ -145,17 +145,6 @@ fatjetType = NTupleObjectType("fatjet",  baseObjectTypes = [ fourVectorType ], v
     # bb-tag output variable
     NTupleVariable("bbtag",  lambda x : x.bbtag, help="Hbb b-tag score"),
 
-    # bb-tag input variables
-    NTupleVariable("PFLepton_ptrel",   lambda x : x.PFLepton_ptrel, help="pt-rel of e/mu (for bb-tag)"),    
-    NTupleVariable("z_ratio",          lambda x : x.z_ratio, help="z-ratio (for bb-tag)"),    
-    NTupleVariable("tau_dot",          lambda x : x.tau_dot, help="tau_dot (for bb-tag)"),    
-    NTupleVariable("SV_mass_0",        lambda x : x.SV_mass_0, help="secondary vertex mass (for bb-tag)"),    
-    NTupleVariable("SV_EnergyRatio_0", lambda x : x.SV_EnergyRatio_0, help="secondary vertex mass energy ratio 0 (for bb-tag)"),    
-    NTupleVariable("SV_EnergyRatio_1", lambda x : x.SV_EnergyRatio_1, help="secondary vertex mass energy ratio 1 (for bb-tag)"),    
-    NTupleVariable("PFLepton_IP2D",    lambda x : x.PFLepton_IP2D, help="lepton IP2D (for bb-tag)"),    
-    NTupleVariable("tau_21",           lambda x : x.tau_21, help="nsubjettiness tau2/tau1 (for bb-tag)"),    
-    NTupleVariable("nSL",              lambda x : x.nSL, help="number of soft leptons (for bb-tag)"),    
-    NTupleVariable("vertexNTracks",    lambda x : x.vertexNTracks, help="number of tracks for vertex (for bb-tag)"),    
     ])
 
 
@@ -176,18 +165,6 @@ ak8FatjetType = NTupleObjectType("ak8fatjet",  baseObjectTypes = [ fourVectorTyp
     NTupleVariable("mfiltered",  lambda x : x.userFloat("ak8PFJetsCHSFilteredMass"),  help="Filtered Mass"),
 
     NTupleVariable("bbtag",  lambda x : x.bbtag, help="Hbb b-tag score"),
-
-    # bb-tag input variables
-    NTupleVariable("PFLepton_ptrel",   lambda x : x.PFLepton_ptrel, help="pt-rel of e/mu (for bb-tag)"),    
-    NTupleVariable("z_ratio",          lambda x : x.z_ratio, help="z-ratio (for bb-tag)"),    
-    NTupleVariable("tau_dot",          lambda x : x.tau_dot, help="tau_dot (for bb-tag)"),    
-    NTupleVariable("SV_mass_0",        lambda x : x.SV_mass_0, help="secondary vertex mass (for bb-tag)"),    
-    NTupleVariable("SV_EnergyRatio_0", lambda x : x.SV_EnergyRatio_0, help="secondary vertex mass energy ratio 0 (for bb-tag)"),    
-    NTupleVariable("SV_EnergyRatio_1", lambda x : x.SV_EnergyRatio_1, help="secondary vertex mass energy ratio 1 (for bb-tag)"),    
-    NTupleVariable("PFLepton_IP2D",    lambda x : x.PFLepton_IP2D, help="lepton IP2D (for bb-tag)"),    
-    NTupleVariable("tau_21",           lambda x : x.tau_21, help="nsubjettiness tau2/tau1 (for bb-tag)"),    
-    NTupleVariable("nSL",              lambda x : x.nSL, help="number of soft leptons (for bb-tag)"),    
-    NTupleVariable("vertexNTracks",    lambda x : x.vertexNTracks, help="number of tracks for vertex (for bb-tag)"),    
 
     ])
 
