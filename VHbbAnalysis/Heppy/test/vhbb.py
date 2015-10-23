@@ -154,9 +154,13 @@ btag_weights["bTagWeight"] = NTupleVariable("bTagWeight",
 #print list(btag_weights.values())
 treeProducer.globalVariables += list(btag_weights.values())
 
-# Lepton Analyzer, take its default config
+# Lepton Analyzer, take its default config and fix loose iso consistent with tight definition
 from PhysicsTools.Heppy.analyzers.objects.LeptonAnalyzer import LeptonAnalyzer
 LepAna = LeptonAnalyzer.defaultConfig
+LepAna.mu_isoCorr  = "deltaBeta"
+LepAna.loose_muon_isoCut = lambda muon : muon.relIso04 < 0.4 
+LepAna.ele_isoCorr = "rhoArea"
+LepAna.loose_electron_isoCut = lambda electron : electron.relIso03 < 0.4 
 
 from PhysicsTools.Heppy.analyzers.objects.VertexAnalyzer import VertexAnalyzer
 VertexAna = VertexAnalyzer.defaultConfig
@@ -236,15 +240,15 @@ JetAna.dataGT = "74X_dataRun2_reMiniAOD_v0"
 JetAna.addJECShifts=True
 JetAna.addJERShifts=True
 
-mu_pfRelIso04 = lambda mu : (mu.pfIsolationR04().sumChargedHadronPt + max( mu.pfIsolationR04().sumNeutralHadronEt + mu.pfIsolationR04().sumPhotonEt - 0.5 * mu.pfIsolationR04().sumPUPt,0.0)) / mu.pt()
+#mu_pfRelIso04 = lambda mu : (mu.pfIsolationR04().sumChargedHadronPt + max( mu.pfIsolationR04().sumNeutralHadronEt + mu.pfIsolationR04().sumPhotonEt - 0.5 * mu.pfIsolationR04().sumPUPt,0.0)) / mu.pt()
 
 VHbb = cfg.Analyzer(
     verbose=False,
     class_object=VHbbAnalyzer,
     wEleSelection = lambda x : x.pt() > 25 and x.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"),
-    wMuSelection = lambda x : x.pt() > 25 and x.muonID("POG_ID_Tight") and mu_pfRelIso04(x) < 0.15,
+    wMuSelection = lambda x : x.pt() > 25 and x.muonID("POG_ID_Tight"), #and mu_pfRelIso04(x) < 0.15,
     zEleSelection = lambda x : x.pt() > 15 and x.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"),
-    zMuSelection = lambda x : x.pt() > 10 and x.muonID("POG_ID_Loose") and mu_pfRelIso04(x) < 0.25,
+    zMuSelection = lambda x : x.pt() > 10 and x.muonID("POG_ID_Loose"), #and mu_pfRelIso04(x) < 0.25,
     zLeadingElePt = 20,
     zLeadingMuPt = 20,
     higgsJetsPreSelection = lambda x: (( x.puJetId() > 0 and x.jetID('POG_PFID_Loose')) or abs(x.eta())>3.0 ) and x.pt() >  20 ,
@@ -374,7 +378,7 @@ class TestFilter(logging.Filter):
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 10000)
+    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 1000)
 
     import time
     import cProfile
