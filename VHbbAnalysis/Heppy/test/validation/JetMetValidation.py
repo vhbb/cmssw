@@ -50,6 +50,53 @@ def save_snapshot_2D(h, hp, ntuple_version, sample_name, option, stat):
     leg.Draw()
     ROOT.gPad.SaveAs("./plots_JetMetValidation_"+ntuple_version+"_"+sample_name+"/"+h.GetName()+".png")
 
+def save_RMS(h, ntuple_version, sample_name, option, stat):
+    if not stat:
+        ROOT.gStyle.SetOptStat(0000000)
+    else:
+        ROOT.gStyle.SetOptStat(1)
+
+    hp  = hist1D(h.GetName()+"_RMS",  h.GetTitle()+" (RMS);"+h.GetXaxis().GetTitle()+";RMS("+h.GetYaxis().GetTitle()+")",  h.GetXaxis().GetTitle(), h.GetXaxis().GetNbins(), h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())        
+    hpp = hist1D(h.GetName()+"_fit",  h.GetTitle()+" (Fit);"+h.GetXaxis().GetTitle()+";#sigma("+h.GetYaxis().GetTitle()+")",  h.GetXaxis().GetTitle(), h.GetXaxis().GetNbins(), h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())        
+    hp.SetMarkerStyle(ROOT.kFullCircle)
+    hp.SetMarkerSize(1.4)
+    hp.SetMarkerColor(ROOT.kBlue)
+    hpp.SetMarkerStyle(ROOT.kOpenCircle)
+    hpp.SetMarkerSize(1.4)
+    hpp.SetMarkerColor(ROOT.kRed)
+
+    for b in range(1, h.GetXaxis().GetNbins()+1 ):
+        hslice =  h.ProjectionY("", b, b) 
+        hp.SetBinContent(b, hslice.GetRMS() )
+        hp.SetBinError(b,   hslice.GetRMSError() )
+        if hslice.GetEntries()>10:
+            fit = ROOT.TF1("fit_"+h.GetName()+"_"+str(b), "[0]*exp(-0.5*((x-[1])/[2])**2)", -5, +5 )
+            fit.SetParameter(0, hslice.Integral())
+            fit.SetParameter(1, 0.)
+            fit.SetParameter(2, 0.4)
+            hslice.Fit(fit, "",  "", -2*hslice.GetRMS(), +2*hslice.GetRMS() )
+            res = hslice.Fit(fit, "",  "", -1*hslice.GetRMS(), +1*hslice.GetRMS() )
+            val     = fit.GetParameter(2) if res.Status()==0 else 0.
+            val_err = fit.GetParError(2)  if res.Status()==0 else 0.
+            hpp.SetBinContent(b, val)
+            hpp.SetBinError(b,  val_err)
+
+    hp.SetMinimum(0.)
+    hp.SetMaximum(0.5)
+    hp.Draw( option )
+    hpp.Draw( option+"SAME" )
+    leg = ROOT.TLegend(0.64,0.13,0.88,0.30, "","brNDC");
+    leg.SetFillStyle(0)
+    leg.SetBorderSize(0)
+    leg.SetFillColor(10)
+    leg.SetTextSize(0.03)
+    leg.SetHeader(ntuple_version+", "+sample_name )
+    leg.AddEntry(hp, "RMS" , "P")
+    leg.AddEntry(hpp, "#sigma (gaus)" , "P")
+    leg.Draw()
+    ROOT.gPad.SaveAs("./plots_JetMetValidation_"+ntuple_version+"_"+sample_name+"/"+hp.GetName()+".png")
+
+
 
 def hist1D(name, title, var, nBins, xLow, xHigh):
     h = ROOT.TH1D(name, title, nBins, xLow, xHigh)
@@ -992,6 +1039,8 @@ for k in hists.keys():
                 h.Write("", ROOT.TObject.kOverwrite)
                 save_snapshot(h, ntuple_version, sample_name, "PE" if not "Correlation" in h.GetName() else "COLZ", True)
                 continue
+            if ("Jet" in h.GetName()) and ("Pt" in  h.GetName()) and ("Resolution" in h.GetName()):
+                save_RMS(h, ntuple_version, sample_name, "PE", False)
             hp = h.ProfileX("_pfx", 1, -1, "")   
             hp.GetYaxis().SetTitle( "mean of ("+h.GetYaxis().GetTitle()+")" )
             nbinsX = h.GetXaxis().GetNbins()
