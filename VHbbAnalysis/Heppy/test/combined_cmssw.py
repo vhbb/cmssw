@@ -28,7 +28,7 @@ def initialize(isMC=True):
 
     process = cms.Process("EX")
     process.source = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring("file:///scratch/gregor/TTJets_MSDecaysCKM_central_Tune4C_13TeV_MiniAOD.root")
+        fileNames = cms.untracked.vstring("file:///scratch/gregor/test_miniaodv2.root")
     )
     process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
@@ -216,12 +216,12 @@ def initialize(isMC=True):
         if fatjet_name == "slimmedJetsAK8":        
             delta_r = 0.8
             maxSVDeltaRToJet = 0.7
-            weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BoostedDoubleSV_AK8_BDT_v2.weights.xml.gz')
+            weightFile = 'RecoBTag/SecondaryVertex/data/BoostedDoubleSV_AK8_BDT_v2.weights.xml.gz'
             jetAlgo = "AntiKt"
         elif fatjet_name == "ca15PFJetsCHS":        
             delta_r = 1.5
             maxSVDeltaRToJet = 1.3
-            weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BoostedDoubleSV_CA15_BDT_v2.weights.xml.gz')
+            weightFile = 'RecoBTag/SecondaryVertex/data/BoostedDoubleSV_CA15_BDT_v2.weights.xml.gz'
             jetAlgo = "CambridgeAachen"
         else:
             print "Invalid fatjet for b-tagging: ", fatjet_name
@@ -290,8 +290,7 @@ def initialize(isMC=True):
 
 
         # Produce the output
-        for object_name in [impact_info_name, isv_info_name,
-                            sm_info_name, se_info_name,          
+        for object_name in [impact_info_name, isv_info_name,                            
                             bb_comp_name, tag_name]:
 
             process.OUT.outputCommands.append("keep *_{0}_*_EX".format(object_name))
