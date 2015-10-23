@@ -216,12 +216,12 @@ def initialize(isMC=True):
         if fatjet_name == "slimmedJetsAK8":        
             delta_r = 0.8
             maxSVDeltaRToJet = 0.7
-            weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BoostedDoubleSV_AK8_BDT_v2.weights.xml.gz')
+            weightFile = 'RecoBTag/SecondaryVertex/data/BoostedDoubleSV_AK8_BDT_v2.weights.xml.gz'
             jetAlgo = "AntiKt"
         elif fatjet_name == "ca15PFJetsCHS":        
             delta_r = 1.5
             maxSVDeltaRToJet = 1.3
-            weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BoostedDoubleSV_CA15_BDT_v2.weights.xml.gz')
+            weightFile = 'RecoBTag/SecondaryVertex/data/BoostedDoubleSV_CA15_BDT_v2.weights.xml.gz'
             jetAlgo = "CambridgeAachen"
         else:
             print "Invalid fatjet for b-tagging: ", fatjet_name
@@ -287,6 +287,27 @@ def initialize(isMC=True):
                                tagInfos = cms.VInputTag(cms.InputTag(impact_info_name),
                                                         cms.InputTag(isv_info_name)
                                                     )))
+
+
+        # SOFT MUON
+        setattr(process,
+                sm_info_name,
+                softPFMuonsTagInfos.clone(
+                    jets = cms.InputTag(fatjet_name),
+                    muons = cms.InputTag("slimmedMuons"),
+                    primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices")             
+                ))
+
+        # SOFT ELECTRON
+        setattr(process,
+                se_info_name,
+                softPFElectronsTagInfos.clone(
+                    jets = cms.InputTag(fatjet_name),
+                    electrons = cms.InputTag("slimmedElectrons"),
+                    primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices"),                
+                    DeltaRElectronJet=cms.double(delta_r),
+                ))
+
 
 
         # Produce the output
