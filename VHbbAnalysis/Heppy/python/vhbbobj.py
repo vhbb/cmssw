@@ -72,7 +72,8 @@ tauTypeVHbb = NTupleObjectType("tauTypeVHbb", baseObjectTypes = [ tauType ], var
 
 jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables = [
     NTupleVariable("idxFirstTauMatch", lambda x : x.tauIdxs[0] if len(getattr(x, "tauIdxs", [])) > 0 else -1, int,help='index of the first matching tau'),
-    NTupleVariable("hadronFlavour", lambda x : x.mcFlavour, int,     mcOnly=True, help="match to heavy hadrons"),
+    NTupleVariable("heppyFlavour", lambda x : x.mcFlavour, int,     mcOnly=True, help="heppy-style match to gen quarks"),
+    NTupleVariable("hadronFlavour", lambda x : x.hadronFlavour(), int,     mcOnly=True, help="hadron flavour (ghost matching to B/C hadrons)"),
     NTupleVariable("btagBDT", lambda x : getattr(x,"btagBDT",-99), help="combined super-btag"),
     NTupleVariable("btagProb", lambda x : x.btag('pfJetProbabilityBJetTags') , help="jet probability b-tag"),
     NTupleVariable("btagBProb", lambda x : x.btag('pfJetBProbabilityBJetTags') , help="jet b-probability b-tag"),
@@ -134,7 +135,7 @@ bweightcalc = BTagWeightCalculator(
     csvpath + "/csv_rwt_lf_IT_FlatSF_2015_07_27.root"
 )
 
-for syst in ["JES", "LF", "HF", "Stats1", "Stats2"]:
+for syst in ["JES", "LF", "HF", "Stats1", "Stats2", "cErr1", "cErr2"]:
     for sdir in ["Up", "Down"]:
         jetTypeVHbb.variables += [NTupleVariable("bTagWeight"+syst+sdir,
             lambda jet, sname=syst+sdir,bweightcalc=bweightcalc: bweightcalc.calcJetWeight(
