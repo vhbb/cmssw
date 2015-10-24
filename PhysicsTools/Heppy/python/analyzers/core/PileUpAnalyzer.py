@@ -21,7 +21,7 @@ class PileUpAnalyzer( Analyzer ):
     If the component is not MC, or if the puFileData and puFileMC are not
     set for the component, the reweighting is not done. 
     
-    The analyzer sets event.vertexWeight.
+    The analyzer sets event.puWeight.
     This weight is multiplied to the global event weight, event.eventWeight.
     When using this analyzer, make sure that the VertexAnalyzer is disabled,
     as you would be reweighting the MC PU distribution twice!
@@ -95,7 +95,7 @@ class PileUpAnalyzer( Analyzer ):
 
     def beginLoop(self, setup):
         super(PileUpAnalyzer,self).beginLoop(setup)
-        self.averages.add('vertexWeight', Average('vertexWeight') )
+        self.averages.add('puWeight', Average('puWeight') )
 
 
     def process(self, event):
