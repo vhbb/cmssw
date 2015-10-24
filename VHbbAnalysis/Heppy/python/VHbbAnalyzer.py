@@ -101,6 +101,38 @@ class VHbbAnalyzer( Analyzer ):
         event.softActivityVHJets=[x for x in self.softActivity(event,j1,j2,excludedJets,-1000) if x.pt() > 2.0 ]
 
 
+    def addPullVector(self,event) :
+      """ Add color flow properties to the jetsForHiggs jet collections.
+
+      It calculates the pull angle for each jet of jetsForHiggs jet collection.
+      It stores the phi angle and the magnitude of the pull angle as property of a jet.
+
+      Contact: pierluigi.bortignon@gmail.ch 
+      Args: event: the event.
+      Returns: nothing.      
+
+      """
+      # the pull vector (t_vect) is a 2D vector living in a (Phi,Rapidity) plane.
+      t_vect=ROOT.TVector2()
+      # pt threashold for PFCandidates to be considered in the pull angle calculation
+      min_pfCands_pt = 0.3
+
+      pfCandsForColorFlow=ROOT.std.vector(ROOT.reco.Particle.LorentzVector)()
+      for jet in event.jetsForHiggs:
+        # The color flow is calculated using only charged PFCandidates over a certain threashold of pt
+        pfCands=[jet.sourceCandidatePtr(i) for i in range(0,jet.numberOfSourceCandidatePtrs())]
+        goodPFCands = [pfCand for pfCand in pfCands if pfCand.charge() != 0 and pfCand.pt() > min_pfCands_pt ] 
+
+        # put goodPFCandidates in a vector of LorentzVector and pass it to the C++ wrapper (colorFlow). The C++ wrapper improves the speed of the algorithm by about a fator 4.
+        map(lambda x:pfCandsForColorFlow.push_back(x.p4()), goodPFCands)
+        colorFlow = ROOT.heppy.ColorFlow(pfCandsForColorFlow)
+        t_vect=colorFlow.get_pull_vector()
+
+        # add to the jets properties the pull vector phi angle and magnitude.
+        jet.pullVectorPhi=t_vect.Phi()
+        jet.pullVectorMag=t_vect.Mod() # if there are less than 2 charged of candidates then the magnitude will be 0.
+
+
     def softActivity(self,event,j1,j2,excludedJets,dR0=0.4) :
 	if not hasattr(event,"pfCands") :
 	        event.pfCands = list(self.handles['pfCands'].product())
@@ -428,6 +460,9 @@ class VHbbAnalyzer( Analyzer ):
         self.searchISRforVH(event)
         self.doVHRegression(event)
         self.doVBFblikelihood(event)
+
+        self.fillTauIndices(event)
+        self.addPullVector(event)
 
 	if getattr(self.cfg_ana,"doVBF", True) :
 	    self.doVBF(event)
