@@ -419,7 +419,7 @@ class VHbbAnalyzer( Analyzer ):
         self.inputCounter.Fill(1)
         if self.cfg_comp.isMC:
             genWeight = self.handles['GenInfo'].product().weight()
-            self.inputCounterWeighted.Fill(1,copysign(1.0,genWeight)*event.vertexWeight)
+            self.inputCounterWeighted.Fill(1,copysign(1.0,genWeight)*event.puWeight)
             if genWeight > 0:
                 self.inputCounterPosWeight.Fill(1)
             elif genWeight < 0:
