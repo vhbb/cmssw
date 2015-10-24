@@ -4,6 +4,8 @@ from math import *
 import ROOT
 #from CMGTools.TTHAnalysis.signedSip import *
 from PhysicsTools.Heppy.analyzers.objects.autophobj import *
+from PhysicsTools.HeppyCore.utils.deltar import deltaPhi
+
 import copy, os
 
 leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonType ], variables = [
