@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_HEPPY_V13_003'
-config.General.workArea = 'crab_projects_V13_003'
+config.General.requestName = 'VHBB_HEPPY_A14_003'
+config.General.workArea = 'crab_projects_A14_003'
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -20,7 +20,6 @@ config.JobType.inputFiles = ['heppy_config.py',
                              '../vhbb.py',
                               '../vhbb_combined.py',
                              'TMVAClassification_BDT.weights.xml',
-                             'pdfQG_AK4chs_antib_13TeV_v1.root',
                              'puData.root',
                              'puMC.root',
                               'json.txt',
@@ -28,6 +27,7 @@ config.JobType.inputFiles = ['heppy_config.py',
                               "../Wln-spring15.weights.xml",
                               "../Znn-spring15.weights.xml",
                               "../VBF-spring15.weights.xml",
+                              "../TMVA_blikelihood_vbf_singlebtag_v13_id.xml",
 ]
 #config.JobType.outputFiles = ['tree.root']
 
@@ -37,10 +37,10 @@ config.Data.inputDBS = 'global'
 #config.Data.splitting = 'LumiBased'
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 2
-#onfig.Data.totalUnits = 50
-config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyV13/'
+config.Data.totalUnits = 50
+config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyA14/'
 config.Data.publication = True
-config.Data.publishDataName = 'VHBB_HEPPY_V13'
+config.Data.publishDataName = 'VHBB_HEPPY_A14'
 #only for data
 #config.Data.lumiMask = 'json.txt'
 
