@@ -2,7 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 HighPtElectronPSet = cms.PSet(
     hltPathsToCheck = cms.vstring(
-        "HLT_Ele105_CaloIdVT_GsfTrkIdT_v" # Run2 proposal
+        "HLT_Ele105_CaloIdVT_GsfTrkIdT_v", # Run2 proposal
+        "HLT_Ele115_CaloIdVT_GsfTrkIdT_v"  # 50ns backup menu
         ),
     recElecLabel  = cms.InputTag("gedGsfElectrons"),
     # -- Analysis specific cuts
@@ -12,4 +13,6 @@ HighPtElectronPSet = cms.PSet(
                                     300, 400, 500, 600, 700, 800, 900, 1000,
                                     1100, 1200, 1500
                                    ),
+    dropPt2 = cms.bool(True),
+    dropPt3 = cms.bool(True),
     )

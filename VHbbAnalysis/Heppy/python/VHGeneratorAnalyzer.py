@@ -144,6 +144,7 @@ class GeneratorAnalyzer( Analyzer ):
                 print ""
 
         event.genHiggsBoson = []
+        event.genHiggsSisters = []
         event.genleps    = []
         event.gentauleps = []
         event.gentaus    = []
@@ -153,6 +154,7 @@ class GeneratorAnalyzer( Analyzer ):
         event.genallbquarks = []
         event.genwzquarks = []
         event.gentopquarks  = []
+        event.genallstatus2bhadrons = [ p for p in event.genParticles if p.status() ==2 and self.hasBottom(p.pdgId()) ]
         event.genallcquarks = [ p for p in event.genParticles if abs(p.pdgId()) == 4 and ( p.numberOfDaughters() == 0 or abs(p.daughter(0).pdgId()) != 4) ]
 
 		# aggiunti da me
@@ -175,6 +177,10 @@ class GeneratorAnalyzer( Analyzer ):
 
 
         higgsBosons = [ p for p in event.genParticles if (p.pdgId() == 25) and p.numberOfDaughters() > 0 and abs(p.daughter(0).pdgId()) != 25 ]
+        higgsBosonsFirst = [ p for p in event.genParticles if (p.pdgId() == 25) and p.numberOfMothers() > 0 and abs(p.mother(0).pdgId()) != 25 ]
+        higgsMothers = [x.mother(0) for x in higgsBosonsFirst]
+        #print higgsMothers
+        event.genHiggsSisters = [p for p in event.genParticles if p.mother(0) in higgsMothers  and p.pdgId() != 25 ]
 
         if len(higgsBosons) == 0:
             event.genHiggsDecayMode = 0
@@ -214,7 +220,7 @@ class GeneratorAnalyzer( Analyzer ):
             #event.genHiggsBoson = higgsBosons[-1]
             event.genHiggsBoson = GenParticle(higgsBosons[-1])
             event.genHiggsBosons = higgsBosons
-            event.genHiggsDecayMode = abs( event.genHiggsBoson.daughter(0).pdgId() )
+            event.genHiggsDecayMode = abs(  event.genHiggsBoson.daughter(0).pdgId() if event.genHiggsBoson.numberOfDaughters() >= 1 else 0)
             self.fillTopQuarks( event )
             self.countBPartons( event )
             #self.fillWZQuarks(   event, event.genHiggsBoson )
@@ -238,6 +244,15 @@ class GeneratorAnalyzer( Analyzer ):
                 if getattr(p, 'sourceId', 0) == 0:
                     p.sourceId = 99
 
+    def hasBottom(self,pdgId):
+      code1=0;
+      code2=0;
+      tmpHasBottom = False;
+      code1 = (int)( ( abs(pdgId) / 100)%10 );
+      code2 = (int)( ( abs(pdgId) /1000)%10 );
+      if ( code1 == 5 or code2 == 5): tmpHasBottom = True;
+      return tmpHasBottom;
+      
     def countBPartons(self,event):
         event.allBPartons = [ q for q in event.genParticles if abs(q.pdgId()) == 5 and abs(q.status()) == 2 and abs(q.pt()) > 15 ]
         event.allBPartons.sort(key = lambda q : q.pt(), reverse = True)

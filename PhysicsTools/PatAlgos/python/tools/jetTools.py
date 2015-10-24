@@ -318,7 +318,8 @@ class AddJetCollection(ConfigToolBase):
                 _newPatJetFlavourAssociation.rParam=rParam
                 _newPatJetFlavourAssociation.bHadrons=cms.InputTag("patJetPartons"+postfix,"bHadrons")
                 _newPatJetFlavourAssociation.cHadrons=cms.InputTag("patJetPartons"+postfix,"cHadrons")
-                _newPatJetFlavourAssociation.partons=cms.InputTag("patJetPartons"+postfix,"partons")
+                _newPatJetFlavourAssociation.partons=cms.InputTag("patJetPartons"+postfix,"physicsPartons")
+                _newPatJetFlavourAssociation.leptons=cms.InputTag("patJetPartons"+postfix,"leptons")
             else :
                 setattr(process, 'patJetFlavourAssociation'+_labelName+postfix,
                         patJetFlavourAssociation.clone(
@@ -327,7 +328,8 @@ class AddJetCollection(ConfigToolBase):
                             rParam=rParam,
                             bHadrons = cms.InputTag("patJetPartons"+postfix,"bHadrons"),
                             cHadrons = cms.InputTag("patJetPartons"+postfix,"cHadrons"),
-                            partons = cms.InputTag("patJetPartons"+postfix,"partons")
+                            partons = cms.InputTag("patJetPartons"+postfix,"physicsPartons"),
+                            leptons = cms.InputTag("patJetPartons"+postfix,"leptons")
                         )
                 )
                 knownModules.append('patJetFlavourAssociation'+_labelName+postfix)
@@ -413,10 +415,28 @@ class AddJetCollection(ConfigToolBase):
                         if explicitJTA:
                             _btagInfo = getattr(process, btagInfo+_labelName+postfix)
                             _btagInfo.explicitJTA = cms.bool(explicitJTA)
+                    if btagInfo == 'pfImpactParameterTagInfosAK8':
+                        setattr(process, btagInfo+_labelName+postfix, btag.pfImpactParameterTagInfosAK8.clone(jets = jetSource,primaryVertex=pvSource,candidates=pfCandidates))
+                        if explicitJTA:
+                            _btagInfo = getattr(process, btagInfo+_labelName+postfix)
+                            _btagInfo.explicitJTA = cms.bool(explicitJTA)
+                    if btagInfo == 'pfImpactParameterTagInfosCA15':
+                        setattr(process, btagInfo+_labelName+postfix, btag.pfImpactParameterTagInfosCA15.clone(jets = jetSource,primaryVertex=pvSource,candidates=pfCandidates))
+                        if explicitJTA:
+                            _btagInfo = getattr(process, btagInfo+_labelName+postfix)
+                            _btagInfo.explicitJTA = cms.bool(explicitJTA)
                     if btagInfo == 'pfSecondaryVertexTagInfos':
                         setattr(process, btagInfo+_labelName+postfix, btag.pfSecondaryVertexTagInfos.clone(trackIPTagInfos = cms.InputTag('pfImpactParameterTagInfos'+_labelName+postfix)))
                     if btagInfo == 'pfInclusiveSecondaryVertexFinderTagInfos':
                         setattr(process, btagInfo+_labelName+postfix, btag.pfInclusiveSecondaryVertexFinderTagInfos.clone(trackIPTagInfos = cms.InputTag('pfImpactParameterTagInfos'+_labelName+postfix), extSVCollection=svSource))
+                        if svClustering:
+                            setupSVClustering(getattr(process, btagInfo+_labelName+postfix), _algo, rParam, fatJets, groomedFatJets)
+                    if btagInfo == 'pfInclusiveSecondaryVertexFinderTagInfosAK8':
+                        setattr(process, btagInfo+_labelName+postfix, btag.pfInclusiveSecondaryVertexFinderTagInfosAK8.clone(trackIPTagInfos = cms.InputTag('pfImpactParameterTagInfosAK8'+_labelName+postfix), extSVCollection=svSource))
+                        if svClustering:
+                            setupSVClustering(getattr(process, btagInfo+_labelName+postfix), _algo, rParam, fatJets, groomedFatJets)
+                    if btagInfo == 'pfInclusiveSecondaryVertexFinderTagInfosCA15':
+                        setattr(process, btagInfo+_labelName+postfix, btag.pfInclusiveSecondaryVertexFinderTagInfosCA15.clone(trackIPTagInfos = cms.InputTag('pfImpactParameterTagInfosCA15'+_labelName+postfix), extSVCollection=svSource))
                         if svClustering:
                             setupSVClustering(getattr(process, btagInfo+_labelName+postfix), _algo, rParam, fatJets, groomedFatJets)
                     if btagInfo == 'pfSecondaryVertexNegativeTagInfos':

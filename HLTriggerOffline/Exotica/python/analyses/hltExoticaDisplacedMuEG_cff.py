@@ -13,8 +13,8 @@ DisplacedMuEGPSet = cms.PSet(
         #"HLT_Mu17_Ele8_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v", # Run1
         #"HLT_Mu8_Ele17_CaloIdT_CaloIsoVL_TrkIdVL_TrkIsoVL_v"  # Run1
         ),
-    #recElecLabel  = cms.InputTag("gedGsfElectrons"),
-    recPhotonLabel  = cms.InputTag("gedPhotons"),
+    recElecLabel  = cms.InputTag("gedGsfElectrons"),
+    #recPhotonLabel  = cms.InputTag("gedPhotons"),
     recMuonLabel  = cms.InputTag("muons"),
     # -- Analysis specific cuts
     minCandidates = cms.uint32(1),
@@ -31,5 +31,7 @@ DisplacedMuEGPSet = cms.PSet(
                                     #185, 190, 195, 200),
                                     0, 10, 20, 30, 40, 50,
                                     100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600
-    )
+    ),
+    dropPt2 = cms.bool(True),
+    dropPt3 = cms.bool(True),
 )

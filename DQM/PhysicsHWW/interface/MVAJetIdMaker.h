@@ -5,7 +5,7 @@
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "RecoMET/METAlgorithms/interface/PFSpecificAlgo.h"
-#include "DQM/PhysicsHWW/interface/PileupJetIdAlgo.h"
+#include "RecoJets/JetProducers/interface/PileupJetIdAlgo.h"
 #include "DQM/PhysicsHWW/interface/HWW.h"
 
 class MVAJetIdMaker {
@@ -20,6 +20,7 @@ class MVAJetIdMaker {
     edm::EDGetTokenT<reco::PFJetCollection>       PFJetCollection_;
     edm::EDGetTokenT<reco::VertexCollection>      thePVCollection_;
     std::string jetCorrector_;
+    edm::EDGetTokenT<double> theRhoCollection_;
     PileupJetIdAlgo  *fPUJetIdAlgo;
 
 };

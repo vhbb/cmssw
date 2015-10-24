@@ -830,7 +830,7 @@ void PlotAlignmentValidation::plotChi2(const char *inputFile)
   TGaxis::SetMaxDigits(3);
 
   Bool_t errorflag = kTRUE;
-  TFile* fi1 = new TFile(inputFile,"read");
+  TFile* fi1 = TFile::Open(inputFile,"read");
   TDirectoryFile* mta1 = NULL;
   TDirectoryFile* mtb1 = NULL;
   TCanvas* normchi = NULL;
@@ -1375,7 +1375,7 @@ setDMRHistStyleAndLegend(TH1F* h, PlotAlignmentValidation::DMRPlotInfo& plotinfo
     if (useFit_) {
       legend << " #mu = " << fitResults.first << " #mum, #sigma = " << fitResults.second << " #mum";
     } else {
-      legend << " #mu = " << h->GetMean(1)*10000 << " #mum, rms = " << h->GetRMS(1)*10000 << " #mum";
+      legend << " #mu = " << h->GetMean(1)*10000 << " #mum, rms = " << h->GetRMS(1)*10000 << " #pm " << h->GetRMSError(1)*10000 << " #mum, " << (int) h->GetEntries() << " modules" ;
     }
   } else if (plotinfo.variable == "rmsX" || plotinfo.variable == "rmsY") {
     legend << " #mu = " << h->GetMean(1)*10000 << " #mum, rms = " << h->GetRMS(1)*10000 << " #mum";

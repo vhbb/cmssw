@@ -13,11 +13,15 @@ print crabFiles
 firstInput = crabFiles[0]
 print "--------------- using edmFileUtil to convert PFN to LFN -------------------------"
 for i in xrange(0,len(crabFiles)) :
-     pfn=os.popen("edmFileUtil -d %s"%(crabFiles[i])).read() 
-     pfn=re.sub("\n","",pfn)
-     print crabFiles[i],"->",pfn
-     crabFiles[i]=pfn
-     #crabFiles[i]="root://xrootd-cms.infn.it:1194/"+crabFiles[i]
+     if os.getenv("GLIDECLIENT_Group","") != "overflow" :
+       print "Data is local"
+       pfn=os.popen("edmFileUtil -d %s"%(crabFiles[i])).read() 
+       pfn=re.sub("\n","",pfn)
+       print crabFiles[i],"->",pfn
+       crabFiles[i]=pfn
+     else:
+       print "Data is not local, using AAA/xrootd"
+       crabFiles[i]="root://cms-xrd-global.cern.ch/"+crabFiles[i]
 
 import imp
 handle = open("heppy_config.py", 'r')

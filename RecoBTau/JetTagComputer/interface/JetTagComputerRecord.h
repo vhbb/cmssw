@@ -5,10 +5,12 @@
 #include <boost/mpl/vector.hpp>
 
 class BTauGenericMVAJetTagComputerRcd;
+class GBRWrapperRcd;
+class TransientTrackRecord;
 
 class JetTagComputerRecord :
   public edm::eventsetup::DependentRecordImplementation<
     JetTagComputerRecord,
-    boost::mpl::vector<BTauGenericMVAJetTagComputerRcd> > {};
+    boost::mpl::vector<BTauGenericMVAJetTagComputerRcd, GBRWrapperRcd, TransientTrackRecord> > {};
 
 #endif

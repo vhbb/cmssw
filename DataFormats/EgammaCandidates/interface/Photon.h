@@ -164,6 +164,9 @@ namespace reco {
 	   
       {}
     } ;
+    const ShowerShape& showerShapeVariables() const { return showerShapeBlock_; }
+    const ShowerShape& full5x5_showerShapeVariables() const { return full5x5_showerShapeBlock_; }
+
     void setShowerShapeVariables ( const ShowerShape& a )     { showerShapeBlock_ = a ;}
     void full5x5_setShowerShapeVariables ( const ShowerShape& a )     { full5x5_showerShapeBlock_ = a ;}
     
@@ -439,6 +442,9 @@ namespace reco {
     float sumNeutralHadronEtHighThreshold() const {return pfIsolation_.sumNeutralHadronEtHighThreshold;}
     float sumPhotonEtHighThreshold() const {return pfIsolation_.sumPhotonEtHighThreshold;}
     float sumPUPt() const {return pfIsolation_.sumPUPt;}
+
+    /// Get Particle Flow Isolation variables block
+    const PflowIsolationVariables& getPflowIsolationVariables() const { return pfIsolation_; }
 
     /// Set Particle Flow Isolation variables
     void setPflowIsolationVariables ( const PflowIsolationVariables& pfisol ) {  pfIsolation_ = pfisol;} 

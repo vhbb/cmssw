@@ -369,8 +369,11 @@ void DQMStore::mergeAndResetMEsRunSummaryCache(uint32_t run,
       continue;
     }
 
-    MonitorElement global_me(*i);
+    // don't call the copy constructor
+    // we are just searching for a global histogram - a copy is not necessary
+    MonitorElement global_me(*i, MonitorElementNoCloneTag());
     global_me.globalize();
+
     // Since this accesses the data, the operation must be
     // be locked.
     std::lock_guard<std::mutex> guard(book_mutex_);
@@ -396,7 +399,11 @@ void DQMStore::mergeAndResetMEsRunSummaryCache(uint32_t run,
       if (verbose_ > 1)
         std::cout << "No global Object found. " << std::endl;
       std::pair<std::set<MonitorElement>::const_iterator, bool> gme;
-      gme = data_.insert(global_me);
+
+      // this makes an actual and a single copy with Clone()'ed th1
+      MonitorElement actual_global_me(*i);
+      actual_global_me.globalize();
+      gme = data_.insert(std::move(actual_global_me));
       assert(gme.second);
     }
     // TODO(rovere): eventually reset the local object and mark it as reusable??
@@ -430,7 +437,7 @@ void DQMStore::mergeAndResetMEsLuminositySummaryCache(uint32_t run,
       continue;
     }
 
-    MonitorElement global_me(*i);
+    MonitorElement global_me(*i, MonitorElementNoCloneTag());
     global_me.globalize();
     global_me.setLumi(lumi);
     // Since this accesses the data, the operation must be
@@ -458,7 +465,12 @@ void DQMStore::mergeAndResetMEsLuminositySummaryCache(uint32_t run,
       if (verbose_ > 1)
         std::cout << "No global Object found. " << std::endl;
       std::pair<std::set<MonitorElement>::const_iterator, bool> gme;
-      gme = data_.insert(global_me);
+
+      // this makes an actual and a single copy with Clone()'ed th1
+      MonitorElement actual_global_me(*i);
+      actual_global_me.globalize();
+      actual_global_me.setLumi(lumi);
+      gme = data_.insert(std::move(actual_global_me));
       assert(gme.second);
     }
     // make the ME reusable for the next LS
@@ -471,7 +483,7 @@ void DQMStore::mergeAndResetMEsLuminositySummaryCache(uint32_t run,
     std::set<MonitorElement>::const_iterator i_lumi = data_.lower_bound(global_me);
     while (i_lumi->data_.lumi != lumi) {
       auto temp = i_lumi++;
-      if (i_lumi->getFullname() == i->getFullname() &&  i_lumi->markedToDelete())
+      if (i_lumi->getName() == i->getName() && i_lumi->getPathname() == i->getPathname() &&  i_lumi->markedToDelete())
 	{
 	  data_.erase(temp);
 	}
@@ -817,7 +829,7 @@ DQMStore::book(const std::string &dir, const std::string &name,
     // Create and initialise core object.
     assert(dirs_.count(dir));
     MonitorElement proto(&*dirs_.find(dir), name, run_, streamId_, moduleId_);
-    me = const_cast<MonitorElement &>(*data_.insert(proto).first)
+    me = const_cast<MonitorElement &>(*data_.insert(std::move(proto)).first)
       .initialise((MonitorElement::Kind)kind, h);
 
     // Initialise quality test information.
@@ -874,7 +886,7 @@ DQMStore::book(const std::string &dir,
     // Create it and return for initialisation.
     assert(dirs_.count(dir));
     MonitorElement proto(&*dirs_.find(dir), name, run_, streamId_, moduleId_);
-    return &const_cast<MonitorElement &>(*data_.insert(proto).first);
+    return &const_cast<MonitorElement &>(*data_.insert(std::move(proto)).first);
   }
 }
 
@@ -1990,6 +2002,17 @@ DQMStore::getAllContents(const std::string &path,
     }
     result.push_back(const_cast<MonitorElement *>(&*i));
   }
+
+  if (enableMultiThread_)
+    {
+      //save legacy modules when running MT
+      i = data_.begin();
+      for ( ; i != e && isSubdirectory(*cleaned, *i->data_.dirname); ++i) {
+        if (i->data_.run != 0 || i->data_.streamId != 0 || i->data_.moduleId != 0) break;
+        result.push_back(const_cast<MonitorElement *>(&*i));
+      }
+    }
+
   return result;
 }
 
@@ -3198,11 +3221,11 @@ DQMStore::removeElement(const std::string &dir, const std::string &name, bool wa
 {
   MonitorElement proto(&dir, name);
   MEMap::iterator pos = data_.find(proto);
-  if (pos == data_.end() && warning)
+  if (pos != data_.end())
+    data_.erase(pos);
+  else if (warning)
     std::cout << "DQMStore: WARNING: attempt to remove non-existent"
               << " monitor element '" << name << "' in '" << dir << "'\n";
-  else
-    data_.erase(pos);
 }
 
 //////////////////////////////////////////////////////////////////////

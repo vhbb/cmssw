@@ -25,14 +25,14 @@ def applySubstructure( process ) :
                      genJetCollection = cms.InputTag('slimmedGenJetsAK8')
                      )
     process.patJetsAK8.userData.userFloats.src = [] # start with empty list of user floats
-    process.selectedPatJetsAK8.cut = cms.string("pt > 200")
+    process.selectedPatJetsAK8.cut = cms.string("pt > 170")
 
 
 
     ## AK8 groomed masses
     from RecoJets.Configuration.RecoPFJets_cff import ak8PFJetsCHSPruned, ak8PFJetsCHSSoftDrop, ak8PFJetsCHSFiltered, ak8PFJetsCHSTrimmed 
     process.ak8PFJetsCHSPruned   = ak8PFJetsCHSPruned.clone()
-    process.ak8PFJetsCHSSoftDrop = ak8PFJetsCHSSoftDrop.clone()
+    #process.ak8PFJetsCHSSoftDrop = ak8PFJetsCHSSoftDrop.clone() # already in AOD
     process.ak8PFJetsCHSTrimmed  = ak8PFJetsCHSTrimmed.clone()
     process.ak8PFJetsCHSFiltered = ak8PFJetsCHSFiltered.clone()
     process.load("RecoJets.JetProducers.ak8PFJetsCHS_groomingValueMaps_cfi")
@@ -77,7 +77,7 @@ def applySubstructure( process ) :
         fatJets=cms.InputTag('ak8PFJetsCHS'),             # needed for subjet flavor clustering
         groomedFatJets=cms.InputTag('ak8PFJetsCHSSoftDrop') # needed for subjet flavor clustering
     )
-    process.selectedPatJetsAK8PFCHSSoftDrop.cut = cms.string("pt > 200")
+    process.selectedPatJetsAK8PFCHSSoftDrop.cut = cms.string("pt > 170")
     
     process.slimmedJetsAK8PFCHSSoftDropSubjets = cms.EDProducer("PATJetSlimmer",
         src = cms.InputTag("selectedPatJetsAK8PFCHSSoftDropSubjets"),
@@ -88,6 +88,8 @@ def applySubstructure( process ) :
         dropTrackRefs = cms.string("1"),
         dropSpecific = cms.string("1"),
         dropTagInfos = cms.string("1"),
+        modifyJets = cms.bool(True),
+        modifierConfig = cms.PSet( modifications = cms.VPSet() )
     )
 
     
@@ -133,6 +135,8 @@ def applySubstructure( process ) :
         dropTrackRefs = cms.string("1"),
         dropSpecific = cms.string("1"),
         dropTagInfos = cms.string("1"),
+        modifyJets = cms.bool(True),
+        modifierConfig = cms.PSet( modifications = cms.VPSet() )
     )
     
     ## Establish references between PATified fat jets and subjets using the BoostedJetMerger

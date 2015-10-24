@@ -3,6 +3,12 @@ import os
 import shutil
 import sys
 import time
+import glob
+import importlib
+
+# as we need to load the shared lib from here, make sure it's in our path:
+if os.path.join( os.environ['CMSSW_BASE'], 'src') not in sys.path:
+   sys.path.append( os.path.join( os.environ['CMSSW_BASE'], 'src') )
 
 # -------------------------------------------------------------------------------------------------------
 
@@ -28,7 +34,7 @@ payload2xmlCodeTemplate = """
 
 namespace { // Avoid cluttering the global namespace.
 
-  std::string payload2xml( const std::string &payloadData, const std::string &payloadType ) { 
+  std::string %(plType)s2xml( const std::string &payloadData, const std::string &payloadType ) { 
 
       // now to convert
       std::unique_ptr< %(plType)s > payload;
@@ -56,7 +62,7 @@ namespace { // Avoid cluttering the global namespace.
 BOOST_PYTHON_MODULE(%(mdName)s)
 {
     using namespace boost::python;
-    def ("payload2xml", payload2xml);
+    def ("%(plType)s2xml", %(plType)s2xml);
 }
 
 """ 
@@ -107,15 +113,45 @@ class CondXmlProcessor(object):
     def __init__(self, condDBIn):
     	self.conddb = condDBIn
     	self._pl2xml_isPrepared = False
-	self._pl2xml_tmpDir = "fakeSubSys4pl/fakePkg4pl"
+
+	if not os.path.exists( os.path.join( os.environ['CMSSW_BASE'], 'src') ):
+	   raise Exception("Looks like you are not running in a CMSSW developer area, $CMSSW_BASE/src/ does not exist")
+
+	self.fakePkgName = "fakeSubSys4pl/fakePkg4pl"
+	self._pl2xml_tmpDir = os.path.join( os.environ['CMSSW_BASE'], 'src', self.fakePkgName )
+
 	self.doCleanup = True
 
     def __del__(self):
 
     	if self.doCleanup: 
- 	   shutil.rmtree( self._pl2xml_tmpDir.split('/')[0] )
-           os.unlink('./pl2xmlComp.so')
+           shutil.rmtree( '/'.join( self._pl2xml_tmpDir.split('/')[:-1] ) )
+           os.unlink( os.path.join( os.environ['CMSSW_BASE'], 'src', './pl2xmlComp.so') )
         return 
+
+    def discover(self, payloadType):
+
+        # first search in developer area:
+	libDir = os.path.join( os.environ["CMSSW_BASE"], 'lib', os.environ["SCRAM_ARCH"] )
+	pluginList = glob.glob( libDir + '/plugin%s_toXML.so' % payloadType )
+
+        # if nothing found there, check release:
+        if not pluginList:
+	   libDir = os.path.join( os.environ["CMSSW_RELEASE_BASE"], 'lib', os.environ["SCRAM_ARCH"] )
+	   pluginList = glob.glob( libDir + '/plugin%s_toXML.so' % payloadType )
+
+	# print "found plugin for %s (in %s) : %s " % (payloadType, libDir, pluginList)
+
+	xmlConverter = None
+	if len(pluginList) > 0:
+           dirPath, libName = os.path.split( pluginList[0] )
+	   sys.path.append(dirPath)
+	   # print "going to import %s from %s" % (libName, dirPath)
+	   xmlConverter = importlib.import_module( libName.replace('.so', '') )
+	   # print "found : ", dir(xmlConverter)
+	   self.doCleanup = False
+
+	return xmlConverter
 
     def prepPayload2xml(self, session, payload):
 
@@ -129,11 +165,13 @@ class CondXmlProcessor(object):
         	     'plType' : plType,
     	    }
     
+        converter = self.discover(plType)
+	if converter: return converter
+
         code = payload2xmlCodeTemplate % info
     
         tmpDir = self._pl2xml_tmpDir
-        if ( os.path.exists( tmpDir.split('/')[0] ) or
- 	     os.path.exists( tmpDir ) ) :
+        if ( os.path.exists( tmpDir ) ) :
            msg = '\nERROR: %s already exists, please remove if you did not create that manually !!' % tmpDir
            self.doCleanup = False
 	   raise Exception(msg)
@@ -150,30 +188,39 @@ class CondXmlProcessor(object):
         	 codeFile.write(code)
     	 	 codeFile.close()
     
+	libDir = os.path.join( os.environ["CMSSW_BASE"], 'tmp', os.environ["SCRAM_ARCH"], 'src', self.fakePkgName, 'src', self.fakePkgName.replace('/',''))
+	libName = libDir + '/lib%s.so' % self.fakePkgName.replace('/','') 
     	cmd = "source /afs/cern.ch/cms/cmsset_default.sh;"
-    	cmd += "(cd %s ; scram b 2>&1 >build.log && cp %s/tmp/%s/src/%s/src/%s/lib%s.so ../../pl2xmlComp.so )" % (tmpDir, os.environ["CMSSW_BASE"], os.environ["SCRAM_ARCH"], tmpDir, tmpDir.replace('/',''), tmpDir.replace('/','') ) 
+    	cmd += "(cd %s ; scram b 2>&1 >build.log && cp %s $CMSSW_BASE/src/pl2xmlComp.so )" % (tmpDir, libName)
     	ret = os.system(cmd)
 	if ret != 0 : self.doCleanup = False
 
 	buildTime = time.time()-startTime
 	print >> sys.stderr, "buillding done in ", buildTime, 'sec., return code from build: ', ret
 
-        return (ret == 0)
+	if (ret != 0):
+           return None
+
+        return importlib.import_module( 'pl2xmlComp' )
     
     def payload2xml(self, session, payload):
     
         if not self._pl2xml_isPrepared:
-           if not self.prepPayload2xml(session, payload):
+	   xmlConverter = self.prepPayload2xml(session, payload)
+           if not xmlConverter:
               msg = "Error preparing code for "+payload
               raise Exception(msg)
            self._pl2xml_isPrepared = True
+
     
         # get payload from DB:
         result = session.query(self.conddb.Payload.data, self.conddb.Payload.object_type).filter(self.conddb.Payload.hash == payload).one()
         data, plType = result
     
+        convFuncName = plType+'2xml'
         sys.path.append('.')
-        import pl2xmlComp
-        resultXML = pl2xmlComp.payload2xml( data, plType )
+	func = getattr(xmlConverter, convFuncName)
+    	resultXML = func( str(data), str(plType) )
+
         print resultXML    
     

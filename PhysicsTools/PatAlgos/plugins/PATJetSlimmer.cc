@@ -11,7 +11,7 @@
 
 #include "DataFormats/Candidate/interface/CandidateFwd.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
@@ -19,20 +19,24 @@
 #include "CommonTools/UtilAlgos/interface/StringCutObjectSelector.h"
 
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "PhysicsTools/PatAlgos/interface/ObjectModifier.h"
 
 namespace pat {
 
-  class PATJetSlimmer : public edm::EDProducer {
+  class PATJetSlimmer : public edm::stream::EDProducer<> {
     public:
       explicit PATJetSlimmer(const edm::ParameterSet & iConfig);
       virtual ~PATJetSlimmer() { }
 
       virtual void produce(edm::Event & iEvent, const edm::EventSetup & iSetup);
+      virtual void beginLuminosityBlock(const edm::LuminosityBlock&, const  edm::EventSetup&) override final;
 
     private:
-      edm::EDGetTokenT<edm::Association<pat::PackedCandidateCollection>> pf2pc_;
-      edm::EDGetTokenT<edm::View<pat::Jet> >  jets_;
-      StringCutObjectSelector<pat::Jet> dropJetVars_,dropDaughters_,rekeyDaughters_,dropTrackRefs_,dropSpecific_,dropTagInfos_;
+      const edm::EDGetTokenT<edm::Association<pat::PackedCandidateCollection>> pf2pc_;
+      const edm::EDGetTokenT<edm::View<pat::Jet> >  jets_;
+      const StringCutObjectSelector<pat::Jet> dropJetVars_,dropDaughters_,rekeyDaughters_,dropTrackRefs_,dropSpecific_,dropTagInfos_;
+      const bool modifyJet_;
+      std::unique_ptr<pat::ObjectModifier<pat::Jet> > jetModifier_;
   };
 
 } // namespace
@@ -46,9 +50,23 @@ pat::PATJetSlimmer::PATJetSlimmer(const edm::ParameterSet & iConfig) :
     rekeyDaughters_(iConfig.getParameter<std::string>("rekeyDaughters")),
     dropTrackRefs_(iConfig.getParameter<std::string>("dropTrackRefs")),
     dropSpecific_(iConfig.getParameter<std::string>("dropSpecific")),
-    dropTagInfos_(iConfig.getParameter<std::string>("dropTagInfos"))
+    dropTagInfos_(iConfig.getParameter<std::string>("dropTagInfos")),
+    modifyJet_(iConfig.getParameter<bool>("modifyJets"))
 {
+    edm::ConsumesCollector sumes(consumesCollector());
+    if( modifyJet_ ) {
+      const edm::ParameterSet& mod_config = iConfig.getParameter<edm::ParameterSet>("modifierConfig");
+      jetModifier_.reset(new pat::ObjectModifier<pat::Jet>(mod_config) );
+      jetModifier_->setConsumes(sumes);
+    } else {
+      jetModifier_.reset(nullptr);
+    }
     produces<std::vector<pat::Jet> >();
+}
+
+void 
+pat::PATJetSlimmer::beginLuminosityBlock(const edm::LuminosityBlock&, const  edm::EventSetup& iSetup) {
+  if( modifyJet_ ) jetModifier_->setEventContent(iSetup);
 }
 
 void 
@@ -64,9 +82,14 @@ pat::PATJetSlimmer::produce(edm::Event & iEvent, const edm::EventSetup & iSetup)
     auto_ptr<vector<pat::Jet> >  out(new vector<pat::Jet>());
     out->reserve(src->size());
 
+    if( modifyJet_ ) { jetModifier_->setEvent(iEvent); }
+
     for (edm::View<pat::Jet>::const_iterator it = src->begin(), ed = src->end(); it != ed; ++it) {
 	    out->push_back(*it);
 	    pat::Jet & jet = out->back();
+
+            if( modifyJet_ ) { jetModifier_->modify(jet); }
+            
 	    if(dropTagInfos_(*it)){
 		    jet.tagInfos_.clear();
 		    jet.tagInfosFwdPtr_.clear(); 

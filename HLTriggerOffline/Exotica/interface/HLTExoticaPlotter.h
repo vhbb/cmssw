@@ -75,7 +75,12 @@ private:
     std::vector<double> _parametersEta;
     std::vector<double> _parametersPhi;
     std::vector<double> _parametersTurnOn;
+    std::vector<double> _parametersTurnOnSumEt;
     std::vector<double> _parametersDxy;
+
+    // flag to switch off
+    bool _drop_pt2;
+    bool _drop_pt3;
 
     std::map<std::string, MonitorElement *> _elements;
 };

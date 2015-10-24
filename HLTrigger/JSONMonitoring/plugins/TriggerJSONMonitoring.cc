@@ -17,6 +17,8 @@
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
+#include "EventFilter/Utilities/interface/FastMonitoringService.h"
+
 #include <fstream>
 
 TriggerJSONMonitoring::TriggerJSONMonitoring(const edm::ParameterSet& ps)
@@ -529,7 +531,19 @@ TriggerJSONMonitoring::endLuminosityBlockSummary(const edm::LuminosityBlock& iLu
 void
 TriggerJSONMonitoring::globalEndLuminosityBlockSummary(const edm::LuminosityBlock& iLumi, const edm::EventSetup& iSetup, const LuminosityBlockContext* iContext, hltJson::lumiVars* iSummary)
 {
-  if (iSummary->processed->value().at(0)!=0) {
+
+  unsigned int iLs  = iLumi.luminosityBlock();
+  unsigned int iRun = iLumi.run();
+
+  bool writeFiles=true;
+  if (edm::Service<evf::MicroStateService>().isAvailable()) {
+    evf::FastMonitoringService * fms = (evf::FastMonitoringService *)(edm::Service<evf::MicroStateService>().operator->());
+    if (fms) {
+      writeFiles = fms->shouldWriteFiles(iLumi.luminosityBlock());
+    }
+  }
+
+  if (writeFiles) {
     Json::StyledWriter writer;
 
     char hostname[33];
@@ -541,9 +555,6 @@ TriggerJSONMonitoring::globalEndLuminosityBlockSummary(const edm::LuminosityBloc
 
     std::stringstream sOutDef;
     sOutDef << monPath << "output_" << getpid() << ".jsd";
-
-    unsigned int iLs  = iLumi.luminosityBlock();
-    unsigned int iRun = iLumi.run();
 
     //Write the .jsndata files which contain the actual rates
     //HLT .jsndata file
@@ -569,9 +580,23 @@ TriggerJSONMonitoring::globalEndLuminosityBlockSummary(const edm::LuminosityBloc
     ssHltJsnData <<  "run" << std::setfill('0') << std::setw(6) << iRun << "_ls" << std::setfill('0') << std::setw(4) << iLs;
     ssHltJsnData << "_streamHLTRates_pid" << std::setfill('0') << std::setw(5) << getpid() << ".jsndata";
 
-    std::ofstream outHltJsnData( monPath + ssHltJsnData.str() );
-    outHltJsnData<<result;
-    outHltJsnData.close();
+    if (iSummary->processed->value().at(0)!=0) {
+      std::ofstream outHltJsnData( monPath + ssHltJsnData.str() );
+      outHltJsnData<<result;
+      outHltJsnData.close();
+    }
+
+    //HLT jsn entries
+    StringJ hltJsnFilelist;
+    IntJ hltJsnFilesize    = 0;
+    unsigned int hltJsnFileAdler32 = 1;
+    if (iSummary->processed->value().at(0)!=0) {
+      hltJsnFilelist.update(ssHltJsnData.str());
+      hltJsnFilesize    = result.size();
+      hltJsnFileAdler32 = cms::Adler32(result.c_str(),result.size());
+    }
+    StringJ hltJsnInputFiles;
+    hltJsnInputFiles.update("");
 
     //L1 .jsndata file
     Json::Value l1JsnData;
@@ -594,44 +619,46 @@ TriggerJSONMonitoring::globalEndLuminosityBlockSummary(const edm::LuminosityBloc
     ssL1JsnData << "run" << std::setfill('0') << std::setw(6) << iRun << "_ls" << std::setfill('0') << std::setw(4) << iLs;
     ssL1JsnData << "_streamL1Rates_pid" << std::setfill('0') << std::setw(5) << getpid() << ".jsndata";
 
-    std::ofstream outL1JsnData( monPath + "/" + ssL1JsnData.str() );
-    outL1JsnData<<result;
-    outL1JsnData.close();
+    if (iSummary->processed->value().at(0)!=0) {
+      std::ofstream outL1JsnData( monPath + "/" + ssL1JsnData.str() );
+      outL1JsnData<<result;
+      outL1JsnData.close();
+    }
+
+    //L1 jsn entries
+    StringJ l1JsnFilelist;
+    IntJ l1JsnFilesize    = 0;
+    unsigned int l1JsnFileAdler32 = 1;
+    if (iSummary->processed->value().at(0)!=0) {
+      l1JsnFilelist.update(ssL1JsnData.str());
+      l1JsnFilesize    = result.size();
+      l1JsnFileAdler32 = cms::Adler32(result.c_str(),result.size());
+    }
+    StringJ l1JsnInputFiles;
+    l1JsnInputFiles.update("");
+
 
     //Create special DAQ JSON file for L1 and HLT rates pseudo-streams
     //Only three variables are different between the files: 
     //the file list, the file size and the Adler32 value
-    IntJ daqJsnProcessed_   = iSummary->processed->value().at(0);
-    IntJ daqJsnAccepted_    = daqJsnProcessed_;
-    IntJ daqJsnErrorEvents_ = 0;                  
-    IntJ daqJsnRetCodeMask_ = 0;                 
+    IntJ daqJsnProcessed   = iSummary->processed->value().at(0);
+    IntJ daqJsnAccepted    = daqJsnProcessed;
+    IntJ daqJsnErrorEvents = 0;                  
+    IntJ daqJsnRetCodeMask = 0;                 
 
-    struct stat st;
-
-    //HLT
-    StringJ hltJsnFilelist_;
-    hltJsnFilelist_.update(ssHltJsnData.str());                 
-
-    const char* cName = (monPath+ssHltJsnData.str()).c_str();
-    stat(cName, &st);
-
-    IntJ hltJsnFilesize_    = st.st_size;                    
-    StringJ hltJsnInputFiles_;               
-    hltJsnInputFiles_.update("");
-    IntJ hltJsnFileAdler32_ = cms::Adler32(cName, st.st_size);        
-
+    //write out HLT metadata jsn
     Json::Value hltDaqJsn;
     hltDaqJsn[DataPoint::SOURCE] = sourceHost;
     hltDaqJsn[DataPoint::DEFINITION] = sOutDef.str();
 
-    hltDaqJsn[DataPoint::DATA].append((unsigned int)daqJsnProcessed_.value());
-    hltDaqJsn[DataPoint::DATA].append((unsigned int)daqJsnAccepted_.value());
-    hltDaqJsn[DataPoint::DATA].append((unsigned int)daqJsnErrorEvents_.value());
-    hltDaqJsn[DataPoint::DATA].append((unsigned int)daqJsnRetCodeMask_.value());
-    hltDaqJsn[DataPoint::DATA].append(hltJsnFilelist_.value());
-    hltDaqJsn[DataPoint::DATA].append((unsigned int)hltJsnFilesize_.value());
-    hltDaqJsn[DataPoint::DATA].append(hltJsnInputFiles_.value());
-    hltDaqJsn[DataPoint::DATA].append((unsigned int)hltJsnFileAdler32_.value());
+    hltDaqJsn[DataPoint::DATA].append((unsigned int)daqJsnProcessed.value());
+    hltDaqJsn[DataPoint::DATA].append((unsigned int)daqJsnAccepted.value());
+    hltDaqJsn[DataPoint::DATA].append((unsigned int)daqJsnErrorEvents.value());
+    hltDaqJsn[DataPoint::DATA].append((unsigned int)daqJsnRetCodeMask.value());
+    hltDaqJsn[DataPoint::DATA].append(hltJsnFilelist.value());
+    hltDaqJsn[DataPoint::DATA].append((unsigned int)hltJsnFilesize.value());
+    hltDaqJsn[DataPoint::DATA].append(hltJsnInputFiles.value());
+    hltDaqJsn[DataPoint::DATA].append(hltJsnFileAdler32);
     hltDaqJsn[DataPoint::DATA].append(iSummary->streamHLTDestination);
 
     result = writer.write(hltDaqJsn);
@@ -644,30 +671,19 @@ TriggerJSONMonitoring::globalEndLuminosityBlockSummary(const edm::LuminosityBloc
     outHltDaqJsn<<result;
     outHltDaqJsn.close();
 
-    //L1
-    StringJ l1JsnFilelist_;
-    l1JsnFilelist_.update(ssL1JsnData.str());                 
-
-    cName = (monPath+ssL1JsnData.str()).c_str();
-    stat(cName, &st);
-
-    IntJ l1JsnFilesize_    = st.st_size;                    
-    StringJ l1JsnInputFiles_;               
-    l1JsnInputFiles_.update("");
-    IntJ l1JsnFileAdler32_ = cms::Adler32(cName, st.st_size);        
-
+    //write out L1 metadata jsn
     Json::Value l1DaqJsn;
     l1DaqJsn[DataPoint::SOURCE] = sourceHost;
     l1DaqJsn[DataPoint::DEFINITION] = sOutDef.str();
 
-    l1DaqJsn[DataPoint::DATA].append((unsigned int)daqJsnProcessed_.value());
-    l1DaqJsn[DataPoint::DATA].append((unsigned int)daqJsnAccepted_.value());
-    l1DaqJsn[DataPoint::DATA].append((unsigned int)daqJsnErrorEvents_.value());
-    l1DaqJsn[DataPoint::DATA].append((unsigned int)daqJsnRetCodeMask_.value());
-    l1DaqJsn[DataPoint::DATA].append(l1JsnFilelist_.value());
-    l1DaqJsn[DataPoint::DATA].append((unsigned int)l1JsnFilesize_.value());
-    l1DaqJsn[DataPoint::DATA].append(l1JsnInputFiles_.value());
-    l1DaqJsn[DataPoint::DATA].append((unsigned int)l1JsnFileAdler32_.value());
+    l1DaqJsn[DataPoint::DATA].append((unsigned int)daqJsnProcessed.value());
+    l1DaqJsn[DataPoint::DATA].append((unsigned int)daqJsnAccepted.value());
+    l1DaqJsn[DataPoint::DATA].append((unsigned int)daqJsnErrorEvents.value());
+    l1DaqJsn[DataPoint::DATA].append((unsigned int)daqJsnRetCodeMask.value());
+    l1DaqJsn[DataPoint::DATA].append(l1JsnFilelist.value());
+    l1DaqJsn[DataPoint::DATA].append((unsigned int)l1JsnFilesize.value());
+    l1DaqJsn[DataPoint::DATA].append(l1JsnInputFiles.value());
+    l1DaqJsn[DataPoint::DATA].append(l1JsnFileAdler32);
     l1DaqJsn[DataPoint::DATA].append(iSummary->streamL1Destination);
 
     result = writer.write(l1DaqJsn);

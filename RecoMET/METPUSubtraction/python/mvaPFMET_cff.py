@@ -15,7 +15,7 @@ calibratedAK4PFJetsForPFMVAMEt = cms.EDProducer('PFJetCorrectionProducer',
     correctors = cms.vstring("ak4PFL1FastL2L3") # NOTE: use "ak5PFL1FastL2L3" for MC / "ak5PFL1FastL2L3Residual" for Data
 )
 
-from RecoJets.JetProducers.pileupjetidproducer_cfi import pileupJetIdEvaluator
+from RecoJets.JetProducers.PileupJetID_cfi import pileupJetIdEvaluator
 from RecoJets.JetProducers.PileupJetIDParams_cfi import JetIdParams
 puJetIdForPFMVAMEt = pileupJetIdEvaluator.clone(
     algos = cms.VPSet(
@@ -38,6 +38,7 @@ puJetIdForPFMVAMEt = pileupJetIdEvaluator.clone(
             "frac04",
             "frac05"
             ),
+        etaBinnedWeights = cms.bool(False),
         tmvaWeights = cms.string("RecoJets/JetProducers/data/TMVAClassificationCategory_JetID_MET_53X_Dec2012.weights.xml.gz"),
         tmvaMethod = cms.string("JetID"),
         tmvaSpectators = cms.vstring(),
@@ -72,11 +73,17 @@ pfMVAMEt = cms.EDProducer("PFMETProducerMVA",
     globalThreshold = cms.double(-1.),#pfMet.globalThreshold,
     minCorrJetPt = cms.double(-1.),
     inputFileNames = cms.PSet(
-        U     = cms.FileInPath('RecoMET/METPUSubtraction/data/gbrmet_53_Sep2013_type1.root'),
-        DPhi  = cms.FileInPath('RecoMET/METPUSubtraction/data/gbrmetphi_53_June2013_type1.root'),
-        CovU1 = cms.FileInPath('RecoMET/METPUSubtraction/data/gbru1cov_53_Dec2012.root'),
-        CovU2 = cms.FileInPath('RecoMET/METPUSubtraction/data/gbru2cov_53_Dec2012.root')
-          ),
+        U     = cms.FileInPath('RecoMET/METPUSubtraction/data/gbrmet_7_2_X_MINIAOD_BX25PU20_Mar2015.root'),
+        DPhi  = cms.FileInPath('RecoMET/METPUSubtraction/data/gbrphi_7_2_X_MINIAOD_BX25PU20_Mar2015.root'),
+        CovU1 = cms.FileInPath('RecoMET/METPUSubtraction/data/gbru1cov_7_2_X_MINIAOD_BX25PU20_Mar2015.root'),
+        CovU2 = cms.FileInPath('RecoMET/METPUSubtraction/data/gbru2cov_7_2_X_MINIAOD_BX25PU20_Mar2015.root')
+    ),
+    inputRecords = cms.PSet(
+        U     = cms.string("RecoilCor"),
+        DPhi  = cms.string("PhiCor"), 
+        CovU1 = cms.string("CovU1"),
+        CovU2 = cms.string("CovU2")
+    ),
     loadMVAfromDB = cms.bool(False),                             
 
     corrector = cms.string("ak4PFL1Fastjet"),
