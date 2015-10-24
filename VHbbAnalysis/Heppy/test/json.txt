@@ -1,1 +1,1 @@
-Lumi/V13/Cert_246908-255031_13TeV_PromptReco_Collisions15_25ns_JSON_v2.txt
+Lumi/V14/Cert_246908-258750_13TeV_PromptReco_Collisions15_25ns_JSON.txt
