@@ -210,8 +210,13 @@ triggerTable = {
         "HLT_DoubleJet90_Double30_TripleBTagCSV0p67_v*",
     ],
     "ttHleptonic" : [
+        "HLT_Ele17_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*",
         "HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
         "HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v*",
+        "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*",
+        "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*",
+        "HLT_Ele27_eta2p1_WPLoose_Gsf_v*",
+        "HLT_IsoMu18_v*",
     ],
     "ttHhardonicAll" : [
         "HLT_PFHT450_SixJet40_PFBTagCSV0p72_v*",
