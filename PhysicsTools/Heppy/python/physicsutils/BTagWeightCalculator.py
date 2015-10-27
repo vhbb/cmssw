@@ -25,6 +25,7 @@ class BTagWeightCalculator:
 
         return True
 
+    # return a map between pt/eta/syst bins and histograms
     def getHistosFromFile(self, fn):
         ret = {}
         tf = ROOT.TFile(fn)
@@ -36,48 +37,52 @@ class BTagWeightCalculator:
             if not (kn.startswith("csv_ratio") or kn.startswith("c_csv_ratio") ):
                 continue
             spl = kn.split("_")
-            is_c = 1 if kn.startswith("c_csv_ratio") else 0
 
-            if spl[2+is_c] == "all":
+            # a counter to identify charm jets. Needed because histogram names for charm
+            # jets have one more '_'
+            is_charm = 1 if kn.startswith("c_csv_ratio") else 0
+
+            if spl[2+is_charm] == "all":
                 ptbin = -1
                 etabin = -1
                 kind = "all"
                 syst = "nominal"
             else:
-                ptbin = int(spl[2+is_c][2:])
-                etabin = int(spl[3+is_c][3:])
-                kind = spl[4+is_c]
-                if len(spl)==(6+is_c):
-                    syst = spl[5+is_c]
+                ptbin = int(spl[2+is_charm][2:])
+                etabin = int(spl[3+is_charm][3:])
+                kind = spl[4+is_charm]
+                if len(spl)==(6+is_charm):
+                    syst = spl[5+is_charm]
                 else:
                     syst = "nominal"
             ret[(ptbin, etabin, kind, syst)] = k.ReadObj().Clone()
         return ret
 
+    # return the b-tag weight for this jet
     def calcJetWeight(self, jet, kind, systematic):
-        pt   = jet.pt()
+        pt = jet.pt()
         aeta = abs(jet.eta())
-        fl   = abs(jet.hadronFlavour())
-        csv  = jet.btag(self.btag)
+        fl = abs(jet.hadronFlavour())
+        csv = jet.btag(self.btag)
 
-        is_b = (fl == 5)
-        is_c = (fl == 4)
-        is_l = (fl < 4)
+        is_bottom = (fl == 5)
+        is_charm = (fl == 4)
+        is_light = (fl < 4)
 
-        if is_b and not (systematic in ["JESUp", "JESDown", "LFUp", "LFDown", 
+        if is_bottom and not (systematic in ["JESUp", "JESDown", "LFUp", "LFDown", 
                                         "Stats1Up", "Stats1Down", "Stats2Up", "Stats2Down", 
                                         "nominal"]):
             return 1.0
-        if is_c and not (systematic in ["cErr1Up", "cErr1Down", "cErr2Up", "cErr2Down", 
+        if is_charm and not (systematic in ["cErr1Up", "cErr1Down", "cErr2Up", "cErr2Down", 
                                         "nominal"]):
             return 1.0
-        if is_l and not (systematic in ["JESUp", "JESDown", "HFUp", "HFDown", 
+        if is_light and not (systematic in ["JESUp", "JESDown", "HFUp", "HFDown", 
                                         "Stats1Up", "Stats1Down", "Stats2Up", "Stats2Down", 
                                         "nominal"]):
             return 1.0
 
 
-        if is_b or is_c:
+        if is_bottom or is_charm:
             ptbin = self.getBin(self.pt_bins_hf, pt)
             etabin = self.getBin(self.eta_bins_hf, aeta)
         else:
@@ -89,7 +94,7 @@ class BTagWeightCalculator:
 
         k = (ptbin, etabin, kind, systematic)
         hdict = self.pdfs["lf"]
-        if is_b or is_c:
+        if is_bottom or is_charm:
             hdict = self.pdfs["hf"]
         h = hdict.get(k, None)
         if not h:
@@ -105,6 +110,7 @@ class BTagWeightCalculator:
         w = h.GetBinContent(csvbin)
         return w
 
+    # loop over all jets and compute the product of all b-tag scale factors
     def calcEventWeight(self, jets, kind, systematic):
         weights = np.array(
             [self.calcJetWeight(jet, kind, systematic)
