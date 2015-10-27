@@ -19,6 +19,7 @@ from RecoJets.JetProducers.PFJetParameters_cfi import *
 # B-Tagging
 from RecoBTag.SoftLepton.softPFMuonTagInfos_cfi import *
 from RecoBTag.SoftLepton.softPFElectronTagInfos_cfi import *
+from RecoBTag.SecondaryVertex.trackSelection_cff import *
 
 # This function is called by the cmsswPreprocessor 
 # (has to be named initialize, can have arbitrary arguments as long as
@@ -211,15 +212,16 @@ def initialize(isMC=True):
         if skip_ca15 and (fatjet_name in ["ca15PFJetsCHS"]):
             continue
 
+
         if fatjet_name == "slimmedJetsAK8":        
             delta_r = 0.8
             maxSVDeltaRToJet = 0.7
-            weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BoostedDoubleSV_AK8_BDT.weights.xml.gz')
+            weightFile = 'RecoBTag/SecondaryVertex/data/BoostedDoubleSV_AK8_BDT_v2.weights.xml.gz'
             jetAlgo = "AntiKt"
         elif fatjet_name == "ca15PFJetsCHS":        
             delta_r = 1.5
             maxSVDeltaRToJet = 1.3
-            weightFile = cms.FileInPath('RecoBTag/SecondaryVertex/data/BoostedDoubleSV_CA15_BDT.weights.xml.gz')
+            weightFile = 'RecoBTag/SecondaryVertex/data/BoostedDoubleSV_CA15_BDT_v2.weights.xml.gz'
             jetAlgo = "CambridgeAachen"
         else:
             print "Invalid fatjet for b-tagging: ", fatjet_name
@@ -261,13 +263,39 @@ def initialize(isMC=True):
         getattr(process, isv_info_name).vertexCuts.maxDeltaRToJetAxis = cms.double(delta_r)
         getattr(process, isv_info_name).jetAlgorithm = cms.string(jetAlgo)
 
+        # DOUBLE B COMPUTER
+        setattr(process,
+                bb_comp_name,                
+                cms.ESProducer("CandidateBoostedDoubleSecondaryVertexESProducer",
+                               trackSelectionBlock,
+                               beta = cms.double(1.0),
+                               R0 = cms.double(delta_r),
+                               maxSVDeltaRToJet = cms.double(maxSVDeltaRToJet),
+                               useCondDB = cms.bool(False),
+                               weightFile = cms.FileInPath(weightFile),
+                               useGBRForest = cms.bool(True),
+                               useAdaBoost = cms.bool(False),
+                               trackPairV0Filter = cms.PSet(k0sMassWindow = cms.double(0.03))
+                           ))
+        getattr(process, bb_comp_name).trackSelection.jetDeltaRMax = cms.double(delta_r)
+
+        # TAGS
+        setattr(process,
+                tag_name, 
+                cms.EDProducer("JetTagProducer",
+                               jetTagComputer = cms.string(bb_comp_name),
+                               tagInfos = cms.VInputTag(cms.InputTag(impact_info_name),
+                                                        cms.InputTag(isv_info_name)
+                                                    )))
+
+
         # SOFT MUON
         setattr(process,
                 sm_info_name,
                 softPFMuonsTagInfos.clone(
                     jets = cms.InputTag(fatjet_name),
                     muons = cms.InputTag("slimmedMuons"),
-                    primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices")                
+                    primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices")             
                 ))
 
         # SOFT ELECTRON
@@ -280,24 +308,6 @@ def initialize(isMC=True):
                     DeltaRElectronJet=cms.double(delta_r),
                 ))
 
-        # DOUBLE B COMPUTER
-        setattr(process,
-                bb_comp_name,
-                cms.ESProducer("CandidateBoostedDoubleSecondaryVertexESProducer",
-                               beta = cms.double(1.0),
-                               R0 = cms.double(delta_r),
-                               maxSVDeltaRToJet = cms.double(maxSVDeltaRToJet),
-                               weightFile = weightFile))
-
-        # TAGS
-        setattr(process,
-                tag_name, 
-                cms.EDProducer("JetTagProducer",
-                               jetTagComputer = cms.string(bb_comp_name),
-                               tagInfos = cms.VInputTag(cms.InputTag(impact_info_name),
-                                                        cms.InputTag(isv_info_name),
-                                                        cms.InputTag(sm_info_name),
-                                                        cms.InputTag(se_info_name))))
 
 
         # Produce the output

@@ -98,10 +98,10 @@ class GeneratorAnalyzer( Analyzer ):
                 self.fillWZQuarks(event, dau, True, sourceId)
 
     def fillHiggsBQuarks(self, event,h):
-        """Get the b quarks from top decays into event.genbquarksFromTop"""
+        """Get the b quarks from top decays into event.genbquarksFromH"""
         for i in xrange( h.numberOfDaughters() ):
             dau = GenParticle(h.daughter(i))
-            if abs(dau.pdgId()) == 5:
+            if abs(dau.pdgId()) in [3,4,5]:
                     event.genbquarksFromH.append( dau )
                     if dau.numberOfDaughters() == 1 :
                          event.genbquarksFromHafterISR.append( GenParticle(dau.daughter(0)))
@@ -143,7 +143,7 @@ class GeneratorAnalyzer( Analyzer ):
                     print " | dau[%d] %5d pdgId %+5d status %3d  pt %6.1f  " % (j,idau,dau.pdgId(),dau.status(),dau.pt()),
                 print ""
 
-        event.genHiggsBoson = []
+        event.genHiggsBosons = []
         event.genHiggsSisters = []
         event.genleps    = []
         event.gentauleps = []
@@ -154,7 +154,7 @@ class GeneratorAnalyzer( Analyzer ):
         event.genallbquarks = []
         event.genwzquarks = []
         event.gentopquarks  = []
-        event.genallstatus2bhadrons = [ p for p in event.genParticles if p.status ==2 and hasBottom(p.pdgId()) ]
+        event.genallstatus2bhadrons = [ p for p in event.genParticles if p.status() ==2 and self.hasBottom(p.pdgId()) ]
         event.genallcquarks = [ p for p in event.genParticles if abs(p.pdgId()) == 4 and ( p.numberOfDaughters() == 0 or abs(p.daughter(0).pdgId()) != 4) ]
 
 		# aggiunti da me
@@ -181,6 +181,11 @@ class GeneratorAnalyzer( Analyzer ):
         higgsMothers = [x.mother(0) for x in higgsBosonsFirst]
         #print higgsMothers
         event.genHiggsSisters = [p for p in event.genParticles if p.mother(0) in higgsMothers  and p.pdgId() != 25 ]
+
+        #print "higgsBosons: ", len(higgsBosons)
+        #print "higgsBosonsFirst: ", len(higgsBosonsFirst)
+        #print "higgsMothers: ", len(higgsMothers)
+        
 
         if len(higgsBosons) == 0:
             event.genHiggsDecayMode = 0
@@ -217,8 +222,8 @@ class GeneratorAnalyzer( Analyzer ):
 #                print "More than one higgs? \n%s\n" % higgsBosons
 
             #questo blocco viene eseguito quando c'e' almeno un higgs
-            #event.genHiggsBoson = higgsBosons[-1]
-            event.genHiggsBoson = GenParticle(higgsBosons[-1])
+            event.genHiggsBoson = higgsBosons[-1]
+            #event.genHiggsBoson = [GenParticle(higgsBosons[-1])]
             event.genHiggsBosons = higgsBosons
             event.genHiggsDecayMode = abs(  event.genHiggsBoson.daughter(0).pdgId() if event.genHiggsBoson.numberOfDaughters() >= 1 else 0)
             self.fillTopQuarks( event )
@@ -226,8 +231,8 @@ class GeneratorAnalyzer( Analyzer ):
             #self.fillWZQuarks(   event, event.genHiggsBoson )
             #self.fillWZQuarks(   event, event.protons[0], sourceId=2212) : non serve, quando c'e' higgs non ci sn quarks da WZ
             for h in event.genHiggsBosons :
-                self.fillHiggsBQuarks(   event, h)
-            event.genHiggsBoson = [GenParticle(higgsBosons[-1])]
+                self.fillHiggsBQuarks( event, h)
+            #event.genHiggsBoson = [GenParticle(higgsBosons[-1])]
             #self.fillGenLeptons( event, event.genHiggsBoson, sourceId=25 )
             #if self.cfg_ana.verbose:
             if False:
@@ -247,10 +252,10 @@ class GeneratorAnalyzer( Analyzer ):
     def hasBottom(self,pdgId):
       code1=0;
       code2=0;
-      tmpHasBottom = false;
+      tmpHasBottom = False;
       code1 = (int)( ( abs(pdgId) / 100)%10 );
       code2 = (int)( ( abs(pdgId) /1000)%10 );
-      if ( code1 == 5 or code2 == 5): tmpHasBottom = true;
+      if ( code1 == 5 or code2 == 5): tmpHasBottom = True;
       return tmpHasBottom;
       
     def countBPartons(self,event):
