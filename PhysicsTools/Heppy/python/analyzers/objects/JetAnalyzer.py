@@ -49,6 +49,7 @@ def cleanJetsAndLeptons(jets,leptons,deltaR,arbitration):
 
 
 def shiftJERfactor(JERShift, aeta):
+    """Taken from run1 prescriptions, return JER factor as function of absolute eta, with parameters as in run1"""
         factor = 1.079 + JERShift*0.026
         if   aeta > 3.2: factor = 1.056 + JERShift * 0.191
         elif aeta > 2.8: factor = 1.395 + JERShift * 0.063
