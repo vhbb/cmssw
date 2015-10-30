@@ -1,3 +1,5 @@
+## Trigger used on data available on: http://cmslxr.fnal.gov/source/HLTrigger/Configuration/python/HLT_GRun_cff.py?v=CMSSW_7_5_4
+
 triggerTable = {
     "ZnnHbbAll" : [
         "HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDTight_BTagCSV0p72_v*",
@@ -249,5 +251,12 @@ triggerTable = {
         "HLT_DiPFJetAve200_v*",
         "HLT_DiPFJetAve260_v*",
         "HLT_DiPFJetAve320_v*",
+
+        "HLT_AK8DiPFJet250_200_TrimMass30_BTagCSV0p45_v*",
+        "HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV0p45_v*",
+        "HLT_AK8PFHT600_TrimR0p1PT0p03Mass50_BTagCSV0p45_v*",
+        "HLT_AK8PFHT650_TrimR0p1PT0p03Mass50_v*",
+        "HLT_AK8PFHT700_TrimR0p1PT0p03Mass50_v*",
+        "HLT_AK8PFJet360_TrimMass30_v*",
     ],
 }
