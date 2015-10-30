@@ -1,3 +1,6 @@
+## Trigger menu in MC: /dev/CMSSW_7_4_0/GRun/V41 (default in CMSSW_7_4_1)
+## http://cmslxr.fnal.gov/source/HLTrigger/Configuration/python/HLT_GRun_cff.py?v=CMSSW_7_4_1
+
 triggerTable = {
     "ZnnHbbAll" : [
         "HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDLoose_BTagCSV0p7_v*",
@@ -221,5 +224,8 @@ triggerTable = {
         "HLT_PFJet320_v*",
         "HLT_PFJet400_v*",
         "HLT_PFJet450_v*",
+        "HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV0p41_v*",
+        "HLT_AK8PFHT700_TrimR0p1PT0p03Mass50_v*",
+        "HLT_AK8PFJet360_TrimMass30_v*",
     ],
 }
