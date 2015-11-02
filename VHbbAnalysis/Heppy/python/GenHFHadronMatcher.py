@@ -88,7 +88,6 @@ class GenHFHadronMatcher( Analyzer ):
         arrs_b = {k: self.handles[k].product() for k in self.keys_b}
         arrs_c = {k: self.handles[k].product() for k in self.keys_c}
         event.ttbarCategory = self.handles["ttbarCategory"].product()[0]
-        print "ev.ttbarCategory", event.ttbarCategory
         nbhad = arrs_b["genBHadJetIndex"].size()
         nchad = arrs_c["genCHadJetIndex"].size()
 
@@ -211,7 +210,6 @@ class GenHFHadronMatcher( Analyzer ):
         #event.genJetsHadronMatcher = sorted(genJets, key=lambda j: j.pt(), reverse=True)
         #classification as done by this code
         event.ttbarCls = cls
-        print "ttcls", event.ttbarCls, event.ttbarCategory
 
     def jetCut(self, jet):
         return jet.pt() > self.genJetMinPt and abs(jet.eta()) < self.genJetMaxEta
