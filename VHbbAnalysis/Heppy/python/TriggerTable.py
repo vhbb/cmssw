@@ -52,6 +52,7 @@ triggerTable = {
     "WenHbbAll" : [
         "HLT_Ele32_eta2p1_WP75_Gsf_v*",
         "HLT_Ele32_eta2p1_WP75_Gsf_CentralPFJet30_BTagCSV07_v*",
+        "HLT_Ele22_eta2p1_WP75_Gsf_v*",
         "HLT_Ele27_eta2p1_WP85_Gsf_HT200_v*",
         "HLT_Ele27_WP85_Gsf_v*",
         "HLT_Ele27_eta2p1_WP75_Gsf_v*",
