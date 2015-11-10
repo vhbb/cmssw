@@ -344,6 +344,10 @@ genTauJetType = NTupleObjectType("genTauJet", baseObjectTypes = [ genParticleTyp
     NTupleVariable("decayMode", lambda x : x.decayMode, int, mcOnly=True, help="Generator level tau decay mode"),
 ])
 
+genTopType = NTupleObjectType("genTopType", baseObjectTypes = [ genParticleType ], variables = [
+    NTupleVariable("decayMode", lambda x : x.decayMode, int, mcOnly=True, help="Generator level top decay mode: 0=leptonic, 1=hadronic, -1=not known"),
+])
+
 genJetType = NTupleObjectType("genJet", baseObjectTypes = [ genParticleType ], variables = [
     NTupleVariable("numBHadrons", lambda x : getattr(x,"numBHadronsBeforeTop",-1), int, mcOnly=True, help="number of matched b hadrons before top quark decay"),
     NTupleVariable("numCHadrons", lambda x : getattr(x,"numCHadronsBeforeTop",-1), int, mcOnly=True, help="number of matched c hadrons before top quark decay"),
