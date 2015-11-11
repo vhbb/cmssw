@@ -84,13 +84,18 @@ class JetReCalibrator:
             for sepcorr in self.separateJetCorrectors.keys():
                 setattr(j,"CorrFactor_"+sepcorr,self.getCorrection(j,rho,0,[0,0],corrector=self.separateJetCorrectors[sepcorr]))
 
-    def getCorrection(self,jet,rho,delta=0,metShift=[0,0],corrector=None):
+    def getCorrection(self,jet,rho,delta=0,metShift=[0,0],corrector=None,isHttSubjet=False):
         """Calculates the correction factor of a jet without modifying it
         """
         if not corrector: corrector = self.JetCorrector
         if corrector!=self.JetCorrector and (delta!=0 or metShift!=[0,0]): raise RuntimeError, 'Configuration not supported'
         corrector.setJetEta(jet.eta())
-        corrector.setJetPt(jet.pt() * jet.rawFactor())
+
+        # HTT Subjets are uncalibrated and have no rawFactor attacted
+        if isHttSubjet:
+            corrector.setJetPt(jet.pt())
+        else:
+            corrector.setJetPt(jet.pt() * jet.rawFactor())
         corrector.setJetA(jet.jetArea())
         corrector.setRho(rho)
         corr = corrector.getCorrection()
@@ -104,9 +109,12 @@ class JetReCalibrator:
             except RuntimeError, r:
                 print "Caught %s when getting uncertainty for jet of pt %.1f, eta %.2f\n" % (r,corr * jet.pt() * jet.rawFactor(),jet.eta())
                 jet.jetEnergyCorrUncertainty = 0.5
-        if jet.photonEnergyFraction() < 0.9 and jet.pt()*corr*jet.rawFactor() > 10:
-            metShift[0] -= jet.px()*(corr*jet.rawFactor() - 1)*(1-jet.muonEnergyFraction())
-            metShift[1] -= jet.py()*(corr*jet.rawFactor() - 1)*(1-jet.muonEnergyFraction()) 
+
+        # Do not calculate metShift for HTT subjets
+        if not isHttSubjet:
+            if jet.photonEnergyFraction() < 0.9 and jet.pt()*corr*jet.rawFactor() > 10:
+                metShift[0] -= jet.px()*(corr*jet.rawFactor() - 1)*(1-jet.muonEnergyFraction())
+                metShift[1] -= jet.py()*(corr*jet.rawFactor() - 1)*(1-jet.muonEnergyFraction()) 
         if delta != 0:
             #print "   jet with corr pt %6.2f has an uncertainty %.2f " % (jet.pt()*jet.rawFactor()*corr, jet.jetEnergyCorrUncertainty)
             corr *= max(0, 1+delta*jet.jetEnergyCorrUncertainty)
