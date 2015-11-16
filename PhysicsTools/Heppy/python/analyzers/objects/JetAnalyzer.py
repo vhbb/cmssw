@@ -179,14 +179,14 @@ class JetAnalyzer( Analyzer ):
                     jet.qgl_calc =  self.qglcalc.computeQGLikelihood
                     jet.qgl_rho =  rho
                 # temporary fix since the jetID it's not good for eta>3
-                if abs(jet.eta()) <3:
-                    if self.testJetID (jet ):
-                        self.jets.append(jet)
-                        self.jetsIdOnly.append(jet)
-                    else:
-                        self.jetsFailId.append(jet)
-                else:
+                #if abs(jet.eta()) <3:
+                if self.testJetID (jet ):
                     self.jets.append(jet)
+                    self.jetsIdOnly.append(jet)
+                else:
+                    self.jetsFailId.append(jet)
+                #else:
+                #    self.jets.append(jet)
             elif self.testJetID (jet ):
                 self.jetsIdOnly.append(jet)
 
