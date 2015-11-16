@@ -125,9 +125,10 @@ class JetAnalyzer( Analyzer ):
 
         self.deltaMetFromJEC = [0.,0.]
 #        print "before. rho",self.rho,self.cfg_ana.collectionPostFix,'allJets len ',len(allJets),'pt', [j.pt() for j in allJets]
+        self.allJetsUsedForMET = filter(lambda jet: self.cfg_ana.jetsForMetCut, allJets)
+        allJets = self.allJetsUsedForMET
         if self.doJEC:
             self.jetReCalibrator.correctAll(allJets, rho, delta=self.shiftJEC, metShift=self.deltaMetFromJEC, addCorr=True, addShifts=self.addJECShifts)           
-        self.allJetsUsedForMET = allJets
 #        print "after. rho",self.rho,self.cfg_ana.collectionPostFix,'allJets len ',len(allJets),'pt', [j.pt() for j in allJets]
 
         if self.cfg_comp.isMC:
@@ -254,8 +255,8 @@ class JetAnalyzer( Analyzer ):
         #MC stuff
         if self.cfg_comp.isMC:
             self.deltaMetFromJetSmearing = [0, 0]
-            for j in self.cleanJetsAll:
-                if hasattr(j, 'deltaMetFromJetSmearing'):
+            for j in allJets:
+                if self.cfg_ana.propagateJetSmearToMET and hasattr(j, 'deltaMetFromJetSmearing'):
                     self.deltaMetFromJetSmearing[0] += j.deltaMetFromJetSmearing[0]
                     self.deltaMetFromJetSmearing[1] += j.deltaMetFromJetSmearing[1]
 
@@ -438,6 +439,8 @@ setattr(JetAnalyzer,"defaultConfig", cfg.Analyzer(
     shiftJEC = 0, # set to +1 or -1 to apply +/-1 sigma shift to the nominal jet energies
     addJECShifts = False, # if true, add  "corr", "corrJECUp", and "corrJECDown" for each jet (requires uncertainties to be available!)
     smearJets = True,
+    propagateJetSmearToMET = False,
+    jetsForMetCut = lambda jet: True, #use only these jets for JEC/JER propagation to MET
     shiftJER = 0, # set to +1 or -1 to get +/-1 sigma shifts    
     addJERShifts = 0, # add +/-1 sigma shifts to jets, intended to be used with shiftJER=0
     cleanJetsFromFirstPhoton = False,
