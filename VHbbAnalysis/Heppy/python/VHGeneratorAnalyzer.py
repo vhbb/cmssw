@@ -125,6 +125,14 @@ class GeneratorAnalyzer( Analyzer ):
                     self.fillWZQuarks(   event, dau, True, sourceId=6 )
 
     def makeMCInfo(self, event):
+
+        event.LHEweights = []
+        for w in event.LHE_weights:
+            #print int(w.id), ": ", w.wgt
+            # specify which weights you want to save (e.g. 1001-1009: scale variations; https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW)
+            if  int(w.id)/1000==1:
+                event.LHEweights.append(w)
+
 #       event.genParticles = map( GenParticle, self.mchandles['genParticles'].product() )
         event.genParticles = list(self.mchandles['genParticles'].product() )
 
