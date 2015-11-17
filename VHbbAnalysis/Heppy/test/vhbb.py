@@ -129,8 +129,8 @@ treeProducer= cfg.Analyzer(
 		#"genWbosonsToLL"  : NTupleCollection("GenWbosonsToLL", genParticleType, 6, help="Generated W or Z bosons decaying to LL"),
 		"genvbosons"       : NTupleCollection("GenVbosons", genParticleType, 6, help="Generated W or Z bosons, mass > 30"),
 		"pileUpVertex_z"       : NTupleCollection("pileUpVertex_z",    objectFloat, 5,help="z position of hardest pile-up collisions"),        
-		"pileUpVertex_ptHat"       : NTupleCollection("pileUpVertex_ptHat",    objectFloat, 5,help="z position of hardest pile-up collisions"),        
-		"LHE_weights"       : NTupleCollection("LHE_weights_scale",   weightsInfoType , 9 ,help="LHE weights for scale variations",mcOnly=True),        
+		"pileUpVertex_ptHat"   : NTupleCollection("pileUpVertex_ptHat",    objectFloat, 5,help="z position of hardest pile-up collisions"),        
+		"LHEweights"       : NTupleCollection("LHE_weights",   weightsInfoType , 200 ,help="LHE weights", mcOnly=True),        
 
 	}
 	)
