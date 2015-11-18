@@ -7,6 +7,7 @@ from PhysicsTools.HeppyCore.utils.deltar import matchObjectCollection, matchObje
 import PhysicsTools.HeppyCore.framework.config as cfg
 
 def FindTrigger(triggerName,names):
+    if triggerName=="": return True
     triggerName = triggerName.replace("*","")
     triggerName = triggerName.replace("$","")
     for name in names:
@@ -16,7 +17,7 @@ def FindTrigger(triggerName,names):
 class triggerCollection(object):
     def __init__(self, triggerObjectsCfg):
         collectionInfo = triggerObjectsCfg[0]
-        collectionLabel = collectionInfo[0]
+        collectionLabel = collectionInfo[0] if len(collectionInfo)>0 else ""
         collectionInstance = collectionInfo[1] if len(collectionInfo)>1 else ""
         collectionProcess = collectionInfo[2] if len(collectionInfo)>2 else "HLT"
         self.collectionText = collectionLabel + ":" + collectionInstance + ":" + collectionProcess
@@ -56,11 +57,10 @@ class TriggerObjectsAnalyzer( Analyzer ):
             triggerObjectsInfo = self.triggerObjectsInfos[collectionName]
             objects = []
             for ob in allTriggerObjects:
-                if triggerObjectsInfo.collectionText!=ob.collection(): continue
+                if (triggerObjectsInfo.collectionText!="::HLT") and triggerObjectsInfo.collectionText!=ob.collection(): continue
                 if (triggerObjectsInfo.path!="") and not FindTrigger(triggerObjectsInfo.path, ob.pathNames()): continue
                 if (triggerObjectsInfo.filterName!="") and not (triggerObjectsInfo.filterName in ob.filterLabels()): continue
                 objects.append(ob)
-            size = len(objects)
             setattr(event,'trgObjects_'+collectionName,objects)
 
 setattr(TriggerObjectsAnalyzer,"defaultConfig",cfg.Analyzer(

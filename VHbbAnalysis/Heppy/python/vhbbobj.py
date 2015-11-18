@@ -317,6 +317,8 @@ triggerObjectsType = NTupleObjectType("triggerObjects",  baseObjectTypes = [ fou
 triggerObjectsOnlyPtType = NTupleObjectType("triggerObjects",  baseObjectTypes = [ ], variables = [
     NTupleVariable("pt", lambda x : x.pt(), float, mcOnly=False, help="trigger object pt"),
 ])
+triggerObjectsNothingType = NTupleObjectType("triggerObjects",  baseObjectTypes = [ ], variables = [
+])
 
 ##------------------------------------------  
 ## Heavy flavour hadron

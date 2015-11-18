@@ -317,7 +317,7 @@ hbheAna = hbheAnalyzer.defaultConfig
 from PhysicsTools.Heppy.analyzers.core.TriggerObjectsAnalyzer import TriggerObjectsAnalyzer
 from VHbbAnalysis.Heppy.TriggerObjectsList import *
 TriggerObjectsAna = TriggerObjectsAnalyzer.defaultConfig
-TriggerObjectsAna.triggerObjectsCfgs = triggerObjectCollectionsOnlySize
+TriggerObjectsAna.triggerObjectsCfgs = triggerObjectCollections
 
 for collectionName in triggerObjectCollectionsFull.keys():
     treeProducer.collections["trgObjects_"+collectionName] = NTupleCollection("trgObjects_"+collectionName, triggerObjectsType, 5, help="")
@@ -326,7 +326,8 @@ for collectionName in triggerObjectCollectionsOnlyPt.keys():
     treeProducer.collections["trgObjects_"+collectionName] = NTupleCollection("trgObjects_"+collectionName, triggerObjectsOnlyPtType, 5, help="")
 
 for collectionName in triggerObjectCollectionsOnlySize.keys():
-    treeProducer.globalVariables.append(NTupleVariable("trgObjects_"+collectionName+"_size", lambda ev : len(getattr(ev,"trgObjects_"+collectionName,[])), int, help="trigger objects size"))
+    treeProducer.collections["trgObjects_"+collectionName] = NTupleCollection("trgObjects_"+collectionName, triggerObjectsNothingType , 5, help="")
+#    treeProducer.globalVariables.append(NTupleVariable("trgObjects_"+collectionName+"_size", lambda ev : len(getattr(ev,"trgObjects_"+collectionName,[])), int, help="trigger objects size"))
 
 ###
 
