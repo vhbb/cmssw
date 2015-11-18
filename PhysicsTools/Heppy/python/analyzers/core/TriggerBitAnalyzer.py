@@ -4,7 +4,14 @@ from PhysicsTools.Heppy.analyzers.core.Analyzer import Analyzer
 from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
 from PhysicsTools.Heppy.analyzers.core.AutoFillTreeProducer  import NTupleVariable
 import PhysicsTools.HeppyCore.framework.config as cfg
-        
+
+def FindTrigger(triggerName,names):
+    triggerName = triggerName.replace("*","")
+    triggerName = triggerName.replace("$","")
+    for name in names:
+        if triggerName in name: return True
+    return False
+
 class TriggerBitAnalyzer( Analyzer ):
     def __init__(self, cfg_ana, cfg_comp, looperName ):
         super(TriggerBitAnalyzer,self).__init__(cfg_ana,cfg_comp,looperName)
