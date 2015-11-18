@@ -458,8 +458,8 @@ class VHbbAnalyzer( Analyzer ):
 	self.doHiggsHighPt(event)
         self.doHiggsAddJetsdR08(event)
         self.searchISRforVH(event)
-#        self.doVHRegression(event)
-#        self.doVBFblikelihood(event)
+        self.doVHRegression(event)
+        self.doVBFblikelihood(event)
 
         self.fillTauIndices(event)
         self.addPullVector(event)
