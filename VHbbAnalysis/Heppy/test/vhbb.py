@@ -42,7 +42,7 @@ treeProducer= cfg.Analyzer(
                  NTupleVariable("lheNl",  lambda ev: ev.lheNl, float,mcOnly=True, help="number of light(uds) jets at LHE level"),
 		 NTupleVariable("lheV_pt",  lambda ev: ev.lheV_pt, float,mcOnly=True, help="Vector pT at LHE level"),
                  NTupleVariable("lheHT",  lambda ev: ev.lheHT, float,mcOnly=True, help="HT at LHE level"),
-                 NTupleVariable("LHE_originalWeight",  lambda ev: ev.LHE_originalWeight, float, mcOnly=True, help="LHE original weight (for normalisation of LHE_weights)"),
+                 #NTupleVariable("LHE_originalWeight",  lambda ev: ev.LHE_originalWeight, float, mcOnly=True, help="LHE original weight (for normalisation of LHE_weights)"),
                  NTupleVariable("genTTHtoTauTauDecayMode", lambda ev: ev.genTTHtoTauTauDecayMode, int,mcOnly=True, help="gen level ttH, H -> tautau decay mode"),        		 
 		#Soft Activity vars
 #                 NTupleVariable("totSoftActivityJets2", lambda ev: len([ x for x in ev.softActivityJets if x.pt()> 2 ] ), int, help="number of jets from soft activity with pt>2Gev"),
@@ -130,7 +130,8 @@ treeProducer= cfg.Analyzer(
 		"genvbosons"       : NTupleCollection("GenVbosons", genParticleType, 6, help="Generated W or Z bosons, mass > 30"),
 		"pileUpVertex_z"       : NTupleCollection("pileUpVertex_z",    objectFloat, 5,help="z position of hardest pile-up collisions"),        
 		"pileUpVertex_ptHat"   : NTupleCollection("pileUpVertex_ptHat",    objectFloat, 5,help="z position of hardest pile-up collisions"),        
-		"LHEweights"       : NTupleCollection("LHE_weights",   weightsInfoType , 200 ,help="LHE weights", mcOnly=True),        
+		"LHE_weights_scale"       : NTupleCollection("LHE_weights_scale",   weightsInfoType , 6 ,help="LHE weights for scale variation", mcOnly=True),        
+		"LHE_weights_pdf"       : NTupleCollection("LHE_weights_pdf",   weightsInfoType , 100 ,help="LHE weights for pdf variation; TO BE IMPLEMENTED", mcOnly=True),        
 
 	}
 	)
@@ -348,7 +349,10 @@ from PhysicsTools.Heppy.utils.miniAodFiles import miniAodFiles
 sample = cfg.MCComponent(
     files = [
 		#"/scratch/arizzi/00B6C8DE-E76E-E511-AEDE-008CFA000BB8.root" ##ttbar
-		"/scratch/bianchi/F8935867-E66D-E511-BB7A-001E67398633.root", 
+		#"/scratch/bianchi/F8935867-E66D-E511-BB7A-001E67398633.root", 
+		#"root://xrootd-cms.infn.it//store/mc/RunIISpring15MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/40000/FEE1CE52-216E-E511-9B5A-0025905A60B8.root", # POWHEG ttbar
+		#"root://xrootd-cms.infn.it//store/mc/RunIISpring15MiniAODv2/TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v1/10000/FEA37919-EA76-E511-9B23-28924A38DC1E.root", # MG5 ttbar
+		"root://xrootd-cms.infn.it//store/mc/RunIISpring15MiniAODv2/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/74X_mcRun2_asymptotic_v2-v3/60000/FEEAA420-1E6A-E511-8E6D-00261894393D.root", # aMC ttbar
 		],
 
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
