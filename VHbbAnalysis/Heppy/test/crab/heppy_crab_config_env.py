@@ -13,4 +13,4 @@ sample=m.group(1)+"__"+m.group(2)
 
 config.General.requestName+= "_"+sample
 config.Data.inputDataset = dataset
-config.Data.publishDataName += "_"+sample
+config.Data.outputDatasetTag += "_"+sample

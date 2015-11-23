@@ -1,5 +1,5 @@
 #!/bin/bash
-cmsenv
+#cmsenv
 source /cvmfs/cms.cern.ch/crab3/crab.sh
 #voms-proxy-init -voms cms
 #for i in `cat datasets_MCRUN2_25ns.txt` ; do

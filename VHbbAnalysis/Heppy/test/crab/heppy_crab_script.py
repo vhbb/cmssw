@@ -37,7 +37,7 @@ from PhysicsTools.HeppyCore.framework.looper import Looper
 looper = Looper( 'Output', config, nPrint = 1)
 looper.loop()
 looper.write()
-
+print "looper is done"
 #print PSet.process.output.fileName
 os.system("ls -lR")
 os.rename("Output/tree.root", "tree.root")
@@ -88,6 +88,6 @@ fwkreport='''<FrameworkJobReport>
 </File>
 
 </FrameworkJobReport>''' % (firstInput,entries)
-
+print fwkreport
 f1=open('./FrameworkJobReport.xml', 'w+')
 f1.write(fwkreport)
