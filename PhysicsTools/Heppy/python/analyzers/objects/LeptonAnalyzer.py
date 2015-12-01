@@ -96,6 +96,10 @@ class LeptonAnalyzer( Analyzer ):
         self.handles['rhoMu'] = AutoHandle( self.cfg_ana.rhoMuon, 'double')
         #rho for electrons
         self.handles['rhoEle'] = AutoHandle( self.cfg_ana.rhoElectron, 'double')
+        
+        #Electron MVA ID
+        self.handles['mvaidEleMediumId'] = AutoHandle( self.cfg_ana.mvaidElectronMediumId, 'edm::ValueMap<bool>')
+        self.handles['mvaidEle'] = AutoHandle( self.cfg_ana.mvaidElectron, 'edm::ValueMap<float>')
 
         # JP/CV: add Spring15 EGamma POG electron ID MVA
         # ( https://twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentificationRun2#Recipes_for_7_4_12_Spring15_MVA )
@@ -301,7 +305,14 @@ class LeptonAnalyzer( Analyzer ):
         """
                make a list of all electrons, and apply basic corrections to them
         """
+
+        #https://twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentificationRun2#Recipes_for_7_4_12_Spring15_MVA
         allelectrons = map( Electron, self.handles['electrons'].product() )
+        mvaIdMediumId = self.handles['mvaidEleMediumId'].product()
+        mvaId = self.handles['mvaidEle'].product()
+        for ie, ele in enumerate(allelectrons):
+            ele.mediumIdResult = mvaIdMediumId.get(ie)
+            ele.mvaId = mvaId.get(ie)
 
         ## Duplicate removal for fast sim (to be checked if still necessary in latest greatest 5.3.X releases)
         allelenodup = []
@@ -625,7 +636,7 @@ setattr(LeptonAnalyzer,"defaultConfig",cfg.Analyzer(
     loose_electron_relIso = 0.4,
     # loose_electron_isoCut = lambda electron : electron.miniRelIso < 0.1
     loose_electron_lostHits = 1.0,
-    # JP/CV: add Spring15 EGamma POG electron ID MVA
+    # FIXME: JP/CV: add Spring15 EGamma POG electron ID MVA
     # ( https://twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentificationRun2#Recipes_for_7_4_12_Spring15_MVA )
     eleMVAIdSpring15TrigMedium = "egmGsfElectronIDs:mvaEleID-Spring15-25ns-Trig-V1-wp90",
     eleMVAIdSpring15TrigTight = "egmGsfElectronIDs:mvaEleID-Spring15-25ns-Trig-V1-wp80",
