@@ -2,25 +2,39 @@ import ROOT
 import numpy as np
 
 class BTagWeightCalculator:
+    """
+    Calculates the jet and event correction factor as a weight based on the b-tagger shape-dependent data/mc 
+    corrections.
+
+    Currently, the recipe is only described in https://twiki.cern.ch/twiki/bin/viewauth/CMS/TTbarHbbRun2ReferenceAnalysis#Applying_CSV_weights
+
+    In short, jet-by-jet correction factors as a function of pt, eta and CSV have been derived.
+    This code accesses the flavour of MC jets and gets the correct 
+    """
     def __init__(self, fn_hf, fn_lf) :
         self.pdfs = {}
 
-        self.pt_bins_hf = np.array([20, 30, 40, 60, 100, 160, 10000])
+        #bin edges of the heavy-flavour histograms 
+        self.pt_bins_hf = np.array([20, 30, 40, 60, 100])
         self.eta_bins_hf = np.array([0, 2.41])
 
-        self.pt_bins_lf = np.array([20, 30, 40, 60, 10000])
+        #bin edges of the light-flavour histograms 
+        self.pt_bins_lf = np.array([20, 30, 40, 60])
         self.eta_bins_lf = np.array([0, 0.8, 1.6, 2.41])
 
+        #name of the default b-tagger
         self.btag = "pfCombinedInclusiveSecondaryVertexV2BJetTags"
         self.init(fn_hf, fn_lf)
 
     def getBin(self, bvec, val):
-        return int(bvec.searchsorted(val) - 1)
+        return int(bvec.searchsorted(val, side="right")) - 1
 
     def init(self, fn_hf, fn_lf) :
         print "[BTagWeightCalculator]: Initializing from files", fn_hf, fn_lf
 
+        #print "hf"
         self.pdfs["hf"] = self.getHistosFromFile(fn_hf)
+        #print "lf"
         self.pdfs["lf"] = self.getHistosFromFile(fn_lf)
 
         return True
@@ -51,28 +65,46 @@ class BTagWeightCalculator:
                     syst = spl[5+is_c]
                 else:
                     syst = "nominal"
+            #print (ptbin, etabin, kind, syst)
             ret[(ptbin, etabin, kind, syst)] = k.ReadObj().Clone()
         return ret
 
     def calcJetWeight(self, jet, kind, systematic):
-        pt   = jet.pt()
-        aeta = abs(jet.eta())
-        fl   = abs(jet.hadronFlavour())
-        csv  = jet.btag(self.btag)
+        """
+        Calculates the per-jet correction factor.
+        jet: either an object with the attributes pt, eta, mcFlavour, self.btag
+             or a Heppy Jet
+        kind: string specifying the name of the corrections. Usually "final".
+        systematic: the correction systematic, e.g. "nominal", "JESUp", etc
+        returns: a float with the correction
+        """
+        #if jet is a simple class with attributes
+        try:
+            pt   = getattr(jet, "pt")
+            aeta = abs(getattr(jet, "eta"))
+            fl   = abs(getattr(jet, "mcFlavour"))
+            csv  = getattr(jet, self.btag)
+        #if jet is a heppy Jet object
+        except AttributeError as e:
+            #print "could not get jet", e
+            pt   = jet.pt()
+            aeta = abs(jet.eta())
+            fl   = abs(jet.hadronFlavour())
+            csv  = jet.btag(self.btag)
 
         is_b = (fl == 5)
         is_c = (fl == 4)
         is_l = (fl < 4)
 
-        if is_b and not (systematic in ["JESUp", "JESDown", "LFUp", "LFDown", 
-                                        "Stats1Up", "Stats1Down", "Stats2Up", "Stats2Down", 
+        if is_b and not (systematic in ["JESUp", "JESDown", "LFUp", "LFDown",
+                                        "Stats1Up", "Stats1Down", "Stats2Up", "Stats2Down",
                                         "nominal"]):
             return 1.0
-        if is_c and not (systematic in ["cErr1Up", "cErr1Down", "cErr2Up", "cErr2Down", 
+        if is_c and not (systematic in ["cErr1Up", "cErr1Down", "cErr2Up", "cErr2Down",
                                         "nominal"]):
             return 1.0
-        if is_l and not (systematic in ["JESUp", "JESDown", "HFUp", "HFDown", 
-                                        "Stats1Up", "Stats1Down", "Stats2Up", "Stats2Down", 
+        if is_l and not (systematic in ["JESUp", "JESDown", "HFUp", "HFDown",
+                                        "Stats1Up", "Stats1Down", "Stats2Up", "Stats2Down",
                                         "nominal"]):
             return 1.0
 
@@ -85,6 +117,7 @@ class BTagWeightCalculator:
             etabin = self.getBin(self.eta_bins_lf, aeta)
 
         if ptbin < 0 or etabin < 0:
+            #print "pt or eta bin outside range", pt, aeta, ptbin, etabin
             return 1.0
 
         k = (ptbin, etabin, kind, systematic)
@@ -93,13 +126,14 @@ class BTagWeightCalculator:
             hdict = self.pdfs["hf"]
         h = hdict.get(k, None)
         if not h:
+            #print "no histogram", k
             return 1.0
 
         csvbin = 1
-        if csv>=0:
-            csvbin = h.FindBin(csv)
+        csvbin = h.FindBin(csv)
 
         if csvbin <= 0 or csvbin > h.GetNbinsX():
+            #print "csv bin outside range", csv, csvbin
             return 1.0
 
         w = h.GetBinContent(csvbin)
