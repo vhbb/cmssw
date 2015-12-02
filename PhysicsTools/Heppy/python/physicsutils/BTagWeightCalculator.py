@@ -9,12 +9,17 @@ class BTagWeightCalculator:
     Currently, the recipe is only described in https://twiki.cern.ch/twiki/bin/viewauth/CMS/TTbarHbbRun2ReferenceAnalysis#Applying_CSV_weights
 
     In short, jet-by-jet correction factors as a function of pt, eta and CSV have been derived.
-    This code accesses the flavour of MC jets and gets the correct 
+    This code accesses the flavour of MC jets and gets the correct weight histogram
+    corresponding to the pt, eta and flavour of the jet.
+    From there, the per-jet weight is just accessed according to the value of the discriminator.
     """
     def __init__(self, fn_hf, fn_lf) :
         self.pdfs = {}
 
-        #bin edges of the heavy-flavour histograms 
+        #bin edges of the heavy-flavour histograms
+        #pt>=20 && pt<30 -> bin=0
+        #pt>=30 && pt<40 -> bin=1
+        #etc
         self.pt_bins_hf = np.array([20, 30, 40, 60, 100])
         self.eta_bins_hf = np.array([0, 2.41])
 
@@ -29,7 +34,11 @@ class BTagWeightCalculator:
     def getBin(self, bvec, val):
         return int(bvec.searchsorted(val, side="right")) - 1
 
-    def init(self, fn_hf, fn_lf) :
+    def init(self, fn_hf, fn_lf):
+        """
+        fn_hf (string) - path to the heavy flavour weight file
+        fn_lf (string) - path to the light flavour weight file
+        """
         print "[BTagWeightCalculator]: Initializing from files", fn_hf, fn_lf
 
         #print "hf"
@@ -40,6 +49,26 @@ class BTagWeightCalculator:
         return True
 
     def getHistosFromFile(self, fn):
+        """
+        Initialized the lookup table for b-tag weight histograms based on jet
+        pt, eta and flavour.
+        The format of the weight file is similar to:
+         KEY: TH1D     csv_ratio_Pt0_Eta0_final;1
+         KEY: TH1D     csv_ratio_Pt0_Eta0_final_JESUp;1
+         KEY: TH1D     csv_ratio_Pt0_Eta0_final_JESDown;1
+         KEY: TH1D     csv_ratio_Pt0_Eta0_final_LFUp;1
+         KEY: TH1D     csv_ratio_Pt0_Eta0_final_LFDown;1
+         KEY: TH1D     csv_ratio_Pt0_Eta0_final_Stats1Up;1
+         KEY: TH1D     csv_ratio_Pt0_Eta0_final_Stats1Down;1
+         KEY: TH1D     csv_ratio_Pt0_Eta0_final_Stats2Up;1
+         KEY: TH1D     csv_ratio_Pt0_Eta0_final_Stats2Down;1
+         KEY: TH1D     c_csv_ratio_Pt0_Eta0_final;2
+         KEY: TH1D     c_csv_ratio_Pt0_Eta0_final;1
+         KEY: TH1D     c_csv_ratio_Pt0_Eta0_final_cErr1Up;1
+         KEY: TH1D     c_csv_ratio_Pt0_Eta0_final_cErr1Down;1
+         KEY: TH1D     c_csv_ratio_Pt0_Eta0_final_cErr2Up;1
+         KEY: TH1D     c_csv_ratio_Pt0_Eta0_final_cErr2Down;1
+        """
         ret = {}
         tf = ROOT.TFile(fn)
         if not tf or tf.IsZombie():
@@ -65,7 +94,6 @@ class BTagWeightCalculator:
                     syst = spl[5+is_c]
                 else:
                     syst = "nominal"
-            #print (ptbin, etabin, kind, syst)
             ret[(ptbin, etabin, kind, syst)] = k.ReadObj().Clone()
         return ret
 
@@ -140,6 +168,9 @@ class BTagWeightCalculator:
         return w
 
     def calcEventWeight(self, jets, kind, systematic):
+        """
+        The per-event weight is just a product of per-jet weights.
+        """
         weights = np.array(
             [self.calcJetWeight(jet, kind, systematic)
             for jet in jets]
