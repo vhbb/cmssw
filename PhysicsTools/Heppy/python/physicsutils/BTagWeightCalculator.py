@@ -94,7 +94,7 @@ class BTagWeightCalculator:
                     syst = spl[5+is_c]
                 else:
                     syst = "nominal"
-            ret[(ptbin, etabin, kind, syst)] = k.ReadObj().Clone()
+            ret[(is_c, ptbin, etabin, kind, syst)] = k.ReadObj().Clone()
         return ret
 
     def calcJetWeight(self, jet, kind, systematic):
@@ -122,7 +122,7 @@ class BTagWeightCalculator:
 
         is_b = (fl == 5)
         is_c = (fl == 4)
-        is_l = (fl < 4)
+        is_l = not (is_b or is_c)
 
         if is_b and not (systematic in ["JESUp", "JESDown", "LFUp", "LFDown",
                                         "Stats1Up", "Stats1Down", "Stats2Up", "Stats2Down",
@@ -148,7 +148,7 @@ class BTagWeightCalculator:
             #print "pt or eta bin outside range", pt, aeta, ptbin, etabin
             return 1.0
 
-        k = (ptbin, etabin, kind, systematic)
+        k = (is_c, ptbin, etabin, kind, systematic)
         hdict = self.pdfs["lf"]
         if is_b or is_c:
             hdict = self.pdfs["hf"]
