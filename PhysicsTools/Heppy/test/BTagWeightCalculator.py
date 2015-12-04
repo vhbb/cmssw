@@ -2,7 +2,7 @@
 import os
 import numpy as np
 from PhysicsTools.Heppy.physicsutils.BTagWeightCalculator import BTagWeightCalculator
-csvpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/csv"
+csvpath = os.environ['CMSSW_BASE']+"/src/PhysicsTools/Heppy/data"
 bweightcalc = BTagWeightCalculator(
     csvpath + "/csv_rwt_fit_hf_2015_11_20.root",
     csvpath + "/csv_rwt_fit_lf_2015_11_20.root"
