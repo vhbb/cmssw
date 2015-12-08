@@ -107,13 +107,13 @@ class BTagWeightCalculator:
         returns: a float with the correction
         """
         #if jet is a simple class with attributes
-        try:
+        if isinstance(getattr(jet, "pt"), float):
             pt   = getattr(jet, "pt")
             aeta = abs(getattr(jet, "eta"))
             fl   = abs(getattr(jet, "mcFlavour"))
             csv  = getattr(jet, self.btag)
         #if jet is a heppy Jet object
-        except AttributeError as e:
+        else:
             #print "could not get jet", e
             pt   = jet.pt()
             aeta = abs(jet.eta())
