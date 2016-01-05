@@ -249,10 +249,10 @@ class VHbbAnalyzer( Analyzer ):
               for x in addJetsForHiggs:
                  event.hJetsaddJetsdR08.append(x)
                  event.dRaddJetsdR08.append( min(deltaR( x.eta(), x.phi(), event.hJetsCSV[0].eta(), event.hJetsCSV[0].phi()),deltaR( x.eta(), x.phi(), event.hJetsCSV[1].eta(), event.hJetsCSV[1].phi() )) )
-                 event.hjidxaddJetsdR08=[event.cleanJetsAll.index(x) for x in event.hJetsaddJetsdR08 ]   
-                 event.aJetsaddJetsdR08 = [x for x in event.cleanJets if x not in event.hJetsaddJetsdR08]
-                 event.aJetsaddJetsdR08+=event.cleanJetsFwd
-                 event.ajidxaddJetsdR08=[event.cleanJetsAll.index(x) for x in event.aJetsaddJetsdR08 ]
+              event.hjidxaddJetsdR08=[event.cleanJetsAll.index(x) for x in event.hJetsaddJetsdR08 ]   
+              event.aJetsaddJetsdR08 = [x for x in event.cleanJets if x not in event.hJetsaddJetsdR08]
+              event.aJetsaddJetsdR08+=event.cleanJetsFwd
+              event.ajidxaddJetsdR08=[event.cleanJetsAll.index(x) for x in event.aJetsaddJetsdR08 ]
         
            event.HaddJetsdR08 = sum(map(lambda x:x.p4(), event.hJetsaddJetsdR08), ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)) 
 
