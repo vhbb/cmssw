@@ -9,6 +9,7 @@ import pprint
 from math import ceil
 from event import Event
 import timeit
+import resource
 
 class Setup(object):
     '''The Looper creates a Setup object to hold information relevant during 
@@ -53,7 +54,8 @@ class Looper(object):
                   firstEvent=0,
                   nPrint=0,
                   timeReport=False,
-                  quiet=False):
+                  quiet=False,
+                  memCheckFromEvent=-1):
         """Handles the processing of an event sample.
         An Analyzer is built for each Config.Analyzer present
         in sequence. The Looper can then be used to process an event,
@@ -67,6 +69,7 @@ class Looper(object):
         nPrint  : number of events to print at the beginning
         """
 
+        self.config = config
         self.name = self._prepareOutput(name)
         self.outDir = self.name
         self.logger = logging.getLogger( self.name )
@@ -83,6 +86,8 @@ class Looper(object):
         self.firstEvent = firstEvent
         self.nPrint = int(nPrint)
         self.timeReport = [ {'time':0.0,'events':0} for a in self.analyzers ] if timeReport else False
+        self.memReportFirstEvent = memCheckFromEvent
+        self.memLast=0
         tree_name = None
         if( hasattr(self.cfg_comp, 'tree_name') ):
             tree_name = self.cfg_comp.tree_name
@@ -183,15 +188,15 @@ class Looper(object):
             print 'Stopped loop following a UserWarning exception'
 
         info = self.logger.info
-        info('number of events processed: {nEv}'.format(nEv=iEv+1))
-        info('')
+        warning = self.logger.warning
+        warning('number of events processed: {nEv}'.format(nEv=iEv+1))
+        warning('')
         info( self.cfg_comp )
         info('')        
         for analyzer in self.analyzers:
             analyzer.endLoop(self.setup)
         if self.timeReport:
             allev = max([x['events'] for x in self.timeReport])
-            warning = self.logger.warning
             warning("\n      ---- TimeReport (all times in ms; first evt is skipped) ---- ")
             warning("%9s   %9s    %9s   %9s %6s   %s" % ("processed","all evts","time/proc", " time/all", "  [%] ", "analyer"))
             warning("%9s   %9s    %9s   %9s %6s   %s" % ("---------","--------","---------", "---------", " -----", "-------------"))
@@ -207,6 +212,9 @@ class Looper(object):
             warning("%9s   %9s    %9s   %9s   %s" % ("---------","--------","---------", "---------", "-------------"))
             warning("%9d   %9d   %10.2f  %10.2f %5.1f%%   %s" % ( passev, allev, 1000*totPerProcEv, 1000*totPerAllEv, 100.0, "TOTAL"))
             warning("")
+        if hasattr(self.config,"preprocessor") and self.config.preprocessor is not None:
+              if hasattr(self.config.preprocessor,"endLoop"):
+                  self.config.preprocessor.endLoop(self.cfg_comp)
 
     def process(self, iEv ):
         """Run event processing for all analyzers in the sequence.
@@ -221,7 +229,17 @@ class Looper(object):
             if not analyzer.beginLoopCalled:
                 analyzer.beginLoop(self.setup)
             start = timeit.default_timer()
+            if self.memReportFirstEvent >=0 and iEv >= self.memReportFirstEvent:           
+                memNow=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+                if memNow > self.memLast :
+                   print  "Mem Jump detected before analyzer %s at event %s. RSS(before,after,difference) %s %s %s "%( analyzer.name, iEv, self.memLast, memNow, memNow-self.memLast)
+                self.memLast=memNow
             ret = analyzer.process( self.event )
+            if self.memReportFirstEvent >=0 and iEv >= self.memReportFirstEvent:           
+                memNow=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+                if memNow > self.memLast :
+                   print "Mem Jump detected in analyzer %s at event %s. RSS(before,after,difference) %s %s %s "%( analyzer.name, iEv, self.memLast, memNow, memNow-self.memLast)
+                self.memLast=memNow
             if self.timeReport:
                 self.timeReport[i]['events'] += 1
                 if self.timeReport[i]['events'] > 0:
@@ -266,3 +284,4 @@ if __name__ == '__main__':
     looper = Looper( 'Loop', cfg.config,nPrint = 5)
     looper.loop()
     looper.write()
+
