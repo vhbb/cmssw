@@ -12,12 +12,19 @@ from VHbbAnalysis.Heppy.GenHFHadronMatcher import GenHFHadronMatcher
 
 
 # Add Boosted Information
-
 boostana=cfg.Analyzer(
     verbose=False,
     class_object=AdditionalBoost,
 )
 sequence.insert(sequence.index(VHbb),boostana)
+
+
+genhfana=cfg.Analyzer(
+    verbose=False,
+    class_object=GenHFHadronMatcher,
+)
+sequence.insert(sequence.index(VHbb),genhfana)
+
 
 treeProducer.collections["ak08"] = NTupleCollection("FatjetAK08ungroomed",  ak8FatjetType,  10,
                                                     help = "AK, R=0.8, pT > 200 GeV, no grooming")
