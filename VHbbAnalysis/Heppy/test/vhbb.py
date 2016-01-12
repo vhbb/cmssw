@@ -55,9 +55,6 @@ treeProducer= cfg.Analyzer(
 		 NTupleVariable("metPuppi_pt",  lambda ev : ev.metPuppi.pt(), help="met from Puppi"),
 		 NTupleVariable("metPuppi_phi",  lambda ev : ev.metPuppi.phi(), help="met phi from Puppi"),
 		 NTupleVariable("metPuppi_rawpt",  lambda ev : ev.metPuppi.uncorPt(), help="raw met from Puppi"),
-		 NTupleVariable("metNoHF_pt",  lambda ev : ev.metNoHF.pt(), help="met from NoHF"),
-		 NTupleVariable("metNoHF_phi",  lambda ev : ev.metNoHF.phi(), help="met phi from NoHF"),
-		 NTupleVariable("metNoHF_rawpt",  lambda ev : ev.metNoHF.uncorPt(), help="raw met from NoHF"),
 		 NTupleVariable("metType1p2_pt",  lambda ev : ev.met.shiftedPt(12,2), help="type1type2met"),
 		 NTupleVariable("metNoPU_pt",  lambda ev : ev.metNoPU.pt(), help="PFnoPU E_{T}^{miss}"),
 		 NTupleVariable("metNoPU_phi",  lambda ev : ev.metNoPU.phi(), help="phi of PFnoPU E_{T}^{miss}"),
@@ -216,16 +213,6 @@ METPuppiAna.doTkMet = False
 METPuppiAna.doMetNoPU = False
 
 
-METNoHFAna = copy.copy(METPuppiAna)
-METNoHFAna.metCollection     = "slimmedMETsNoHF"
-METNoHFAna.doMetNoPU = False
-METNoHFAna.recalibrate = False
-METNoHFAna.collectionPostFix = "NoHF"
-METNoHFAna.copyMETsByValue = True
-METNoHFAna.doTkMet = False
-METNoHFAna.doMetNoPU = False
-
-
 
 
 from PhysicsTools.Heppy.analyzers.core.PileUpAnalyzer import PileUpAnalyzer
@@ -337,13 +324,13 @@ jsonAna = cfg.Analyzer(JSONAnalyzer,
       passAll=True
       )
 
-sequence = [jsonAna,LHEAna,FlagsAna, hbheAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,TauAna,JetAna,METAna, METPuppiAna, METNoHFAna, PdfAna, VHbb,TTHtoTauTau,TTHtoTauTauGen,treeProducer]#,sh]
+sequence = [jsonAna,LHEAna,FlagsAna, hbheAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,TauAna,JetAna,METAna, METPuppiAna,  PdfAna, VHbb,TTHtoTauTau,TTHtoTauTauGen,treeProducer]#,sh]
 
 
 from PhysicsTools.Heppy.utils.miniAodFiles import miniAodFiles
 sample = cfg.MCComponent(
     files = [
-		"/scratch/arizzi/00B6C8DE-E76E-E511-AEDE-008CFA000BB8.root" ##ttbar
+		"root://xrootd.ba.infn.it//store/mc/RunIIFall15MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-scaledown-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/30000/045996FE-A19D-E511-B76D-D4AE526A0B47.root" ##ttbar
 ],
 
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
@@ -370,7 +357,7 @@ class TestFilter(logging.Filter):
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 100)
+    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 1000)
 
     import time
     import cProfile

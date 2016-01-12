@@ -76,9 +76,9 @@ class JetRegression :
 		self.Jet_chMult[0] = j.chargedMultiplicity()
 		self.Jet_vtxPt[0] = sqrt(j.userFloat("vtxPx")**2 + j.userFloat("vtxPy")**2)
 		self.Jet_vtxMass[0] = j.userFloat("vtxMass")
-		self.Jet_vtx3dL[0] = j.userFloat("vtx3dL")
-		self.Jet_vtxNtrk[0] = j.userFloat("vtxNtrk")
-		self.Jet_vtx3deL[0] = j.userFloat("vtx3deL")
+		self.Jet_vtx3dL[0] = j.userFloat("vtx3DVal")
+		self.Jet_vtxNtrk[0] = j.userFloat("vtxNtracks")
+		self.Jet_vtx3deL[0] = self.Jet_vtx3dL[0]/j.userFloat("vtx3DSig") if j.userFloat("vtx3DSig") > 0 else 0
 		setattr(j,attrName,self.reader.EvaluateRegression(self.name)[0])
 
                 #j.pt_reg = self.reader.EvaluateRegression(self.name)[0]
