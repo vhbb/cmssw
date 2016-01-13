@@ -103,7 +103,7 @@ def initialize(isMC=True):
                                                              Rcutoff = cms.double( -999.0),       # not used by default
                                                              # variables for axes definition :
                                                              axesDefinition = cms.uint32( 6 ),    # CMS default is 1-pass KT axes
-                                                             nPass = cms.int32(-999.0),             # not used by default
+                                                             nPass = cms.int32(-999),             # not used by default
                                                              akAxesR0 = cms.double(-999.0)        # not used by default
         )
 
@@ -153,7 +153,7 @@ def initialize(isMC=True):
                                                                          Rcutoff = cms.double( -999.0),       # not used by default
                                                                          # variables for axes definition :
                                                                          axesDefinition = cms.uint32( 6 ),    # CMS default is 1-pass KT axes
-                                                                         nPass = cms.int32(-999.0),             # not used by default
+                                                                         nPass = cms.int32(-999),             # not used by default
                                                                          akAxesR0 = cms.double(-999.0)        # not used by default
         )
 
