@@ -19,6 +19,14 @@ from PhysicsTools.HeppyCore.utils.deltar import deltaR,deltaPhi
 from PhysicsTools.Heppy.physicsutils.genutils import *
 import PhysicsTools.HeppyCore.framework.config as cfg
 
+LHE_scale_order = { 
+    2 : 0, # muR =  1,  muF = 2
+    3 : 1, # muR =  1,  muF = 0.5
+    4 : 2, # muR =  2,  muF = 1
+    5 : 4, # muR =  2,  muF = 2
+    7 : 3, # muR =0.5,  muF = 1
+    9 : 5, # muR =0.5,  muF = 0.5
+    }
         
 class GeneratorAnalyzer( Analyzer ):
     """Do generator-level analysis of a ttH->leptons decay:
@@ -125,6 +133,25 @@ class GeneratorAnalyzer( Analyzer ):
                     self.fillWZQuarks(   event, dau, True, sourceId=6 )
 
     def makeMCInfo(self, event):
+
+        LHE_weights_scale = []
+        LHE_weights_pdf = []
+
+        # https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW)
+        for w in event.LHE_weights:
+            wid = int(w.id)
+            # for LO samples, the scale weights are 1,...,9; for NLO 1001,1009
+            if (wid in range(1,10)) or (wid in range(1001,1010)):
+                wid = wid%1000
+                if wid not in [1,6,8]: # these are the nominal and anticorrelated muR,muF variations
+                    w.wgt = w.wgt/event.LHE_originalWeight if abs(event.LHE_originalWeight)>0 else w.wgt
+                    w.order = LHE_scale_order[wid]
+                    #print int(w.id), ": ", w.wgt, " (pos ", w.order, ")"
+                    LHE_weights_scale.append(w)
+
+        event.LHE_weights_scale = sorted(LHE_weights_scale, key=lambda w : w.order)
+        event.LHE_weights_pdf = LHE_weights_pdf
+
 #       event.genParticles = map( GenParticle, self.mchandles['genParticles'].product() )
         event.genParticles = list(self.mchandles['genParticles'].product() )
 
