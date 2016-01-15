@@ -3,8 +3,11 @@ import sys,os
 # miniaod_version = "RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9*"
 # filename = 'datasets_MCRUN2_25ns.txt'
 
-miniaod_version = "RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v*"
-filename = 'datasets_MCRUN2_25ns_RunIISpring15MiniAODv2.txt'
+# miniaod_version = "RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v*"
+# filename = 'datasets_MCRUN2_25ns_RunIISpring15MiniAODv2.txt'
+
+miniaod_version = "RunIIFall15MiniAODv1-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v*"
+filename = 'datasets_MCRUN2_25ns_RunIIFall15MiniAODv1-PU25nsData2015v1_76X.txt'
 
 # REMOVE DATASET NAMES CONTAINING:
 
@@ -35,7 +38,7 @@ remove = [
           'BdToKstarMuMu','Estar_EG','ZGTo2LG','Mustar_MuG','Estar_EG','InclusivebtoMu','GluGluHToEEG','InclusiveBtoJpsi',
           '/DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',
           'BlackHole_','DMS_','DMV_','/DsTo','AxialMonoW_Mphi','X53X53To2L2Nu','VectorMono','AxialMono','StringBall',
-          'top_5f_DS_',
+          'top_5f_DS_','ExtendedWeakIsospinModel','SMS-T2tt','SinglePi','SingleNeutrin','H0ToUps','SLQ_Rhanded-MLQ',
           # '/ttHJetToNonbb_M120_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           # '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           # '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v3/MINIAODSIM',
