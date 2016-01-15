@@ -74,17 +74,22 @@ class JetAnalyzer( Analyzer ):
         if   self.recalibrateJets == "MC"  : self.recalibrateJets =     self.cfg_comp.isMC
         elif self.recalibrateJets == "Data": self.recalibrateJets = not self.cfg_comp.isMC
         elif self.recalibrateJets not in [True,False]: raise RuntimeError, "recalibrateJets must be any of { True, False, 'MC', 'Data' }, while it is %r " % self.recalibrateJets
-        
-        self.doJEC = self.recalibrateJets or (self.shiftJEC != 0) or self.addJECShifts
+       
+        calculateSeparateCorrections = getattr(cfg_ana,"calculateSeparateCorrections", False);
+        calculateType1METCorrection  = getattr(cfg_ana,"calculateType1METCorrection",  False);
+        self.doJEC = self.recalibrateJets or (self.shiftJEC != 0) or self.addJECShifts or calculateSeparateCorrections or calculateType1METCorrection
         if self.doJEC:
           doResidual = getattr(cfg_ana, 'applyL2L3Residual', 'Data')
           if   doResidual == "MC":   doResidual = self.cfg_comp.isMC
           elif doResidual == "Data": doResidual = not self.cfg_comp.isMC
           elif doResidual not in [True,False]: raise RuntimeError, "If specified, applyL2L3Residual must be any of { True, False, 'MC', 'Data'(default)}"
-          if self.cfg_comp.isMC:
-            self.jetReCalibrator = JetReCalibrator(mcGT,self.cfg_ana.recalibrationType, doResidual, cfg_ana.jecPath, calculateSeparateCorrections=getattr(cfg_ana,"calculateSeparateCorrections",False))
-          else:
-            self.jetReCalibrator = JetReCalibrator(dataGT,self.cfg_ana.recalibrationType, doResidual, cfg_ana.jecPath, calculateSeparateCorrections=getattr(cfg_ana,"calculateSeparateCorrections",False))
+          GT = mcGT if self.cfg_comp.isMC else dataGT
+          # Now take care of the optional arguments
+          kwargs = { 'calculateSeparateCorrections':calculateSeparateCorrections,
+                     'calculateType1METCorrection' :calculateType1METCorrection, }
+          if kwargs['calculateType1METCorrection']: kwargs['type1METParams'] = cfg_ana.type1METParams
+          # instantiate the jet re-calibrator
+          self.jetReCalibrator = JetReCalibrator(GT, cfg_ana.recalibrationType, doResidual, cfg_ana.jecPath, **kwargs)
         self.doPuId = getattr(self.cfg_ana, 'doPuId', True)
         self.jetLepDR = getattr(self.cfg_ana, 'jetLepDR', 0.4)
         self.jetLepArbitration = getattr(self.cfg_ana, 'jetLepArbitration', lambda jet,lepton: lepton) 
@@ -124,9 +129,24 @@ class JetAnalyzer( Analyzer ):
             jet.mcFlavour = 0
 
         self.deltaMetFromJEC = [0.,0.]
+        self.type1METCorr    = [0.,0.,0.]
 #        print "before. rho",self.rho,self.cfg_ana.collectionPostFix,'allJets len ',len(allJets),'pt', [j.pt() for j in allJets]
         if self.doJEC:
-            self.jetReCalibrator.correctAll(allJets, rho, delta=self.shiftJEC, metShift=self.deltaMetFromJEC, addCorr=True, addShifts=self.addJECShifts)           
+            if not self.recalibrateJets:  # check point that things won't change
+                jetsBefore = [ (j.pt(),j.eta(),j.phi(),j.rawFactor()) for j in allJets ]
+            self.jetReCalibrator.correctAll(allJets, rho, delta=self.shiftJEC, 
+                                                addCorr=True, addShifts=self.addJECShifts,
+                                                metShift=self.deltaMetFromJEC, type1METCorr=self.type1METCorr )           
+            if not self.recalibrateJets: 
+                jetsAfter = [ (j.pt(),j.eta(),j.phi(),j.rawFactor()) for j in allJets ]
+                if len(jetsBefore) != len(jetsAfter): 
+                    print "ERROR: I had to recompute jet corrections, and they rejected some of the jets:\nold = %s\n new = %s\n" % (jetsBefore,jetsAfter)
+                else:
+                    for (told, tnew) in zip(jetsBefore,jetsAfter):
+                        if (deltaR2(told[1],told[2],tnew[1],tnew[2])) > 0.0001:
+                            print "ERROR: I had to recompute jet corrections, and one jet direction moved: old = %s, new = %s\n" % (told, tnew)
+                        elif abs(told[0]-tnew[0])/(told[0]+tnew[0]) > 0.5e-3 or abs(told[3]-tnew[3]) > 0.5e-3:
+                            print "ERROR: I had to recompute jet corrections, and one jet pt or corr changed: old = %s, new = %s\n" % (told, tnew)
         self.allJetsUsedForMET = allJets
 #        print "after. rho",self.rho,self.cfg_ana.collectionPostFix,'allJets len ',len(allJets),'pt', [j.pt() for j in allJets]
 
@@ -161,7 +181,8 @@ class JetAnalyzer( Analyzer ):
         for jet in allJets:
             #Check if lepton and jet have overlapping PF candidates 
             leps_with_overlaps = []
-            for i in range(jet.numberOfSourceCandidatePtrs()):
+            if getattr(self.cfg_ana, 'checkLeptonPFOverlap', True):
+              for i in range(jet.numberOfSourceCandidatePtrs()):
                 p1 = jet.sourceCandidatePtr(i) #Ptr<Candidate> p1
                 for lep in leptons:
                     for j in range(lep.numberOfSourceCandidatePtrs()):
@@ -177,15 +198,11 @@ class JetAnalyzer( Analyzer ):
                 if(self.cfg_ana.doQG):
                     jet.qgl_calc =  self.qglcalc.computeQGLikelihood
                     jet.qgl_rho =  rho
-                # temporary fix since the jetID it's not good for eta>3
-                if abs(jet.eta()) <3:
-                    if self.testJetID (jet ):
-                        self.jets.append(jet)
-                        self.jetsIdOnly.append(jet)
-                    else:
-                        self.jetsFailId.append(jet)
-                else:
+                if self.testJetID( jet ):
                     self.jets.append(jet)
+                    self.jetsIdOnly.append(jet)
+                else:
+                    self.jetsFailId.append(jet)
             elif self.testJetID (jet ):
                 self.jetsIdOnly.append(jet)
 
@@ -194,7 +211,7 @@ class JetAnalyzer( Analyzer ):
 
         self.cleanJets    = [j for j in self.cleanJetsAll if abs(j.eta()) <  self.cfg_ana.jetEtaCentral ]
         self.cleanJetsFwd = [j for j in self.cleanJetsAll if abs(j.eta()) >= self.cfg_ana.jetEtaCentral ]
-        self.discardedJets = [j for j in allJets if j not in self.cleanJetsAll]
+        self.discardedJets = [j for j in self.jets if j not in self.cleanJetsAll]
         if hasattr(event, 'selectedLeptons') and self.cfg_ana.cleanSelectedLeptons:
             event.discardedLeptons = [ l for l in leptons if l not in cleanLeptons ]
             event.selectedLeptons  = [ l for l in event.selectedLeptons if l not in event.discardedLeptons ]
@@ -207,12 +224,13 @@ class JetAnalyzer( Analyzer ):
                     #print "overlap discarded", lep.p4().pt(), lep.p4().eta(), lep.p4().phi(), lep.jetOverlap.p4().pt(), lep.jetOverlap.p4().eta(), lep.jetOverlap.p4().phi()
                     lep.jetOverlapIdx = 1000 + self.discardedJets.index(lep.jetOverlap)
 
-        if self.cfg_ana.cleanJetsFromTaus and hasattr(event, 'selectedTaus'):
-            leptons = leptons[:] + event.selectedTaus
-        if self.cfg_ana.cleanJetsFromIsoTracks and hasattr(event, 'selectedIsoCleanTrack'):
-            leptons = leptons[:] + event.selectedIsoCleanTrack
-        
-        # Clean Jets from photons
+        ## First cleaning, then Jet Id
+        self.noIdCleanJetsAll, cleanLeptons = cleanJetsAndLeptons(self.jetsAllNoID, leptons, self.jetLepDR, self.jetLepArbitration)
+        self.noIdCleanJets = [j for j in self.noIdCleanJetsAll if abs(j.eta()) <  self.cfg_ana.jetEtaCentral ]
+        self.noIdCleanJetsFwd = [j for j in self.noIdCleanJetsAll if abs(j.eta()) >=  self.cfg_ana.jetEtaCentral ]
+        self.noIdDiscardedJets = [j for j in self.jetsAllNoID if j not in self.noIdCleanJetsAll]
+
+        ## Clean Jets from photons (first cleaning, then Jet Id)
         photons = []
         if hasattr(event, 'selectedPhotons'):
             if self.cfg_ana.cleanJetsFromFirstPhoton:
@@ -223,16 +241,39 @@ class JetAnalyzer( Analyzer ):
         self.gamma_cleanJetsAll = cleanNearestJetOnly(self.cleanJetsAll, photons, self.jetGammaDR)
         self.gamma_cleanJets    = [j for j in self.gamma_cleanJetsAll if abs(j.eta()) <  self.cfg_ana.jetEtaCentral ]
         self.gamma_cleanJetsFwd = [j for j in self.gamma_cleanJetsAll if abs(j.eta()) >= self.cfg_ana.jetEtaCentral ]
+        self.gamma_noIdCleanJetsAll = cleanNearestJetOnly(self.noIdCleanJetsAll, photons, self.jetGammaDR)
+        self.gamma_noIdCleanJets    = [j for j in self.gamma_noIdCleanJetsAll if abs(j.eta()) <  self.cfg_ana.jetEtaCentral ]
+        self.gamma_noIdCleanJetsFwd = [j for j in self.gamma_noIdCleanJetsAll if abs(j.eta()) >= self.cfg_ana.jetEtaCentral ]
         ###
 
         if self.cfg_ana.alwaysCleanPhotons:
             self.cleanJets = self.gamma_cleanJets
             self.cleanJetsAll = self.gamma_cleanJetsAll
             self.cleanJetsFwd = self.gamma_cleanJetsFwd
+            #
+            self.noIdCleanJets = self.gamma_noIdCleanJets
+            self.noIdCleanJetsAll = self.gamma_noIdCleanJetsAll
+            self.noIdCleanJetsFwd = self.gamma_noIdCleanJetsFwd
 
-        ## Associate jets to inclusive leptons
+        ## Jet Id, after jet/lepton cleaning
+        self.cleanJetsFailIdAll = []
+        for jet in self.noIdCleanJetsAll:
+            if not self.testJetID( jet ):
+                self.cleanJetsFailIdAll.append(jet)
+        
+        self.cleanJetsFailId = [j for j in self.cleanJetsFailIdAll if abs(j.eta()) <  self.cfg_ana.jetEtaCentral ]
+        
+        ## Jet Id, after jet/photon cleaning
+        self.gamma_cleanJetsFailIdAll = []
+        for jet in self.gamma_noIdCleanJetsAll:
+            if not self.testJetID( jet ):
+                self.gamma_cleanJetsFailIdAll.append(jet)
+
+        self.gamma_cleanJetsFailId = [j for j in self.gamma_cleanJetsFailIdAll if abs(j.eta()) <  self.cfg_ana.jetEtaCentral ]
+        
+        ## Associate jets to leptons
         incleptons = event.inclusiveLeptons if hasattr(event, 'inclusiveLeptons') else event.selectedLeptons
-        jlpairs = matchObjectCollection( incleptons, allJets, self.jetLepDR**2)
+        jlpairs = matchObjectCollection(incleptons, allJets, self.jetLepDR**2)
 
         for jet in allJets:
             jet.leptons = [l for l in jlpairs if jlpairs[l] == jet ]
@@ -264,7 +305,7 @@ class JetAnalyzer( Analyzer ):
             if self.cfg_ana.cleanGenJetsFromPhoton:
                 self.cleanGenJets = cleanNearestJetOnly(self.cleanGenJets, photons, self.jetLepDR)
 
-	    if hasattr(self.cfg_ana,"genNuSelection") :
+	    if getattr(self.cfg_ana, 'attachNeutrinos', True) and hasattr(self.cfg_ana,"genNuSelection") :
 		jetNus=[x for x in event.genParticles if abs(x.pdgId()) in [12,14,16] and self.cfg_ana.genNuSelection(x) ]
 	 	pairs= matchObjectCollection (jetNus, self.genJets, 0.4**2)
                 
@@ -276,20 +317,13 @@ class JetAnalyzer( Analyzer ):
 				genJet.nu+=nu.p4()
 			
             
-            #event.nGenJets25 = 0
-            #event.nGenJets25Cen = 0
-            #event.nGenJets25Fwd = 0
-            #for j in event.cleanGenJets:
-            #    event.nGenJets25 += 1
-            #    if abs(j.eta()) <= 2.4: event.nGenJets25Cen += 1
-            #    else:                   event.nGenJets25Fwd += 1
-                    
             if self.cfg_ana.do_mc_match:
                 self.jetFlavour(event)
 
         if hasattr(event,"jets"+self.cfg_ana.collectionPostFix): raise RuntimeError, "Event already contains a jet collection with the following postfix: "+self.cfg_ana.collectionPostFix
         setattr(event,"rho"                    +self.cfg_ana.collectionPostFix, self.rho                    ) 
         setattr(event,"deltaMetFromJEC"        +self.cfg_ana.collectionPostFix, self.deltaMetFromJEC        ) 
+        setattr(event,"type1METCorr"           +self.cfg_ana.collectionPostFix, self.type1METCorr           ) 
         setattr(event,"allJetsUsedForMET"      +self.cfg_ana.collectionPostFix, self.allJetsUsedForMET      ) 
         setattr(event,"jets"                   +self.cfg_ana.collectionPostFix, self.jets                   ) 
         setattr(event,"jetsFailId"             +self.cfg_ana.collectionPostFix, self.jetsFailId             ) 
@@ -298,10 +332,14 @@ class JetAnalyzer( Analyzer ):
         setattr(event,"cleanJetsAll"           +self.cfg_ana.collectionPostFix, self.cleanJetsAll           ) 
         setattr(event,"cleanJets"              +self.cfg_ana.collectionPostFix, self.cleanJets              ) 
         setattr(event,"cleanJetsFwd"           +self.cfg_ana.collectionPostFix, self.cleanJetsFwd           ) 
+        setattr(event,"cleanJetsFailIdAll"           +self.cfg_ana.collectionPostFix, self.cleanJetsFailIdAll           ) 
+        setattr(event,"cleanJetsFailId"              +self.cfg_ana.collectionPostFix, self.cleanJetsFailId              ) 
         setattr(event,"discardedJets"          +self.cfg_ana.collectionPostFix, self.discardedJets          ) 
         setattr(event,"gamma_cleanJetsAll"     +self.cfg_ana.collectionPostFix, self.gamma_cleanJetsAll     ) 
         setattr(event,"gamma_cleanJets"        +self.cfg_ana.collectionPostFix, self.gamma_cleanJets        ) 
         setattr(event,"gamma_cleanJetsFwd"     +self.cfg_ana.collectionPostFix, self.gamma_cleanJetsFwd     ) 
+        setattr(event,"gamma_cleanJetsFailIdAll"     +self.cfg_ana.collectionPostFix, self.gamma_cleanJetsFailIdAll     ) 
+        setattr(event,"gamma_cleanJetsFailId"        +self.cfg_ana.collectionPostFix, self.gamma_cleanJetsFailId        ) 
 
 
         if self.cfg_comp.isMC:
@@ -399,8 +437,8 @@ class JetAnalyzer( Analyzer ):
                jet.deltaMetFromJetSmearing = [ -(ptscale-1)*jet.rawFactor()*jet.px(), -(ptscale-1)*jet.rawFactor()*jet.py() ]
                if ptscale != 0:
                   jet.setP4(jet.p4()*ptscale)
-               # leave the uncorrected unchanged for sync
-               jet._rawFactorMultiplier *= (1.0/ptscale) if ptscale != 0 else 1
+                  # leave the uncorrected unchanged for sync
+                  jet.setRawFactor(jet.rawFactor()/ptscale)
             #else: print "jet with pt %.1d, eta %.2f is unmatched" % (jet.pt(), jet.eta())
                if (self.shiftJER==0) and (self.addJERShifts):
                    setattr(jet, "corrJER", ptscale )
@@ -432,6 +470,7 @@ setattr(JetAnalyzer,"defaultConfig", cfg.Analyzer(
     relaxJetId = False,  
     doPuId = False, # Not commissioned in 7.0.X
     doQG = False, 
+    checkLeptonPFOverlap = True,
     recalibrateJets = False,
     applyL2L3Residual = 'Data', # if recalibrateJets, apply L2L3Residual to Data only
     recalibrationType = "AK4PFchs",
@@ -439,14 +478,18 @@ setattr(JetAnalyzer,"defaultConfig", cfg.Analyzer(
     addJECShifts = False, # if true, add  "corr", "corrJECUp", and "corrJECDown" for each jet (requires uncertainties to be available!)
     smearJets = True,
     shiftJER = 0, # set to +1 or -1 to get +/-1 sigma shifts    
+    jecPath = "",
+    calculateSeparateCorrections = False,
+    calculateType1METCorrection  = False,
+    type1METParams = { 'jetPtThreshold':15., 'skipEMfractionThreshold':0.9, 'skipMuons':True },
     addJERShifts = 0, # add +/-1 sigma shifts to jets, intended to be used with shiftJER=0
     cleanJetsFromFirstPhoton = False,
     cleanJetsFromTaus = False,
     cleanJetsFromIsoTracks = False,
     alwaysCleanPhotons = False,
-    jecPath = "",
     do_mc_match=True,
     cleanGenJetsFromPhoton = False,
+    attachNeutrinos = True,
     genNuSelection = lambda nu : True, #FIXME: add here check for ispromptfinalstate
     collectionPostFix = ""
     )
