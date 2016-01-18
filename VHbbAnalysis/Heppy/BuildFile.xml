@@ -10,6 +10,10 @@
 <use name="fastjet"/>
 <use name="ktjet"/>
 <use name="EgammaAnalysis/ElectronTools"/>
+<use name="MagneticField/UniformEngine"/>
+<use name="MagneticField/ParametrizedEngine"/>
+<use name="RecoVertex/KalmanVertexFit"/>
+<use name="RecoVertex/VertexTools"/>
 <use name="boost"/>
 <use name="lhapdf"/>
 <export>
