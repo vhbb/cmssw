@@ -70,14 +70,14 @@ class BTagWeightCalculator:
         is_light = (fl < 4)
 
         if is_bottom and not (systematic in ["JESUp", "JESDown", "LFUp", "LFDown", 
-                                        "Stats1Up", "Stats1Down", "Stats2Up", "Stats2Down", 
+                                        "HFStats1Up", "HFStats1Down", "HFStats2Up", "HFStats2Down", 
                                         "nominal"]):
             return 1.0
         if is_charm and not (systematic in ["cErr1Up", "cErr1Down", "cErr2Up", "cErr2Down", 
                                         "nominal"]):
             return 1.0
         if is_light and not (systematic in ["JESUp", "JESDown", "HFUp", "HFDown", 
-                                        "Stats1Up", "Stats1Down", "Stats2Up", "Stats2Down", 
+                                        "LFStats1Up", "LFStats1Down", "LFStats2Up", "LFStats2Down", 
                                         "nominal"]):
             return 1.0
 
@@ -91,6 +91,9 @@ class BTagWeightCalculator:
 
         if ptbin < 0 or etabin < 0:
             return 1.0
+
+        if "Stats" in systematic:
+            systematic = systematic[2:]
 
         k = (ptbin, etabin, kind, systematic)
         hdict = self.pdfs["lf"]
