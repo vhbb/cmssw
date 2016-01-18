@@ -39,7 +39,7 @@ class TTHtoTauTauGeneratorAnalyzer( Analyzer ):
     def beginLoop(self,setup):
         super(TTHtoTauTauGeneratorAnalyzer,self).beginLoop(setup)
 
-    def findFirstDaughterGivenPdgId(self, givenMother, givenPdgIds):
+    def findFirstDaughterGivenPdgId(self, givenMother, givenMotherPdgId, givenPdgIds):
         """Get the first gen level daughter particle with given pdgId"""
 
         mothers = []
@@ -48,6 +48,8 @@ class TTHtoTauTauGeneratorAnalyzer( Analyzer ):
         while len(mothers) > 0:
             daughters = []
             for mother in mothers:
+                if givenMotherPdgId and mother.pdgId() != givenMotherPdgId:
+                    continue
                 for idxDaughter in range(mother.numberOfDaughters()):
                     daughter = GenParticle(mother.daughter(idxDaughter))
                     daughters.append(daughter)
@@ -65,7 +67,7 @@ class TTHtoTauTauGeneratorAnalyzer( Analyzer ):
         t = None
         tbar = None
         H = None
-        
+
         for genParticle in genParticles:
             pdgId = genParticle.pdgId()
             if pdgId == +6 and not t:
@@ -75,36 +77,49 @@ class TTHtoTauTauGeneratorAnalyzer( Analyzer ):
             if pdgId in [ 25, 35, 36 ] and not H:
                 H = genParticle
 
+        event.genH_decayMode = -1
+        if H:
+            for pdgIds in [ [ +5, -5 ], [ +24, -24 ], [ 21, 21 ], [ +15, -15 ], [ 23, 23 ], [ +4, -4 ], [ 22, 22 ], [ 23, 22 ] ]:
+                if self.findFirstDaughterGivenPdgId(H, H.pdgId(), [ pdgIds[0] ]) and self.findFirstDaughterGivenPdgId(H, H.pdgId(), [ pdgIds[1] ]):
+                    event.genH_decayMode = abs(pdgIds[0]*pdgIds[1])
+                    break
+
         numElectrons_or_Muons_fromH = 0
         numHadTaus_fromH = 0
-        if self.findFirstDaughterGivenPdgId(H, [ -11, -13 ]):
-            numElectrons_or_Muons_fromH = numElectrons_or_Muons_fromH + 1
-        elif self.findFirstDaughterGivenPdgId(H, [ -15 ]):
-            numHadTaus_fromH = numHadTaus_fromH + 1
-        if self.findFirstDaughterGivenPdgId(H, [ +11, +13 ]):
-            numElectrons_or_Muons_fromH = numElectrons_or_Muons_fromH + 1
-        elif self.findFirstDaughterGivenPdgId(H, [ +15 ]):
-            numHadTaus_fromH = numHadTaus_fromH + 1
+        if H:
+            if self.findFirstDaughterGivenPdgId(H, None, [ -11, -13 ]):
+                numElectrons_or_Muons_fromH = numElectrons_or_Muons_fromH + 1
+            elif self.findFirstDaughterGivenPdgId(H, H.pdgId(), [ -15 ]):
+                numHadTaus_fromH = numHadTaus_fromH + 1
+            if self.findFirstDaughterGivenPdgId(H, None, [ +11, +13 ]):
+                numElectrons_or_Muons_fromH = numElectrons_or_Muons_fromH + 1
+            elif self.findFirstDaughterGivenPdgId(H, H.pdgId(), [ +15 ]):
+                numHadTaus_fromH = numHadTaus_fromH + 1
 
         numBs = 0
-        if self.findFirstDaughterGivenPdgId(t, [ +5 ]):
-            numBs = numBs + 1
-        if self.findFirstDaughterGivenPdgId(tbar, [ -5 ]):
-            numBs = numBs + 1
+        if t and tbar:
+            if self.findFirstDaughterGivenPdgId(t, t.pdgId(), [ +5 ]):
+                numBs = numBs + 1
+            if self.findFirstDaughterGivenPdgId(tbar, tbar.pdgId(), [ -5 ]):
+                numBs = numBs + 1
 
-        Wplus = self.findFirstDaughterGivenPdgId(t, [ +24 ])
-        Wminus = self.findFirstDaughterGivenPdgId(tbar, [ -24 ])
+        Wplus = None
+        Wminus = None
+        if t and tbar:
+            Wplus = self.findFirstDaughterGivenPdgId(t, t.pdgId(), [ +24 ])
+            Wminus = self.findFirstDaughterGivenPdgId(tbar, tbar.pdgId(), [ -24 ])
         
         numElectrons_or_Muons_fromW = 0
         numHadTaus_fromW = 0
-        if self.findFirstDaughterGivenPdgId(Wplus, [ -11, -13 ]):
-            numElectrons_or_Muons_fromW = numElectrons_or_Muons_fromW + 1
-        elif self.findFirstDaughterGivenPdgId(Wplus, [ -15 ]):
-            numHadTaus_fromW = numHadTaus_fromW + 1
-        if self.findFirstDaughterGivenPdgId(Wminus, [ +11, +13 ]):
-            numElectrons_or_Muons_fromW = numElectrons_or_Muons_fromW + 1
-        elif self.findFirstDaughterGivenPdgId(Wminus, [ +15 ]):
-            numHadTaus_fromW = numHadTaus_fromW + 1
+        if Wplus and Wminus:
+            if self.findFirstDaughterGivenPdgId(Wplus, None, [ -11, -13 ]):
+                numElectrons_or_Muons_fromW = numElectrons_or_Muons_fromW + 1
+            elif self.findFirstDaughterGivenPdgId(Wplus, Wplus.pdgId(), [ -15 ]):
+                numHadTaus_fromW = numHadTaus_fromW + 1
+            if self.findFirstDaughterGivenPdgId(Wminus, None, [ +11, +13 ]):
+                numElectrons_or_Muons_fromW = numElectrons_or_Muons_fromW + 1
+            elif self.findFirstDaughterGivenPdgId(Wminus, Wminus.pdgId(), [ +15 ]):
+                numHadTaus_fromW = numHadTaus_fromW + 1
 
         event.genTTHtoTauTauDecayMode = -1
         if numElectrons_or_Muons_fromH == 2 and (numElectrons_or_Muons_fromW + numHadTaus_fromW) == 2:
