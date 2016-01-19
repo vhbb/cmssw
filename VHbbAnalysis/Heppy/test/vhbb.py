@@ -42,7 +42,8 @@ treeProducer= cfg.Analyzer(
                  NTupleVariable("lheNl",  lambda ev: ev.lheNl, float,mcOnly=True, help="number of light(uds) jets at LHE level"),
 		 NTupleVariable("lheV_pt",  lambda ev: ev.lheV_pt, float,mcOnly=True, help="Vector pT at LHE level"),
                  NTupleVariable("lheHT",  lambda ev: ev.lheHT, float,mcOnly=True, help="HT at LHE level"),
-                 NTupleVariable("genTTHtoTauTauDecayMode", lambda ev: ev.genTTHtoTauTauDecayMode, int,mcOnly=True, help="gen level ttH, H -> tautau decay mode"),        
+                 #NTupleVariable("LHE_originalWeight",  lambda ev: ev.LHE_originalWeight, float, mcOnly=True, help="LHE original weight (for normalisation of LHE_weights)"),
+                 NTupleVariable("genTTHtoTauTauDecayMode", lambda ev: ev.genTTHtoTauTauDecayMode, int,mcOnly=True, help="gen level ttH, H -> tautau decay mode"),        		 
 		#Soft Activity vars
 #                 NTupleVariable("totSoftActivityJets2", lambda ev: len([ x for x in ev.softActivityJets if x.pt()> 2 ] ), int, help="number of jets from soft activity with pt>2Gev"),
  #                NTupleVariable("totSoftActivityJets5", lambda ev: len([ x for x in ev.softActivityJets if x.pt()> 5 ] ), int, help="number of jets from soft activity with pt>5Gev"),
@@ -125,7 +126,10 @@ treeProducer= cfg.Analyzer(
 		#"genWbosonsToLL"  : NTupleCollection("GenWbosonsToLL", genParticleType, 6, help="Generated W or Z bosons decaying to LL"),
 		"genvbosons"       : NTupleCollection("GenVbosons", genParticleType, 6, help="Generated W or Z bosons, mass > 30"),
 		"pileUpVertex_z"       : NTupleCollection("pileUpVertex_z",    objectFloat, 5,help="z position of hardest pile-up collisions"),        
-		"pileUpVertex_ptHat"       : NTupleCollection("pileUpVertex_ptHat",    objectFloat, 5,help="z position of hardest pile-up collisions"),        
+		"pileUpVertex_ptHat"   : NTupleCollection("pileUpVertex_ptHat",    objectFloat, 5,help="z position of hardest pile-up collisions"),        
+		"LHE_weights_scale"       : NTupleCollection("LHE_weights_scale",   weightsInfoType , 6 ,help="LHE weights for scale variation", mcOnly=True),        
+		"LHE_weights_pdf"       : NTupleCollection("LHE_weights_pdf",   weightsInfoType , 100 ,help="LHE weights for pdf variation; TO BE IMPLEMENTED", mcOnly=True),        
+
 	}
 	)
 
@@ -191,8 +195,12 @@ JetAna.calculateSeparateCorrections = True # CV: needed for ttH prompt lepton MV
 from PhysicsTools.Heppy.analyzers.gen.LHEAnalyzer import LHEAnalyzer 
 LHEAna = LHEAnalyzer.defaultConfig
 
+from PhysicsTools.Heppy.analyzers.gen.LHEWeightAnalyzer import LHEWeightAnalyzer 
+LHEWeightAna = LHEWeightAnalyzer.defaultConfig
+
 from PhysicsTools.Heppy.analyzers.gen.GeneratorAnalyzer import GeneratorAnalyzer 
 GenAna = GeneratorAnalyzer.defaultConfig
+
 from VHbbAnalysis.Heppy.VHGeneratorAnalyzer import GeneratorAnalyzer as  VHGeneratorAnalyzer
 VHGenAna = VHGeneratorAnalyzer.defaultConfig
 
@@ -328,15 +336,13 @@ jsonAna = cfg.Analyzer(JSONAnalyzer,
       passAll=True
       )
 
-sequence = [jsonAna,LHEAna,FlagsAna, hbheAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,TauAna,JetAna,ttHLeptonMVA,METAna, METPuppiAna,  PdfAna, VHbb,TTHtoTauTau,TTHtoTauTauGen,treeProducer]#,sh]
-
+sequence = [jsonAna,LHEAna,LHEWeightAna,FlagsAna, hbheAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,TauAna,JetAna,ttHLeptonMVA,METAna, METPuppiAna,  PdfAna, VHbb,TTHtoTauTau,TTHtoTauTauGen,treeProducer]#,sh]
 
 from PhysicsTools.Heppy.utils.miniAodFiles import miniAodFiles
 sample = cfg.MCComponent(
-    files = [
+	files = [
 		"root://xrootd.ba.infn.it//store/mc/RunIIFall15MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-scaledown-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/30000/045996FE-A19D-E511-B76D-D4AE526A0B47.root" ##ttbar
-],
-
+		],
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
     name="ZHLL125", isEmbed=False,
     puFileMC="puMC.root",
@@ -361,7 +367,7 @@ class TestFilter(logging.Filter):
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 1000)
+    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 100)
 
     import time
     import cProfile
