@@ -81,7 +81,8 @@ _MuonVars = {
 
 _ElectronVars = {
  'WithPtV2': [
-    MVAVar("LepGood_mvaIdPhys14",lambda x: x.mvaRun2("NonTrigPhys14")),    
+##    MVAVar("LepGood_mvaIdPhys14",lambda x: x.mvaRun2("NonTrigPhys14")),
+      MVAVar("LepGood_mvaIdPhys14",lambda x: -1.), # CV: EGamma POG electron MVA ID not working yet
  ]
 
 }
@@ -106,7 +107,11 @@ class LeptonMVA:
         ])
     def __call__(self,lep,ncorr="auto"):
         if ncorr == "auto": ncorr = 0 # (1 if self._isMC else 0)
-        if   abs(lep.pdgId()) == 11: return self.el(lep,ncorr)
-        elif abs(lep.pdgId()) == 13: return self.mu(lep,ncorr)
-        else: return -99
+        retVal = -99
+        if abs(lep.pdgId()) == 11:
+            retVal = self.el(lep,ncorr)
+        elif abs(lep.pdgId()) == 13:
+            retVal = self.mu(lep,ncorr)
+        return retVal
+    
 
