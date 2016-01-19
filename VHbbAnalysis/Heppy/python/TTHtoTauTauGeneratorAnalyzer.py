@@ -51,7 +51,7 @@ class TTHtoTauTauGeneratorAnalyzer( Analyzer ):
                 if givenMotherPdgId and mother.pdgId() != givenMotherPdgId:
                     continue
                 for idxDaughter in range(mother.numberOfDaughters()):
-                    daughter = GenParticle(mother.daughter(idxDaughter))
+                    daughter = mother.daughter(idxDaughter)
                     daughters.append(daughter)
             for daughter in daughters:
                 if daughter.pdgId() in givenPdgIds:
