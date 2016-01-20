@@ -194,6 +194,15 @@ class GeneratorAnalyzer( Analyzer ):
         #event.genWbosonsToLL = [ p for p in event.genParticles if abs(p.pdgId()) in [24] and abs(p.daughter(0).pdgId())!= abs(p.pdgId()) ]
 
         event.genvbosons = [ p for p in event.genParticles if abs(p.pdgId()) in [23,24] and p.numberOfDaughters()>0 and abs(p.daughter(0).pdgId()) != abs(p.pdgId()) and p.mass() > 30 ]
+
+        if not event.genvbosons:
+            if abs(event.genParticles[4].pdgId()) in [11,12,13,14,15,16] and abs(event.genParticles[4].pdgId())==abs(event.genParticles[5].pdgId()):
+                l1=event.genParticles[4]
+                l2=event.genParticles[5]
+                V=GenParticle(0, l1.p4()+l2.p4(), l1.vertex(), 23, -123, 0)
+                V.addDaughter(l1.daughterRef(0).motherRef(0))
+                V.addDaughter(l2.daughterRef(0).motherRef(0))
+                event.genvbosons = [V]
  		   
         #bosons = [ gp for gp in event.genParticles if gp.status() > 2 and  abs(gp.pdgId()) in [22,23,24]  ]
     	for b in event.genvbosons:
