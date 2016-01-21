@@ -313,6 +313,24 @@ svType = NTupleObjectType("sv", baseObjectTypes = [ fourVectorType ], variables 
     NTupleVariable("mcFlavHeaviest", lambda x : x.mcFlavHeaviest, int, mcOnly=True, help="Flavour of heaviest hadron with maximum number of matched daughters"),
 ])
 
+
+##------------------------------------------  
+## Trigger object type
+##------------------------------------------  
+
+triggerObjectsType = NTupleObjectType("triggerObjects",  baseObjectTypes = [ fourVectorType ], variables = [
+])
+triggerObjectsOnlyPtType = NTupleObjectType("triggerObjects",  baseObjectTypes = [ ], variables = [
+    NTupleVariable("pt", lambda x : x.pt(), float, mcOnly=False, help="trigger object pt"),
+])
+triggerObjectsNothingType = NTupleObjectType("triggerObjects",  baseObjectTypes = [ ], variables = [
+])
+
+##------------------------------------------  
+## Heavy flavour hadron
+##------------------------------------------  
+
+
 heavyFlavourHadronType = NTupleObjectType("heavyFlavourHadron", baseObjectTypes = [ genParticleType ], variables = [
     NTupleVariable("flav", lambda x : x.flav, int, mcOnly=True, help="Flavour"),
     NTupleVariable("sourceId", lambda x : x.sourceId, int, mcOnly=True, help="pdgId of heaviest mother particle (stopping at the first one heaviest than 175 GeV)"),
