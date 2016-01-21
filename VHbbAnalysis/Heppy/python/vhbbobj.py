@@ -138,8 +138,8 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
 from PhysicsTools.Heppy.physicsutils.BTagWeightCalculator import BTagWeightCalculator
 csvpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/csv"
 bweightcalc = BTagWeightCalculator(
-    csvpath + "/csv_rwt_hf_IT_FlatSF_2015_07_27.root",
-    csvpath + "/csv_rwt_lf_IT_FlatSF_2015_07_27.root"
+    csvpath + "/csv_rwt_fit_hf_2015_12_14.root",
+    csvpath + "/csv_rwt_fit_lf_2015_12_14.root"
 )
 
 for syst in ["JES", "LF", "HF", "HFStats1", "HFStats2", "LFStats1", "LFStats2", "cErr1", "cErr2"]:
