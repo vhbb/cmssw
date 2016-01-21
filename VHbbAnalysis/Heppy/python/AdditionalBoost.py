@@ -269,11 +269,17 @@ class AdditionalBoost( Analyzer ):
         else:
             doResidual = True
 
-        self.jetReCalibrator = JetReCalibrator(GT,
+        self.jetReCalibratorL2L3 = JetReCalibrator(GT,
                                                recalibrationType, 
                                                doResidual, 
                                                jecPath,
                                                skipLevel1=True)
+
+	self.jetReCalibratorL1L2L3 = JetReCalibrator(GT,
+                                               recalibrationType,
+                                               doResidual,
+                                               jecPath,
+                                               skipLevel1=False)
 
     
     def declareHandles(self):
@@ -374,8 +380,10 @@ class AdditionalBoost( Analyzer ):
             for i in xrange(len(newtags)) :
                 if jet.physObj == newtags.key(i).get():
                     jet.bbtag = newtags.value(i)
-		corr=  self.jetReCalibratorAK8.getCorrection(Jet(jet),rho)
+		corr=  self.jetReCalibratorL2L3.getCorrection(Jet(jet),rho)
                 jet.mprunedcorr= jet.userFloat("ak8PFJetsCHSPrunedMass")*corr	
+		jet.JEC_L2L3 = corr
+		jet.JEC_L1L2L3 = self.jetReCalibratorL1L2L3.getCorrection(Jet(jet),rho)
 
 
             # bb-tag Inputs
@@ -511,7 +519,7 @@ class AdditionalBoost( Analyzer ):
                 continue
 
             ungroomed_jet = Jet(closest_ung_fj_and_dr[0])        
-            c = self.jetReCalibrator.getCorrection(ungroomed_jet, rho)
+            c = self.jetReCalibratorL1L2L3.getCorrection(ungroomed_jet, rho)
                         
             # Need to do a deep-copy. Otherwise the original jet will be modified
             cal_groomed_fj = PhysicsObject(groomed_fj).__copy__() 
