@@ -68,4 +68,6 @@ export ROOT_INCLUDE_PATH=.:./src:$ROOT_INCLUDE_PATH
 
 python heppy_crab_script.py $1
 echo "======================== CMSRUN LOG ============================"
-cat Output/cmsRun.log 
+cat Output/cmsRun.log
+ls -al
+cat FrameworkJobReport.xml
