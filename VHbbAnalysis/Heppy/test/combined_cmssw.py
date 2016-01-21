@@ -469,7 +469,24 @@ def initialize(isMC=True):
         process.tauGenJets.GenParticles = cms.InputTag('prunedGenParticles')
         process.load("PhysicsTools.JetMCAlgos.TauGenJetsDecayModeSelectorAllHadrons_cfi")
         process.OUT.outputCommands.append("keep *_tauGenJetsSelectorAllHadrons_*_EX")
-
+    
+    
+    ########################################
+    # Electron MVA ID: https://twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentificationRun2#Recipes_and_implementation
+    ########################################
+   
+    from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+    switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
+    for eleid in ["RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_Trig_V1_cff"]:
+        setupAllVIDIdsInModule(process, eleid, setupVIDElectronSelection)
+    process.OUT.outputCommands.append("keep *_electronEcalPFClusterIsolationProducer_*_*")
+    process.OUT.outputCommands.append("keep *_electronHcalPFClusterIsolationProducer_*_*")
+    process.OUT.outputCommands.append("keep *_electronEcalPFClusterIsolationProducer__*")
+    process.OUT.outputCommands.append("keep *_electronHcalPFClusterIsolationProducer__*")
+    process.OUT.outputCommands.append("keep *_electronMVAValueMapProducer_*_EX")
+    process.OUT.outputCommands.append("keep *_egmGsfElectronIDs_*_EX")
+    
+    #process.eleIDPath = cms.Path(process.egmGsfElectronIDSequence)
     return process
 
 # Called directly 
