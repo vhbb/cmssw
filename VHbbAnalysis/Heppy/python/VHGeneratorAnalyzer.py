@@ -111,9 +111,33 @@ class GeneratorAnalyzer( Analyzer ):
         """Get the b quarks from top decays into event.genbquarksFromTop"""
 
         event.gentopquarks = [ p for p in event.genParticles if abs(p.pdgId()) == 6 and p.numberOfDaughters() > 0 and abs(p.daughter(0).pdgId()) != 6 ]
-        #if len(event.gentopquarks) != 2:
-        #    print "Not two top quarks? \n%s\n" % event.gentopquarks
-
+       
+        #Find the top decay mode (0 - leptonic, 1 - hadronic)
+        for top in event.gentopquarks:
+            ndaus = top.numberOfDaughters()
+            top.decayMode = -1
+            
+            #go over top daughters
+            for idau in range(ndaus):
+                dau = top.daughter(idau)
+                #found the W
+                if abs(dau.pdgId()) == 24:
+                    #find the true daughters of the W (in case of decay chain)
+                    W_daus = realGenDaughters(dau)
+                    decayMode = -1
+                    #go over the daughters of the W
+                    for idauw in range(len(W_daus)):
+                        w_dau_id = abs(W_daus[idauw].pdgId())
+                        #leptonic
+                        if w_dau_id in [11,12,13,14,15,16]:
+                            decayMode = 0
+                            break
+                        #hadronic
+                        elif w_dau_id < 6:
+                            decayMode = 1
+                            break
+                    top.decayMode = decayMode
+                    break
         for tq in event.gentopquarks:
             for i in xrange( tq.numberOfDaughters() ):
                 dau = GenParticle(tq.daughter(i))
