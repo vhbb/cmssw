@@ -293,7 +293,7 @@ from VHbbAnalysis.Heppy.TriggerTableData import triggerTable as triggerTableData
 TrigAna = cfg.Analyzer(
     verbose = False,
     class_object = TriggerBitAnalyzer,
-    triggerBits = TriggerTableData,  #in 76X simulation and Run2015 data use the same HLT menu
+    triggerBits = triggerTable,  #default is MC, use the triggerTableData in -data.py files
 #   processName = 'HLT',
 #   outprefix = 'HLT'
    )
