@@ -22,13 +22,14 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
     NTupleVariable("eleMissingHits",      lambda x : x.lostInner() if abs(x.pdgId())==11 else -1., help="Missing hits for electrons"),
     NTupleVariable("eleChi2",      lambda x : x.gsfTrack().normalizedChi2() if abs(x.pdgId())==11 else -1., help="Track chi squared for electrons' gsf tracks"),
     # Extra electron id variables
-#    NTupleVariable("convVetoFull", lambda x : (x.passConversionVeto() and x.gsfTrack().trackerExpectedHitsInner().numberOfLostHits() == 0) if abs(x.pdgId())==11 else 1, int, help="Conv veto + no missing hits for electrons, always true for muons."),
-    #NTupleVariable("eleMVAId",     lambda x : (x.electronID("POG_MVA_ID_NonTrig") + 2*x.electronID("POG_MVA_ID_Trig")) if abs(x.pdgId()) == 11 else -1, int, help="Electron mva id working point: 0=none, 1=non-trig, 2=trig, 3=both"),
-#    NTupleVariable("eleMVAId",     lambda x : (x.electronID("POG_MVA_ID_NonTrig_full5x5") + 2*x.electronID("POG_MVA_ID_Trig_full5x5")) if abs(x.pdgId()) == 11 else -1, int, help="Electron mva id working point (2012, full5x5 shapes): 0=none, 1=non-trig, 2=trig, 3=both"),
-#    NTupleVariable("tightCharge",  lambda lepton : ( lepton.isGsfCtfScPixChargeConsistent() + lepton.isGsfScPixChargeConsistent() ) if abs(lepton.pdgId()) == 11 else 2*(lepton.innerTrack().ptError()/lepton.innerTrack().pt() < 0.2), int, help="Tight charge criteria"),
-    #NTupleVariable("mvaId",        lambda lepton : lepton.mvaNonTrigV0() if abs(lepton.pdgId()) == 11 else 1, help="EGamma POG MVA ID for non-triggering electrons (as HZZ); 1 for muons"),
-#    NTupleVariable("mvaId",         lambda lepton : lepton.mvaNonTrigV0(full5x5=True) if abs(lepton.pdgId()) == 11 else 1, help="EGamma POG MVA ID for non-triggering electrons (as HZZ); 1 for muons"),
-#    NTupleVariable("mvaIdTrig",     lambda lepton : lepton.mvaTrigV0(full5x5=True)    if abs(lepton.pdgId()) == 11 else 1, help="EGamma POG MVA ID for triggering electrons; 1 for muons"),
+    NTupleVariable("convVetoFull", lambda x : (x.passConversionVeto() and x.lostInner() == 0) if abs(x.pdgId())==11 else 1, int, help="Conv veto + no missing hits for electrons, always true for muons."),
+    NTupleVariable("eleMVArawPhys14NonTrig", lambda x : x.mvaRun2("NonTrigPhys14") if abs(x.pdgId()) == 11 else -1, help="EGamma POG MVA ID for non-triggering electrons (raw MVA value, Phys14 training); 1 for muons"),
+    NTupleVariable("eleMVAIdPhys14NonTrig", lambda x : max(x.electronID("POG_MVA_ID_Phys14_NonTrig_VLoose"), 2*x.electronID("POG_MVA_ID_Phys14_NonTrig_Loose"), 3*x.electronID("POG_MVA_ID_Phys14_NonTrig_Tight")) if abs(x.pdgId()) == 11 else -1, int, help="EGamma POG MVA ID for non-triggering electrons (0=none, 1=vloose, 2=loose, 3=tight, Phys14 training); 1 for muons"),
+    NTupleVariable("eleMVArawSpring15Trig", lambda x : x.mvaRawSpring15Trig if abs(x.pdgId()) == 11 else -1, help="EGamma POG MVA ID for triggering electrons (raw MVA value, Spring15 training); 1 for muons"),
+    NTupleVariable("eleMVAIdSpring15Trig", lambda x : max(x.mvaIdSpring15TrigMedium, 2*x.mvaIdSpring15TrigTight) if abs(x.pdgId()) == 11 else -1, int, help="EGamma POG MVA ID for triggering electrons (0=none, 1=WP90, 2=WP80, Spring15 training); 1 for muons"),
+    NTupleVariable("eleMVArawSpring15NonTrig", lambda x : x.mvaRawSpring15NonTrig if abs(x.pdgId()) == 11 else -1, help="EGamma POG MVA ID for non-triggering electrons (raw MVA value, Spring15 training); 1 for muons"),
+    NTupleVariable("eleMVAIdSpring15NonTrig", lambda x : max(x.mvaIdSpring15NonTrigMedium, 2*x.mvaIdSpring15NonTrigTight) if abs(x.pdgId()) == 11 else -1, int, help="EGamma POG MVA ID for non-triggering electrons (0=none, 1=WP90, 2=WP80, Spring15 training); 1 for muons"),
+    ##NTupleVariable("tightCharge",  lambda lepton : ( lepton.isGsfCtfScPixChargeConsistent() + lepton.isGsfScPixChargeConsistent() ) if abs(lepton.pdgId()) == 11 else 2*(lepton.innerTrack().ptError()/lepton.innerTrack().pt() < 0.2), int, help="Tight charge criteria"),
     # Muon-speficic info
     NTupleVariable("nStations",    lambda lepton : lepton.numberOfMatchedStations() if abs(lepton.pdgId()) == 13 else 4, help="Number of matched muons stations (4 for electrons)"),
     NTupleVariable("trkKink",      lambda lepton : lepton.combinedQuality().trkKink if abs(lepton.pdgId()) == 13 else 0, help="Tracker kink-finder"), 
@@ -43,11 +44,14 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
     NTupleVariable("trackerLayers", lambda x : (x.track() if abs(x.pdgId())==13 else x.gsfTrack()).hitPattern().trackerLayersWithMeasurement(), int, help="Tracker Layers"),
     NTupleVariable("pixelLayers", lambda x : (x.track() if abs(x.pdgId())==13 else x.gsfTrack()).hitPattern().pixelLayersWithMeasurement(), int, help="Pixel Layers"),
     # TTH-id related variables
-    NTupleVariable("mvaTTH",     lambda lepton : lepton.mvaValue if hasattr(lepton,'mvaValue') else -1, help="Lepton MVA (ttH version)"),
+    NTupleVariable("mvaTTH",     lambda lepton : lepton.mvaValueTTH if hasattr(lepton,'mvaValueTTH') else -1, help="Lepton MVA (ttH version)"),
     NTupleVariable("jetOverlapIdx", lambda lepton : getattr(lepton, "jetOverlapIdx", -1), int, help="index of jet with overlapping PF constituents. If idx>=1000, then idx = idx-1000 and refers to discarded jets."),
     NTupleVariable("jetPtRatio", lambda lepton : lepton.pt()/lepton.jet.pt() if hasattr(lepton,'jet') else -1, help="pt(lepton)/pt(nearest jet)"),
     NTupleVariable("jetBTagCSV", lambda lepton : lepton.jet.btag('pfCombinedInclusiveSecondaryVertexV2BJetTags') if hasattr(lepton,'jet') and hasattr(lepton.jet, 'btag') else -99, help="btag of nearest jet"),
     NTupleVariable("jetDR",      lambda lepton : deltaR(lepton.eta(),lepton.phi(),lepton.jet.eta(),lepton.jet.phi()) if hasattr(lepton,'jet') else -1, help="deltaR(lepton, nearest jet)"),
+    NTupleVariable("mvaTTHjetPtRatio", lambda lepton : lepton.pt()/lepton.jet_leptonMVA.pt() if hasattr(lepton,'jet_leptonMVA') else -1, help="pt(lepton)/pt(nearest jet with pT > 25 GeV)"),
+    NTupleVariable("mvaTTHjetBTagCSV", lambda lepton : lepton.jet_leptonMVA.btag('combinedInclusiveSecondaryVertexV2BJetTags') if hasattr(lepton,'jet_leptonMVA') and hasattr(lepton.jet_leptonMVA, 'btag') else -99, help="btag of nearest jet with pT > 25 GeV"),    
+    NTupleVariable("mvaTTHjetDR",      lambda lepton : deltaR(lepton.eta(),lepton.phi(),lepton.jet_leptonMVA.eta(),lepton.jet_leptonMVA.phi()) if hasattr(lepton,'jet_leptonMVA') else -1, help="deltaR(lepton, nearest jet with pT > 25 GeV)"),
     NTupleVariable("pfRelIso03",      lambda ele : (ele.pfIsolationVariables().sumChargedHadronPt + max(ele.pfIsolationVariables().sumNeutralHadronEt + ele.pfIsolationVariables().sumPhotonEt - 0.5 * ele.pfIsolationVariables().sumPUPt,0.0)) / ele.pt()  if abs(ele.pdgId()) == 11 else -1, help="0.3 particle based iso"),
     NTupleVariable("pfRelIso04",      lambda mu : (mu.pfIsolationR04().sumChargedHadronPt + max( mu.pfIsolationR04().sumNeutralHadronEt + mu.pfIsolationR04().sumPhotonEt - 0.5 * mu.pfIsolationR04().sumPUPt,0.0)) / mu.pt() if abs(mu.pdgId()) == 13 else -1, help="0.4 particle based iso"),
     NTupleVariable("etaSc", lambda x : x.superCluster().eta() if abs(x.pdgId())==11 else -100, help="Electron supercluster pseudorapidity"),
@@ -138,11 +142,11 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
 from PhysicsTools.Heppy.physicsutils.BTagWeightCalculator import BTagWeightCalculator
 csvpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/csv"
 bweightcalc = BTagWeightCalculator(
-    csvpath + "/csv_rwt_hf_IT_FlatSF_2015_07_27.root",
-    csvpath + "/csv_rwt_lf_IT_FlatSF_2015_07_27.root"
+    csvpath + "/csv_rwt_fit_hf_2015_12_14.root",
+    csvpath + "/csv_rwt_fit_lf_2015_12_14.root"
 )
 
-for syst in ["JES", "LF", "HF", "Stats1", "Stats2", "cErr1", "cErr2"]:
+for syst in ["JES", "LF", "HF", "HFStats1", "HFStats2", "LFStats1", "LFStats2", "cErr1", "cErr2"]:
     for sdir in ["Up", "Down"]:
         jetTypeVHbb.variables += [NTupleVariable("bTagWeight"+syst+sdir,
             lambda jet, sname=syst+sdir,bweightcalc=bweightcalc: bweightcalc.calcJetWeight(

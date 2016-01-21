@@ -194,19 +194,19 @@ triggerTable = {
         "HLT_Mu8_TrkIsoVVL_Ele17_CaloIdL_TrackIdL_IsoVL_v*",
     ],
     "ttHhardonicAll" : [
-        "HLT_PFHT450_SixJet40_PFBTagCSV_v*",
+        "HLT_PFHT450_SixJet40_PFBTagCSV0p72_v*",
         "HLT_PFHT450_SixJet40_v*",
-        "HLT_PFHT400_SixJet30_BTagCSV0p5_2PFBTagCSV_v*",
+        "HLT_PFHT400_SixJet30_BTagCSV0p55_2PFBTagCSV0p72_v*",
         "HLT_PFHT400_SixJet30_v*",
         "HLT_PFHT350_v*", 
     ],
     "ttHhardonicHighLumi" : [
-        "HLT_PFHT400_SixJet30_BTagCSV0p5_2PFBTagCSV_v*",
-        "HLT_PFHT450_SixJet40_PFBTagCSV_v*",
+        "HLT_PFHT400_SixJet30_BTagCSV0p55_2PFBTagCSV0p72_v*",
+        "HLT_PFHT450_SixJet40_PFBTagCSV0p72_v*",
     ],
     "ttHhardonicLowLumi" : [
-        "HLT_PFHT400_SixJet30_BTagCSV0p5_2PFBTagCSV_v*",
-        "HLT_PFHT450_SixJet40_PFBTagCSV_v*",
+        "HLT_PFHT400_SixJet30_BTagCSV0p55_2PFBTagCSV0p72_v*",
+        "HLT_PFHT450_SixJet40_PFBTagCSV0p72_v*",
     ],
 
     "hadronic" : [
