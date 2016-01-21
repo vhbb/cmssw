@@ -142,7 +142,7 @@ bweightcalc = BTagWeightCalculator(
     csvpath + "/csv_rwt_lf_IT_FlatSF_2015_07_27.root"
 )
 
-for syst in ["JES", "LF", "HF", "Stats1", "Stats2", "cErr1", "cErr2"]:
+for syst in ["JES", "LF", "HF", "HFStats1", "HFStats2", "LFStats1", "LFStats2", "cErr1", "cErr2"]:
     for sdir in ["Up", "Down"]:
         jetTypeVHbb.variables += [NTupleVariable("bTagWeight"+syst+sdir,
             lambda jet, sname=syst+sdir,bweightcalc=bweightcalc: bweightcalc.calcJetWeight(

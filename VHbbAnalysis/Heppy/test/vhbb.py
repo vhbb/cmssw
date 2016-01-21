@@ -142,7 +142,7 @@ shifted_mets = {mk: NTupleObject(nm, shiftedMetType, help="PF E_{T}^{miss}, afte
 treeProducer.globalObjects.update(shifted_mets)
 
 btag_weights = {}
-for syst in ["JES", "LF", "HF", "Stats1", "Stats2", "cErr1", "cErr2"]:
+for syst in ["JES", "LF", "HF", "HFStats1", "HFStats2", "LFStats1", "LFStats2", "cErr1", "cErr2"]:
 	for sdir in ["Up", "Down"]:
 		name = "bTagWeight"+syst+sdir
 		btag_weights[name] = NTupleVariable("bTagWeight_" + syst + sdir,
