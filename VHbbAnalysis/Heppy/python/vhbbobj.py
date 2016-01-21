@@ -258,27 +258,38 @@ patSubjetType = NTupleObjectType("patsubjet",  baseObjectTypes = [ fourVectorTyp
 
 httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variables = [
 
+    NTupleVariable("ptcal",   lambda x : x.ptcal,   help="pT (calibrated)"),
+    NTupleVariable("etacal",  lambda x : x.etacal,  help="eta (calibrated)"),
+    NTupleVariable("phical",  lambda x : x.phical,  help="phi (calibrated)"),
+    NTupleVariable("masscal", lambda x : x.masscal, help="mass (calibrated)"),
+
     NTupleVariable("fRec",  lambda x : x.fRec, help="relative W width"),
     NTupleVariable("Ropt",  lambda x : x.Ropt, help="optimal value of R"),
     NTupleVariable("RoptCalc",  lambda x : x.RoptCalc, help="expected value of optimal R"),
     NTupleVariable("ptForRoptCalc",  lambda x : x.ptForRoptCalc, help="pT used for calculation of RoptCalc"),
 
     # Leading W Subjet (pt)
+    NTupleVariable("sjW1ptcal",lambda x : x.sjW1ptcal,help = "Leading W Subjet pT (calibrated)"),
     NTupleVariable("sjW1pt",   lambda x : x.sjW1pt,   help = "Leading W Subjet pT"),
     NTupleVariable("sjW1eta",  lambda x : x.sjW1eta,  help = "Leading W Subjet eta"),
     NTupleVariable("sjW1phi",  lambda x : x.sjW1phi,  help = "Leading W Subjet phi"),
+    NTupleVariable("sjW1masscal", lambda x : x.sjW1masscal, help = "Leading W Subjet mass (calibrated)"),
     NTupleVariable("sjW1mass", lambda x : x.sjW1mass, help = "Leading W Subjet mass"),
     NTupleVariable("sjW1btag", lambda x : x.sjW1btag, help = "Leading W Subjet btag"),
     # Second W Subjet (pt)
+    NTupleVariable("sjW2ptcal", lambda x : x.sjW2ptcal,help = "Second Subjet pT (calibrated)"),
     NTupleVariable("sjW2pt",   lambda x : x.sjW2pt,   help = "Second Subjet pT"),
     NTupleVariable("sjW2eta",  lambda x : x.sjW2eta,  help = "Second Subjet eta"),
     NTupleVariable("sjW2phi",  lambda x : x.sjW2phi,  help = "Second Subjet phi"),
+    NTupleVariable("sjW2masscal", lambda x : x.sjW2masscal, help = "Second Subjet mass (calibrated)"),
     NTupleVariable("sjW2mass", lambda x : x.sjW2mass, help = "Second Subjet mass"),
     NTupleVariable("sjW2btag", lambda x : x.sjW2btag, help = "Second Subjet btag"),
     # Non-W Subjet
+    NTupleVariable("sjNonWptcal",lambda x : x.sjNonWptcal,help = "Non-W Subjet pT (calibrated)"),
     NTupleVariable("sjNonWpt",   lambda x : x.sjNonWpt,   help = "Non-W Subjet pT"),
     NTupleVariable("sjNonWeta",  lambda x : x.sjNonWeta,  help = "Non-W Subjet eta"),
     NTupleVariable("sjNonWphi",  lambda x : x.sjNonWphi,  help = "Non-W Subjet phi"),
+    NTupleVariable("sjNonWmasscal", lambda x : x.sjNonWmasscal, help = "Non-W Subjet mass (calibrated)"),
     NTupleVariable("sjNonWmass", lambda x : x.sjNonWmass, help = "Non-W Subjet mass"),
     NTupleVariable("sjNonWbtag", lambda x : x.sjNonWbtag, help = "Non-W Subjet btag"),
     ])
