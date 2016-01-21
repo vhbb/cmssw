@@ -81,10 +81,8 @@ _MuonVars = {
 
 _ElectronVars = {
  'WithPtV2': [
-##    MVAVar("LepGood_mvaIdPhys14",lambda x: x.mvaRun2("NonTrigPhys14")),
-      MVAVar("LepGood_mvaIdPhys14",lambda x: -1.), # CV: EGamma POG electron MVA ID not working yet
+    MVAVar("LepGood_mvaIdPhys14",lambda x: x.mvaRun2("NonTrigPhys14")),
  ]
-
 }
 
 
