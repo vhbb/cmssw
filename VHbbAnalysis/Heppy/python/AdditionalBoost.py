@@ -25,13 +25,14 @@ os.environ['ROOT_INCLUDE_PATH'] = "/cvmfs/cms.cern.ch/slc6_amd64_gcc491/external
 ROOT.gSystem.Load("libfastjet")
 ROOT.gSystem.Load("libfastjetcontribfragile")
 ROOT.gSystem.Load("libRecoBTagSecondaryVertex")
-
+ROOT.gSystem.Load("libDataFormatsTauReco.so")
 
 ROOT.gInterpreter.ProcessLine('#include "FWCore/ParameterSet/interface/ParameterSet.h"')
 
 ROOT.gInterpreter.ProcessLine('#include "fastjet/contrib/Njettiness.hh"')
 ROOT.gInterpreter.ProcessLine('#include "RecoBTag/SecondaryVertex/interface/TrackSelector.h"')
 ROOT.gInterpreter.ProcessLine('#include "RecoBTag/SecondaryVertex/interface/V0Filter.h"')
+ROOT.gInterpreter.ProcessLine('#include "DataFormats/BTauReco/interface/TaggingVariable.h"')
 
 # Helper function as there seem to be no python bindings for
 # DataFormats/Math/interface/deltaR.h
@@ -49,9 +50,9 @@ def etaRelToTauAxis( vertex, tauAxis, tau_trackEtaRel) :
   tracks = vertex.daughterPtrVector()
 
 
-#  for track in tracks:
+  for track in tracks:
   #for(std::vector<reco::CandidatePtr>::const_iterator track = tracks.begin(); track != tracks.end(); ++track)
-    #tau_trackEtaRel.add(abs(reco::btau::etaRel(direction.Unit(), track.momentum())))
+    tau_trackEtaRel.add(abs(ROOT.reco.btau.etaRel(direction.Unit(), track.momentum())))
 
 njettiness_08 = ROOT.fastjet.contrib.Njettiness(ROOT.fastjet.contrib.OnePass_KT_Axes(), 
                                                   ROOT.fastjet.contrib.NormalizedMeasure(1.0, 0.8))
