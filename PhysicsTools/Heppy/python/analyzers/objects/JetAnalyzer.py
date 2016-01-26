@@ -295,7 +295,7 @@ class JetAnalyzer( Analyzer ):
         #MC stuff
         if self.cfg_comp.isMC:
             self.deltaMetFromJetSmearing = [0, 0]
-            for j in allJets:
+            for j in self.allJets:
                 if self.cfg_ana.propagateJetSmearToMET and hasattr(j, 'deltaMetFromJetSmearing'):
                     self.deltaMetFromJetSmearing[0] += j.deltaMetFromJetSmearing[0]
                     self.deltaMetFromJetSmearing[1] += j.deltaMetFromJetSmearing[1]
