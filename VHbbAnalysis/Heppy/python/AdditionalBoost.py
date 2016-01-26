@@ -54,6 +54,16 @@ def etaRelToTauAxis( vertex, tauAxis, tau_trackEtaRel) :
   #for(std::vector<reco::CandidatePtr>::const_iterator track = tracks.begin(); track != tracks.end(); ++track)
     tau_trackEtaRel.add(abs(ROOT.reco.btau.etaRel(direction.Unit(), track.momentum())))
 
+
+
+
+def vertexKinematics(vertex, vtxKinematics):
+
+    tracks = vertex.daughterPtrVector()
+    for track in tracks:
+        mytrack = track.bestTrack()
+        vtxKinematics.add(mytrack, 1.0)
+
 njettiness_08 = ROOT.fastjet.contrib.Njettiness(ROOT.fastjet.contrib.OnePass_KT_Axes(), 
                                                   ROOT.fastjet.contrib.NormalizedMeasure(1.0, 0.8))
 
@@ -124,6 +134,7 @@ trackPairV0Filter = ROOT.reco.V0Filter(pset_v0filt)
 
 # Helper function to calculate Hbb tagging input variables
 def calcBBTagVariables(jet, 
+                       orig_jet,
                        muonTagInfos, 
                        elecTagInfos, 
                        ipTagInfo, 
@@ -204,6 +215,10 @@ def calcBBTagVariables(jet,
         ptrackRef = selectedTracks[itt]
         ptrack = ROOT.reco.btag.toTrack(selectedTracks[itt])
 
+        #const reco::CandidatePtr ptrackRef = selectedTracks[itt];
+        #const reco::Track * ptrackPtr = reco::btag::toTrack(ptrackRef);
+        #const reco::Track & ptrack = *ptrackPtr;
+
         # Assume MiniAOD and do setTracksPV(ptrackRef, vertexRef, track_PVweight)
         # directly
         track_PVweight = 0.
@@ -217,15 +232,18 @@ def calcBBTagVariables(jet,
         data = ipData[itt]
         isSelected = False
 
-        if (trackSelector(ptrack, data, jet, pv)):
+
+
+        if (trackSelector(ptrack, data, orig_jet, pv)):
             isSelected = True
 
         # check if the track is from V0
         isfromV0 = False
         isfromV0Tight = False
 
+
         trackPairV0Test = [None, None]
-        trackPairV0Test[0] = ptrackPtr
+        trackPairV0Test[0] = ROOT.reco.btag.toTrack(ptrackRef)
 
         for jtt in range(trackSize):
  
@@ -238,10 +256,15 @@ def calcBBTagVariables(jet,
             pairTrack = pairTrackPtr
  
             trackPairV0Test[1] = pairTrackPtr
- 
-            if ( not trackPairV0Filter(trackPairV0Test, 2)):
+            
+            # Convert python list to std vector
+            trackPairV0Test_vec = ROOT.std.vector("reco::Track")()
+            for x in trackPairV0Test:
+                trackPairV0Test_vec.push_back(x)
+
+            if ( not trackPairV0Filter(trackPairV0Test_vec)):
                 isfromV0 = True
-                if trackSelector(pairTrack, pairTrackData, jet, pv):
+                if trackSelector(pairTrack, pairTrackData, orig_jet, pv):
                     isfromV0Tight = True
  
             if isfromV0 and isfromV0Tight:
@@ -299,9 +322,15 @@ def calcBBTagVariables(jet,
     
     for vtx in range(svTagInfo.nVertices()):
 
+        pdb.set_trace()
+
+        vertexKinematic = ROOT.reco.TrackKinematics()
+
         # get the vertex kinematics
-        vertex = svTagInfo.secondaryVertex(vtx);
-        vertexKinematics = ROOT.reco.TrackKinematics(vertex, vertexKinematic)
+        vertex = svTagInfo.secondaryVertex(vtx)
+        vertexKinematics(vertex, vertexKinematic)
+
+        pdb.set_trace()
 
         if currentAxes.size() > 1:
         
@@ -310,7 +339,7 @@ def calcBBTagVariables(jet,
                         tau2Kinematics = tau2Kinematics + vertexKinematic
                         if tau2_flightDistance2dSig < 0 :
                         
-                          tau2_flightDistance2dSig = svTagInfo.flightDistance(vtx,true).significance()
+                          tau2_flightDistance2dSig = svTagInfo.flightDistance(vtx,True).significance()
                           tau2_vertexDeltaR = math.sqrt(deltaR2(svTagInfo.flightDirection(vtx),currentAxes[1]))
                         
                         etaRelToTauAxis(vertex, currentAxes[1], tau2_trackEtaRels)
@@ -321,7 +350,7 @@ def calcBBTagVariables(jet,
                         tau1Kinematics = tau1Kinematics + vertexKinematic
                         if tau1_flightDistance2dSig < 0 :
                         
-                          tau1_flightDistance2dSig =svTagInfo.flightDistance(vtx,true).significance()
+                          tau1_flightDistance2dSig =svTagInfo.flightDistance(vtx,True).significance()
                           tau1_vertexDeltaR = math.sqrt(deltaR2(svTagInfo.flightDirection(vtx),currentAxes[0]))
                         
                         etaRelToTauAxis(vertex, currentAxes[0], tau1_trackEtaRels)
@@ -334,7 +363,7 @@ def calcBBTagVariables(jet,
                 tau1Kinematics = tau1Kinematics + vertexKinematic
                 if tau1_flightDistance2dSig < 0 :
                 
-                  tau1_flightDistance2dSig =svTagInfo.flightDistance(vtx,true).significance()
+                  tau1_flightDistance2dSig =svTagInfo.flightDistance(vtx,True).significance()
                   tau1_vertexDeltaR = math.sqrt(deltaR2(svTagInfo.flightDirection(vtx),currentAxes[0]))
                 
                 etaRelToTauAxis(vertex, currentAxes[1], tau1_trackEtaRels)
@@ -658,7 +687,6 @@ class AdditionalBoost( Analyzer ):
                                                                "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
 
     def process(self, event):
-        pdb.set_trace()
  
         run = event.input.eventAuxiliary().id().run()
         lumi = event.input.eventAuxiliary().id().luminosityBlock()
@@ -699,7 +727,11 @@ class AdditionalBoost( Analyzer ):
             ipTagInfo    = self.handles['ak08ipTagInfos'].product()[ij]
             svTagInfo    = self.handles['ak08svTagInfos'].product()[ij]
 
+            # original jeta
+            orig_jet = self.handles["ak08"].product()[ij]
+
             calcBBTagVariables(jet, 
+                               orig_jet,
                                muonTagInfos, 
                                elecTagInfos, 
                                ipTagInfo, 
@@ -750,7 +782,11 @@ class AdditionalBoost( Analyzer ):
                 ipTagInfo    = self.handles['ca15ipTagInfos'].product()[ij]
                 svTagInfo    = self.handles['ca15svTagInfos'].product()[ij]
 
+                # original jeta
+                orig_jet = self.handles[prefix+'ungroomed'].product()[ij]
+
                 calcBBTagVariables(jet, 
+                                   orig_jet,
                                    muonTagInfos, 
                                    elecTagInfos, 
                                    ipTagInfo, 
