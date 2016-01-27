@@ -6,6 +6,7 @@ import ROOT
 from PhysicsTools.Heppy.analyzers.objects.autophobj import *
 from PhysicsTools.HeppyCore.utils.deltar import deltaPhi
 
+
 import copy, os
 
 leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonType ], variables = [
@@ -158,6 +159,39 @@ jetTypeVHbb.variables += [NTupleVariable("bTagWeight",
         jet, kind="final", systematic="nominal",
     ), float, mcOnly=True, help="b-tag CSV weight, nominal"
 )]
+
+#add per-lepton SF
+from leptonSF import LeptonSF
+
+jsonpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/leptonSF/"
+jsons = {    
+    'muSF_HLT' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco74X_Dec1.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p2_PtEtaBins', 'abseta_pt_ratio' ],
+    'muSF_IsoLoose' : [ jsonpath+'MuonIso_Z_RunCD_Reco74X_Dec1.json' , 'NUM_LooseRelIso_DEN_LooseID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
+    'muSF_IsoTight' : [ jsonpath+'MuonIso_Z_RunCD_Reco74X_Dec1.json' , 'NUM_TightRelIso_DEN_TightID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
+    'muSF_IdLoose' : [ jsonpath+'MuonID_Z_RunCD_Reco74X_Dec1.json' , 'NUM_LooseID_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
+    'muSF_IdTight' : [ jsonpath+'MuonID_Z_RunCD_Reco74X_Dec1.json' , 'NUM_TightIDandIPCut_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
+    'eleSF_HLT' : ['','',''],
+    'eleSF_IdLoose' : [jsonpath+'CutBasedID_LooseWP.json', 'CutBasedID_LooseWP', 'eta_pt_ratio'],
+    'eleSF_IdTight' : [jsonpath+'CutBasedID_TightWP.json', 'CutBasedID_TightWP', 'eta_pt_ratio'],
+    'eleSF_IsoLoose' : ['','',''],
+    'eleSF_IsoTight' : ['','',''],
+    }
+
+correctors = {}
+for name, conf in jsons.iteritems(): 
+    correctors[name] = LeptonSF(conf[0], conf[1], conf[2])
+
+for cut in ["HLT", "IsoLoose", "IsoTight", "IdLoose", "IdTight"]:     
+    leptonTypeVHbb.variables += [NTupleVariable("SF_"+cut, 
+                                                lambda x, muCorr=correctors["muSF_"+cut], eleCorr=correctors["eleSF_"+cut] : muCorr.get_2D(x.pt(), x.eta())[0] if abs(x.pdgId()) == 13 else eleCorr.get_2D(x.pt(), x.eta())[0], 
+                                                float, mcOnly=True, help="SF for lepton "+cut
+                                                )]
+    leptonTypeVHbb.variables += [NTupleVariable("SFerr_"+cut, 
+                                                lambda x, muCorr=correctors["muSF_"+cut], eleCorr=correctors["eleSF_"+cut] : muCorr.get_2D(x.pt(), x.eta())[1] if abs(x.pdgId()) == 13 else eleCorr.get_2D(x.pt(), x.eta())[1], 
+                                                float, mcOnly=True, help="SF error for lepton "+cut
+                                                )]
+
+
 
 
 ##------------------------------------------  

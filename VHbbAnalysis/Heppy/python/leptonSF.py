@@ -4,18 +4,28 @@ import json
 # A class to apply SF's tabulated in json files
 class LeptonSF:
     def __init__(self, lep_json, lep_name, lep_binning) :
-        self.init(lep_json, lep_name, lep_binning)
+        if not os.path.isfile(lep_json):
+            self.valid = False
+            print "LeptonSF: ", lep_json, " is not a valid json file"
+        else:
+            self.init(lep_json, lep_name, lep_binning)
 
     def init(self, lep_json, lep_name, lep_binning) :
         f = open(lep_json, 'r')             
         results = json.load(f)
         if lep_name not in results.keys():
+            self.valid = False
+            print "LeptonSF: ", lep_name , " is not a valid identifier"
             return False
         self.res = results[lep_name]
         self.lep_binning = lep_binning
+        self.valid = True
         f.close()
 
     def get_2D(self, pt, eta):
+        if not self.valid:
+            #print "LeptonSF: return 1.0 +/- 0.0"
+            return [1.0, 0.0]        
 
         stripForEta = 5
         if self.lep_binning not in self.res.keys():
