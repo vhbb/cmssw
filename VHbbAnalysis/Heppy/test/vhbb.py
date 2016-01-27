@@ -33,7 +33,12 @@ treeProducer= cfg.Analyzer(
 		 NTupleVariable("VMt", lambda ev : ev.V.goodMt, help="Transverse mass of the vector boson"),
 		 NTupleVariable("HVdPhi", lambda ev : deltaPhi(ev.V.phi(),ev.H.phi()), help="Delta phi between Higgs and Z/W"),
 		 NTupleVariable("fakeMET_sumet", lambda ev : ev.fakeMET.sumet, help="Fake SumET from Zmumu events removing muons"),
+    	         NTupleVariable("bx",  lambda ev: ev.input.eventAuxiliary().bunchCrossing(), int, help="bunch crossing number"),
 		 NTupleVariable("rho",  lambda ev: ev.rho, float, help="kt6PFJets rho"),
+		 NTupleVariable("rhoN",  lambda ev: ev.rhoN, float, help="rho with neutrals only"),
+		 NTupleVariable("rhoCHPU",  lambda ev: ev.rhoCHPU, float, help="rho with charged pileup particles"),
+		 NTupleVariable("rhoCentral",  lambda ev: ev.rho, float, help="rho central"),
+          
 		 NTupleVariable("deltaR_jj",  lambda ev: deltaR(ev.hJets[0].eta(),ev.hJets[0].phi(),ev.hJets[1].eta(),ev.hJets[1].phi()) if len(ev.hJets) > 1 else -1, float, help="deltaR higgsJets"),
 		 NTupleVariable("lheNj",  lambda ev: ev.lheNj, float,mcOnly=True, help="number of jets at LHE level"),
                  NTupleVariable("lheNb",  lambda ev: ev.lheNb, float,mcOnly=True, help="number of b-jets at LHE level"),
@@ -52,13 +57,14 @@ treeProducer= cfg.Analyzer(
 		 NTupleVariable("mhtJet30",  lambda ev : ev.mhtJet30, help="mht with jets30"),
 		 NTupleVariable("mhtPhiJet30",  lambda ev : ev.mhtPhiJet30, help="mht phi with jets30"),
 		 NTupleVariable("htJet30",  lambda ev : ev.htJet30, help="ht  with jets30"),
+                 NTupleVariable("met_sig",  lambda ev : ev.met.significance(), help="met significance from MET::significance() method"),
 		 NTupleVariable("met_rawpt",  lambda ev : ev.met.uncorPt(), help="raw met"),
 		 NTupleVariable("metPuppi_pt",  lambda ev : ev.metPuppi.pt(), help="met from Puppi"),
 		 NTupleVariable("metPuppi_phi",  lambda ev : ev.metPuppi.phi(), help="met phi from Puppi"),
 		 NTupleVariable("metPuppi_rawpt",  lambda ev : ev.metPuppi.uncorPt(), help="raw met from Puppi"),
 		 NTupleVariable("metType1p2_pt",  lambda ev : ev.met.shiftedPt(12,2), help="type1type2met"),
-		 NTupleVariable("metNoPU_pt",  lambda ev : ev.metNoPU.pt(), help="PFnoPU E_{T}^{miss}"),
-		 NTupleVariable("metNoPU_phi",  lambda ev : ev.metNoPU.phi(), help="phi of PFnoPU E_{T}^{miss}"),
+#		 NTupleVariable("metNoPU_pt",  lambda ev : ev.metNoPU.pt(), help="PFnoPU E_{T}^{miss}"),
+#		 NTupleVariable("metNoPU_phi",  lambda ev : ev.metNoPU.phi(), help="phi of PFnoPU E_{T}^{miss}"),
 		 NTupleVariable("tkMet_pt",  lambda ev : ev.tkMet.pt(), help="E_{T}^{miss} from tracks"),
 		 NTupleVariable("tkMet_phi",  lambda ev : ev.tkMet.phi(), help="phi of E_{T}^{miss} from tracks"),
 		 NTupleVariable("tkMetPVchs_pt",  lambda ev : ev.tkMetPVchs.pt(), help="E_{T}^{miss} from tracks"),
@@ -207,7 +213,7 @@ VHGenAna = VHGeneratorAnalyzer.defaultConfig
 from PhysicsTools.Heppy.analyzers.objects.METAnalyzer import METAnalyzer
 METAna = METAnalyzer.defaultConfig
 METAna.doTkMet = True
-METAna.doMetNoPU = True
+METAna.doMetNoPU = False
 METAna.doTkGenMet = False
 METAna.includeTkMetPVLoose = False
 METAna.includeTkMetPVTight = False
@@ -359,7 +365,8 @@ sequence = [jsonAna,LHEAna,LHEWeightAna,FlagsAna, hbheAna, GenAna,VHGenAna,PUAna
 from PhysicsTools.Heppy.utils.miniAodFiles import miniAodFiles
 sample = cfg.MCComponent(
 	files = [
-		"root://xrootd.ba.infn.it//store/mc/RunIIFall15MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-scaledown-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/30000/045996FE-A19D-E511-B76D-D4AE526A0B47.root" ##ttbar
+#		"root://xrootd.ba.infn.it//store/mc/RunIIFall15MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-scaledown-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/30000/045996FE-A19D-E511-B76D-D4AE526A0B47.root" ##ttbar
+		"045996FE-A19D-E511-B76D-D4AE526A0B47.root" ##ttbar
 		],
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
     name="ZHLL125", isEmbed=False,
