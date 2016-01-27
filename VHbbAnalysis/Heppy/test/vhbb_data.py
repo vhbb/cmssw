@@ -10,6 +10,7 @@ sample.files=[
 sample.json="json.txt"
 
 
+TriggerObjectsAna.triggerObjectInputTag = ('selectedPatTrigger','','RECO')
 FlagsAna.processName='RECO'
 TrigAna.triggerBits = triggerTableData
 

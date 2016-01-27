@@ -12,9 +12,10 @@ sample.isData=True
 from vhbb_combined import *
 sample.json="json.txt"
 sample.files=[
- "root://xrootd.unl.edu//store/data/Run2015B/SingleMuon/MINIAOD/PromptReco-v1/000/251/162/00000/160C08A3-4227-E511-B829-02163E01259F.root"
+"root://xrootd.ba.infn.it//store/data/Run2015D/BTagCSV/MINIAOD/16Dec2015-v1/50000/00AF8EB4-70AB-E511-9271-00266CFAE7AC.root"
 ]
 
+TriggerObjectsAna.triggerObjectInputTag = ('selectedPatTrigger','','RECO')
 FlagsAna.processName='RECO'
 TrigAna.triggerBits = triggerTableData
 
