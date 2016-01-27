@@ -222,7 +222,8 @@ ak8FatjetType = NTupleObjectType("ak8fatjet",  baseObjectTypes = [ fourVectorTyp
     NTupleVariable("Flavour", lambda x : x.partonFlavour(), int,     mcOnly=True, help="parton flavor as ghost matching"),
     NTupleVariable("BhadronFlavour", lambda x : x.jetFlavourInfo().getbHadrons().size(), int,     mcOnly=True, help="hadron flavour (ghost matching to B hadrons)"),
     NTupleVariable("ChadronFlavour", lambda x : x.jetFlavourInfo().getcHadrons().size(), int,     mcOnly=True, help="hadron flavour (ghost matching to C hadrons)"),	
-    NTupleVariable("GenPt", lambda x : ( xgenJet()!=0 ? x.genJet().pt() : -1. ), float, mcOnly=True, help="gen jet pt for JER computation"),
+
+    NTupleVariable("GenPt", lambda x : x.genJetFwdRef().pt() if (x.genJetFwdRef().isNonnull() and x.genJetFwdRef().isAvailable())  else -1., float, mcOnly=True, help="gen jet pt for JER computation"),
     
     # bb-tag input variables
     NTupleVariable("PFLepton_ptrel",   lambda x : x.PFLepton_ptrel, help="pt-rel of e/mu (for bb-tag)"),    
