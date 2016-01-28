@@ -52,7 +52,7 @@ def etaRelToTauAxis( vertex, tauAxis, tau_trackEtaRel) :
 
   for track in tracks:
   #for(std::vector<reco::CandidatePtr>::const_iterator track = tracks.begin(); track != tracks.end(); ++track)
-    tau_trackEtaRel.add(abs(ROOT.reco.btau.etaRel(direction.Unit(), track.momentum())))
+    tau_trackEtaRel.append(abs(ROOT.reco.btau.etaRel(direction.Unit(), track.momentum())))
 
 
 
@@ -322,17 +322,13 @@ def calcBBTagVariables(jet,
     
     for vtx in range(svTagInfo.nVertices()):
 
-        pdb.set_trace()
-
         vertexKinematic = ROOT.reco.TrackKinematics()
 
         # get the vertex kinematics
         vertex = svTagInfo.secondaryVertex(vtx)
         vertexKinematics(vertex, vertexKinematic)
 
-        pdb.set_trace()
-
-        if currentAxes.size() > 1:
+        if len(currentAxes) > 1:
         
                 if math.sqrt(deltaR2(svTagInfo.flightDirection(vtx),currentAxes[1])) < math.sqrt(deltaR2(svTagInfo.flightDirection(vtx),currentAxes[0])) :
                 
@@ -358,7 +354,7 @@ def calcBBTagVariables(jet,
                 
 
         
-        elif currentAxes.size() > 0:
+        elif len(currentAxes) > 0:
         
                 tau1Kinematics = tau1Kinematics + vertexKinematic
                 if tau1_flightDistance2dSig < 0 :
@@ -374,7 +370,7 @@ def calcBBTagVariables(jet,
         if (math.sqrt(deltaR2(flightDir, jetDir)<(0.7*0.7))) :
           VTXmap[svTagInfo.flightDistance(vtx).error()]=vtx
   # end loop over vertices
-    nSV = VTXmap.size()
+    nSV = len(VTXmap)
 
     #allSum=ROOT.math.XYZTLorentzVector()
     allSum = allKinematics.weightedVectorSum()
@@ -403,44 +399,45 @@ def calcBBTagVariables(jet,
 
     #std::sort( tau1_trackEtaRels.begin(),tau1_trackEtaRels.end() );
     #std::sort( tau2_trackEtaRels.begin(),tau2_trackEtaRels.end() );
-    sorted(tau1_trackEtaRels.keys())	
-    sorted(tau2_trackEtaRels.keys())
+    tau1_trackEtaRels.sort()	
+    tau2_trackEtaRels.sort()
  
-    if tau1_trackEtaRels.size() >2  :
-      tau1_trackEtaRel_0 = tau1_trackEtaRels.at(0)
-      tau1_trackEtaRel_1 = tau1_trackEtaRels.at(1)
-      tau1_trackEtaRel_2 = tau1_trackEtaRels.at(2)
-    elif tau1_trackEtaRels.size() ==0 : 	
+    if len(tau1_trackEtaRels) >2  :
+      tau1_trackEtaRel_0 = tau1_trackEtaRels[0]
+      tau1_trackEtaRel_1 = tau1_trackEtaRels[1]
+      tau1_trackEtaRel_2 = tau1_trackEtaRels[2]
+    elif len(tau1_trackEtaRels) ==0 : 	
       tau1_trackEtaRel_0 = dummyEtaRel
       tau1_trackEtaRel_1 = dummyEtaRel
       tau1_trackEtaRel_2 = dummyEtaRel	
-    elif tau1_trackEtaRels.size() ==1:
-      tau1_trackEtaRel_0 = tau1_trackEtaRels.at(0)
+    elif len(tau1_trackEtaRels) ==1:
+      tau1_trackEtaRel_0 = tau1_trackEtaRels[0]
       tau1_trackEtaRel_1 = dummyEtaRel
       tau1_trackEtaRel_2 = dummyEtaRel
-    elif tau1_trackEtaRels.size() ==2: 
-      tau1_trackEtaRel_0 = tau1_trackEtaRels.at(0)
-      tau1_trackEtaRel_1 = tau1_trackEtaRels.at(1)
+    elif len(tau1_trackEtaRels) ==2: 
+      tau1_trackEtaRel_0 = tau1_trackEtaRels[0]
+      tau1_trackEtaRel_1 = tau1_trackEtaRels[1]
       tau1_trackEtaRel_2 = dummyEtaRel
      
-    if tau2_trackEtaRels.size() >2 :
-       tau2_trackEtaRel_0 = tau2_trackEtaRels.at(0)
-       tau2_trackEtaRel_1 = tau2_trackEtaRels.at(1)
-       tau2_trackEtaRel_2 = tau2_trackEtaRels.at(2)
-    elif tau2_trackEtaRels.size() ==0 :
+    if len(tau2_trackEtaRels) >2 :
+       tau2_trackEtaRel_0 = tau2_trackEtaRels[0]
+       tau2_trackEtaRel_1 = tau2_trackEtaRels[1]
+       tau2_trackEtaRel_2 = tau2_trackEtaRels[2]
+    elif len(tau2_trackEtaRels) == 0:
        tau2_trackEtaRel_0 = dummyEtaRel
        tau2_trackEtaRel_1 = dummyEtaRel
        tau2_trackEtaRel_2 = dummyEtaRel
-    elif tau2_trackEtaRels.size() ==1 :
-       tau2_trackEtaRel_0 = tau2_trackEtaRels.at(0)
+    elif len(tau2_trackEtaRels) == 1:
+       tau2_trackEtaRel_0 = tau2_trackEtaRels[0]
        tau2_trackEtaRel_1 = dummyEtaRel
        tau2_trackEtaRel_2 = dummyEtaRel
-    elif tau2_trackEtaRels.size() ==2 :
-       tau2_trackEtaRel_0 = tau2_trackEtaRels.at(0)
-       tau2_trackEtaRel_1 = tau2_trackEtaRels.at(1)
+    elif len(tau2_trackEtaRels) == 2:
+       tau2_trackEtaRel_0 = tau2_trackEtaRels[0]
+       tau2_trackEtaRel_1 = tau2_trackEtaRels[1]
        tau2_trackEtaRel_2 = dummyEtaRel
 
-
+    
+    cont = 0
 		 
     for vtx in (sorted(VTXmap.keys())):
        cont += 1
@@ -453,7 +450,7 @@ def calcBBTagVariables(jet,
            vtxMass = SV_p4_0.mass()
 
            if vtxMass > 0.:
-              z_ratio = math.sqrt(deltaR2((currentAxes[1],currentAxes[0])))*SV_p4_0.pt()/vtxMass
+              z_ratio = math.sqrt(deltaR2(currentAxes[1],currentAxes[0]))*SV_p4_0.pt()/vtxMass
  
        if cont==2:         
            flightDir_1 = svTagInfo.flightDirection(index)
@@ -461,7 +458,7 @@ def calcBBTagVariables(jet,
            vtxMass = (SV_p4_1+SV_p4_0).mass()
             
            if vtxMass > 0.:
-	        z_ratio = math.sqrt(deltaR2((flightDir_0,flightDir_1)))*SV_p4_1.pt()/vtxMass
+	        z_ratio = math.sqrt(deltaR2(flightDir_0,flightDir_1))*SV_p4_1.pt()/vtxMass
    
            break
 
@@ -548,30 +545,30 @@ def calcBBTagVariables(jet,
  
 
     jet.z_ratio = z_ratio
-    jet.trackSipdSig_3 = trackSip3dSig_3
-    jet.trackSipdSig_2 = trackSip3dSig_2
-    jet.trackSipdSig_1 = trackSip3dSig_1
-    jet.trackSipdSig_0 = trackSip3dSig_0
-    jet.trackSipdSig_1_0 = tau2_trackSip3dSig_0
-    jet.trackSipdSig_0_0 = tau1_trackSip3dSig_0
-    jet.trackSipdSig_1_1 = tau2_trackSip3dSig_1
-    jet.trackSipdSig_0_1 = tau1_trackSip3dSig_1
+    jet.trackSip3dSig_3 = trackSip3dSig_3
+    jet.trackSip3dSig_2 = trackSip3dSig_2
+    jet.trackSip3dSig_1 = trackSip3dSig_1
+    jet.trackSip3dSig_0 = trackSip3dSig_0
+    jet.tau2_trackSip3dSig_0 = tau2_trackSip3dSig_0
+    jet.tau1_trackSip3dSig_0 = tau1_trackSip3dSig_0
+    jet.tau2_trackSip3dSig_1 = tau2_trackSip3dSig_1
+    jet.tau1_trackSip3dSig_1 = tau1_trackSip3dSig_1
     jet.trackSip2dSigAboveCharm_0 = trackSip2dSigAboveCharm_0
     jet.trackSip2dSigAboveBottom_0 = trackSip2dSigAboveBottom_0
     jet.trackSip2dSigAboveBottom_1 = trackSip2dSigAboveBottom_1
-    jet.tau1_trackEtaRel_0 = tau2_trackEtaRel_0
-    jet.tau1_trackEtaRel_1 = tau2_trackEtaRel_1
-    jet.tau1_trackEtaRel_2 = tau2_trackEtaRel_2
-    jet.tau0_trackEtaRel_0 = tau1_trackEtaRel_0
-    jet.tau0_trackEtaRel_1 = tau1_trackEtaRel_1
-    jet.tau0_trackEtaRel_2 = tau1_trackEtaRel_2
-    jet.tau_vertexMass_0 = tau1_vertexMass
-    jet.tau_vertexEnergyRatio_0 = tau1_vertexEnergyRatio
-    jet.tau_vertexDeltaR_0 = tau1_vertexDeltaR
-    jet.tau_flightDistance2dSig_0 = tau1_flightDistance2dSig
-    jet.tau_vertexMass_1 = tau2_vertexMass
-    jet.tau_vertexEnergyRatio_1 = tau2_vertexEnergyRatio
-    jet.tau_flightDistance2dSig_1 = tau2_flightDistance2dSig
+    jet.tau2_trackEtaRel_0 = tau2_trackEtaRel_0
+    jet.tau2_trackEtaRel_1 = tau2_trackEtaRel_1
+    jet.tau2_trackEtaRel_2 = tau2_trackEtaRel_2
+    jet.tau1_trackEtaRel_0 = tau1_trackEtaRel_0
+    jet.tau1_trackEtaRel_1 = tau1_trackEtaRel_1
+    jet.tau1_trackEtaRel_2 = tau1_trackEtaRel_2
+    jet.tau1_vertexMass = tau1_vertexMass
+    jet.tau1_vertexEnergyRatio = tau1_vertexEnergyRatio
+    jet.tau1_vertexDeltaR = tau1_vertexDeltaR
+    jet.tau1_flightDistance2dSig = tau1_flightDistance2dSig
+    jet.tau2_vertexMass = tau2_vertexMass
+    jet.tau2_vertexEnergyRatio = tau2_vertexEnergyRatio
+    jet.tau2_flightDistance2dSig = tau2_flightDistance2dSig
     jet.jetNTracks = jetNTracks
     jet.nSV = nSV
 
