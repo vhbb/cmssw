@@ -27,6 +27,9 @@ class VHbbAnalyzer( Analyzer ):
 
     def declareHandles(self):
         super(VHbbAnalyzer, self).declareHandles()
+        self.handles['rhoN'] =  AutoHandle( 'fixedGridRhoFastjetCentralNeutral','double' )
+        self.handles['rhoCHPU'] =  AutoHandle( 'fixedGridRhoFastjetCentralChargedPileUp','double' )
+        self.handles['rhoCentral'] =  AutoHandle( 'fixedGridRhoFastjetCentral','double' )
         if getattr(self.cfg_ana,"doSoftActivityVH", False) or getattr(self.cfg_ana,"doVBF", True):
             self.handles['pfCands'] =  AutoHandle( 'packedPFCandidates', 'std::vector<pat::PackedCandidate>' )
         if self.cfg_comp.isMC:
@@ -386,6 +389,11 @@ class VHbbAnalyzer( Analyzer ):
                 if dR < 0.3 and dR < dRmin :
                     t.jetIdx = jIdx
                     dRmin = dR
+    def additionalRhos(self,event) :
+        event.rhoN= self.handles['rhoN'].product()
+        event.rhoCHPU= self.handles['rhoCHPU'].product()
+        event.rhoCentral= self.handles['rhoCentral'].product()
+
 
     def initOutputs (self,event) : 
         event.hJets = []
@@ -415,7 +423,9 @@ class VHbbAnalyzer( Analyzer ):
         event.hjidxDiJetPtByCSV = []
         event.softActivityJets=[]
         event.softActivityVHJets=[]
-
+        event.rhoN= -1
+        event.rhoCHPU= -1
+        event.rhoCentral= -1
 
     def process(self, event):
 	#print "Event number",event.iEv
@@ -450,7 +460,7 @@ class VHbbAnalyzer( Analyzer ):
 	ssThreshold = 200.
 	# filter events with less than 2 jets with pt 20
         event.jetsForHiggs = [x for x in event.cleanJets if self.cfg_ana.higgsJetsPreSelection(x) ]
-	if not  ( len(event.jetsForHiggs) >= 2  or (len(event.cleanJets) == 1 and event.cleanJets[0] > ssThreshold ) ) :
+	if not  ( len(event.jetsForHiggs) >= 2  or (len(event.cleanJets) == 1 and event.cleanJets[0].pt() > ssThreshold ) ) :
 		return self.cfg_ana.passall
         if event.Vtype < 0 and not ( sum(x.pt() > 30 for x in event.jetsForHiggs) >= 4 or sum(x.pt() for x in event.jetsForHiggs[:4]) > 160 ):
                 return self.cfg_ana.passall
