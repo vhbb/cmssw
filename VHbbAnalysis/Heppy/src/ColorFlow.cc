@@ -14,6 +14,7 @@ namespace heppy{
 
 
   ColorFlow::ColorFlow(std::vector<math::XYZTLorentzVector> pfCands) 
+    : pfCands_ (pfCands)
     {
       // initalisation of variables
       init();
