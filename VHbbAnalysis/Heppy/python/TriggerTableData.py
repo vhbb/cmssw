@@ -208,6 +208,13 @@ triggerTable = {
     "HH4bLowLumi" : [
         "HLT_QuadJet45_TripleBTagCSV0p67_v*",
         "HLT_DoubleJet90_Double30_TripleBTagCSV0p67_v*",
+
+        "HLT_AK8DiPFJet250_200_TrimMass30_BTagCSV0p45_v*",
+        "HLT_AK8DiPFJet280_200_TrimMass30_BTagCSV0p45_v*",
+        "HLT_AK8PFHT600_TrimR0p1PT0p03Mass50_BTagCSV0p45_v*",
+        "HLT_AK8PFHT650_TrimR0p1PT0p03Mass50_v*",
+        "HLT_AK8PFHT700_TrimR0p1PT0p03Mass50_v*",
+        "HLT_AK8PFJet360_TrimMass30_v*",
     ],
     "ttHleptonic" : [
         "HLT_Mu17_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
