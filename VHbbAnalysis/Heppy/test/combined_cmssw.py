@@ -130,7 +130,7 @@ def initialize(isMC=True):
         process.ca15PFSoftdropZ2B1JetsCHS = process.ca15PFJetsCHS.clone(
             useSoftDrop = cms.bool(True),
             zcut = cms.double(0.2),
-            beta = cms.double(0.1),
+            beta = cms.double(1.),
             R0 = cms.double(1.5),
             useExplicitGhosts = cms.bool(True))
 
