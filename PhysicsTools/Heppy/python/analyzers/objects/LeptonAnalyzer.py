@@ -301,6 +301,7 @@ class LeptonAnalyzer( Analyzer ):
         """
                make a list of all electrons, and apply basic corrections to them
         """
+
         allelectrons = map( Electron, self.handles['electrons'].product() )
 
         ## Duplicate removal for fast sim (to be checked if still necessary in latest greatest 5.3.X releases)
@@ -625,7 +626,7 @@ setattr(LeptonAnalyzer,"defaultConfig",cfg.Analyzer(
     loose_electron_relIso = 0.4,
     # loose_electron_isoCut = lambda electron : electron.miniRelIso < 0.1
     loose_electron_lostHits = 1.0,
-    # JP/CV: add Spring15 EGamma POG electron ID MVA
+    # FIXME: JP/CV: add Spring15 EGamma POG electron ID MVA
     # ( https://twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentificationRun2#Recipes_for_7_4_12_Spring15_MVA )
     eleMVAIdSpring15TrigMedium = "egmGsfElectronIDs:mvaEleID-Spring15-25ns-Trig-V1-wp90",
     eleMVAIdSpring15TrigTight = "egmGsfElectronIDs:mvaEleID-Spring15-25ns-Trig-V1-wp80",
