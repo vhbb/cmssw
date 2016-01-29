@@ -73,7 +73,7 @@ class GeneratorAnalyzer( Analyzer ):
     def beginLoop(self,setup):
         super(GeneratorAnalyzer,self).beginLoop(setup)
 
-    def fillGenLeptons(self, event, particle, isTau=False, sourceId=25):
+    def fillGenLeptons(self, event, particle, isTau=False, recovered=False, sourceId=25):
         """Get the gen level light leptons (prompt and/or from tau decays)"""
 
         for i in xrange( particle.numberOfDaughters() ):
@@ -83,14 +83,24 @@ class GeneratorAnalyzer( Analyzer ):
             id = abs(dau.pdgId())
             moid = abs(dau.mother().pdgId()) if dau.mother() else 2212 #if no mom, let say it is a proton (consistent with CMSSW < 74X)
             if id in [11,13]:
-                if isTau: event.gentauleps.append(dau)
-                else:     event.genleps.append(dau)
+                if not recovered:
+                    if isTau: event.gentauleps.append(dau)
+                    else:     event.genleps.append(dau)
+                else:
+                    if isTau: event.gentaulepsRecovered.append(dau)
+                    else:     event.genlepsRecovered.append(dau)
             elif id == 15:
-                if moid in [22,23,24]:
-                    event.gentaus.append(dau)
-                self.fillGenLeptons(event, dau, True, sourceId) 
+                if not recovered:
+                    if moid in [22,23,24]:
+                        event.gentaus.append(dau)
+                    self.fillGenLeptons(event, dau, True, sourceId)
+                else:
+                    if moid in [22,23,24]:
+                        event.gentausRecovered.append(dau)
+                    self.fillGenLeptons(event, dau, True, True, sourceId) 
             elif id in [22,23,24]:
-                self.fillGenLeptons(event, dau, False, sourceId)
+                if not recovered: self.fillGenLeptons(event, dau, False,       sourceId)
+                else:             self.fillGenLeptons(event, dau, False, True, sourceId)
 
     def fillWZQuarks(self, event, particle, isWZ=False, sourceId=25):
         """Descend daughters of 'particle', and add quarks from W,Z to event.genwzquarks
@@ -175,6 +185,9 @@ class GeneratorAnalyzer( Analyzer ):
         event.genleps    = []
         event.gentauleps = []
         event.gentaus    = []
+        event.genlepsRecovered    = []
+        event.gentaulepsRecovered = []
+        event.gentausRecovered    = []
         event.genbquarksFromTop  = []
         event.genbquarksFromH  = []
         event.genbquarksFromHafterISR = []
@@ -211,6 +224,9 @@ class GeneratorAnalyzer( Analyzer ):
                 	self.fillGenLeptons(event, b, sourceId=abs(b.pdgId())) #selezione su leptoni fatta dentro la funzione stessa
                 	self.fillWZQuarks(event, b, isWZ=True, sourceId=abs(b.pdgId()))
 
+        for b in event.genvbosonsRecovered:
+            if b.numberOfDaughters()>0 :
+                self.fillGenLeptons(event, b, recovered=True, sourceId=abs(b.pdgId()))
 
 
         higgsBosons = [ p for p in event.genParticles if (p.pdgId() == 25) and p.numberOfDaughters() > 0 and abs(p.daughter(0).pdgId()) != 25 ]
