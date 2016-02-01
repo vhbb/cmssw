@@ -22,6 +22,8 @@ boostana.isMC = sample.isMC
 boostana.skip_ca15 = False
 sequence.insert(sequence.index(VHbb),boostana)
 
+#used freshly computed MVA ID variables
+LepAna.updateEleMVA = True
 
 genhfana=cfg.Analyzer(
     verbose=False,
