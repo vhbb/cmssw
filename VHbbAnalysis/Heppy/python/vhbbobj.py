@@ -81,6 +81,7 @@ tauTypeVHbb = NTupleObjectType("tauTypeVHbb", baseObjectTypes = [ tauType ], var
 ##------------------------------------------  
 
 jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables = [
+    NTupleVariable("rawPtAfterSmearing",  lambda x : x.pt() / getattr(x, 'corr', 1) , help="p_{T} before JEC but including JER effect"),
     NTupleVariable("idxFirstTauMatch", lambda x : x.tauIdxs[0] if len(getattr(x, "tauIdxs", [])) > 0 else -1, int,help='index of the first matching tau'),
     NTupleVariable("heppyFlavour", lambda x : x.mcFlavour, int,     mcOnly=True, help="heppy-style match to gen quarks"),
 #    NTupleVariable("hadronFlavour", lambda x : x.hadronFlavour(), int,     mcOnly=True, help="hadron flavour (ghost matching to B/C hadrons)"),
