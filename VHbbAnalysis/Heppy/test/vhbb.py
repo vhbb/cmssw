@@ -217,6 +217,7 @@ VHGenAna = VHGeneratorAnalyzer.defaultConfig
 
 from PhysicsTools.Heppy.analyzers.objects.METAnalyzer import METAnalyzer
 METAna = METAnalyzer.defaultConfig
+METAna.applyJetSmearing = False
 METAna.doTkMet = True
 METAna.doMetNoPU = False
 METAna.doTkGenMet = False
