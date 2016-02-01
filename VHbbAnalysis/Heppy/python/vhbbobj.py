@@ -186,6 +186,7 @@ from leptonSF import LeptonSF
 jsonpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/leptonSF/"
 jsons = {    
     'muSF_HLT' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco74X_Dec1.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p2_PtEtaBins', 'abseta_pt_ratio' ],
+    'muEff_HLT' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco74X_Dec1_MC.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p3_PtEtaBins', 'abseta_pt_MC' ],
     'muSF_IsoLoose' : [ jsonpath+'MuonIso_Z_RunCD_Reco74X_Dec1.json' , 'NUM_LooseRelIso_DEN_LooseID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
     'muSF_IsoTight' : [ jsonpath+'MuonIso_Z_RunCD_Reco74X_Dec1.json' , 'NUM_TightRelIso_DEN_TightID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
     'muSF_IdLoose' : [ jsonpath+'MuonID_Z_RunCD_Reco74X_Dec1.json' , 'NUM_LooseID_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
