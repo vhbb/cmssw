@@ -217,6 +217,7 @@ VHGenAna = VHGeneratorAnalyzer.defaultConfig
 
 from PhysicsTools.Heppy.analyzers.objects.METAnalyzer import METAnalyzer
 METAna = METAnalyzer.defaultConfig
+METAna.applyJetSmearing = False
 METAna.doTkMet = True
 METAna.doMetNoPU = False
 METAna.doTkGenMet = False
@@ -248,6 +249,8 @@ JetAna.addJECShifts=True
 JetAna.addJERShifts=True
 
 #mu_pfRelIso04 = lambda mu : (mu.pfIsolationR04().sumChargedHadronPt + max( mu.pfIsolationR04().sumNeutralHadronEt + mu.pfIsolationR04().sumPhotonEt - 0.5 * mu.pfIsolationR04().sumPUPt,0.0)) / mu.pt()
+def ele_mvaEleID_Trig_preselection(ele) : 
+	return (ele.pt()>15 and ( ( abs(ele.superCluster().eta()) < 1.4442 and ele.full5x5_sigmaIetaIeta() < 0.012 and ele.hcalOverEcal() < 0.09 and (ele.ecalPFClusterIso() / ele.pt()) < 0.37 and (ele.hcalPFClusterIso() / ele.pt()) < 0.25 and (ele.dr03TkSumPt() / ele.pt()) < 0.18 and abs(ele.deltaEtaSuperClusterTrackAtVtx()) < 0.0095 and abs(ele.deltaPhiSuperClusterTrackAtVtx()) < 0.065 ) or ( abs(ele.superCluster().eta()) > 1.5660 and ele.full5x5_sigmaIetaIeta() < 0.033 and ele.hcalOverEcal() <0.09 and (ele.ecalPFClusterIso() / ele.pt()) < 0.45 and (ele.hcalPFClusterIso() / ele.pt()) < 0.28 and (ele.dr03TkSumPt() / ele.pt()) < 0.18 ) ))
 
 from VHbbAnalysis.Heppy.ttHLeptonMVAAnalyzer import ttHLeptonMVAAnalyzer
 ttHLeptonMVA = cfg.Analyzer(
@@ -258,9 +261,11 @@ ttHLeptonMVA = cfg.Analyzer(
 VHbb = cfg.Analyzer(
     verbose=False,
     class_object=VHbbAnalyzer,
-    wEleSelection = lambda x : x.pt() > 25 and x.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"),
+    #wEleSelection = lambda x : x.pt() > 25 and x.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"),
+    wEleSelection = lambda x : x.pt() > 25 and x.electronID("mvaEleID-Spring15-25ns-Trig-V1-wp80") and ele_mvaEleID_Trig_preselection(x),
     wMuSelection = lambda x : x.pt() > 25 and x.muonID("POG_ID_Tight"), #and mu_pfRelIso04(x) < 0.15,
-    zEleSelection = lambda x : x.pt() > 15 and x.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"),
+    #zEleSelection = lambda x : x.pt() > 15 and x.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"),
+    zEleSelection = lambda x : x.pt() > 15 and x.electronID("mvaEleID-Spring15-25ns-Trig-V1-wp90") and ele_mvaEleID_Trig_preselection(x),
     zMuSelection = lambda x : x.pt() > 10 and x.muonID("POG_ID_Loose"), #and mu_pfRelIso04(x) < 0.25,
     zLeadingElePt = 20,
     zLeadingMuPt = 20,
@@ -372,6 +377,7 @@ sample = cfg.MCComponent(
 	files = [
 #		"root://xrootd.ba.infn.it//store/mc/RunIIFall15MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-scaledown-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/30000/045996FE-A19D-E511-B76D-D4AE526A0B47.root" ##ttbar
 		"045996FE-A19D-E511-B76D-D4AE526A0B47.root" ##ttbar
+		#"root://xrootd.ba.infn.it//store/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-100to200_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext1-v1/60000/027D7153-29BF-E511-A2BC-0025B3E025B6.root"
 		],
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
     name="ZHLL125", isEmbed=False,
