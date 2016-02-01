@@ -410,19 +410,20 @@ class LeptonAnalyzer( Analyzer ):
 
         # JP/CV: add Spring15 EGamma POG electron ID MVA
         # ( https://twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentificationRun2#Recipes_for_7_4_12_Spring15_MVA )
-        eleMVAIdSpring15TrigMedium = self.handles['eleMVAIdSpring15TrigMedium'].product()
-        eleMVAIdSpring15TrigTight  = self.handles['eleMVAIdSpring15TrigTight'].product()
-        eleMVArawSpring15Trig = self.handles['eleMVArawSpring15Trig'].product()
-        eleMVAIdSpring15NonTrigMedium = self.handles['eleMVAIdSpring15NonTrigMedium'].product()
-        eleMVAIdSpring15NonTrigTight  = self.handles['eleMVAIdSpring15NonTrigTight'].product()
-        eleMVArawSpring15NonTrig = self.handles['eleMVArawSpring15NonTrig'].product()
-        for ie, ele in enumerate(allelectrons):
-            ele.mvaIdSpring15TrigMedium = eleMVAIdSpring15TrigMedium.get(ie)
-            ele.mvaIdSpring15TrigTight = eleMVAIdSpring15TrigTight.get(ie)
-            ele.mvaRawSpring15Trig = eleMVArawSpring15Trig.get(ie)
-            ele.mvaIdSpring15NonTrigMedium = eleMVAIdSpring15NonTrigMedium.get(ie)
-            ele.mvaIdSpring15NonTrigTight = eleMVAIdSpring15NonTrigTight.get(ie)
-            ele.mvaRawSpring15NonTrig = eleMVArawSpring15NonTrig.get(ie)
+        if getattr(self.cfg_ana,'updateEleMVA',False) :
+            eleMVAIdSpring15TrigMedium = self.handles['eleMVAIdSpring15TrigMedium'].product()
+            eleMVAIdSpring15TrigTight  = self.handles['eleMVAIdSpring15TrigTight'].product()
+            eleMVArawSpring15Trig = self.handles['eleMVArawSpring15Trig'].product()
+            eleMVAIdSpring15NonTrigMedium = self.handles['eleMVAIdSpring15NonTrigMedium'].product()
+            eleMVAIdSpring15NonTrigTight  = self.handles['eleMVAIdSpring15NonTrigTight'].product()
+            eleMVArawSpring15NonTrig = self.handles['eleMVArawSpring15NonTrig'].product()
+            for ie, ele in enumerate(allelectrons):
+                ele.mvaIdSpring15TrigMedium = eleMVAIdSpring15TrigMedium.get(ie)
+                ele.mvaIdSpring15TrigTight = eleMVAIdSpring15TrigTight.get(ie)
+                ele.mvaRawSpring15Trig = eleMVArawSpring15Trig.get(ie)
+                ele.mvaIdSpring15NonTrigMedium = eleMVAIdSpring15NonTrigMedium.get(ie)
+                ele.mvaIdSpring15NonTrigTight = eleMVAIdSpring15NonTrigTight.get(ie)
+                ele.mvaRawSpring15NonTrig = eleMVArawSpring15NonTrig.get(ie)
         
         return allelectrons 
 
@@ -628,6 +629,7 @@ setattr(LeptonAnalyzer,"defaultConfig",cfg.Analyzer(
     loose_electron_lostHits = 1.0,
     # FIXME: JP/CV: add Spring15 EGamma POG electron ID MVA
     # ( https://twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentificationRun2#Recipes_for_7_4_12_Spring15_MVA )
+    updateEleMVA = False,
     eleMVAIdSpring15TrigMedium = "egmGsfElectronIDs:mvaEleID-Spring15-25ns-Trig-V1-wp90",
     eleMVAIdSpring15TrigTight = "egmGsfElectronIDs:mvaEleID-Spring15-25ns-Trig-V1-wp80",
     eleMVArawSpring15Trig = "electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15Trig25nsV1Values",
