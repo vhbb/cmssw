@@ -278,12 +278,10 @@ VHbb = cfg.Analyzer(
     doSoftActivityVH=True,
     doVBF=True,
     regressions = [
-        {"weight":"Zll-spring15.weights.xml", "name":"jet0Regression_zll", "vtypes":[0,1]},
-        {"weight":"Wln-spring15.weights.xml", "name":"jet0Regression_wln", "vtypes":[2,3]},
-        {"weight":"Znn-spring15.weights.xml", "name":"jet0Regression_znn", "vtypes":[4,5,-1]}
+        {"weight":"ttbar-spring15.weights.xml", "name":"jet0Regression", "vtypes":[0,1,2,3,4,5,-1]},
     ],
     regressionVBF = [ 		
-	{"weight":"VBF-spring15.weights.xml", "name":"jet0Regression_vbf", "vtypes":[0,1,2,3,4,5,-1]}
+	{"weight":"ttbar-spring15.weights.xml", "name":"jet0Regression_vbf", "vtypes":[0,1,2,3,4,5,-1]}
     ],
     VBFblikelihood = {"weight":"TMVA_blikelihood_vbf_cmssw76.weights.xml", "name":"BDGT"}
 )
