@@ -424,7 +424,7 @@ primaryVertexType = NTupleObjectType("primaryVertex", variables = [
     NTupleVariable("isFake",   lambda x : x.isFake()),
     NTupleVariable("ndof",   lambda x : x.ndof()),
     NTupleVariable("Rho",   lambda x : x.position().Rho()),
-#    NTupleVariable("score",  lambda x : x.mass()), # to be added for 74X
+    NTupleVariable("score",  lambda x : x.score),
 ])
 
 genTauJetType = NTupleObjectType("genTauJet", baseObjectTypes = [ genParticleType ], variables = [
