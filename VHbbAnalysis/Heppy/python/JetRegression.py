@@ -11,7 +11,7 @@ class JetRegression :
 #      for i in range(0,3):
         reader = ROOT.TMVA.Reader()
         self.Jet_pt =array.array('f',[0])
-        self.Jet_rawPt = array.array('f',[0])
+        self.Jet_corr = array.array('f',[0])
         self.rho = array.array('f',[0])
         self.Jet_eta = array.array('f',[0])
         self.Jet_mt = array.array('f',[0])
@@ -19,8 +19,8 @@ class JetRegression :
         self.Jet_leptonPtRel = array.array('f',[0])
         self.Jet_leptonPt =  array.array('f',[0])
         self.Jet_leptonDeltaR = array.array('f',[0])
-        self.Jet_chEmEF = array.array('f',[0])
-        self.Jet_chHEF = array.array('f',[0])
+        #self.Jet_chEmEF = array.array('f',[0])
+        #self.Jet_chHEF = array.array('f',[0])
         self.Jet_neHEF = array.array('f',[0])
         self.Jet_neEmEF = array.array('f',[0])
         self.Jet_chMult = array.array('f',[0])
@@ -30,7 +30,7 @@ class JetRegression :
         self.Jet_vtxNtrk = array.array('f',[0])
         self.Jet_vtx3deL = array.array('f',[0])
         reader.AddVariable("Jet_pt",self.Jet_pt)
-        reader.AddVariable("Jet_rawPt",self.Jet_rawPt)
+        reader.AddVariable("Jet_corr",self.Jet_corr)
         reader.AddVariable("rho",self.rho)
         reader.AddVariable("Jet_eta",self.Jet_eta)
         reader.AddVariable("Jet_mt",self.Jet_mt)
@@ -38,8 +38,8 @@ class JetRegression :
         reader.AddVariable("Jet_leptonPtRel",self.Jet_leptonPtRel)
         reader.AddVariable("Jet_leptonPt",self.Jet_leptonPt)
         reader.AddVariable("Jet_leptonDeltaR",self.Jet_leptonDeltaR)
-        reader.AddVariable("Jet_chEmEF",self.Jet_chEmEF)
-        reader.AddVariable("Jet_chHEF",self.Jet_chHEF)
+        #reader.AddVariable("Jet_chEmEF",self.Jet_chEmEF)
+        #reader.AddVariable("Jet_chHEF",self.Jet_chHEF)
         reader.AddVariable("Jet_neHEF",self.Jet_neHEF)
         reader.AddVariable("Jet_neEmEF",self.Jet_neEmEF)
         reader.AddVariable("Jet_chMult",self.Jet_chMult)
@@ -58,7 +58,7 @@ class JetRegression :
 	for j in event.jetsForHiggs :
 		self.Jet_pt[0] = j.pt()
 		self.Jet_eta[0] = j.eta()
-		self.Jet_rawPt[0] = j.pt()*j.rawFactor()
+		self.Jet_corr[0] = j.rawFactor()
 		self.Jet_mt[0] = j.mt()
 		self.Jet_leadTrackPt[0] = j.leadTrackPt()
 		if len(j.leptons) > 0       :
@@ -69,8 +69,8 @@ class JetRegression :
 			self.Jet_leptonPtRel[0] = -99
 			self.Jet_leptonPt[0] =  -99
 			self.Jet_leptonDeltaR[0] =-99
-		self.Jet_chEmEF[0] = j.chargedEmEnergyFraction()
-		self.Jet_chHEF[0] = j.chargedHadronEnergyFraction()
+#		self.Jet_chEmEF[0] = j.chargedEmEnergyFraction()
+#		self.Jet_chHEF[0] = j.chargedHadronEnergyFraction()
 		self.Jet_neHEF[0] = j.neutralHadronEnergyFraction()
 		self.Jet_neEmEF[0] = j.neutralEmEnergyFraction()
 		self.Jet_chMult[0] = j.chargedMultiplicity()

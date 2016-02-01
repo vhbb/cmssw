@@ -55,18 +55,12 @@ class VHbbAnalyzer( Analyzer ):
             self.inputCounterWeighted = ROOT.TH1F("CountWeighted","Count with gen weight and pu weight",1,0,2)
             self.inputCounterPosWeight = ROOT.TH1F("CountPosWeight","Count genWeight>0",1,0,2)
             self.inputCounterNegWeight = ROOT.TH1F("CountNegWeight","Count genWeight<0",1,0,2)
-        self.regressions={}
-	self.regressionVBF={}
-	for re in self.cfg_ana.regressionVBF :
-		print "Initialize regression ",re
-		regression_VBF = JetRegression(re["weight"],re["name"])
-		for i in re["vtypes"] :
-                  self.regressionVBF[i] = regression_VBF
-        for re in self.cfg_ana.regressions :
-            print "Initialize regression ",re
-            regression = JetRegression(re["weight"],re["name"])              
-            for i in re["vtypes"] :
-                self.regressions[i] = regression
+	re=self.cfg_ana.regressionVBF
+	print "Initialize regression ",re
+	self.regression_VBF = JetRegression(re["weight"],re["name"])
+        re_vh=self.cfg_ana.regressions
+        print "Initialize regression ",re_vh
+        self.regression = JetRegression(re_vh["weight"],re_vh["name"])              
         blike=self.cfg_ana.VBFblikelihood
         print "Initialize VBF blikelihood ", blike
         self.blikelihood = VBFblikelihood(blike["weight"],blike["name"])
@@ -75,7 +69,7 @@ class VHbbAnalyzer( Analyzer ):
     def doVBF(self,event) :
         event.jetsForVBF = [x for x in event.cleanJetsAll if self.cfg_ana.higgsJetsPreSelectionVBF(x) ]
         if event.Vtype in self.regressionVBF :
-            self.regressionVBF[event.Vtype].evaluateRegression(event,"pt_regVBF")
+        	self.regressionVBF.evaluateRegression(event,"pt_regVBF")
         #compute only for events passing VBF selection
         if len(event.jetsForVBF) < 4 or  event.jetsForVBF[0] < 70 or  event.jetsForVBF[1] < 55 or  event.jetsForVBF[2] < 35 or  event.jetsForVBF[3] < 20 :
             return
@@ -261,7 +255,7 @@ class VHbbAnalyzer( Analyzer ):
 
     def doVHRegression(self, event):
        if (len(event.jetsForHiggs) >=2 ):
-          self.regressions[event.Vtype].evaluateRegression(event)
+          self.regressions.evaluateRegression(event)
           hJetCSV_reg0 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[0].p4())
           hJetCSV_reg1 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[1].p4())
           hJetCSV_reg0*=event.hJetsCSV[0].pt_reg/event.hJetsCSV[0].pt()
