@@ -1,4 +1,8 @@
 triggerTable = {
+    "ZnnHbb" : [
+        "HLT_PFMET90_PFMHT90_IDTight_v*",
+        "HLT_PFMET170_NoiseCleaned_v*",
+    ],
     "ZnnHbbAll" : [
         "HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDTight_BTagCSV0p72_v*",
         "HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDTight_v*",
@@ -10,15 +14,6 @@ triggerTable = {
         "HLT_DiCentralPFJet55_PFMET110_NoiseCleaned_v*",
         "HLT_PFHT350_PFMET100_NoiseCleaned_v*",
     ],
-    "ZnnHbbHighLumi" : [
-        "HLT_CaloMHTNoPU90_PFMET90_PFMHT90_IDTight_BTagCSV0p72_v*",
-        "HLT_PFMET120_PFMHT120_IDTight_v*",
-        "HLT_PFMET170_NoiseCleaned_v*",
-    ],
-    "ZnnHbbLowLumi" : [
-        "HLT_PFMET90_PFMHT90_IDTight_v*",
-    ],
-
     "ZeeHbbAll" : [
         "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*",
         "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
