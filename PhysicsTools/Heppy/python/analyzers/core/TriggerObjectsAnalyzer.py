@@ -66,7 +66,7 @@ class TriggerObjectsAnalyzer( Analyzer ):
 setattr(TriggerObjectsAnalyzer,"defaultConfig",cfg.Analyzer(
     TriggerObjectsAnalyzer, name="TriggerObjectsAnalyzerDefault",
     triggerObjectsCfgs = {"caloJets":(("hltAK4CaloJetsCorrectedIDPassed")),"caloMet":(("hltMet","","HLT"),"hltMET90","HLT_PFMET90_PFMHT90_IDTight*")},
-    triggerObjectInputTag = ('selectedPatTrigger','','PAT'),
+    triggerObjectInputTag = ('selectedPatTrigger','','RECO'),
     triggerBitsInputTag = ('TriggerResults','','HLT')
 )
 )
