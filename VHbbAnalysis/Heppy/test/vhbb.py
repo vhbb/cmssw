@@ -180,7 +180,7 @@ LepAna.loose_electron_isoCut = lambda electron : electron.relIso03 < 0.4
 from PhysicsTools.Heppy.analyzers.objects.VertexAnalyzer import VertexAnalyzer
 VertexAna = VertexAnalyzer.defaultConfig
 VertexAna.keepFailingEvents = True
-VertexAna.score = 'offlineSlimmedPrimaryVertices'
+VertexAna.scores = 'offlineSlimmedPrimaryVertices'
 
 
 from PhysicsTools.Heppy.analyzers.objects.PhotonAnalyzer import PhotonAnalyzer
