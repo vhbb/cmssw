@@ -192,6 +192,7 @@ jsons = {
     'muSF_IdLoose' : [ jsonpath+'MuonID_Z_RunCD_Reco74X_Dec1.json' , 'NUM_LooseID_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
     'muSF_IdTight' : [ jsonpath+'MuonID_Z_RunCD_Reco74X_Dec1.json' , 'NUM_TightIDandIPCut_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
     'eleSF_HLT' : ['','',''],
+    'eleEff_HLT' : ['','',''],
     'eleSF_IdLoose' : [jsonpath+'CutBasedID_LooseWP.json', 'CutBasedID_LooseWP', 'eta_pt_ratio'],
     'eleSF_IdTight' : [jsonpath+'CutBasedID_TightWP.json', 'CutBasedID_TightWP', 'eta_pt_ratio'],
     'eleSF_IsoLoose' : ['','',''],
@@ -210,6 +211,15 @@ for cut in ["HLT", "IsoLoose", "IsoTight", "IdLoose", "IdTight"]:
     leptonTypeVHbb.variables += [NTupleVariable("SFerr_"+cut, 
                                                 lambda x, muCorr=correctors["muSF_"+cut], eleCorr=correctors["eleSF_"+cut] : muCorr.get_2D(x.pt(), x.eta())[1] if abs(x.pdgId()) == 13 else eleCorr.get_2D(x.pt(), x.eta())[1], 
                                                 float, mcOnly=True, help="SF error for lepton "+cut
+                                                )]
+leptonTypeVHbb.variables += [NTupleVariable("Eff_HLT", 
+                                                lambda x, muCorr=correctors["muEff_HLT"], eleCorr=correctors["eleSF_HLT"] : muCorr.get_2D(x.pt(), x.eta())[0] if abs(x.pdgId()) == 13 else eleCorr.get_2D(x.pt(), x.eta())[0], 
+
+                                                float, mcOnly=True, help="Eff for lepton HLT"
+                                                )]
+leptonTypeVHbb.variables += [NTupleVariable("Efferr_HLT", 
+                                                lambda x, muCorr=correctors["muEff_HLT"], eleCorr=correctors["eleEff_HLT"] : muCorr.get_2D(x.pt(), x.eta())[1] if abs(x.pdgId()) == 13 else eleCorr.get_2D(x.pt(), x.eta())[1], 
+                                                float, mcOnly=True, help="Eff error for lepton HLT"
                                                 )]
 
 
