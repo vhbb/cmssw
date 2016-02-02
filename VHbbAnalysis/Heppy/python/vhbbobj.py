@@ -88,6 +88,7 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("btagSoftMu", lambda x : getattr(x, "btagSoftMu", -1000) , help="soft muon b-tag"),
     NTupleVariable("btagnew",   lambda x : getattr(x,"btagnew",-2), help="newest btag discriminator"),
     NTupleVariable("btagCSVV0",   lambda x : x.bDiscriminator('pfCombinedSecondaryVertexV2BJetTags'), help="should be the old CSV discriminator with AVR vertices"),
+    NTupleVariable("btagCMVAV2",  lambda x : x.btag('pfCombinedMVAV2BJetTags'), help="CMVA V2 discriminator"),
    # NTupleVariable("mcMatchId",    lambda x : x.mcMatchId,   int, mcOnly=True, help="Match to source from hard scatter (25 for H, 6 for t, 23/24 for W/Z)"),
    # NTupleVariable("puId", lambda x : x.puJetIdPassed, int,     mcOnly=False, help="puId (full MVA, loose WP, 5.3.X training on AK5PFchs: the only thing that is available now)"),
    # NTupleVariable("id",    lambda x : x.jetID("POG_PFID") , int, mcOnly=False,help="POG Loose jet ID"),
@@ -143,8 +144,8 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
 from PhysicsTools.Heppy.physicsutils.BTagWeightCalculator import BTagWeightCalculator
 csvpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/csv"
 bweightcalc = BTagWeightCalculator(
-    csvpath + "/csv_rwt_fit_hf_2015_12_14.root",
-    csvpath + "/csv_rwt_fit_lf_2015_12_14.root"
+    csvpath + "/csv_rwt_fit_hf_2016_01_28.root", 
+    csvpath + "/csv_rwt_fit_lf_2016_01_28.root", 
 )
 
 for syst in ["JES", "LF", "HF", "HFStats1", "HFStats2", "LFStats1", "LFStats2", "cErr1", "cErr2"]:

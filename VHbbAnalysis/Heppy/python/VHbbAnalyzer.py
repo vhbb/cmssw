@@ -55,6 +55,8 @@ class VHbbAnalyzer( Analyzer ):
             self.inputCounterWeighted = ROOT.TH1F("CountWeighted","Count with gen weight and pu weight",1,0,2)
             self.inputCounterPosWeight = ROOT.TH1F("CountPosWeight","Count genWeight>0",1,0,2)
             self.inputCounterNegWeight = ROOT.TH1F("CountNegWeight","Count genWeight<0",1,0,2)
+            for LHE_scale in range(6):
+               setattr(self, "inputCounterWeightedLHEWeight_"+str(LHE_scale), ROOT.TH1F("CountWeightedLHEWeight_"+str(LHE_scale),"Count with gen weight x LHE_weight_scale["+str(LHE_scale)+"] and pu weight",1,0,2))
         self.regressions={}
 	self.regressionVBF={}
 	for re in self.cfg_ana.regressionVBF :
@@ -434,6 +436,8 @@ class VHbbAnalyzer( Analyzer ):
         if self.cfg_comp.isMC:
             genWeight = self.handles['GenInfo'].product().weight()
             self.inputCounterWeighted.Fill(1,copysign(1.0,genWeight)*event.puWeight)
+            for LHE_scale in range(6): 
+               getattr(self, "inputCounterWeightedLHEWeight_"+str(LHE_scale)).Fill(1,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_scale[LHE_scale]).wgt) 
             if genWeight > 0:
                 self.inputCounterPosWeight.Fill(1)
             elif genWeight < 0:
