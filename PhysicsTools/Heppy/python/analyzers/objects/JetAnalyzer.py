@@ -83,7 +83,7 @@ class JetAnalyzer( Analyzer ):
           if   doResidual == "MC":   doResidual = self.cfg_comp.isMC
           elif doResidual == "Data": doResidual = not self.cfg_comp.isMC
           elif doResidual not in [True,False]: raise RuntimeError, "If specified, applyL2L3Residual must be any of { True, False, 'MC', 'Data'(default)}"
-          GT = mcGT if self.cfg_comp.isMC else dataGT
+          GT = getattr(cfg_comp, 'jecGT', mcGT if self.cfg_comp.isMC else dataGT)
           # Now take care of the optional arguments
           kwargs = { 'calculateSeparateCorrections':calculateSeparateCorrections,
                      'calculateType1METCorrection' :calculateType1METCorrection, }
@@ -295,8 +295,8 @@ class JetAnalyzer( Analyzer ):
         #MC stuff
         if self.cfg_comp.isMC:
             self.deltaMetFromJetSmearing = [0, 0]
-            for j in self.cleanJetsAll:
-                if hasattr(j, 'deltaMetFromJetSmearing'):
+            for j in self.allJets:
+                if self.cfg_ana.propagateJetSmearToMET and hasattr(j, 'deltaMetFromJetSmearing'):
                     self.deltaMetFromJetSmearing[0] += j.deltaMetFromJetSmearing[0]
                     self.deltaMetFromJetSmearing[1] += j.deltaMetFromJetSmearing[1]
 
@@ -477,6 +477,8 @@ setattr(JetAnalyzer,"defaultConfig", cfg.Analyzer(
     shiftJEC = 0, # set to +1 or -1 to apply +/-1 sigma shift to the nominal jet energies
     addJECShifts = False, # if true, add  "corr", "corrJECUp", and "corrJECDown" for each jet (requires uncertainties to be available!)
     smearJets = True,
+    propagateJetSmearToMET = False,
+    jetsForMetCut = lambda jet: True, #use only these jets for JEC/JER propagation to MET
     shiftJER = 0, # set to +1 or -1 to get +/-1 sigma shifts    
     jecPath = "",
     calculateSeparateCorrections = False,
