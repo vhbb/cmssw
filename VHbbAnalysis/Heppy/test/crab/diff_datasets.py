@@ -3,8 +3,14 @@ import sys,os
 # miniaod_version = "RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9*"
 # filename = 'datasets_MCRUN2_25ns.txt'
 
-miniaod_version = "RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v*"
-filename = 'datasets_MCRUN2_25ns_RunIISpring15MiniAODv2.txt'
+# miniaod_version = "RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v*"
+# filename = 'datasets_MCRUN2_25ns_RunIISpring15MiniAODv2.txt'
+
+# miniaod_version = "RunIIFall15MiniAODv1-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v*"
+# filename = 'datasets_MCRUN2_25ns_RunIIFall15MiniAODv1-PU25nsData2015v1_76X.txt'
+
+miniaod_version = "RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v*"
+filename = 'datasets_MCRUN2_25ns_RunIIFall15MiniAODv2-PU25nsData2015v1_76X.txt'
 
 # REMOVE DATASET NAMES CONTAINING:
 
@@ -35,7 +41,10 @@ remove = [
           'BdToKstarMuMu','Estar_EG','ZGTo2LG','Mustar_MuG','Estar_EG','InclusivebtoMu','GluGluHToEEG','InclusiveBtoJpsi',
           '/DYJetsToLL_M-50_HT-200to400_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM',
           'BlackHole_','DMS_','DMV_','/DsTo','AxialMonoW_Mphi','X53X53To2L2Nu','VectorMono','AxialMono','StringBall',
-          'top_5f_DS_',
+          'top_5f_DS_','ExtendedWeakIsospinModel','SMS-T2tt','SinglePi','SingleNeutrin','H0ToUps','SLQ_Rhanded-MLQ',
+          'ContinToZZ','SingleNeutron','BuToJpsiPi','Chib0ToUps','DYToLL_M_1_T','EEG_PTG','GluGluWWTo2E2Nu','HToZATo2L2Tau',
+          'MinBias_chMulti85','MuMuG_PTG130To400','SingleK0','WLLJJ','WZJJ','ChMulti85','Chib0ToUps','DYToEE_NNPDF30','ZToEE_NNPDF',
+          'GluGluToHiggs0PMToZZ','/TTTT_','WWJJToLNuLNu_EWK_QCD_noTop',
           # '/ttHJetToNonbb_M120_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           # '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           # '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v3/MINIAODSIM',
