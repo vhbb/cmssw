@@ -60,20 +60,15 @@ class VHbbAnalyzer( Analyzer ):
             for LHE_pdf in range(2):
                setattr(self, "inputCounterWeightedLHEWeightPdf_"+str(LHE_pdf), ROOT.TH1F("CountWeightedLHEWeightPdf_"+str(LHE_pdf),"Count with gen weight x LHE_weights_pdf["+str(LHE_pdf)+"] and pu weight",1,0,2))
 
-
-	re=self.cfg_ana.regressionVBF
-        print "Initialize regression ",re
-        self.regressionVBF = JetRegression(re["weight"],re["name"])
-
-	re_vh=self.cfg_ana.regressions
+	re=self.cfg_ana.regressionVBF 
+	print "Initialize regression ",re
+        self.regressionVBF[i] = JetRegression(re["weight"],re["name"])
+        re_vh=self.cfg_ana.regressions 
         print "Initialize regression ",re_vh
-        self.regressions = JetRegression(re_vh["weight"],re_vh["name"])
-
-
+        self.regressions = JetRegression(re_vh["weight"],re_vh["name"])              
         blike=self.cfg_ana.VBFblikelihood
         print "Initialize VBF blikelihood ", blike
         self.blikelihood = VBFblikelihood(blike["weight"],blike["name"])
-
 
 
     def doVBF(self,event) :
@@ -265,7 +260,7 @@ class VHbbAnalyzer( Analyzer ):
 
     def doVHRegression(self, event):
        if (len(event.jetsForHiggs) >=2 ):
-          self.regressions.evaluateRegression(event)
+          self.regressions[event.Vtype].evaluateRegression(event)
           hJetCSV_reg0 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[0].p4())
           hJetCSV_reg1 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[1].p4())
           hJetCSV_reg0*=event.hJetsCSV[0].pt_reg/event.hJetsCSV[0].pt()
