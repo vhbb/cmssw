@@ -115,7 +115,7 @@ preprocessor = CmsswPreprocessor("combined_cmssw.py", options = {"isMC":sample.i
 config.preprocessor=preprocessor
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 100)
+    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 300)
     import time
     import cProfile
     p = cProfile.Profile(time.clock)
