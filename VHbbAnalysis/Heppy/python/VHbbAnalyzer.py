@@ -439,9 +439,9 @@ class VHbbAnalyzer( Analyzer ):
         if self.cfg_comp.isMC:
             genWeight = self.handles['GenInfo'].product().weight()
             self.inputCounterWeighted.Fill(1,copysign(1.0,genWeight)*event.puWeight)
-            for LHE_scale in range(6): 
+            for LHE_scale in range(len(event.LHE_weights_scale)): 
                getattr(self, "inputCounterWeightedLHEWeightScale_"+str(LHE_scale)).Fill(1,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_scale[LHE_scale]).wgt) 
-            for LHE_pdf in range(2): 
+            for LHE_pdf in range(len(event.LHE_weights_pdf)): 
                getattr(self, "inputCounterWeightedLHEWeightPdf_"+str(LHE_pdf)).Fill(1,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_pdf[LHE_pdf]).wgt) 
             if genWeight > 0:
                 self.inputCounterPosWeight.Fill(1)

@@ -185,7 +185,7 @@ class GeneratorAnalyzer( Analyzer ):
                     LHE_weights_scale.append(w)
             # thse are up/down variations for the NNPDF: https://twiki.cern.ch/twiki/bin/view/CMS/TTbarHbbRun2ReferenceAnalysisLimits
             if wid in [2005,2067]:
-                print  w.wgt
+                #print  w.wgt
                 w.wgt = w.wgt/event.LHE_originalWeight if abs(event.LHE_originalWeight)>0 else w.wgt
                 LHE_weights_pdf.append(w)
 
