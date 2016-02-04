@@ -391,7 +391,8 @@ from PhysicsTools.Heppy.utils.miniAodFiles import miniAodFiles
 sample = cfg.MCComponent(
 	files = [
 		#"root://xrootd.ba.infn.it//store/mc/RunIIFall15MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-scaledown-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/30000/045996FE-A19D-E511-B76D-D4AE526A0B47.root" ##ttbar
-		"045996FE-A19D-E511-B76D-D4AE526A0B47.root" ##ttbar
+		#"045996FE-A19D-E511-B76D-D4AE526A0B47.root" ##ttbar
+		"/scratch/bianchi/06EC3B62-39B8-E511-9957-0002C94CD0C0.root"
 		#"root://xrootd.ba.infn.it//store/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-100to200_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext1-v1/60000/027D7153-29BF-E511-A2BC-0025B3E025B6.root"
 		],
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
