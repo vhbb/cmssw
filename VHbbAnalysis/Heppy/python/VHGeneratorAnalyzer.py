@@ -309,6 +309,7 @@ class GeneratorAnalyzer( Analyzer ):
             #event.genHiggsBoson = [GenParticle(higgsBosons[-1])]
             event.genHiggsBosons = higgsBosons
             event.genHiggsDecayMode = abs(  event.genHiggsBoson.daughter(0).pdgId() if event.genHiggsBoson.numberOfDaughters() >= 1 else 0)
+            event.genHiggsDecayMode += abs( event.genHiggsBoson.daughter(1).pdgId() if event.genHiggsBoson.numberOfDaughters() >= 2 and abs( event.genHiggsBoson.daughter(1).pdgId() ) != abs( event.genHiggsBoson.daughter(0).pdgId()) else 0) * 10000
             self.fillTopQuarks( event )
             self.countBPartons( event )
             #self.fillWZQuarks(   event, event.genHiggsBoson )
