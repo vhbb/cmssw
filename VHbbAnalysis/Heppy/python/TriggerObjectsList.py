@@ -17,6 +17,7 @@ triggerObjectCollectionsOnlyPt = {
     "caloMhtNoPU":[["hltMHTNoPU"]],
     "pfMet":[["hltPFMETProducer"]],
     "pfMht":[["hltPFMHTTightID"]],
+    "pfHt":[["hltPFHT"]],
 }
 triggerObjectCollectionsOnlySize = {
     ## VBF triggers
