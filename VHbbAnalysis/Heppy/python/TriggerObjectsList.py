@@ -11,6 +11,8 @@ triggerObjectCollectionsOnlyPt = {
 #    "caloMet":[["hltMet","","HLT"],"hltMET90","HLT_PFMET90_PFMHT90_IDTight*"] hltL1extraParticles:Central:HLT
     "l1CentralJets":[["hltL1extraParticles","Central"]],
     "l1ForwardJets":[["hltL1extraParticles","Forward"]],
+    "l1Met":[["hltL1extraParticles","MET"]],
+    "l1Mht":[["hltL1extraParticles","MHT"]],
     "caloJets":[["hltAK4CaloJetsCorrectedIDPassed"]],
     "pfJets":[["hltAK4PFJetsCorrected"]],
 
@@ -20,11 +22,6 @@ triggerObjectCollectionsOnlyPt = {
     "pfMet":[["hltPFMETProducer"]],
     "pfMht":[["hltPFMHTTightID"]],
     "pfHt":[["hltPFHT"]],
-}
-
-triggerObjectCollectionsOnlyPtSumEt = {
-    "l1Met":[["hltL1extraParticles","MET"]],
-    "l1Mht":[["hltL1extraParticles","MHT"]],
 }
 
 triggerObjectCollectionsOnlySize = {
@@ -83,7 +80,6 @@ triggerObjectCollectionsOnlySize = {
 
 triggerObjectCollections = dict(
     triggerObjectCollectionsOnlySize.items() + 
-    triggerObjectCollectionsOnlyPtSumEt.items() + 
     triggerObjectCollectionsOnlyPt.items() + 
     triggerObjectCollectionsFull.items()
     )
