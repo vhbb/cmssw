@@ -25,6 +25,8 @@ treeProducer= cfg.Analyzer(
 	verbose=False, 
 	vectorTree = True,
         globalVariables	= [
+                 NTupleVariable("puWeightUp", lambda ev : getattr(ev,"puWeightPlus",1.), help="Pileup up variation",mcOnly=True),
+                 NTupleVariable("puWeightDown", lambda ev : getattr(ev,"puWeightMinus",1.), help="Pileup down variation",mcOnly=True),
                  NTupleVariable("json", lambda ev : getattr(ev,"json",True), help="Passing json selection"),
                  NTupleVariable("nPU0", lambda ev : [bx.nPU() for bx in  ev.pileUpInfo if bx.getBunchCrossing()==0][0], help="nPU in BX=0",mcOnly=True),
                  NTupleVariable("nPVs", lambda ev : len(ev.goodVertices), help="total number of good PVs"),
@@ -399,6 +401,8 @@ sample = cfg.MCComponent(
     name="ZHLL125", isEmbed=False,
     puFileMC="puMC.root",
     puFileData="puData.root", 
+    puFileDataPlus="puDataPlus.root", 
+    puFileDataMinus="puDataMinus.root", 
     splitFactor = 5
     )
 sample.isMC=True
