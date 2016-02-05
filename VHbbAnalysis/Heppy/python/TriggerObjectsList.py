@@ -11,6 +11,7 @@ triggerObjectCollectionsOnlyPt = {
     "caloJets":[["hltAK4CaloJetsCorrectedIDPassed"]],
     "pfJets":[["hltAK4PFJetsCorrected"]],
 
+    "l1Mht":[["hltL1extraParticles","MHT"]],
     "l1Met":[["hltL1extraParticles","MET"]],
     "caloMet":[["hltMet"]],
     "caloMht":[["hltMht"]],
