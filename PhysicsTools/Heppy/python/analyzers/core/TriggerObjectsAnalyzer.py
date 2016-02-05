@@ -6,6 +6,7 @@ from PhysicsTools.Heppy.analyzers.core.AutoFillTreeProducer  import NTupleVariab
 from PhysicsTools.HeppyCore.utils.deltar import matchObjectCollection, matchObjectCollection3
 import PhysicsTools.HeppyCore.framework.config as cfg
 
+""" Check if triggerName is in names using wildcard"""
 def FindTrigger(triggerName,names):
     if triggerName=="": return True
     triggerName = triggerName.replace("*","")
@@ -14,6 +15,16 @@ def FindTrigger(triggerName,names):
         if triggerName in name: return True
     return False
 
+"""
+Example
+trColl = triggerCollection(("hltMet","","HLT"),"hltMET90","HLT_PFMET90_PFMHT90_IDTight*")
+
+It gives:
+trColl.collectionText ="hltMet::HLT"
+trColl.collectionName ="hltMet"
+trColl.filterName ="hltMET90"
+trColl.path ="HLT_PFMET90_PFMHT90_IDTight*"
+"""
 class triggerCollection(object):
     def __init__(self, triggerObjectsCfg):
         collectionInfo = triggerObjectsCfg[0]
@@ -36,6 +47,7 @@ class TriggerObjectsAnalyzer( Analyzer ):
         self.triggerObjectInputTag = getattr(self.cfg_ana,"triggerObjectInputTag",("","",""))
         self.triggerBitsInputTag = getattr(self.cfg_ana,"triggerBitsInputTag",("","",""))
         self.triggerObjectsInfos = {}
+        self.names = None
         for collectionName in triggerObjectsCfgs.keys():
             self.triggerObjectsInfos[collectionName] = triggerCollection(triggerObjectsCfgs[collectionName])
         
@@ -49,17 +61,22 @@ class TriggerObjectsAnalyzer( Analyzer ):
 
     def process(self, event):
         self.readCollections( event.input )
-        triggerBits = self.handles['TriggerBits'].product()
+        # get the trigger names (only in the first event)
+        if self.names is None:
+            triggerBits = self.handles['TriggerBits'].product()
+            self.names = event.input.object().triggerNames(triggerBits)
+        # get the trigger object
         allTriggerObjects = self.handles['TriggerObjects'].product()
-        names = event.input.object().triggerNames(triggerBits)
-        for ob in allTriggerObjects: ob.unpackPathNames(names)
+        # for each collection name save the trigger object matching with the triggerObjectsInfo (eg. )
         for collectionName in self.triggerObjectsInfos.keys():
             triggerObjectsInfo = self.triggerObjectsInfos[collectionName]
             objects = []
             for ob in allTriggerObjects:
                 if (triggerObjectsInfo.collectionText!="::HLT") and triggerObjectsInfo.collectionText!=ob.collection(): continue
-                if (triggerObjectsInfo.path!="") and not FindTrigger(triggerObjectsInfo.path, ob.pathNames()): continue
                 if (triggerObjectsInfo.filterName!="") and not (triggerObjectsInfo.filterName in ob.filterLabels()): continue
+                if (triggerObjectsInfo.path!=""):
+                    ob.unpackPathNames(self.names)
+                    if not FindTrigger(triggerObjectsInfo.path, ob.pathNames()): continue
                 objects.append(ob)
             setattr(event,'trgObjects_'+collectionName,objects)
 
