@@ -358,6 +358,9 @@ for collectionName in triggerObjectCollectionsFull.keys():
 for collectionName in triggerObjectCollectionsOnlyPt.keys():
     treeProducer.collections["trgObjects_"+collectionName] = NTupleCollection("trgObjects_"+collectionName, triggerObjectsOnlyPtType, 5, help="")
 
+for collectionName in triggerObjectCollectionsOnlyPtSumEt.keys():
+    treeProducer.collections["trgObjects_"+collectionName] = NTupleCollection("trgObjects_"+collectionName, triggerObjectsOnlyPtType, 5, help="")
+
 for collectionName in triggerObjectCollectionsOnlySize.keys():
     treeProducer.collections["trgObjects_"+collectionName] = NTupleCollection("trgObjects_"+collectionName, triggerObjectsNothingType , 5, help="")
 #    treeProducer.globalVariables.append(NTupleVariable("trgObjects_"+collectionName+"_size", lambda ev : len(getattr(ev,"trgObjects_"+collectionName,[])), int, help="trigger objects size"))
