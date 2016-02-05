@@ -80,7 +80,8 @@ class VHbbAnalyzer( Analyzer ):
     def doVBF(self,event) :
         event.jetsForVBF = [x for x in event.cleanJetsAll if self.cfg_ana.higgsJetsPreSelectionVBF(x) ]
         if event.Vtype in self.regressionVBF :
-            self.regressionVBF[event.Vtype].evaluateRegression(event,"pt_regVBF")
+           for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
+              self.regressionVBF[event.Vtype].evaluateRegression(event,"pt_regVBF", analysis)
         #compute only for events passing VBF selection
         if len(event.jetsForVBF) < 4 or  event.jetsForVBF[0] < 70 or  event.jetsForVBF[1] < 55 or  event.jetsForVBF[2] < 35 or  event.jetsForVBF[3] < 20 :
             return
@@ -266,18 +267,27 @@ class VHbbAnalyzer( Analyzer ):
 
     def doVHRegression(self, event):
        if (len(event.jetsForHiggs) >=2 ):
-          self.regressions[event.Vtype].evaluateRegression(event)
-          hJetCSV_reg0 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[0].p4())
-          hJetCSV_reg1 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[1].p4())
-          hJetCSV_reg0*=event.hJetsCSV[0].pt_reg/event.hJetsCSV[0].pt()
-          hJetCSV_reg1*=event.hJetsCSV[1].pt_reg/event.hJetsCSV[1].pt()
-          event.HCSV_reg = hJetCSV_reg0+hJetCSV_reg1
+          # ""=nominal, the other correspond to jet energies up/down for JEC and JER
+          for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
+             self.regressions[event.Vtype].evaluateRegression(event, "pt_reg", analysis)
+             hJetCSV_reg0 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[0].p4())
+             hJetCSV_reg1 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[1].p4())
 
-          hJet_reg0=ROOT.reco.Particle.LorentzVector(event.hJets[0].p4())
-          hJet_reg1=ROOT.reco.Particle.LorentzVector(event.hJets[1].p4())
-          hJet_reg0*=event.hJets[0].pt_reg/event.hJets[0].pt()
-          hJet_reg1*=event.hJets[1].pt_reg/event.hJets[1].pt()
-          event.H_reg = hJet_reg0+hJet_reg1
+             hJetCSV_reg0*=getattr(event.hJetsCSV[0],"pt_reg"+analysis)/event.hJetsCSV[0].pt()
+             hJetCSV_reg1*=getattr(event.hJetsCSV[1],"pt_reg"+analysis)/event.hJetsCSV[1].pt()
+             setattr(event,"HCSV_reg"+("_"+analysis if analysis!="" else ""), hJetCSV_reg0+hJetCSV_reg1)
+
+             hJet_reg0=ROOT.reco.Particle.LorentzVector(event.hJets[0].p4())
+             hJet_reg1=ROOT.reco.Particle.LorentzVector(event.hJets[1].p4())
+             hJet_reg0*=getattr(event.hJets[0],"pt_reg"+analysis)/event.hJets[0].pt()
+             hJet_reg1*=getattr(event.hJets[1],"pt_reg"+analysis)/event.hJets[1].pt()
+             setattr(event,"H_reg"+("_"+analysis if analysis!="" else ""), hJet_reg0+hJet_reg1)
+             #print  "H_reg"+("_"+analysis if analysis!="" else ""), getattr(event, "H_reg"+("_"+analysis if analysis!="" else "")).Pt()
+       else:
+          for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
+             setattr(event,"HCSV_reg"+("_"+analysis if analysis!="" else ""), ROOT.reco.Particle.LorentzVector() ) 
+             setattr(event,"H_reg"+("_"+analysis if analysis!="" else ""), ROOT.reco.Particle.LorentzVector() )
+
 
     def doVBFblikelihood(self, event):
         self.blikelihood.evaluateBlikelihood(event)

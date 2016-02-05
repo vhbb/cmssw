@@ -142,10 +142,15 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("numberOfDaughters",   lambda x : x.numberOfDaughters(), int, mcOnly=False,help="number of daughters"),
     NTupleVariable("btagIdx",   lambda x : x.btagIdx, int, mcOnly=False,help="ranking in btag"),
     NTupleVariable("mcIdx",   lambda x : x.mcJet.index if hasattr(x,"mcJet") and x.mcJet is not None else -1, int, mcOnly=False,help="index of the matching gen jet"),
-    NTupleVariable("pt_reg",lambda x : getattr(x,"pt_reg",-99), help="Regression"),
-    NTupleVariable("pt_regVBF",lambda x : getattr(x,"pt_regVBF",-99), help="Regression for VBF"),
+    #NTupleVariable("pt_reg",lambda x : getattr(x,"pt_reg",-99), help="Regression"),
+    #NTupleVariable("pt_regVBF",lambda x : getattr(x,"pt_regVBF",-99), help="Regression for VBF"),
     NTupleVariable("blike_VBF",lambda x : getattr(x,"blike_VBF",-2), help="VBF blikelihood for SingleBtag dataset")
  ])
+
+# "" is the nominal rgression, the other refer to JEC/JER up/down
+for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
+    jetTypeVHbb.variables += [NTupleVariable("pt_reg"+("_"+analysis if analysis!="" else ""), lambda x, analysis=analysis : getattr(x,"pt_reg"+analysis,-99), help="Regression "+analysis)]
+    jetTypeVHbb.variables += [NTupleVariable("pt_regVBF"+("_"+analysis if analysis!="" else ""), lambda x, analysis=analysis : getattr(x,"pt_regVBF"+analysis,-99), help="Regressionfor VBF "+analysis)]
 
 
 #add per-jet b-tag systematic weight
