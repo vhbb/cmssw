@@ -3,7 +3,7 @@
 
 
 triggerObjectCollectionsFull = {
-    "hltIsoMu18":[[],"hltL3MuonCandidates","HLT_IsoMu18_v*"],
+    "hltIsoMu18":[[],"hltL3crIsoL1sMu16L1f0L2f10QL3f18QL3trkIsoFiltered0p09","HLT_IsoMu18_v*"],
     "hltEle23WPLoose":[[],"hltEle23WPLooseGsfTrackIsoFilter","HLT_Ele23_WPLoose_Gsf_v*"],
     "hltEle22eta2p1WPLoose":[[],"hltSingleEle22WPLooseGsfTrackIsoFilter","HLT_Ele22_eta2p1_WPLoose_Gsf_v*"],
 }
@@ -23,8 +23,8 @@ triggerObjectCollectionsOnlyPt = {
 }
 
 triggerObjectCollectionsOnlyPtSumEt = {
-    "l1Mht":[["hltL1extraParticles","MHT"]],
     "l1Met":[["hltL1extraParticles","MET"]],
+    "l1Mht":[["hltL1extraParticles","MHT"]],
 }
 
 triggerObjectCollectionsOnlySize = {
@@ -81,4 +81,9 @@ triggerObjectCollectionsOnlySize = {
 
 }
 
-triggerObjectCollections = dict(triggerObjectCollectionsOnlySize.items() + triggerObjectCollectionsOnlyPt.items() + triggerObjectCollectionsFull.items())
+triggerObjectCollections = dict(
+    triggerObjectCollectionsOnlySize.items() + 
+    triggerObjectCollectionsOnlyPtSumEt.items() + 
+    triggerObjectCollectionsOnlyPt.items() + 
+    triggerObjectCollectionsFull.items()
+    )
