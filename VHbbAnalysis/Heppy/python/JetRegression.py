@@ -66,7 +66,7 @@ class JetRegression :
             if pt_corr<0.:
                 pt_corr = 1.0
             self.Jet_pt[0] = j.pt()*pt_corr
-            self.Jet_corr[0] = j.rawFactor()/pt_corr
+            self.Jet_corr[0] = j.rawFactor()/(pt_corr if "JER" not in analysis else 1.0)
             self.Jet_mt[0] = j.mt()*pt_corr
             self.Jet_eta[0] = j.eta()
             self.Jet_leadTrackPt[0] = j.leadTrackPt()
