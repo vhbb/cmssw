@@ -6,7 +6,7 @@ from PhysicsTools.Heppy.analyzers.core.AutoFillTreeProducer  import NTupleVariab
 from PhysicsTools.HeppyCore.utils.deltar import matchObjectCollection, matchObjectCollection3
 import PhysicsTools.HeppyCore.framework.config as cfg
 
-""" Check if triggerName is in names using wildcard"""
+""" FindTrigger: check if HLT path triggerName is names (using wildcard)"""
 def FindTrigger(triggerName,names):
     if triggerName=="": return True
     triggerName = triggerName.replace("*","")
@@ -15,15 +15,15 @@ def FindTrigger(triggerName,names):
         if triggerName in name: return True
     return False
 
-"""
-Example
+""" 
+triggerCollection is a class that interprets the triggerObjectsCfgs elements.
+Example:
 trColl = triggerCollection(("hltMet","","HLT"),"hltMET90","HLT_PFMET90_PFMHT90_IDTight*")
-
 It gives:
-trColl.collectionText ="hltMet::HLT"
-trColl.collectionName ="hltMet"
-trColl.filterName ="hltMET90"
-trColl.path ="HLT_PFMET90_PFMHT90_IDTight*"
+trColl.collectionText   ="hltMet::HLT"
+trColl.collectionName   ="hltMet"
+trColl.filterName       ="hltMET90"
+trColl.path             ="HLT_PFMET90_PFMHT90_IDTight*"
 """
 class triggerCollection(object):
     def __init__(self, triggerObjectsCfg):
@@ -40,6 +40,16 @@ class triggerCollection(object):
         self.filterName = triggerObjectsCfg[1] if len(triggerObjectsCfg)>1 else ""
         self.path = triggerObjectsCfg[2] if len(triggerObjectsCfg)>2 else ""
 
+"""
+TriggerObjectsAnalyzer is a class that saves the trigger objects matching the parameters defined in triggerObjectsCfgs.
+Example
+triggerObjectsCfgs = {"caloMet":(("hltMet","","HLT"),"hltMET90","HLT_PFMET90_PFMHT90_IDTight*") )}
+means:
+    - caloMet is just a name
+    - ("hltMet","","HLT") is the label, instance and process name of the EDProducer that produced the trigger objects
+    - hltMET90 is the label of the EDFilter that saves the trigger objects
+    - HLT_PFMET90_PFMHT90_IDTight* is the name of the HLT path that we require was running the EDFilter module
+"""
 class TriggerObjectsAnalyzer( Analyzer ):
     def __init__(self, cfg_ana, cfg_comp, looperName ):
         super(TriggerObjectsAnalyzer,self).__init__(cfg_ana,cfg_comp,looperName)
@@ -75,7 +85,9 @@ class TriggerObjectsAnalyzer( Analyzer ):
                 if (triggerObjectsInfo.collectionText!="::HLT") and triggerObjectsInfo.collectionText!=ob.collection(): continue
                 if (triggerObjectsInfo.filterName!="") and not (triggerObjectsInfo.filterName in ob.filterLabels()): continue
                 if (triggerObjectsInfo.path!=""):
-                    ob.unpackPathNames(self.names)
+                    if not hasattr(ob,"unpacked"):
+                        ob.unpacked = True
+                        ob.unpackPathNames(self.names)
                     if not FindTrigger(triggerObjectsInfo.path, ob.pathNames()): continue
                 objects.append(ob)
             setattr(event,'trgObjects_'+collectionName,objects)
