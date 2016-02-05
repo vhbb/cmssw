@@ -28,6 +28,7 @@ config.JobType.inputFiles = ['heppy_config.py',
                               "../Znn-spring15.weights.xml",
                               "../VBF-spring15.weights.xml",
                               "../ttbar-spring15.weights.xml",
+                              "../ttbar-fall15.weights.xml",
 										'../TMVA_blikelihood_vbf_cmssw76.weights.xml'
 ]
 #config.JobType.outputFiles = ['tree.root']
