@@ -3,6 +3,9 @@
 
 
 triggerObjectCollectionsFull = {
+    "hltIsoMu18":[[],"hltL3MuonCandidates","HLT_IsoMu18_v*"],
+    "hltEle23WPLoose":[[],"hltEle23WPLooseGsfTrackIsoFilter","HLT_Ele23_WPLoose_Gsf_v*"],
+    "hltEle22eta2p1WPLoose":[[],"hltSingleEle22WPLooseGsfTrackIsoFilter","HLT_Ele22_eta2p1_WPLoose_Gsf_v*"],
 }
 triggerObjectCollectionsOnlyPt = {
 #    "caloMet":[["hltMet","","HLT"],"hltMET90","HLT_PFMET90_PFMHT90_IDTight*"] hltL1extraParticles:Central:HLT
