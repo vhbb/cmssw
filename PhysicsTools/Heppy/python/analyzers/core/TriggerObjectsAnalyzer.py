@@ -54,30 +54,33 @@ class TriggerObjectsAnalyzer( Analyzer ):
     def __init__(self, cfg_ana, cfg_comp, looperName ):
         super(TriggerObjectsAnalyzer,self).__init__(cfg_ana,cfg_comp,looperName)
         triggerObjectsCfgs = getattr(self.cfg_ana,"triggerObjectsCfgs",[])
-        self.triggerObjectInputTag = getattr(self.cfg_ana,"triggerObjectInputTag",("","",""))
-        self.triggerBitsInputTag = getattr(self.cfg_ana,"triggerBitsInputTag",("","",""))
-        self.triggerObjectsInfos = {}
-        self.names = None
+        self.triggerObjectInputTag  = getattr(self.cfg_ana,"triggerObjectInputTag",("","",""))
+        self.triggerBitsInputTag    = getattr(self.cfg_ana,"triggerBitsInputTag",("","",""))
+        self.triggerObjectsInfos    = {}
+        self.runNumber              = -1
+        self.names                  = None
         for collectionName in triggerObjectsCfgs.keys():
             self.triggerObjectsInfos[collectionName] = triggerCollection(triggerObjectsCfgs[collectionName])
         
     def declareHandles(self):
         super(TriggerObjectsAnalyzer, self).declareHandles()
-        self.handles['TriggerBits'] = AutoHandle( self.triggerBitsInputTag, 'edm::TriggerResults' )
-        self.handles['TriggerObjects'] = AutoHandle( self.triggerObjectInputTag, 'std::vector<pat::TriggerObjectStandAlone>' )
+        self.handles['TriggerBits']     = AutoHandle( self.triggerBitsInputTag, 'edm::TriggerResults' )
+        self.handles['TriggerObjects']  = AutoHandle( self.triggerObjectInputTag, 'std::vector<pat::TriggerObjectStandAlone>' )
 
     def beginLoop(self, setup):
         super(TriggerObjectsAnalyzer,self).beginLoop(setup)
 
     def process(self, event):
         self.readCollections( event.input )
-        # get the trigger names (only in the first event)
-        if self.names is None:
+        run = event.input.eventAuxiliary().id().run()
+        # get the trigger names (only for the first event of each run)
+        if self.runNumber!= run:
             triggerBits = self.handles['TriggerBits'].product()
             self.names = event.input.object().triggerNames(triggerBits)
+            self.runNumber = run
         # get the trigger object
         allTriggerObjects = self.handles['TriggerObjects'].product()
-        # for each collection name save the trigger object matching with the triggerObjectsInfo (eg. )
+        # for each collection name save the trigger object matching the triggerObjectsInfo
         for collectionName in self.triggerObjectsInfos.keys():
             triggerObjectsInfo = self.triggerObjectsInfos[collectionName]
             objects = []
