@@ -432,10 +432,6 @@ triggerObjectsType = NTupleObjectType("triggerObjects",  baseObjectTypes = [ fou
 triggerObjectsOnlyPtType = NTupleObjectType("triggerObjects",  baseObjectTypes = [ ], variables = [
     NTupleVariable("pt", lambda x : x.pt(), float, mcOnly=False, help="trigger object pt"),
 ])
-triggerObjectsOnlyPtSumEtType = NTupleObjectType("triggerObjects",  baseObjectTypes = [ ], variables = [
-    NTupleVariable("pt", lambda x : x.pt(), float, mcOnly=False, help="trigger object pt"),
-    NTupleVariable("etTotal", lambda x : x.etTotal(), float, mcOnly=False, help="trigger object sumet"),
-])
 triggerObjectsNothingType = NTupleObjectType("triggerObjects",  baseObjectTypes = [ ], variables = [
 ])
 
