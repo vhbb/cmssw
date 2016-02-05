@@ -11,8 +11,6 @@ triggerObjectCollectionsOnlyPt = {
     "caloJets":[["hltAK4CaloJetsCorrectedIDPassed"]],
     "pfJets":[["hltAK4PFJetsCorrected"]],
 
-    "l1Mht":[["hltL1extraParticles","MHT"]],
-    "l1Met":[["hltL1extraParticles","MET"]],
     "caloMet":[["hltMet"]],
     "caloMht":[["hltMht"]],
     "caloMhtNoPU":[["hltMHTNoPU"]],
@@ -20,6 +18,12 @@ triggerObjectCollectionsOnlyPt = {
     "pfMht":[["hltPFMHTTightID"]],
     "pfHt":[["hltPFHT"]],
 }
+
+triggerObjectCollectionsOnlyPtSumEt = {
+    "l1Mht":[["hltL1extraParticles","MHT"]],
+    "l1Met":[["hltL1extraParticles","MET"]],
+}
+
 triggerObjectCollectionsOnlySize = {
     ## VBF triggers
     "hltL1sL1TripleJet927664VBFORL1TripleJet846848VBFORL1HTT100ORL1HTT125ORL1HTT150ORL1HTT175ORL1SingleJet128ORL1DoubleJetC84":[[],"hltL1sL1TripleJet927664VBFORL1TripleJet846848VBFORL1HTT100ORL1HTT125ORL1HTT150ORL1HTT175ORL1SingleJet128ORL1DoubleJetC84",""],
