@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_C20_01'
-config.General.workArea = 'crab_projects_C20_001'
+config.General.requestName = 'VHBB_F20_01'
+config.General.workArea = 'crab_projects_F20_001'
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -21,6 +21,8 @@ config.JobType.inputFiles = ['heppy_config.py',
                               '../vhbb_combined.py',
                              'TMVAClassification_BDT.weights.xml',
                              'puData.root',
+                             '../puDataMinus.root',
+                             '../puDataPlus.root',
                              'puMC.root',
                               'json.txt',
                               "../Zll-spring15.weights.xml",
@@ -39,9 +41,9 @@ config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 1
 config.Data.totalUnits = 2
-config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyC20/'
+config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyF20/'
 config.Data.publication = True
-config.Data.outputDatasetTag = 'VHBB_HEPPY_C20'
+config.Data.outputDatasetTag = 'VHBB_HEPPY_F20'
 
 config.section_("Site")
 config.Site.storageSite = "T2_IT_Pisa"
