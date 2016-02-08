@@ -7,6 +7,10 @@ from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
 from PhysicsTools.Heppy.physicsobjects.PhysicsObject import PhysicsObject
 
 class Hadron(object):
+    """
+    Represents a hadron in the GenHFHadronMatcher.cc context.
+    Specified by an index in the hadron vector and an index to a jet.
+    """
     def __init__(self, idx, jetIdx, flavour, fromTopWeak):
         self.index = idx
         self.jetIndex = jetIdx
@@ -64,7 +68,8 @@ class GenHFHadronMatcher( Analyzer ):
                 ("matchGenCHadron",x,"EX"), "std::vector<int>"
             )
         self.handles['genBHadJetIndex'] = AutoHandle( ("matchGenBHadron","genBHadJetIndex","EX"), "std::vector<int>")
-        #self.handles['genJets'] = AutoHandle( self.genJetsSrc, "std::vector<reco::GenJet>")
+        
+        self.handles['ttbarCategory'] = AutoHandle( ("categorizeGenTtbar","genTtbarId","EX"), "int")
 
         self.genJetMinPt = 20
         self.genJetMaxEta = 2.4
@@ -82,13 +87,14 @@ class GenHFHadronMatcher( Analyzer ):
 
         arrs_b = {k: self.handles[k].product() for k in self.keys_b}
         arrs_c = {k: self.handles[k].product() for k in self.keys_c}
-
+        event.ttbarCategory = self.handles["ttbarCategory"].product()[0]
         nbhad = arrs_b["genBHadJetIndex"].size()
         nchad = arrs_c["genCHadJetIndex"].size()
 
         bhads = [Hadron(*[arrs_b[k][i] for k in self.keys_b]) for i in range(nbhad)]
         chads = [CHadron(*[arrs_c[k][i] for k in self.keys_c]) for i in range(nchad)]
 
+        #pre-create the counters on gen-jets
         for gj in genJets:
             for fl in ["b", "c"]:
                 d = {}
@@ -101,6 +107,8 @@ class GenHFHadronMatcher( Analyzer ):
 
         #get b-hadrons not coming from W, save the ones that are before the top
         for had in bhads:
+
+            #hadron had no associated jet
             if had.jetIndex < 0:
                 continue
 
@@ -200,7 +208,7 @@ class GenHFHadronMatcher( Analyzer ):
             gj.numCHadronsFromTop = gj.cHadMatch["pteta"]["fromTop"]
 
         #event.genJetsHadronMatcher = sorted(genJets, key=lambda j: j.pt(), reverse=True)
-
+        #classification as done by this code
         event.ttbarCls = cls
 
     def jetCut(self, jet):

@@ -446,10 +446,33 @@ def initialize(isMC=True):
         process.matchGenCHadron = matchGenCHadron.clone(
             genParticles = genParticleCollection
         )
+
+        process.categorizeGenTtbar = cms.EDProducer("GenTtbarCategorizer",
+            # Phase space of additional jets
+            genJetPtMin = cms.double(20.),
+            genJetAbsEtaMax = cms.double(2.4),
+            # Input tags holding information about b/c hadron matching
+            genJets = cms.InputTag(genJetCollection),
+            genBHadJetIndex = cms.InputTag("matchGenBHadron", "genBHadJetIndex"),
+            genBHadFlavour = cms.InputTag("matchGenBHadron", "genBHadFlavour"),
+            genBHadFromTopWeakDecay = cms.InputTag("matchGenBHadron", "genBHadFromTopWeakDecay"),
+            genBHadPlusMothers = cms.InputTag("matchGenBHadron", "genBHadPlusMothers"),
+            genBHadPlusMothersIndices = cms.InputTag("matchGenBHadron", "genBHadPlusMothersIndices"),
+            genBHadIndex = cms.InputTag("matchGenBHadron", "genBHadIndex"),
+            genBHadLeptonHadronIndex = cms.InputTag("matchGenBHadron", "genBHadLeptonHadronIndex"),
+            genBHadLeptonViaTau = cms.InputTag("matchGenBHadron", "genBHadLeptonViaTau"),
+            genCHadJetIndex = cms.InputTag("matchGenCHadron", "genCHadJetIndex"),
+            genCHadFlavour = cms.InputTag("matchGenCHadron", "genCHadFlavour"),
+            genCHadFromTopWeakDecay = cms.InputTag("matchGenCHadron", "genCHadFromTopWeakDecay"),
+            genCHadBHadronId = cms.InputTag("matchGenCHadron", "genCHadBHadronId"),
+        )
+
         process.OUT.outputCommands.append("keep *_matchGenBHadron__EX")
         process.OUT.outputCommands.append("keep *_matchGenCHadron__EX")
         process.OUT.outputCommands.append("keep *_matchGenBHadron_*_EX")
         process.OUT.outputCommands.append("keep *_matchGenCHadron_*_EX")
+        process.OUT.outputCommands.append("keep *_categorizeGenTtbar_*_EX")
+        process.OUT.outputCommands.append("keep *_categorizeGenTtbar__EX")
 
     #Schedule to run soft muon and electron taggers on miniAOD
     process.softPFElectronsTagInfos.jets = cms.InputTag("slimmedJets")
@@ -476,6 +499,21 @@ def initialize(isMC=True):
         process.load("PhysicsTools.JetMCAlgos.TauGenJetsDecayModeSelectorAllHadrons_cfi")
         process.OUT.outputCommands.append("keep *_tauGenJetsSelectorAllHadrons_*_EX")
 
+
+
+    ########################################
+    # Electron MVA ID: https://twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentificationRun2#Recipes_and_implementation
+    ########################################
+   
+    from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
+    switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
+    for eleid in ["RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_Trig_V1_cff"]:
+        setupAllVIDIdsInModule(process, eleid, setupVIDElectronSelection)
+    for eleid in ["RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_nonTrig_V1_cff"]:
+        setupAllVIDIdsInModule(process, eleid, setupVIDElectronSelection)
+    process.OUT.outputCommands.append("keep *_electronMVAValueMapProducer_*_EX")
+    process.OUT.outputCommands.append("keep *_egmGsfElectronIDs_*_EX")
+    
     return process
 
 # Called directly 

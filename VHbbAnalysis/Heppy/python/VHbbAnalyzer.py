@@ -27,6 +27,9 @@ class VHbbAnalyzer( Analyzer ):
 
     def declareHandles(self):
         super(VHbbAnalyzer, self).declareHandles()
+        self.handles['rhoN'] =  AutoHandle( 'fixedGridRhoFastjetCentralNeutral','double' )
+        self.handles['rhoCHPU'] =  AutoHandle( 'fixedGridRhoFastjetCentralChargedPileUp','double' )
+        self.handles['rhoCentral'] =  AutoHandle( 'fixedGridRhoFastjetCentral','double' )
         if getattr(self.cfg_ana,"doSoftActivityVH", False) or getattr(self.cfg_ana,"doVBF", True):
             self.handles['pfCands'] =  AutoHandle( 'packedPFCandidates', 'std::vector<pat::PackedCandidate>' )
         if self.cfg_comp.isMC:
@@ -52,6 +55,11 @@ class VHbbAnalyzer( Analyzer ):
             self.inputCounterWeighted = ROOT.TH1F("CountWeighted","Count with gen weight and pu weight",1,0,2)
             self.inputCounterPosWeight = ROOT.TH1F("CountPosWeight","Count genWeight>0",1,0,2)
             self.inputCounterNegWeight = ROOT.TH1F("CountNegWeight","Count genWeight<0",1,0,2)
+            for LHE_scale in range(6):
+               setattr(self, "inputCounterWeightedLHEWeightScale_"+str(LHE_scale), ROOT.TH1F("CountWeightedLHEWeightScale_"+str(LHE_scale),"Count with gen weight x LHE_weights_scale["+str(LHE_scale)+"] and pu weight",1,0,2))
+            for LHE_pdf in range(2):
+               setattr(self, "inputCounterWeightedLHEWeightPdf_"+str(LHE_pdf), ROOT.TH1F("CountWeightedLHEWeightPdf_"+str(LHE_pdf),"Count with gen weight x LHE_weights_pdf["+str(LHE_pdf)+"] and pu weight",1,0,2))
+
         self.regressions={}
 	self.regressionVBF={}
 	for re in self.cfg_ana.regressionVBF :
@@ -72,7 +80,8 @@ class VHbbAnalyzer( Analyzer ):
     def doVBF(self,event) :
         event.jetsForVBF = [x for x in event.cleanJetsAll if self.cfg_ana.higgsJetsPreSelectionVBF(x) ]
         if event.Vtype in self.regressionVBF :
-            self.regressionVBF[event.Vtype].evaluateRegression(event,"pt_regVBF")
+           for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
+              self.regressionVBF[event.Vtype].evaluateRegression(event,"pt_regVBF", analysis)
         #compute only for events passing VBF selection
         if len(event.jetsForVBF) < 4 or  event.jetsForVBF[0] < 70 or  event.jetsForVBF[1] < 55 or  event.jetsForVBF[2] < 35 or  event.jetsForVBF[3] < 20 :
             return
@@ -214,58 +223,71 @@ class VHbbAnalyzer( Analyzer ):
 
     def doHiggsHighCSV(self,event) :
         #leading csv interpretation
-        event.hJetsCSV=sorted(event.jetsForHiggs,key = lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')), reverse=True)[0:2]
-        event.aJetsCSV = [x for x in event.cleanJets if x not in event.hJetsCSV]
-        event.hjidxCSV=[event.cleanJetsAll.index(x) for x in event.hJetsCSV ]
-        event.ajidxCSV=[event.cleanJetsAll.index(x) for x in event.aJetsCSV ]
-        event.aJetsCSV+=event.cleanJetsFwd
-        event.HCSV = event.hJetsCSV[0].p4()+event.hJetsCSV[1].p4()
+        if ( len(event.jetsForHiggs) >= 2):  
+           event.hJetsCSV=sorted(event.jetsForHiggs,key = lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')), reverse=True)[0:2]
+           event.aJetsCSV = [x for x in event.cleanJets if x not in event.hJetsCSV]
+           event.hjidxCSV=[event.cleanJetsAll.index(x) for x in event.hJetsCSV ]
+           event.ajidxCSV=[event.cleanJetsAll.index(x) for x in event.aJetsCSV ]
+           event.aJetsCSV+=event.cleanJetsFwd
+           event.HCSV = event.hJetsCSV[0].p4()+event.hJetsCSV[1].p4()
 
     def doHiggsHighPt(self,event) :
         #highest pair interpretations
-        event.hJets=list(max(itertools.combinations(event.jetsForHiggs,2), key = lambda x : (x[0].p4()+x[1].p4()).pt() ))
-        event.aJets = [x for x in event.cleanJets if x not in event.hJets]
-        event.hjidx=[event.cleanJetsAll.index(x) for x in event.hJets ]
-        event.ajidx=[event.cleanJetsAll.index(x) for x in event.aJets ]
-        event.aJets+=event.cleanJetsFwd
-        hJetsByCSV = sorted(event.hJets , key =  lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')), reverse=True)
-        event.hjidxDiJetPtByCSV = [event.cleanJetsAll.index(x) for x in hJetsByCSV]
-        event.H = event.hJets[0].p4()+event.hJets[1].p4()
+        if ( len(event.jetsForHiggs) >= 2):
+           event.hJets=list(max(itertools.combinations(event.jetsForHiggs,2), key = lambda x : (x[0].p4()+x[1].p4()).pt() ))
+           event.aJets = [x for x in event.cleanJets if x not in event.hJets]
+           event.hjidx=[event.cleanJetsAll.index(x) for x in event.hJets ]
+           event.ajidx=[event.cleanJetsAll.index(x) for x in event.aJets ]
+           event.aJets+=event.cleanJetsFwd
+           hJetsByCSV = sorted(event.hJets , key =  lambda jet : jet.btag(getattr(self.cfg_ana,"btagDiscriminator",'pfCombinedInclusiveSecondaryVertexV2BJetTags')), reverse=True)
+           event.hjidxDiJetPtByCSV = [event.cleanJetsAll.index(x) for x in hJetsByCSV]
+           event.H = event.hJets[0].p4()+event.hJets[1].p4()
 
 
     def doHiggsAddJetsdR08(self,event) :
-        event.hJetsaddJetsdR08 = [x for x in event.hJetsCSV]
-        event.dRaddJetsdR08 = []
-        event.aJetsaddJetsdR08 = [x for x in event.aJetsCSV]
-	event.hjidxaddJetsdR08 = [x for x in event.hjidxCSV]         
-	event.ajidxaddJetsdR08 = [x for x in event.ajidxCSV]         
+        if ( len(event.jetsForHiggs) >= 2):
+           event.hJetsaddJetsdR08 = [x for x in event.hJetsCSV]
+           event.dRaddJetsdR08 = []
+           event.aJetsaddJetsdR08 = [x for x in event.aJetsCSV]
+           event.hjidxaddJetsdR08 = [x for x in event.hjidxCSV]         
+           event.ajidxaddJetsdR08 = [x for x in event.ajidxCSV]         
          #multiple jets interpretations, for central jets closest to dR<0.8 from higgs jets
-        jetsForHiggsAddJetsdR08 = [x for x in event.cleanJetsAll if (x.pt()>15 and abs(x.eta())<3.0 and x.puJetId() > 0 and x.jetID('POG_PFID_Loose') ) ]
-        if (len(jetsForHiggsAddJetsdR08) > 2): 
-           addJetsForHiggs = [x for x in jetsForHiggsAddJetsdR08 if ( x not in event.hJetsCSV  and  min(deltaR( x.eta(), x.phi(), event.hJetsCSV[0].eta(), event.hJetsCSV[0].phi()),deltaR( x.eta(), x.phi(), event.hJetsCSV[1].eta(), event.hJetsCSV[1].phi()))<0.8 ) ]
-           for x in addJetsForHiggs:
-                event.hJetsaddJetsdR08.append(x)
-                event.dRaddJetsdR08.append( min(deltaR( x.eta(), x.phi(), event.hJetsCSV[0].eta(), event.hJetsCSV[0].phi()),deltaR( x.eta(), x.phi(), event.hJetsCSV[1].eta(), event.hJetsCSV[1].phi() )) )
-           event.hjidxaddJetsdR08=[event.cleanJetsAll.index(x) for x in event.hJetsaddJetsdR08 ]   
-           event.aJetsaddJetsdR08 = [x for x in event.cleanJets if x not in event.hJetsaddJetsdR08]
-           event.aJetsaddJetsdR08+=event.cleanJetsFwd
-           event.ajidxaddJetsdR08=[event.cleanJetsAll.index(x) for x in event.aJetsaddJetsdR08 ]
+           jetsForHiggsAddJetsdR08 = [x for x in event.cleanJetsAll if (x.pt()>15 and abs(x.eta())<3.0 and x.puJetId() > 0 and x.jetID('POG_PFID_Loose') ) ]
+           if (len(jetsForHiggsAddJetsdR08) > 2): 
+              addJetsForHiggs = [x for x in jetsForHiggsAddJetsdR08 if ( x not in event.hJetsCSV  and  min(deltaR( x.eta(), x.phi(), event.hJetsCSV[0].eta(), event.hJetsCSV[0].phi()),deltaR( x.eta(), x.phi(), event.hJetsCSV[1].eta(), event.hJetsCSV[1].phi()))<0.8 ) ]
+              for x in addJetsForHiggs:
+                 event.hJetsaddJetsdR08.append(x)
+                 event.dRaddJetsdR08.append( min(deltaR( x.eta(), x.phi(), event.hJetsCSV[0].eta(), event.hJetsCSV[0].phi()),deltaR( x.eta(), x.phi(), event.hJetsCSV[1].eta(), event.hJetsCSV[1].phi() )) )
+              event.hjidxaddJetsdR08=[event.cleanJetsAll.index(x) for x in event.hJetsaddJetsdR08 ]   
+              event.aJetsaddJetsdR08 = [x for x in event.cleanJets if x not in event.hJetsaddJetsdR08]
+              event.aJetsaddJetsdR08+=event.cleanJetsFwd
+              event.ajidxaddJetsdR08=[event.cleanJetsAll.index(x) for x in event.aJetsaddJetsdR08 ]
         
-        event.HaddJetsdR08 = sum(map(lambda x:x.p4(), event.hJetsaddJetsdR08), ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)) 
+           event.HaddJetsdR08 = sum(map(lambda x:x.p4(), event.hJetsaddJetsdR08), ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)) 
 
     def doVHRegression(self, event):
-        self.regressions[event.Vtype].evaluateRegression(event)
-        hJetCSV_reg0 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[0].p4())
-        hJetCSV_reg1 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[1].p4())
-        hJetCSV_reg0*=event.hJetsCSV[0].pt_reg/event.hJetsCSV[0].pt()
-        hJetCSV_reg1*=event.hJetsCSV[1].pt_reg/event.hJetsCSV[1].pt()
-        event.HCSV_reg = hJetCSV_reg0+hJetCSV_reg1
+       if (len(event.jetsForHiggs) >=2 ):
+          # ""=nominal, the other correspond to jet energies up/down for JEC and JER
+          for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
+             self.regressions[event.Vtype].evaluateRegression(event, "pt_reg", analysis)
+             hJetCSV_reg0 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[0].p4())
+             hJetCSV_reg1 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[1].p4())
 
-        hJet_reg0=ROOT.reco.Particle.LorentzVector(event.hJets[0].p4())
-        hJet_reg1=ROOT.reco.Particle.LorentzVector(event.hJets[1].p4())
-        hJet_reg0*=event.hJets[0].pt_reg/event.hJets[0].pt()
-        hJet_reg1*=event.hJets[1].pt_reg/event.hJets[1].pt()
-        event.H_reg = hJet_reg0+hJet_reg1
+             hJetCSV_reg0*=getattr(event.hJetsCSV[0],"pt_reg"+analysis)/event.hJetsCSV[0].pt()
+             hJetCSV_reg1*=getattr(event.hJetsCSV[1],"pt_reg"+analysis)/event.hJetsCSV[1].pt()
+             setattr(event,"HCSV_reg"+("_"+analysis if analysis!="" else ""), hJetCSV_reg0+hJetCSV_reg1)
+
+             hJet_reg0=ROOT.reco.Particle.LorentzVector(event.hJets[0].p4())
+             hJet_reg1=ROOT.reco.Particle.LorentzVector(event.hJets[1].p4())
+             hJet_reg0*=getattr(event.hJets[0],"pt_reg"+analysis)/event.hJets[0].pt()
+             hJet_reg1*=getattr(event.hJets[1],"pt_reg"+analysis)/event.hJets[1].pt()
+             setattr(event,"H_reg"+("_"+analysis if analysis!="" else ""), hJet_reg0+hJet_reg1)
+             #print  "H_reg"+("_"+analysis if analysis!="" else ""), getattr(event, "H_reg"+("_"+analysis if analysis!="" else "")).Pt()
+       else:
+          for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
+             setattr(event,"HCSV_reg"+("_"+analysis if analysis!="" else ""), ROOT.reco.Particle.LorentzVector() ) 
+             setattr(event,"H_reg"+("_"+analysis if analysis!="" else ""), ROOT.reco.Particle.LorentzVector() )
+
 
     def doVBFblikelihood(self, event):
         self.blikelihood.evaluateBlikelihood(event)
@@ -382,6 +404,11 @@ class VHbbAnalyzer( Analyzer ):
                 if dR < 0.3 and dR < dRmin :
                     t.jetIdx = jIdx
                     dRmin = dR
+    def additionalRhos(self,event) :
+        event.rhoN= self.handles['rhoN'].product()
+        event.rhoCHPU= self.handles['rhoCHPU'].product()
+        event.rhoCentral= self.handles['rhoCentral'].product()
+
 
     def initOutputs (self,event) : 
         event.hJets = []
@@ -411,7 +438,9 @@ class VHbbAnalyzer( Analyzer ):
         event.hjidxDiJetPtByCSV = []
         event.softActivityJets=[]
         event.softActivityVHJets=[]
-
+        event.rhoN= -1
+        event.rhoCHPU= -1
+        event.rhoCentral= -1
 
     def process(self, event):
 	#print "Event number",event.iEv
@@ -420,6 +449,10 @@ class VHbbAnalyzer( Analyzer ):
         if self.cfg_comp.isMC:
             genWeight = self.handles['GenInfo'].product().weight()
             self.inputCounterWeighted.Fill(1,copysign(1.0,genWeight)*event.puWeight)
+            for LHE_scale in range(min(len(event.LHE_weights_scale),6)): 
+               getattr(self, "inputCounterWeightedLHEWeightScale_"+str(LHE_scale)).Fill(1,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_scale[LHE_scale]).wgt) 
+            for LHE_pdf in range(min(len(event.LHE_weights_pdf),2)): 
+               getattr(self, "inputCounterWeightedLHEWeightPdf_"+str(LHE_pdf)).Fill(1,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_pdf[LHE_pdf]).wgt) 
             if genWeight > 0:
                 self.inputCounterPosWeight.Fill(1)
             elif genWeight < 0:
@@ -443,10 +476,10 @@ class VHbbAnalyzer( Analyzer ):
               j.btagIdx=-1
       
 	#substructure threshold, make configurable
-	ssTrheshold = 200.
+	ssThreshold = 200.
 	# filter events with less than 2 jets with pt 20
         event.jetsForHiggs = [x for x in event.cleanJets if self.cfg_ana.higgsJetsPreSelection(x) ]
-	if not   len(event.jetsForHiggs) >= 2 : # and event.jetsForHiggs[1] > 20.) : # or(len(event.cleanJets) == 1 and event.cleanJets[0] > ssThreshold ) ) :
+	if not  ( len(event.jetsForHiggs) >= 2  or (len(event.cleanJets) == 1 and event.cleanJets[0].pt() > ssThreshold ) ) :
 		return self.cfg_ana.passall
         if event.Vtype < 0 and not ( sum(x.pt() > 30 for x in event.jetsForHiggs) >= 4 or sum(x.pt() for x in event.jetsForHiggs[:4]) > 160 ):
                 return self.cfg_ana.passall
