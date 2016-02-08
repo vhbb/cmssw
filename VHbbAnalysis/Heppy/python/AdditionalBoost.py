@@ -543,19 +543,18 @@ def calcBBTagVariables(jet,
     jet.PFLepton_IP2D        = PFLepton_IP2D
     jet.nSL                  = nSL
  
-
     jet.z_ratio = z_ratio
-    jet.trackSip3dSig_3 = trackSip3dSig_3
-    jet.trackSip3dSig_2 = trackSip3dSig_2
-    jet.trackSip3dSig_1 = trackSip3dSig_1
-    jet.trackSip3dSig_0 = trackSip3dSig_0
-    jet.tau2_trackSip3dSig_0 = tau2_trackSip3dSig_0
-    jet.tau1_trackSip3dSig_0 = tau1_trackSip3dSig_0
-    jet.tau2_trackSip3dSig_1 = tau2_trackSip3dSig_1
-    jet.tau1_trackSip3dSig_1 = tau1_trackSip3dSig_1
-    jet.trackSip2dSigAboveCharm_0 = trackSip2dSigAboveCharm_0
-    jet.trackSip2dSigAboveBottom_0 = trackSip2dSigAboveBottom_0
-    jet.trackSip2dSigAboveBottom_1 = trackSip2dSigAboveBottom_1
+    #jet.trackSip3dSig_3 = trackSip3dSig_3
+    #jet.trackSip3dSig_2 = trackSip3dSig_2
+    #jet.trackSip3dSig_1 = trackSip3dSig_1
+    #jet.trackSip3dSig_0 = trackSip3dSig_0
+    #jet.tau2_trackSip3dSig_0 = tau2_trackSip3dSig_0
+    #jet.tau1_trackSip3dSig_0 = tau1_trackSip3dSig_0
+    #jet.tau2_trackSip3dSig_1 = tau2_trackSip3dSig_1
+    #jet.tau1_trackSip3dSig_1 = tau1_trackSip3dSig_1
+    #jet.trackSip2dSigAboveCharm_0 = trackSip2dSigAboveCharm_0
+    #jet.trackSip2dSigAboveBottom_0 = trackSip2dSigAboveBottom_0
+    #jet.trackSip2dSigAboveBottom_1 = trackSip2dSigAboveBottom_1
     jet.tau2_trackEtaRel_0 = tau2_trackEtaRel_0
     jet.tau2_trackEtaRel_1 = tau2_trackEtaRel_1
     jet.tau2_trackEtaRel_2 = tau2_trackEtaRel_2
