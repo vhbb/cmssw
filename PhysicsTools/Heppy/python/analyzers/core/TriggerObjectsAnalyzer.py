@@ -80,20 +80,26 @@ class TriggerObjectsAnalyzer( Analyzer ):
             self.runNumber = run
         # get the trigger object
         allTriggerObjects = self.handles['TriggerObjects'].product()
-        # for each collection name save the trigger object matching the triggerObjectsInfo
+        
+        # init objects
+        objects = {}
         for collectionName in self.triggerObjectsInfos.keys():
-            triggerObjectsInfo = self.triggerObjectsInfos[collectionName]
-            objects = []
-            for ob in allTriggerObjects:
+            objects[collectionName]=[]
+        # for each collection name save the trigger object matching the triggerObjectsInfo
+        for ob in allTriggerObjects:
+            for collectionName in self.triggerObjectsInfos.keys():
+                triggerObjectsInfo = self.triggerObjectsInfos[collectionName]
                 if (triggerObjectsInfo.collectionText!="::HLT") and triggerObjectsInfo.collectionText!=ob.collection(): continue
-                if (triggerObjectsInfo.filterName!="") and not (triggerObjectsInfo.filterName in ob.filterLabels()): continue
                 if (triggerObjectsInfo.path!=""):
                     if not hasattr(ob,"unpacked"):
                         ob.unpacked = True
                         ob.unpackPathNames(self.names)
                     if not FindTrigger(triggerObjectsInfo.path, ob.pathNames()): continue
-                objects.append(ob)
-            setattr(event,'trgObjects_'+collectionName,objects)
+                if (triggerObjectsInfo.filterName!="") and not (ob.hasFilterLabel(triggerObjectsInfo.filterName)): continue
+                objects[collectionName].append(ob)
+        # add object variables in event
+        for collectionName in self.triggerObjectsInfos.keys():
+            setattr(event,'trgObjects_'+collectionName,objects[collectionName])
 
 setattr(TriggerObjectsAnalyzer,"defaultConfig",cfg.Analyzer(
     TriggerObjectsAnalyzer, name="TriggerObjectsAnalyzerDefault",
