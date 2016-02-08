@@ -58,10 +58,10 @@ class JetRegression :
 	for j in event.jetsForHiggs :
             pt_corr = 1.0
             if ("JEC" in analysis and hasattr(j, analysis)):
-                pt_corr = getattr(j, analysis)/getattr(j, "corr") if hasattr(j, "corr") else 1.0
+                pt_corr = getattr(j, analysis)/getattr(j, "corr") if hasattr(j, "corr") and getattr(j, "corr") !=0 else 1.0
                 #print "JEC"+analysis, pt_corr
             elif ("JER" in analysis and hasattr(j, analysis)):
-                pt_corr = getattr(j, analysis)/getattr(j, "corrJER") if hasattr(j, "corrJER") else 1.0
+                pt_corr = getattr(j, analysis)/getattr(j, "corrJER") if hasattr(j, "corrJER") and getattr(j, "corrJER")!=0 else 1.0
                 #print "JER"+analysis, pt_corr
             if pt_corr<0.:
                 pt_corr = 1.0
