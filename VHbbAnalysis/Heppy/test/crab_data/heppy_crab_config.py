@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_HEPPY_C20_003'
-config.General.workArea = 'crab_projects_C20_003'
+config.General.requestName = 'VHBB_HEPPY_D20_003'
+config.General.workArea = 'crab_projects_D20_003'
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -18,16 +18,20 @@ config.JobType.inputFiles = ['heppy_config.py',
                              'MVAJetTags_620SLHCX_Phase1And2Upgrade.db',
                              'combined_cmssw.py',
                              '../vhbb.py',
-                              '../vhbb_combined.py',
+                             '../vhbb_combined.py',
+                             '../TMVA_blikelihood_vbf_cmssw76.weights.xml',
                              'TMVAClassification_BDT.weights.xml',
                              'puData.root',
                              'puMC.root',
+                             '../puDataMinus.root',
+                             '../puDataPlus.root',
                               'json.txt',
                               "../Zll-spring15.weights.xml",
                               "../Wln-spring15.weights.xml",
                               "../Znn-spring15.weights.xml",
                               "../VBF-spring15.weights.xml",
                               "../ttbar-spring15.weights.xml",
+                              "../ttbar-fall15.weights.xml",
                               "../TMVA_blikelihood_vbf_singlebtag_v13_id.xml",
 ]
 #config.JobType.outputFiles = ['tree.root']
@@ -39,9 +43,9 @@ config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 2
 config.Data.totalUnits = 20
-config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyC20/'
+config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyD20/'
 config.Data.publication = True
-config.Data.outputDatasetTag = 'VHBB_HEPPY_C20'
+config.Data.outputDatasetTag = 'VHBB_HEPPY_D20'
 #only for data
 #config.Data.lumiMask = 'json.txt'
 
