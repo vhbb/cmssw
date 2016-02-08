@@ -23,6 +23,9 @@ for (s,r) in replacePatterns :
   sample=re.sub(s,r,sample)
 
 config.General.requestName+= "_"+sample
+if len(config.General.requestName) > 100 :
+  config.General.requestName=config.General.requestName[:90]+config.General.requestName[-10:] 
+
 print config.General.requestName 
 config.Data.inputDataset = dataset
 config.Data.outputDatasetTag += "_"+sample
