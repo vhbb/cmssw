@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_HEPPY_D20_003'
-config.General.workArea = 'crab_projects_D20_003'
+config.General.requestName = 'VHBB_HEPPY_H20_003'
+config.General.workArea = 'crab_projects_H20_003'
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -42,10 +42,10 @@ config.Data.inputDBS = 'global'
 #config.Data.splitting = 'LumiBased'
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 2
-config.Data.totalUnits = 20
-config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyD20/'
+#config.Data.totalUnits = 20
+config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyH20/'
 config.Data.publication = True
-config.Data.outputDatasetTag = 'VHBB_HEPPY_D20'
+config.Data.outputDatasetTag = 'VHBB_HEPPY_H20'
 #only for data
 #config.Data.lumiMask = 'json.txt'
 
