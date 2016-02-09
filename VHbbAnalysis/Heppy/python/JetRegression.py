@@ -57,17 +57,12 @@ class JetRegression :
 	self.rho[0] = event.rho
 	for j in event.jetsForHiggs :
             pt_corr = 1.0
-            #shifts are implemented by taking the 'nominal' correction and dividing its up/down
-            pt_shift = getattr(j, analysis, -99.)
-            pt_shift_nominal = -99.
-            if pt_shift>0. and "JEC" in analysis:
-                pt_shift_nominal = getattr(j, "corr", -99.)
-                #print "JEC"+analysis, pt_shift_nominal
-            elif pt_shift>0. and "JER" in analysis:
-                pt_shift_nominal = getattr(j, "corrJER", -99.)
-                #print "JEC"+analysis, pt_shift_nominal
-            pt_corr = pt_shift/pt_shift_nominal if pt_shift_nominal>0. else 1.0
-            #print "\t", pt_corr
+            if ("JEC" in analysis and hasattr(j, analysis)):
+                pt_corr = getattr(j, analysis)/getattr(j, "corr") if hasattr(j, "corr") and getattr(j, "corr") !=0 else 1.0
+                #print "JEC"+analysis, pt_corr
+            elif ("JER" in analysis and hasattr(j, analysis)):
+                pt_corr = getattr(j, analysis)/getattr(j, "corrJER") if hasattr(j, "corrJER") and getattr(j, "corrJER")!=0 else 1.0
+                #print "JER"+analysis, pt_corr
             if pt_corr<=0.:
                 pt_corr = 1.0
             self.Jet_pt[0] = j.pt()*pt_corr
