@@ -176,13 +176,14 @@ jetTypeVHbb.variables += [NTupleVariable("bTagWeight",
 
 # add the POG SF
 ROOT.gSystem.Load(csvpath+'/BTagCalibrationStandalone.so')
-calib = ROOT.BTagCalibration("csvv2", csvpath+"/CSVv2.csv")
+calib = ROOT.BTagCalibration("csvv2", csvpath+"/CSVv2_prelim.csv")
 
 for wp in [ [0, "L"],[1, "M"], [2,"T"] ]:
     for syst in ["central", "up", "down"]:
         csv_calib_bc = ROOT.BTagCalibrationReader(calib, wp[0], "mujets", syst)
-        csv_calib_l = ROOT.BTagCalibrationReader(calib, wp[0], "comb", syst)
-        jetTypeVHbb.variables += [ NTupleVariable("btagCSV"+wp[1]+"SF_"+syst,  lambda jet, csv_calib_bc=csv_calib_bc, csv_calib_l=csv_calib_l : 
+        csv_calib_l = ROOT.BTagCalibrationReader(calib, wp[0], "incl", syst)
+        syst_name = "" if syst=="central" else ("_"+syst.title())
+        jetTypeVHbb.variables += [ NTupleVariable("btagCSV"+wp[1]+"SF"+syst_name,  lambda jet, csv_calib_bc=csv_calib_bc, csv_calib_l=csv_calib_l : 
                                                   (csv_calib_bc.eval( -jet.hadronFlavour()+5 ,jet.eta(), jet.pt()) if (abs(jet.eta())<2.4 and jet.pt()<670. and jet.pt()>30.) else 1.0) 
                                                   if jet.hadronFlavour()>=4 
                                                   else (csv_calib_l.eval(2,jet.eta(), jet.pt()) if (abs(jet.eta())<2.4 and jet.pt()<1000. and jet.pt()>20.) else 1.0)
