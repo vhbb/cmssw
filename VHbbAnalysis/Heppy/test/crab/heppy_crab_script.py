@@ -13,7 +13,7 @@ print crabFiles
 firstInput = crabFiles[0]
 print "--------------- using edmFileUtil to convert PFN to LFN -------------------------"
 for i in xrange(0,len(crabFiles)) :
-     if os.getenv("GLIDECLIENT_Group","") != "overflow" :
+     if os.getenv("GLIDECLIENT_Group","") != "overflow" and  os.getenv("GLIDECLIENT_Group","") != "overflow_conservative" :
        print "Data is local"
        pfn=os.popen("edmFileUtil -d %s"%(crabFiles[i])).read() 
        pfn=re.sub("\n","",pfn)

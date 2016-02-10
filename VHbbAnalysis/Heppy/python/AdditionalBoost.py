@@ -258,7 +258,8 @@ class AdditionalBoost( Analyzer ):
         self.skip_ca15 = skip_ca15
 
         # Prepare re-calibrator
-        recalibrationType = "AK8PFchs"        
+        recalibrationTypeAK8 = "AK8PFchs"        
+        recalibrationTypeAK4 = "AK4PFchs"        
 
         # Following instructions from:
         # https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetWtagging
@@ -269,17 +270,27 @@ class AdditionalBoost( Analyzer ):
         else:
             doResidual = True
 
-        self.jetReCalibratorL2L3 = JetReCalibrator(GT,
-                                               recalibrationType, 
-                                               doResidual, 
-                                               jecPath,
-                                               skipLevel1=True)
 
-	self.jetReCalibratorL1L2L3 = JetReCalibrator(GT,
-                                               recalibrationType,
-                                               doResidual,
-                                               jecPath,
-                                               skipLevel1=False)
+        self.jetReCalibratorAK8L2L3 = JetReCalibrator(GT,
+                                                      recalibrationTypeAK8, 
+                                                      doResidual, 
+                                                      jecPath,
+                                                      skipLevel1=True)
+
+	self.jetReCalibratorAK8L1L2L3 = JetReCalibrator(GT,
+                                                       recalibrationTypeAK8,
+                                                       doResidual,
+                                                       jecPath,
+                                                       skipLevel1=False)
+
+
+        self.jetReCalibratorAK4 = JetReCalibrator(GT,
+                                                  recalibrationTypeAK4, 
+                                                  doResidual, 
+                                                  jecPath,
+                                                  skipLevel1=False)
+
+
 
     
     def declareHandles(self):
@@ -380,10 +391,10 @@ class AdditionalBoost( Analyzer ):
             for i in xrange(len(newtags)) :
                 if jet.physObj == newtags.key(i).get():
                     jet.bbtag = newtags.value(i)
-		corr=  self.jetReCalibratorL2L3.getCorrection(Jet(jet),rho)
+		corr = self.jetReCalibratorAK8L2L3.getCorrection(Jet(jet),rho)
                 jet.mprunedcorr= jet.userFloat("ak8PFJetsCHSPrunedMass")*corr	
 		jet.JEC_L2L3 = corr
-		jet.JEC_L1L2L3 = self.jetReCalibratorL1L2L3.getCorrection(Jet(jet),rho)
+		jet.JEC_L1L2L3 = self.jetReCalibratorAK8L1L2L3.getCorrection(Jet(jet),rho)
 
 
             # bb-tag Inputs
@@ -519,7 +530,9 @@ class AdditionalBoost( Analyzer ):
                 continue
 
             ungroomed_jet = Jet(closest_ung_fj_and_dr[0])        
-            c = self.jetReCalibratorL1L2L3.getCorrection(ungroomed_jet, rho)
+
+            c = self.jetReCalibratorAK8L2L3.getCorrection(ungroomed_jet, rho)
+
                         
             # Need to do a deep-copy. Otherwise the original jet will be modified
             cal_groomed_fj = PhysicsObject(groomed_fj).__copy__() 
@@ -568,40 +581,98 @@ class AdditionalBoost( Analyzer ):
 
                 # HTT return the subjet-pair closest to the W-mass as W-subjets
                 # Could be improved by b-tagging if we run into a problem
-
                 [sj_w1, sj_w2, sj_nonw] = [con.__deref__() for con in candJets[i].getJetConstituents() if not con.isNull()]
-            
-                event.httCandidates[i].sjW1pt   = sj_w1.pt()
-                event.httCandidates[i].sjW1eta  = sj_w1.eta()
-                event.httCandidates[i].sjW1phi  = sj_w1.phi()
-                event.httCandidates[i].sjW1mass = sj_w1.mass()
+
+                # Calibrate the subjets: W1
+                sj_w1_uncal = Jet(sj_w1)        
+                c = self.jetReCalibratorAK4.getCorrection(sj_w1_uncal, rho, isHttSubjet=True)            
+                sj_w1_cal = PhysicsObject(sj_w1).__copy__() 
+                sj_w1_cal.scaleEnergy(c)
+
+
+                # Calibrate the subjets: W2
+                sj_w2_uncal = Jet(sj_w2)        
+                c = self.jetReCalibratorAK4.getCorrection(sj_w2_uncal, rho, isHttSubjet=True)            
+                sj_w2_cal = PhysicsObject(sj_w2).__copy__() 
+                sj_w2_cal.scaleEnergy(c)
+
+                # Calibrate the subjets: NonW
+                sj_nonw_uncal = Jet(sj_nonw)        
+                c = self.jetReCalibratorAK4.getCorrection(sj_nonw_uncal, rho, isHttSubjet=True)            
+                sj_nonw_cal = PhysicsObject(sj_nonw).__copy__() 
+                sj_nonw_cal.scaleEnergy(c)
+
+
+
+                # Make TLVs so we can add them and get the top quark
+                # candidate                
+                tlv_sj_w1_cal   = ROOT.TLorentzVector()
+                tlv_sj_w2_cal   = ROOT.TLorentzVector()
+                tlv_sj_nonw_cal = ROOT.TLorentzVector()
+
+                tlv_sj_w1_cal.SetPtEtaPhiM(sj_w1_cal.pt(),
+                                           sj_w1_cal.eta(),
+                                           sj_w1_cal.phi(),
+                                           sj_w1_cal.mass())
+                tlv_sj_w2_cal.SetPtEtaPhiM(sj_w2_cal.pt(),
+                                           sj_w2_cal.eta(),
+                                           sj_w2_cal.phi(),
+                                           sj_w2_cal.mass())
+                tlv_sj_nonw_cal.SetPtEtaPhiM(sj_nonw_cal.pt(),
+                                             sj_nonw_cal.eta(),
+                                             sj_nonw_cal.phi(),
+                                             sj_nonw_cal.mass())
+                
+                tlv_top_cal =  tlv_sj_w1_cal + tlv_sj_w2_cal + tlv_sj_nonw_cal
+
+                # Store calibrated top candidate variables
+                event.httCandidates[i].ptcal    = tlv_top_cal.Pt()
+                event.httCandidates[i].etacal   = tlv_top_cal.Eta()
+                event.httCandidates[i].phical   = tlv_top_cal.Phi()
+                event.httCandidates[i].masscal  = tlv_top_cal.M()
+                                            
+                # Store SJ W1 Variables
+                event.httCandidates[i].sjW1ptcal   = sj_w1_cal.pt()
+                event.httCandidates[i].sjW1masscal = sj_w1_cal.mass()
+                event.httCandidates[i].sjW1pt      = sj_w1.pt()
+                event.httCandidates[i].sjW1eta     = sj_w1.eta()
+                event.httCandidates[i].sjW1phi     = sj_w1.phi()
+                event.httCandidates[i].sjW1mass    = sj_w1.mass()
 
                 # Get the correct b-tag
                 for ib in xrange(0, len(sjbtags)) :
                     if  sj_w1 == sjbtags.key(ib).get():
                         event.httCandidates[i].sjW1btag = sjbtags.value(ib)
 
-
-                event.httCandidates[i].sjW2pt   = sj_w2.pt()  
-                event.httCandidates[i].sjW2eta  = sj_w2.eta() 
-                event.httCandidates[i].sjW2phi  = sj_w2.phi() 
-                event.httCandidates[i].sjW2mass = sj_w2.mass()
-
+                # Store SJ W2 Variables
+                event.httCandidates[i].sjW2ptcal   = sj_w2_cal.pt()
+                event.httCandidates[i].sjW2masscal = sj_w2_cal.mass()
+                event.httCandidates[i].sjW2pt      = sj_w2.pt()  
+                event.httCandidates[i].sjW2eta     = sj_w2.eta() 
+                event.httCandidates[i].sjW2phi     = sj_w2.phi() 
+                event.httCandidates[i].sjW2mass    = sj_w2.mass()
 
                 # Get the correct b-tag
                 for ib in xrange(0, len(sjbtags)) :
                     if  sj_w2 == sjbtags.key(ib).get():
                         event.httCandidates[i].sjW2btag = sjbtags.value(ib)
 
-                event.httCandidates[i].sjNonWpt   = sj_nonw.pt()  
-                event.httCandidates[i].sjNonWeta  = sj_nonw.eta() 
-                event.httCandidates[i].sjNonWphi  = sj_nonw.phi() 
-                event.httCandidates[i].sjNonWmass = sj_nonw.mass()
+                # Store SJ Non W Variables
+                event.httCandidates[i].sjNonWptcal   = sj_nonw_cal.pt()  
+                event.httCandidates[i].sjNonWmasscal = sj_nonw_cal.mass()  
+                event.httCandidates[i].sjNonWpt      = sj_nonw.pt()  
+                event.httCandidates[i].sjNonWeta     = sj_nonw.eta() 
+                event.httCandidates[i].sjNonWphi     = sj_nonw.phi() 
+                event.httCandidates[i].sjNonWmass    = sj_nonw.mass()
 
                 # Get the correct b-tag
                 for ib in xrange(0, len(sjbtags)) :
                     if  sj_nonw == sjbtags.key(ib).get():
                         event.httCandidates[i].sjNonWbtag = sjbtags.value(ib)
+
+            
+
+
 
         return True
 

@@ -11,7 +11,7 @@ class JetRegression :
 #      for i in range(0,3):
         reader = ROOT.TMVA.Reader()
         self.Jet_pt =array.array('f',[0])
-        self.Jet_rawPt = array.array('f',[0])
+        self.Jet_corr = array.array('f',[0])
         self.rho = array.array('f',[0])
         self.Jet_eta = array.array('f',[0])
         self.Jet_mt = array.array('f',[0])
@@ -19,8 +19,8 @@ class JetRegression :
         self.Jet_leptonPtRel = array.array('f',[0])
         self.Jet_leptonPt =  array.array('f',[0])
         self.Jet_leptonDeltaR = array.array('f',[0])
-        self.Jet_chEmEF = array.array('f',[0])
-        self.Jet_chHEF = array.array('f',[0])
+        #self.Jet_chEmEF = array.array('f',[0])
+        #self.Jet_chHEF = array.array('f',[0])
         self.Jet_neHEF = array.array('f',[0])
         self.Jet_neEmEF = array.array('f',[0])
         self.Jet_chMult = array.array('f',[0])
@@ -30,7 +30,7 @@ class JetRegression :
         self.Jet_vtxNtrk = array.array('f',[0])
         self.Jet_vtx3deL = array.array('f',[0])
         reader.AddVariable("Jet_pt",self.Jet_pt)
-        reader.AddVariable("Jet_rawPt",self.Jet_rawPt)
+        reader.AddVariable("Jet_corr",self.Jet_corr)
         reader.AddVariable("rho",self.rho)
         reader.AddVariable("Jet_eta",self.Jet_eta)
         reader.AddVariable("Jet_mt",self.Jet_mt)
@@ -38,8 +38,8 @@ class JetRegression :
         reader.AddVariable("Jet_leptonPtRel",self.Jet_leptonPtRel)
         reader.AddVariable("Jet_leptonPt",self.Jet_leptonPt)
         reader.AddVariable("Jet_leptonDeltaR",self.Jet_leptonDeltaR)
-        reader.AddVariable("Jet_chEmEF",self.Jet_chEmEF)
-        reader.AddVariable("Jet_chHEF",self.Jet_chHEF)
+        #reader.AddVariable("Jet_chEmEF",self.Jet_chEmEF)
+        #reader.AddVariable("Jet_chHEF",self.Jet_chHEF)
         reader.AddVariable("Jet_neHEF",self.Jet_neHEF)
         reader.AddVariable("Jet_neEmEF",self.Jet_neEmEF)
         reader.AddVariable("Jet_chMult",self.Jet_chMult)
@@ -52,34 +52,43 @@ class JetRegression :
         self.reader=reader
         self.name=name
 
-    def evaluateRegression(self, event, attrName="pt_reg"):
+    def evaluateRegression(self, event, attrName="pt_reg", analysis=""):
 #self.readCollections( event.input )
 	self.rho[0] = event.rho
 	for j in event.jetsForHiggs :
-		self.Jet_pt[0] = j.pt()
-		self.Jet_eta[0] = j.eta()
-		self.Jet_rawPt[0] = j.pt()*j.rawFactor()
-		self.Jet_mt[0] = j.mt()
-		self.Jet_leadTrackPt[0] = j.leadTrackPt()
-		if len(j.leptons) > 0       :
-			self.Jet_leptonPtRel[0] = ptRel(j.leptons[0].p4(),j.p4())
-			self.Jet_leptonPt[0] =  j.leptons[0].pt()
-			self.Jet_leptonDeltaR[0] = deltaR(j.leptons[0].p4().eta(),j.leptons[0].p4().phi(),j.p4().eta(),j.p4().phi())
-		else:
-			self.Jet_leptonPtRel[0] = -99
-			self.Jet_leptonPt[0] =  -99
-			self.Jet_leptonDeltaR[0] =-99
-		self.Jet_chEmEF[0] = j.chargedEmEnergyFraction()
-		self.Jet_chHEF[0] = j.chargedHadronEnergyFraction()
-		self.Jet_neHEF[0] = j.neutralHadronEnergyFraction()
-		self.Jet_neEmEF[0] = j.neutralEmEnergyFraction()
-		self.Jet_chMult[0] = j.chargedMultiplicity()
-		self.Jet_vtxPt[0] = sqrt(j.userFloat("vtxPx")**2 + j.userFloat("vtxPy")**2)
-		self.Jet_vtxMass[0] = j.userFloat("vtxMass")
-		self.Jet_vtx3dL[0] = j.userFloat("vtx3DVal")
-		self.Jet_vtxNtrk[0] = j.userFloat("vtxNtracks")
-		self.Jet_vtx3deL[0] = self.Jet_vtx3dL[0]/j.userFloat("vtx3DSig") if j.userFloat("vtx3DSig") > 0 else 0
-		setattr(j,attrName,self.reader.EvaluateRegression(self.name)[0])
+            pt_corr = 1.0
+            if ("JEC" in analysis and hasattr(j, analysis)):
+                pt_corr = getattr(j, analysis)/getattr(j, "corr") if hasattr(j, "corr") and getattr(j, "corr") !=0 else 1.0
+                #print "JEC"+analysis, pt_corr
+            elif ("JER" in analysis and hasattr(j, analysis)):
+                pt_corr = getattr(j, analysis)/getattr(j, "corrJER") if hasattr(j, "corrJER") and getattr(j, "corrJER")!=0 else 1.0
+                #print "JER"+analysis, pt_corr
+            if pt_corr<=0.:
+                pt_corr = 1.0
+            self.Jet_pt[0] = j.pt()*pt_corr
+            self.Jet_corr[0] = j.rawFactor()/(pt_corr if "JER" not in analysis else 1.0)
+            self.Jet_mt[0] = j.mt()*pt_corr
+            self.Jet_eta[0] = j.eta()
+            self.Jet_leadTrackPt[0] = j.leadTrackPt()
+            if len(j.leptons) > 0       :
+                self.Jet_leptonPtRel[0] = ptRel(j.leptons[0].p4(),j.p4()*pt_corr)
+                self.Jet_leptonPt[0] =  j.leptons[0].pt()
+                self.Jet_leptonDeltaR[0] = deltaR(j.leptons[0].p4().eta(),j.leptons[0].p4().phi(),j.p4().eta(),j.p4().phi())
+            else:
+                self.Jet_leptonPtRel[0] = -99
+                self.Jet_leptonPt[0] =  -99
+                self.Jet_leptonDeltaR[0] =-99
+            #self.Jet_chEmEF[0] = j.chargedEmEnergyFraction()
+            #self.Jet_chHEF[0] = j.chargedHadronEnergyFraction()
+            self.Jet_neHEF[0] = j.neutralHadronEnergyFraction()
+            self.Jet_neEmEF[0] = j.neutralEmEnergyFraction()
+            self.Jet_chMult[0] = j.chargedMultiplicity()
+            self.Jet_vtxPt[0] = sqrt(j.userFloat("vtxPx")**2 + j.userFloat("vtxPy")**2)
+            self.Jet_vtxMass[0] = j.userFloat("vtxMass")
+            self.Jet_vtx3dL[0] = j.userFloat("vtx3DVal")
+            self.Jet_vtxNtrk[0] = j.userFloat("vtxNtracks")
+            self.Jet_vtx3deL[0] = self.Jet_vtx3dL[0]/j.userFloat("vtx3DSig") if j.userFloat("vtx3DSig") > 0 else 0
+            setattr(j,attrName+analysis,self.reader.EvaluateRegression(self.name)[0])
 
                 #j.pt_reg = self.reader.EvaluateRegression(self.name)[0]
 		

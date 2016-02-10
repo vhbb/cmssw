@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_HEPPY_A14_003'
-config.General.workArea = 'crab_projects_A14_003'
+config.General.requestName = 'VHBB_HEPPY_H20_003'
+config.General.workArea = 'crab_projects_H20_003'
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -18,15 +18,20 @@ config.JobType.inputFiles = ['heppy_config.py',
                              'MVAJetTags_620SLHCX_Phase1And2Upgrade.db',
                              'combined_cmssw.py',
                              '../vhbb.py',
-                              '../vhbb_combined.py',
+                             '../vhbb_combined.py',
+                             '../TMVA_blikelihood_vbf_cmssw76.weights.xml',
                              'TMVAClassification_BDT.weights.xml',
                              'puData.root',
                              'puMC.root',
+                             '../puDataMinus.root',
+                             '../puDataPlus.root',
                               'json.txt',
                               "../Zll-spring15.weights.xml",
                               "../Wln-spring15.weights.xml",
                               "../Znn-spring15.weights.xml",
                               "../VBF-spring15.weights.xml",
+                              "../ttbar-spring15.weights.xml",
+                              "../ttbar-fall15.weights.xml",
                               "../TMVA_blikelihood_vbf_singlebtag_v13_id.xml",
 ]
 #config.JobType.outputFiles = ['tree.root']
@@ -37,10 +42,10 @@ config.Data.inputDBS = 'global'
 #config.Data.splitting = 'LumiBased'
 config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 2
-config.Data.totalUnits = 50
-config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyA14/'
+#config.Data.totalUnits = 20
+config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyH20/'
 config.Data.publication = True
-config.Data.publishDataName = 'VHBB_HEPPY_A14'
+config.Data.outputDatasetTag = 'VHBB_HEPPY_H20'
 #only for data
 #config.Data.lumiMask = 'json.txt'
 

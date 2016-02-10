@@ -95,6 +95,7 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("btagSoftMu", lambda x : getattr(x, "btagSoftMu", -1000) , help="soft muon b-tag"),
     NTupleVariable("btagnew",   lambda x : getattr(x,"btagnew",-2), help="newest btag discriminator"),
     NTupleVariable("btagCSVV0",   lambda x : x.bDiscriminator('pfCombinedSecondaryVertexV2BJetTags'), help="should be the old CSV discriminator with AVR vertices"),
+    NTupleVariable("btagCMVAV2",  lambda x : x.btag('pfCombinedMVAV2BJetTags'), help="CMVA V2 discriminator"),
    # NTupleVariable("mcMatchId",    lambda x : x.mcMatchId,   int, mcOnly=True, help="Match to source from hard scatter (25 for H, 6 for t, 23/24 for W/Z)"),
    # NTupleVariable("puId", lambda x : x.puJetIdPassed, int,     mcOnly=False, help="puId (full MVA, loose WP, 5.3.X training on AK5PFchs: the only thing that is available now)"),
    # NTupleVariable("id",    lambda x : x.jetID("POG_PFID") , int, mcOnly=False,help="POG Loose jet ID"),
@@ -141,18 +142,23 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("numberOfDaughters",   lambda x : x.numberOfDaughters(), int, mcOnly=False,help="number of daughters"),
     NTupleVariable("btagIdx",   lambda x : x.btagIdx, int, mcOnly=False,help="ranking in btag"),
     NTupleVariable("mcIdx",   lambda x : x.mcJet.index if hasattr(x,"mcJet") and x.mcJet is not None else -1, int, mcOnly=False,help="index of the matching gen jet"),
-    NTupleVariable("pt_reg",lambda x : getattr(x,"pt_reg",-99), help="Regression"),
-    NTupleVariable("pt_regVBF",lambda x : getattr(x,"pt_regVBF",-99), help="Regression for VBF"),
+    #NTupleVariable("pt_reg",lambda x : getattr(x,"pt_reg",-99), help="Regression"),
+    #NTupleVariable("pt_regVBF",lambda x : getattr(x,"pt_regVBF",-99), help="Regression for VBF"),
     NTupleVariable("blike_VBF",lambda x : getattr(x,"blike_VBF",-2), help="VBF blikelihood for SingleBtag dataset")
  ])
+
+# "" is the nominal rgression, the other refer to JEC/JER up/down
+for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
+    jetTypeVHbb.variables += [NTupleVariable("pt_reg"+("_"+analysis if analysis!="" else ""), lambda x, analysis=analysis : getattr(x,"pt_reg"+analysis,-99), help="Regression "+analysis)]
+    jetTypeVHbb.variables += [NTupleVariable("pt_regVBF"+("_"+analysis if analysis!="" else ""), lambda x, analysis=analysis : getattr(x,"pt_regVBF"+analysis,-99), help="Regressionfor VBF "+analysis)]
 
 
 #add per-jet b-tag systematic weight
 from PhysicsTools.Heppy.physicsutils.BTagWeightCalculator import BTagWeightCalculator
 csvpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/csv"
 bweightcalc = BTagWeightCalculator(
-    csvpath + "/csv_rwt_fit_hf_2015_12_14.root",
-    csvpath + "/csv_rwt_fit_lf_2015_12_14.root"
+    csvpath + "/csv_rwt_fit_hf_2016_01_28.root", 
+    csvpath + "/csv_rwt_fit_lf_2016_01_28.root", 
 )
 
 for syst in ["JES", "LF", "HF", "HFStats1", "HFStats2", "LFStats1", "LFStats2", "cErr1", "cErr2"]:
@@ -170,13 +176,14 @@ jetTypeVHbb.variables += [NTupleVariable("bTagWeight",
 
 # add the POG SF
 ROOT.gSystem.Load(csvpath+'/BTagCalibrationStandalone.so')
-calib = ROOT.BTagCalibration("csvv2", csvpath+"/CSVv2.csv")
+calib = ROOT.BTagCalibration("csvv2", csvpath+"/CSVv2_prelim.csv")
 
 for wp in [ [0, "L"],[1, "M"], [2,"T"] ]:
     for syst in ["central", "up", "down"]:
         csv_calib_bc = ROOT.BTagCalibrationReader(calib, wp[0], "mujets", syst)
-        csv_calib_l = ROOT.BTagCalibrationReader(calib, wp[0], "comb", syst)
-        jetTypeVHbb.variables += [ NTupleVariable("btagCSV"+wp[1]+"SF_"+syst,  lambda jet, csv_calib_bc=csv_calib_bc, csv_calib_l=csv_calib_l : 
+        csv_calib_l = ROOT.BTagCalibrationReader(calib, wp[0], "incl", syst)
+        syst_name = "" if syst=="central" else ("_"+syst.title())
+        jetTypeVHbb.variables += [ NTupleVariable("btagCSV"+wp[1]+"SF"+syst_name,  lambda jet, csv_calib_bc=csv_calib_bc, csv_calib_l=csv_calib_l : 
                                                   (csv_calib_bc.eval( -jet.hadronFlavour()+5 ,jet.eta(), jet.pt()) if (abs(jet.eta())<2.4 and jet.pt()<670. and jet.pt()>30.) else 1.0) 
                                                   if jet.hadronFlavour()>=4 
                                                   else (csv_calib_l.eval(2,jet.eta(), jet.pt()) if (abs(jet.eta())<2.4 and jet.pt()<1000. and jet.pt()>20.) else 1.0)
@@ -189,11 +196,13 @@ from leptonSF import LeptonSF
 jsonpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/leptonSF/"
 jsons = {    
     'muSF_HLT' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco74X_Dec1.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p2_PtEtaBins', 'abseta_pt_ratio' ],
+    'muEff_HLT' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco74X_Dec1_MC.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p3_PtEtaBins', 'abseta_pt_MC' ],
     'muSF_IsoLoose' : [ jsonpath+'MuonIso_Z_RunCD_Reco74X_Dec1.json' , 'NUM_LooseRelIso_DEN_LooseID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
     'muSF_IsoTight' : [ jsonpath+'MuonIso_Z_RunCD_Reco74X_Dec1.json' , 'NUM_TightRelIso_DEN_TightID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
     'muSF_IdLoose' : [ jsonpath+'MuonID_Z_RunCD_Reco74X_Dec1.json' , 'NUM_LooseID_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
     'muSF_IdTight' : [ jsonpath+'MuonID_Z_RunCD_Reco74X_Dec1.json' , 'NUM_TightIDandIPCut_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
     'eleSF_HLT' : ['','',''],
+    'eleEff_HLT' : ['','',''],
     'eleSF_IdLoose' : [jsonpath+'CutBasedID_LooseWP.json', 'CutBasedID_LooseWP', 'eta_pt_ratio'],
     'eleSF_IdTight' : [jsonpath+'CutBasedID_TightWP.json', 'CutBasedID_TightWP', 'eta_pt_ratio'],
     'eleSF_IsoLoose' : ['','',''],
@@ -212,6 +221,15 @@ for cut in ["HLT", "IsoLoose", "IsoTight", "IdLoose", "IdTight"]:
     leptonTypeVHbb.variables += [NTupleVariable("SFerr_"+cut, 
                                                 lambda x, muCorr=correctors["muSF_"+cut], eleCorr=correctors["eleSF_"+cut] : muCorr.get_2D(x.pt(), x.eta())[1] if abs(x.pdgId()) == 13 else eleCorr.get_2D(x.pt(), x.eta())[1], 
                                                 float, mcOnly=True, help="SF error for lepton "+cut
+                                                )]
+leptonTypeVHbb.variables += [NTupleVariable("Eff_HLT", 
+                                                lambda x, muCorr=correctors["muEff_HLT"], eleCorr=correctors["eleSF_HLT"] : muCorr.get_2D(x.pt(), x.eta())[0] if abs(x.pdgId()) == 13 else eleCorr.get_2D(x.pt(), x.eta())[0], 
+
+                                                float, mcOnly=True, help="Eff for lepton HLT"
+                                                )]
+leptonTypeVHbb.variables += [NTupleVariable("Efferr_HLT", 
+                                                lambda x, muCorr=correctors["muEff_HLT"], eleCorr=correctors["eleEff_HLT"] : muCorr.get_2D(x.pt(), x.eta())[1] if abs(x.pdgId()) == 13 else eleCorr.get_2D(x.pt(), x.eta())[1], 
+                                                float, mcOnly=True, help="Eff error for lepton HLT"
                                                 )]
 
 
@@ -349,27 +367,38 @@ patSubjetType = NTupleObjectType("patsubjet",  baseObjectTypes = [ fourVectorTyp
 
 httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variables = [
 
+    NTupleVariable("ptcal",   lambda x : x.ptcal,   help="pT (calibrated)"),
+    NTupleVariable("etacal",  lambda x : x.etacal,  help="eta (calibrated)"),
+    NTupleVariable("phical",  lambda x : x.phical,  help="phi (calibrated)"),
+    NTupleVariable("masscal", lambda x : x.masscal, help="mass (calibrated)"),
+
     NTupleVariable("fRec",  lambda x : x.fRec, help="relative W width"),
     NTupleVariable("Ropt",  lambda x : x.Ropt, help="optimal value of R"),
     NTupleVariable("RoptCalc",  lambda x : x.RoptCalc, help="expected value of optimal R"),
     NTupleVariable("ptForRoptCalc",  lambda x : x.ptForRoptCalc, help="pT used for calculation of RoptCalc"),
 
     # Leading W Subjet (pt)
+    NTupleVariable("sjW1ptcal",lambda x : x.sjW1ptcal,help = "Leading W Subjet pT (calibrated)"),
     NTupleVariable("sjW1pt",   lambda x : x.sjW1pt,   help = "Leading W Subjet pT"),
     NTupleVariable("sjW1eta",  lambda x : x.sjW1eta,  help = "Leading W Subjet eta"),
     NTupleVariable("sjW1phi",  lambda x : x.sjW1phi,  help = "Leading W Subjet phi"),
+    NTupleVariable("sjW1masscal", lambda x : x.sjW1masscal, help = "Leading W Subjet mass (calibrated)"),
     NTupleVariable("sjW1mass", lambda x : x.sjW1mass, help = "Leading W Subjet mass"),
     NTupleVariable("sjW1btag", lambda x : x.sjW1btag, help = "Leading W Subjet btag"),
     # Second W Subjet (pt)
+    NTupleVariable("sjW2ptcal", lambda x : x.sjW2ptcal,help = "Second Subjet pT (calibrated)"),
     NTupleVariable("sjW2pt",   lambda x : x.sjW2pt,   help = "Second Subjet pT"),
     NTupleVariable("sjW2eta",  lambda x : x.sjW2eta,  help = "Second Subjet eta"),
     NTupleVariable("sjW2phi",  lambda x : x.sjW2phi,  help = "Second Subjet phi"),
+    NTupleVariable("sjW2masscal", lambda x : x.sjW2masscal, help = "Second Subjet mass (calibrated)"),
     NTupleVariable("sjW2mass", lambda x : x.sjW2mass, help = "Second Subjet mass"),
     NTupleVariable("sjW2btag", lambda x : x.sjW2btag, help = "Second Subjet btag"),
     # Non-W Subjet
+    NTupleVariable("sjNonWptcal",lambda x : x.sjNonWptcal,help = "Non-W Subjet pT (calibrated)"),
     NTupleVariable("sjNonWpt",   lambda x : x.sjNonWpt,   help = "Non-W Subjet pT"),
     NTupleVariable("sjNonWeta",  lambda x : x.sjNonWeta,  help = "Non-W Subjet eta"),
     NTupleVariable("sjNonWphi",  lambda x : x.sjNonWphi,  help = "Non-W Subjet phi"),
+    NTupleVariable("sjNonWmasscal", lambda x : x.sjNonWmasscal, help = "Non-W Subjet mass (calibrated)"),
     NTupleVariable("sjNonWmass", lambda x : x.sjNonWmass, help = "Non-W Subjet mass"),
     NTupleVariable("sjNonWbtag", lambda x : x.sjNonWbtag, help = "Non-W Subjet btag"),
     ])

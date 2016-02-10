@@ -174,6 +174,7 @@ class GeneratorAnalyzer( Analyzer ):
         # https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW)
         for w in event.LHE_weights:
             wid = int(w.id)
+            #print wid, ": ", w.wgt
             # for LO samples, the scale weights are 1,...,9; for NLO 1001,1009
             if (wid in range(1,10)) or (wid in range(1001,1010)):
                 wid = wid%1000
@@ -182,6 +183,11 @@ class GeneratorAnalyzer( Analyzer ):
                     w.order = LHE_scale_order[wid]
                     #print int(w.id), ": ", w.wgt, " (pos ", w.order, ")"
                     LHE_weights_scale.append(w)
+            # thse are up/down variations for the NNPDF: https://twiki.cern.ch/twiki/bin/view/CMS/TTbarHbbRun2ReferenceAnalysisLimits
+            if wid in [2005,2067]:
+                #print  w.wgt
+                w.wgt = w.wgt/event.LHE_originalWeight if abs(event.LHE_originalWeight)>0 else w.wgt
+                LHE_weights_pdf.append(w)
 
         event.LHE_weights_scale = sorted(LHE_weights_scale, key=lambda w : w.order)
         event.LHE_weights_pdf = LHE_weights_pdf
@@ -303,6 +309,7 @@ class GeneratorAnalyzer( Analyzer ):
             #event.genHiggsBoson = [GenParticle(higgsBosons[-1])]
             event.genHiggsBosons = higgsBosons
             event.genHiggsDecayMode = abs(  event.genHiggsBoson.daughter(0).pdgId() if event.genHiggsBoson.numberOfDaughters() >= 1 else 0)
+            event.genHiggsDecayMode += abs( event.genHiggsBoson.daughter(1).pdgId() if event.genHiggsBoson.numberOfDaughters() >= 2 and abs( event.genHiggsBoson.daughter(1).pdgId() ) != abs( event.genHiggsBoson.daughter(0).pdgId()) else 0) * 10000
             self.fillTopQuarks( event )
             self.countBPartons( event )
             #self.fillWZQuarks(   event, event.genHiggsBoson )
