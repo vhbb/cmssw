@@ -349,6 +349,7 @@ output_service = cfg.Service(
 
 from PhysicsTools.Heppy.analyzers.core.TriggerBitAnalyzer import TriggerBitAnalyzer
 FlagsAna = TriggerBitAnalyzer.defaultEventFlagsConfig
+FlagsAna.triggerBits.update( { "chargedHadronTrackResolutionFilter" : ["Flag_chargedHadronTrackResolutionFilter"], "muonBadTrackFilter" : ["Flag_muonBadTrackFilter"], "CSCTightHalo2015Filter" : ["Flag_CSCTightHalo2015Filter"] } )
 
 from VHbbAnalysis.Heppy.hbheAnalyzer import *
 hbheAna = hbheAnalyzer.defaultConfig
