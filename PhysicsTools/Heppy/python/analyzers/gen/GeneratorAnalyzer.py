@@ -44,7 +44,7 @@ class GeneratorAnalyzer( Analyzer ):
             event.genlepsFromTop = [] #mu/ele that have a t->W chain as ancestor, also contained in event.genleps
        event.genwzquarks and event.genbquarks, might have overlaps 
        event.genbquarksFromTop and event.genbquarksFromH are all contained in event.genbquarks
-       
+
        """
 
     def __init__(self, cfg_ana, cfg_comp, looperName ):
@@ -58,7 +58,7 @@ class GeneratorAnalyzer( Analyzer ):
     def declareHandles(self):
         super(GeneratorAnalyzer, self).declareHandles()
         self.mchandles['genParticles'] = AutoHandle( 'prunedGenParticles', 'std::vector<reco::GenParticle>' )
-
+                
     def beginLoop(self,setup):
         super(GeneratorAnalyzer,self).beginLoop(setup)
 
@@ -187,6 +187,8 @@ class GeneratorAnalyzer( Analyzer ):
             event.genbquarksFromTop = []
             event.genbquarksFromH   = []
             event.genlepsFromTop = []
+            event.genvertex = 0
+            if len(event.generatorSummary)>2: event.genvertex=event.generatorSummary[2].vertex().z()
             for p in event.generatorSummary:
                 id = abs(p.pdgId())
                 if id == 25: 

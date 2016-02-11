@@ -89,6 +89,29 @@ class NTupleObjectType:
                 if b2 not in ret:
                     ret.append(b2)
         return ret
+    def addVariables(self,newvars):
+        currentnames = [v.name for v in self.allVars(True)] # require no conflict with all variables, including mcOnly ones
+        uniquenewvars = []
+        for var in newvars:
+            if var.name in uniquenewvars: raise RuntimeError, "Duplicate definition of variable %s while adding variables to object type %s" % (var.name,self.name)
+            uniquenewvars.append(var.name)
+            if var.name not in currentnames:
+                self.variables.append(var)
+            else:
+              raise RuntimeError, "Variable %s is already present in object type %s" % (var.name,self.name)
+    def addSubObjects(self,sos):
+        currentnames = [v.name for v in self.subObjects]
+        uniquenewobjs = []
+        for ob in sos:
+            if ob.name in uniquenewobjs: raise RuntimeError, "Duplicate definition of sub-object %s while adding it to object type %s" % (ob.name,self.name)
+            uniquenewobjs.append(ob.name)
+            if ob.name not in currentnames:
+                self.subObjects.append(ob)
+            else:
+              raise RuntimeError, "Sub-object %s is already present in object type %s" % (ob.name,self.name)
+        self._subObjectVars.clear() # clear and update cache of subobj variables
+        mynewvars = self.allVars(True)
+        mynewvars = self.allVars(False)
     def removeVariable(self,name):
         self.variables = [ v for v in self.variables if v.name != name]
     def __repr__(self):
@@ -129,6 +152,33 @@ class NTupleObject:
     def __repr__(self):
         return "<NTupleObject[%s]>" % self.name
 
+    def get_py_wrapper_class(self, isMC):
+        s = "class %s:\n" % self.name
+        s += "    \"\"\"\n"
+        s += "    {0}\n".format(self.help)
+        s += "    \"\"\"\n"
+
+        s += "    @staticmethod\n"
+        s += "    def make_obj(tree):\n"
+        vs = []
+        helps = []
+        for v in self.objectType.allVars(isMC):
+            if len(v.name)>0:
+                s += "        _{1} = getattr(tree, \"{0}_{1}\", None)\n".format(self.name, v.name)
+                vs += [v.name]
+                helps += [v.help]
+            else:
+                s += "        _{0} = getattr(tree, \"{0}\", None);\n".format(self.name)
+                vs += [self.name]
+                helps += [self.help]
+        vecstring = ", ".join(["_{0}".format(v) for v in vs])
+
+        s += "        return {0}({1})\n".format(self.name, vecstring)
+
+        s += "    def __init__(self, {0}):\n".format(",".join(vs))
+        for v, h in zip(vs, helps):
+            s += "        self.{0} = {0} #{1}\n".format(v, h)
+        return s
 
 class NTupleCollection:
     """Type defining a set of branches associated to a list of objects (i.e. an instance of NTupleObjectType)"""
@@ -206,16 +256,30 @@ class NTupleCollection:
 
     def get_py_wrapper_class(self, isMC):
         s = "class %s:\n" % self.name
-        s += "    def __init__(self, tree, n):\n"
-        for v in self.objectType.allVars(isMC):
-            if len(v.name)>0:
-                s += "        self.{0} = tree.{1}_{2}[n];\n".format(v.name, self.name, v.name)
-            else:
-                s += "        self.{0} = tree.{0}[n];\n".format(self.name)
+        s += "    \"\"\"\n"
+        s += "    {0}\n".format(self.help)
+        s += "    \"\"\"\n"
 
         s += "    @staticmethod\n"
-        s += "    def make_array(event):\n"
-        s += "        return [{0}(event.input, i) for i in range(event.input.n{0})]\n".format(self.name)
-        return s
+        s += "    def make_array(tree):\n"
+        s += "        n = getattr(tree, \"n{0}\", 0)\n".format(self.name)
+        vs = []
+        helps = []
+        for v in self.objectType.allVars(isMC):
+            if len(v.name)>0:
+                s += "        _{1} = getattr(tree, \"{0}_{1}\", [None]*n)\n".format(self.name, v.name)
+                vs += [v.name]
+                helps += [v.help]
+            else:
+                s += "        _{0} = getattr(tree, \"{0}\", [None]*n);\n".format(self.name)
+                vs += [self.name]
+                helps += [self.help]
+        vecstring = ", ".join(["_{0}[n]".format(v) for v in vs])
 
+        s += "        return [{0}({1}) for n in range(n)]\n".format(self.name, vecstring)
+
+        s += "    def __init__(self, {0}):\n".format(",".join(vs))
+        for h, v in zip(helps, vs):
+            s += "        self.{0} = {0} #{1}\n".format(v, h)
+        return s
 
