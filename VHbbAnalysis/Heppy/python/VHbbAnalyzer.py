@@ -52,7 +52,8 @@ class VHbbAnalyzer( Analyzer ):
         if "outputfile" in setup.services :
             setup.services["outputfile"].file.cd()
             self.inputCounter = ROOT.TH1F("Count","Count",1,0,2)
-            self.inputCounterWeighted = ROOT.TH1F("CountWeighted","Count with gen weight and pu weight",1,0,2)
+            self.inputCounterFullWeighted = ROOT.TH1F("CountFullWeighted","Count with gen weight and pu weight",1,0,2)
+            self.inputCounterWeighted = ROOT.TH1F("CountWeighted","Count with sign(gen weight) and pu weight",1,0,2)
             self.inputCounterPosWeight = ROOT.TH1F("CountPosWeight","Count genWeight>0",1,0,2)
             self.inputCounterNegWeight = ROOT.TH1F("CountNegWeight","Count genWeight<0",1,0,2)
             for LHE_scale in range(6):
@@ -449,6 +450,7 @@ class VHbbAnalyzer( Analyzer ):
         if self.cfg_comp.isMC:
             genWeight = self.handles['GenInfo'].product().weight()
             self.inputCounterWeighted.Fill(1,copysign(1.0,genWeight)*event.puWeight)
+            self.inputCounterFullWeighted.Fill(1,genWeight*event.puWeight)
             for LHE_scale in range(min(len(event.LHE_weights_scale),6)): 
                getattr(self, "inputCounterWeightedLHEWeightScale_"+str(LHE_scale)).Fill(1,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_scale[LHE_scale]).wgt) 
             for LHE_pdf in range(min(len(event.LHE_weights_pdf),2)): 
