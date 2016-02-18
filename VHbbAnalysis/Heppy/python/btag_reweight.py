@@ -213,8 +213,8 @@ class Jet :
 
 csvpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/csv"
 bweightcalc = BTagWeightCalculator(
-    csvpath + "/csv_rwt_fit_hf_2015_12_14.root",
-    csvpath + "/csv_rwt_fit_lf_2015_12_14.root"
+    csvpath + "/csv_rwt_fit_hf_76x_2016_02_08.root",
+    csvpath + "/csv_rwt_fit_lf_76x_2016_02_08.root"
 )
 bweightcalc.btag = "btagCSV"
 
