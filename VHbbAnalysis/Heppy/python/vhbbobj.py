@@ -157,8 +157,8 @@ for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
 from PhysicsTools.Heppy.physicsutils.BTagWeightCalculator import BTagWeightCalculator
 csvpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/csv"
 bweightcalc = BTagWeightCalculator(
-    csvpath + "/csv_rwt_fit_hf_2016_01_28.root", 
-    csvpath + "/csv_rwt_fit_lf_2016_01_28.root", 
+    csvpath + "/csv_rwt_fit_hf_76x_2016_02_08.root", 
+    csvpath + "/csv_rwt_fit_lf_76x_2016_02_08.root", 
 )
 
 for syst in ["JES", "LF", "HF", "HFStats1", "HFStats2", "LFStats1", "LFStats2", "cErr1", "cErr2"]:
