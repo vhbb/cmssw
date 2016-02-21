@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_HEPPY_A14_001'
-config.General.workArea = 'crab_projects_A14_001'
+config.General.requestName = 'VHBB_H20_02'
+config.General.workArea = 'crab_projects_H20_002'
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -21,12 +21,16 @@ config.JobType.inputFiles = ['heppy_config.py',
                               '../vhbb_combined.py',
                              'TMVAClassification_BDT.weights.xml',
                              'puData.root',
+                             '../puDataMinus.root',
+                             '../puDataPlus.root',
                              'puMC.root',
                               'json.txt',
                               "../Zll-spring15.weights.xml",
                               "../Wln-spring15.weights.xml",
                               "../Znn-spring15.weights.xml",
                               "../VBF-spring15.weights.xml",
+                              "../ttbar-spring15.weights.xml",
+                              "../ttbar-fall15.weights.xml",
 										'../TMVA_blikelihood_vbf_cmssw76.weights.xml'
 ]
 #config.JobType.outputFiles = ['tree.root']
@@ -35,11 +39,11 @@ config.section_("Data")
 config.Data.inputDataset = '/ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 2
-config.Data.totalUnits = 4
-config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyA14/'
+config.Data.unitsPerJob = 1
+#config.Data.totalUnits = -1
+config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyH20/'
 config.Data.publication = True
-config.Data.publishDataName = 'VHBB_HEPPY_A14'
+config.Data.outputDatasetTag = 'VHBB_HEPPY_H20'
 
 config.section_("Site")
 config.Site.storageSite = "T2_IT_Pisa"

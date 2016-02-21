@@ -278,8 +278,9 @@ class NTupleCollection:
 
         s += "        return [{0}({1}) for n in range(n)]\n".format(self.name, vecstring)
 
-        s += "    def __init__(self, {0}):\n".format(",".join(vs))
-        for h, v in zip(helps, vs):
-            s += "        self.{0} = {0} #{1}\n".format(v, h)
+        if len(vs):
+            s += "    def __init__(self, {0}):\n".format(",".join(vs))
+            for h, v in zip(helps, vs):
+                s += "        self.{0} = {0} #{1}\n".format(v, h)
         return s
 

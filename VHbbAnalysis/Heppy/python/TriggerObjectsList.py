@@ -3,21 +3,27 @@
 
 
 triggerObjectCollectionsFull = {
+    "hltIsoMu18":[[],"hltL3crIsoL1sMu16L1f0L2f10QL3f18QL3trkIsoFiltered0p09","HLT_IsoMu18_v*"],
+    "hltEle23WPLoose":[[],"hltEle23WPLooseGsfTrackIsoFilter","HLT_Ele23_WPLoose_Gsf_v*"],
+    "hltEle22eta2p1WPLoose":[[],"hltSingleEle22WPLooseGsfTrackIsoFilter","HLT_Ele22_eta2p1_WPLoose_Gsf_v*"],
 }
 triggerObjectCollectionsOnlyPt = {
 #    "caloMet":[["hltMet","","HLT"],"hltMET90","HLT_PFMET90_PFMHT90_IDTight*"] hltL1extraParticles:Central:HLT
     "l1CentralJets":[["hltL1extraParticles","Central"]],
     "l1ForwardJets":[["hltL1extraParticles","Forward"]],
+    "l1Met":[["hltL1extraParticles","MET"]],
+    "l1Mht":[["hltL1extraParticles","MHT"]],
     "caloJets":[["hltAK4CaloJetsCorrectedIDPassed"]],
     "pfJets":[["hltAK4PFJetsCorrected"]],
 
-    "l1Met":[["hltL1extraParticles","MET"]],
     "caloMet":[["hltMet"]],
     "caloMht":[["hltMht"]],
     "caloMhtNoPU":[["hltMHTNoPU"]],
     "pfMet":[["hltPFMETProducer"]],
     "pfMht":[["hltPFMHTTightID"]],
+    "pfHt":[["hltPFHT"]],
 }
+
 triggerObjectCollectionsOnlySize = {
     ## VBF triggers
     "hltL1sL1TripleJet927664VBFORL1TripleJet846848VBFORL1HTT100ORL1HTT125ORL1HTT150ORL1HTT175ORL1SingleJet128ORL1DoubleJetC84":[[],"hltL1sL1TripleJet927664VBFORL1TripleJet846848VBFORL1HTT100ORL1HTT125ORL1HTT150ORL1HTT175ORL1SingleJet128ORL1DoubleJetC84",""],
@@ -72,4 +78,8 @@ triggerObjectCollectionsOnlySize = {
 
 }
 
-triggerObjectCollections = dict(triggerObjectCollectionsOnlySize.items() + triggerObjectCollectionsOnlyPt.items() + triggerObjectCollectionsFull.items())
+triggerObjectCollections = dict(
+    triggerObjectCollectionsOnlySize.items() + 
+    triggerObjectCollectionsOnlyPt.items() + 
+    triggerObjectCollectionsFull.items()
+    )

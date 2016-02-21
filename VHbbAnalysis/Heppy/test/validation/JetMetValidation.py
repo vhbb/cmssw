@@ -162,34 +162,36 @@ def category(count_genjet_b, count_genjet_2b, count_genjet_c, count_genjet_2c):
 
 
 def pass_event(ev):
-    return (ev.Vtype==0 or ev.Vtype==1 or ev.Vtype==2 or ev.Vtype==3)
+    return (ev.Vtype==0 or ev.Vtype==1 or ev.Vtype==2 or ev.Vtype==3) and len(ev.hJidx)==2
 
 ##############################################################################################################
 
-ntuple_version = "Pre-V14"
+ntuple_version = "Pre-V20"
 
-sample_name    = "ZH_test"
-#sample_name    = "ttH"
+#sample_name    = "ZH_test"
+sample_name    = "TTJets"
 
 #path   = "dcap://t3se01.psi.ch:22125//pnfs/psi.ch/cms/trivcat///store/t3groups/ethz-higgs/run2/V12/"
 
 #path   = "dcap://t3se01.psi.ch:22125///pnfs/psi.ch/cms/trivcat///store/t3groups/ethz-higgs/run2/VHBBHeppyV13/"
 #path    = "root://cms-xrd-global.cern.ch//store/group/cmst3/user/degrutto/VHBBHeppyR14_TEST/"
-path     = "/shome/bianchi/VHbb/CMSSW_7_4_15/src/VHbbAnalysis/Heppy/test/Loop_1"
+#path     = "/shome/bianchi/VHbb/CMSSW_7_4_15/src/VHbbAnalysis/Heppy/test/Loop_1"
+
+path = "root://xrootd-cms.infn.it///store/group/phys_higgs/hbb/ntuples/A20/user/arizzi/VHBBHeppyA20/"
 
 #sample = "ZH_HToBB_ZToLL_M125_13TeV_powheg_pythia8/VHBB_HEPPY_V13_ZH_HToBB_ZToLL_M125_13TeV_powheg_pythia8__RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/151002_083741/0000/" 
 #sample = "TT_TuneCUETP8M1_13TeV-powheg-pythia8/VHBB_HEPPY_V13_TT_TuneCUETP8M1_13TeV-powheg-pythia8__RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext3-v1/151002_060637/0000/"
 #sample  = "ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pythia8/VHBB_HEPPY_R14_TEST_ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pythia8__RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/151020_184306/0000/"
 #sample  = "ttHTobb_M125_13TeV_powheg_pythia8/VHBB_HEPPY_R14_TEST_ttHTobb_M125_13TeV_powheg_pythia8__RunIISpring15MiniAODv2-74X_mcRun2_asymptotic_v2-v1/151020_184403/0000"
-sample = ""
+sample = "TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/VHBB_HEPPY_A20_TTJets_TuneCUETP8M1_13TeV-madgraphMLM-Py8__fall15MAv2-pu25ns15v1_76r2as_v12-v1/160201_141838/0000/"
 
 file_names = [
     #"tree_1.root",
-    "tree.root",
+    #"tree.root",
     ]
 
-for p in range(2, 2):
-    #file_names.append( "tree_"+str(p)+".root" )
+for p in range(2, 3):
+    file_names.append( "tree_"+str(p)+".root" )
     print "Adding file n.", p
 
 chain = ROOT.TChain("tree")
@@ -241,10 +243,14 @@ hists = {
             "LFDown"      :  hist1D("BTagWeight_LFDown", "BTagWeight event weight (LFDown)",  "Weight", 40, 0., 3) ,
             "HFUp"        :  hist1D("BTagWeight_HFUp",     "BTagWeight event weight (HFUp)",    "Weight", 40, 0., 3) ,
             "HFDown"      :  hist1D("BTagWeight_HFDown", "BTagWeight event weight (HFDown)",  "Weight", 40, 0., 3) ,
-            "Stats1Up"    :  hist1D("BTagWeight_Stats1Up",     "BTagWeight event weight (Stats1Up)",    "Weight", 40, 0., 3) ,
-            "Stats1Down"  :  hist1D("BTagWeight_Stats1Down", "BTagWeight event weight (Stats1Down)",  "Weight", 40, 0., 3) ,
-            "Stats2Up"    :  hist1D("BTagWeight_Stats2Up",     "BTagWeight event weight (Stats2Up)",    "Weight", 40, 0., 3) ,
-            "Stats2Down"  :  hist1D("BTagWeight_Stats2Down", "BTagWeight event weight (Stats2Down)",  "Weight", 40, 0., 3) ,
+            "LFStats1Up"    :  hist1D("BTagWeight_LFStats1Up",     "BTagWeight event weight (LFStats1Up)",    "Weight", 40, 0., 3) ,
+            "LFStats1Down"  :  hist1D("BTagWeight_LFStats1Down", "BTagWeight event weight (LFStats1Down)",  "Weight", 40, 0., 3) ,
+            "LFStats2Up"    :  hist1D("BTagWeight_LFStats2Up",     "BTagWeight event weight (LFStats2Up)",    "Weight", 40, 0., 3) ,
+            "LFStats2Down"  :  hist1D("BTagWeight_LFStats2Down", "BTagWeight event weight (LFStats2Down)",  "Weight", 40, 0., 3) ,
+            "HFStats1Up"    :  hist1D("BTagWeight_HFStats1Up",     "BTagWeight event weight (HFStats1Up)",    "Weight", 40, 0., 3) ,
+            "HFStats1Down"  :  hist1D("BTagWeight_HFStats1Down", "BTagWeight event weight (HFStats1Down)",  "Weight", 40, 0., 3) ,
+            "HFStats2Up"    :  hist1D("BTagWeight_HFStats2Up",     "BTagWeight event weight (HFStats2Up)",    "Weight", 40, 0., 3) ,
+            "HFStats2Down"  :  hist1D("BTagWeight_HFStats2Down", "BTagWeight event weight (HFStats2Down)",  "Weight", 40, 0., 3) ,
             "cErr1Up"     :  hist1D("BTagWeight_cErr1Up",     "BTagWeight event weight (cErr1Up)",    "Weight", 40, 0., 3) ,
             "cErr1Down"   :  hist1D("BTagWeight_cErr1Down", "BTagWeight event weight (cErr1Down)",  "Weight", 40, 0., 3) ,
             "cErr2Up"     :  hist1D("BTagWeight_cErr2Up",     "BTagWeight event weight (cErr2Up)",    "Weight", 40, 0., 3) ,
@@ -333,12 +339,12 @@ hists = {
             "tkMet_0to50"   :  hist1D("MET_Pt_Resolution_tkMet_0", "TkMet MET p_{T} resolution, 0<gen E_{T}^{miss}<50 GeV",   "Reco/Gen", 40, 0, 3) ,
             "tkMet_50to100" :  hist1D("MET_Pt_Resolution_tkMet_1", "TkMet MET p_{T} resolution, 50<gen E_{T}^{miss}<100 GeV", "Reco/Gen", 40, 0, 3) ,
             "tkMet_100toinf":  hist1D("MET_Pt_Resolution_tkMet_2", "TkMet MET p_{T} resolution, 100<gen E_{T}^{miss} GeV",    "Reco/Gen", 40, 0, 3) ,
-            "noHF_0to50"   :  hist1D("MET_Pt_Resolution_NoHF_0", "NoHF MET p_{T} resolution, 0<gen E_{T}^{miss}<50 GeV",   "Reco/Gen", 40, 0, 3) ,
-            "noHF_50to100" :  hist1D("MET_Pt_Resolution_NoHF_1", "NoHF MET p_{T} resolution, 50<gen E_{T}^{miss}<100 GeV", "Reco/Gen", 40, 0, 3) ,
-            "noHF_100toinf":  hist1D("MET_Pt_Resolution_NoHF_2", "NoHF MET p_{T} resolution, 100<gen E_{T}^{miss} GeV",    "Reco/Gen", 40, 0, 3) ,
-            "noPU_0to50"   :  hist1D("MET_Pt_Resolution_NoPU_0", "NoPU MET p_{T} resolution, 0<gen E_{T}^{miss}<50 GeV",   "Reco/Gen", 40, 0, 3) ,
-            "noPU_50to100" :  hist1D("MET_Pt_Resolution_NoPU_1", "NoPU MET p_{T} resolution, 50<gen E_{T}^{miss}<100 GeV", "Reco/Gen", 40, 0, 3) ,
-            "noPU_100toinf":  hist1D("MET_Pt_Resolution_NoPU_2", "NoPU MET p_{T} resolution, 100<gen E_{T}^{miss} GeV",    "Reco/Gen", 40, 0, 3) ,
+            #"noHF_0to50"   :  hist1D("MET_Pt_Resolution_NoHF_0", "NoHF MET p_{T} resolution, 0<gen E_{T}^{miss}<50 GeV",   "Reco/Gen", 40, 0, 3) ,
+            #"noHF_50to100" :  hist1D("MET_Pt_Resolution_NoHF_1", "NoHF MET p_{T} resolution, 50<gen E_{T}^{miss}<100 GeV", "Reco/Gen", 40, 0, 3) ,
+            #"noHF_100toinf":  hist1D("MET_Pt_Resolution_NoHF_2", "NoHF MET p_{T} resolution, 100<gen E_{T}^{miss} GeV",    "Reco/Gen", 40, 0, 3) ,
+            #"noPU_0to50"   :  hist1D("MET_Pt_Resolution_NoPU_0", "NoPU MET p_{T} resolution, 0<gen E_{T}^{miss}<50 GeV",   "Reco/Gen", 40, 0, 3) ,
+            #"noPU_50to100" :  hist1D("MET_Pt_Resolution_NoPU_1", "NoPU MET p_{T} resolution, 50<gen E_{T}^{miss}<100 GeV", "Reco/Gen", 40, 0, 3) ,
+            #"noPU_100toinf":  hist1D("MET_Pt_Resolution_NoPU_2", "NoPU MET p_{T} resolution, 100<gen E_{T}^{miss} GeV",    "Reco/Gen", 40, 0, 3) ,
             },
         "PxPy_correlation" : {
             "type1_0to50"    :  hist2D("MET_PxPy_Correlation_type1_0", "Type1 MET #Deltap_{x.y} correlation,  0<gen E_{T}^{miss}<50  GeV", "(Reco-Gen)_{x}", 40, -100, 100, "(Reco-Gen)_{y}", 40, -100, 100) ,
@@ -467,6 +473,69 @@ hists = {
             "Bin1" : hist2D("BJet_Pt_Resolution_Bin1", "Jet (b) p_{T} response, 1.5<|#eta|<2.5", "p_{T} gen [GeV]", 19,  20, 400, "(Reco-Gen)/Gen", 40, -1, 1) ,
             "Bin2" : hist2D("BJet_Pt_Resolution_Bin2", "Jet (b) p_{T} response, 2.5<|#eta|<4.5", "p_{T} gen [GeV]", 19,  20, 400, "(Reco-Gen)/Gen", 40, -1, 1) ,
             },
+
+###
+        "Pt_resolution_reco_noNu_2D"   : {
+            "Bin0" : hist2D("RegressedBJet_Pt_Resolution_reco_noNu_Bin0", "Reco Jet (b) p_{T} response vs. gen, 0.0<|#eta|<1.5", "p_{T} gen [GeV]", 19,  20, 400, "(p_{T}(reco)-p_{T}(gen))/p_{T}(gen)", 40, -1, 1) ,
+            "Bin1" : hist2D("RegressedBJet_Pt_Resolution_reco_noNu_Bin1", "Reco Jet (b) p_{T} response vs. gen, 1.5<|#eta|<2.5", "p_{T} gen [GeV]", 19,  20, 400, "(p_{T}(reco)-p_{T}(gen))/p_{T}(gen)", 40, -1, 1) ,
+            "Bin2" : hist2D("RegressedBJet_Pt_Resolution_reco_noNu_Bin2", "Reco Jet (b) p_{T} response vs. gen, 2.5<|#eta|<4.5", "p_{T} gen [GeV]", 19,  20, 400, "(p_{T}(reco)-p_{T}(gen))/p_{T}(gen)", 40, -1, 1) ,
+            },       
+
+        "Pt_resolution_reco_wNu_2D"   : {
+            "Bin0" : hist2D("RegressedBJet_Pt_Resolution_reco_wNu_Bin0", "Reco Jet (b) p_{T} response vs. gen with #nu, 0.0<|#eta|<1.5", "p_{T} gen [GeV]", 19,  20, 400, "(p_{T}(reco)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin1" : hist2D("RegressedBJet_Pt_Resolution_reco_wNu_Bin1", "Reco Jet (b) p_{T} response vs. gen with #nu, 1.5<|#eta|<2.5", "p_{T} gen [GeV]", 19,  20, 400, "(p_{T}(reco)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin2" : hist2D("RegressedBJet_Pt_Resolution_reco_wNu_Bin2", "Reco Jet (b) p_{T} response vs. gen with #nu, 2.5<|#eta|<4.5", "p_{T} gen [GeV]", 19,  20, 400, "(p_{T}(reco)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            },        
+
+        "Pt_resolution_reco_wNu_2_2D"   : {
+            "Bin0" : hist2D("RegressedBJet_Pt_Resolution_reco_wNu_2_Bin0", "Reco Jet (b) p_{T} response vs. gen with #nu, 0.0<|#eta|<1.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reco)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin1" : hist2D("RegressedBJet_Pt_Resolution_reco_wNu_2_Bin1", "Reco Jet (b) p_{T} response vs. gen with #nu, 1.5<|#eta|<2.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reco)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin2" : hist2D("RegressedBJet_Pt_Resolution_reco_wNu_2_Bin2", "Reco Jet (b) p_{T} response vs. gen with #nu, 2.5<|#eta|<4.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reco)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            },        
+
+        "Pt_resolution_reg_noNu_2D"   : {
+            "Bin0" : hist2D("RegressedBJet_Pt_Resolution_reg_noNu_Bin0", "Regressed Jet (b) p_{T} response vs. gen, 0.0<|#eta|<1.5", "p_{T} gen [GeV]", 19,  20, 400, "(p_{T}(reg)-p_{T}(gen))/p_{T}(gen)", 40, -1, 1) ,
+            "Bin1" : hist2D("RegressedBJet_Pt_Resolution_reg_noNu_Bin1", "Regressed Jet (b) p_{T} response vs. gen, 1.5<|#eta|<2.5", "p_{T} gen [GeV]", 19,  20, 400, "(p_{T}(reg)-p_{T}(gen))/p_{T}(gen)", 40, -1, 1) ,
+            "Bin2" : hist2D("RegressedBJet_Pt_Resolution_reg_noNu_Bin2", "Regressed Jet (b) p_{T} response vs. gen, 2.5<|#eta|<4.5", "p_{T} gen [GeV]", 19,  20, 400, "(p_{T}(reg)-p_{T}(gen))/p_{T}(gen)", 40, -1, 1) ,
+            },       
+        
+        "Pt_resolution_reg_wNu_2D"   : {
+            "Bin0" : hist2D("RegressedBJet_Pt_Resolution_reg_wNu_Bin0", "Regressed Jet (b) p_{T} response vs. gen with #nu, 0.0<|#eta|<1.5", "p_{T} gen [GeV]", 19,  20, 400, "(p_{T}(reg)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin1" : hist2D("RegressedBJet_Pt_Resolution_reg_wNu_Bin1", "Regressed Jet (b) p_{T} response vs. gen with #nu, 1.5<|#eta|<2.5", "p_{T} gen [GeV]", 19,  20, 400, "(p_{T}(reg)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin2" : hist2D("RegressedBJet_Pt_Resolution_reg_wNu_Bin2", "Regressed Jet (b) p_{T} response vs. gen with #nu, 2.5<|#eta|<4.5", "p_{T} gen [GeV]", 19,  20, 400, "(p_{T}(reg)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            },        
+
+        "Pt_resolution_reg_wNu_2_2D"   : {
+            "Bin0" : hist2D("RegressedBJet_Pt_Resolution_reg_wNu_2_Bin0", "Regressed Jet (b) p_{T} response vs. gen with #nu, 0.0<|#eta|<1.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reg)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin1" : hist2D("RegressedBJet_Pt_Resolution_reg_wNu_2_Bin1", "Regressed Jet (b) p_{T} response vs. gen with #nu, 1.5<|#eta|<2.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reg)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin2" : hist2D("RegressedBJet_Pt_Resolution_reg_wNu_2_Bin2", "Regressed Jet (b) p_{T} response vs. gen with #nu, 2.5<|#eta|<4.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reg)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            },        
+
+        ###
+        "Pt_resolution_reco_wSoftLepton_2D"   : {
+            "Bin0" : hist2D("RegressedBJet_Pt_Resolution_reco_wSoftLepton_Bin0", "Reco Jet (b) p_{T} response vs. gen with soft lepton, 0.0<|#eta|<1.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reco)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin1" : hist2D("RegressedBJet_Pt_Resolution_reco_wSoftLepton_Bin1", "Reco Jet (b) p_{T} response vs. gen with soft lepton, 1.5<|#eta|<2.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reco)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin2" : hist2D("RegressedBJet_Pt_Resolution_reco_wSoftLepton_Bin2", "Reco Jet (b) p_{T} response vs. gen with soft lepton, 2.5<|#eta|<4.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reco)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            },        
+        "Pt_resolution_reg_wSoftLepton_2D"   : {
+            "Bin0" : hist2D("RegressedBJet_Pt_Resolution_reg_wSoftLepton_Bin0", "Regressed Jet (b) p_{T} response vs. gen with soft lepton, 0.0<|#eta|<1.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reg)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin1" : hist2D("RegressedBJet_Pt_Resolution_reg_wSoftLepton_Bin1", "Regressed Jet (b) p_{T} response vs. gen with soft lepton, 1.5<|#eta|<2.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reg)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin2" : hist2D("RegressedBJet_Pt_Resolution_reg_wSoftLepton_Bin2", "Regressed Jet (b) p_{T} response vs. gen with soft lepton, 2.5<|#eta|<4.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reg)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            },        
+        "Pt_resolution_reco_woSoftLepton_2D"   : {
+            "Bin0" : hist2D("RegressedBJet_Pt_Resolution_reco_woSoftLepton_Bin0", "Reco Jet (b) p_{T} response vs. gen without soft lepton, 0.0<|#eta|<1.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reco)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin1" : hist2D("RegressedBJet_Pt_Resolution_reco_woSoftLepton_Bin1", "Reco Jet (b) p_{T} response vs. gen without soft lepton, 1.5<|#eta|<2.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reco)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin2" : hist2D("RegressedBJet_Pt_Resolution_reco_woSoftLepton_Bin2", "Reco Jet (b) p_{T} response vs. gen without soft lepton, 2.5<|#eta|<4.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reco)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            },        
+        "Pt_resolution_reg_woSoftLepton_2D"   : {
+            "Bin0" : hist2D("RegressedBJet_Pt_Resolution_reg_woSoftLepton_Bin0", "Regressed Jet (b) p_{T} response vs. gen without soft lepton, 0.0<|#eta|<1.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reg)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin1" : hist2D("RegressedBJet_Pt_Resolution_reg_woSoftLepton_Bin1", "Regressed Jet (b) p_{T} response vs. gen without soft lepton, 1.5<|#eta|<2.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reg)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            "Bin2" : hist2D("RegressedBJet_Pt_Resolution_reg_woSoftLepton_Bin2", "Regressed Jet (b) p_{T} response vs. gen without soft lepton, 2.5<|#eta|<4.5", "p_{T} gen + #nu [GeV]", 19,  20, 400, "(p_{T}(reg)-p_{T}(gen+#nu))/p_{T}(gen+#nu)", 40, -1, 1) ,
+            },        
+        ##
+
+
+
         "NumBHadrons" : {
             "Bin0" : hist1D("BJet_numBHadrons_Bin0", "Number of b hadrons in b-jets, 0.0<|#eta|<1.5", "number of b hadrons", 5,-1,4),
             "Bin1" : hist1D("BJet_numBHadrons_Bin1", "Number of b hadrons in b-jets, 1.5<|#eta|<2.5", "number of b hadrons", 5,-1,4),
@@ -517,27 +586,50 @@ hists = {
             "Bin1_Bin3" : hist2D("BJet_BTagWeightLF_Bin1_Bin3", "Jet (b) btag weight LF Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
             },
 
-        "Btag_weightStats1_2D" : {
-            "Bin0_Bin0" : hist2D("BJet_BTagWeightStats1_Bin0_Bin0", "Jet (b) btag weight Stats1 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin1" : hist2D("BJet_BTagWeightStats1_Bin0_Bin1", "Jet (b) btag weight Stats1 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin2" : hist2D("BJet_BTagWeightStats1_Bin0_Bin2", "Jet (b) btag weight Stats1 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin3" : hist2D("BJet_BTagWeightStats1_Bin0_Bin3", "Jet (b) btag weight Stats1 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin0" : hist2D("BJet_BTagWeightStats1_Bin1_Bin0", "Jet (b) btag weight Stats1 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin1" : hist2D("BJet_BTagWeightStats1_Bin1_Bin1", "Jet (b) btag weight Stats1 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin2" : hist2D("BJet_BTagWeightStats1_Bin1_Bin2", "Jet (b) btag weight Stats1 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin3" : hist2D("BJet_BTagWeightStats1_Bin1_Bin3", "Jet (b) btag weight Stats1 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+        "Btag_weightLFStats1_2D" : {
+            "Bin0_Bin0" : hist2D("BJet_BTagWeightLFStats1_Bin0_Bin0", "Jet (b) btag weight LFStats1 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin1" : hist2D("BJet_BTagWeightLFStats1_Bin0_Bin1", "Jet (b) btag weight LFStats1 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin2" : hist2D("BJet_BTagWeightLFStats1_Bin0_Bin2", "Jet (b) btag weight LFStats1 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin3" : hist2D("BJet_BTagWeightLFStats1_Bin0_Bin3", "Jet (b) btag weight LFStats1 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin0" : hist2D("BJet_BTagWeightLFStats1_Bin1_Bin0", "Jet (b) btag weight LFStats1 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin1" : hist2D("BJet_BTagWeightLFStats1_Bin1_Bin1", "Jet (b) btag weight LFStats1 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin2" : hist2D("BJet_BTagWeightLFStats1_Bin1_Bin2", "Jet (b) btag weight LFStats1 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin3" : hist2D("BJet_BTagWeightLFStats1_Bin1_Bin3", "Jet (b) btag weight LFStats1 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
             },
 
-        "Btag_weightStats2_2D" : {
-            "Bin0_Bin0" : hist2D("BJet_BTagWeightStats2_Bin0_Bin0", "Jet (b) btag weight Stats2 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin1" : hist2D("BJet_BTagWeightStats2_Bin0_Bin1", "Jet (b) btag weight Stats2 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin2" : hist2D("BJet_BTagWeightStats2_Bin0_Bin2", "Jet (b) btag weight Stats2 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin3" : hist2D("BJet_BTagWeightStats2_Bin0_Bin3", "Jet (b) btag weight Stats2 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin0" : hist2D("BJet_BTagWeightStats2_Bin1_Bin0", "Jet (b) btag weight Stats2 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin1" : hist2D("BJet_BTagWeightStats2_Bin1_Bin1", "Jet (b) btag weight Stats2 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin2" : hist2D("BJet_BTagWeightStats2_Bin1_Bin2", "Jet (b) btag weight Stats2 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin3" : hist2D("BJet_BTagWeightStats2_Bin1_Bin3", "Jet (b) btag weight Stats2 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+        "Btag_weightLFStats2_2D" : {
+            "Bin0_Bin0" : hist2D("BJet_BTagWeightLFStats2_Bin0_Bin0", "Jet (b) btag weight LFStats2 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin1" : hist2D("BJet_BTagWeightLFStats2_Bin0_Bin1", "Jet (b) btag weight LFStats2 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin2" : hist2D("BJet_BTagWeightLFStats2_Bin0_Bin2", "Jet (b) btag weight LFStats2 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin3" : hist2D("BJet_BTagWeightLFStats2_Bin0_Bin3", "Jet (b) btag weight LFStats2 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin0" : hist2D("BJet_BTagWeightLFStats2_Bin1_Bin0", "Jet (b) btag weight LFStats2 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin1" : hist2D("BJet_BTagWeightLFStats2_Bin1_Bin1", "Jet (b) btag weight LFStats2 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin2" : hist2D("BJet_BTagWeightLFStats2_Bin1_Bin2", "Jet (b) btag weight LFStats2 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin3" : hist2D("BJet_BTagWeightLFStats2_Bin1_Bin3", "Jet (b) btag weight LFStats2 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
             },
+
+        "Btag_weightHFStats1_2D" : {
+            "Bin0_Bin0" : hist2D("BJet_BTagWeightHFStats1_Bin0_Bin0", "Jet (b) btag weight HFStats1 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin1" : hist2D("BJet_BTagWeightHFStats1_Bin0_Bin1", "Jet (b) btag weight HFStats1 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin2" : hist2D("BJet_BTagWeightHFStats1_Bin0_Bin2", "Jet (b) btag weight HFStats1 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin3" : hist2D("BJet_BTagWeightHFStats1_Bin0_Bin3", "Jet (b) btag weight HFStats1 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin0" : hist2D("BJet_BTagWeightHFStats1_Bin1_Bin0", "Jet (b) btag weight HFStats1 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin1" : hist2D("BJet_BTagWeightHFStats1_Bin1_Bin1", "Jet (b) btag weight HFStats1 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin2" : hist2D("BJet_BTagWeightHFStats1_Bin1_Bin2", "Jet (b) btag weight HFStats1 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin3" : hist2D("BJet_BTagWeightHFStats1_Bin1_Bin3", "Jet (b) btag weight HFStats1 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            },
+
+        "Btag_weightHFStats2_2D" : {
+            "Bin0_Bin0" : hist2D("BJet_BTagWeightHFStats2_Bin0_Bin0", "Jet (b) btag weight HFStats2 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin1" : hist2D("BJet_BTagWeightHFStats2_Bin0_Bin1", "Jet (b) btag weight HFStats2 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin2" : hist2D("BJet_BTagWeightHFStats2_Bin0_Bin2", "Jet (b) btag weight HFStats2 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin3" : hist2D("BJet_BTagWeightHFStats2_Bin0_Bin3", "Jet (b) btag weight HFStats2 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin0" : hist2D("BJet_BTagWeightHFStats2_Bin1_Bin0", "Jet (b) btag weight HFStats2 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin1" : hist2D("BJet_BTagWeightHFStats2_Bin1_Bin1", "Jet (b) btag weight HFStats2 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin2" : hist2D("BJet_BTagWeightHFStats2_Bin1_Bin2", "Jet (b) btag weight HFStats2 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin3" : hist2D("BJet_BTagWeightHFStats2_Bin1_Bin3", "Jet (b) btag weight HFStats2 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            },
+
 
         "Btag_weightcErr1_2D" : {
             "Bin0_Bin0" : hist2D("BJet_BTagWeightcErr1_Bin0_Bin0", "Jet (b) btag weight cErr1 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
@@ -623,26 +715,48 @@ hists = {
             "Bin1_Bin3" : hist2D("CJet_BTagWeightHF_Bin1_Bin3", "Jet (c) btag weight HF Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
             },
 
-        "Btag_weightStats1_2D" : {
-            "Bin0_Bin0" : hist2D("CJet_BTagWeightStats1_Bin0_Bin0", "Jet (c) btag weight Stats1 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin1" : hist2D("CJet_BTagWeightStats1_Bin0_Bin1", "Jet (c) btag weight Stats1 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin2" : hist2D("CJet_BTagWeightStats1_Bin0_Bin2", "Jet (c) btag weight Stats1 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin3" : hist2D("CJet_BTagWeightStats1_Bin0_Bin3", "Jet (c) btag weight Stats1 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin0" : hist2D("CJet_BTagWeightStats1_Bin1_Bin0", "Jet (c) btag weight Stats1 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin1" : hist2D("CJet_BTagWeightStats1_Bin1_Bin1", "Jet (c) btag weight Stats1 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin2" : hist2D("CJet_BTagWeightStats1_Bin1_Bin2", "Jet (c) btag weight Stats1 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin3" : hist2D("CJet_BTagWeightStats1_Bin1_Bin3", "Jet (c) btag weight Stats1 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+        "Btag_weightLFStats1_2D" : {
+            "Bin0_Bin0" : hist2D("CJet_BTagWeightLFStats1_Bin0_Bin0", "Jet (c) btag weight LFStats1 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin1" : hist2D("CJet_BTagWeightLFStats1_Bin0_Bin1", "Jet (c) btag weight LFStats1 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin2" : hist2D("CJet_BTagWeightLFStats1_Bin0_Bin2", "Jet (c) btag weight LFStats1 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin3" : hist2D("CJet_BTagWeightLFStats1_Bin0_Bin3", "Jet (c) btag weight LFStats1 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin0" : hist2D("CJet_BTagWeightLFStats1_Bin1_Bin0", "Jet (c) btag weight LFStats1 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin1" : hist2D("CJet_BTagWeightLFStats1_Bin1_Bin1", "Jet (c) btag weight LFStats1 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin2" : hist2D("CJet_BTagWeightLFStats1_Bin1_Bin2", "Jet (c) btag weight LFStats1 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin3" : hist2D("CJet_BTagWeightLFStats1_Bin1_Bin3", "Jet (c) btag weight LFStats1 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
             },
 
-        "Btag_weightStats2_2D" : {
-            "Bin0_Bin0" : hist2D("CJet_BTagWeightStats2_Bin0_Bin0", "Jet (c) btag weight Stats2 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin1" : hist2D("CJet_BTagWeightStats2_Bin0_Bin1", "Jet (c) btag weight Stats2 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin2" : hist2D("CJet_BTagWeightStats2_Bin0_Bin2", "Jet (c) btag weight Stats2 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin3" : hist2D("CJet_BTagWeightStats2_Bin0_Bin3", "Jet (c) btag weight Stats2 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin0" : hist2D("CJet_BTagWeightStats2_Bin1_Bin0", "Jet (c) btag weight Stats2 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin1" : hist2D("CJet_BTagWeightStats2_Bin1_Bin1", "Jet (c) btag weight Stats2 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin2" : hist2D("CJet_BTagWeightStats2_Bin1_Bin2", "Jet (c) btag weight Stats2 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin3" : hist2D("CJet_BTagWeightStats2_Bin1_Bin3", "Jet (c) btag weight Stats2 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+        "Btag_weightLFStats2_2D" : {
+            "Bin0_Bin0" : hist2D("CJet_BTagWeightLFStats2_Bin0_Bin0", "Jet (c) btag weight LFStats2 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin1" : hist2D("CJet_BTagWeightLFStats2_Bin0_Bin1", "Jet (c) btag weight LFStats2 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin2" : hist2D("CJet_BTagWeightLFStats2_Bin0_Bin2", "Jet (c) btag weight LFStats2 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin3" : hist2D("CJet_BTagWeightLFStats2_Bin0_Bin3", "Jet (c) btag weight LFStats2 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin0" : hist2D("CJet_BTagWeightLFStats2_Bin1_Bin0", "Jet (c) btag weight LFStats2 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin1" : hist2D("CJet_BTagWeightLFStats2_Bin1_Bin1", "Jet (c) btag weight LFStats2 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin2" : hist2D("CJet_BTagWeightLFStats2_Bin1_Bin2", "Jet (c) btag weight LFStats2 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin3" : hist2D("CJet_BTagWeightLFStats2_Bin1_Bin3", "Jet (c) btag weight LFStats2 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            },
+
+        "Btag_weightHFStats1_2D" : {
+            "Bin0_Bin0" : hist2D("CJet_BTagWeightHFStats1_Bin0_Bin0", "Jet (c) btag weight HFStats1 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin1" : hist2D("CJet_BTagWeightHFStats1_Bin0_Bin1", "Jet (c) btag weight HFStats1 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin2" : hist2D("CJet_BTagWeightHFStats1_Bin0_Bin2", "Jet (c) btag weight HFStats1 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin3" : hist2D("CJet_BTagWeightHFStats1_Bin0_Bin3", "Jet (c) btag weight HFStats1 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin0" : hist2D("CJet_BTagWeightHFStats1_Bin1_Bin0", "Jet (c) btag weight HFStats1 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin1" : hist2D("CJet_BTagWeightHFStats1_Bin1_Bin1", "Jet (c) btag weight HFStats1 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin2" : hist2D("CJet_BTagWeightHFStats1_Bin1_Bin2", "Jet (c) btag weight HFStats1 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin3" : hist2D("CJet_BTagWeightHFStats1_Bin1_Bin3", "Jet (c) btag weight HFStats1 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            },
+
+        "Btag_weightHFStats2_2D" : {
+            "Bin0_Bin0" : hist2D("CJet_BTagWeightHFStats2_Bin0_Bin0", "Jet (c) btag weight HFStats2 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin1" : hist2D("CJet_BTagWeightHFStats2_Bin0_Bin1", "Jet (c) btag weight HFStats2 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin2" : hist2D("CJet_BTagWeightHFStats2_Bin0_Bin2", "Jet (c) btag weight HFStats2 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin3" : hist2D("CJet_BTagWeightHFStats2_Bin0_Bin3", "Jet (c) btag weight HFStats2 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin0" : hist2D("CJet_BTagWeightHFStats2_Bin1_Bin0", "Jet (c) btag weight HFStats2 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin1" : hist2D("CJet_BTagWeightHFStats2_Bin1_Bin1", "Jet (c) btag weight HFStats2 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin2" : hist2D("CJet_BTagWeightHFStats2_Bin1_Bin2", "Jet (c) btag weight HFStats2 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin3" : hist2D("CJet_BTagWeightHFStats2_Bin1_Bin3", "Jet (c) btag weight HFStats2 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
             },
 
         "Btag_weightcErr1_2D" : {
@@ -720,27 +834,50 @@ hists = {
             "Bin1_Bin3" : hist2D("LJet_BTagWeightLF_Bin1_Bin3", "Jet (udsg) btag weight LF Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
             },
 
-        "Btag_weightStats1_2D" : {
-            "Bin0_Bin0" : hist2D("LJet_BTagWeightStats1_Bin0_Bin0", "Jet (udsg) btag weight Stats1 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin1" : hist2D("LJet_BTagWeightStats1_Bin0_Bin1", "Jet (udsg) btag weight Stats1 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin2" : hist2D("LJet_BTagWeightStats1_Bin0_Bin2", "Jet (udsg) btag weight Stats1 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin3" : hist2D("LJet_BTagWeightStats1_Bin0_Bin3", "Jet (udsg) btag weight Stats1 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin0" : hist2D("LJet_BTagWeightStats1_Bin1_Bin0", "Jet (udsg) btag weight Stats1 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin1" : hist2D("LJet_BTagWeightStats1_Bin1_Bin1", "Jet (udsg) btag weight Stats1 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin2" : hist2D("LJet_BTagWeightStats1_Bin1_Bin2", "Jet (udsg) btag weight Stats1 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin3" : hist2D("LJet_BTagWeightStats1_Bin1_Bin3", "Jet (udsg) btag weight Stats1 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+        "Btag_weightLFStats1_2D" : {
+            "Bin0_Bin0" : hist2D("LJet_BTagWeightLFStats1_Bin0_Bin0", "Jet (udsg) btag weight LFStats1 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin1" : hist2D("LJet_BTagWeightLFStats1_Bin0_Bin1", "Jet (udsg) btag weight LFStats1 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin2" : hist2D("LJet_BTagWeightLFStats1_Bin0_Bin2", "Jet (udsg) btag weight LFStats1 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin3" : hist2D("LJet_BTagWeightLFStats1_Bin0_Bin3", "Jet (udsg) btag weight LFStats1 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin0" : hist2D("LJet_BTagWeightLFStats1_Bin1_Bin0", "Jet (udsg) btag weight LFStats1 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin1" : hist2D("LJet_BTagWeightLFStats1_Bin1_Bin1", "Jet (udsg) btag weight LFStats1 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin2" : hist2D("LJet_BTagWeightLFStats1_Bin1_Bin2", "Jet (udsg) btag weight LFStats1 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin3" : hist2D("LJet_BTagWeightLFStats1_Bin1_Bin3", "Jet (udsg) btag weight LFStats1 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
             },
 
-        "Btag_weightStats2_2D" : {
-            "Bin0_Bin0" : hist2D("LJet_BTagWeightStats2_Bin0_Bin0", "Jet (udsg) btag weight Stats2 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin1" : hist2D("LJet_BTagWeightStats2_Bin0_Bin1", "Jet (udsg) btag weight Stats2 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin2" : hist2D("LJet_BTagWeightStats2_Bin0_Bin2", "Jet (udsg) btag weight Stats2 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin0_Bin3" : hist2D("LJet_BTagWeightStats2_Bin0_Bin3", "Jet (udsg) btag weight Stats2 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin0" : hist2D("LJet_BTagWeightStats2_Bin1_Bin0", "Jet (udsg) btag weight Stats2 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin1" : hist2D("LJet_BTagWeightStats2_Bin1_Bin1", "Jet (udsg) btag weight Stats2 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin2" : hist2D("LJet_BTagWeightStats2_Bin1_Bin2", "Jet (udsg) btag weight Stats2 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
-            "Bin1_Bin3" : hist2D("LJet_BTagWeightStats2_Bin1_Bin3", "Jet (udsg) btag weight Stats2 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+        "Btag_weightLFStats2_2D" : {
+            "Bin0_Bin0" : hist2D("LJet_BTagWeightLFStats2_Bin0_Bin0", "Jet (udsg) btag weight LFStats2 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin1" : hist2D("LJet_BTagWeightLFStats2_Bin0_Bin1", "Jet (udsg) btag weight LFStats2 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin2" : hist2D("LJet_BTagWeightLFStats2_Bin0_Bin2", "Jet (udsg) btag weight LFStats2 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin3" : hist2D("LJet_BTagWeightLFStats2_Bin0_Bin3", "Jet (udsg) btag weight LFStats2 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin0" : hist2D("LJet_BTagWeightLFStats2_Bin1_Bin0", "Jet (udsg) btag weight LFStats2 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin1" : hist2D("LJet_BTagWeightLFStats2_Bin1_Bin1", "Jet (udsg) btag weight LFStats2 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin2" : hist2D("LJet_BTagWeightLFStats2_Bin1_Bin2", "Jet (udsg) btag weight LFStats2 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin3" : hist2D("LJet_BTagWeightLFStats2_Bin1_Bin3", "Jet (udsg) btag weight LFStats2 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
             },
+
+        "Btag_weightHFStats1_2D" : {
+            "Bin0_Bin0" : hist2D("LJet_BTagWeightHFStats1_Bin0_Bin0", "Jet (udsg) btag weight HFStats1 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin1" : hist2D("LJet_BTagWeightHFStats1_Bin0_Bin1", "Jet (udsg) btag weight HFStats1 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin2" : hist2D("LJet_BTagWeightHFStats1_Bin0_Bin2", "Jet (udsg) btag weight HFStats1 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin3" : hist2D("LJet_BTagWeightHFStats1_Bin0_Bin3", "Jet (udsg) btag weight HFStats1 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin0" : hist2D("LJet_BTagWeightHFStats1_Bin1_Bin0", "Jet (udsg) btag weight HFStats1 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin1" : hist2D("LJet_BTagWeightHFStats1_Bin1_Bin1", "Jet (udsg) btag weight HFStats1 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin2" : hist2D("LJet_BTagWeightHFStats1_Bin1_Bin2", "Jet (udsg) btag weight HFStats1 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin3" : hist2D("LJet_BTagWeightHFStats1_Bin1_Bin3", "Jet (udsg) btag weight HFStats1 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            },
+
+        "Btag_weightHFStats2_2D" : {
+            "Bin0_Bin0" : hist2D("LJet_BTagWeightHFStats2_Bin0_Bin0", "Jet (udsg) btag weight HFStats2 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin1" : hist2D("LJet_BTagWeightHFStats2_Bin0_Bin1", "Jet (udsg) btag weight HFStats2 Up/Down, 0.0<|#eta|<1.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin2" : hist2D("LJet_BTagWeightHFStats2_Bin0_Bin2", "Jet (udsg) btag weight HFStats2 Up/Down, 0.0<|#eta|<1.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin0_Bin3" : hist2D("LJet_BTagWeightHFStats2_Bin0_Bin3", "Jet (udsg) btag weight HFStats2 Up/Down, 0.0<|#eta|<1.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin0" : hist2D("LJet_BTagWeightHFStats2_Bin1_Bin0", "Jet (udsg) btag weight HFStats2 Up/Down, 1.5<|#eta|<2.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin1" : hist2D("LJet_BTagWeightHFStats2_Bin1_Bin1", "Jet (udsg) btag weight HFStats2 Up/Down, 1.5<|#eta|<2.5 and 30<p_{T}<50",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin2" : hist2D("LJet_BTagWeightHFStats2_Bin1_Bin2", "Jet (udsg) btag weight HFStats2 Up/Down, 1.5<|#eta|<2.5 and 50<p_{T}<100", "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            "Bin1_Bin3" : hist2D("LJet_BTagWeightHFStats2_Bin1_Bin3", "Jet (udsg) btag weight HFStats2 Up/Down, 1.5<|#eta|<2.5 and 100<p_{T}",    "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
+            },
+
 
         "Btag_weightcErr1_2D" : {
             "Bin0_Bin0" : hist2D("LJet_BTagWeightcErr1_Bin0_Bin0", "Jet (udsg) btag weight cErr1 Up/Down, 0.0<|#eta|<1.5 and 20<p_{T}<30",  "CSV",  24,  -0.1, 1.1, "max(Variation)/Nominal",  50, 0., 2.0) ,
@@ -803,7 +940,7 @@ for k in hists.keys():
 out.cd()
 
 print chain.GetEntries()
-for iev in range( min(20000, chain.GetEntries()) ):
+for iev in range( min(100000, chain.GetEntries()) ):
 
     chain.GetEntry(iev)
     ev = chain
@@ -814,7 +951,7 @@ for iev in range( min(20000, chain.GetEntries()) ):
         continue
 
     hists["Event"]["BTagWeight"]["Nominal"].Fill( min(ev.bTagWeight,2.99) )
-    for syst in ["JES", "LF", "HF", "Stats1", "Stats2", "cErr1", "cErr2"]:
+    for syst in ["JES", "LF", "HF", "LFStats1", "LFStats2", "HFStats1", "HFStats2", "cErr1", "cErr2"]:
         for shift in ["Up", "Down"]: 
             hists["Event"]["BTagWeight"][syst+shift].Fill( min( getattr(ev, "bTagWeight_"+syst+shift), 2.99) )
 
@@ -859,7 +996,7 @@ for iev in range( min(20000, chain.GetEntries()) ):
     for j in [ ev.hJidx[0],  ev.hJidx[1] ]:
         if j>=0:
             mcIdx = ev.Jet_mcIdx[j] 
-            if mcIdx>=0 and ev.Jet_mcPt[j]>20.:
+            if mcIdx>=0 and ev.Jet_mcPt[j]>20. and mcIdx<ev.nGenJet:
                 if not( ev.GenJet_pt[mcIdx]>20. and abs(ev.GenJet_eta[mcIdx])<2.5 ):
                     continue
                 if ev.GenJet_numBHadrons[mcIdx]==1:
@@ -899,8 +1036,8 @@ for iev in range( min(20000, chain.GetEntries()) ):
     hists["MET"]["Pt_response"]["type1p2"+genPtBin].Fill(ev.metType1p2_pt/ev.met_genPt if ev.met_genPt>0 else 0., weight(ev))
     hists["MET"]["Pt_response"]["puppi"+genPtBin].Fill(ev.metPuppi_pt/ev.met_genPt if ev.met_genPt>0 else 0., weight(ev))
     hists["MET"]["Pt_response"]["tkMet"+genPtBin].Fill(ev.tkMet_pt/ev.met_genPt if ev.met_genPt>0 else 0., weight(ev))
-    hists["MET"]["Pt_response"]["noHF"+genPtBin].Fill(ev.metNoHF_pt/ev.met_genPt if ev.met_genPt>0 else 0., weight(ev))
-    hists["MET"]["Pt_response"]["noPU"+genPtBin].Fill(ev.metNoPU_pt/ev.met_genPt if ev.met_genPt>0 else 0., weight(ev))
+    #hists["MET"]["Pt_response"]["noHF"+genPtBin].Fill(ev.metNoHF_pt/ev.met_genPt if ev.met_genPt>0 else 0., weight(ev))
+    #hists["MET"]["Pt_response"]["noPU"+genPtBin].Fill(ev.metNoPU_pt/ev.met_genPt if ev.met_genPt>0 else 0., weight(ev))
 
     hists["MET"]["PxPy_correlation"]["type1"+genPtBin].Fill( ev.met_pt*ROOT.TMath.Cos(ev.met_phi)  - ev.met_genPt*ROOT.TMath.Cos(ev.met_genPhi),
                                                             ev.met_pt*ROOT.TMath.Sin(ev.met_phi)  - ev.met_genPt*ROOT.TMath.Sin(ev.met_genPhi), weight(ev))
@@ -945,8 +1082,9 @@ for iev in range( min(20000, chain.GetEntries()) ):
         
         pt_mc_wNu = -1
         if mcIdx >= 0 and mcIdx<ev.nGenJet and pt_mc>20.:
-            numBHadrons = ev.GenJet_numBHadrons[mcIdx]
-            numCHadrons = ev.GenJet_numCHadrons[mcIdx]
+            if abs(eta_mc)<2.4:
+                numBHadrons = ev.GenJet_numBHadrons[mcIdx] + ev.GenJet_numBHadronsFromTop[mcIdx] + ev.GenJet_numBHadronsAfterTop[mcIdx]
+                numCHadrons = ev.GenJet_numCHadrons[mcIdx] + ev.GenJet_numCHadronsFromTop[mcIdx] + ev.GenJet_numCHadronsAfterTop[mcIdx]        
             pt_mc_wNu   = ev.GenJet_wNuPt[mcIdx] 
 
         if pt>20. and abs(eta)<4.5:
@@ -988,10 +1126,26 @@ for iev in range( min(20000, chain.GetEntries()) ):
             if abs(hadronFlavour)==5:
                 if pt_mc>0.:
                     hists["BJet"]["Pt_resolution_2D"][binEta].Fill( pt_mc,  (pt-pt_mc)/pt_mc, weight(ev))
+                    if pt_reg>0.:
+                        if ev.Jet_leptonPt[j]>0.:
+                            hists["BJet"]["Pt_resolution_reco_wSoftLepton_2D"][binEta].Fill( pt_mc_wNu,  (pt-pt_mc_wNu)/pt_mc_wNu,     weight(ev))
+                            hists["BJet"]["Pt_resolution_reg_wSoftLepton_2D"] [binEta].Fill( pt_mc_wNu,  (pt_reg-pt_mc_wNu)/pt_mc_wNu, weight(ev))                            
+                        else:
+                            hists["BJet"]["Pt_resolution_reco_woSoftLepton_2D"][binEta].Fill( pt_mc_wNu,  (pt-pt_mc_wNu)/pt_mc_wNu,     weight(ev))
+                            hists["BJet"]["Pt_resolution_reg_woSoftLepton_2D"] [binEta].Fill( pt_mc_wNu,  (pt_reg-pt_mc_wNu)/pt_mc_wNu, weight(ev))                                                        
+                        if abs(pt_mc_wNu-pt_mc)<0.001:
+                            hists["BJet"]["Pt_resolution_reco_noNu_2D"][binEta].Fill( pt_mc,  (pt-pt_mc)/pt_mc,     weight(ev))
+                            hists["BJet"]["Pt_resolution_reg_noNu_2D"] [binEta].Fill( pt_mc,  (pt_reg-pt_mc)/pt_mc, weight(ev))
+                        else:
+                            hists["BJet"]["Pt_resolution_reco_wNu_2D"] [binEta].Fill( pt_mc,  (pt-pt_mc_wNu)/pt_mc, weight(ev))
+                            hists["BJet"]["Pt_resolution_reg_wNu_2D"]  [binEta].Fill( pt_mc,  (pt_reg-pt_mc_wNu)/pt_mc_wNu, weight(ev))
+                            hists["BJet"]["Pt_resolution_reco_wNu_2_2D"] [binEta].Fill( pt_mc_wNu,  (pt-pt_mc_wNu)/pt_mc, weight(ev))
+                            hists["BJet"]["Pt_resolution_reg_wNu_2_2D"]  [binEta].Fill( pt_mc_wNu,  (pt_reg-pt_mc_wNu)/pt_mc_wNu, weight(ev))
+
                 hists["BJet"]["NumBHadrons"][binEta].Fill(numBHadrons)
                 if binEta in ["Bin0", "Bin1"]:
                     hists["BJet"]["Btag_weight_2D"]   [binEta+"_"+binPt].Fill( max(ev.Jet_btagCSV[j], -0.1), ev.Jet_bTagWeight[j], weight(ev) )
-                    for syst in ["JES", "LF", "HF", "Stats1", "Stats2", "cErr1", "cErr2"]:
+                    for syst in ["JES", "LF", "HF", "LFStats1", "LFStats2", "HFStats1", "HFStats2", "cErr1", "cErr2"]:
                         for shift in ["Up", "Down"]: 
                             hists["BJet"]["Btag_weight"+syst+"_2D"][binEta+"_"+binPt].Fill( max(ev.Jet_btagCSV[j], -0.1), getattr(ev,"Jet_bTagWeight"+syst+shift)[j], weight(ev))
                             #print syst+shift, ": ", getattr(ev,"Jet_bTagWeight"+syst+shift)[j]
@@ -1002,7 +1156,7 @@ for iev in range( min(20000, chain.GetEntries()) ):
                 hists["CJet"]["NumCHadrons"][binEta].Fill(numCHadrons)
                 if binEta in ["Bin0", "Bin1"]:
                     hists["CJet"]["Btag_weight_2D"]   [binEta+"_"+binPt].Fill( max(ev.Jet_btagCSV[j], -0.1), ev.Jet_bTagWeight[j], weight(ev) )
-                    for syst in ["JES", "HF", "LF", "Stats1", "Stats2", "cErr1", "cErr2"]:
+                    for syst in ["JES", "LF", "HF", "LFStats1", "LFStats2", "HFStats1", "HFStats2", "cErr1", "cErr2"]:
                         for shift in ["Up", "Down"]: 
                             hists["CJet"]["Btag_weight"+syst+"_2D"][binEta+"_"+binPt].Fill( max(ev.Jet_btagCSV[j], -0.1), getattr(ev,"Jet_bTagWeight"+syst+shift)[j], weight(ev))
                                                                                                                       
@@ -1015,7 +1169,7 @@ for iev in range( min(20000, chain.GetEntries()) ):
 
                 if binEta in ["Bin0", "Bin1"]:
                     hists["LJet"]["Btag_weight_2D"]   [binEta+"_"+binPt].Fill( max(ev.Jet_btagCSV[j], -0.1), ev.Jet_bTagWeight[j], weight(ev) )
-                    for syst in ["JES", "HF", "LF", "Stats1", "Stats2", "cErr1", "cErr2"]:
+                    for syst in ["JES", "LF", "HF", "LFStats1", "LFStats2", "HFStats1", "HFStats2", "cErr1", "cErr2"]:
                         for shift in ["Up", "Down"]: 
                             hists["LJet"]["Btag_weight"+syst+"_2D"][binEta+"_"+binPt].Fill( max(ev.Jet_btagCSV[j], -0.1), getattr(ev,"Jet_bTagWeight"+syst+shift)[j], weight(ev))
 

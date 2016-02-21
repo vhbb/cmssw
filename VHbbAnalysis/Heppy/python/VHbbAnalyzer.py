@@ -52,9 +52,15 @@ class VHbbAnalyzer( Analyzer ):
         if "outputfile" in setup.services :
             setup.services["outputfile"].file.cd()
             self.inputCounter = ROOT.TH1F("Count","Count",1,0,2)
-            self.inputCounterWeighted = ROOT.TH1F("CountWeighted","Count with gen weight and pu weight",1,0,2)
+            self.inputCounterFullWeighted = ROOT.TH1F("CountFullWeighted","Count with gen weight and pu weight",1,0,2)
+            self.inputCounterWeighted = ROOT.TH1F("CountWeighted","Count with sign(gen weight) and pu weight",1,0,2)
             self.inputCounterPosWeight = ROOT.TH1F("CountPosWeight","Count genWeight>0",1,0,2)
             self.inputCounterNegWeight = ROOT.TH1F("CountNegWeight","Count genWeight<0",1,0,2)
+            for LHE_scale in range(6):
+               setattr(self, "inputCounterWeightedLHEWeightScale_"+str(LHE_scale), ROOT.TH1F("CountWeightedLHEWeightScale_"+str(LHE_scale),"Count with gen weight x LHE_weights_scale["+str(LHE_scale)+"] and pu weight",1,0,2))
+            for LHE_pdf in range(2):
+               setattr(self, "inputCounterWeightedLHEWeightPdf_"+str(LHE_pdf), ROOT.TH1F("CountWeightedLHEWeightPdf_"+str(LHE_pdf),"Count with gen weight x LHE_weights_pdf["+str(LHE_pdf)+"] and pu weight",1,0,2))
+
         self.regressions={}
 	self.regressionVBF={}
 	for re in self.cfg_ana.regressionVBF :
@@ -75,7 +81,8 @@ class VHbbAnalyzer( Analyzer ):
     def doVBF(self,event) :
         event.jetsForVBF = [x for x in event.cleanJetsAll if self.cfg_ana.higgsJetsPreSelectionVBF(x) ]
         if event.Vtype in self.regressionVBF :
-            self.regressionVBF[event.Vtype].evaluateRegression(event,"pt_regVBF")
+           for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
+              self.regressionVBF[event.Vtype].evaluateRegression(event,"pt_regVBF", analysis)
         #compute only for events passing VBF selection
         if len(event.jetsForVBF) < 4 or  event.jetsForVBF[0] < 70 or  event.jetsForVBF[1] < 55 or  event.jetsForVBF[2] < 35 or  event.jetsForVBF[3] < 20 :
             return
@@ -261,18 +268,27 @@ class VHbbAnalyzer( Analyzer ):
 
     def doVHRegression(self, event):
        if (len(event.jetsForHiggs) >=2 ):
-          self.regressions[event.Vtype].evaluateRegression(event)
-          hJetCSV_reg0 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[0].p4())
-          hJetCSV_reg1 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[1].p4())
-          hJetCSV_reg0*=event.hJetsCSV[0].pt_reg/event.hJetsCSV[0].pt()
-          hJetCSV_reg1*=event.hJetsCSV[1].pt_reg/event.hJetsCSV[1].pt()
-          event.HCSV_reg = hJetCSV_reg0+hJetCSV_reg1
+          # ""=nominal, the other correspond to jet energies up/down for JEC and JER
+          for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
+             self.regressions[event.Vtype].evaluateRegression(event, "pt_reg", analysis)
+             hJetCSV_reg0 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[0].p4())
+             hJetCSV_reg1 =ROOT.reco.Particle.LorentzVector( event.hJetsCSV[1].p4())
 
-          hJet_reg0=ROOT.reco.Particle.LorentzVector(event.hJets[0].p4())
-          hJet_reg1=ROOT.reco.Particle.LorentzVector(event.hJets[1].p4())
-          hJet_reg0*=event.hJets[0].pt_reg/event.hJets[0].pt()
-          hJet_reg1*=event.hJets[1].pt_reg/event.hJets[1].pt()
-          event.H_reg = hJet_reg0+hJet_reg1
+             hJetCSV_reg0*=getattr(event.hJetsCSV[0],"pt_reg"+analysis)/event.hJetsCSV[0].pt()
+             hJetCSV_reg1*=getattr(event.hJetsCSV[1],"pt_reg"+analysis)/event.hJetsCSV[1].pt()
+             setattr(event,"HCSV_reg"+("_"+analysis if analysis!="" else ""), hJetCSV_reg0+hJetCSV_reg1)
+
+             hJet_reg0=ROOT.reco.Particle.LorentzVector(event.hJets[0].p4())
+             hJet_reg1=ROOT.reco.Particle.LorentzVector(event.hJets[1].p4())
+             hJet_reg0*=getattr(event.hJets[0],"pt_reg"+analysis)/event.hJets[0].pt()
+             hJet_reg1*=getattr(event.hJets[1],"pt_reg"+analysis)/event.hJets[1].pt()
+             setattr(event,"H_reg"+("_"+analysis if analysis!="" else ""), hJet_reg0+hJet_reg1)
+             #print  "H_reg"+("_"+analysis if analysis!="" else ""), getattr(event, "H_reg"+("_"+analysis if analysis!="" else "")).Pt()
+       else:
+          for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
+             setattr(event,"HCSV_reg"+("_"+analysis if analysis!="" else ""), ROOT.reco.Particle.LorentzVector() ) 
+             setattr(event,"H_reg"+("_"+analysis if analysis!="" else ""), ROOT.reco.Particle.LorentzVector() )
+
 
     def doVBFblikelihood(self, event):
         self.blikelihood.evaluateBlikelihood(event)
@@ -434,6 +450,11 @@ class VHbbAnalyzer( Analyzer ):
         if self.cfg_comp.isMC:
             genWeight = self.handles['GenInfo'].product().weight()
             self.inputCounterWeighted.Fill(1,copysign(1.0,genWeight)*event.puWeight)
+            self.inputCounterFullWeighted.Fill(1,genWeight*event.puWeight)
+            for LHE_scale in range(min(len(event.LHE_weights_scale),6)): 
+               getattr(self, "inputCounterWeightedLHEWeightScale_"+str(LHE_scale)).Fill(1,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_scale[LHE_scale]).wgt) 
+            for LHE_pdf in range(min(len(event.LHE_weights_pdf),2)): 
+               getattr(self, "inputCounterWeightedLHEWeightPdf_"+str(LHE_pdf)).Fill(1,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_pdf[LHE_pdf]).wgt) 
             if genWeight > 0:
                 self.inputCounterPosWeight.Fill(1)
             elif genWeight < 0:
