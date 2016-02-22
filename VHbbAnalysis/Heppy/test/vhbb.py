@@ -28,6 +28,7 @@ treeProducer= cfg.Analyzer(
                  NTupleVariable("puWeightUp", lambda ev : getattr(ev,"puWeightPlus",1.), help="Pileup up variation",mcOnly=True),
                  NTupleVariable("puWeightDown", lambda ev : getattr(ev,"puWeightMinus",1.), help="Pileup down variation",mcOnly=True),
                  NTupleVariable("json", lambda ev : getattr(ev,"json",True), help="Passing json selection"),
+                 NTupleVariable("json_silver", lambda ev : getattr(ev,"json_silver",True), help="Passing silver json selection"),
                  NTupleVariable("nPU0", lambda ev : [bx.nPU() for bx in  ev.pileUpInfo if bx.getBunchCrossing()==0][0], help="nPU in BX=0",mcOnly=True),
                  NTupleVariable("nPVs", lambda ev : len(ev.goodVertices), help="total number of good PVs"),
 		 NTupleVariable("Vtype", lambda ev : ev.Vtype, help="Event classification"),
@@ -396,6 +397,11 @@ TrigAna.unrollbits=True
 from PhysicsTools.Heppy.analyzers.core.JSONAnalyzer import JSONAnalyzer
 jsonAna = cfg.Analyzer(JSONAnalyzer,
       passAll=True
+      )
+silverJsonAna = cfg.Analyzer(JSONAnalyzer,
+      passAll=True,
+      json="silver.txt",
+      suffix="_silver"
       )
 
 sequence = [jsonAna,LHEAna,LHEWeightAna,FlagsAna, hbheAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,TauAna,JetAna,ttHLeptonMVA,METAna, METPuppiAna,  PdfAna, VHbb,TTHtoTauTau,TTHtoTauTauGen,TriggerObjectsAna,treeProducer]#,sh]
