@@ -60,6 +60,11 @@ class VertexAnalyzer( Analyzer ):
           self.handles['vertices'] =  AutoHandle( "offlineSlimmedPrimaryVertices", 'std::vector<reco::Vertex>', fallbackLabel="offlinePrimaryVertices" )
         else:
           self.handles['vertices'] =  AutoHandle( self.allVertices, 'std::vector<reco::Vertex>' )
+        self.hasScore=False 
+        if hasattr(self.cfg_ana,'scores') :
+          self.handles['scores'] =  AutoHandle( self.cfg_ana.scores,'edm::ValueMap<float>' )
+          self.hasScore=True 
+
         self.fixedWeight = None
         if self.cfg_comp.isMC:
             if hasattr( self.cfg_ana, 'fixedWeight'):
@@ -69,14 +74,24 @@ class VertexAnalyzer( Analyzer ):
                                                              'double' )
 
         self.mchandles['pusi'] =  AutoHandle(
-            'addPileupInfo',
-            'std::vector<PileupSummaryInfo>' 
+            'slimmedAddPileupInfo',
+            'std::vector<PileupSummaryInfo>', 
+            fallbackLabel='addPileupInfo',
             )        
 
         self.handles['rho'] =  AutoHandle(
             ('fixedGridRhoFastjetAll',''),
             'double' 
             )        
+        self.handles['rhoCN'] =  AutoHandle(
+            ('fixedGridRhoFastjetCentralNeutral',''),
+            'double' 
+            )        
+        self.handles['sigma'] =  AutoHandle(
+            ('fixedGridSigmaFastjetAll',''),
+            'double',
+            mayFail=True
+            )
 
     def beginLoop(self, setup):
         super(VertexAnalyzer,self).beginLoop(setup)
@@ -90,10 +105,14 @@ class VertexAnalyzer( Analyzer ):
     def process(self,  event):
         self.readCollections(event.input )
         event.rho = self.handles['rho'].product()[0]
-        event.vertices = self.handles['vertices'].product()
+        event.rhoCN = self.handles['rhoCN'].product()[0]
+        event.sigma = self.handles['sigma'].product()[0] if self.handles['sigma'].isValid() else -999
+        event.vertices = list(self.handles['vertices'].product())
+        if self.hasScore :
+            event.scores = self.handles['scores'].product()
+            for i,v in enumerate(event.vertices) :
+                v.score = event.scores.get(i)
         event.goodVertices = filter(self.testGoodVertex,event.vertices)
-
-
         self.count.inc('All Events')
 
         
@@ -161,6 +180,7 @@ setattr(VertexAnalyzer,"defaultConfig",cfg.Analyzer(
     class_object=VertexAnalyzer,
     vertexWeight = None,
     fixedWeight = 1,
+#   scores =  'offlineSlimmedPrimaryVertices',
     verbose = False
    )
 )
