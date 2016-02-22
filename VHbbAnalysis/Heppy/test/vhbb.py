@@ -260,8 +260,8 @@ JetAna.doQG=True
 JetAna.QGpath=os.environ['CMSSW_BASE']+"/src/PhysicsTools/Heppy/data/pdfQG_AK4chs_13TeV_v2b.root"
 JetAna.recalibrateJets=True
 JetAna.jecPath=os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/jec"
-JetAna.mcGT="74X_mcRun2_asymptotic_v2"
-JetAna.dataGT = "74X_dataRun2_reMiniAOD_v0"
+JetAna.mcGT="Fall15_25nsV2_MC"
+JetAna.dataGT = "Fall15_25nsV2_DATA"
 JetAna.addJECShifts=True
 JetAna.addJERShifts=True
 
