@@ -56,10 +56,11 @@ class VHbbAnalyzer( Analyzer ):
             self.inputCounterWeighted = ROOT.TH1F("CountWeighted","Count with sign(gen weight) and pu weight",1,0,2)
             self.inputCounterPosWeight = ROOT.TH1F("CountPosWeight","Count genWeight>0",1,0,2)
             self.inputCounterNegWeight = ROOT.TH1F("CountNegWeight","Count genWeight<0",1,0,2)
-            for LHE_scale in range(6):
-               setattr(self, "inputCounterWeightedLHEWeightScale_"+str(LHE_scale), ROOT.TH1F("CountWeightedLHEWeightScale_"+str(LHE_scale),"Count with gen weight x LHE_weights_scale["+str(LHE_scale)+"] and pu weight",1,0,2))
-            for LHE_pdf in range(2):
-               setattr(self, "inputCounterWeightedLHEWeightPdf_"+str(LHE_pdf), ROOT.TH1F("CountWeightedLHEWeightPdf_"+str(LHE_pdf),"Count with gen weight x LHE_weights_pdf["+str(LHE_pdf)+"] and pu weight",1,0,2))
+            #for LHE_scale in range(6):
+            setattr(self, "inputCounterWeightedLHEWeightScale", ROOT.TH1F("CountWeightedLHEWeightScale","Count with gen weight x LHE_weights_scale and pu weight",6,-0.5,5.5))
+            setattr(self, "inputCounterWeightedLHEWeightPdf", ROOT.TH1F("CountWeightedLHEWeightPdf","Count with gen weight x LHE_weights_pdf and pu weight",103,-0.5,102.5))
+            #for LHE_pdf in range(2):
+            #   setattr(self, "inputCounterWeightedLHEWeightPdf_"+str(LHE_pdf), ROOT.TH1F("CountWeightedLHEWeightPdf_"+str(LHE_pdf),"Count with gen weight x LHE_weights_pdf["+str(LHE_pdf)+"] and pu weight",1,0,2))
 
         self.regressions={}
 	self.regressionVBF={}
@@ -451,10 +452,10 @@ class VHbbAnalyzer( Analyzer ):
             genWeight = self.handles['GenInfo'].product().weight()
             self.inputCounterWeighted.Fill(1,copysign(1.0,genWeight)*event.puWeight)
             self.inputCounterFullWeighted.Fill(1,genWeight*event.puWeight)
-            for LHE_scale in range(min(len(event.LHE_weights_scale),6)): 
-               getattr(self, "inputCounterWeightedLHEWeightScale_"+str(LHE_scale)).Fill(1,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_scale[LHE_scale]).wgt) 
-            for LHE_pdf in range(min(len(event.LHE_weights_pdf),2)): 
-               getattr(self, "inputCounterWeightedLHEWeightPdf_"+str(LHE_pdf)).Fill(1,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_pdf[LHE_pdf]).wgt) 
+            for LHE_scale in range(len(event.LHE_weights_scale)): 
+               getattr(self, "inputCounterWeightedLHEWeightScale").Fill(LHE_scale,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_scale[LHE_scale]).wgt) 
+            for LHE_pdf in range(len(event.LHE_weights_pdf)): 
+               getattr(self, "inputCounterWeightedLHEWeightPdf").Fill(LHE_pdf,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_pdf[LHE_pdf]).wgt) 
             if genWeight > 0:
                 self.inputCounterPosWeight.Fill(1)
             elif genWeight < 0:
