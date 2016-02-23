@@ -28,6 +28,7 @@ treeProducer= cfg.Analyzer(
                  NTupleVariable("puWeightUp", lambda ev : getattr(ev,"puWeightPlus",1.), help="Pileup up variation",mcOnly=True),
                  NTupleVariable("puWeightDown", lambda ev : getattr(ev,"puWeightMinus",1.), help="Pileup down variation",mcOnly=True),
                  NTupleVariable("json", lambda ev : getattr(ev,"json",True), help="Passing json selection"),
+                 NTupleVariable("json_silver", lambda ev : getattr(ev,"json_silver",True), help="Passing silver json selection"),
                  NTupleVariable("nPU0", lambda ev : [bx.nPU() for bx in  ev.pileUpInfo if bx.getBunchCrossing()==0][0], help="nPU in BX=0",mcOnly=True),
                  NTupleVariable("nPVs", lambda ev : len(ev.goodVertices), help="total number of good PVs"),
 		 NTupleVariable("Vtype", lambda ev : ev.Vtype, help="Event classification"),
@@ -36,6 +37,8 @@ treeProducer= cfg.Analyzer(
 		 NTupleVariable("HVdPhi", lambda ev : deltaPhi(ev.V.phi(),ev.H.phi()), help="Delta phi between Higgs and Z/W"),
 		 NTupleVariable("fakeMET_sumet", lambda ev : ev.fakeMET.sumet, help="Fake SumET from Zmumu events removing muons"),
     	         NTupleVariable("bx",  lambda ev: ev.input.eventAuxiliary().bunchCrossing(), int, help="bunch crossing number"),
+		 NTupleVariable("caloMetPt",  lambda ev: ev.met.caloMETPt(), float, help="calo met pt "),
+		 NTupleVariable("caloMetPhi",  lambda ev: ev.met.caloMETPhi(), float, help="calo met phi"),
 		 NTupleVariable("rho",  lambda ev: ev.rho, float, help="kt6PFJets rho"),
 		 NTupleVariable("rhoN",  lambda ev: ev.rhoN, float, help="rho with neutrals only"),
 		 NTupleVariable("rhoCHPU",  lambda ev: ev.rhoCHPU, float, help="rho with charged pileup particles"),
@@ -260,8 +263,8 @@ JetAna.doQG=True
 JetAna.QGpath=os.environ['CMSSW_BASE']+"/src/PhysicsTools/Heppy/data/pdfQG_AK4chs_13TeV_v2b.root"
 JetAna.recalibrateJets=True
 JetAna.jecPath=os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/jec"
-JetAna.mcGT="74X_mcRun2_asymptotic_v2"
-JetAna.dataGT = "74X_dataRun2_reMiniAOD_v0"
+JetAna.mcGT="Fall15_25nsV2_MC"
+JetAna.dataGT = "Fall15_25nsV2_DATA"
 JetAna.addJECShifts=True
 JetAna.addJERShifts=True
 
@@ -394,6 +397,11 @@ TrigAna.unrollbits=True
 from PhysicsTools.Heppy.analyzers.core.JSONAnalyzer import JSONAnalyzer
 jsonAna = cfg.Analyzer(JSONAnalyzer,
       passAll=True
+      )
+silverJsonAna = cfg.Analyzer(JSONAnalyzer,
+      passAll=True,
+      json="silver.txt",
+      suffix="_silver"
       )
 
 sequence = [jsonAna,LHEAna,LHEWeightAna,FlagsAna, hbheAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,TauAna,JetAna,ttHLeptonMVA,METAna, METPuppiAna,  PdfAna, VHbb,TTHtoTauTau,TTHtoTauTauGen,TriggerObjectsAna,treeProducer]#,sh]

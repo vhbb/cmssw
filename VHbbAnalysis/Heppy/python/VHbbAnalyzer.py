@@ -156,7 +156,7 @@ class VHbbAnalyzer( Analyzer ):
 	                used.append(j.sourceCandidatePtr(i))
 	#get the pointed objects
  	used =  [x.get() for x in used]
-	remainingPF = [x for x in event.pfCands if x.charge() != 0 and abs(x.eta()) < 2.5 and  x.pt() > 0.3 and x.fromPV() >=2 and x not in used] 
+	remainingPF = [x for x in event.pfCands if x.charge() != 0 and abs(x.eta()) < 2.5 and  x.pt() > 0.3 and (x.fromPV() >=2 or x.pvAssociationQuality()>= x.CompatibilityDz) and x not in used] 
         dRbb = deltaR(j1.eta(),j1.phi(),j2.eta(),j2.phi())
 	map(lambda x:inputs.push_back(x.p4()), remainingPF)
 	softActivity=ROOT.heppy.FastSoftActivity(inputs,-1,0.4,j1.p4(),j2.p4(),dRbb+2*dR0)

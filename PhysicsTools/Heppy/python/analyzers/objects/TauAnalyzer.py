@@ -81,10 +81,14 @@ class TauAnalyzer( Analyzer ):
 
             tau.idMVA = id6(tau, "by%sIsolationMVA3oldDMwLT")
             tau.idMVANewDM = id6(tau, "by%sIsolationMVA3newDMwLT")
+            tau.idMVArun2 = id6(tau, "by%sIsolationMVArun2v1DBoldDMwLT")
+            tau.idMVArun2dR03 = id6(tau, "by%sIsolationMVArun2v1DBdR03oldDMwLT")
+            tau.idMVArun2NewDM = id6(tau, "by%sIsolationMVArun2v1DBnewDMwLT")
             tau.idCI3hit = id3(tau, "by%sCombinedIsolationDeltaBetaCorr3Hits")
+            tau.idCI3hitdR03 = id3(tau, "by%sCombinedIsolationDeltaBetaCorr3HitsdR03")
             tau.idAntiMu = tau.tauID("againstMuonLoose3") + tau.tauID("againstMuonTight3")
             tau.idAntiE = id5(tau, "againstElectron%sMVA5")
-            #print "Tau pt %5.1f: idMVA2 %d, idCI3hit %d, %s, %s" % (tau.pt(), tau.idMVA2, tau.idCI3hit, tau.tauID(self.cfg_ana.tauID), tau.tauID(self.cfg_ana.tauLooseID))
+            tau.idAntiErun2 = id5(tau, "againstElectron%sMVA6")
             
             if tau.tauID(self.cfg_ana.inclusive_tauID):
                 event.inclusiveTaus.append(tau)
