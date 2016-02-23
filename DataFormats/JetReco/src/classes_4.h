@@ -10,7 +10,6 @@
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/JetReco/interface/TrackJetCollection.h"
 #include "DataFormats/JetReco/interface/PFClusterJetCollection.h"
-#include "DataFormats/JetReco/interface/Jet.h"
 #include "DataFormats/JetReco/interface/JetTrackMatch.h"
 #include "DataFormats/JetReco/interface/JetFloatAssociation.h"
 #include "DataFormats/JetReco/interface/JetTracksAssociation.h"
@@ -36,6 +35,9 @@
 
 #include "DataFormats/Common/interface/PtrVector.h"
 #include "DataFormats/Common/interface/Ptr.h"
+
+#include "DataFormats/JetReco/interface/HTTTopJetTagInfo.h"
+
 
 namespace DataFormats_JetReco {
   struct dictionary4 {
@@ -64,12 +66,10 @@ namespace DataFormats_JetReco {
 
     // Ptr stuff
     edm::Ptr<reco::Jet> ptrj;
-    edm::reftobase::RefHolder<edm::Ptr<reco::Jet> > refHolderPtrRecoJet;
     edm::PtrVector<reco::Jet> ptrvj;
 
     edm::Ptr<reco::CaloJet> ptrcj;
     edm::PtrVector<reco::CaloJet> ptrvcj;
-    edm::reftobase::RefHolder<edm::Ptr<reco::CaloJet> > refHolderPtrCaloJet;
 
     edm::Ptr<reco::JPTJet> ptrjptj;
     edm::PtrVector<reco::JPTJet> ptrvjptj;
@@ -177,6 +177,18 @@ namespace DataFormats_JetReco {
     edm::PtrVector<reco::FFTCaloJet> ptrvgj_fft_2;
     edm::Association<reco::FFTCaloJetCollection> a_gj_fft_2;
     edm::Wrapper<edm::Association<reco::FFTCaloJetCollection> > w_a_gj_fft_2;
+
+    reco::HTTTopJetProperties                                            htttopjetp;
+    std::pair<edm::RefToBase<reco::Jet>, reco::HTTTopJetProperties>      htttopjetp_p;
+
+    reco::HTTTopJetTagInfo                                               htttopjet;
+    reco::HTTTopJetTagInfoCollection                                     htttopjet_c;
+    reco::HTTTopJetTagInfoRef                                            htttopjet_r;
+    reco::HTTTopJetTagInfoRefProd                                        htttopjet_rp;
+    reco::HTTTopJetTagInfoRefVector                                      htttopjet_rv;
+    edm::Wrapper<reco::HTTTopJetTagInfoCollection>                       htttopjet_wc;
+    edm::reftobase::Holder<reco::BaseTagInfo, reco::HTTTopJetTagInfoRef> rb_htttopjet;
+    edm::reftobase::RefHolder<reco::HTTTopJetTagInfoRef>                 rbh_htttopjet; 
 
   };
 }
