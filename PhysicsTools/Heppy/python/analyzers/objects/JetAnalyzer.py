@@ -49,13 +49,13 @@ def cleanJetsAndLeptons(jets,leptons,deltaR,arbitration):
 
 
 def shiftJERfactor(JERShift, aeta):
-    factor = 1.061 + self.shiftJER*0.023
-    if   aeta > 3.2: factor = 1.320 + self.shiftJER * 0.286
-    elif aeta > 3.0: factor = 1.303 + self.shiftJER * 0.111
-    elif aeta > 2.5: factor = 1.343 + self.shiftJER * 0.123
-    elif aeta > 1.9: factor = 1.126 + self.shiftJER * 0.094
-    elif aeta > 1.3: factor = 1.106 + self.shiftJER * 0.030
-    elif aeta > 0.8: factor = 1.088 + self.shiftJER * 0.029
+    factor = 1.061 + shiftJER*0.023
+    if   aeta > 3.2: factor = 1.320 + shiftJER * 0.286
+    elif aeta > 3.0: factor = 1.303 + shiftJER * 0.111
+    elif aeta > 2.5: factor = 1.343 + shiftJER * 0.123
+    elif aeta > 1.9: factor = 1.126 + shiftJER * 0.094
+    elif aeta > 1.3: factor = 1.106 + shiftJER * 0.030
+    elif aeta > 0.8: factor = 1.088 + shiftJER * 0.029
     return factor 
 
 
