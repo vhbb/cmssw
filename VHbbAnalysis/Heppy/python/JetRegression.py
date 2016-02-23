@@ -54,6 +54,7 @@ class JetRegression :
 
     def evaluateRegression(self, event, attrName="pt_reg", analysis=""):
 #self.readCollections( event.input )
+# uniform with https://github.com/cvernier/RegressionHbb/blob/master/treeForRegression.C
 	self.rho[0] = event.rho
 	for j in event.jetsForHiggs :
             pt_corr = 1.0
@@ -75,17 +76,17 @@ class JetRegression :
                 self.Jet_leptonPt[0] =  j.leptons[0].pt()
                 self.Jet_leptonDeltaR[0] = deltaR(j.leptons[0].p4().eta(),j.leptons[0].p4().phi(),j.p4().eta(),j.p4().phi())
             else:
-                self.Jet_leptonPtRel[0] = -99
-                self.Jet_leptonPt[0] =  -99
-                self.Jet_leptonDeltaR[0] =-99
-            #self.Jet_chEmEF[0] = j.chargedEmEnergyFraction()
-            #self.Jet_chHEF[0] = j.chargedHadronEnergyFraction()
-            self.Jet_neHEF[0] = j.neutralHadronEnergyFraction()
-            self.Jet_neEmEF[0] = j.neutralEmEnergyFraction()
+                self.Jet_leptonPtRel[0] = 0
+                self.Jet_leptonPt[0] =  0
+                self.Jet_leptonDeltaR[0] =0
+            #self.Jet_chEmEF[0] = min(1,0, j.chargedEmEnergyFraction())
+            #self.Jet_chHEF[0] = min(1.-, j.chargedHadronEnergyFraction())
+            self.Jet_neHEF[0] = min(1.0,j.neutralHadronEnergyFraction())
+            self.Jet_neEmEF[0] = min(1.0,j.neutralEmEnergyFraction())
             self.Jet_chMult[0] = j.chargedMultiplicity()
             self.Jet_vtxPt[0] = sqrt(j.userFloat("vtxPx")**2 + j.userFloat("vtxPy")**2)
             self.Jet_vtxMass[0] = j.userFloat("vtxMass")
-            self.Jet_vtx3dL[0] = j.userFloat("vtx3DVal")
+            self.Jet_vtx3dL[0] = max(0., j.userFloat("vtx3DVal"))
             self.Jet_vtxNtrk[0] = j.userFloat("vtxNtracks")
             self.Jet_vtx3deL[0] = self.Jet_vtx3dL[0]/j.userFloat("vtx3DSig") if j.userFloat("vtx3DSig") > 0 else 0
             setattr(j,attrName+analysis,self.reader.EvaluateRegression(self.name)[0])
