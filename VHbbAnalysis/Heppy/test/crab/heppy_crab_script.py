@@ -31,6 +31,8 @@ handle.close()
 
 #replace files with crab ones
 config.components[0].files=crabFiles
+if hasattr(PSet.process.source, "lumisToProcess"):
+    config.preprocessor.options["lumisToProcess"] = PSet.process.source.lumisToProcess
 
 
 from PhysicsTools.HeppyCore.framework.looper import Looper
