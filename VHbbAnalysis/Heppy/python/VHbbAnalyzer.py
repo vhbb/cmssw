@@ -52,13 +52,15 @@ class VHbbAnalyzer( Analyzer ):
         if "outputfile" in setup.services :
             setup.services["outputfile"].file.cd()
             self.inputCounter = ROOT.TH1F("Count","Count",1,0,2)
-            self.inputCounterWeighted = ROOT.TH1F("CountWeighted","Count with gen weight and pu weight",1,0,2)
+            self.inputCounterFullWeighted = ROOT.TH1F("CountFullWeighted","Count with gen weight and pu weight",1,0,2)
+            self.inputCounterWeighted = ROOT.TH1F("CountWeighted","Count with sign(gen weight) and pu weight",1,0,2)
             self.inputCounterPosWeight = ROOT.TH1F("CountPosWeight","Count genWeight>0",1,0,2)
             self.inputCounterNegWeight = ROOT.TH1F("CountNegWeight","Count genWeight<0",1,0,2)
-            for LHE_scale in range(6):
-               setattr(self, "inputCounterWeightedLHEWeightScale_"+str(LHE_scale), ROOT.TH1F("CountWeightedLHEWeightScale_"+str(LHE_scale),"Count with gen weight x LHE_weights_scale["+str(LHE_scale)+"] and pu weight",1,0,2))
-            for LHE_pdf in range(2):
-               setattr(self, "inputCounterWeightedLHEWeightPdf_"+str(LHE_pdf), ROOT.TH1F("CountWeightedLHEWeightPdf_"+str(LHE_pdf),"Count with gen weight x LHE_weights_pdf["+str(LHE_pdf)+"] and pu weight",1,0,2))
+            #for LHE_scale in range(6):
+            setattr(self, "inputCounterWeightedLHEWeightScale", ROOT.TH1F("CountWeightedLHEWeightScale","Count with gen weight x LHE_weights_scale and pu weight",6,-0.5,5.5))
+            setattr(self, "inputCounterWeightedLHEWeightPdf", ROOT.TH1F("CountWeightedLHEWeightPdf","Count with gen weight x LHE_weights_pdf and pu weight",103,-0.5,102.5))
+            #for LHE_pdf in range(2):
+            #   setattr(self, "inputCounterWeightedLHEWeightPdf_"+str(LHE_pdf), ROOT.TH1F("CountWeightedLHEWeightPdf_"+str(LHE_pdf),"Count with gen weight x LHE_weights_pdf["+str(LHE_pdf)+"] and pu weight",1,0,2))
 
         self.regressions={}
 	self.regressionVBF={}
@@ -154,7 +156,7 @@ class VHbbAnalyzer( Analyzer ):
 	                used.append(j.sourceCandidatePtr(i))
 	#get the pointed objects
  	used =  [x.get() for x in used]
-	remainingPF = [x for x in event.pfCands if x.charge() != 0 and abs(x.eta()) < 2.5 and  x.pt() > 0.3 and x.fromPV() >=2 and x not in used] 
+	remainingPF = [x for x in event.pfCands if x.charge() != 0 and abs(x.eta()) < 2.5 and  x.pt() > 0.3 and (x.fromPV() >=2 or x.pvAssociationQuality()>= x.CompatibilityDz) and x not in used] 
         dRbb = deltaR(j1.eta(),j1.phi(),j2.eta(),j2.phi())
 	map(lambda x:inputs.push_back(x.p4()), remainingPF)
 	softActivity=ROOT.heppy.FastSoftActivity(inputs,-1,0.4,j1.p4(),j2.p4(),dRbb+2*dR0)
@@ -449,10 +451,11 @@ class VHbbAnalyzer( Analyzer ):
         if self.cfg_comp.isMC:
             genWeight = self.handles['GenInfo'].product().weight()
             self.inputCounterWeighted.Fill(1,copysign(1.0,genWeight)*event.puWeight)
-            for LHE_scale in range(min(len(event.LHE_weights_scale),6)): 
-               getattr(self, "inputCounterWeightedLHEWeightScale_"+str(LHE_scale)).Fill(1,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_scale[LHE_scale]).wgt) 
-            for LHE_pdf in range(min(len(event.LHE_weights_pdf),2)): 
-               getattr(self, "inputCounterWeightedLHEWeightPdf_"+str(LHE_pdf)).Fill(1,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_pdf[LHE_pdf]).wgt) 
+            self.inputCounterFullWeighted.Fill(1,genWeight*event.puWeight)
+            for LHE_scale in range(len(event.LHE_weights_scale)): 
+               getattr(self, "inputCounterWeightedLHEWeightScale").Fill(LHE_scale,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_scale[LHE_scale]).wgt) 
+            for LHE_pdf in range(len(event.LHE_weights_pdf)): 
+               getattr(self, "inputCounterWeightedLHEWeightPdf").Fill(LHE_pdf,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_pdf[LHE_pdf]).wgt) 
             if genWeight > 0:
                 self.inputCounterPosWeight.Fill(1)
             elif genWeight < 0:

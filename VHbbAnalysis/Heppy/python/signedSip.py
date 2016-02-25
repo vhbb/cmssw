@@ -1,7 +1,10 @@
 import ROOT
 
-#ROOT.gSystem.Load("libCMGToolsTTHAnalysis")
+ROOT.gSystem.Load("libVHbbAnalysisHeppy")
 SignedImpactParameterComputer = ROOT.SignedImpactParameter()
+
+def qualityTrk(Trk, vertex):
+    return SignedImpactParameterComputer.qualitytrk(Trk,vertex)
 
 def signedSip3D(lepton, vertex=None):
     if vertex is None:
