@@ -204,12 +204,16 @@ from leptonSF import LeptonSF
 
 jsonpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/leptonSF/"
 jsons = {    
-    'muSF_HLT' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco74X_Dec1.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p2_PtEtaBins', 'abseta_pt_ratio' ],
-    'muEff_HLT' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco74X_Dec1_MC.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p3_PtEtaBins', 'abseta_pt_MC' ],
-    'muSF_IsoLoose' : [ jsonpath+'MuonIso_Z_RunCD_Reco74X_Dec1.json' , 'NUM_LooseRelIso_DEN_LooseID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
-    'muSF_IsoTight' : [ jsonpath+'MuonIso_Z_RunCD_Reco74X_Dec1.json' , 'NUM_TightRelIso_DEN_TightID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
-    'muSF_IdLoose' : [ jsonpath+'MuonID_Z_RunCD_Reco74X_Dec1.json' , 'NUM_LooseID_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
-    'muSF_IdTight' : [ jsonpath+'MuonID_Z_RunCD_Reco74X_Dec1.json' , 'NUM_TightIDandIPCut_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
+    'muEff_HLT_C' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15_eff.json' , 'runC_IsoMu20_OR_IsoTkMu20_PtEtaBins', 'abseta_pt_MC' ],
+    'muEff_HLT_D4p2' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15_eff.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p2_PtEtaBins', 'abseta_pt_MC' ],
+    'muEff_HLT_D4p3' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15_eff.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p3_PtEtaBins', 'abseta_pt_MC' ],
+    'muSF_HLT_C' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15.json' , 'runC_IsoMu20_OR_IsoTkMu20_PtEtaBins', 'abseta_pt_ratio' ],
+    'muSF_HLT_D4p2' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p2_PtEtaBins', 'abseta_pt_ratio' ],
+    'muSF_HLT_D4p3' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p3_PtEtaBins', 'abseta_pt_ratio' ],
+    'muSF_IsoLoose' : [ jsonpath+'MuonIso_Z_RunCD_Reco76X_Feb15.json' , 'MC_NUM_LooseRelIso_DEN_LooseID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
+    'muSF_IsoTight' : [ jsonpath+'MuonIso_Z_RunCD_Reco76X_Feb15.json' , 'MC_NUM_TightRelIso_DEN_TightID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
+    'muSF_IdLoose' : [ jsonpath+'MuonID_Z_RunCD_Reco76X_Feb15.json' , 'MC_NUM_LooseID_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
+    'muSF_IdTight' : [ jsonpath+'MuonID_Z_RunCD_Reco76X_Feb15.json' , 'MC_NUM_TightIDandIPCut_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
     'eleSF_HLT' : ['','',''],
     'eleEff_HLT' : ['','',''],
     'eleSF_IdLoose' : [jsonpath+'CutBasedID_LooseWP.json', 'CutBasedID_LooseWP', 'eta_pt_ratio'],
@@ -231,16 +235,26 @@ for cut in ["HLT", "IsoLoose", "IsoTight", "IdLoose", "IdTight"]:
                                                 lambda x, muCorr=correctors["muSF_"+cut], eleCorr=correctors["eleSF_"+cut] : muCorr.get_2D(x.pt(), x.eta())[1] if abs(x.pdgId()) == 13 else eleCorr.get_2D(x.pt(), x.eta())[1], 
                                                 float, mcOnly=True, help="SF error for lepton "+cut
                                                 )]
-leptonTypeVHbb.variables += [NTupleVariable("Eff_HLT", 
-                                                lambda x, muCorr=correctors["muEff_HLT"], eleCorr=correctors["eleSF_HLT"] : muCorr.get_2D(x.pt(), x.eta())[0] if abs(x.pdgId()) == 13 else eleCorr.get_2D(x.pt(), x.eta())[0], 
 
-                                                float, mcOnly=True, help="Eff for lepton HLT"
-                                                )]
-leptonTypeVHbb.variables += [NTupleVariable("Efferr_HLT", 
-                                                lambda x, muCorr=correctors["muEff_HLT"], eleCorr=correctors["eleEff_HLT"] : muCorr.get_2D(x.pt(), x.eta())[1] if abs(x.pdgId()) == 13 else eleCorr.get_2D(x.pt(), x.eta())[1], 
-                                                float, mcOnly=True, help="Eff error for lepton HLT"
-                                                )]
-
+if abs(x.pdgId()) == 13:
+    for cut in ["HLT_C", "HLT_D4p2", "HLT_D4p3"]:     
+        leptonTypeVHbb.variables += [NTupleVariable("SF_"+cut, 
+            lambda x, muCorr=correctors["muSF_"+cut] : muCorr.get_2D(x.pt(), x.eta())[0],
+                                                    float, mcOnly=True, help="SF for lepton "+cut
+                                                    )]
+        leptonTypeVHbb.variables += [NTupleVariable("SFerr_"+cut, 
+            lambda x, muCorr=correctors["muSF_"+cut] : muCorr.get_2D(x.pt(), x.eta())[1],
+                                                    float, mcOnly=True, help="SF error for lepton "+cut
+                                                    )]
+        leptonTypeVHbb.variables += [NTupleVariable("Eff_"+cut, 
+            lambda x, muCorr=correctors["Eff_"+cut] : muCorr.get_2D(x.pt(), x.eta())[0],
+                                                        float, mcOnly=True, help="Eff for lepton HLT"
+                                                        )]
+        leptonTypeVHbb.variables += [NTupleVariable("Efferr_"+cut, 
+            lambda x, muCorr=correctors["Eff_"+cut] : muCorr.get_2D(x.pt(), x.eta())[1],
+                                                        float, mcOnly=True, help="Eff error for lepton HLT"
+                                                        )]
+    
 
 
 
