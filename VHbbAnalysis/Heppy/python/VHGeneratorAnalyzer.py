@@ -27,6 +27,11 @@ LHE_scale_order = {
     7 : 3, # muR =0.5,  muF = 1
     9 : 5, # muR =0.5,  muF = 0.5
     }
+LHE_pdf_ids = list(itertools.chain( 
+        range(10, 110+1),    # 0-110 (NNPDF30_lo_as_0130)  
+        range(2001, 2100+1), # 2001-2100 (NNPDF30_nlo_nf_5_pdfas)
+        range(2101, 2102+1)  # 2101-2102 (alpha_s variationns) 
+        ))
         
 class GeneratorAnalyzer( Analyzer ):
     """Do generator-level analysis of a ttH->leptons decay:
@@ -184,7 +189,7 @@ class GeneratorAnalyzer( Analyzer ):
                     #print int(w.id), ": ", w.wgt, " (pos ", w.order, ")"
                     LHE_weights_scale.append(w)
             # thse are up/down variations for the NNPDF: https://twiki.cern.ch/twiki/bin/view/CMS/TTbarHbbRun2ReferenceAnalysisLimits
-            if wid in [2005,2067]:
+            if wid in LHE_pdf_ids:
                 #print  w.wgt
                 w.wgt = w.wgt/event.LHE_originalWeight if abs(event.LHE_originalWeight)>0 else w.wgt
                 LHE_weights_pdf.append(w)
