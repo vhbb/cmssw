@@ -24,12 +24,20 @@ from RecoBTag.SecondaryVertex.trackSelection_cff import *
 # This function is called by the cmsswPreprocessor 
 # (has to be named initialize, can have arbitrary arguments as long as
 # all have a default value)
-def initialize(isMC=True):
+def initialize(**kwargs):
+    isMC = kwargs.get("isMC", True)
+    lumisToProcess = kwargs.get("lumisToProcess", None)
 
     process = cms.Process("EX")
-    process.source = cms.Source("PoolSource",
-        fileNames = cms.untracked.vstring("file:///scratch/gregor/TTJets_MSDecaysCKM_central_Tune4C_13TeV_MiniAOD.root")
-    )
+    if lumisToProcess == None:
+        process.source = cms.Source("PoolSource",
+            fileNames = cms.untracked.vstring("file:///scratch/gregor/TTJets_MSDecaysCKM_central_Tune4C_13TeV_MiniAOD.root")
+        )
+    else:
+        process.source = cms.Source("PoolSource",
+            fileNames = cms.untracked.vstring("file:///scratch/gregor/TTJets_MSDecaysCKM_central_Tune4C_13TeV_MiniAOD.root"),
+            lumisToProcess = lumisToProcess
+        )
     process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
     process.OUT = cms.OutputModule("PoolOutputModule",
