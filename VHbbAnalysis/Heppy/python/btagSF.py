@@ -30,10 +30,10 @@ def get_csv_SF(pt=30., eta=0.0, fl=5, syst="central", wp="CSVM", btag_calibrator
         return 1.0
 
     # pt ranges for bc SF
-    pt_range_high_bc = 670.
+    pt_range_high_bc = 670.-1e-02
     if "CMVAV2" in wp:
-        pt_range_high_bc = 320.
-    pt_range_low_bc = 30.
+        pt_range_high_bc = 320.-1e-02
+    pt_range_low_bc = 30.+1e-02
 
     # b or c jets
     if fl>=4:
