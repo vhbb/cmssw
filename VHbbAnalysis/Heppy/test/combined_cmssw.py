@@ -20,6 +20,7 @@ from RecoJets.JetProducers.PFJetParameters_cfi import *
 from RecoBTag.SoftLepton.softPFMuonTagInfos_cfi import *
 from RecoBTag.SoftLepton.softPFElectronTagInfos_cfi import *
 from RecoBTag.SecondaryVertex.trackSelection_cff import *
+from Configuration.AlCa.GlobalTag import GlobalTag
 
 # This function is called by the cmsswPreprocessor 
 # (has to be named initialize, can have arbitrary arguments as long as
@@ -45,6 +46,18 @@ def initialize(isMC=True):
     )
 
     skip_ca15 = False
+
+    # 76X PU ID
+#    process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+#    process.GlobalTag = GlobalTag(process.GlobalTag, '76X_mcRun2_asymptotic_RunIIFall15DR76_v1')
+    process.load("RecoJets.JetProducers.PileupJetID_cfi")
+    process.pileupJetIdUpdated = process.pileupJetId.clone(
+    jets=cms.InputTag("slimmedJets"),
+      inputIsCorrected=True,
+      applyJec=False,
+      vertexes=cms.InputTag("offlineSlimmedPrimaryVertices")
+    )
+    process.OUT.outputCommands.append("keep *_pileupJetIdUpdated_fullId_EX")
 
     ########################################
     # Boosted Substructure
