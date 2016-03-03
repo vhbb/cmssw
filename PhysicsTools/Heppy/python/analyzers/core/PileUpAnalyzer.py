@@ -72,6 +72,19 @@ class PileUpAnalyzer( Analyzer ):
                 self.datafile = TFile( self.cfg_comp.puFileData )
                 self.datahist = self.datafile.Get('pileup')
                 self.datahist.Scale( 1 / self.datahist.Integral() )
+
+                #PU uncertainties variations
+                self.datahistPlus=None
+                self.datahistMinus=None
+                if hasattr(self.cfg_comp,"puFileDataPlus") :
+                    self.datafilePlus = TFile( self.cfg_comp.puFileDataPlus )
+                    self.datahistPlus = self.datafilePlus.Get('pileup')
+                    self.datahistPlus.Scale( 1. / self.datahistPlus.Integral() )
+                if hasattr(self.cfg_comp,"puFileDataMinus") :
+                    self.datafileMinus = TFile( self.cfg_comp.puFileDataMinus )
+                    self.datahistMinus = self.datafileMinus.Get('pileup')
+                    self.datahistMinus.Scale( 1. / self.datahistMinus.Integral() )
+
                 # import pdb; pdb.set_trace()
                 if self.mchist.GetNbinsX() != self.datahist.GetNbinsX():
                     raise ValueError('data and mc histograms must have the same number of bins')
@@ -83,9 +96,11 @@ class PileUpAnalyzer( Analyzer ):
     def declareHandles(self):
         super(PileUpAnalyzer, self).declareHandles()
         self.mchandles['pusi'] =  AutoHandle(
-            'addPileupInfo',
-            'std::vector<PileupSummaryInfo>' 
+            'slimmedAddPileupInfo',
+            'std::vector<PileupSummaryInfo>',
+            fallbackLabel="addPileupInfo"
             ) 
+
         if self.allVertices == '_AUTO_':
             self.handles['vertices'] =  AutoHandle( "offlineSlimmedPrimaryVertices", 'std::vector<reco::Vertex>', fallbackLabel="offlinePrimaryVertices" ) 
         else:
@@ -93,7 +108,7 @@ class PileUpAnalyzer( Analyzer ):
 
     def beginLoop(self, setup):
         super(PileUpAnalyzer,self).beginLoop(setup)
-        self.averages.add('vertexWeight', Average('vertexWeight') )
+        self.averages.add('puWeight', Average('puWeight') )
 
 
     def process(self, event):
@@ -102,8 +117,10 @@ class PileUpAnalyzer( Analyzer ):
         if self.cfg_comp.isEmbed :
           return True
 
-        event.vertexWeight = 1
+        event.puWeight = 1
         event.nPU = None
+        event.pileUpVertex_z = []
+        event.pileUpVertex_ptHat = []
         if self.cfg_comp.isMC:
             event.pileUpInfo = map( PileUpSummaryInfo,
                                     self.mchandles['pusi'].product() )
@@ -118,6 +135,13 @@ class PileUpAnalyzer( Analyzer ):
                     if self.doHists:
                         self.rawmcpileup.hist.Fill( event.nPU )
 
+                    ##get z position of on-time pile-up sorted by pt-hat
+                    ptHat_zPositions = zip(puInfo.getPU_pT_hats(),puInfo.getPU_zpositions())
+                    ptHat_zPositions.sort(reverse=True)
+                    for ptHat_zPosition in ptHat_zPositions:
+                        event.pileUpVertex_z.append(ptHat_zPosition[1])
+                        event.pileUpVertex_ptHat.append(ptHat_zPosition[0])
+            
             if event.nPU is None:
                 raise ValueError('nPU cannot be None! means that no pu info has been found for bunch crossing 0.')
         elif self.cfg_comp.isEmbed:
@@ -129,18 +153,20 @@ class PileUpAnalyzer( Analyzer ):
         if self.enable:
             bin = self.datahist.FindBin(event.nPU)
             if bin<1 or bin>self.datahist.GetNbinsX():
-                event.vertexWeight = 0
+                event.puWeight = 0
             else:
                 data = self.datahist.GetBinContent(bin)
                 mc = self.mchist.GetBinContent(bin)
                 #Protect 0 division!!!!
                 if mc !=0.0:
-                    event.vertexWeight = data/mc
+                    event.puWeight = data/mc
+                    event.puWeightPlus = self.datahistPlus.GetBinContent(bin)/mc if self.datahistPlus is not None else 1.
+                    event.puWeightMinus = self.datahistMinus.GetBinContent(bin)/mc if self.datahistMinus is not None else 1.
                 else:
-                    event.vertexWeight = 1
+                    event.puWeight = 1
                 
-        event.eventWeight *= event.vertexWeight
-        self.averages['vertexWeight'].add( event.vertexWeight )
+        event.eventWeight *= event.puWeight
+        self.averages['puWeight'].add( event.puWeight )
         return True
         
     def write(self, setup):

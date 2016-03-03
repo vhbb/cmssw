@@ -30,11 +30,11 @@ def deltaPhi( p1, p2):
 def inConeCollection(pivot, particles, deltaRMax, deltaRMin=1e-5):
     '''Returns the list of particles that are less than deltaRMax away from pivot.'''
     dR2Max = deltaRMax ** 2
-    dR2Min = deltaRMin ** 2
+    dR2Min = deltaRMin ** 2 if deltaRMin  > 0 else -1
     results = []
     for ptc in particles:
         dR2 = deltaR2(pivot.eta(), pivot.phi(), ptc.eta(), ptc.phi()) 
-        if dR2Min < dR2 < dR2Max:
+        if dR2Min < dR2 and dR2 < dR2Max:
             results.append(ptc)
     return results
 
@@ -149,14 +149,14 @@ def bestMatch( object, matchCollection):
     return bm, deltaR2Min
 
 
-def matchObjectCollection( objects, matchCollection, deltaR2Max):
+def matchObjectCollection( objects, matchCollection, deltaR2Max, filter = lambda x,y : True):
     pairs = {}
     if len(objects)==0:
         return pairs
     if len(matchCollection)==0:
         return dict( zip(objects, [None]*len(objects)) )
     for object in objects:
-        bm, dr2 = bestMatch( object, matchCollection )
+        bm, dr2 = bestMatch( object, [mob for mob in matchCollection if filter(object,mob)] )
         if dr2<deltaR2Max:
             pairs[object] = bm
         else:
@@ -205,14 +205,3 @@ def matchObjectCollection2 ( objects, matchCollection, deltaRMax = 0.3 ):
 
 
 
-if __name__ == '__main__':
-
-    import sys
-    args = sys.argv[1:]
-    fargs = map( float, args )
-
-    print 'dR2 = ', deltaR2( *fargs )
-    print 'dR = ', deltaR( *fargs )
-    
-
-    
