@@ -61,6 +61,8 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
     NTupleVariable("dr03TkSumPt", lambda x : x.dr03TkSumPt() if abs(x.pdgId())==11 else 0.0 , help="Electron track sum pt"),
     NTupleVariable("eleEcalClusterIso", lambda x : x.ecalPFClusterIso() if abs(x.pdgId())==11 else 0.0 , help="Electron ecal cluster iso"),
     NTupleVariable("eleHcalClusterIso", lambda x : x.hcalPFClusterIso() if abs(x.pdgId())==11 else 0.0 , help="Electron hcal cluster iso"),
+    NTupleVariable("miniIsoCharged", lambda x : x.miniAbsIsoCharged if hasattr(x,'miniAbsIsoCharged') else  -999, help="PF miniIso (charged) in GeV"),
+    NTupleVariable("miniIsoNeutral", lambda x : x.miniAbsIsoNeutral if hasattr(x,'miniAbsIsoNeutral') else  -999, help="PF miniIso (neutral) in GeV"),
     # MC-match info
 #    NTupleVariable("mcMatchId",  lambda x : x.mcMatchId, int, mcOnly=True, help="Match to source from hard scatter (25 for H, 6 for t, 23/24 for W/Z)"),
 #    NTupleVariable("mcMatchAny",  lambda x : x.mcMatchAny, int, mcOnly=True, help="Match to any final state leptons: -mcMatchId if prompt, 0 if unmatched, 1 if light flavour, 2 if heavy flavour (b)"),
