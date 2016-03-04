@@ -12,6 +12,9 @@ class LeptonSF:
 
     def init(self, lep_json, lep_name, lep_binning) :
         f = open(lep_json, 'r')             
+        print 'json is',lep_json
+        print 'lep_name is', lep_name
+        print 'lep_binning is', lep_binning
         results = json.load(f)
         if lep_name not in results.keys():
             self.valid = False
@@ -26,10 +29,12 @@ class LeptonSF:
         if not self.valid:
             #print "LeptonSF: return 1.0 +/- 0.0"
             return [1.0, 0.0]        
+            print 'get_2D returned 1.0 because not valide JSON'
 
         stripForEta = 5
         if self.lep_binning not in self.res.keys():
             return [1.0, 0.0]
+            print 'get_2D returned 1.0 because lep_binning'
 
         if "abseta" in self.lep_binning:
             eta = abs(eta)
@@ -51,6 +56,7 @@ class LeptonSF:
                 return [result["value"], result["error"]]
 
         # if nothing was found, return 1 +/- 0
+        print 'seems like nothing was found'
         return [1.0, 0.0]
 
 
@@ -58,19 +64,37 @@ class LeptonSF:
 ##################################################################################################
 # EXAMPLE 
 #
-#jsons = {
-#    'SingleMuonTrigger_Z_RunCD_Reco74X_Dec1.json' : ['runD_IsoMu20_OR_IsoTkMu20_HLTv4p3_PtEtaBins', 'abseta_pt_ratio'],
-#    'MuonIso_Z_RunCD_Reco74X_Dec1.json' : ['NUM_LooseRelIso_DEN_LooseID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'], 
-#    'MuonID_Z_RunCD_Reco74X_Dec1.json' : ['NUM_LooseID_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
-#    'CutBasedID_LooseWP.json' : ['CutBasedID_LooseWP', 'eta_pt_ratio'],
-#    'CutBasedID_TightWP.json' : ['CutBasedID_TightWP', 'eta_pt_ratio'],
-#    'SingleMuonTrigger_Z_RunCD_Reco74X_Dec1_MC.json' : ['runD_IsoMu20_OR_IsoTkMu20_HLTv4p3_PtEtaBins', 'abseta_pt_MC'],
-#    }
 
-#for j, name in jsons.iteritems():
-#    lepCorr = LeptonSF(j , name[0], name[1])
-#    weight = lepCorr.get_2D( 35. , 1.0)
-#    val = weight[0]
-#    err = weight[1]
-#    print j, name[0], ': ',  val, ' +/- ', err
+if __name__ == "__main__":
 
+    jsonpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/leptonSF/"
+    jsons = {    
+        jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15.json' : ['runC_IsoMu20_OR_IsoTkMu20_PtEtaBins', 'abseta_pt_ratio' ]
+        #jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15.json' : ['runD_IsoMu20_OR_IsoTkMu20_HLTv4p2_PtEtaBins', 'abseta_pt_ratio' ],
+        #jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15.json' : ['runD_IsoMu20_OR_IsoTkMu20_HLTv4p3_PtEtaBins', 'abseta_pt_ratio' ]
+        }
+
+    for j, name in jsons.iteritems():
+        lepCorr = LeptonSF(j , name[0], name[1])
+        weight = lepCorr.get_2D( 35. , 1.0)
+        val = weight[0]
+        err = weight[1]
+        print j, name[0], ': ',  val, ' +/- ', err
+    
+    
+    #jsons = {
+    #    'SingleMuonTrigger_Z_RunCD_Reco74X_Dec1.json' : ['runD_IsoMu20_OR_IsoTkMu20_HLTv4p3_PtEtaBins', 'abseta_pt_ratio'],
+    #    'MuonIso_Z_RunCD_Reco74X_Dec1.json' : ['NUM_LooseRelIso_DEN_LooseID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'], 
+    #    'MuonID_Z_RunCD_Reco74X_Dec1.json' : ['NUM_LooseID_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
+    #    'CutBasedID_LooseWP.json' : ['CutBasedID_LooseWP', 'eta_pt_ratio'],
+    #    'CutBasedID_TightWP.json' : ['CutBasedID_TightWP', 'eta_pt_ratio'],
+    #    'SingleMuonTrigger_Z_RunCD_Reco74X_Dec1_MC.json' : ['runD_IsoMu20_OR_IsoTkMu20_HLTv4p3_PtEtaBins', 'abseta_pt_MC'],
+    #    }
+    #
+    #for j, name in jsons.iteritems():
+    #    lepCorr = LeptonSF(j , name[0], name[1])
+    #    weight = lepCorr.get_2D( 35. , 1.0)
+    #    val = weight[0]
+    #    err = weight[1]
+    #    print j, name[0], ': ',  val, ' +/- ', err
+    
