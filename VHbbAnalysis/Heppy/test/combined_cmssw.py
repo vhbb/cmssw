@@ -62,31 +62,10 @@ def initialize(**kwargs):
     # Select candidates that would pass CHS requirements
     process.chs = cms.EDFilter("CandPtrSelector", src = cms.InputTag("packedPFCandidates"), cut = cms.string("fromPV"))
 
-    # Apply pruning to AK R=0.8 jets
-    process.ak08PFPrunedJetsCHS = cms.EDProducer(
-        "FastjetJetProducer",
-        PFJetParameters,
-        AnomalousCellParameters,
-        jetAlgorithm = cms.string("AntiKt"),
-        rParam       = cms.double(0.8),
-        usePruning = cms.bool(True),
-        nFilt = cms.int32(2),
-        zcut = cms.double(0.1),
-        rcut_factor = cms.double(0.5),
-        useExplicitGhosts = cms.bool(True),
-        writeCompound = cms.bool(True), # Also write subjets for pruned fj
-        jetCollInstanceName=cms.string("SubJets")
-    )
-    process.ak08PFPrunedJetsCHS.src = cms.InputTag("chs")
-    process.ak08PFPrunedJetsCHS.jetPtMin = cms.double(200.)
-
     if isMC:
         process.OUT.outputCommands.append("keep *_slimmedJetsAK8_*_PAT")
     else:
         process.OUT.outputCommands.append("keep *_slimmedJetsAK8_*_RECO")
-
-    process.OUT.outputCommands.append("keep *_ak08PFPrunedJetsCHS_*_EX")
-
 
     if not skip_ca15:
         # CA, R=1.5, pT > 200 GeV
@@ -331,15 +310,12 @@ def initialize(**kwargs):
     ########################################
 
 
-    for fatjet_name in ["ak08PFPrunedJetsCHS", "ca15PFPrunedJetsCHS", "looseOptRHTT"]:
+    for fatjet_name in ["ca15PFPrunedJetsCHS", "looseOptRHTT"]:
 
         if skip_ca15 and (fatjet_name in ["ca15PFPrunedJetsCHS", "looseOptRHTT"]):
             continue
 
-        if fatjet_name == "ak08PFPrunedJetsCHS":        
-            delta_r = 0.8
-            jetAlgo = "AntiKt"
-        elif fatjet_name == "ca15PFPrunedJetsCHS":        
+        if fatjet_name == "ca15PFPrunedJetsCHS":        
             delta_r = 1.5
             jetAlgo = "CambridgeAachen"
         elif fatjet_name == "looseOptRHTT":
@@ -382,7 +358,7 @@ def initialize(**kwargs):
         getattr(process, isv_info_name).trackSelection.jetDeltaRMax = cms.double(delta_r)
         getattr(process, isv_info_name).vertexCuts.maxDeltaRToJetAxis = cms.double(delta_r)
         getattr(process, isv_info_name).jetAlgorithm = cms.string(jetAlgo)
-        getattr(process, isv_info_name).fatJets  =  cms.InputTag(fatjet_name.replace("ak08PFPrunedJetsCHS","slimmedJetsAK8").replace("looseOptRHTT","ca15PFJetsCHS"))
+        getattr(process, isv_info_name).fatJets  =  cms.InputTag(fatjet_name.replace("looseOptRHTT","ca15PFJetsCHS"))
         getattr(process, isv_info_name).groomedFatJets  =  cms.InputTag(fatjet_name)
 
         # CSV V2 COMPUTER
