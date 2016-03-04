@@ -156,7 +156,6 @@ class VHbbAnalyzer( Analyzer ):
 	                used.append(j.sourceCandidatePtr(i))
 	#get the pointed objects
  	used =  [x.get() for x in used]
-        print "AAA",event.pfCands[0].CompatibilityDz,  event.pfCands[0].pvAssociationQuality()
 	remainingPF = [x for x in event.pfCands if x.charge() != 0 and abs(x.eta()) < 2.5 and  x.pt() > 0.3 and x.pvAssociationQuality()>= x.CompatibilityDz and x.vertexRef().key()==0 and x not in used] 
         dRbb = deltaR(j1.eta(),j1.phi(),j2.eta(),j2.phi())
 	map(lambda x:inputs.push_back(x.p4()), remainingPF)
