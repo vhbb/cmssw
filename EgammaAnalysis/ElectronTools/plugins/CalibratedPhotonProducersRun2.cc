@@ -29,8 +29,7 @@ private:
 template<typename T>
 CalibratedPhotonProducerRun2T<T>::CalibratedPhotonProducerRun2T( const edm::ParameterSet & conf ) :
   thePhotonToken(consumes<edm::View<T> >(conf.getParameter<edm::InputTag>("photons"))),
-  theEnCorrectorRun2(conf.getParameter<bool>("isMC"), conf.getParameter<bool>("isSynchronization"), conf.getParameter<std::string >("correctionFile")) {
-
+  theEnCorrectorRun2(conf.getParameter<bool>("isMC"), conf.getParameter<bool>("isSynchronization"), conf.getParameter<std::vector<double> >("smearings"), conf.getParameter<std::vector<double> >("scales")) {
   produces<std::vector<T> >();
 }
 

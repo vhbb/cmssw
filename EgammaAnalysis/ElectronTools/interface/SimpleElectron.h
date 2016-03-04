@@ -9,7 +9,7 @@ class SimpleElectron
 {
 	public:
 	    SimpleElectron(){}
-	    SimpleElectron( unsigned int run, 
+	    SimpleElectron( double run, 
                         double eClass, 
                         double r9, 
                         double scEnergy, 
@@ -69,7 +69,7 @@ class SimpleElectron
     	double getEta() const {return eta_;}
     	float getR9() const {return r9_;}
     	int getElClass() const {return eClass_;}
-    	unsigned int getRunNumber() const {return run_;}
+    	int getRunNumber() const {return run_;}
     	bool isEB() const {return isEB_;}
     	bool isMC() const {return isMC_;}
     	bool isEcalDriven() const {return isEcalDriven_;}
@@ -82,7 +82,7 @@ class SimpleElectron
     	void setNewEnergyError(double newEnergyError){newEnergyError_ = newEnergyError;}
 
 	private:
-    	unsigned int run_; 
+    	double run_; 
         double eClass_;
     	double r9_;
     	double scEnergy_; 
