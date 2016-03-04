@@ -25,6 +25,9 @@ sequence.insert(sequence.index(VHbb),boostana)
 #used freshly computed MVA ID variables
 LepAna.updateEleMVA = True
 
+#Use PUID from 76X
+JetAna.externalPuId="pileupJetIdUpdated:fullId"
+
 genhfana=cfg.Analyzer(
     verbose=False,
     class_object=GenHFHadronMatcher,
@@ -115,7 +118,7 @@ preprocessor = CmsswPreprocessor("combined_cmssw.py", options = {"isMC":sample.i
 config.preprocessor=preprocessor
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 300)
+    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 3000)
     import time
     import cProfile
     p = cProfile.Profile(time.clock)
