@@ -4,8 +4,9 @@ from math import *
 import ROOT
 #from CMGTools.TTHAnalysis.signedSip import *
 from PhysicsTools.Heppy.analyzers.objects.autophobj import *
-from PhysicsTools.HeppyCore.utils.deltar import deltaPhi
-
+from PhysicsTools.HeppyCore.utils.deltar import deltaPhi, deltaR
+from VHbbAnalysis.Heppy.signedSip import qualityTrk
+from VHbbAnalysis.Heppy.leptonMVA import ptRelv2
 
 import copy, os
 
@@ -33,7 +34,8 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
     ##NTupleVariable("tightCharge",  lambda lepton : ( lepton.isGsfCtfScPixChargeConsistent() + lepton.isGsfScPixChargeConsistent() ) if abs(lepton.pdgId()) == 11 else 2*(lepton.innerTrack().ptError()/lepton.innerTrack().pt() < 0.2), int, help="Tight charge criteria"),
     # Muon-speficic info
     NTupleVariable("nStations",    lambda lepton : lepton.numberOfMatchedStations() if abs(lepton.pdgId()) == 13 else 4, help="Number of matched muons stations (4 for electrons)"),
-    NTupleVariable("trkKink",      lambda lepton : lepton.combinedQuality().trkKink if abs(lepton.pdgId()) == 13 else 0, help="Tracker kink-finder"), 
+    NTupleVariable("trkKink",      lambda lepton : lepton.combinedQuality().trkKink if abs(lepton.pdgId()) == 13 else 0, help="Tracker kink-finder"),
+    NTupleVariable("segmentCompatibility",      lambda lepton : lepton.segmentCompatibility() if abs(lepton.pdgId()) == 13 else 0, help="Segment compatibility"), 
     NTupleVariable("caloCompatibility",      lambda lepton : lepton.caloCompatibility() if abs(lepton.pdgId()) == 13 else 0, help="Calorimetric compatibility"), 
     NTupleVariable("globalTrackChi2",      lambda lepton : lepton.globalTrack().normalizedChi2() if abs(lepton.pdgId()) == 13 and lepton.globalTrack().isNonnull() else 0, help="Global track normalized chi2"), 
     NTupleVariable("nChamberHits", lambda lepton: lepton.globalTrack().hitPattern().numberOfValidMuonHits() if abs(lepton.pdgId()) == 13 and lepton.globalTrack().isNonnull() else -1, help="Number of muon chamber hits (-1 for electrons)"),
@@ -61,6 +63,10 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
     NTupleVariable("dr03TkSumPt", lambda x : x.dr03TkSumPt() if abs(x.pdgId())==11 else 0.0 , help="Electron track sum pt"),
     NTupleVariable("eleEcalClusterIso", lambda x : x.ecalPFClusterIso() if abs(x.pdgId())==11 else 0.0 , help="Electron ecal cluster iso"),
     NTupleVariable("eleHcalClusterIso", lambda x : x.hcalPFClusterIso() if abs(x.pdgId())==11 else 0.0 , help="Electron hcal cluster iso"),
+    NTupleVariable("miniIsoCharged", lambda x : x.miniAbsIsoCharged if hasattr(x,'miniAbsIsoCharged') else  -999, help="PF miniIso (charged) in GeV"),
+    NTupleVariable("miniIsoNeutral", lambda x : x.miniAbsIsoNeutral if hasattr(x,'miniAbsIsoNeutral') else  -999, help="PF miniIso (neutral) in GeV"),
+    NTupleVariable("mvaTTHjetPtRel", lambda x : ptRelv2(x) if hasattr(x,'jet') else -1, help="jetPtRel variable used by ttH multilepton MVA"),
+    NTupleVariable("mvaTTHjetNDauChargedMVASel", lambda lepton: sum((deltaR(x.eta(),x.phi(),lepton.jet.eta(),lepton.jet.phi())<=0.4 and x.charge()!=0 and x.fromPV()>1 and qualityTrk(x.pseudoTrack(),lepton.associatedVertex)) for x in lepton.jet.daughterPtrVector()) if hasattr(lepton,'jet') and lepton.jet != lepton else 0, help="jetNDauChargedMVASel variable used by ttH multilepton MVA"),
     # MC-match info
 #    NTupleVariable("mcMatchId",  lambda x : x.mcMatchId, int, mcOnly=True, help="Match to source from hard scatter (25 for H, 6 for t, 23/24 for W/Z)"),
 #    NTupleVariable("mcMatchAny",  lambda x : x.mcMatchAny, int, mcOnly=True, help="Match to any final state leptons: -mcMatchId if prompt, 0 if unmatched, 1 if light flavour, 2 if heavy flavour (b)"),
