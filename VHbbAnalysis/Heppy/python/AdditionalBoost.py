@@ -4,6 +4,7 @@ import math
 import ROOT
 import sys
 import os
+import pdb
 
 import pdb
 import ctypes
@@ -573,6 +574,20 @@ def calcBBTagVariables(jet,
 
 # End of calcBBTagVariables
 
+def calcBBTagVariables_dummy(jet):
+    dummy_val = -9999
+    jet.PFLepton_ptrel       = dummy_val
+    jet.z_ratio              = dummy_val
+    jet.tau_dot              = dummy_val
+    jet.SV_mass_0            = dummy_val
+    jet.SV_EnergyRatio_0     = dummy_val
+    jet.SV_EnergyRatio_1     = dummy_val
+    jet.PFLepton_IP2D        = dummy_val
+    jet.tau_21               = dummy_val
+    jet.nSL                  = dummy_val
+    jet.vertexNTracks        = dummy_val
+    
+    
 class AdditionalBoost( Analyzer ):
 
     def __init__(self, cfg_ana, cfg_comp, looperName):
@@ -700,105 +715,6 @@ class AdditionalBoost( Analyzer ):
         
         # Will need who for jet calibration later
         rho =  self.handles["rho"].product()[0]
-
-        ######## 
-        # AK8 Jets from MiniAOD + Subjet btags
-        ########
-
-        setattr(event, "ak08", map(PhysicsObject, self.handles["ak08"].product()))
-
-        setattr(event, "ak0softdropsubjets", map(PhysicsObject, self.handles["ak08softdropsubjets"].product()))
-
-        # bb-tag Output
-        newtags =  self.handles['ak08bbtag'].product()
-
-        # Loop over jets                        
-        for ij, jet in enumerate(getattr(event, "ak08")):
-
-            # Fill bb-tag
-            for i in xrange(len(newtags)) :
-                if jet.physObj == newtags.key(i).get():
-                    jet.bbtag = newtags.value(i)
-		corr = self.jetReCalibratorAK8L2L3.getCorrection(Jet(jet),rho)
-                jet.mprunedcorr= jet.userFloat("ak8PFJetsCHSPrunedMass")*corr	
-		jet.JEC_L2L3 = corr
-		jet.JEC_L1L2L3 = self.jetReCalibratorAK8L1L2L3.getCorrection(Jet(jet),rho)
-
-
-            # bb-tag Inputs
-            muonTagInfos = self.handles['ak08muonTagInfos'].product()[ij]
-            elecTagInfos = self.handles['ak08elecTagInfos'].product()[ij]
-            ipTagInfo    = self.handles['ak08ipTagInfos'].product()[ij]
-            svTagInfo    = self.handles['ak08svTagInfos'].product()[ij]
-
-            # original jeta
-            orig_jet = self.handles["ak08"].product()[ij]
-
-            calcBBTagVariables(jet, 
-                               orig_jet,
-                               muonTagInfos, 
-                               elecTagInfos, 
-                               ipTagInfo, 
-                               svTagInfo,
-                               njettiness_08,
-                               maxSVDeltaRToJet = 0.7,)
-
-        # end of loop over jets
-
-
-
-        ######## 
-        # Ungroomed Fatjets + NSubjettiness + Hbb Tagging
-        ########
-
-        for prefix in ["ca15"]:
-
-            if self.skip_ca15 and ("ca15" in prefix):
-                continue
-
-            # N-Subjettiness
-            tau1 = self.handles[prefix+'tau1'].product()
-            tau2 = self.handles[prefix+'tau2'].product()
-            tau3 = self.handles[prefix+'tau3'].product()
-
-            # bb-tag Output
-            newtags =  self.handles[prefix+'bbtag'].product()
-                
-            # Four Vector
-            setattr(event, prefix+"ungroomed", map(PhysicsObject, self.handles[prefix+'ungroomed'].product()))
-
-            # Loop over jets                        
-            for ij, jet in enumerate(getattr(event, prefix+"ungroomed")):
-
-                # Fill N-Subjettiness
-                jet.tau1 = tau1.get(ij)
-                jet.tau2 = tau2.get(ij)
-                jet.tau3 = tau3.get(ij)
-
-                # Fill bb-tag
-                for i in xrange(len(newtags)) :
-                    if jet.physObj == newtags.key(i).get():
-                        jet.bbtag = newtags.value(i)
-
-                # bb-tag Inputs
-                muonTagInfos = self.handles['ca15muonTagInfos'].product()[ij]
-                elecTagInfos = self.handles['ca15elecTagInfos'].product()[ij]
-                ipTagInfo    = self.handles['ca15ipTagInfos'].product()[ij]
-                svTagInfo    = self.handles['ca15svTagInfos'].product()[ij]
-
-                # original jeta
-                orig_jet = self.handles[prefix+'ungroomed'].product()[ij]
-
-                calcBBTagVariables(jet, 
-                                   orig_jet,
-                                   muonTagInfos, 
-                                   elecTagInfos, 
-                                   ipTagInfo, 
-                                   svTagInfo,
-                                   njettiness_15,
-                                   maxSVDeltaRToJet = 1.3)
-                                    
-            # end of loop over jets
 
         ######## 
         # Softdrop Fatjets + NSubjettiness
@@ -1005,6 +921,114 @@ class AdditionalBoost( Analyzer ):
                 for ib in xrange(0, len(sjbtags)) :
                     if  sj_nonw == sjbtags.key(ib).get():
                         event.httCandidates[i].sjNonWbtag = sjbtags.value(ib)
+
+        ######## 
+        # AK8 Jets from MiniAOD + Subjet btags
+        ########
+
+        setattr(event, "ak08", map(PhysicsObject, self.handles["ak08"].product()))
+        setattr(event, "ak08softdropsubjets", map(PhysicsObject, self.handles["ak08softdropsubjets"].product()))
+
+        do_calc_bb = False
+        # Calc BB tag  
+        # -- if there is a HTT candidate and at least one lepton
+        if len(event.selectedLeptons):
+            for cand in event.httCandidates:
+                if cand.fRec < 0.2 and cand.mass() > 100 and cand.mass() < 200:
+                    do_calc_bb = True                
+        # -- or if there are at least two fatjets with pT > 250 GeV and the scalar sum of the jet pTs is > 600
+        fj_pt250 = [j for j in event.ak08 if j.pt() > 250]
+        if len(fj_pt250) >= 2 and sum([j.pt() for j in fj_pt250]) > 600:
+            do_calc_bb = True            
+                
+        # bb-tag Output
+        newtags =  self.handles['ak08bbtag'].product()
+
+        # Loop over jets                        
+        for ij, jet in enumerate(getattr(event, "ak08")):
+
+            # Fill bb-tag
+            for i in xrange(len(newtags)) :
+                if jet.physObj == newtags.key(i).get():
+                    jet.bbtag = newtags.value(i)
+		corr = self.jetReCalibratorAK8L2L3.getCorrection(Jet(jet),rho)
+                jet.mprunedcorr= jet.userFloat("ak8PFJetsCHSPrunedMass")*corr	
+		jet.JEC_L2L3 = corr
+		jet.JEC_L1L2L3 = self.jetReCalibratorAK8L1L2L3.getCorrection(Jet(jet),rho)
+
+
+            # bb-tag Inputs
+            muonTagInfos = self.handles['ak08muonTagInfos'].product()[ij]
+            elecTagInfos = self.handles['ak08elecTagInfos'].product()[ij]
+            ipTagInfo    = self.handles['ak08ipTagInfos'].product()[ij]
+            svTagInfo    = self.handles['ak08svTagInfos'].product()[ij]
+
+            if do_calc_bb:
+                calcBBTagVariables(jet, 
+                                   muonTagInfos, 
+                                   elecTagInfos, 
+                                   ipTagInfo, 
+                                   svTagInfo,
+                                   njettiness_08,
+                                   maxSVDeltaRToJet = 0.7,)
+            else:
+                calcBBTagVariables_dummy(jet)
+
+        # end of loop over jets
+
+        ######## 
+        # Ungroomed Fatjets + NSubjettiness + Hbb Tagging
+        ########
+
+        for prefix in ["ca15"]:
+
+            if self.skip_ca15 and ("ca15" in prefix):
+                continue
+
+            # N-Subjettiness
+            tau1 = self.handles[prefix+'tau1'].product()
+            tau2 = self.handles[prefix+'tau2'].product()
+            tau3 = self.handles[prefix+'tau3'].product()
+
+            # bb-tag Output
+            newtags =  self.handles[prefix+'bbtag'].product()
+                
+            # Four Vector
+            setattr(event, prefix+"ungroomed", map(PhysicsObject, self.handles[prefix+'ungroomed'].product()))
+
+            # Loop over jets                        
+            for ij, jet in enumerate(getattr(event, prefix+"ungroomed")):
+
+                # Fill N-Subjettiness
+                jet.tau1 = tau1.get(ij)
+                jet.tau2 = tau2.get(ij)
+                jet.tau3 = tau3.get(ij)
+
+                # Fill bb-tag
+                for i in xrange(len(newtags)) :
+                    if jet.physObj == newtags.key(i).get():
+                        jet.bbtag = newtags.value(i)
+
+                # bb-tag Inputs
+                muonTagInfos = self.handles['ca15muonTagInfos'].product()[ij]
+                elecTagInfos = self.handles['ca15elecTagInfos'].product()[ij]
+                ipTagInfo    = self.handles['ca15ipTagInfos'].product()[ij]
+                svTagInfo    = self.handles['ca15svTagInfos'].product()[ij]
+
+                if do_calc_bb:
+                    calcBBTagVariables(jet, 
+                                       muonTagInfos, 
+                                       elecTagInfos, 
+                                       ipTagInfo, 
+                                       svTagInfo,
+                                       njettiness_15,
+                                       maxSVDeltaRToJet = 1.3)
+                else:
+                    calcBBTagVariables_dummy(jet)
+
+                                    
+            # end of loop over jets
+
 
             
 
