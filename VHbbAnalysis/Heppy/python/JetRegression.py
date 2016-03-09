@@ -19,11 +19,11 @@ class JetRegression :
         self.Jet_leptonPtRel = array.array('f',[0])
         self.Jet_leptonPt =  array.array('f',[0])
         self.Jet_leptonDeltaR = array.array('f',[0])
-        #self.Jet_chEmEF = array.array('f',[0])
+        #self.Jet_chmEF = array.array('f',[0])
         #self.Jet_chHEF = array.array('f',[0])
         self.Jet_neHEF = array.array('f',[0])
         self.Jet_neEmEF = array.array('f',[0])
-        self.Jet_chMult = array.array('f',[0])
+        #self.Jet_chMult = array.array('f',[0])
         self.Jet_vtxPt = array.array('f',[0])
         self.Jet_vtxMass = array.array('f',[0])
         self.Jet_vtx3dL = array.array('f',[0])
@@ -42,7 +42,7 @@ class JetRegression :
         #reader.AddVariable("Jet_chHEF",self.Jet_chHEF)
         reader.AddVariable("Jet_neHEF",self.Jet_neHEF)
         reader.AddVariable("Jet_neEmEF",self.Jet_neEmEF)
-        reader.AddVariable("Jet_chMult",self.Jet_chMult)
+        #reader.AddVariable("Jet_chMult",self.Jet_chMult)
         reader.AddVariable("Jet_vtxPt",self.Jet_vtxPt)
         reader.AddVariable("Jet_vtxMass",self.Jet_vtxMass)
         reader.AddVariable("Jet_vtx3dL",self.Jet_vtx3dL)
@@ -67,7 +67,9 @@ class JetRegression :
             if pt_corr<=0.:
                 pt_corr = 1.0
             self.Jet_pt[0] = j.pt()*pt_corr
-            self.Jet_corr[0] = j.rawFactor()/(pt_corr if "JER" not in analysis else 1.0)
+            #self.Jet_corr[0] = j.rawFactor()/(pt_corr if "JER" not in analysis else 1.0)
+           # self.Jet_corr[0] =  (1/ j.rawFactor() ) / j.corrJER * ( pt_corr if "JER" not in analysis else 1.0 )
+            self.Jet_corr[0] =  getattr(j, "corr") if hasattr(j, "corr") * (pt_corr if "JER" not in analysis else 1.0 ) else 0.0
             self.Jet_mt[0] = j.mt()*pt_corr
             self.Jet_eta[0] = j.eta()
             self.Jet_leadTrackPt[0] = j.leadTrackPt()
@@ -83,13 +85,13 @@ class JetRegression :
             #self.Jet_chHEF[0] = min(1.-, j.chargedHadronEnergyFraction())
             self.Jet_neHEF[0] = min(1.0,j.neutralHadronEnergyFraction())
             self.Jet_neEmEF[0] = min(1.0,j.neutralEmEnergyFraction())
-            self.Jet_chMult[0] = j.chargedMultiplicity()
+            #self.Jet_chMult[0] = j.chargedMultiplicity()
             self.Jet_vtxPt[0] = sqrt(j.userFloat("vtxPx")**2 + j.userFloat("vtxPy")**2)
             self.Jet_vtxMass[0] = j.userFloat("vtxMass")
             self.Jet_vtx3dL[0] = max(0., j.userFloat("vtx3DVal"))
             self.Jet_vtxNtrk[0] = j.userFloat("vtxNtracks")
             self.Jet_vtx3deL[0] = self.Jet_vtx3dL[0]/j.userFloat("vtx3DSig") if j.userFloat("vtx3DSig") > 0 else 0
-            setattr(j,attrName+analysis,self.reader.EvaluateRegression(self.name)[0])
+            setattr(j,attrName+analysis,self.reader.EvaluateRegression(self.name)[0] * self.Jet_pt[0])
 
                 #j.pt_reg = self.reader.EvaluateRegression(self.name)[0]
 		
