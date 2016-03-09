@@ -25,13 +25,14 @@ config.JobType.inputFiles = ['heppy_config.py',
                              '../puDataPlus.root',
                              'puMC.root',
                               'json.txt',
-                              "../Zll-spring15.weights.xml",
-                              "../Wln-spring15.weights.xml",
-                              "../Znn-spring15.weights.xml",
-                              "../VBF-spring15.weights.xml",
-                              "../ttbar-spring15.weights.xml",
-                              "../ttbar-fall15.weights.xml",
-										'../TMVA_blikelihood_vbf_cmssw76.weights.xml'
+                              #"../Zll-spring15.weights.xml",
+                              #"../Wln-spring15.weights.xml",
+                              #"../Znn-spring15.weights.xml",
+                              #"../VBF-spring15.weights.xml",
+                              #"../ttbar-spring15.weights.xml",
+                              #"../ttbar-fall15.weights.xml",
+                              "../ttbar-fall15_TargetGenOverPt_GenPtCut0.weights.xml",
+			      '../TMVA_blikelihood_vbf_cmssw76.weights.xml'
 ]
 #config.JobType.outputFiles = ['tree.root']
 
