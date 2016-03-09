@@ -3,14 +3,14 @@ import json
 
 # A class to apply SF's tabulated in json files
 class LeptonSF:
-    def __init__(self, lep_json, lep_name, lep_binning) :
+    def __init__(self, lep_json, lep_name, lep_binning, extrapolateFromClosestBin=True) :
         if not os.path.isfile(lep_json):
             self.valid = False
             print "LeptonSF: ", lep_json, " is not a valid json file"
         else:
-            self.init(lep_json, lep_name, lep_binning)
+            self.init(lep_json, lep_name, lep_binning, extrapolateFromClosestBin)
 
-    def init(self, lep_json, lep_name, lep_binning) :
+    def init(self, lep_json, lep_name, lep_binning, extrapolateFromClosestBin) :
         f = open(lep_json, 'r')             
         print 'json is',lep_json
         print 'lep_name is', lep_name
@@ -24,42 +24,66 @@ class LeptonSF:
         self.lep_name = lep_name
         self.lep_binning = lep_binning
         self.valid = True
+        self.extrapolateFromClosestBin = extrapolateFromClosestBin
         f.close()
 
     def get_2D(self, pt, eta):
         if not self.valid:
-            #print "LeptonSF: return 1.0 +/- 0.0"
             return [1.0, 0.0]        
-            #print 'get_2D returned 1.0 because not valide JSON'
 
         stripForEta = 5
         if self.lep_binning not in self.res.keys():
             return [1.0, 0.0]
-            #print 'get_2D returned 1.0 because lep_binning'
 
         if "abseta" in self.lep_binning:
             eta = abs(eta)
             stripForEta = 8
 
+        # if no bin is found, search for closest one, and double the uncertainty
+        closestEtaBin = ""
+        closestPtBin = ""
+        closestEta = 9999.
+        closestPt = 9999.
+
+        etaFound = False
+        ptFound = False
         for etaKey, values in sorted(self.res[self.lep_binning].iteritems()) :
             etaL = float(((etaKey[stripForEta:]).rstrip(']').split(',')[0]))
             etaH = float(((etaKey[stripForEta:]).rstrip(']').split(',')[1]))
-            if not (eta>etaL and eta<etaH):
-                continue 
+
+            if abs(etaL-eta)<closestEta or abs(etaH-eta)<closestEta and not etaFound:
+                closestEta = min(abs(etaL-eta), abs(etaH-eta))
+                closestEtaBin = etaKey
+
+            if (eta>etaL and eta<etaH):
+                closestEtaBin = etaKey
+                etaFound = True                
+
             #print etaL, etaH
             for ptKey, result in sorted(values.iteritems()) :
                 ptL = float(((ptKey[4:]).rstrip(']').split(',')[0]))
                 ptH = float(((ptKey[4:]).rstrip(']').split(',')[1]))                
-                if not (pt>ptL and pt<ptH):
-                    continue 
+
+                if abs(ptL-pt)<closestPt or abs(ptH-pt)<closestPt and not ptFound:
+                    closestPt = min(abs(ptL-pt), abs(ptH-pt))
+                    closestPtBin = ptKey
+
+                if (pt>ptL and pt<ptH):
+                    closestPtBin = ptKey
+                    ptFound = True
+
                 #print ptL, ptH
                 #print "|eta| bin: %s  pT bin: %s\tdata/MC SF: %f +/- %f" % (etaKey, ptKey, result["value"], result["error"])
-                return [result["value"], result["error"]]
+                if etaFound and ptFound:
+                    return [result["value"], result["error"]]
 
-        # if nothing was found, return 1 +/- 0
-        #print 'seems like nothing was found', self.lep_name, pt, eta
-        return [1.0, 0.0]
-
+        if self.extrapolateFromClosestBin and not (closestPtBin=="" or closestEtaBin==""):
+            #print 'closest bin for (%s,%s) is %s,%s' % (pt, eta , closestEtaBin, closestPtBin)
+            #print '\t return ', [self.res[self.lep_binning][closestEtaBin][closestPtBin]["value"], self.res[self.lep_binning][closestEtaBin][closestPtBin]["error"]]
+            return [self.res[self.lep_binning][closestEtaBin][closestPtBin]["value"], 
+                    2*self.res[self.lep_binning][closestEtaBin][closestPtBin]["error"]] 
+        else:
+            return [1.0, 0.0]
 
 
 ##################################################################################################
@@ -77,10 +101,10 @@ if __name__ == "__main__":
 
     for j, name in jsons.iteritems():
         lepCorr = LeptonSF(j , name[0], name[1])
-        weight = lepCorr.get_2D( 35. , 1.0)
+        weight = lepCorr.get_2D( 15. , 3.9)
         val = weight[0]
         err = weight[1]
-        print j, name[0], ': ',  val, ' +/- ', err
+        print 'SF: ',  val, ' +/- ', err
     
     
     #jsons = {
