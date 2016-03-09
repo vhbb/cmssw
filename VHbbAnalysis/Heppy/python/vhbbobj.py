@@ -228,6 +228,8 @@ jsons = {
     'eleSF_HLT_D4p3' : ['','',''],
     'eleSF_IdLoose' : [jsonpath+'CutBasedID_LooseWP.json', 'CutBasedID_LooseWP', 'eta_pt_ratio'],
     'eleSF_IdTight' : [jsonpath+'CutBasedID_TightWP.json', 'CutBasedID_TightWP', 'eta_pt_ratio'],
+    'eleSF_trigMVAID_WP80' : [jsonpath+'ScaleFactor_GsfElectronToRECO_passingTrigWP80.json', 'ScaleFactor_GsfElectronToRECO_passingTrigWP80', 'eta_pt_ratio'],
+    'eleSF_trigMVAID_WP90' : [jsonpath+'ScaleFactor_GsfElectronToRECO_passingTrigWP90.json', 'ScaleFactor_GsfElectronToRECO_passingTrigWP90', 'eta_pt_ratio'],
     'eleSF_IsoLoose' : ['','',''],
     'eleSF_IsoTight' : ['','',''],
     }
@@ -236,7 +238,7 @@ correctors = {}
 for name, conf in jsons.iteritems(): 
     correctors[name] = LeptonSF(conf[0], conf[1], conf[2])
 
-for cut in ["IsoLoose", "IsoTight", "IdLoose", "IdTight","HLT_D4p3","HLT_D4p2","HLT_C"]:     
+for cut in ["IsoLoose", "IsoTight", "IdLoose", "IdTight","HLT_D4p3","HLT_D4p2","HLT_C", "trigMVAID_WP80", "trigMVAID_WP90"]:     
     leptonTypeVHbb.variables += [NTupleVariable("SF_"+cut, 
                                                 lambda x, muCorr=correctors["muSF_"+cut], eleCorr=correctors["eleSF_"+cut] : muCorr.get_2D(x.pt(), x.eta())[0] if abs(x.pdgId()) == 13 else eleCorr.get_2D(x.pt(), x.eta())[0], 
                                                 float, mcOnly=True, help="SF for lepton "+cut
