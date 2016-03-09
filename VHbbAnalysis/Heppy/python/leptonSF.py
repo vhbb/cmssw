@@ -21,6 +21,7 @@ class LeptonSF:
             print "LeptonSF: ", lep_name , " is not a valid identifier"
             return False
         self.res = results[lep_name]
+        self.lep_name = lep_name
         self.lep_binning = lep_binning
         self.valid = True
         f.close()
@@ -29,12 +30,12 @@ class LeptonSF:
         if not self.valid:
             #print "LeptonSF: return 1.0 +/- 0.0"
             return [1.0, 0.0]        
-            print 'get_2D returned 1.0 because not valide JSON'
+            #print 'get_2D returned 1.0 because not valide JSON'
 
         stripForEta = 5
         if self.lep_binning not in self.res.keys():
             return [1.0, 0.0]
-            print 'get_2D returned 1.0 because lep_binning'
+            #print 'get_2D returned 1.0 because lep_binning'
 
         if "abseta" in self.lep_binning:
             eta = abs(eta)
@@ -56,7 +57,7 @@ class LeptonSF:
                 return [result["value"], result["error"]]
 
         # if nothing was found, return 1 +/- 0
-        print 'seems like nothing was found'
+        #print 'seems like nothing was found', self.lep_name, pt, eta
         return [1.0, 0.0]
 
 
