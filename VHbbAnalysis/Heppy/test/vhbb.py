@@ -128,7 +128,7 @@ treeProducer= cfg.Analyzer(
 
 		#dump of gen objects
                 #"generatorSummary"    : NTupleCollection("GenSummary", genParticleWithLinksType, 30, help="Generator summary, see description in Heppy GeneratorAnalyzer",mcOnly=True),
-                "genJets"    : NTupleCollection("GenJet",   genJetType, 15, help="Generated jets with hadron matching, sorted by pt descending",filter=lambda x: x.pt() > 20,mcOnly=True),
+                "genJets"    : NTupleCollection("GenJet",   genJetType, 15, help="Generated jets with hadron matching, sorted by pt descending",filter=lambda x: x.pt() > 0,mcOnly=True),
                 "genHiggsSisters"    : NTupleCollection("GenHiggsSisters",     genParticleType, 4, help="Sisters of the Higgs bosons",mcOnly=True),
                 "gentopquarks"    : NTupleCollection("GenTop",     genTopType, 4, help="Generated top quarks from hard scattering",mcOnly=True),
                 "genallstatus2bhadrons"    : NTupleCollection("GenStatus2bHad",     genParticleType, 15, help="Generated Status 2 b Hadrons",mcOnly=True),
@@ -306,10 +306,10 @@ VHbb = cfg.Analyzer(
     doSoftActivityVH=True,
     doVBF=True,
     regressions = [
-        {"weight":"ttbar-fall15.weights.xml", "name":"jet0Regression", "vtypes":[0,1,2,3,4,5,-1]},
+        {"weight":"ttbar-fall15_TargetGenOverPt_GenPtCut0.weights.xml", "name":"jet0Regression", "vtypes":[0,1,2,3,4,5,-1]},
     ],
     regressionVBF = [
-        {"weight":"ttbar-fall15.weights.xml", "name":"jet0Regression_vbf", "vtypes":[0,1,2,3,4,5,-1]}
+        {"weight":"ttbar-fall15_TargetGenOverPt_GenPtCut0.weights.xml", "name":"jet0Regression_vbf", "vtypes":[0,1,2,3,4,5,-1]}
     ],
     VBFblikelihood = {"weight":"TMVA_blikelihood_vbf_cmssw76_h21trained.weights.xml", "name":"BDGT"}
 )
