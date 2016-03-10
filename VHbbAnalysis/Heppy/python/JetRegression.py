@@ -12,7 +12,8 @@ class JetRegression :
         reader = ROOT.TMVA.Reader()
         self.Jet_pt =array.array('f',[0])
         self.Jet_corr = array.array('f',[0])
-        self.rho = array.array('f',[0])
+        #self.rho = array.array('f',[0])
+        self.nPVs = array.array('f',[0])
         self.Jet_eta = array.array('f',[0])
         self.Jet_mt = array.array('f',[0])
         self.Jet_leadTrackPt = array.array('f',[0])
@@ -21,7 +22,8 @@ class JetRegression :
         self.Jet_leptonDeltaR = array.array('f',[0])
         #self.Jet_chmEF = array.array('f',[0])
         #self.Jet_chHEF = array.array('f',[0])
-        self.Jet_neHEF = array.array('f',[0])
+        #self.Jet_neHEF = array.array('f',[0])
+        self.Jet_totHEF  = array.array('f',[0])
         self.Jet_neEmEF = array.array('f',[0])
         #self.Jet_chMult = array.array('f',[0])
         self.Jet_vtxPt = array.array('f',[0])
@@ -31,7 +33,8 @@ class JetRegression :
         self.Jet_vtx3deL = array.array('f',[0])
         reader.AddVariable("Jet_pt",self.Jet_pt)
         reader.AddVariable("Jet_corr",self.Jet_corr)
-        reader.AddVariable("rho",self.rho)
+        #reader.AddVariable("rho",self.rho)
+        reader.AddVariable("nPVs",self.nPVs) 
         reader.AddVariable("Jet_eta",self.Jet_eta)
         reader.AddVariable("Jet_mt",self.Jet_mt)
         reader.AddVariable("Jet_leadTrackPt",self.Jet_leadTrackPt)
@@ -40,7 +43,8 @@ class JetRegression :
         reader.AddVariable("Jet_leptonDeltaR",self.Jet_leptonDeltaR)
         #reader.AddVariable("Jet_chEmEF",self.Jet_chEmEF)
         #reader.AddVariable("Jet_chHEF",self.Jet_chHEF)
-        reader.AddVariable("Jet_neHEF",self.Jet_neHEF)
+        #reader.AddVariable("Jet_neHEF",self.Jet_neHEF)
+        reader.AddVariable("Jet_chHEF+Jet_neHEF",self.Jet_totHEF)
         reader.AddVariable("Jet_neEmEF",self.Jet_neEmEF)
         #reader.AddVariable("Jet_chMult",self.Jet_chMult)
         reader.AddVariable("Jet_vtxPt",self.Jet_vtxPt)
@@ -54,8 +58,9 @@ class JetRegression :
 
     def evaluateRegression(self, event, attrName="pt_reg", analysis=""):
 #self.readCollections( event.input )
-# uniform with https://github.com/cvernier/RegressionHbb/blob/master/treeForRegression.C
-	self.rho[0] = event.rho
+# uniform with https://github.com/degrutto/HbbRegression 
+	#self.rho[0] = event.rho
+        self.nPVs[0] = len(event.goodVertices) 
 	for j in event.jetsForHiggs :
             pt_corr = 1.0
             if ("JEC" in analysis and hasattr(j, analysis)):
@@ -83,7 +88,8 @@ class JetRegression :
                 self.Jet_leptonDeltaR[0] =0
             #self.Jet_chEmEF[0] = min(1,0, j.chargedEmEnergyFraction())
             #self.Jet_chHEF[0] = min(1.-, j.chargedHadronEnergyFraction())
-            self.Jet_neHEF[0] = min(1.0,j.neutralHadronEnergyFraction())
+            #self.Jet_neHEF[0] = min(1.0,j.neutralHadronEnergyFraction())
+            self.Jet_totHEF[0] = min(1.0, j.chargedHadronEnergyFraction() + j.neutralHadronEnergyFraction())    
             self.Jet_neEmEF[0] = min(1.0,j.neutralEmEnergyFraction())
             #self.Jet_chMult[0] = j.chargedMultiplicity()
             self.Jet_vtxPt[0] = sqrt(j.userFloat("vtxPx")**2 + j.userFloat("vtxPy")**2)
