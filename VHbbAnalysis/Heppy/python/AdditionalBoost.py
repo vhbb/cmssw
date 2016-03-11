@@ -300,18 +300,10 @@ class AdditionalBoost( Analyzer ):
 
         self.handles['ak08']     = AutoHandle( ("slimmedJetsAK8",""), "std::vector<pat::Jet>")
 
-        self.handles['ak08pruned']        = AutoHandle( ("ak08PFPrunedJetsCHS","","EX"), "std::vector<reco::BasicJet>")
-        self.handles['ak08prunedsubjets'] = AutoHandle( ("ak08PFPrunedJetsCHS","SubJets","EX"), "std::vector<reco::PFJet>")
-
         self.handles['ak08softdropsubjets'] = AutoHandle( ("slimmedJetsAK8PFCHSSoftDropPacked","SubJets"), "std::vector<pat::Jet>")
 
         self.handles['ak08bbtag'] = AutoHandle( ("slimmedJetsAK8pfBoostedDoubleSecondaryVertexBJetTags","","EX"), 
                                                 "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
-
-        self.handles['ak08prunedsubjetbtag'] = AutoHandle( ("ak08PFPrunedJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags","","EX"), 
-                                                           "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
-
-
         self.handles['ak08ipTagInfos']     = AutoHandle( ("slimmedJetsAK8ImpactParameterTagInfos","","EX"), "vector<reco::IPTagInfo<vector<edm::Ptr<reco::Candidate> >,reco::JetTagInfo> >")
 
         self.handles['ak08svTagInfos']     = AutoHandle( ("slimmedJetsAK8pfInclusiveSecondaryVertexFinderTagInfos", "","EX"), "vector<reco::TemplatedSecondaryVertexTagInfo<reco::IPTagInfo<vector<edm::Ptr<reco::Candidate> >,reco::JetTagInfo>,reco::VertexCompositePtrCandidate> >")
@@ -379,7 +371,7 @@ class AdditionalBoost( Analyzer ):
 
         setattr(event, "ak08", map(PhysicsObject, self.handles["ak08"].product()))
 
-        setattr(event, "ak0softdropsubjets", map(PhysicsObject, self.handles["ak08softdropsubjets"].product()))
+        setattr(event, "ak08softdropsubjets", map(PhysicsObject, self.handles["ak08softdropsubjets"].product()))
 
         # bb-tag Output
         newtags =  self.handles['ak08bbtag'].product()
@@ -498,56 +490,56 @@ class AdditionalBoost( Analyzer ):
         # Groomed Uncalibrated Fatjets
         ########
 
-        for fj_name in ['ak08pruned', 'ca15trimmed', 'ca15softdrop', 'ca15pruned']:            
+        for fj_name in ['ca15trimmed', 'ca15softdrop', 'ca15pruned']:            
                 setattr(event, fj_name, map(PhysicsObject, self.handles[fj_name].product()))
 
-
-        ######## 
-        # Groomed Fatjets to calibrate
-        ########
-
-        pruned_cal_jets = []
-
-        for groomed_fj in self.handles['ak08pruned'].product():                        
-
-            # We need the closest ungroomed fatjet to get the JEC:            
-            # - Make a list of pairs: deltaR(ungroomed fj, groomed fj) for all ungroomed fatjets
-            # - Sort by deltaR
-            # - And take the minimum
-            
-            if len(getattr(event, "ak08")):
-                closest_ung_fj_and_dr = sorted(
-                    [(ung_fj, deltaR2(ung_fj, groomed_fj)) for ung_fj in getattr(event, "ak08")], 
-                    key=lambda x:x[1])[0]
-            else:
-                print "WARNING: No ungroomed fatjets found in event with groomed fatjet. Skipping"
-                continue
-
-            # Use the jet cone size for matching
-            minimal_dr_groomed_ungroomed = 0.8
-            if closest_ung_fj_and_dr[1] > minimal_dr_groomed_ungroomed:
-                print "WARNING: No ungroomed fatjet found close to groomed fatjet. Skipping"
-                continue
-
-            ungroomed_jet = Jet(closest_ung_fj_and_dr[0])        
-
-            c = self.jetReCalibratorAK8L2L3.getCorrection(ungroomed_jet, rho)
-
-                        
-            # Need to do a deep-copy. Otherwise the original jet will be modified
-            cal_groomed_fj = PhysicsObject(groomed_fj).__copy__() 
-            cal_groomed_fj.scaleEnergy(c)
-            
-            pruned_cal_jets.append(cal_groomed_fj)
-
-        setattr(event, 'ak08prunedcal', pruned_cal_jets)
-
+#
+#        ######## 
+#        # Groomed Fatjets to calibrate
+#        ########
+#
+#        pruned_cal_jets = []
+#
+#        for groomed_fj in self.handles['ak08pruned'].product():                        
+#
+#            # We need the closest ungroomed fatjet to get the JEC:            
+#            # - Make a list of pairs: deltaR(ungroomed fj, groomed fj) for all ungroomed fatjets
+#            # - Sort by deltaR
+#            # - And take the minimum
+#            
+#            if len(getattr(event, "ak08")):
+#                closest_ung_fj_and_dr = sorted(
+#                    [(ung_fj, deltaR2(ung_fj, groomed_fj)) for ung_fj in getattr(event, "ak08")], 
+#                    key=lambda x:x[1])[0]
+#            else:
+#                print "WARNING: No ungroomed fatjets found in event with groomed fatjet. Skipping"
+#                continue
+#
+#            # Use the jet cone size for matching
+#            minimal_dr_groomed_ungroomed = 0.8
+#            if closest_ung_fj_and_dr[1] > minimal_dr_groomed_ungroomed:
+#                print "WARNING: No ungroomed fatjet found close to groomed fatjet. Skipping"
+#                continue
+#
+#            ungroomed_jet = Jet(closest_ung_fj_and_dr[0])        
+#
+#            c = self.jetReCalibratorAK8L2L3.getCorrection(ungroomed_jet, rho)
+#
+#                        
+#            # Need to do a deep-copy. Otherwise the original jet will be modified
+#            cal_groomed_fj = PhysicsObject(groomed_fj).__copy__() 
+#            cal_groomed_fj.scaleEnergy(c)
+#            
+#            pruned_cal_jets.append(cal_groomed_fj)
+#
+#        setattr(event, 'ak08prunedcal', pruned_cal_jets)
+#
             
         ######## 
         # Subjets 
         ########
 
-        for fj_name in ['ak08pruned','ca15pruned']:
+        for fj_name in ['ca15pruned']:
 
             if self.skip_ca15 and ("ca15" in fj_name):
                 continue
