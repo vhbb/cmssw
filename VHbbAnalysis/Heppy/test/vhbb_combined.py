@@ -38,22 +38,7 @@ sequence.insert(sequence.index(VHbb),genhfana)
 treeProducer.collections["ak08"] = NTupleCollection("FatjetAK08ungroomed",  ak8FatjetType,  10,
                                                     help = "AK, R=0.8, pT > 200 GeV, no grooming, calibrated")
 
-treeProducer.collections["ak08pruned"] = NTupleCollection("FatjetAK08pruned",
-                                                            fourVectorType,
-                                                            10,
-                                                            help="AK, R=0.8, pT > 200 GeV, pruned zcut=0.1, rcut=0.5, n=2, uncalibrated")
-
-treeProducer.collections["ak08prunedcal"] = NTupleCollection("FatjetAK08prunedCal",
-                                                             fourVectorType,
-                                                             10,
-                                                             help="AK, R=0.8, pT > 200 GeV, pruned zcut=0.1, rcut=0.5, n=2, calibrated")
-
-treeProducer.collections["ak08prunedsubjets"] = NTupleCollection("SubjetAK08pruned",
-                                                                 subjetType,
-                                                                 10,
-                                                                 help="Subjets of AK, R=0.8, pT > 200 GeV, pruned zcut=0.1, rcut=0.5, n=2")
-
-treeProducer.collections["ak0softdropsubjets"] = NTupleCollection("SubjetAK08softdrop",
+treeProducer.collections["ak08softdropsubjets"] = NTupleCollection("SubjetAK08softdrop",
                                                                  patSubjetType,
                                                                  10,
                                                                  help="Subjets of AK, R=0.8 softdrop")
