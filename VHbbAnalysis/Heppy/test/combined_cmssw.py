@@ -67,6 +67,33 @@ def initialize(**kwargs):
     )
     process.OUT.outputCommands.append("keep *_pileupJetIdUpdated_fullId_EX")
 
+
+    process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
+                                                       calibratedPatElectrons = cms.PSet(
+            initialSeed = cms.untracked.uint32(1),
+            engineName = cms.untracked.string('TRandom3')
+            ),
+                                                       )
+    #EGAMMA energy smearing
+    process.load('EgammaAnalysis.ElectronTools.calibratedElectronsRun2_cfi')
+    correctionType = "76XReReco"
+    files = {"Prompt2015":"EgammaAnalysis/ElectronTools/data/74X_Prompt_2015",
+             "76XReReco" :"EgammaAnalysis/ElectronTools/data/76X_16DecRereco_2015"}
+    
+    process.calibratedPatElectrons = cms.EDProducer("CalibratedPatElectronProducerRun2",
+                                                    # input collections
+                                                    electrons = cms.InputTag('slimmedElectrons'),
+                                                    gbrForestName = cms.string("gedelectron_p4combination_25ns"),                                        
+                                                    # data or MC corrections
+                                                    # if isMC is false, data corrections are applied
+                                                    isMC = cms.bool(isMC),                                       
+                                                    # set to True to get special "fake" smearing for synchronization. Use JUST in case of synchronization
+                                                    isSynchronization = cms.bool(False),
+                                                    correctionFile = cms.string(files[correctionType])
+                                                    )
+    process.OUT.outputCommands.append("keep *_calibratedPatElectrons_*_EX")
+    
+
     ########################################
     # Boosted Substructure
     ########################################
