@@ -380,7 +380,7 @@ def calcBBTagVariables(jet,
     if tau1_nSecondaryVertices > 0. :
      #tau1_vertexSum=ROOT.math.XYZTLorentzVector()	
       tau1_vertexSum = tau1Kinematics.weightedVectorSum()
-      tau1_vertexEnergyRatio = tau1_vertexSum.E() / allSum.E()
+      tau1_vertexEnergyRatio = tau1_vertexSum.E() / allSum.E() if allSum.E() > 0 else 0.
       if tau1_vertexEnergyRatio > 50. :
 		 tau1_vertexEnergyRatio = 50.	
 
@@ -390,7 +390,7 @@ def calcBBTagVariables(jet,
     if  tau2_nSecondaryVertices > 0. :
      tau2_vertexSum=ROOT.math.XYZTLorentzVector()  
      tau2_vertexSum = tau2Kinematics.weightedVectorSum()
-     tau2_vertexEnergyRatio = tau2_vertexSum.E() / allSum.E()
+     tau2_vertexEnergyRatio = tau2_vertexSum.E() / allSum.E() if allSum.E() > 0 else 0.
      if tau2_vertexEnergyRatio > 50. :
 	 tau2_vertexEnergyRatio = 50.
 
