@@ -185,6 +185,11 @@ treeProducer.globalVariables += list(btag_weights.values())
 # Lepton Analyzer, take its default config and fix loose iso consistent with tight definition
 from PhysicsTools.Heppy.analyzers.objects.LeptonAnalyzer import LeptonAnalyzer
 LepAna = LeptonAnalyzer.defaultConfig
+LepAna.doElectronScaleCorrections = {
+	'data' : 'EgammaAnalysis/ElectronTools/data/76X_16DecRereco_2015', 
+	'GBRForest' : [os.environ['CMSSW_BASE']+'/src/VHbbAnalysis/Heppy/data/egamma/egamma_epComb_GBRForest_76X.root','gedelectron_p4combination_25ns'], 
+	'isSync' : False
+	}
 LepAna.mu_isoCorr  = "deltaBeta"
 #LepAna.loose_muon_isoCut = lambda muon : muon.relIso04 < 0.25 
 LepAna.loose_muon_isoCut = lambda muon : muon.relIso04 < 0.4
@@ -290,11 +295,11 @@ VHbb = cfg.Analyzer(
     verbose=False,
     class_object=VHbbAnalyzer,
     #wEleSelection = lambda x : x.pt() > 25 and x.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-tight"),
-    wEleSelection = lambda x : x.pt() > 25 and x.electronID("mvaEleID-Spring15-25ns-Trig-V1-wp80") and ele_mvaEleID_Trig_preselection(x),
+    wEleSelection = lambda x : x.pt() > 25 and getattr(x,"mvaIdSpring15TrigTight",False) and ele_mvaEleID_Trig_preselection(x),
     #wMuSelection = lambda x : x.pt() > 25 and x.muonID("POG_ID_Tight"),
     wMuSelection = lambda x : x.pt() > 25 and x.muonID("POG_ID_Tight") and mu_pfRelIso04(x) < 0.15,
     #zEleSelection = lambda x : x.pt() > 15 and x.electronID("cutBasedElectronID-Spring15-25ns-V1-standalone-loose"),
-    zEleSelection = lambda x : x.pt() > 15 and x.electronID("mvaEleID-Spring15-25ns-Trig-V1-wp90") and ele_mvaEleID_Trig_preselection(x),
+    zEleSelection = lambda x : x.pt() > 15 and getattr(x,"mvaIdSpring15TrigMedium",False) and ele_mvaEleID_Trig_preselection(x),
     #zMuSelection = lambda x : x.pt() > 10 and x.muonID("POG_ID_Loose"),
     zMuSelection = lambda x : x.pt() > 15 and x.muonID("POG_ID_Loose") and mu_pfRelIso04(x) < 0.25,
     zLeadingElePt = 20,
@@ -411,7 +416,7 @@ sample = cfg.MCComponent(
 	files = [
 		#"root://xrootd.ba.infn.it//store/mc/RunIIFall15MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-scaledown-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/30000/045996FE-A19D-E511-B76D-D4AE526A0B47.root" ##ttbar
 		#"045996FE-A19D-E511-B76D-D4AE526A0B47.root" ##ttbar
-		#"/scratch/bianchi/06EC3B62-39B8-E511-9957-0002C94CD0C0.root"
+		#"/scratch/bianchi/004CB067-8DBD-E511-B0FB-047D7B881D3A.root"
 #		"027D7153-29BF-E511-A2BC-0025B3E025B6.root"
 		"root://xrootd.ba.infn.it//store/mc/RunIIFall15MiniAODv2/DYJetsToLL_M-100to200_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12_ext1-v1/60000/027D7153-29BF-E511-A2BC-0025B3E025B6.root"
 		],
