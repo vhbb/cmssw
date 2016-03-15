@@ -67,6 +67,7 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
     NTupleVariable("miniIsoNeutral", lambda x : x.miniAbsIsoNeutral if hasattr(x,'miniAbsIsoNeutral') else  -999, help="PF miniIso (neutral) in GeV"),
     NTupleVariable("mvaTTHjetPtRel", lambda x : ptRelv2(x) if hasattr(x,'jet') else -1, help="jetPtRel variable used by ttH multilepton MVA"),
     NTupleVariable("mvaTTHjetNDauChargedMVASel", lambda lepton: sum((deltaR(x.eta(),x.phi(),lepton.jet.eta(),lepton.jet.phi())<=0.4 and x.charge()!=0 and x.fromPV()>1 and qualityTrk(x.pseudoTrack(),lepton.associatedVertex)) for x in lepton.jet.daughterPtrVector()) if hasattr(lepton,'jet') and lepton.jet != lepton else 0, help="jetNDauChargedMVASel variable used by ttH multilepton MVA"),
+    NTupleVariable("uncalibratedPt", lambda x : getattr(x,"uncalibratedP4").Pt() if abs(x.pdgId())==11 and hasattr(x,"uncalibratedP4") else x.pt() , help="Electron uncalibrated pt"),
     # MC-match info
 #    NTupleVariable("mcMatchId",  lambda x : x.mcMatchId, int, mcOnly=True, help="Match to source from hard scatter (25 for H, 6 for t, 23/24 for W/Z)"),
 #    NTupleVariable("mcMatchAny",  lambda x : x.mcMatchAny, int, mcOnly=True, help="Match to any final state leptons: -mcMatchId if prompt, 0 if unmatched, 1 if light flavour, 2 if heavy flavour (b)"),
