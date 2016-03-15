@@ -187,7 +187,7 @@ from PhysicsTools.Heppy.analyzers.objects.LeptonAnalyzer import LeptonAnalyzer
 LepAna = LeptonAnalyzer.defaultConfig
 LepAna.doElectronScaleCorrections = {
 	'data' : 'EgammaAnalysis/ElectronTools/data/76X_16DecRereco_2015', 
-	'GBRForest' : [os.environ['CMSSW_BASE']+'/src/VHbbAnalysis/Heppy/data/egamma/GBRForest_data_25ns.root','gedelectron_p4combination_25ns'], 
+	'GBRForest' : [os.environ['CMSSW_BASE']+'/src/VHbbAnalysis/Heppy/data/egamma/egamma_epComb_GBRForest_76X.root','gedelectron_p4combination_25ns'], 
 	'isSync' : False
 	}
 LepAna.mu_isoCorr  = "deltaBeta"
