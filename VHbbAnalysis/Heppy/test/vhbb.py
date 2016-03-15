@@ -185,6 +185,11 @@ treeProducer.globalVariables += list(btag_weights.values())
 # Lepton Analyzer, take its default config and fix loose iso consistent with tight definition
 from PhysicsTools.Heppy.analyzers.objects.LeptonAnalyzer import LeptonAnalyzer
 LepAna = LeptonAnalyzer.defaultConfig
+LepAna.doElectronScaleCorrections = {
+	'data' : 'EgammaAnalysis/ElectronTools/data/76X_16DecRereco_2015', 
+	'GBRForest' : [os.environ['CMSSW_BASE']+'/src/VHbbAnalysis/Heppy/data/egamma/GBRForest_data_25ns.root','gedelectron_p4combination_25ns'], 
+	'isSync' : False
+	}
 LepAna.mu_isoCorr  = "deltaBeta"
 #LepAna.loose_muon_isoCut = lambda muon : muon.relIso04 < 0.25 
 LepAna.loose_muon_isoCut = lambda muon : muon.relIso04 < 0.4
