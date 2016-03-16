@@ -257,5 +257,7 @@ triggerTable = {
         "HLT_DiPFJetAve200_v*",
         "HLT_DiPFJetAve260_v*",
         "HLT_DiPFJetAve320_v*",
+        "HLT_DoubleJetsC100_DoubleBTagCSV0p85_DoublePFJetsC160_v*",
+        "HLT_DoubleJetsC100_DoubleBTagCSV0p9_DoublePFJetsC100MaxDeta1p6_v*" 
     ],
 }
