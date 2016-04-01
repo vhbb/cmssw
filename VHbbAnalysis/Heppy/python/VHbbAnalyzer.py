@@ -434,6 +434,10 @@ class VHbbAnalyzer( Analyzer ):
         event.HaddJetsdR08 = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.H_reg = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.HCSV_reg = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
+        for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
+             setattr(event,"HCSV_reg"+("_"+analysis if analysis!="" else ""), ROOT.reco.Particle.LorentzVector() )
+             setattr(event,"H_reg"+("_"+analysis if analysis!="" else ""), ROOT.reco.Particle.LorentzVector() )
+
         event.V = ROOT.reco.Particle.LorentzVector(0.,0.,0.,0.)
         event.minDr3=-1
         event.V.goodMt=0
