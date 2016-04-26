@@ -25,8 +25,8 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
     NTupleVariable("eleChi2",      lambda x : x.gsfTrack().normalizedChi2() if abs(x.pdgId())==11 else -1., help="Track chi squared for electrons' gsf tracks"),
     # Extra electron id variables
     NTupleVariable("convVetoFull", lambda x : (x.passConversionVeto() and x.lostInner() == 0) if abs(x.pdgId())==11 else 1, int, help="Conv veto + no missing hits for electrons, always true for muons."),
-    NTupleVariable("eleMVArawPhys14NonTrig", lambda x : x.mvaRun2("NonTrigPhys14") if abs(x.pdgId()) == 11 else -1, help="EGamma POG MVA ID for non-triggering electrons (raw MVA value, Phys14 training); 1 for muons"),
-    NTupleVariable("eleMVAIdPhys14NonTrig", lambda x : max(x.electronID("POG_MVA_ID_Phys14_NonTrig_VLoose"), 2*x.electronID("POG_MVA_ID_Phys14_NonTrig_Loose"), 3*x.electronID("POG_MVA_ID_Phys14_NonTrig_Tight")) if abs(x.pdgId()) == 11 else -1, int, help="EGamma POG MVA ID for non-triggering electrons (0=none, 1=vloose, 2=loose, 3=tight, Phys14 training); 1 for muons"),
+    #NTupleVariable("eleMVArawPhys14NonTrig", lambda x : x.mvaRun2("NonTrigPhys14") if abs(x.pdgId()) == 11 else -1, help="EGamma POG MVA ID for non-triggering electrons (raw MVA value, Phys14 training); 1 for muons"),
+    #NTupleVariable("eleMVAIdPhys14NonTrig", lambda x : max(x.electronID("POG_MVA_ID_Phys14_NonTrig_VLoose"), 2*x.electronID("POG_MVA_ID_Phys14_NonTrig_Loose"), 3*x.electronID("POG_MVA_ID_Phys14_NonTrig_Tight")) if abs(x.pdgId()) == 11 else -1, int, help="EGamma POG MVA ID for non-triggering electrons (0=none, 1=vloose, 2=loose, 3=tight, Phys14 training); 1 for muons"),
     NTupleVariable("eleMVArawSpring15Trig", lambda x : getattr(x,"mvaRawSpring15Trig",-2) if abs(x.pdgId()) == 11 else -1, help="EGamma POG MVA ID for triggering electrons (raw MVA value, Spring15 training); 1 for muons"),
     NTupleVariable("eleMVAIdSpring15Trig", lambda x : max(x.mvaIdSpring15TrigMedium, 2*x.mvaIdSpring15TrigTight) if abs(x.pdgId()) == 11 and hasattr(x,"mvaIdSpring15TrigMedium") else -1, int, help="EGamma POG MVA ID for triggering electrons (0=none, 1=WP90, 2=WP80, Spring15 training); 1 for muons"),
     NTupleVariable("eleMVArawSpring15NonTrig", lambda x : getattr(x,"mvaRawSpring15NonTrig",-2) if abs(x.pdgId()) == 11 else -1, help="EGamma POG MVA ID for non-triggering electrons (raw MVA value, Spring15 training); 1 for muons"),
@@ -67,6 +67,7 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
     NTupleVariable("miniIsoNeutral", lambda x : x.miniAbsIsoNeutral if hasattr(x,'miniAbsIsoNeutral') else  -999, help="PF miniIso (neutral) in GeV"),
     NTupleVariable("mvaTTHjetPtRel", lambda x : ptRelv2(x) if hasattr(x,'jet') else -1, help="jetPtRel variable used by ttH multilepton MVA"),
     NTupleVariable("mvaTTHjetNDauChargedMVASel", lambda lepton: sum((deltaR(x.eta(),x.phi(),lepton.jet.eta(),lepton.jet.phi())<=0.4 and x.charge()!=0 and x.fromPV()>1 and qualityTrk(x.pseudoTrack(),lepton.associatedVertex)) for x in lepton.jet.daughterPtrVector()) if hasattr(lepton,'jet') and lepton.jet != lepton else 0, help="jetNDauChargedMVASel variable used by ttH multilepton MVA"),
+    NTupleVariable("uncalibratedPt", lambda x : getattr(x,"uncalibratedP4").Pt() if abs(x.pdgId())==11 and hasattr(x,"uncalibratedP4") else x.pt() , help="Electron uncalibrated pt"),
     # MC-match info
 #    NTupleVariable("mcMatchId",  lambda x : x.mcMatchId, int, mcOnly=True, help="Match to source from hard scatter (25 for H, 6 for t, 23/24 for W/Z)"),
 #    NTupleVariable("mcMatchAny",  lambda x : x.mcMatchAny, int, mcOnly=True, help="Match to any final state leptons: -mcMatchId if prompt, 0 if unmatched, 1 if light flavour, 2 if heavy flavour (b)"),
@@ -287,26 +288,6 @@ fatjetType = NTupleObjectType("fatjet",  baseObjectTypes = [ fourVectorType ], v
     # bb-tag output variable
     NTupleVariable("bbtag",  lambda x : x.bbtag, help="Hbb b-tag score"),
 
-    # bb-tag input variables
-    NTupleVariable("PFLepton_ptrel",   lambda x : x.PFLepton_ptrel, help="pt-rel of e/mu (for bb-tag)"),    
-    NTupleVariable("z_ratio",          lambda x : x.z_ratio, help="z-ratio (for bb-tag)"),    
-    NTupleVariable("tau_dot",          lambda x : x.tau_dot, help="tau_dot (for bb-tag)"),    
-    NTupleVariable("SV_mass_0",        lambda x : x.SV_mass_0, help="secondary vertex mass (for bb-tag)"),    
-    NTupleVariable("SV_EnergyRatio_0", lambda x : x.SV_EnergyRatio_0, help="secondary vertex mass energy ratio 0 (for bb-tag)"),    
-    NTupleVariable("SV_EnergyRatio_1", lambda x : x.SV_EnergyRatio_1, help="secondary vertex mass energy ratio 1 (for bb-tag)"),    
-    NTupleVariable("PFLepton_IP2D",    lambda x : x.PFLepton_IP2D, help="lepton IP2D (for bb-tag)"),    
-    NTupleVariable("tau_21",           lambda x : x.tau_21, help="nsubjettiness tau2/tau1 (for bb-tag)"),    
-    NTupleVariable("nSL",              lambda x : x.nSL, help="number of soft leptons (for bb-tag)"),    
-    NTupleVariable("vertexNTracks",    lambda x : x.vertexNTracks, help="number of tracks for vertex (for bb-tag)"),   
-  # ID variables
-    NTupleVariable("numberOfDaughters",  lambda x : x.numberOfDaughters(), help = "numberOfDaughters" ),
-    NTupleVariable("neutralEmEnergyFraction",  lambda x : x.neutralEmEnergyFraction(), help = "neutralEmEnergyFraction" ),
-    NTupleVariable("neutralHadronEnergyFraction",  lambda x : x.neutralHadronEnergyFraction(), help = "neutralHadronEnergyFraction" ),
-    NTupleVariable("muonEnergyFraction",  lambda x : x.muonEnergyFraction(), help = "muonEnergyFraction" ),
-    NTupleVariable("chargedEmEnergyFraction",  lambda x : x.chargedEmEnergyFraction(), help = "chargedEmEnergyFraction" ),
-    NTupleVariable("chargedHadronEnergyFraction",  lambda x : x.chargedHadronEnergyFraction(), help = "chargedHadronEnergyFraction" ),
-    NTupleVariable("chargedMultiplicity",  lambda x : x.chargedMultiplicity(), help = "chargedMultiplicity" ),
-
     ])
 
 
@@ -351,14 +332,37 @@ ak8FatjetType = NTupleObjectType("ak8fatjet",  baseObjectTypes = [ fourVectorTyp
     # bb-tag input variables
     NTupleVariable("PFLepton_ptrel",   lambda x : x.PFLepton_ptrel, help="pt-rel of e/mu (for bb-tag)"),    
     NTupleVariable("z_ratio",          lambda x : x.z_ratio, help="z-ratio (for bb-tag)"),    
-    NTupleVariable("tau_dot",          lambda x : x.tau_dot, help="tau_dot (for bb-tag)"),    
-    NTupleVariable("SV_mass_0",        lambda x : x.SV_mass_0, help="secondary vertex mass (for bb-tag)"),    
-    NTupleVariable("SV_EnergyRatio_0", lambda x : x.SV_EnergyRatio_0, help="secondary vertex mass energy ratio 0 (for bb-tag)"),    
-    NTupleVariable("SV_EnergyRatio_1", lambda x : x.SV_EnergyRatio_1, help="secondary vertex mass energy ratio 1 (for bb-tag)"),    
     NTupleVariable("PFLepton_IP2D",    lambda x : x.PFLepton_IP2D, help="lepton IP2D (for bb-tag)"),    
-    NTupleVariable("tau_21",           lambda x : x.tau_21, help="nsubjettiness tau2/tau1 (for bb-tag)"),    
-    NTupleVariable("nSL",              lambda x : x.nSL, help="number of soft leptons (for bb-tag)"),    
-    NTupleVariable("vertexNTracks",    lambda x : x.vertexNTracks, help="number of tracks for vertex (for bb-tag)"),    
+    NTupleVariable("nSL", lambda x : x.nSL, help="number of soft leptons (for bb-tag)"),    
+    #NTupleVariable("trackSipdSig_3", lambda x : x.trackSip3dSig_3 , help=" bb-tag input as in 76x"),
+    #NTupleVariable("trackSipdSig_2", lambda x : x.trackSip3dSig_2 , help=" bb-tag input as in 76x"),
+    #NTupleVariable("trackSipdSig_1", lambda x : x.trackSip3dSig_1, help=" bb-tag input as in 76x"),
+    #NTupleVariable("trackSipdSig_0", lambda x : x.trackSip3dSig_0, help=" bb-tag input as in 76x"),
+    #NTupleVariable("trackSipdSig_1_0", lambda x : x.tau2_trackSip3dSig_0, help=" bb-tag input as in 76x"),
+    #NTupleVariable("trackSipdSig_0_0", lambda x : x.tau1_trackSip3dSig_0, help=" bb-tag input as in 76x"),
+    #NTupleVariable("trackSipdSig_1_1", lambda x : x.tau2_trackSip3dSig_1, help=" bb-tag input as in 76x"),
+    #NTupleVariable("trackSipdSig_0_1", lambda x : x.tau1_trackSip3dSig_1, help=" bb-tag input as in 76x"),
+    #NTupleVariable("trackSip2dSigAboveCharm_0", lambda x : x.trackSip2dSigAboveCharm_0, help=" bb-tag input as in 76x"),
+    #NTupleVariable("trackSip2dSigAboveBottom_0", lambda x : x.trackSip2dSigAboveBottom_0, help=" bb-tag input as in 76x"),
+    #NTupleVariable("trackSip2dSigAboveBottom_1", lambda x : x.trackSip2dSigAboveBottom_1, help=" bb-tag input as in 76x"),
+    NTupleVariable("tau1_trackEtaRel_0", lambda x : x.tau2_trackEtaRel_0, help=" bb-tag input as in 76x"),
+    NTupleVariable("tau1_trackEtaRel_1", lambda x : x.tau2_trackEtaRel_1, help=" bb-tag input as in 76x"),
+    NTupleVariable("tau1_trackEtaRel_2", lambda x : x.tau2_trackEtaRel_2, help=" bb-tag input as in 76x"),
+    NTupleVariable("tau0_trackEtaRel_0", lambda x : x.tau1_trackEtaRel_0, help=" bb-tag input as in 76x"),
+    NTupleVariable("tau0_trackEtaRel_1", lambda x : x.tau1_trackEtaRel_1, help=" bb-tag input as in 76x"),
+    NTupleVariable("tau0_trackEtaRel_2", lambda x : x.tau1_trackEtaRel_2, help=" bb-tag input as in 76x"),
+    NTupleVariable("tau_vertexMass_0", lambda x : x.tau1_vertexMass, help=" bb-tag input as in 76x"),
+    NTupleVariable("tau_vertexEnergyRatio_0", lambda x : x.tau1_vertexEnergyRatio, help=" bb-tag input as in 76x"),
+    NTupleVariable("tau_vertexDeltaR_0", lambda x : x.tau1_vertexDeltaR, help=" bb-tag input as in 76x"),
+    NTupleVariable("tau_flightDistance2dSig_0", lambda x : x.tau1_flightDistance2dSig, help=" bb-tag input as in 76x"),
+    NTupleVariable("tau_vertexMass_1", lambda x : x.tau2_vertexMass, help=" bb-tag input as in 76x"),
+    NTupleVariable("tau_vertexEnergyRatio_1", lambda x : x.tau2_vertexEnergyRatio, help=" bb-tag input as in 76x"),
+    NTupleVariable("tau_flightDistance2dSig_1", lambda x : x.tau2_flightDistance2dSig, help=" bb-tag input as in 76x"),
+    #NTupleVariable("jetNTracks", lambda x : x.jetNTracks, help=" bb-tag input as in 76x"),
+    NTupleVariable("nSV", lambda x : x.nSV, help=" bb-tag input as in 76x"),
+
+
+    
 
     ])
 
