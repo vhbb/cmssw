@@ -45,8 +45,6 @@ remove = [
           'ContinToZZ','SingleNeutron','BuToJpsiPi','Chib0ToUps','DYToLL_M_1_T','EEG_PTG','GluGluWWTo2E2Nu','HToZATo2L2Tau',
           'MinBias_chMulti85','MuMuG_PTG130To400','SingleK0','WLLJJ','WZJJ','ChMulti85','Chib0ToUps','DYToEE_NNPDF30','ZToEE_NNPDF',
           'GluGluToHiggs0PMToZZ','/TTTT_','WWJJToLNuLNu_EWK_QCD_noTop','SeesawTypeIII','RPVStopStop','gluinoGMSB_M',
-          'X53ToTW_M','GluGluSpin0ToGG_W','GluGluSpin0ToZG_ZToLL_W','RPVresonantToMuTau_M','SLQ_Lhanded','SLQ_2ndgen_Rhanded',
-          'RPVresonantToETau_M',
           # '/ttHJetToNonbb_M120_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           # '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v2/MINIAODSIM',
           # '/ttHJetToNonbb_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9_ext1-v3/MINIAODSIM',
