@@ -46,6 +46,41 @@ def deltaR2(a, b):
     
     return pow(abs(abs(phi1 - phi2) - math.pi) - math.pi, 2) + pow(eta1 - eta2, 2)
 
+
+# Test if the jet passes the loose JetID criteria defined at
+# https://twiki.cern.ch/twiki/bin/view/CMS/JetID#Recommendations_for_13_TeV_data
+# Furthermore we require:
+#   - pT > 20 GeV
+#   - |eta| < 2.4
+def passesJetId(jet):
+    
+    if jet.pt() <= 20:
+        return False
+    
+    if abs(jet.eta()) >= 2.4:
+        return False
+
+    if jet.neutralHadronEnergyFraction() >= 0.99:
+        return False
+    
+    if jet.neutralEmEnergyFraction() >= 0.99:
+        return False
+
+    if jet.chargedMultiplicity()+jet.neutralMultiplicity() <= 1:
+        return False
+    
+    if jet.chargedHadronEnergyFraction() <= 0:
+        return False
+        
+    if jet.chargedMultiplicity() <= 0:
+        return False
+    
+    if  jet.chargedEmEnergyFraction() >= 0.99:
+        return False
+
+    return True
+
+
 def etaRelToTauAxis( vertex, tauAxis, tau_trackEtaRel) :
   direction = ROOT.Math.XYZVector(tauAxis.px(), tauAxis.py(), tauAxis.pz())
   tracks = vertex.daughterPtrVector()
@@ -853,8 +888,11 @@ class AdditionalBoost( Analyzer ):
                         # Map dummy value to -0.1
                         if j.btag == -10.:
                             j.btag = -0.1
+                            
+            # Add jetID information
+            for j in getattr(event, fj_name+"subjets"):
+                j.jetID = passesJetId(j)
                         
-
             # Add information from which FJ the subjet comes
             # Loop over subjets
             for j in getattr(event, fj_name+"subjets"):
@@ -909,6 +947,9 @@ class AdditionalBoost( Analyzer ):
                 # HTT return the subjet-pair closest to the W-mass as W-subjets
                 # Could be improved by b-tagging if we run into a problem
                 [sj_w1, sj_w2, sj_nonw] = [con.__deref__() for con in candJets[i].getJetConstituents() if not con.isNull()]
+
+                # Do all subjets pass the JetID requirements
+                event.httCandidates[i].subjetIDPassed = all([passesJetId(x) for x in [sj_w1, sj_w2, sj_nonw]])
 
                 # Calibrate the subjets: W1
                 sj_w1_uncal = Jet(sj_w1)        
