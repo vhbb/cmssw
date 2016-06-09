@@ -14,13 +14,14 @@
 #include "CondFormats.h"
 
 //
+#include <memory>
 #include <sstream>
 
 namespace cond {
 
   namespace persistency {
 
-    std::pair<std::string, boost::shared_ptr<void> > fetchOne( const std::string &payloadTypeName, const cond::Binary &data, const cond::Binary &streamerInfo, boost::shared_ptr<void> payloadPtr ){
+    std::pair<std::string, std::shared_ptr<void> > fetchOne( const std::string &payloadTypeName, const cond::Binary &data, const cond::Binary &streamerInfo, std::shared_ptr<void> payloadPtr ){
 
       bool match = false;
       FETCH_PAYLOAD_CASE( std::string ) 
@@ -139,9 +140,10 @@ namespace cond {
       FETCH_PAYLOAD_CASE( HBHENegativeEFilter )
       FETCH_PAYLOAD_CASE( HcalChannelQuality )
       FETCH_PAYLOAD_CASE( HcalCholeskyMatrices )
+      FETCH_PAYLOAD_CASE( HcalDcsValues )
       FETCH_PAYLOAD_CASE( HcalElectronicsMap )
       FETCH_PAYLOAD_CASE( HcalFlagHFDigiTimeParams )
-      FETCH_PAYLOAD_CASE( HcalDcsValues )
+      FETCH_PAYLOAD_CASE( HcalFrontEndMap )
       FETCH_PAYLOAD_CASE( HcalGains )
       FETCH_PAYLOAD_CASE( HcalGainWidths )
       FETCH_PAYLOAD_CASE( HcalL1TriggerObjects )
@@ -213,6 +215,7 @@ namespace cond {
       FETCH_PAYLOAD_CASE( L1TUtmObject )
       FETCH_PAYLOAD_CASE( L1TUtmScale )
       FETCH_PAYLOAD_CASE( L1TUtmTriggerMenu )
+      FETCH_PAYLOAD_CASE( L1TGlobalParameters )
       FETCH_PAYLOAD_CASE( L1TriggerKey )
       FETCH_PAYLOAD_CASE( L1TriggerKeyList )
       FETCH_PAYLOAD_CASE( lumi::LumiSectionData )
@@ -286,6 +289,7 @@ namespace cond {
       FETCH_PAYLOAD_CASE( EcalCondObjectContainer<EcalXtalGroupId> )
       FETCH_PAYLOAD_CASE( EcalCondObjectContainer<float> )
       FETCH_PAYLOAD_CASE( MagFieldConfig )
+      FETCH_PAYLOAD_CASE( L1TGlobalPrescalesVetos )
 
       //   
       if( payloadTypeName == "PhysicsTools::Calibration::Histogram3D<double,double,double,double>" ){    
@@ -308,8 +312,8 @@ namespace cond {
       return std::make_pair( payloadTypeName, payloadPtr );
     }
 
-    std::pair<std::string,boost::shared_ptr<void> > fetch( const cond::Hash& payloadId, Session& session ){
-      boost::shared_ptr<void> payloadPtr;
+    std::pair<std::string,std::shared_ptr<void> > fetch( const cond::Hash& payloadId, Session& session ){
+      std::shared_ptr<void> payloadPtr;
       cond::Binary data;
       cond::Binary streamerInfo;
       std::string payloadTypeName;

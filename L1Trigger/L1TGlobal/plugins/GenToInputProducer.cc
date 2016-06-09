@@ -10,7 +10,7 @@
 
 
 // system include files
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // user include files
 
@@ -77,9 +77,9 @@ namespace l1t {
 
     // ----------member data ---------------------------
     unsigned long long m_paramsCacheId; // Cache-ID from current parameters, to check if needs to be updated.
-    //boost::shared_ptr<const CaloParams> m_dbpars; // Database parameters for the trigger, to be updated as needed.
-    //boost::shared_ptr<const FirmwareVersion> m_fwv;
-    //boost::shared_ptr<FirmwareVersion> m_fwv; //not const during testing.
+    //std::shared_ptr<const CaloParams> m_dbpars; // Database parameters for the trigger, to be updated as needed.
+    //std::shared_ptr<const FirmwareVersion> m_fwv;
+    //std::shared_ptr<FirmwareVersion> m_fwv; //not const during testing.
 
     TRandom3* gRandom;
 
@@ -201,7 +201,7 @@ GenToInputProducer::produce(Event& iEvent, const EventSetup& iSetup)
 
   eventCnt_++;
 
-  LogDebug("l1t|Global") << "GenToInputProducer::produce function called...\n";
+  LogDebug("GtGenToInputProducer") << "GenToInputProducer::produce function called...\n";
 
   // Setup vectors
   std::vector<l1t::Muon> muonVec;
@@ -236,12 +236,12 @@ GenToInputProducer::produce(Event& iEvent, const EventSetup& iSetup)
 
 
   //outputs
-  std::auto_ptr<l1t::EGammaBxCollection> egammas (new l1t::EGammaBxCollection(0, bxFirst, bxLast));
-  std::auto_ptr<l1t::MuonBxCollection> muons (new l1t::MuonBxCollection(0, bxFirst, bxLast));
-  std::auto_ptr<l1t::TauBxCollection> taus (new l1t::TauBxCollection(0, bxFirst, bxLast));
-  std::auto_ptr<l1t::JetBxCollection> jets (new l1t::JetBxCollection(0, bxFirst, bxLast));
-  std::auto_ptr<l1t::EtSumBxCollection> etsums (new l1t::EtSumBxCollection(0, bxFirst, bxLast));
-  std::auto_ptr<GlobalExtBlkBxCollection> extCond( new GlobalExtBlkBxCollection(0,bxFirst,bxLast));
+  std::unique_ptr<l1t::EGammaBxCollection> egammas (new l1t::EGammaBxCollection(0, bxFirst, bxLast));
+  std::unique_ptr<l1t::MuonBxCollection> muons (new l1t::MuonBxCollection(0, bxFirst, bxLast));
+  std::unique_ptr<l1t::TauBxCollection> taus (new l1t::TauBxCollection(0, bxFirst, bxLast));
+  std::unique_ptr<l1t::JetBxCollection> jets (new l1t::JetBxCollection(0, bxFirst, bxLast));
+  std::unique_ptr<l1t::EtSumBxCollection> etsums (new l1t::EtSumBxCollection(0, bxFirst, bxLast));
+  std::unique_ptr<GlobalExtBlkBxCollection> extCond( new GlobalExtBlkBxCollection(0,bxFirst,bxLast));
 
   std::vector<int> mu_cands_index;
   std::vector<int> eg_cands_index;
@@ -268,7 +268,7 @@ GenToInputProducer::produce(Event& iEvent, const EventSetup& iSetup)
     }
   }
   else {
-    LogTrace("l1t|Global") << ">>> GenParticles collection not found!" << std::endl;
+    LogTrace("GtGenToInputProducer") << ">>> GenParticles collection not found!" << std::endl;
   }
 
 
@@ -439,7 +439,7 @@ GenToInputProducer::produce(Event& iEvent, const EventSetup& iSetup)
     }
   }
   else {
-    LogTrace("l1t|Global") << ">>> GenJets collection not found!" << std::endl;
+    LogTrace("GtGenToInputProducer") << ">>> GenJets collection not found!" << std::endl;
   }
 
 
@@ -465,7 +465,7 @@ GenToInputProducer::produce(Event& iEvent, const EventSetup& iSetup)
 
   }
   else {
-    LogTrace("l1t|Global") << ">>> GenMet collection not found!" << std::endl;
+    LogTrace("GtGenToInputProducer") << ">>> GenMet collection not found!" << std::endl;
   }
 
 
@@ -479,6 +479,28 @@ GenToInputProducer::produce(Event& iEvent, const EventSetup& iSetup)
    l1t::EtSum htTotal(*p4, l1t::EtSum::EtSumType::kTotalHt,pt, 0, 0, 0); 
    etsumVec.push_back(htTotal);
 
+// Add EtSums for testing the MinBias Trigger (use some random numbers)   
+   int hfP0val  = gRandom->Poisson(4.);
+   if(hfP0val>15) hfP0val = 15;
+   l1t::EtSum hfP0(*p4, l1t::EtSum::EtSumType::kMinBiasHFP0,hfP0val, 0, 0, 0); 
+   etsumVec.push_back(hfP0);
+
+   int hfM0val  = gRandom->Poisson(4.);
+   if(hfM0val>15) hfM0val = 15;
+   l1t::EtSum hfM0(*p4, l1t::EtSum::EtSumType::kMinBiasHFM0,hfM0val, 0, 0, 0); 
+   etsumVec.push_back(hfM0);   
+
+   int hfP1val  = gRandom->Poisson(4.);
+   if(hfP1val>15) hfP1val = 15;
+   l1t::EtSum hfP1(*p4, l1t::EtSum::EtSumType::kMinBiasHFP1,hfP1val, 0, 0, 0); 
+   etsumVec.push_back(hfP1);
+
+   int hfM1val  = gRandom->Poisson(4.);
+   if(hfM1val>15) hfM1val = 15;
+   l1t::EtSum hfM1(*p4, l1t::EtSum::EtSumType::kMinBiasHFM1,hfM1val, 0, 0, 0); 
+   etsumVec.push_back(hfM1);    
+
+ 
  
 // Fill in some external conditions for testing
    if((iEvent.id().event())%2 == 0 ) {
@@ -613,12 +635,12 @@ GenToInputProducer::produce(Event& iEvent, const EventSetup& iSetup)
    }     
    
 
-  iEvent.put(egammas);
-  iEvent.put(muons);
-  iEvent.put(taus);
-  iEvent.put(jets);
-  iEvent.put(etsums);
-  iEvent.put(extCond);
+  iEvent.put(std::move(egammas));
+  iEvent.put(std::move(muons));
+  iEvent.put(std::move(taus));
+  iEvent.put(std::move(jets));
+  iEvent.put(std::move(etsums));
+  iEvent.put(std::move(extCond));
 
   // Now shift the bx data by one to prepare for next event.
   muonVec_bxm2 = muonVec_bxm1;
@@ -665,7 +687,7 @@ GenToInputProducer::endJob() {
 
 void GenToInputProducer::beginRun(Run const&iR, EventSetup const&iE){
 
-  LogDebug("l1t|Global") << "GenToInputProducer::beginRun function called...\n";
+  LogDebug("GtGenToInputProducer") << "GenToInputProducer::beginRun function called...\n";
 
   counter_ = 0;
   srand( 0 );

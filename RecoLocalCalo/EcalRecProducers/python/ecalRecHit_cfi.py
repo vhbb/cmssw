@@ -80,3 +80,4 @@ ecalRecHit = cms.EDProducer("EcalRecHitProducer",
     cleaningConfig=cleaningAlgoConfig,
 
     )
+

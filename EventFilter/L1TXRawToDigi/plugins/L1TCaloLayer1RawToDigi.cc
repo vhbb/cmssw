@@ -78,13 +78,13 @@ private:
   virtual void produce(Event&, const EventSetup&) override;
   virtual void endStream() override;
 
-  void makeECalTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::auto_ptr<EcalTrigPrimDigiCollection>& ecalTPGs);
+  void makeECalTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::unique_ptr<EcalTrigPrimDigiCollection>& ecalTPGs);
 
-  void makeHCalTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::auto_ptr<HcalTrigPrimDigiCollection>& hcalTPGs);
+  void makeHCalTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::unique_ptr<HcalTrigPrimDigiCollection>& hcalTPGs);
 
-  void makeHFTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::auto_ptr<HcalTrigPrimDigiCollection>& hcalTPGs);
+  void makeHFTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::unique_ptr<HcalTrigPrimDigiCollection>& hcalTPGs);
 
-  void makeRegions(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::auto_ptr<L1CaloRegionCollection>& regions);
+  void makeRegions(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::unique_ptr<L1CaloRegionCollection>& regions);
 
   //virtual void beginRun(Run const&, EventSetup const&) override;
   //virtual void endRun(Run const&, EventSetup const&) override;
@@ -149,9 +149,9 @@ L1TCaloLayer1RawToDigi::produce(Event& iEvent, const EventSetup& iSetup)
   Handle<FEDRawDataCollection> fedRawDataCollection;
   iEvent.getByLabel(fedRawDataLabel, fedRawDataCollection);
 
-  std::auto_ptr<EcalTrigPrimDigiCollection> ecalTPGs(new EcalTrigPrimDigiCollection);
-  std::auto_ptr<HcalTrigPrimDigiCollection> hcalTPGs(new HcalTrigPrimDigiCollection);
-  std::auto_ptr<L1CaloRegionCollection> regions (new L1CaloRegionCollection);
+  std::unique_ptr<EcalTrigPrimDigiCollection> ecalTPGs(new EcalTrigPrimDigiCollection);
+  std::unique_ptr<HcalTrigPrimDigiCollection> hcalTPGs(new HcalTrigPrimDigiCollection);
+  std::unique_ptr<L1CaloRegionCollection> regions (new L1CaloRegionCollection);
 
   // if raw data collection is present, check the headers and do the unpacking
   if (fedRawDataCollection.isValid()) {
@@ -202,16 +202,16 @@ L1TCaloLayer1RawToDigi::produce(Event& iEvent, const EventSetup& iSetup)
     return; 
   }
 
-  iEvent.put(ecalTPGs);
-  iEvent.put(hcalTPGs);
-  iEvent.put(regions);
+  iEvent.put(std::move(ecalTPGs));
+  iEvent.put(std::move(hcalTPGs));
+  iEvent.put(std::move(regions));
 
   event++;
   if(verbose && event == 5) LogDebug("L1TCaloLayer1") << "L1TCaloLayer1RawToDigi: Goodbye! Tired of printing junk" << endl;
 
 }
 
-void L1TCaloLayer1RawToDigi::makeECalTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::auto_ptr<EcalTrigPrimDigiCollection>& ecalTPGs) {
+void L1TCaloLayer1RawToDigi::makeECalTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::unique_ptr<EcalTrigPrimDigiCollection>& ecalTPGs) {
   UCTCTP7RawData::CaloType cType = UCTCTP7RawData::EBEE;
   for(uint32_t iPhi = 0; iPhi < 4; iPhi++) { // Loop over all four phi divisions on card
     int cPhi = - 1 + lPhi * 4 + iPhi; // Calorimeter phi index
@@ -234,7 +234,7 @@ void L1TCaloLayer1RawToDigi::makeECalTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Dat
 	// Top three bits seem to be unused. So, we steal those to set the tower masking, link masking and link status information 
 	// To decode these custom three bits use ((EcalTriggerPrimitiveSample::raw() >> 13) & 0x7)
 	uint32_t towerDatum = ctp7Data.getET(cType, negativeEta, iEta, iPhi);
-	if(ctp7Data.getFB(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x0100;
+	if(ctp7Data.getFB(cType, negativeEta, iEta, iPhi)!=0) towerDatum |= 0x0100;
 	if(ctp7Data.isTowerMasked(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x2000;
 	if(ctp7Data.isLinkMasked(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x4000;
 	if(ctp7Data.isLinkMisaligned(cType, negativeEta, iEta, iPhi) ||
@@ -242,7 +242,8 @@ void L1TCaloLayer1RawToDigi::makeECalTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Dat
 	   ctp7Data.isLinkDown(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x8000;
 	EcalTriggerPrimitiveSample sample(towerDatum); 
 	int zSide = cEta / ((int) iEta);
-	EcalSubdetector ecalTriggerTower = EcalSubdetector::EcalTriggerTower;
+        // As far as I can tell, the ECal unpacker only uses barrel and endcap IDs, never EcalTriggerTower
+	const EcalSubdetector ecalTriggerTower = (iEta > 17 ) ? EcalSubdetector::EcalEndcap : EcalSubdetector::EcalBarrel;
 	EcalTrigTowerDetId id(zSide, ecalTriggerTower, iEta, cPhi);
 	EcalTriggerPrimitiveDigi tpg(id);
 	tpg.setSize(1);
@@ -254,7 +255,7 @@ void L1TCaloLayer1RawToDigi::makeECalTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Dat
 
 }
 
-void L1TCaloLayer1RawToDigi::makeHCalTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::auto_ptr<HcalTrigPrimDigiCollection>& hcalTPGs) {
+void L1TCaloLayer1RawToDigi::makeHCalTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::unique_ptr<HcalTrigPrimDigiCollection>& hcalTPGs) {
   UCTCTP7RawData::CaloType cType = UCTCTP7RawData::HBHE;
   for(uint32_t iPhi = 0; iPhi < 4; iPhi++) { // Loop over all four phi divisions on card
     int cPhi = - 1 + lPhi * 4 + iPhi; // Calorimeter phi index
@@ -277,7 +278,7 @@ void L1TCaloLayer1RawToDigi::makeHCalTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Dat
 	// We use next three bits to set the tower masking, link masking and link status information as done for Ecal
 	// To decode these custom six bits use ((EcalTriggerPrimitiveSample::raw() >> 9) & 0x77)
 	uint32_t towerDatum = ctp7Data.getET(cType, negativeEta, iEta, iPhi);
-	if(ctp7Data.getFB(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x0100;
+	if(ctp7Data.getFB(cType, negativeEta, iEta, iPhi)!=0) towerDatum |= 0x0100;
 	if(ctp7Data.isLinkMisaligned(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x0200;
 	if(ctp7Data.isLinkInError(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x0400;
 	if(ctp7Data.isLinkDown(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x0800;
@@ -298,7 +299,7 @@ void L1TCaloLayer1RawToDigi::makeHCalTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Dat
 
 }
 
-void L1TCaloLayer1RawToDigi::makeHFTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::auto_ptr<HcalTrigPrimDigiCollection>& hcalTPGs) {
+void L1TCaloLayer1RawToDigi::makeHFTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::unique_ptr<HcalTrigPrimDigiCollection>& hcalTPGs) {
   UCTCTP7RawData::CaloType cType = UCTCTP7RawData::HF;
   for(uint32_t side = 0; side <= 1; side++) {
     bool negativeEta = false;
@@ -307,20 +308,23 @@ void L1TCaloLayer1RawToDigi::makeHFTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Data,
       for(uint32_t iPhi = 0; iPhi < 2; iPhi++) {
 	if(iPhi == 1 && iEta == 40) iEta = 41;
 	int cPhi = 1 + lPhi * 4 + iPhi * 2; // Calorimeter phi index: 1, 3, 5, ... 71
+        if(iEta == 41) cPhi -= 2; // Last two HF are 3, 7, 11, ...
+        cPhi = (cPhi+69)%72 + 1; // cPhi -= 2 mod 72
 	int cEta = iEta;
 	if(negativeEta) cEta = -iEta;
 	// This code is fragile! Note that towerDatum is packed as is done in HcalTriggerPrimitiveSample
 	// Bottom 8-bits are ET
 	// Then feature bit
+        // Then minBias ADC count bit
 	// The remaining bits are undefined presently
 	// We use next three bits for link details, which we did not have room in EcalTriggerPrimitiveSample case
 	// We use next three bits to set the tower masking, link masking and link status information as done for Ecal
 	// To decode these custom six bits use ((EcalTriggerPrimitiveSample::raw() >> 9) & 0x77)
 	uint32_t towerDatum = ctp7Data.getET(cType, negativeEta, iEta, iPhi);
-	if(ctp7Data.getFB(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x0100;
-	if(ctp7Data.isLinkMisaligned(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x0200;
-	if(ctp7Data.isLinkInError(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x0400;
-	if(ctp7Data.isLinkDown(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x0800;
+        towerDatum |= ctp7Data.getFB(cType, negativeEta, iEta, iPhi) << 8;
+	if(ctp7Data.isLinkMisaligned(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x0400;
+	if(ctp7Data.isLinkInError(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x0800;
+	if(ctp7Data.isLinkDown(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x1000;
 	if(ctp7Data.isTowerMasked(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x2000;
 	if(ctp7Data.isLinkMasked(cType, negativeEta, iEta, iPhi)) towerDatum |= 0x4000;
 	if(ctp7Data.isLinkMisaligned(cType, negativeEta, iEta, iPhi) ||
@@ -339,14 +343,14 @@ void L1TCaloLayer1RawToDigi::makeHFTPGs(uint32_t lPhi, UCTCTP7RawData& ctp7Data,
 }
 
 void 
-L1TCaloLayer1RawToDigi::makeRegions(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::auto_ptr<L1CaloRegionCollection>& regions) {
+L1TCaloLayer1RawToDigi::makeRegions(uint32_t lPhi, UCTCTP7RawData& ctp7Data, std::unique_ptr<L1CaloRegionCollection>& regions) {
   for(uint32_t side = 0; side <= 1; side++) {
     bool negativeEta = false;
     if(side == 0) negativeEta = true;
     for(uint32_t region = 0; region <= 6; region++) {
       uint32_t regionData = ctp7Data.getRegionSummary(negativeEta, region);
-      uint32_t lEta = region + 4; // GCT eta goes 0-21, 0-3 -HF, 4-10 -B/E, 11-17 +B/E, 18-21 +HF
-      if(!negativeEta) lEta += 7;
+      uint32_t lEta = 10 - region; // GCT eta goes 0-21, 0-3 -HF, 4-10 -B/E, 11-17 +B/E, 18-21 +HF
+      if(!negativeEta) lEta = region + 11;
       regions->push_back(L1CaloRegion((uint16_t) regionData, (unsigned) lEta, (unsigned) lPhi, (int16_t) 0));
     }
   }

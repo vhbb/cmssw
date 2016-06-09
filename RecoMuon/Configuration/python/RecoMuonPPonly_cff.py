@@ -83,3 +83,25 @@ muonGlobalReco = cms.Sequence(globalmuontracking*muonIdProducerSequence*muonSele
 # 6th - Run the remnant part of the muon sequence (muonGlobalReco) 
 
 ########################################################
+
+from Configuration.StandardSequences.Eras import eras
+_enableGEMMeasurement = dict( EnableGEMMeasurement = cms.bool(True) )
+eras.run3_GEM.toModify( standAloneMuons, STATrajBuilderParameters = dict(
+    FilterParameters = _enableGEMMeasurement, 
+    BWFilterParameters = _enableGEMMeasurement ) )
+eras.run3_GEM.toModify( refittedStandAloneMuons, STATrajBuilderParameters = dict(
+    FilterParameters = _enableGEMMeasurement,
+    BWFilterParameters = _enableGEMMeasurement ) )
+
+_enableME0Measurement = dict( EnableME0Measurement = cms.bool(True) )
+eras.phase2_muon.toModify( standAloneMuons, STATrajBuilderParameters = dict(
+    FilterParameters = _enableME0Measurement,
+    BWFilterParameters = _enableME0Measurement ) )
+eras.phase2_muon.toModify( refittedStandAloneMuons, STATrajBuilderParameters = dict(
+    FilterParameters = _enableME0Measurement,
+    BWFilterParameters = _enableME0Measurement ) )
+
+from RecoMuon.MuonIdentification.me0MuonReco_cff import *
+_phase2_muonGlobalReco = muonGlobalReco.copy()
+_phase2_muonGlobalReco += me0MuonReco
+eras.phase2_muon.toReplaceWith( muonGlobalReco, _phase2_muonGlobalReco )

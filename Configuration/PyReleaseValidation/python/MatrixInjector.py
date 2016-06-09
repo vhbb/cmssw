@@ -183,15 +183,21 @@ class MatrixInjector(object):
             wmsplit['TTbar_13_ID']=1
             wmsplit['SingleMuPt10FS_ID']=1
             wmsplit['TTbarFS_ID']=1
-            wmsplit['RECODR2_50nsreHLT']=1
-            wmsplit['RECODR2_25nsreHLT']=1
+            wmsplit['RECODR2_50nsreHLT']=5
+            wmsplit['RECODR2_25nsreHLT']=5
+            wmsplit['RECODR2_2016reHLT']=5
             wmsplit['HLTDR2_50ns']=1
             wmsplit['HLTDR2_25ns']=1
+            wmsplit['HLTDR2_2016']=1
             wmsplit['Hadronizer']=1
-            wmsplit['DIGIUP15']=5
-            wmsplit['RECOUP15']=5
+            wmsplit['DIGIUP15']=1 
+            wmsplit['RECOUP15']=1 
             wmsplit['RECOAODUP15']=5
             wmsplit['DBLMINIAODMCUP15NODQM']=5
+            wmsplit['DigiFull']=5
+            wmsplit['RecoFull']=5
+            wmsplit['DigiFullPU']=1
+            wmsplit['RecoFullPU']=1
 
                                     
             #import pprint
@@ -335,7 +341,9 @@ class MatrixInjector(object):
                                 # the scaling factor of 1.2GB / thread is empirical and measured on a SECOND round of tests with PU samples
                                 # the number of threads is NO LONGER assumed to be the same for all tasks
                                 # https://hypernews.cern.ch/HyperNews/CMS/get/edmFramework/3509/1/1/1.html
-                                chainDict['nowmTasklist'][-1]['Memory'] = 3000 + int( chainDict['nowmTasklist'][-1]['Multicore']  -1 )*1200
+                                # now change to 1.5GB / additional thread according to discussion:
+                                # https://hypernews.cern.ch/HyperNews/CMS/get/relval/4817/1/1.html
+                                chainDict['nowmTasklist'][-1]['Memory'] = 3000 + int( chainDict['nowmTasklist'][-1]['Multicore']  -1 )*1500
 
                         index+=1
                     #end of loop through steps

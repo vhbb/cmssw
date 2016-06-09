@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
+import RecoTracker.IterativeTracking.iterativeTkConfig as _cfg
 
 ### load which are the tracks collection 2 be monitored
 from DQM.TrackingMonitorSource.TrackCollections2monitor_cff import *
@@ -42,7 +43,10 @@ for tracks in selectedTracks :
     locals()[label].doPUmonitoring                      = doPUmonitoring                      [tracks]
     locals()[label].doPlotsVsBXlumi                     = doPlotsVsBXlumi                     [tracks]
     locals()[label].doPlotsVsGoodPVtx                   = doPlotsVsGoodPVtx                   [tracks]
-    locals()[label].doEffFromHitPattern                 = doEffFromHitPattern                 [tracks]
+    locals()[label].doEffFromHitPatternVsPU             = doEffFromHitPatternVsPU             [tracks]
+    locals()[label].doEffFromHitPatternVsBX             = cms.bool(False)
+#    locals()[label].doEffFromHitPatternVsBX             = doEffFromHitPatternVsBX             [tracks]
+#    locals()[label].doStopSource                        = doStopSource                        [tracks]    
     locals()[label].setLabel(label)
     
 
@@ -76,7 +80,9 @@ for tracks in selectedTracks :
     locals()[label].doPUmonitoring                      = doPUmonitoring                      [tracks]
     locals()[label].doPlotsVsBXlumi                     = doPlotsVsBXlumi                     [tracks]
     locals()[label].doPlotsVsGoodPVtx                   = doPlotsVsGoodPVtx                   [tracks]
-    locals()[label].doEffFromHitPattern                 = doEffFromHitPattern                 [tracks]
+    locals()[label].doEffFromHitPatternVsPU             = doEffFromHitPatternVsPU             [tracks]
+    locals()[label].doEffFromHitPatternVsBX             = doEffFromHitPatternVsBX             [tracks]
+    locals()[label].doStopSource                        = doStopSource                        [tracks]    
     locals()[label].setLabel(label)
 
 
@@ -86,7 +92,9 @@ for tracks in selectedTracks :
 import DQM.TrackingMonitor.TrackingMonitorSeed_cfi
 
 from DQM.TrackingMonitorSource.IterTrackingModules4seedMonitoring_cfi import *
-for step in selectedIterTrackingStep :
+# Create first modules for all possible iterations, select later which
+# ones to actually use based on era
+for step in seedInputTag.iterkeys():
     label = 'TrackSeedMon'+str(step)
     locals()[label] = DQM.TrackingMonitor.TrackingMonitorSeed_cfi.TrackMonSeed.clone(
         doTrackCandHistos = cms.bool(True)
@@ -168,16 +176,22 @@ for tracks in selectedTracks :
     if tracks != 'generalTracks':
         TrackingDQMSourceTier0 += sequenceName[tracks]
     label = 'TrackerCollisionSelectedTrackMonCommon' + str(tracks)
-    TrackingDQMSourceTier0 += cms.Sequence(locals()[label])
+    TrackingDQMSourceTier0 += locals()[label]
 # seeding monitoring
-for step in selectedIterTrackingStep :
-    label = 'TrackSeedMon'+str(step)
-    TrackingDQMSourceTier0 += cms.Sequence(locals()[label])
-eras.trackingLowPU.toReplaceWith(TrackingDQMSourceTier0, TrackingDQMSourceTier0.copyAndExclude([TrackSeedMonjetCoreRegionalStep]))
+for era in _cfg.allEras():
+    postfix = _cfg.postfix(era)
+    _seq = cms.Sequence()
+    for step in locals()["selectedIterTrackingStep"+postfix]:
+        _seq += locals()["TrackSeedMon"+step]
+    if era == "":
+        locals()["TrackSeedMonSequence"] = _seq
+    else:
+        getattr(eras, era).toReplaceWith(TrackSeedMonSequence, _seq)
+TrackingDQMSourceTier0 += TrackSeedMonSequence
 # MessageLog
 for module in selectedModules :
     label = str(module)+'LogMessageMonCommon'
-    TrackingDQMSourceTier0 += cms.Sequence(locals()[label])
+    TrackingDQMSourceTier0 += locals()[label]
 TrackingDQMSourceTier0 += dqmInfoTracking
 
 
@@ -189,16 +203,13 @@ for tracks in selectedTracks :
     if tracks != 'generalTracks':
         TrackingDQMSourceTier0Common+=sequenceName[tracks]
     label = 'TrackerCollisionSelectedTrackMonCommon' + str(tracks)
-    TrackingDQMSourceTier0Common += cms.Sequence(locals()[label])
+    TrackingDQMSourceTier0Common += locals()[label]
 # seeding monitoring
-for step in selectedIterTrackingStep :
-    label = 'TrackSeedMon'+str(step)
-    TrackingDQMSourceTier0Common += cms.Sequence(locals()[label])
-eras.trackingLowPU.toReplaceWith(TrackingDQMSourceTier0Common, TrackingDQMSourceTier0Common.copyAndExclude([TrackSeedMonjetCoreRegionalStep]))
+TrackingDQMSourceTier0Common += TrackSeedMonSequence
 # MessageLog
 for module in selectedModules :
     label = str(module)+'LogMessageMonCommon'
-    TrackingDQMSourceTier0Common += cms.Sequence(locals()[label])
+    TrackingDQMSourceTier0Common += locals()[label]
 TrackingDQMSourceTier0Common += dqmInfoTracking
 
 TrackingDQMSourceTier0MinBias = cms.Sequence()
@@ -211,15 +222,12 @@ for tracks in selectedTracks :
     if tracks != 'generalTracks':
         TrackingDQMSourceTier0MinBias += sequenceName[tracks]
     label = 'TrackerCollisionSelectedTrackMonMB' + str(tracks)
-    TrackingDQMSourceTier0MinBias += cms.Sequence(locals()[label])
+    TrackingDQMSourceTier0MinBias += locals()[label]
 # seeding monitoring
-for step in selectedIterTrackingStep :
-    label = 'TrackSeedMon'+str(step)
-    TrackingDQMSourceTier0MinBias += cms.Sequence(locals()[label])
-eras.trackingLowPU.toReplaceWith(TrackingDQMSourceTier0MinBias, TrackingDQMSourceTier0MinBias.copyAndExclude([TrackSeedMonjetCoreRegionalStep]))
+TrackingDQMSourceTier0MinBias += TrackSeedMonSequence
 # MessageLog
 for module in selectedModules :
     label = str(module)+'LogMessageMonMB'
-    TrackingDQMSourceTier0MinBias += cms.Sequence(locals()[label])
+    TrackingDQMSourceTier0MinBias += locals()[label]
 TrackingDQMSourceTier0MinBias += dqmInfoTracking
 
