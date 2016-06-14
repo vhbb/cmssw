@@ -1,6 +1,6 @@
 from array import array
 from math import *
-from PhysicsTools.HeppyCore.utils.deltar import deltaR
+from PhysicsTools.HeppyCore.utils.deltar import deltaR, matchObjectCollection
 from VHbbAnalysis.Heppy.signedSip import qualityTrk
 
 import ROOT
@@ -13,17 +13,17 @@ import ROOT
 def jetLepAwareJEC(lep): # use only if jetAna.calculateSeparateCorrections==True
     p4l = lep.p4()
     l = ROOT.TLorentzVector(p4l.Px(),p4l.Py(),p4l.Pz(),p4l.E())
-    if not hasattr(lep.jet,'rawFactor'): return l # if lep==jet (matched to lepton object itself)
-    p4j = lep.jet.p4()
+    if not hasattr(lep.jet_leptonMVA,'rawFactor'): return l # if lep==jet (matched to lepton object itself)
+    p4j = lep.jet_leptonMVA.p4()
     j = ROOT.TLorentzVector(p4j.Px(),p4j.Py(),p4j.Pz(),p4j.E())
-    if ((j*lep.jet.rawFactor()-l).Rho()<1e-4): return l # matched to jet containing only the lepton
-    j = (j*lep.jet.rawFactor()-l*(1.0/lep.jet.l1corrFactor()))*lep.jet.corrFactor()+l
+    if ((j*lep.jet_leptonMVA.rawFactor()-l).Rho()<1e-4): return l # matched to jet containing only the lepton
+    j = (j*lep.jet_leptonMVA.rawFactor()-l*(1.0/lep.jet_leptonMVA.l1corrFactor()))*lep.jet_leptonMVA.corrFactor()+l
     return j
 def ptRelv2(lep): # use only if jetAna.calculateSeparateCorrections==True
     m = jetLepAwareJEC(lep)
     p4l = lep.p4()
     l = ROOT.TLorentzVector(p4l.Px(),p4l.Py(),p4l.Pz(),p4l.E())
-    if ((m-l).Rho()<1e-4): return 0 # lep.jet==lep (no match) or jet containing only the lepton
+    if ((m-l).Rho()<1e-4): return 0 # lep.jet_leptonMVA==lep (no match) or jet containing only the lepton
     return l.Perp((m-l).Vect())
 
 class MVAVar:
@@ -131,7 +131,21 @@ class LeptonMVA:
                     ( lambda x: abs(x.eta()) >= 0.8 and abs(x.eta()) <  1.479, MVATool("BDTG",basepath%"el_eta_fb",_CommonSpect,elVars) ),
                     ( lambda x: abs(x.eta()) >= 1.479                        , MVATool("BDTG",basepath%"el_eta_ec",_CommonSpect,elVars) ),
                     ])
-    def __call__(self,lep,ncorr="auto"):
+    def __call__(self,lep,jets,ncorr="auto"):
+        #------------------------------------------------------------------------
+        # CV: recompute jet-lepton matching for 25 GeV jet pT threshold
+        #    (neccessary, as CERN group uses 25 GeV jet pT threshold, while VHbb analysis uses 15 GeV)
+        selJets = []
+        for jet in jets:
+            if jet.pt() > 25.:
+                selJets.append(jet)
+        jlpairs = matchObjectCollection([ lep ], selJets, 0.4**2)
+        jet = jlpairs[lep]
+        if jet is None:
+            lep.jet_leptonMVA = lep
+        else:
+            lep.jet_leptonMVA = jet
+        #------------------------------------------------------------------------
         if ncorr == "auto": ncorr = 0 # (1 if self._isMC else 0)
         ##if abs(lep.pdgId()) == 11:
         ##  ##print "x.mvaRun2('NonTrigSpring15') = ", lep.mvaRun2("NonTrigSpring15")
