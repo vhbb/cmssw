@@ -20,6 +20,14 @@ sample.files=[
 TriggerObjectsAna.triggerObjectInputTag = ('selectedPatTrigger','','RECO')
 FlagsAna.processName='RECO'
 TrigAna.triggerBits = triggerTableData
+L1TriggerAna.processName = 'RECO'
+TriggerPrescalesAna.processName = 'RECO'
+triggerList = []
+for triggerNames in triggerTableData.values():
+    for triggerName in triggerNames:
+        triggerName = triggerName.replace("*","")
+        triggerList.append(triggerName)
+TriggerPrescalesAna.triggerList = triggerList
 
 # and the following runs the process directly 
 if __name__ == '__main__':
