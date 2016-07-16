@@ -395,10 +395,23 @@ L1TriggerAna = cfg.Analyzer(
     class_object = L1TriggerAnalyzer,
     processName = 'HLT',
 )
+### add trigger prescales ####
+triggerList = []
+for triggerNames in triggerTable.values():
+    for trgName in triggerNames:
+        trgName = trgName.replace("*","")
+        triggerList.append(trgName)
+triggerList = list(set(triggerList))
+from PhysicsTools.Heppy.analyzers.core.TriggerPrescalesAnalyzer import TriggerPrescalesAnalyzer
+TriggerPrescalesAna = cfg.Analyzer(
+    class_object = TriggerPrescalesAnalyzer,
+    name="TriggerPrescalesAnalyzerDefault",
+    triggerList = triggerList,
+    processName = 'PAT',
+    triggerBitsInputTag = ('TriggerResults','','HLT'),
+    l1Prescales = False
+)
 ###
-
-
-
 
 from PhysicsTools.Heppy.analyzers.gen.PDFWeightsAnalyzer import PDFWeightsAnalyzer
 PdfAna = cfg.Analyzer(PDFWeightsAnalyzer,
@@ -427,7 +440,7 @@ silverJsonAna = cfg.Analyzer(JSONAnalyzer,
       suffix="_silver"
       )
 
-sequence = [jsonAna,LHEAna,LHEWeightAna,FlagsAna, hbheAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,TauAna,JetAna,ttHLeptonMVA,METAna, METPuppiAna,  PdfAna, VHbb,TTHtoTauTau,TTHtoTauTauGen,TriggerObjectsAna,L1TriggerAna,treeProducer]#,sh]
+sequence = [jsonAna,LHEAna,LHEWeightAna,FlagsAna, hbheAna, GenAna,VHGenAna,PUAna,TrigAna,VertexAna,LepAna,PhoAna,TauAna,JetAna,ttHLeptonMVA,METAna, METPuppiAna,  PdfAna, VHbb,TTHtoTauTau,TTHtoTauTauGen,TriggerObjectsAna,L1TriggerAna,TriggerPrescalesAna,treeProducer]#,sh]
 
 from PhysicsTools.Heppy.utils.miniAodFiles import miniAodFiles
 sample = cfg.MCComponent(
