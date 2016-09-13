@@ -27,7 +27,7 @@ void HTXSRivetAnalyzer::beginRun(const edm::Run& iRun,const edm::EventSetup& iSe
 
 void HTXSRivetAnalyzer::analyze(const edm::Event& iEvent,const edm::EventSetup& iSetup){
   
-  _HTXS.init();
+  // _HTXS.init();
   //get the hepmc product from the event
   edm::Handle<HepMCProduct> evt;
   iEvent.getByToken(_hepmcCollection, evt);
