@@ -5,7 +5,7 @@ cd CMSSW_8_0_19/src
 
 cmsenv
 
-git cms-addpkg GeneratorInterface/RivetInterface
+git cms-merge-topic -u perrozzi:rivet_hepmc
 
 rivet-buildplugin GeneratorInterface/RivetInterface/src/HiggsTemplateCrossSections.cc; 
 
