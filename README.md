@@ -7,8 +7,11 @@ cmsenv
 
 git cms-merge-topic -u perrozzi:rivet_hepmc
 
-rivet-buildplugin GeneratorInterface/RivetInterface/src/HiggsTemplateCrossSections.cc; 
+# not needed anymore (?)
+# rivet-buildplugin GeneratorInterface/RivetInterface/src/HiggsTemplateCrossSections.cc; 
 
 scram b -j 8; 
+
+cd GeneratorInterface/RivetInterface/test 
 
 cmsRun testRivet.py
