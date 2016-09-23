@@ -5,6 +5,8 @@
 
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 
+#include "Rivet/AnalysisHandler.hh"
+
 #include "GeneratorInterface/RivetInterface/src/HiggsTemplateCrossSections.cc"
 
 #include <vector>
@@ -30,6 +32,8 @@ class HTXSRivetAnalyzer : public edm::EDAnalyzer
   private:
 
   edm::EDGetTokenT<edm::HepMCProduct> _hepmcCollection;
+  Rivet::AnalysisHandler   _analysisHandler;
+  bool                     _isFirstEvent;
   Rivet::HiggsTemplateCrossSections _HTXS;
 
 };

@@ -5,6 +5,7 @@
 #include "Rivet/Analysis.hh"
 #include "Rivet/Particle.hh"
 #include "Rivet/Projections/FastJets.hh"
+#include "Rivet/Projections/FinalState.hh"
 
 // Definition of the StatusCode and Category enums
 #include "HiggsTemplateCrossSections.h"
@@ -15,12 +16,13 @@ namespace Rivet {
   /// @brief  Rivet routine for classifying MC events according to the Higgs template cross section categories
   /// @author Jim Lacey (Carleton University) <james.lacey@cern.ch,jlacey@physics.carleton.ca>
   /// @author Dag Gillberg (Carleton University) <dag.gillberg@cern.ch>
+
   class HiggsTemplateCrossSections : public Analysis {
   public:
     // Constructor
     HiggsTemplateCrossSections()
-    : Analysis("HiggsTemplateCrossSections"),
-    m_HiggsProdMode(HTXS::UNKNOWN) {}
+      : Analysis("HiggsTemplateCrossSections"),
+      m_HiggsProdMode(HTXS::UNKNOWN) {    }
 
   public:
 
@@ -32,8 +34,8 @@ namespace Rivet {
     /// follow a "propagating" particle and return its last instance
     Particle getLastInstance(Particle ptcl) {
       if ( ptcl.genParticle()->end_vertex() ) {
-        if ( !hasChild(ptcl.genParticle(),ptcl.pdgId()) ) return ptcl;
-        else return getLastInstance(ptcl.children()[0]);
+	if ( !hasChild(ptcl.genParticle(),ptcl.pdgId()) ) return ptcl;
+	else return getLastInstance(ptcl.children()[0]);
       }
       return ptcl;
     }
@@ -44,8 +46,8 @@ namespace Rivet {
       if (prodVtx == nullptr) return false;
       // for each ancestor, check if it matches any of the input particles
       for (auto ancestor:particles(prodVtx, HepMC::ancestors)){ 
-        for ( auto part:ptcls ) 
-        if ( ancestor==part.genParticle() ) return true;
+	for ( auto part:ptcls ) 
+	  if ( ancestor==part.genParticle() ) return true;
       }
       // if we get here, no ancetor matched any input particle
       return false; 
@@ -59,28 +61,28 @@ namespace Rivet {
     /// @brief Checks whether the input particle has a child with a given PDGID 
     bool hasChild(const GenParticle *ptcl, int pdgID) {
       for (auto child:Particle(*ptcl).children())
-      if (child.pdgId()==pdgID) return true;
+        if (child.pdgId()==pdgID) return true;
       return false;
     }
     
     /// @brief Checks whether the input particle has a parent with a given PDGID 
     bool hasParent(const GenParticle *ptcl, int pdgID) {
       for (auto parent:particles(ptcl->production_vertex(),HepMC::parents))
-      if (parent->pdg_id()==pdgID) return true;
+        if (parent->pdg_id()==pdgID) return true;
       return false;
     }
 
     /// @brief Return true is particle decays to quarks
     bool quarkDecay(const Particle &p) {
       for (auto child:p.children())
-      if (PID::isQuark(child.pdgId())) return true;
+        if (PID::isQuark(child.pdgId())) return true;
       return false;
     }
     
     /// @brief Returns the classification object with the error code set.
     ///        Prints an warning message, and keeps track of number of errors
     HiggsClassification error(HiggsClassification &cat, HTXS::ErrorCode err, 
-    std::string msg="", int NmaxWarnings=20) {
+			      std::string msg="", int NmaxWarnings=20) {
       // Set the error, and keep statistics
       cat.errorCode = err;
       ++m_errorCount[err];
@@ -88,7 +90,7 @@ namespace Rivet {
       // Print warning message to the screen/log
       static int Nwarnings = 0;
       if ( msg!="" && ++Nwarnings < NmaxWarnings )
-      MSG_WARNING(msg);
+	  MSG_WARNING(msg);
 
       return cat;
     }
@@ -109,14 +111,14 @@ namespace Rivet {
 
 
       if (prodMode == HTXS::UNKNOWN) 
-      return error(cat,HTXS::PRODMODE_DEFINED,
-      "Unkown Higgs production mechanism. Cannot classify event."                                                                       
-      " Classification for all events will most likely fail.");
+	return error(cat,HTXS::PRODMODE_DEFINED,
+		     "Unkown Higgs production mechanism. Cannot classify event."                                                                       
+		     " Classification for all events will most likely fail.");
 
-      //
-      // Step 1. 
-      //  Idenfify the Higgs boson and the hard scatter vertex
-      //  There should be only one of each.
+       //
+       // Step 1. 
+       //  Idenfify the Higgs boson and the hard scatter vertex
+       //  There should be only one of each.
 
       MSG_INFO("FIND THE HIGGS.");
 
@@ -124,89 +126,85 @@ namespace Rivet {
       int Nhiggs=0;
       for ( const GenParticle *ptcl : Rivet::particles(event.genEvent()) ) {
 
-        // MSG_INFO("All particles pdgID " << ptcl->pdg_id() << " ");
-        
+          //MSG_INFO("All Particles pdgID " << ptcl->pdg_id() << " ");
+
         // a) Reject all non-Higgs particles
         if ( !PID::isHiggs(ptcl->pdg_id()) ) continue;
 
-        // MSG_INFO("All Higggs pdgID " << ptcl->pdg_id() << " ");
+        MSG_INFO("All Higggs pdgID " << ptcl->pdg_id() << " ");
 
         // b) select only the final Higgs boson copy, prior to decay
         if ( ptcl->end_vertex() && !hasChild(ptcl,PID::HIGGS) ) {
           cat.higgs = Particle(ptcl); ++Nhiggs;
         }
-        
+
         // c) if HepMC::signal_proces_vertex is missing
         //    set hard-scatter vertex based on first Higgs boson
         if ( HSvtx==nullptr && ptcl->production_vertex() && !hasParent(ptcl,PID::HIGGS) ) {
-          MSG_INFO("ACHTUNG!!! Hsvtx==nullptr ");            
-          HSvtx = ptcl->production_vertex();
+            MSG_INFO("Hsvtx==nullptr ");            
+            HSvtx = ptcl->production_vertex();
         } 
       }
 
       // Make sure things are in order so far
       if (Nhiggs!=1||cat.higgs.children().size()<2) 
-      return error(cat,HTXS::HIGGS_IDENTIFICATION,
-      "Current event has "+std::to_string(Nhiggs)+" Higgs bosons. There must be only one.");
+	return error(cat,HTXS::HIGGS_IDENTIFICATION,
+		     "Current event has "+std::to_string(Nhiggs)+" Higgs bosons. There must be only one.");
 
       if (HSvtx == nullptr) 
-      return error(cat,HTXS::HS_VTX_IDENTIFICATION,"Cannot find hard-scatter vertex of current event.");
+	return error(cat,HTXS::HS_VTX_IDENTIFICATION,"Cannot find hard-scatter vertex of current event.");
 
       //
       // Step 2. 
       //   Identify associated vector bosons
 
       MSG_INFO("FIND THE V'S.");
-
+ 
       // Find associated vector bosons
       int nWs=0, nZs=0, nTop=0;
       if ( isVH(prodMode) ) {
-        for (auto ptcl:particles(HSvtx,HepMC::children)) {
-          MSG_INFO("HSvtx pdgID " << ptcl->pdg_id() << " ");
+	for (auto ptcl:particles(HSvtx,HepMC::children)) {
+        MSG_INFO("Hchildren pdgID " << ptcl->pdg_id() << " ");
 
-          if (PID::isW(ptcl->pdg_id())) { ++nWs; cat.V=Particle(ptcl); }
-          if (PID::isZ(ptcl->pdg_id())) { ++nZs; cat.V=Particle(ptcl); }
-        }
-        
-        if ( nWs==0 && nZs==0 ){
-          return error(cat,HTXS::VH_IDENTIFICATION,"Failed to identify W or Z boson(s) in the associated production!");
-        }
-        cat.V = getLastInstance(cat.V);
+	  if (PID::isW(ptcl->pdg_id())) { ++nWs; cat.V=Particle(ptcl); }
+	  if (PID::isZ(ptcl->pdg_id())) { ++nZs; cat.V=Particle(ptcl); }
+	}
+	cat.V = getLastInstance(cat.V);
       }
 
       MSG_INFO("nZs " << nZs << " nWs: " << nWs << " " );
-      // /*
 
       // Find and store the W-bosons from ttH->WbWbH
       MSG_INFO("FIND THE W'S from ttH.");
 
       Particles Ws;
       if ( prodMode==HTXS::TTH || prodMode==HTXS::TH ){
-        // loop over particles produced in hard-scatter vertex
-        for ( auto ptcl : particles(HSvtx,HepMC::children) ) {
-          if ( !PID::isTop(ptcl->pdg_id()) ) continue;
-          ++nTop;
-          Particle top = getLastInstance(Particle(ptcl));
-          if ( top.genParticle()->end_vertex() ) 
-          for (auto child:top.children())
-          if ( PID::isW(child.pdgId()) ) Ws += child;
-        }
+	// loop over particles produced in hard-scatter vertex
+      	for ( auto ptcl : particles(HSvtx,HepMC::children) ) {
+      	  if ( !PID::isTop(ptcl->pdg_id()) ) continue;
+	  ++nTop;
+	  Particle top = getLastInstance(Particle(ptcl));
+	  //Particle top = Particle(ptcl);
+	  if ( top.genParticle()->end_vertex() ) 
+	    for (auto child:top.children())
+	      if ( PID::isW(child.pdgId()) ) Ws += child;
+	}
       }
 
       // Make sure result make sense
 
       if ( (prodMode==HTXS::TTH && Ws.size()<2) || (prodMode==HTXS::TH && Ws.size()<1 ) )
-      return error(cat,HTXS::TOP_W_IDENTIFICATION,"Failed to identify W-boson(s) from t-decay!");
+	return error(cat,HTXS::TOP_W_IDENTIFICATION,"Failed to identify W-boson(s) from t-decay!");
 
       if ( isVH(prodMode) && ( !cat.V.genParticle()->end_vertex()||cat.V.children().size()<2 ) )
-      return error(cat,HTXS::TOP_W_IDENTIFICATION,"Vector boson does not decay!");
+	return error(cat,HTXS::TOP_W_IDENTIFICATION,"Vector boson does not decay!");
 
       MSG_INFO("nZs: "<< nZs << " nWs: "<<nWs<< " ");
 
       if ( ( prodMode==HTXS::WH && (nZs>0||nWs!=1) ) ||
-          ( (prodMode==HTXS::QQ2ZH||prodMode==HTXS::GG2ZH) && (nZs!=1||nWs>0) ) ) 
-      return error(cat,HTXS::TOP_W_IDENTIFICATION,"Found "+std::to_string(nWs)+" W-bosons and "+
-      std::to_string(nZs)+" Z-bosons. Inconsitent with VH expectation.");
+	   ( (prodMode==HTXS::QQ2ZH||prodMode==HTXS::GG2ZH) && (nZs!=1||nWs>0) ) ) 
+	return error(cat,HTXS::TOP_W_IDENTIFICATION,"Found "+std::to_string(nWs)+" W-bosons and "+
+		     std::to_string(nZs)+" Z-bosons. Inconsitent with VH expectation.");
       
       //
       // Step 3.
@@ -214,7 +212,7 @@ namespace Rivet {
       //   Make sure all stable particles are present
 
       MSG_INFO("FIND THE JETS.");
-
+     
       // Create a list of the vector bosons that decay leptonically
       // Either the vector boson produced in association with the Higgs boson,
       // or the ones produced from decays of top quarks produced with the Higgs
@@ -223,51 +221,59 @@ namespace Rivet {
       for ( auto W:Ws ) if ( W.genParticle()->end_vertex() && !quarkDecay(W) ) leptonicVs += W;
 
       // Obtain all stable, final-state particles
-      const ParticleVector FS = applyProjection<FinalState>(event, "FS").particles();
-      // Particles hadrons;
-      // FourMomentum sum(0,0,0,0), vSum(0,0,0,0), hSum(0,0,0,0);
-      // for ( const Particle &p : FS ) {
-        // // Add up the four momenta of all stable particles as a cross check
-        // sum += p.momentum();
-        // // ignore particles from the Higgs boson
-        // if ( originateFrom(p,cat.higgs) ) { hSum += p.momentum(); continue; }
-        // // Cross-check the V decay products for VH
-        // if ( isVH(prodMode) && originateFrom(p,Ws) ) vSum += p.momentum();
-        // // ignore final state particles from leptonic V decays
-        // if ( leptonicVs.size() && originateFrom(p,leptonicVs) ) continue;
-        // // All particles reaching here are considered hadrons and will be used to build jets
-        // hadrons += p;
-      // }
+      const ParticleVector FS = applyProjection<FinalState>(event, "FS").particles(); 
 
-      // cat.p4decay_higgs = hSum;
-      // cat.p4decay_V = vSum;
+      Particles hadrons;
+      FourMomentum sum(0,0,0,0), vSum(0,0,0,0), hSum(0,0,0,0);
+      for ( const Particle &p : FS ) {
+          // Add up the four momenta of all stable particles as a cross check          
+          sum += p.momentum();
+          MSG_INFO("id: " << p.pdgId() <<" pt: "<< p.pt() <<" sum.pt(): "<< sum.pt());
+          // ignore particles from the Higgs boson
+          if ( originateFrom(p,cat.higgs) ) { hSum += p.momentum(); continue; }
+          // Cross-check the V decay products for VH
+          if ( isVH(prodMode) && originateFrom(p,Ws) ) vSum += p.momentum();
+          // ignore final state particles from leptonic V decays
+          if ( leptonicVs.size() && originateFrom(p,leptonicVs) ) continue;
+          // All particles reaching here are considered hadrons and will be used to build jets
+          hadrons += p;
+      }
 
-      // // Let's build the jets
-      // FastJets jets( FastJets::ANTIKT, 0.4 );
-      // jets.calc(hadrons);
-      // cat.jets25 = jets.jetsByPt( Cuts::pT > 25.0 );
-      // cat.jets30 = jets.jetsByPt( Cuts::pT > 30.0 );
+      cat.p4decay_higgs = hSum;
+      cat.p4decay_V = vSum;
 
-      // // check that four mometum sum of all stable particles satisfies momentum consevation
-      // if ( sum.pt()>0.1 )
-      // return error(cat,HTXS::MOMENTUM_CONSERVATION,"Four vector sum does not amount to pT=0, m=E=sqrt(s), but pT="+
-      // std::to_string(sum.pt())+" GeV and m = "+std::to_string(sum.mass())+" GeV");
+      MSG_INFO("NOW BUILDING THE JETS.");
+
+      // Let's build the jets
+      FastJets jets( FastJets::ANTIKT, 0.4 );
+      jets.calc(hadrons);
+      cat.jets25 = jets.jetsByPt( Cuts::pT > 25.0 );
+      cat.jets30 = jets.jetsByPt( Cuts::pT > 30.0 );
+
+      MSG_INFO("CHECK MOMENTUM.");
+
+      // check that four mometum sum of all stable particles satisfies momentum consevation
+      MSG_INFO("sum.pt()" << sum.pt());
+      MSG_INFO("hSum.pt()" << hSum.pt());
+      MSG_INFO("vSum.pt()" << vSum.pt());
+
+      if ( sum.pt()>0.1 )
+	return error(cat,HTXS::MOMENTUM_CONSERVATION,"Four vector sum does not amount to pT=0, m=E=sqrt(s), but pT="+
+		     std::to_string(sum.pt())+" GeV and m = "+std::to_string(sum.mass())+" GeV");
       
-
-      // //
-      // // Step 4.
-      // //   Classify and save output
+ 
+      //
+      // Step 4.
+      //   Classify and save output
       
-      // MSG_INFO("FINISH.");
+      MSG_INFO("FINISH.");
 
-      // // Apply the categorization categorization
-      // cat.stage0_cat = getStage0Category(prodMode,cat.higgs,cat.V);
-      // cat.stage1_cat_pTjet25GeV = getStage1Category(prodMode,cat.higgs,cat.jets25,cat.V);
-      // cat.stage1_cat_pTjet30GeV = getStage1Category(prodMode,cat.higgs,cat.jets30,cat.V);      
-      // cat.errorCode = HTXS::SUCCESS; ++m_errorCount[HTXS::SUCCESS];
+      // Apply the categorization categorization
+      cat.stage0_cat = getStage0Category(prodMode,cat.higgs,cat.V);
+      cat.stage1_cat_pTjet25GeV = getStage1Category(prodMode,cat.higgs,cat.jets25,cat.V);
+      cat.stage1_cat_pTjet30GeV = getStage1Category(prodMode,cat.higgs,cat.jets30,cat.V);      
+      cat.errorCode = HTXS::SUCCESS; ++m_errorCount[HTXS::SUCCESS];
 
-      // */
-      
       return cat;
     }    
 
@@ -281,7 +287,7 @@ namespace Rivet {
     int getBin(double x, std::vector<double> bins) {
       if (bins.size()==0||x<bins[0]) return -1; // should not happen!
       for (size_t i=1;i<bins.size();++i)
-      if (x<bins[i]) return i-1;
+        if (x<bins[i]) return i-1;
       return bins.size()-1;
     }
     
@@ -300,15 +306,15 @@ namespace Rivet {
     
     /// @brief Stage-0 HTXS categorization
     HTXS::Stage0::Category getStage0Category(const HTXS::HiggsProdMode prodMode,
-    const Particle &higgs,
-    const Particle &V) {
+					     const Particle &higgs,
+					     const Particle &V) {
       using namespace HTXS::Stage0;
       int ctrlHiggs = std::abs(higgs.rapidity())<2.5;
       // Special cases first, qq→Hqq
       if ( (prodMode==HTXS::WH||prodMode==HTXS::QQ2ZH) && quarkDecay(V) ) {
-        return ctrlHiggs ? VH2HQQ : VH2HQQ_FWDH;
+	return ctrlHiggs ? VH2HQQ : VH2HQQ_FWDH;
       } else if ( prodMode==HTXS::GG2ZH && quarkDecay(V) ) {
-        return Category(HTXS::GGF*10 + ctrlHiggs);
+	return Category(HTXS::GGF*10 + ctrlHiggs);
       }
       // General case after
       return  Category(prodMode*10 + ctrlHiggs);
@@ -316,9 +322,9 @@ namespace Rivet {
 
     /// @brief Stage-1 categorization
     HTXS::Stage1::Category getStage1Category(const HTXS::HiggsProdMode prodMode,
-    const Particle &higgs,
-    const Jets &jets,
-    const Particle &V) {
+					     const Particle &higgs,
+					     const Jets &jets,
+					     const Particle &V) {
       using namespace HTXS::Stage1;
       int Njets=jets.size(), ctrlHiggs = std::abs(higgs.rapidity())<2.5, fwdHiggs = !ctrlHiggs;
       double pTj1 = jets.size() ? jets[0].momentum().pt() : 0;
@@ -327,48 +333,48 @@ namespace Rivet {
       // 1. GGF Stage 1 categories
       //    Following YR4 write-up: XXXXX
       if (prodMode==HTXS::GGF || (prodMode==HTXS::GG2ZH && quarkDecay(V)) ) {
-        if (fwdHiggs)        return GG2H_FWDH;
-        if (Njets==0)        return GG2H_0J;
-        else if (Njets==1)   return Category(GG2H_1J_PTH_0_60+getBin(higgs.pt(),{0,60,120,200}));
-        else if (Njets>=2) {
-          if      (vbfTopo==2) return GG2H_VBFTOPO_JET3VETO;
-          else if (vbfTopo==1) return GG2H_VBFTOPO_JET3;
-          // Njets >= 2jets without VBF topology
-          return Category(GG2H_GE2J_PTH_0_60+getBin(higgs.pt(),{0,60,120,200}));
-        }
+	if (fwdHiggs)        return GG2H_FWDH;
+	if (Njets==0)        return GG2H_0J;
+	else if (Njets==1)   return Category(GG2H_1J_PTH_0_60+getBin(higgs.pt(),{0,60,120,200}));
+	else if (Njets>=2) {
+	  if      (vbfTopo==2) return GG2H_VBFTOPO_JET3VETO;
+	  else if (vbfTopo==1) return GG2H_VBFTOPO_JET3;
+	  // Njets >= 2jets without VBF topology
+	  return Category(GG2H_GE2J_PTH_0_60+getBin(higgs.pt(),{0,60,120,200}));
+	}
       }
       // 2. Electroweak qq->Hqq Stage 1 categories
       else if (prodMode==HTXS::VBF || ( isVH(prodMode) && quarkDecay(V)) ) {
-        if (std::abs(higgs.rapidity())>2.5) return QQ2HQQ_FWDH;
-        if (pTj1>200) return QQ2HQQ_PTJET1_GT200;
-        if (vbfTopo==2) return QQ2HQQ_VBFTOPO_JET3VETO;
-        if (vbfTopo==1) return QQ2HQQ_VBFTOPO_JET3;
-        double mjj = jets.size()>1 ? (jets[0].mom()+jets[1].mom()).mass():0;
-        if ( 60 < mjj && mjj < 120 ) return QQ2HQQ_VH2JET;
-        return QQ2HQQ_REST;
+	if (std::abs(higgs.rapidity())>2.5) return QQ2HQQ_FWDH;
+      	if (pTj1>200) return QQ2HQQ_PTJET1_GT200;
+	if (vbfTopo==2) return QQ2HQQ_VBFTOPO_JET3VETO;
+	if (vbfTopo==1) return QQ2HQQ_VBFTOPO_JET3;
+	double mjj = jets.size()>1 ? (jets[0].mom()+jets[1].mom()).mass():0;
+	if ( 60 < mjj && mjj < 120 ) return QQ2HQQ_VH2JET;
+      	return QQ2HQQ_REST;
       }
       // 3. WH->Hlv categories
       else if (prodMode==HTXS::WH) {
-        if (fwdHiggs) return QQ2HLNU_FWDH;
-        else if (V.pt()<150) return QQ2HLNU_PTV_0_150;
-        else if (V.pt()>250) return QQ2HLNU_PTV_GT250;
-        // 150 < pTV/GeV < 250
-        return jets.size()==0 ? QQ2HLNU_PTV_150_250_0J : QQ2HLNU_PTV_150_250_GE1J;
+	if (fwdHiggs) return QQ2HLNU_FWDH;
+	else if (V.pt()<150) return QQ2HLNU_PTV_0_150;
+      	else if (V.pt()>250) return QQ2HLNU_PTV_GT250;
+      	// 150 < pTV/GeV < 250
+      	return jets.size()==0 ? QQ2HLNU_PTV_150_250_0J : QQ2HLNU_PTV_150_250_GE1J;
       }
       // 4. qq->ZH->llH categories
       else if (prodMode==HTXS::QQ2ZH) {
-        if (fwdHiggs) return QQ2HLL_FWDH;
-        else if (V.pt()<150) return QQ2HLL_PTV_0_150;
-        else if (V.pt()>250) return QQ2HLL_PTV_GT250;
-        // 150 < pTV/GeV < 250
-        return jets.size()==0 ? QQ2HLL_PTV_150_250_0J : QQ2HLL_PTV_150_250_GE1J;
+	if (fwdHiggs) return QQ2HLL_FWDH;
+      	else if (V.pt()<150) return QQ2HLL_PTV_0_150;
+      	else if (V.pt()>250) return QQ2HLL_PTV_GT250;
+      	// 150 < pTV/GeV < 250
+      	return jets.size()==0 ? QQ2HLL_PTV_150_250_0J : QQ2HLL_PTV_150_250_GE1J;
       }
       // 5. gg->ZH->llH categories
       else if (prodMode==HTXS::GG2ZH ) {
-        if (fwdHiggs) return GG2HLL_FWDH;
-        if      (V.pt()<150) return GG2HLL_PTV_0_150;
-        else if (jets.size()==0) return GG2HLL_PTV_GT150_0J;
-        return GG2HLL_PTV_GT150_GE1J;
+	if (fwdHiggs) return GG2HLL_FWDH;
+	if      (V.pt()<150) return GG2HLL_PTV_0_150;
+	else if (jets.size()==0) return GG2HLL_PTV_GT150_0J;
+	return GG2HLL_PTV_GT150_GE1J;
       }
       // 6.ttH,bbH,tH categories
       else if (prodMode==HTXS::TTH) return Category(TTH+ctrlHiggs);
@@ -396,8 +402,8 @@ namespace Rivet {
       // check that the production mode has been set
       // if running in standalone Rivet the production mode is set through an env variable
       if (m_HiggsProdMode==HTXS::UNKNOWN) {
-        char *pm_env = getenv("HIGGSPRODMODE");
-        string pm(pm_env==nullptr?"":pm_env);
+	char *pm_env = getenv("HIGGSPRODMODE");
+	string pm(pm_env==nullptr?"":pm_env);
         if      ( pm == "GGF"   ) m_HiggsProdMode = HTXS::GGF;
         else if ( pm == "VBF"   ) m_HiggsProdMode = HTXS::VBF;
         else if ( pm == "WH"    ) m_HiggsProdMode = HTXS::WH;
@@ -413,25 +419,28 @@ namespace Rivet {
       }
 
       // Projections for final state particles
-      const FinalState FS; 
-      addProjection(FS,"FS");
+      const FinalState FS; // DS
+      addProjection(FS,"FS"); // DS
 
       // initialize the histograms with for each of the stages
-      // initializeHistos();
+      initializeHistos();
       m_sumw = 0.0;
       printf("==============================================================\n");
       printf("========             Higgs prod mode %d              =========\n",m_HiggsProdMode);
       printf("========          Sucessful Initialization           =========\n");
       printf("==============================================================\n");
     }
-    
+        
     // Perform the per-event analysis
     void analyze(const Event& event) {
 
+        // 
+        //setHiggsProdMode(HTXS::QQ2ZH);
+
       // get the classification
       //HiggsClassification cat = classifyEvent(event,m_HiggsProdMode);
+
       HiggsClassification cat = classifyEvent(event,HTXS::QQ2ZH);
-      // HiggsClassification cat = classifyEvent(event,HTXS::TTH);
 
       /*
       // Fill histograms: categorization --> linerize the categories
@@ -458,10 +467,10 @@ namespace Rivet {
       // Jet variables. Use jet collection with pT threshold at 30 GeV
       if (cat.jets30.size()) hist_pT_jet1->fill(cat.jets30[0].pt(),weight);
       if (cat.jets30.size()>=2) {
-  const FourMomentum &j1 = cat.jets30[0].momentum(), &j2 = cat.jets30[1].momentum();
-  hist_deltay_jj->fill(std::abs(j1.rapidity()-j2.rapidity()),weight);
-  hist_dijet_mass->fill((j1+j2).mass(),weight);
-  hist_pT_Hjj->fill((j1+j2+cat.higgs.momentum()).pt(),weight);
+	const FourMomentum &j1 = cat.jets30[0].momentum(), &j2 = cat.jets30[1].momentum();
+	hist_deltay_jj->fill(std::abs(j1.rapidity()-j2.rapidity()),weight);
+	hist_dijet_mass->fill((j1+j2).mass(),weight);
+	hist_pT_Hjj->fill((j1+j2+cat.higgs.momentum()).pt(),weight);
       }
       */
     }
@@ -471,18 +480,18 @@ namespace Rivet {
       MSG_INFO ("      Higgs Template X-Sec Categorization Tool          ");
       MSG_INFO ("                Status Code Summary                     ");
       MSG_INFO (" ====================================================== ");
-      // bool allSuccess = (numEvents()==m_errorCount[HTXS::SUCCESS]);
-      // if ( allSuccess ) MSG_INFO ("     >>>> All "<< m_errorCount[HTXS::SUCCESS] <<" events successfully categorized!");
-      // else{
-        MSG_INFO ("     >>>> "<< m_errorCount[HTXS::SUCCESS] <<" events successfully categorized");
-        MSG_INFO ("     >>>> --> the following errors occured:");
-        MSG_INFO ("     >>>> "<< m_errorCount[HTXS::PRODMODE_DEFINED] <<" had an undefined Higgs production mode.");
-        MSG_INFO ("     >>>> "<< m_errorCount[HTXS::MOMENTUM_CONSERVATION] <<" failed momentum conservation.");
-        MSG_INFO ("     >>>> "<< m_errorCount[HTXS::HIGGS_IDENTIFICATION] <<" failed to identify a valid Higgs boson.");
-        MSG_INFO ("     >>>> "<< m_errorCount[HTXS::HS_VTX_IDENTIFICATION] <<" failed to identify the hard scatter vertex.");
-        MSG_INFO ("     >>>> "<< m_errorCount[HTXS::VH_IDENTIFICATION] <<" VH: to identify a valid V-boson.");
-        MSG_INFO ("     >>>> "<< m_errorCount[HTXS::TOP_W_IDENTIFICATION] <<" failed to identify valid Ws from top decay.");
-      // }
+      bool allSuccess = (numEvents()==m_errorCount[HTXS::SUCCESS]);
+      if ( allSuccess ) MSG_INFO ("     >>>> All "<< m_errorCount[HTXS::SUCCESS] <<" events successfully categorized!");
+      else{
+	MSG_INFO ("     >>>> "<< m_errorCount[HTXS::SUCCESS] <<" events successfully categorized");
+	MSG_INFO ("     >>>> --> the following errors occured:");
+	MSG_INFO ("     >>>> "<< m_errorCount[HTXS::PRODMODE_DEFINED] <<" had an undefined Higgs production mode.");
+	MSG_INFO ("     >>>> "<< m_errorCount[HTXS::MOMENTUM_CONSERVATION] <<" failed momentum conservation.");
+	MSG_INFO ("     >>>> "<< m_errorCount[HTXS::HIGGS_IDENTIFICATION] <<" failed to identify a valid Higgs boson.");
+	MSG_INFO ("     >>>> "<< m_errorCount[HTXS::HS_VTX_IDENTIFICATION] <<" failed to identify the hard scatter vertex.");
+	MSG_INFO ("     >>>> "<< m_errorCount[HTXS::VH_IDENTIFICATION] <<" VH: to identify a valid V-boson.");
+	MSG_INFO ("     >>>> "<< m_errorCount[HTXS::TOP_W_IDENTIFICATION] <<" failed to identify valid Ws from top decay.");
+      }
       MSG_INFO (" ====================================================== ");
       MSG_INFO (" ====================================================== ");
     }
@@ -492,13 +501,13 @@ namespace Rivet {
       printClassificationSummary();
       double sf = m_sumw>0?1.0/m_sumw:1.0;
       for (auto hist:{hist_stage0,hist_stage1_pTjet25,hist_stage1_pTjet30,hist_Njets25,hist_Njets30,
-        hist_pT_Higgs,hist_y_Higgs,hist_pT_V,hist_pT_jet1,hist_deltay_jj,hist_dijet_mass,hist_pT_Hjj})
-      scale(hist, sf);
+	    hist_pT_Higgs,hist_y_Higgs,hist_pT_V,hist_pT_jet1,hist_deltay_jj,hist_dijet_mass,hist_pT_Hjj})
+	scale(hist, sf);
     }
     
     /*
-    *  initialize histograms
-    */
+     *  initialize histograms
+     */
 
     void initializeHistos(){
       hist_stage0          = bookHisto1D("HTXS_stage0",20,0,20);
@@ -517,8 +526,8 @@ namespace Rivet {
     /// @}
 
     /*
-    *    initialize private members used in the classification procedure
-    */
+     *    initialize private members used in the classification procedure
+     */
     
   private:
     double m_sumw;
