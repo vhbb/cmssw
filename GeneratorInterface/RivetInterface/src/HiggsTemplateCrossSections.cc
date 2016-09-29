@@ -120,7 +120,7 @@ namespace Rivet {
        //  Idenfify the Higgs boson and the hard scatter vertex
        //  There should be only one of each.
 
-      MSG_INFO("FIND THE HIGGS.");
+      //MSG_INFO("FIND THE HIGGS.");
 
       GenVertex *HSvtx = event.genEvent()->signal_process_vertex();
       int Nhiggs=0;
@@ -131,7 +131,7 @@ namespace Rivet {
         // a) Reject all non-Higgs particles
         if ( !PID::isHiggs(ptcl->pdg_id()) ) continue;
 
-        MSG_INFO("All Higggs pdgID " << ptcl->pdg_id() << " ");
+        //MSG_INFO("All Higggs pdgID " << ptcl->pdg_id() << " ");
 
         // b) select only the final Higgs boson copy, prior to decay
         if ( ptcl->end_vertex() && !hasChild(ptcl,PID::HIGGS) ) {
@@ -141,7 +141,7 @@ namespace Rivet {
         // c) if HepMC::signal_proces_vertex is missing
         //    set hard-scatter vertex based on first Higgs boson
         if ( HSvtx==nullptr && ptcl->production_vertex() && !hasParent(ptcl,PID::HIGGS) ) {
-            MSG_INFO("Hsvtx==nullptr ");            
+            //MSG_INFO("Hsvtx==nullptr ");            
             HSvtx = ptcl->production_vertex();
         } 
       }
@@ -158,13 +158,13 @@ namespace Rivet {
       // Step 2. 
       //   Identify associated vector bosons
 
-      MSG_INFO("FIND THE V'S.");
+      //MSG_INFO("FIND THE V'S.");
  
       // Find associated vector bosons
       int nWs=0, nZs=0, nTop=0;
       if ( isVH(prodMode) ) {
 	for (auto ptcl:particles(HSvtx,HepMC::children)) {
-        MSG_INFO("Hchildren pdgID " << ptcl->pdg_id() << " ");
+        //MSG_INFO("Hchildren pdgID " << ptcl->pdg_id() << " ");
 
 	  if (PID::isW(ptcl->pdg_id())) { ++nWs; cat.V=Particle(ptcl); }
 	  if (PID::isZ(ptcl->pdg_id())) { ++nZs; cat.V=Particle(ptcl); }
@@ -172,10 +172,10 @@ namespace Rivet {
 	cat.V = getLastInstance(cat.V);
       }
 
-      MSG_INFO("nZs " << nZs << " nWs: " << nWs << " " );
+      //MSG_INFO("nZs " << nZs << " nWs: " << nWs << " " );
 
       // Find and store the W-bosons from ttH->WbWbH
-      MSG_INFO("FIND THE W'S from ttH.");
+      //MSG_INFO("FIND THE W'S from ttH.");
 
       Particles Ws;
       if ( prodMode==HTXS::TTH || prodMode==HTXS::TH ){
@@ -199,7 +199,7 @@ namespace Rivet {
       if ( isVH(prodMode) && ( !cat.V.genParticle()->end_vertex()||cat.V.children().size()<2 ) )
 	return error(cat,HTXS::TOP_W_IDENTIFICATION,"Vector boson does not decay!");
 
-      MSG_INFO("nZs: "<< nZs << " nWs: "<<nWs<< " ");
+      //MSG_INFO("nZs: "<< nZs << " nWs: "<<nWs<< " ");
 
       if ( ( prodMode==HTXS::WH && (nZs>0||nWs!=1) ) ||
 	   ( (prodMode==HTXS::QQ2ZH||prodMode==HTXS::GG2ZH) && (nZs!=1||nWs>0) ) ) 
@@ -211,7 +211,7 @@ namespace Rivet {
       //   Build jets
       //   Make sure all stable particles are present
 
-      MSG_INFO("FIND THE JETS.");
+      //MSG_INFO("FIND THE JETS.");
      
       // Create a list of the vector bosons that decay leptonically
       // Either the vector boson produced in association with the Higgs boson,
@@ -228,7 +228,8 @@ namespace Rivet {
       for ( const Particle &p : FS ) {
           // Add up the four momenta of all stable particles as a cross check          
           sum += p.momentum();
-          MSG_INFO("id: " << p.pdgId() <<" pt: "<< p.pt() <<" sum.pt(): "<< sum.pt());
+          //MSG_INFO("id: " << p.pdgId() << " pt: "<< p.pt() <<" sum.pt(): "<< sum.pt());
+          //MSG_INFO("id: " << p.pdgId() << " pt: "<< p.pt());
           // ignore particles from the Higgs boson
           if ( originateFrom(p,cat.higgs) ) { hSum += p.momentum(); continue; }
           // Cross-check the V decay products for VH
@@ -242,7 +243,7 @@ namespace Rivet {
       cat.p4decay_higgs = hSum;
       cat.p4decay_V = vSum;
 
-      MSG_INFO("NOW BUILDING THE JETS.");
+      //MSG_INFO("NOW BUILDING THE JETS.");
 
       // Let's build the jets
       FastJets jets( FastJets::ANTIKT, 0.4 );
@@ -250,14 +251,15 @@ namespace Rivet {
       cat.jets25 = jets.jetsByPt( Cuts::pT > 25.0 );
       cat.jets30 = jets.jetsByPt( Cuts::pT > 30.0 );
 
-      MSG_INFO("CHECK MOMENTUM.");
+      //MSG_INFO("CHECK MOMENTUM.");
 
       // check that four mometum sum of all stable particles satisfies momentum consevation
-      MSG_INFO("sum.pt()" << sum.pt());
-      MSG_INFO("hSum.pt()" << hSum.pt());
-      MSG_INFO("vSum.pt()" << vSum.pt());
+      //MSG_INFO("sum.pt()" << sum.pt());
+      //MSG_INFO("hSum.pt()" << hSum.pt());
+      //MSG_INFO("vSum.pt()" << vSum.pt());
 
-      if ( sum.pt()>0.1 )
+      //if ( sum.pt()>0.1 )
+      if ( sum.pt()>20.0 ) // DS
 	return error(cat,HTXS::MOMENTUM_CONSERVATION,"Four vector sum does not amount to pT=0, m=E=sqrt(s), but pT="+
 		     std::to_string(sum.pt())+" GeV and m = "+std::to_string(sum.mass())+" GeV");
       
@@ -266,7 +268,7 @@ namespace Rivet {
       // Step 4.
       //   Classify and save output
       
-      MSG_INFO("FINISH.");
+      //MSG_INFO("FINISH.");
 
       // Apply the categorization categorization
       cat.stage0_cat = getStage0Category(prodMode,cat.higgs,cat.V);

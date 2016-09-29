@@ -106,7 +106,7 @@ void GenParticles2HepMCConverterHTXS::produce(edm::Event& event, const edm::Even
   for ( unsigned int i=0, n=prunedGenParticlesHandle->size(); i<n; ++i )
   {
     const reco::Candidate* p_pruned = &prunedGenParticlesHandle->at(i);
-    cout << "assigning genparticle with pdgid " << p_pruned->pdgId() << " and status " << p_pruned->status() << " and pt,eta " << p_pruned->pt() << " , " << p_pruned->eta() << endl;
+    //cout << "assigning genparticle with pdgid " << p_pruned->pdgId() << " and status " << p_pruned->status() << " and pt,eta " << p_pruned->pt() << " , " << p_pruned->eta() << endl;
     HepMC::GenParticle* hepmc_prunedParticle = new HepMC::GenParticle(FourVector(p_pruned->p4()), p_pruned->pdgId(), p_pruned->status());
     hepmc_prunedParticle->suggest_barcode(i+1);
 
@@ -126,25 +126,23 @@ void GenParticles2HepMCConverterHTXS::produce(edm::Event& event, const edm::Even
   const reco::Candidate* parton2_pruned = prunedGenParticlesHandle->at(1).daughter(0);
   HepMC::GenVertex* vertex1_pruned = new HepMC::GenVertex(FourVector(parton1_pruned->vertex()));
   HepMC::GenVertex* vertex2_pruned = new HepMC::GenVertex(FourVector(parton2_pruned->vertex()));
-  pruned_hepmc_event->add_vertex(vertex1_pruned);
-  pruned_hepmc_event->add_vertex(vertex2_pruned);
-  vertex1_pruned->add_particle_in(hepmc_prunedParticles[0]);
-  vertex2_pruned->add_particle_in(hepmc_prunedParticles[1]);
-  pruned_hepmc_event->set_beam_particles(hepmc_prunedParticles[0], hepmc_prunedParticles[1]);
-
-  // STORE THE FIRST (RANDOM) VERTEX IN THE hepmc_event
-  const reco::Candidate* parton3_pruned = prunedGenParticlesHandle->at(2).daughter(0);
-  HepMC::GenVertex* vertex3_pruned = new HepMC::GenVertex(FourVector(parton3_pruned->vertex()));
   hepmc_event->add_vertex(vertex1_pruned);
   hepmc_event->add_vertex(vertex2_pruned);
-  hepmc_event->add_vertex(vertex3_pruned);
+  vertex1_pruned->add_particle_in(hepmc_prunedParticles[0]);
+  vertex2_pruned->add_particle_in(hepmc_prunedParticles[1]);
   hepmc_event->set_beam_particles(hepmc_prunedParticles[0], hepmc_prunedParticles[1]);
+
+  // STORE THE FIRST (RANDOM) VERTEX IN THE hepmc_event
+  HepMC::GenVertex* vertex3 = new HepMC::GenVertex(FourVector(parton2_pruned->vertex()));
+  hepmc_event->add_vertex(vertex3);
+  vertex3->add_particle_in(hepmc_prunedParticles[0]);
+  vertex3->add_particle_in(hepmc_prunedParticles[1]);
 
   // Prepare vertex list
   typedef std::map<const reco::Candidate*, HepMC::GenVertex*> ParticleToVertexMap;
-  ParticleToVertexMap particleToVertexMap_pruned;
-  particleToVertexMap_pruned[parton1_pruned] = vertex1_pruned;
-  particleToVertexMap_pruned[parton2_pruned] = vertex2_pruned;
+  ParticleToVertexMap particleToVertexMap;
+  particleToVertexMap[parton1_pruned] = vertex1_pruned;
+  particleToVertexMap[parton2_pruned] = vertex2_pruned;
   for ( unsigned int i=2, n=prunedGenParticlesHandle->size(); i<n; ++i )
   {
     const reco::Candidate* p = &prunedGenParticlesHandle->at(i);
@@ -155,15 +153,15 @@ void GenParticles2HepMCConverterHTXS::produce(edm::Event& event, const edm::Even
       // Mother-daughter hierarchy defines vertex
       const reco::Candidate* elder = p->mother(j)->daughter(0);
       HepMC::GenVertex* vertex;
-      if ( particleToVertexMap_pruned.find(elder) == particleToVertexMap_pruned.end() )
+      if ( particleToVertexMap.find(elder) == particleToVertexMap.end() )
       {
         vertex = new HepMC::GenVertex(FourVector(elder->vertex()));
-        pruned_hepmc_event->add_vertex(vertex);
-        particleToVertexMap_pruned[elder] = vertex;
+        hepmc_event->add_vertex(vertex);
+        particleToVertexMap[elder] = vertex;
       }
       else
       {
-        vertex = particleToVertexMap_pruned[elder];
+        vertex = particleToVertexMap[elder];
       }
 
       // Vertex is found. Now connect each other
@@ -174,34 +172,32 @@ void GenParticles2HepMCConverterHTXS::produce(edm::Event& event, const edm::Even
   }
 
   // Finalize HepMC event record
-  // pruned_hepmc_event->set_signal_process_vertex(*(vertex1_pruned->vertices_begin()));
+  // hepmc_event->set_signal_process_vertex(*(vertex1_pruned->vertices_begin()));
 
   //Loop over all vertices 
   int particle_pruned = 0;
   int vtx = 0;
   bool endloop = false;
-  for (HepMC::GenEvent::vertex_iterator ver = pruned_hepmc_event->vertices_begin(); ver != pruned_hepmc_event->vertices_end(); ver++){
+  for (HepMC::GenEvent::vertex_iterator ver = hepmc_event->vertices_begin(); ver != hepmc_event->vertices_end(); ver++){
     
-    if(vtx>10 || endloop || pruned_hepmc_event->signal_process_vertex()) break;
+    if(vtx>10 || endloop || hepmc_event->signal_process_vertex()) break;
     vtx++;
-    cout << "vtx= " << vtx << endl;
+    //cout << "vtx= " << vtx << endl;
     particle_pruned = 0;
     HepMC::GenVertex::particle_iterator par = (*ver)->particles_begin(HepMC::children);
     
     for (; par != (*ver)->particles_end(HepMC::children); ++par){
       particle_pruned++;
-      cout << "particle_pruned= " << particle_pruned << " pdgid= " << (*par)->pdg_id() << " ; "; 
+      //cout << "particle_pruned= " << particle_pruned << " pdgid= " << (*par)->pdg_id() << " ; "; 
       
       if ((*par)->pdg_id() == 25){
-        pruned_hepmc_event->set_signal_process_vertex(*ver);
-        // STORE THE signal_process_vertex in the hepmc_event !!!
         hepmc_event->set_signal_process_vertex(*ver);
         endloop=true;
       }
     
     }
-    cout << endl;
-    if(endloop) cout << "assigning it to set_signal_process_vertex!" << endl; 
+    //cout << endl;
+    //if(endloop) cout << "assigning it to set_signal_process_vertex!" << endl; 
   
   }
 
@@ -217,7 +213,25 @@ void GenParticles2HepMCConverterHTXS::produce(edm::Event& event, const edm::Even
   for ( unsigned int i=0, n=packedGenParticlesHandle->size(); i<n; ++i )
   {
     const reco::Candidate* p_packed = &packedGenParticlesHandle->at(i);
-    cout << "assigning genparticle with pdgid " << p_packed->pdgId() << " and status " << p_packed->status() << " and pt,eta " << p_packed->pt() << " , " << p_packed->eta() << endl;
+
+    //check that the particle is not already added to the event
+    bool matched=false;
+    for ( unsigned int j=0, nj=prunedGenParticlesHandle->size(); j<nj; ++j )
+    {
+        const reco::Candidate* p_pruned = &prunedGenParticlesHandle->at(j);
+        if (p_pruned->status()!=1) continue;
+        if (p_pruned->pdgId()!=p_packed->pdgId()) continue;
+        //cout<<"inside packed loop, found pruned id: "<<p_pruned->pdgId()<<" pt: "<<p_pruned->pt()<<" eta: "<<p_pruned->eta()<<endl;
+        if (abs(p_pruned->pt()-p_packed->pt())/p_packed->pt()<0.01 && abs(p_pruned->eta()-p_packed->eta())/p_packed->eta()<0.05) matched=true;
+    }
+        
+    if (matched) {
+        //cout<<"skipping packed id: "<<p_packed->pdgId()<<" pt: "<<p_packed->pt()<< " eta: "<< p_packed->eta()<<endl;
+        continue;
+    }
+
+    //cout << "assigning genparticle with pdgid " << p_packed->pdgId() << " and status " << p_packed->status() << " and pt,eta " << p_packed->pt() << " , " << p_packed->eta() << endl;
+    //cout << "id: " << p_packed->pdgId() << " pt: " << p_packed->pt() << " eta: "<< p_packed->eta() << endl;
     HepMC::GenParticle* hepmc_packedParticle = new HepMC::GenParticle(FourVector(p_packed->p4()), p_packed->pdgId(), p_packed->status());
     hepmc_packedParticle->suggest_barcode(i+1);
 
@@ -231,7 +245,8 @@ void GenParticles2HepMCConverterHTXS::produce(edm::Event& event, const edm::Even
     packedGenCandToHepMCMap[p_packed] = hepmc_packedParticle;
     
     // STORE THE PACKED HEPMC PARTICLES INTO THE FIRST PRUNED VERTEX STORED IN THE hepmc_event
-    vertex3_pruned->add_particle_out(hepmc_packedParticles[i]);
+    vertex3->add_particle_out(hepmc_packedParticle);
+
   }
 
   /////////////////////////////
