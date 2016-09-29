@@ -9,24 +9,25 @@
 using namespace Rivet;
 using namespace edm;
 
-HTXSRivetAnalyzer::HTXSRivetAnalyzer(const edm::ParameterSet& pset) : 
-_analysisHandler(),
-_isFirstEvent(true),
-_HTXS()
+HTXSRivetAnalyzer::HTXSRivetAnalyzer(const edm::ParameterSet& pset) //: 
 {
   _hepmcCollection = consumes<HepMCProduct>(pset.getParameter<edm::InputTag>("HepMCCollection"));
   std::vector<std::string> analysisNames = pset.getParameter<std::vector<std::string> >("AnalysisNames");
+
+  _analysisHandler = new Rivet::AnalysisHandler();
+  _isFirstEvent = true;
+  _HTXS = new Rivet::HiggsTemplateCrossSections();
+
 }
 
 HTXSRivetAnalyzer::~HTXSRivetAnalyzer(){
-    delete &_HTXS;
 }
 
 void HTXSRivetAnalyzer::beginJob(){
 }
 
 void HTXSRivetAnalyzer::beginRun(const edm::Run& iRun,const edm::EventSetup& iSetup){
-  _analysisHandler.addAnalysis(&_HTXS);
+  _analysisHandler->addAnalysis(_HTXS);
   return;
 }
 
@@ -40,13 +41,13 @@ void HTXSRivetAnalyzer::analyze(const edm::Event& iEvent,const edm::EventSetup& 
   const HepMC::GenEvent *myGenEvent = evt->GetEvent();
 
   if (_isFirstEvent){
-      _HTXS.setHiggsProdMode(HTXS::QQ2ZH);
-     _analysisHandler.init(*myGenEvent);
+      _HTXS->setHiggsProdMode(HTXS::QQ2ZH);
+     _analysisHandler->init(*myGenEvent);
      _isFirstEvent = false;
   }
 
   // Run the analyses
-  HiggsClassification cat = _HTXS.classifyEvent(*myGenEvent,HTXS::QQ2ZH);
+  HiggsClassification cat = _HTXS->classifyEvent(*myGenEvent,HTXS::QQ2ZH);
 
   std::cout<<"HTXSRivetAnalyzer cat.prodMode "<<cat.prodMode <<std::endl;
   std::cout<<"HTXSRivetAnalyzer cat.errorCode "<< cat.errorCode <<std::endl;
@@ -58,8 +59,8 @@ void HTXSRivetAnalyzer::analyze(const edm::Event& iEvent,const edm::EventSetup& 
 
 
 void HTXSRivetAnalyzer::endRun(const edm::Run& iRun,const edm::EventSetup& iSetup){
-    _HTXS.printClassificationSummary();
-  return;
+    _HTXS->printClassificationSummary();
+    return;
 }
 
 void HTXSRivetAnalyzer::endJob(){
