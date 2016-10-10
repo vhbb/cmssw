@@ -349,6 +349,15 @@ ak8FatjetType = NTupleObjectType("ak8fatjet",  baseObjectTypes = [ fourVectorTyp
     NTupleVariable("ChadronFlavour", lambda x : x.jetFlavourInfo().getcHadrons().size(), int,     mcOnly=True, help="hadron flavour (ghost matching to C hadrons)"),	
 
     NTupleVariable("GenPt", lambda x : x.genJetFwdRef().pt() if (x.genJetFwdRef().isNonnull() and x.genJetFwdRef().isAvailable())  else -1., float, mcOnly=True, help="gen jet pt for JER computation"),
+    NTupleVariable("puppi_pt", lambda x : x.puppi_pt, help="puppi from ak8PFJetsPuppiValueMap as cross check"),
+    NTupleVariable("puppi_eta", lambda x : x.puppi_eta, help="puppi from ak8PFJetsPuppiValueMap as cross check"),
+    NTupleVariable("puppi_phi", lambda x : x.puppi_phi, help="puppi from ak8PFJetsPuppiValueMap as cross check"),
+    NTupleVariable("puppi_mass", lambda x : x.puppi_mass, help="puppi from ak8PFJetsPuppiValueMap as cross check"),
+    NTupleVariable("puppi_tau1", lambda x : x.puppi_tau1, help="puppi from ak8PFJetsPuppiValueMap as cross check"),
+    NTupleVariable("puppi_tau2", lambda x : x.puppi_tau2, help="puppi from ak8PFJetsPuppiValueMap as cross check"),
+    NTupleVariable("puppi_msoftdrop", lambda x : x.puppi_msoftdrop, help="puppi from ak8PFJetsPuppiValueMap as cross check"),
+    NTupleVariable("puppi_msoftdrop_corrL2L3", lambda x : x.puppi_msoftdrop_corrL2L3, help="puppi from ak8PFJetsPuppiValueMap as cross check"),
+  
     
     # bb-tag input variables
     NTupleVariable("PFLepton_ptrel",   lambda x : x.PFLepton_ptrel, help="pt-rel of e/mu (for bb-tag)"),    
