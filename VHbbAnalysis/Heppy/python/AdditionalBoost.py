@@ -703,17 +703,11 @@ class AdditionalBoost( Analyzer ):
         self.handles['rho'] = AutoHandle( ('fixedGridRhoFastjetAll',""), 'double' )
 
         self.handles['ak08']     = AutoHandle( ("slimmedJetsAK8",""), "std::vector<pat::Jet>")
-        #self.handles['ak08puppi']     = AutoHandle( ("slimmedJetsAK8PFPuppi",""), "std::vector<pat::Jet>")
-
-        #self.handles['ak08puppisoftdrop'] = AutoHandle( ("slimmedJetsAK8PFPuppiSoftDropPacked",""), "std::vector<pat::Jet>")
-
         self.handles['ak08softdropsubjets'] = AutoHandle( ("slimmedJetsAK8PFCHSSoftDropPacked","SubJets"), "std::vector<pat::Jet>")
 
         self.handles['ak08bbtag'] = AutoHandle( ("slimmedJetsAK8pfBoostedDoubleSecondaryVertexBJetTags","","EX"), 
                                                 "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
-       # self.handles['ak08puppibbtag']  = AutoHandle( ("slimmedJetsAK8pfBoostedDoubleSecondaryVertexBJetTags","","EX"), 
-      #                                          "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
-
+  
 
         self.handles['ak08ipTagInfos']     = AutoHandle( ("slimmedJetsAK8ImpactParameterTagInfos","","EX"), "vector<reco::IPTagInfo<vector<edm::Ptr<reco::Candidate> >,reco::JetTagInfo> >")
 
