@@ -7,51 +7,29 @@ process.options   = cms.untracked.PSet(
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 process.source = cms.Source("PoolSource",  fileNames = cms.untracked.vstring(
-
-#'/store/mc/RunIISpring16reHLT80/ZH_HToBB_ZToLL_M125_13TeV_powheg_pythia8/AODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/00000/042AE626-B644-E611-ADC8-20CF3056170E.root'
-'/store/mc/RunIISpring16MiniAODv2/ZH_HToBB_ZToLL_M125_13TeV_powheg_pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/00000/10F007BD-8446-E611-A2DD-0025909091AA.root'
-
+'/store/mc/RunIISpring16MiniAODv2/GluGluHToGG_M125_13TeV_amcatnloFXFX_pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/40000/2455EB86-8F38-E611-8E4B-0090FAA58D84.root'
+#'/store/mc/RunIISpring16MiniAODv2/ZH_HToBB_ZToLL_M125_13TeV_powheg_pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v1/00000/10F007BD-8446-E611-A2DD-0025909091AA.root'
 ) 
-
 )
+
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 
 process.myGenerator = cms.EDProducer("GenParticles2HepMCConverterHTXS",
-    #genParticles = cms.InputTag("genParticles"),
-    #genParticles = cms.InputTag("prunedGenParticles"),
     prunedGenParticles = cms.InputTag("prunedGenParticles"),
     packedGenParticles = cms.InputTag("packedGenParticles"),
     genEventInfo = cms.InputTag("generator"),
 )
 
-#process.load("GeneratorInterface.RivetInterface.rivetAnalyzer_cfi")
-process.rivetAnalyzer = cms.EDAnalyzer('RivetAnalyzer',
-  AnalysisNames = cms.vstring('HiggsTemplatCrossSections'),
+process.rivetProducerHTXS = cms.EDProducer('HTXSRivetProducer',
   HepMCCollection = cms.InputTag('myGenerator','unsmeared'),
-  UseExternalWeight = cms.bool(False),
-  GenEventInfoCollection = cms.InputTag('generator'),
-  useLHEweights = cms.bool(False),
-  LHEweightNumber = cms.int32(0),
-  LHECollection = cms.InputTag('source'),
-  CrossSection = cms.double(1000),
-  DoFinalize = cms.bool(True),
-  ProduceDQMOutput = cms.bool(False),
-  OutputFile = cms.string('out.aida')
+  ProductionMode = cms.string('GGF'),
+  #ProductionMode = cms.string('QQ2ZH'),
 )
 
-process.rivetAnalyzerHTXS = cms.EDAnalyzer('HTXSRivetAnalyzer',
-  AnalysisNames = cms.vstring('HiggsTemplateCrossSections'),
-  HepMCCollection = cms.InputTag('myGenerator','unsmeared'),
-  UseExternalWeight = cms.bool(False),
-  GenEventInfoCollection = cms.InputTag('generator'),
-  useLHEweights = cms.bool(False),
-  LHEweightNumber = cms.int32(0),
-  LHECollection = cms.InputTag('source'),
-  CrossSection = cms.double(1000),
-  DoFinalize = cms.bool(True),
-  ProduceDQMOutput = cms.bool(False),
-  OutputFile = cms.string('out.aida')
-)
+process.p = cms.Path(process.myGenerator*process.rivetProducerHTXS)
 
-#process.p = cms.Path(process.myGenerator*process.rivetAnalyzer)
-process.p = cms.Path(process.myGenerator*process.rivetAnalyzerHTXS)
+process.out = cms.OutputModule("PoolOutputModule",
+    outputCommands = cms.untracked.vstring('keep *'),
+    fileName = cms.untracked.string('testHTXSRivet.root')
+)
+process.o = cms.EndPath( process.out )

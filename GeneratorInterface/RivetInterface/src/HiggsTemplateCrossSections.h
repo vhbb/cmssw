@@ -1,5 +1,5 @@
 #ifndef TRUTHRIVETTOOLS_HIGGSTEMPLATECROSSSECTIONS_H
-#define TRUTHRIVETTOOLS_HIGGSTEMPLATECROSSSECTIONS_H 
+#define TRUTHRIVETTOOLS_HIGGSTEMPLATECROSSSECTIONS_H 1
 
 /// Higgs Template Cross Section namespace
 namespace HTXS {
@@ -138,8 +138,7 @@ namespace HTXS {
       cat.stage1_cat_pTjet30GeV = htxs_cat_rivet.stage1_cat_pTjet30GeV;
       return cat;    
     }
-
-     
+    
 #endif 
 
 } // namespace HTXS
@@ -176,10 +175,9 @@ namespace Rivet {
     /// Error code: Whether classification was succesful or some error occured
     HTXS::ErrorCode errorCode;
   };
-
 } // namespace Rivet
 #endif
 
+
+
 #endif
-
-

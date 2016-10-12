@@ -98,15 +98,13 @@ void GenParticles2HepMCConverterHTXS::produce(edm::Event& event, const edm::Even
   // SETUP hard scattering info from PRUNED GEN PARTICLES
   /////////////////////////////
 
-  HepMC::GenEvent* pruned_hepmc_event = new HepMC::GenEvent();
-  
   // Prepare list of HepMC::GenParticles from prunedGenParticles
   std::map<const reco::Candidate*, HepMC::GenParticle*> prunedGenCandToHepMCMap;
   std::vector<HepMC::GenParticle*> hepmc_prunedParticles;
   for ( unsigned int i=0, n=prunedGenParticlesHandle->size(); i<n; ++i )
   {
     const reco::Candidate* p_pruned = &prunedGenParticlesHandle->at(i);
-    //cout << "assigning genparticle with pdgid " << p_pruned->pdgId() << " and status " << p_pruned->status() << " and pt,eta " << p_pruned->pt() << " , " << p_pruned->eta() << endl;
+    //cout << "pruned genparticle with pdgid " << p_pruned->pdgId() << " and status " << p_pruned->status() << " and pt,eta " << p_pruned->pt() << "," << p_pruned->eta() << " Ndaughters: " <<p_pruned->numberOfDaughters() << endl;
     HepMC::GenParticle* hepmc_prunedParticle = new HepMC::GenParticle(FourVector(p_pruned->p4()), p_pruned->pdgId(), p_pruned->status());
     hepmc_prunedParticle->suggest_barcode(i+1);
 
@@ -182,13 +180,13 @@ void GenParticles2HepMCConverterHTXS::produce(edm::Event& event, const edm::Even
     
     if(vtx>10 || endloop || hepmc_event->signal_process_vertex()) break;
     vtx++;
-    //cout << "vtx= " << vtx << endl;
+    //cout << "vtx= " << vtx ;
     particle_pruned = 0;
     HepMC::GenVertex::particle_iterator par = (*ver)->particles_begin(HepMC::children);
     
     for (; par != (*ver)->particles_end(HepMC::children); ++par){
       particle_pruned++;
-      //cout << "particle_pruned= " << particle_pruned << " pdgid= " << (*par)->pdg_id() << " ; "; 
+      //cout << " particle_pruned= " << particle_pruned << " pdgid= " << (*par)->pdg_id() << " ; "; 
       
       if ((*par)->pdg_id() == 25){
         hepmc_event->set_signal_process_vertex(*ver);
@@ -196,8 +194,9 @@ void GenParticles2HepMCConverterHTXS::produce(edm::Event& event, const edm::Even
       }
     
     }
-    //cout << endl;
-    //if(endloop) cout << "assigning it to set_signal_process_vertex!" << endl; 
+
+    //cout<<endl;
+    //if(endloop) cout << " assigned as signal_process_vertex!" << endl; 
   
   }
 
