@@ -158,19 +158,22 @@ namespace Rivet {
 	}
 	cat.V = getLastInstance(cat.V);	
       }
-      
+
       // Find and store the W-bosons from ttH->WbWbH
       Particles Ws;
       if ( prodMode==HTXS::TTH || prodMode==HTXS::TH ){
 	// loop over particles produced in hard-scatter vertex
       	for ( auto ptcl : particles(HSvtx,HepMC::children) ) {
+            MSG_INFO("HSvtx id: "<<ptcl->pdg_id());
       	  if ( !PID::isTop(ptcl->pdg_id()) ) continue;
 	  ++nTop;
 	  Particle top = getLastInstance(Particle(ptcl));
 	  if ( top.genParticle()->end_vertex() ) 
-	    for (auto child:top.children())
-	      if ( PID::isW(child.pdgId()) ) Ws += child;
-	}
+          for (auto child:top.children()) {
+              if ( PID::isW(child.pdgId()) ) Ws += child;
+            MSG_INFO("Topvtx id: "<<child.pdgId());
+          }
+        }
       }
 
       // Make sure result make sense
@@ -218,19 +221,20 @@ namespace Rivet {
       cat.p4decay_higgs = hSum;
       cat.p4decay_V = vSum;
 
-      // Let's build the jets
-      FastJets jets( FastJets::ANTIKT, 0.4 );
+      FinalState fps_temp;
+      FastJets jets(fps_temp, FastJets::ANTIKT, 0.4 );
       jets.calc(hadrons);
+
       cat.jets25 = jets.jetsByPt( Cuts::pT > 25.0 );
       cat.jets30 = jets.jetsByPt( Cuts::pT > 30.0 );
-
+ 
       // check that four mometum sum of all stable particles satisfies momentum consevation
       /*
       if ( sum.pt()>0.1 )
 	return error(cat,HTXS::MOMENTUM_CONSERVATION,"Four vector sum does not amount to pT=0, m=E=sqrt(s), but pT="+
 		     std::to_string(sum.pt())+" GeV and m = "+std::to_string(sum.mass())+" GeV");
       */
- 
+
       /*****
        * Step 4.
        *   Classify and save output
@@ -305,8 +309,11 @@ namespace Rivet {
 	if (Njets==0)        return GG2H_0J;
 	else if (Njets==1)   return Category(GG2H_1J_PTH_0_60+getBin(higgs.pt(),{0,60,120,200}));
 	else if (Njets>=2) {
-	  if      (vbfTopo==2) return GG2H_VBFTOPO_JET3VETO;
-	  else if (vbfTopo==1) return GG2H_VBFTOPO_JET3;
+	  // events with pT_H>200 get priority over VBF cuts
+	  if(higgs.pt()<=200){
+	    if      (vbfTopo==2) return GG2H_VBFTOPO_JET3VETO;
+	    else if (vbfTopo==1) return GG2H_VBFTOPO_JET3;
+	  }
 	  // Njets >= 2jets without VBF topology
 	  return Category(GG2H_GE2J_PTH_0_60+getBin(higgs.pt(),{0,60,120,200}));
 	}
@@ -345,9 +352,9 @@ namespace Rivet {
 	return GG2HLL_PTV_GT150_GE1J;
       }
       // 6.ttH,bbH,tH categories
-      else if (prodMode==HTXS::TTH) return Category(TTH+ctrlHiggs);
-      else if (prodMode==HTXS::BBH) return Category(BBH+ctrlHiggs);
-      else if (prodMode==HTXS::TH ) return Category(TH+ctrlHiggs);
+      else if (prodMode==HTXS::TTH) return Category(TTH_FWDH+ctrlHiggs);
+      else if (prodMode==HTXS::BBH) return Category(BBH_FWDH+ctrlHiggs);
+      else if (prodMode==HTXS::TH ) return Category(TH_FWDH+ctrlHiggs);
       return UNKNOWN;
     }
 
