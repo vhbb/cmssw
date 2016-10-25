@@ -14,6 +14,7 @@
 #include "DataFormats/Candidate/interface/CandidateFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+//#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
@@ -30,12 +31,13 @@ public:
   explicit GenParticles2HepMCConverterHTXS(const edm::ParameterSet& pset);
   ~GenParticles2HepMCConverterHTXS() {};
 
+  //void beginRun(const edm::Run& run, const edm::EventSetup& eventSetup) override;
   void produce(edm::Event& event, const edm::EventSetup& eventSetup) override;
-  bool checkForAncestor(const reco::Candidate * particle, int pdgId);
 
 private:
-  edm::EDGetTokenT<reco::CandidateView> prunedGenParticlesToken_;
-  edm::EDGetTokenT<reco::CandidateView> packedGenParticlesToken_;
+//  edm::InputTag lheEventToken_;
+  edm::EDGetTokenT<reco::CandidateView> genParticlesToken_;
+//  edm::InputTag genRunInfoToken_;
   edm::EDGetTokenT<GenEventInfoProduct> genEventInfoToken_;
   edm::ESHandle<ParticleDataTable> pTable_;
 
@@ -56,35 +58,34 @@ private:
 
 GenParticles2HepMCConverterHTXS::GenParticles2HepMCConverterHTXS(const edm::ParameterSet& pset)
 {
-  prunedGenParticlesToken_ = consumes<reco::CandidateView>(pset.getParameter<edm::InputTag>("prunedGenParticles")); // contain hard scattering info
-  packedGenParticlesToken_ = consumes<reco::CandidateView>(pset.getParameter<edm::InputTag>("packedGenParticles")); // contain status 1 particle info
+//  lheEventToken_ = pset.getParameter<edm::InputTag>("lheEvent");
+  genParticlesToken_ = consumes<reco::CandidateView>(pset.getParameter<edm::InputTag>("genParticles"));
+  //genRunInfoToken_ = pset.getParameter<edm::InputTag>("genRunInfo");
   genEventInfoToken_ = consumes<GenEventInfoProduct>(pset.getParameter<edm::InputTag>("genEventInfo"));
 
   produces<edm::HepMCProduct>("unsmeared");
 }
 
-bool GenParticles2HepMCConverterHTXS::checkForAncestor(const reco::Candidate * particle, int pdgId)
-{
+//void GenParticles2HepMCConverterHTXS::beginRun(edm::Run& run, const edm::EventSetup& eventSetup)
+//{
+  //edm::Handle<GenRunInfoProduct> genRunInfoHandle;
+  //event.getByToken(genRunInfoToken_, genRunInfoHandle);
+  // const double xsecIn = genRunInfoHandle->internalXSec().value();
+  // const double xsecInErr = genRunInfoHandle->internalXSec().error();
+  // const double xsecLO = genRunInfoHandle->externalXSecLO().value();
+  // const double xsecLOErr = genRunInfoHandle->externalXSecLO().error();
+  // const double xsecNLO = genRunInfoHandle->externalXSecNLO().value();
+  // const double xsecNLOErr = genRunInfoHandle->externalXSecNLO().error();
+//}
 
-    if ((int)particle->pdgId()==pdgId) return true;
-
-    for(size_t i=0;i< particle->numberOfMothers();i++)
-    {
-        if (checkForAncestor(particle->mother(i),pdgId)) return true;
-    }
-
-    return false;
-
-}
 
 void GenParticles2HepMCConverterHTXS::produce(edm::Event& event, const edm::EventSetup& eventSetup)
 {
+//  edm::Handle<LHEEventProduct> lheEventHandle;
+//  event.getByToken(lheEventToken_, lheEventHandle);
 
-  edm::Handle<reco::CandidateView> prunedGenParticlesHandle;
-  event.getByToken(prunedGenParticlesToken_, prunedGenParticlesHandle);
-
-  edm::Handle<reco::CandidateView> packedGenParticlesHandle;
-  event.getByToken(packedGenParticlesToken_, packedGenParticlesHandle);
+  edm::Handle<reco::CandidateView> genParticlesHandle;
+  event.getByToken(genParticlesToken_, genParticlesHandle);
 
   edm::Handle<GenEventInfoProduct> genEventInfoHandle;
   event.getByToken(genEventInfoToken_, genEventInfoHandle);
@@ -109,60 +110,67 @@ void GenParticles2HepMCConverterHTXS::produce(edm::Event& event, const edm::Even
   HepMC::PdfInfo hepmc_pdfInfo(pdf_id1, pdf_id2, pdf_x1, pdf_x2, pdf_scalePDF, pdf_xPDF1, pdf_xPDF2);
   hepmc_event->set_pdf_info(hepmc_pdfInfo);
 
-  /////////////////////////////
-  // SETUP hard scattering info from PRUNED GEN PARTICLES
-  /////////////////////////////
+  // Load LHE
+//  const lhef::HEPEUP& lheEvent = lheEventHandle->hepeup();
+//  std::vector<int> lhe_meIndex; // Particle indices with preserved mass, status=2
+//  for ( int i=0, n=lheEvent.ISTUP.size(); i<n; ++i )
+//  {
+//    if ( lheEvent.ISTUP[i] == 2 ) lhe_meIndex.push_back(i);
+//  }
 
-  // Prepare list of HepMC::GenParticles from prunedGenParticles
-  std::map<const reco::Candidate*, HepMC::GenParticle*> prunedGenCandToHepMCMap;
-  std::vector<HepMC::GenParticle*> hepmc_prunedParticles;
-  for ( unsigned int i=0, n=prunedGenParticlesHandle->size(); i<n; ++i )
+  // Prepare list of HepMC::GenParticles
+  std::map<const reco::Candidate*, HepMC::GenParticle*> genCandToHepMCMap;
+  std::vector<HepMC::GenParticle*> hepmc_particles;
+  for ( unsigned int i=0, n=genParticlesHandle->size(); i<n; ++i )
   {
-    const reco::Candidate* p_pruned = &prunedGenParticlesHandle->at(i);
-    //cout << "pruned genparticle with pdgid " << p_pruned->pdgId() << " and status " << p_pruned->status() << " and pt,eta " << p_pruned->pt() << "," << p_pruned->eta() << " Ndaughters: " <<p_pruned->numberOfDaughters() << endl;
-    HepMC::GenParticle* hepmc_prunedParticle = new HepMC::GenParticle(FourVector(p_pruned->p4()), p_pruned->pdgId(), p_pruned->status());
-    hepmc_prunedParticle->suggest_barcode(i+1);
+    const reco::Candidate* p = &genParticlesHandle->at(i);
+    HepMC::GenParticle* hepmc_particle = new HepMC::GenParticle(FourVector(p->p4()), p->pdgId(), p->status());
+    hepmc_particle->suggest_barcode(i+1);
 
     // Assign particle's generated mass from the standard particle data table
     double particleMass;
-    if ( pTable_->particle(p_pruned->pdgId()) ) particleMass = pTable_->particle(p_pruned->pdgId())->mass();
-    else particleMass = p_pruned->mass();
-    hepmc_prunedParticle->set_generated_mass(particleMass);
+    if ( pTable_->particle(p->pdgId()) ) particleMass = pTable_->particle(p->pdgId())->mass();
+    else particleMass = p->mass();
+//    // Re-assign generated mass from LHE, find particle among the LHE
+//    for ( unsigned int j=0, m=lhe_meIndex.size(); j<m; ++j )
+//    {
+//      const unsigned int lheIndex = lhe_meIndex[j];
+//      if ( p->pdgId() != lheEvent.IDUP[lheIndex] ) continue;
+//
+//      const lhef::HEPEUP::FiveVector& vp = lheEvent.PUP[lheIndex];
+//      if ( std::abs(vp[0] - p->px()) > 1e-7 or std::abs(vp[1] - p->py()) > 1e-7 ) continue;
+//      if ( std::abs(vp[2] - p->pz()) > 1e-7 or std::abs(vp[3] - p->energy()) > 1e-7 ) continue;
+//
+//      particleMass = vp[4];
+//      break;
+//    }
+    hepmc_particle->set_generated_mass(particleMass);
 
-    hepmc_prunedParticles.push_back(hepmc_prunedParticle);
-    prunedGenCandToHepMCMap[p_pruned] = hepmc_prunedParticle;
+    hepmc_particles.push_back(hepmc_particle);
+    genCandToHepMCMap[p] = hepmc_particle;
   }
-  
 
   // Put incident beam particles : proton -> parton vertex
-  const reco::Candidate* parton1_pruned = prunedGenParticlesHandle->at(0).daughter(0);
-  const reco::Candidate* parton2_pruned = prunedGenParticlesHandle->at(1).daughter(0);
-  HepMC::GenVertex* vertex1_pruned = new HepMC::GenVertex(FourVector(parton1_pruned->vertex()));
-  HepMC::GenVertex* vertex2_pruned = new HepMC::GenVertex(FourVector(parton2_pruned->vertex()));
-  hepmc_event->add_vertex(vertex1_pruned);
-  hepmc_event->add_vertex(vertex2_pruned);
-  vertex1_pruned->add_particle_in(hepmc_prunedParticles[0]);
-  vertex2_pruned->add_particle_in(hepmc_prunedParticles[1]);
-  hepmc_event->set_beam_particles(hepmc_prunedParticles[0], hepmc_prunedParticles[1]);
-
-  // STORE THE FIRST (RANDOM) VERTEX IN THE hepmc_event
-  HepMC::GenVertex* vertex3 = new HepMC::GenVertex(FourVector(parton2_pruned->vertex()));
-  hepmc_event->add_vertex(vertex3);
-  vertex3->add_particle_in(hepmc_prunedParticles[0]);
-  vertex3->add_particle_in(hepmc_prunedParticles[1]);
+  const reco::Candidate* parton1 = genParticlesHandle->at(0).daughter(0);
+  const reco::Candidate* parton2 = genParticlesHandle->at(1).daughter(0);
+  HepMC::GenVertex* vertex1 = new HepMC::GenVertex(FourVector(parton1->vertex()));
+  HepMC::GenVertex* vertex2 = new HepMC::GenVertex(FourVector(parton2->vertex()));
+  hepmc_event->add_vertex(vertex1);
+  hepmc_event->add_vertex(vertex2);
+  //hepmc_particles[0]->set_status(4);
+  //hepmc_particles[1]->set_status(4);
+  vertex1->add_particle_in(hepmc_particles[0]);
+  vertex2->add_particle_in(hepmc_particles[1]);
+  hepmc_event->set_beam_particles(hepmc_particles[0], hepmc_particles[1]);
 
   // Prepare vertex list
   typedef std::map<const reco::Candidate*, HepMC::GenVertex*> ParticleToVertexMap;
   ParticleToVertexMap particleToVertexMap;
-  particleToVertexMap[parton1_pruned] = vertex1_pruned;
-  particleToVertexMap[parton2_pruned] = vertex2_pruned;
-  for ( unsigned int i=2, n=prunedGenParticlesHandle->size(); i<n; ++i )
+  particleToVertexMap[parton1] = vertex1;
+  particleToVertexMap[parton2] = vertex2;
+  for ( unsigned int i=2, n=genParticlesHandle->size(); i<n; ++i )
   {
-    const reco::Candidate* p = &prunedGenParticlesHandle->at(i);
-
-    if (p->status()==1) continue;
-
-    //cout<<"adding pruned id: "<<p->pdgId()<<" pt: "<<p->pt()<<" status: "<<p->status()<<endl;
+    const reco::Candidate* p = &genParticlesHandle->at(i);
 
     // Connect mother-daughters for the other cases
     for ( unsigned int j=0, nMothers=p->numberOfMothers(); j<nMothers; ++j )
@@ -183,93 +191,37 @@ void GenParticles2HepMCConverterHTXS::produce(edm::Event& event, const edm::Even
 
       // Vertex is found. Now connect each other
       const reco::Candidate* mother = p->mother(j);
-      vertex->add_particle_in(prunedGenCandToHepMCMap[mother]);
-      vertex->add_particle_out(hepmc_prunedParticles[i]);
+      vertex->add_particle_in(genCandToHepMCMap[mother]);
+      vertex->add_particle_out(hepmc_particles[i]);
+   
     }
+
   }
 
   // Finalize HepMC event record
-  // hepmc_event->set_signal_process_vertex(*(vertex1_pruned->vertices_begin()));
+  //hepmc_event->set_signal_process_vertex(*(vertex1->vertices_begin()));
 
   //Loop over all vertices 
   int particle_pruned = 0;
   int vtx = 0;
   bool endloop = false;
   for (HepMC::GenEvent::vertex_iterator ver = hepmc_event->vertices_begin(); ver != hepmc_event->vertices_end(); ver++){    
-    if(endloop || hepmc_event->signal_process_vertex()) break;
-    vtx++;
-    //cout << "vtx= " << vtx ;
-    particle_pruned = 0;
-    HepMC::GenVertex::particle_iterator par = (*ver)->particles_begin(HepMC::children);    
-    for (; par != (*ver)->particles_end(HepMC::children); ++par){
-      particle_pruned++;
-      //cout << " particle_pruned= " << particle_pruned << " pdgid= " << (*par)->pdg_id() << " ; ";       
-      if ((*par)->pdg_id() == 25){
-        hepmc_event->set_signal_process_vertex(*ver);
-        endloop=true;
-      }   
-    }
-    //cout<<endl;
-    //if(endloop) cout << " assigned as signal_process_vertex!" << endl;   
+      if(endloop || hepmc_event->signal_process_vertex()) break;
+      vtx++;
+      //cout << "vtx= " << vtx ;
+      particle_pruned = 0;
+      HepMC::GenVertex::particle_iterator par = (*ver)->particles_begin(HepMC::children);    
+      for (; par != (*ver)->particles_end(HepMC::children); ++par){
+          particle_pruned++;
+          //cout << " particle_pruned= " << particle_pruned << " pdgid= " << (*par)->pdg_id() << " ; ";       
+          if ((*par)->pdg_id() == 25){
+              hepmc_event->set_signal_process_vertex(*ver);
+              endloop=true;
+          }   
+      }
+      //cout<<endl;
+      //if(endloop) cout << " assigned as signal_process_vertex!" << endl;   
   }
-
-  /////////////////////////////
-  // SETUP status 1 particles info from PACKED GEN PARTICLES
-  /////////////////////////////
-
-  // HepMC::GenEvent* packed_hepmc_event = new HepMC::GenEvent();
-  
-  // Prepare list of HepMC::GenParticles from packedGenParticles
-  std::map<const reco::Candidate*, HepMC::GenParticle*> packedGenCandToHepMCMap;
-  std::vector<HepMC::GenParticle*> hepmc_packedParticles;
-  for ( unsigned int i=0, n=packedGenParticlesHandle->size(); i<n; ++i )
-  {
-    const reco::Candidate* p_packed = &packedGenParticlesHandle->at(i);
-
-    /*
-    //check that the particle is not already added to the event  
-    bool matched=false;
-    for ( unsigned int j=0, nj=prunedGenParticlesHandle->size(); j<nj; ++j )
-    {
-        const reco::Candidate* p_pruned = &prunedGenParticlesHandle->at(j);
-        if (p_pruned->status()!=1) continue;
-        if (p_pruned->pdgId()!=p_packed->pdgId()) continue;
-        //cout<<"inside packed loop, found pruned id: "<<p_pruned->pdgId()<<" pt: "<<p_pruned->pt()<<" eta: "<<p_pruned->eta()<<endl;
-        if (abs(p_pruned->pt()-p_packed->pt())/p_packed->pt()<0.01 && abs(p_pruned->eta()-p_packed->eta())/p_packed->eta()<0.05) matched=true;
-    }        
-    if (matched) {
-        //cout<<"skipping packed id: "<<p_packed->pdgId()<<" pt: "<<p_packed->pt()<< " eta: "<< p_packed->eta()<<endl;
-        continue;
-    }
-    */
-
-    //cout << "packed id: " << p_packed->pdgId() << " pt: "<< p_packed->pt()<< " eta: " << p_packed->eta()<<endl;
-    HepMC::GenParticle* hepmc_packedParticle = new HepMC::GenParticle(FourVector(p_packed->p4()), p_packed->pdgId(), p_packed->status());
-    hepmc_packedParticle->suggest_barcode(i+1);
-
-    // Assign particle's generated mass from the standard particle data table
-    double particleMass;
-    if ( pTable_->particle(p_packed->pdgId()) ) particleMass = pTable_->particle(p_packed->pdgId())->mass();
-    else particleMass = p_packed->mass();
-    hepmc_packedParticle->set_generated_mass(particleMass);
-
-    hepmc_packedParticles.push_back(hepmc_packedParticle);
-    packedGenCandToHepMCMap[p_packed] = hepmc_packedParticle;
-
-    const reco::Candidate* motherInPruned = p_packed->mother(0);
-    if (checkForAncestor(motherInPruned,25)==true) 
-    {
-        //cout<<"from Higgs, skipping id:"<<p_packed->pdgId()<<" pt: "<<p_packed->pt()<<endl;
-        continue;
-    }
-    // STORE THE PACKED HEPMC PARTICLES INTO THE FIRST PRUNED VERTEX STORED IN THE hepmc_event
-    vertex3->add_particle_out(hepmc_packedParticle);
-
-  }
-
-  /////////////////////////////
-  // STORE HEPMC RESULT
-  /////////////////////////////
 
   std::auto_ptr<edm::HepMCProduct> hepmc_product(new edm::HepMCProduct());
   hepmc_product->addHepMCData(hepmc_event);
