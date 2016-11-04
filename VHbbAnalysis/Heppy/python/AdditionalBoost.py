@@ -1105,9 +1105,9 @@ class AdditionalBoost( Analyzer ):
         # Loop over jets                        
         for ij, jet in enumerate(getattr(event, "ak08")):
 
-            # Fill bb-tag
-            for i in xrange(len(newtags)) :
-                if jet.physObj == newtags.key(i).get():
+           	 # Fill bb-tag
+            	for i in xrange(len(newtags)) :
+              	  if jet.physObj == newtags.key(i).get():
                     jet.bbtag = newtags.value(i)
 
                 tmp_jet = Jet(jet)
@@ -1125,13 +1125,18 @@ class AdditionalBoost( Analyzer ):
 	        jet.puppi_tau2         = jet.userFloat("ak8PFJetsPuppiValueMap:NjettinessAK8PuppiTau2")
 
                 puppi_softdrop= ROOT.TLorentzVector()
+		puppi_softdrop_raw= ROOT.TLorentzVector()
+                puppi_softdrop_subjet_raw=ROOT.TLorentzVector()	
                 puppi_softdrop_subjet=ROOT.TLorentzVector()
                 sbSubjetsPuppi = jet.subjets("SoftDropPuppi")
                 for it in sbSubjetsPuppi  :
                        puppi_softdrop_subjet.SetPtEtaPhiM(it.pt(),it.eta(),it.phi(),it.mass())
-                       puppi_softdrop+=puppi_softdrop_subjet;
+                       puppi_softdrop+=puppi_softdrop_subjet
+		       puppi_softdrop_subjet_raw.SetPtEtaPhiM(it.correctedP4(0).pt(),it.correctedP4(0).eta(),it.correctedP4(0).phi(),it.correctedP4(0).mass())
+                       puppi_softdrop_raw+=puppi_softdrop_subjet_raw
 
                 jet.puppi_msoftdrop       = puppi_softdrop.M()
+		jet.puppi_msoftdrop_raw   = puppi_softdrop_raw.M()
                 jet.puppi_msoftdrop_corrL2L3       = puppi_softdrop.M()*corr
 
 
