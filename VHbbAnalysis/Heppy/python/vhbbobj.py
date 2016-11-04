@@ -357,7 +357,7 @@ ak8FatjetType = NTupleObjectType("ak8fatjet",  baseObjectTypes = [ fourVectorTyp
     NTupleVariable("puppi_tau2", lambda x : x.puppi_tau2, help="puppi from ak8PFJetsPuppiValueMap as cross check"),
     NTupleVariable("puppi_msoftdrop", lambda x : x.puppi_msoftdrop, help="puppi from ak8PFJetsPuppiValueMap as cross check"),
     NTupleVariable("puppi_msoftdrop_corrL2L3", lambda x : x.puppi_msoftdrop_corrL2L3, help="puppi from ak8PFJetsPuppiValueMap as cross check"),
-  
+    NTupleVariable("puppi_msoftdrop_raw", lambda x : x.puppi_msoftdrop_raw, help="puppi from ak8PFJetsPuppiValueMap as cross check"),
     
     # bb-tag input variables
     NTupleVariable("PFLepton_ptrel",   lambda x : x.PFLepton_ptrel, help="pt-rel of e/mu (for bb-tag)"),    
