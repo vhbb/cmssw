@@ -215,7 +215,13 @@ for jet_corr in JetReCalibrator.factorizedJetCorrections:
     for sdir in ["Up", "Down"]:
         name = jet_corr + sdir
         jetType.variables += [
-            NTupleVariable("corr_{0}".format(name), lambda x : getattr(x, 'corr{0}'.format(name), -99), float, mcOnly=True, help="")
+            NTupleVariable(
+                "corr_{0}".format(name),
+                lambda x, name = name: getattr(x, 'corr{0}'.format(name), -99),
+                float,
+                mcOnly=True,
+                help=""
+            )
         ]
 
 jetTypeExtra = NTupleObjectType("jetExtra",  baseObjectTypes = [ jetType ], variables = [

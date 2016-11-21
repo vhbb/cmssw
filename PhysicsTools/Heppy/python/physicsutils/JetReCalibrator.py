@@ -153,7 +153,7 @@ class JetReCalibrator:
 
             try:
                 jet.jetEnergyCorrUncertainty = JetUncertainty.getUncertainty(True)
-                #print "jetEnergyCorrUncertainty", jet.jetEnergyCorrUncertainty
+                #print "jetEnergyCorrUncertainty {0} {1}".format(uncertainty, jet.jetEnergyCorrUncertainty)
             except RuntimeError as r:
                 print "Caught %s when getting uncertainty for jet of pt %.1f, eta %.2f\n" % (r,corr * jet.pt() * jet.rawFactor(),jet.eta())
                 jet.jetEnergyCorrUncertainty = 0.5
@@ -210,7 +210,7 @@ class JetReCalibrator:
                     cshift = self.getCorrection(jet, rho, uncertainty = unc, delta = delta + cdelta)
                     #print "Jet shift", unc, sdir, cshift
                     setattr(jet, "corr{0}{1}".format(unc, sdir), cshift)
-            s = "jet pt={0}\n".format(jet.pt())
+            s = "jet pt={0} corr={1}\n".format(jet.pt(), jet.corr)
             for unc in  self.factorizedJetCorrections:
                 v1 = getattr(jet, "corr{0}{1}".format(unc, "Up"))
                 v2 = getattr(jet, "corr{0}{1}".format(unc, "Down"))
