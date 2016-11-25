@@ -6,41 +6,11 @@ from PhysicsTools.HeppyCore.utils.deltar import *
 
 
 class JetReCalibrator:
-    factorizedJetCorrections = [
-        "AbsoluteFlavMap",
-        "AbsoluteMPFBias",
-        "AbsoluteScale",
-        "AbsoluteStat",
-        "FlavorQCD",
-        "Fragmentation",
-        "PileUpDataMC",
-        "PileUpEnvelope",
-        "PileUpMuZero",
-        "PileUpPtBB",
-        "PileUpPtEC1",
-        "PileUpPtEC2",
-        "PileUpPtHF",
-        "PileUpPtRef",
-        "RelativeFSR",
-        "RelativeJEREC1",
-        "RelativeJEREC2",
-        "RelativeJERHF",
-        "RelativePtBB",
-        "RelativePtEC1",
-        "RelativePtEC2",
-        "RelativePtHF",
-        "RelativeStatEC",
-        "RelativeStatHF",
-        "SinglePionECAL",
-        "SinglePionHCAL",
-        "TimeEta",
-        "TimePt",
-        "Total"
-    ]
 
     def __init__(self,globalTag,jetFlavour,doResidualJECs,jecPath,upToLevel=3,
                  calculateSeparateCorrections=False,
-                 calculateType1METCorrection=False, type1METParams={'jetPtThreshold':15., 'skipEMfractionThreshold':0.9, 'skipMuons':True}, skipLevel1=False):
+                 calculateType1METCorrection=False, type1METParams={'jetPtThreshold':15., 'skipEMfractionThreshold':0.9, 'skipMuons':True}, skipLevel1=False,
+                 factorizedJetCorrections=["Total"]):
 
         """Create a corrector object that reads the payloads from the text dumps of a global tag under
             CMGTools/RootTools/data/jec  (see the getJec.py there to make the dumps).
@@ -53,6 +23,7 @@ class JetReCalibrator:
         self.upToLevel = upToLevel
         self.calculateType1METCorr = calculateType1METCorrection
         self.type1METParams  = type1METParams
+        self.factorizedJetCorrections = factorizedJetCorrections
         # Make base corrections
         path = os.path.expandvars(jecPath) #"%s/src/CMGTools/RootTools/data/jec" % os.environ['CMSSW_BASE'];
         self.L1JetPar  = ROOT.JetCorrectorParameters("%s/%s_L1FastJet_%s.txt" % (path,globalTag,jetFlavour),"");
