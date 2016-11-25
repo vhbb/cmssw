@@ -29,7 +29,7 @@ class BTagWeightCalculator:
         ret = {}
         tf = ROOT.TFile(fn)
         if not tf or tf.IsZombie():
-            raise FileError("Could not open file {0}".format(fn))
+            raise FileNotFoundError("Could not open file {0}".format(fn))
         ROOT.gROOT.cd()
         for k in tf.GetListOfKeys():
             kn = k.GetName()
