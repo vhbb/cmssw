@@ -9,7 +9,8 @@ class JetReCalibrator:
 
     def __init__(self,globalTag,jetFlavour,doResidualJECs,jecPath,upToLevel=3,
                  calculateSeparateCorrections=False,
-                 calculateType1METCorrection=False, type1METParams={'jetPtThreshold':15., 'skipEMfractionThreshold':0.9, 'skipMuons':True}, skipLevel1=False):
+                 calculateType1METCorrection=False, type1METParams={'jetPtThreshold':15., 'skipEMfractionThreshold':0.9, 'skipMuons':True}, skipLevel1=False,
+                 factorizedJetCorrections=["Total"]):
 
         """Create a corrector object that reads the payloads from the text dumps of a global tag under
             CMGTools/RootTools/data/jec  (see the getJec.py there to make the dumps).
@@ -22,6 +23,7 @@ class JetReCalibrator:
         self.upToLevel = upToLevel
         self.calculateType1METCorr = calculateType1METCorrection
         self.type1METParams  = type1METParams
+        self.factorizedJetCorrections = factorizedJetCorrections
         # Make base corrections
         path = os.path.expandvars(jecPath) #"%s/src/CMGTools/RootTools/data/jec" % os.environ['CMSSW_BASE'];
         self.L1JetPar  = ROOT.JetCorrectorParameters("%s/%s_L1FastJet_%s.txt" % (path,globalTag,jetFlavour),"");
@@ -47,6 +49,14 @@ class JetReCalibrator:
             print 'Missing JEC uncertainty file "%s/%s_Uncertainty_%s.txt", so jet energy uncertainties will not be available' % (path,globalTag,jetFlavour)
             self.JetUncertainty = None
         self.separateJetCorrectors = {}
+
+        
+        unc_factorized_path = "%s/%s_UncertaintySources_%s.txt" % (path, globalTag, jetFlavour)
+        self.factorizedUncertainties = {}
+        for fjc in self.factorizedJetCorrections:
+            pars = ROOT.JetCorrectorParameters(unc_factorized_path, fjc);
+            unc = ROOT.JetCorrectionUncertainty(pars)
+            self.factorizedUncertainties[fjc] = unc
 
         if calculateSeparateCorrections or calculateType1METCorrection:
             # Start from level 1
@@ -81,7 +91,7 @@ class JetReCalibrator:
                     for i in [self.L2JetPar,self.L3JetPar,self.ResJetPar]: self.vParL3Res.push_back(i)
                     self.separateJetCorrectors["L2L3Res"] = ROOT.FactorizedJetCorrector(self.vParL3Res)
 
-    def getCorrection(self,jet,rho,delta=0,metShift=[0,0],corrector=None,isHttSubjet=False):
+    def getCorrection(self,jet,rho, delta=0, metShift=[0,0], corrector=None, isHttSubjet=False, uncertainty="Total"):
         """Calculates the correction factor of a jet without modifying it
         """
         if not corrector: corrector = self.JetCorrector
@@ -98,20 +108,23 @@ class JetReCalibrator:
         corrector.setRho(rho)
         corr = corrector.getCorrection()
 
+        JetUncertainty = self.factorizedUncertainties[uncertainty]
+
         # if delta != 0:
         # Short circuit the condition so we always attach the uncertainty to the jet
         # (Why was this only done for delta != 0?)
         if True:
-            if not self.JetUncertainty: raise RuntimeError("Jet energy scale uncertainty shifts requested, but not available")
-            self.JetUncertainty.setJetEta(jet.eta())
+            if not JetUncertainty: raise RuntimeError("Jet energy scale uncertainty shift {0} requested, but not available".format(uncertainty))
+            JetUncertainty.setJetEta(jet.eta())
 
             if isHttSubjet:
-                self.JetUncertainty.setJetPt(corr * jet.pt())
+                JetUncertainty.setJetPt(corr * jet.pt())
             else:
-                self.JetUncertainty.setJetPt(corr * jet.pt() * jet.rawFactor())
+                JetUncertainty.setJetPt(corr * jet.pt() * jet.rawFactor())
 
             try:
-                jet.jetEnergyCorrUncertainty = self.JetUncertainty.getUncertainty(True) 
+                jet.jetEnergyCorrUncertainty = JetUncertainty.getUncertainty(True)
+                #print "jetEnergyCorrUncertainty {0} {1}".format(uncertainty, jet.jetEnergyCorrUncertainty)
             except RuntimeError as r:
                 print "Caught %s when getting uncertainty for jet of pt %.1f, eta %.2f\n" % (r,corr * jet.pt() * jet.rawFactor(),jet.eta())
                 jet.jetEnergyCorrUncertainty = 0.5
@@ -163,9 +176,22 @@ class JetReCalibrator:
             for sepcorr in self.separateJetCorrectors.keys():
                 setattr(jet,"CorrFactor_"+sepcorr,self.getCorrection(jet,rho,delta=0,corrector=self.separateJetCorrectors[sepcorr]))
         if addShifts:
-            for cdelta,shift in [(1.0, "JECUp"), (-1.0, "JECDown")]:
-                cshift = self.getCorrection(jet,rho,delta+cdelta)
-                setattr(jet, "corr"+shift, cshift)
+            for unc in self.factorizedJetCorrections:
+                for cdelta, sdir in [(1.0, "Up"), (-1.0, "Down")]:
+                    cshift = self.getCorrection(jet, rho, uncertainty = unc, delta = delta + cdelta)
+                    #print "Jet shift", unc, sdir, cshift
+                    setattr(jet, "corr{0}{1}".format(unc, sdir), cshift)
+            s = "jet pt={0} corr={1}\n".format(jet.pt(), jet.corr)
+            for unc in  self.factorizedJetCorrections:
+                v1 = getattr(jet, "corr{0}{1}".format(unc, "Up"))
+                v2 = getattr(jet, "corr{0}{1}".format(unc, "Down"))
+                s += "    {0} {1:.4f} {2:.4f} {3:.4f}\n".format(unc, v1, v2, v1-v2)
+            print s
+
+            #get also the total correction as corrJEC for backwards compatibility
+            for cdelta, sdir in [(1.0, "JECUp"), (-1.0, "JECDown")]:
+                cshift = self.getCorrection(jet, rho, uncertainty = "Total", delta = delta + cdelta)
+                setattr(jet, "corr{0}".format(sdir), cshift)
         if corr <= 0:
             return False
         newpt = jet.pt()*raw*corr
