@@ -1,7 +1,7 @@
 import ROOT
 import os
 
-debug_btagSF = False
+debug_btagSF = True
 
 # load the BTagCalibrationStandalone.cc macro from https://twiki.cern.ch/twiki/bin/view/CMS/BTagCalibration
 csvpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/csv/"
@@ -86,8 +86,8 @@ def get_SF(pt=30., eta=0.0, fl=5, val=0.0, syst="central", algo="CSV", wp="M", s
     # the .csv files use the convention: b=0, c=1, l=2. Convert into hadronFlavour convention: b=5, c=4, f=0
     fl_index = min(-fl+5,2)
     # no fl=1 in .csv for CMVAv2 (a bug???)
-    if not shape_corr and "CMVAV2" in algo and fl==4:
-        fl_index = 0
+    #if not shape_corr and "CMVAV2" in algo and fl==4:
+    #    fl_index = 0
 
     if shape_corr:
         if applies(fl,syst):
@@ -100,7 +100,7 @@ def get_SF(pt=30., eta=0.0, fl=5, val=0.0, syst="central", algo="CSV", wp="M", s
             return sf 
 
     # pt ranges for bc SF: needed to avoid out_of_range exceptions
-    pt_range_high_bc = 670.-1e-02 if "CSV" in algo else 320.-1e-02
+    pt_range_high_bc = (670.-1e-02) if "CSV" in algo else (300.-1e-02)
     pt_range_low_bc = 30.+1e-02
 
     # b or c jets
@@ -131,12 +131,17 @@ def get_event_SF(jets=[], syst="central", algo="CSV", btag_calibrators=btag_cali
 
 if debug_btagSF:
     print "POG WP:"
-    for algo in ["CSV", "CMVAV2"]:
-        for wp in [ "L", "M", "T" ]:
+    for algo in ["CSV", 
+                 "CMVAV2"]:
+        for wp in [ "L", 
+                    "M", "T" 
+                    ]:
             print algo+wp+":"
-            for syst in ["central", "up", "down"]:
+            for syst in ["central" 
+                         , "up", "down"
+                         ]:
                 print "\t"+syst+":"
-                for pt in [19.,25.,31.,330., 680.]:
+                for pt in [19.,25.,31.,330., 680., 1200.]:
                     print ("\t\tB(pt=%.0f, eta=0.0): %.3f" % (pt, get_SF(pt=pt, eta=0.0, fl=5, val=0.0, syst=syst, algo=algo, wp=wp, shape_corr=False)))
                     print ("\t\tC(pt=%.0f, eta=0.0): %.3f" % (pt, get_SF(pt=pt, eta=0.0, fl=4, val=0.0, syst=syst, algo=algo, wp=wp, shape_corr=False)))
                     print ("\t\tL(pt=%.0f, eta=0.0): %.3f" % (pt, get_SF(pt=pt, eta=0.0, fl=0, val=0.0, syst=syst, algo=algo, wp=wp, shape_corr=False)))
