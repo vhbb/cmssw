@@ -1,7 +1,7 @@
 import ROOT
 import os
 
-debug_btagSF = True
+debug_btagSF = False
 
 # load the BTagCalibrationStandalone.cc macro from https://twiki.cern.ch/twiki/bin/view/CMS/BTagCalibration
 csvpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/csv/"
