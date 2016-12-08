@@ -120,7 +120,8 @@ DeepFlavourJetTagsProducer::DeepFlavourJetTagsProducer(const edm::ParameterSet& 
 		var.name = input.name;
 		//two paradigms 
 		vector<string> tokens;
-		boost::split(tokens,var.name,boost::is_any_of("_"));
+		if (var.name != "Jet_JP" && var.name != "Jet_JBP" && var.name != "Jet_SoftMu" && var.name != "Jet_SoftEl"){boost::split(tokens,var.name,boost::is_any_of("_"));}
+		else {tokens.push_back(var.name);}
 		if(!tokens.size()) {
 			throw cms::Exception("RuntimeError") << "I could not parse properly " << input.name << " as input feature" << std::endl;
 		}
@@ -133,6 +134,7 @@ DeepFlavourJetTagsProducer::DeepFlavourJetTagsProducer(const edm::ParameterSet& 
 		}
 		var.index = (tokens.size() == 2) ? stoi(tokens.at(1)) : -1;
 		var.default_value = -1*input.offset; //set default to -offset so that when scaling (val+offset)*scale the outcome is 0
+		
 		variables_.push_back(var);
 	}
 }
@@ -205,6 +207,7 @@ DeepFlavourJetTagsProducer::produce(edm::Event& iEvent, const edm::EventSetup& i
 		//dump the NN output(s)
 		for(size_t i=0; i<outputs_.size(); ++i) {
 			(*output_tags[i])[key] = (notracks) ? -1 : nnout[outputs_[i]];
+			//std::cout << i << ": " << nnout[outputs_[i]] << std::endl;
 		}
 	}
 
