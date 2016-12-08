@@ -2,7 +2,6 @@
 #include <Eigen/Dense>
 
 #include <set>
-#include <iostream>
 
 // internal utility functions
 namespace {
@@ -626,38 +625,24 @@ namespace lwt {
     _scales(inputs.size())
   {
     size_t in_num = 0;
-		std::cout << "Names = [";
     for (const auto& input: inputs) {
       _offsets(in_num) = input.offset;
       _scales(in_num) = input.scale;
       _names.push_back(input.name);
       in_num++;
-			std::cout << input.name << ", ";
     }
-		std::cout << "]" << std::endl;
-		std::cout << "Entries = [" << std::endl;
   }
   VectorXd InputPreprocessor::operator()(const ValueMap& in) const {
     VectorXd invec(_names.size());
     size_t input_number = 0;
-		std::cout << "{ 'raw' : [";
     for (const auto& in_name: _names) {
       if (!in.count(in_name)) {
         throw NNEvaluationException("can't find input: " + in_name);
       }
-			std::cout << in.at(in_name) << ", ";
       invec(input_number) = in.at(in_name);
       input_number++;
     }
-		std::cout << "]," << std::endl;		
-		auto retval = (invec + _offsets).cwiseProduct(_scales);
-		std::cout << " 'processed' : [";
-		 for(size_t i=0; i<input_number; ++i) {
-		 	std::cout << retval(i) << ", ";
-		 }
-		std::cout << "]}," <<std::endl;
-		return retval;
-    //return (invec + _offsets).cwiseProduct(_scales);
+    return (invec + _offsets).cwiseProduct(_scales);
   }
 
 
