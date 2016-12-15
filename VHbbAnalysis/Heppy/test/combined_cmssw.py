@@ -22,6 +22,7 @@ from RecoBTag.SoftLepton.softPFElectronTagInfos_cfi import *
 from RecoBTag.SecondaryVertex.trackSelection_cff import *
 from Configuration.AlCa.GlobalTag import GlobalTag
 
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
 # This function is called by the cmsswPreprocessor 
 # (has to be named initialize, can have arbitrary arguments as long as
 # all have a default value)
@@ -158,6 +159,35 @@ def initialize(**kwargs):
             jetCollInstanceName=cms.string("SubJets"),            
         )
 
+
+        process.ca15PFSoftdropFiltJetsCHS = process.ca15PFJetsCHS.clone(
+            useSoftDrop = cms.bool(True),
+            zcut = cms.double(0.1),
+            beta = cms.double(0),
+            R0 = cms.double(1.5),
+            useFiltering = cms.bool(True),
+            nFilt = cms.int32(3), 
+            rFilt = cms.double(0.3), 
+            useExplicitGhosts = cms.bool(True),
+            writeCompound = cms.bool(True), # Also write subjets
+            jetCollInstanceName=cms.string("SubJets"),            
+        )
+
+        process.ca15PFSoftdropZ2B1FiltJetsCHS = process.ca15PFJetsCHS.clone(
+            useSoftDrop = cms.bool(True),
+            zcut = cms.double(0.2),
+            beta = cms.double(1),
+            R0 = cms.double(1.5),
+            useFiltering = cms.bool(True),
+            nFilt = cms.int32(3), 
+            rFilt = cms.double(0.3), 
+            useExplicitGhosts = cms.bool(True),
+            writeCompound = cms.bool(True), # Also write subjets
+            jetCollInstanceName=cms.string("SubJets"),            
+        )
+
+
+
         # Apply trimming to CA R=1.5 jets
         process.ca15PFTrimmedJetsCHS = process.ca15PFJetsCHS.clone(
             useTrimming = cms.bool(True),
@@ -270,6 +300,8 @@ def initialize(**kwargs):
         process.OUT.outputCommands.append("keep *_ca15PFPrunedJetsCHS_*_EX")
         process.OUT.outputCommands.append("keep *_ca15PFSoftdropJetsCHS_*_EX")
         process.OUT.outputCommands.append("keep *_ca15PFSoftdropZ2B1JetsCHS_*_EX")
+        process.OUT.outputCommands.append("keep *_ca15PFSoftdropFiltJetsCHS_*_EX")
+        process.OUT.outputCommands.append("keep *_ca15PFSoftdropZ2B1FiltJetsCHS_*_EX")
         process.OUT.outputCommands.append("keep *_ca15PFTrimmedJetsCHS_*_EX")
         process.OUT.outputCommands.append("keep *_ca15PFSubjetFilterCHS_*_EX")
         process.OUT.outputCommands.append("keep *_ca15PFJetsCHSNSubjettiness_*_EX")
@@ -409,13 +441,19 @@ def initialize(**kwargs):
     for fatjet_name in ["ca15PFPrunedJetsCHS", 
                         "ca15PFSoftdropJetsCHS", 
                         "ca15PFSoftdropZ2B1JetsCHS",                     
+                        "ca15PFSoftdropFiltJetsCHS", 
+                        "ca15PFSoftdropZ2B1FiltJetsCHS",                     
                         "ca15PFSubjetFilterCHS",
                         "looseOptRHTT"]:
 
         if skip_ca15:
             continue
             
-        if fatjet_name in  ["ca15PFPrunedJetsCHS", "ca15PFSoftdropJetsCHS", "ca15PFSoftdropZ2B1JetsCHS"]:
+        if fatjet_name in  ["ca15PFPrunedJetsCHS", 
+                            "ca15PFSoftdropJetsCHS", 
+                            "ca15PFSoftdropZ2B1JetsCHS",
+                            "ca15PFSoftdropFiltJetsCHS", 
+                            "ca15PFSoftdropZ2B1FiltJetsCHS"]:
             delta_r = 1.5
             jetAlgo = "CambridgeAachen"
             subjet_label = "SubJets"
@@ -602,7 +640,6 @@ def initialize(**kwargs):
     # Electron MVA ID: https://twiki.cern.ch/twiki/bin/viewauth/CMS/MultivariateElectronIdentificationRun2#Recipes_and_implementation
     ########################################
    
-    from PhysicsTools.SelectorUtils.tools.vid_id_tools import *
     switchOnVIDElectronIdProducer(process, DataFormat.MiniAOD)
     for eleid in ["RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring15_25ns_Trig_V1_cff"]:
         setupAllVIDIdsInModule(process, eleid, setupVIDElectronSelection)
@@ -610,11 +647,74 @@ def initialize(**kwargs):
         setupAllVIDIdsInModule(process, eleid, setupVIDElectronSelection)
     process.OUT.outputCommands.append("keep *_electronMVAValueMapProducer_*_EX")
     process.OUT.outputCommands.append("keep *_egmGsfElectronIDs_*_EX")
+
+
+
+    ########################################
+    # MET significance matrix
+    ########################################
     
+    from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+    isData = not isMC
+    runMetCorAndUncFromMiniAOD(process, isData = isData)
+    process.OUT.outputCommands.append("keep *_slimmedMETs_*_EX")
+
+
+
+    #######################################
+    ## BTV HIP mitigation  
+    #######################################
+    # recreate slimmedJets collection
+    process.load("Configuration.StandardSequences.MagneticField_cff")
+    process.load("Configuration.Geometry.GeometryRecoDB_cff")
+    from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
+    updateJetCollection(
+      process,
+      jetSource = cms.InputTag('slimmedJets','','PAT') if isMC else  cms.InputTag('slimmedJets','','RECO'),
+      jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None'),
+      btagDiscriminators = ['pfCombinedInclusiveSecondaryVertexV2BJetTags','pfCombinedMVAV2BJetTags'],
+      runIVF=True,
+      btagPrefix = 'new' # optional, in case interested in accessing both the old and new discriminator values
+    )
+    process.slimmedJets = process.slimmedJets=process.updatedPatJetsTransientCorrected.clone()
+    process.OUT.outputCommands.append("keep *_slimmedJets_*_EX")
+
+    if False :
+    # As tracks are not stored in miniAOD, and b-tag fwk for CMSSW < 72X does not accept candidates
+      process.load('RecoBTag.Configuration.RecoBTag_cff')
+      process.load('RecoJets.Configuration.RecoJetAssociations_cff')
+#    process.ak4JetTracksAssociatorAtVertexPF.jets = cms.InputTag("slimmedJets")
+#    process.ak4JetTracksAssociatorAtVertexPF.tracks = cms.InputTag("packedPFCandidates")
+      process.pfImpactParameterTagInfos.candidates = cms.InputTag("packedPFCandidates")
+      process.pfImpactParameterTagInfos.primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices")
+      process.pfImpactParameterTagInfos.jets = cms.InputTag("slimmedJets")
+      process.pfInclusiveSecondaryVertexFinderTagInfos.extSVCollection = cms.InputTag("slimmedSecondaryVertices")
+      process.pfImpactParameterTagInfos.minimumNumberOfPixelHits = cms.int32(1)
+      process.pfImpactParameterTagInfos.minimumNumberOfHits = cms.int32(0)
+      process.pfSecondaryVertexTagInfos.trackSelection.pixelHitsMin = cms.uint32(1)
+      process.pfSecondaryVertexTagInfos.trackSelection.totalHitsMin = cms.uint32(0)
+      process.inclusiveCandidateVertexFinder.minHits = cms.uint32(0)
+      process.inclusiveCandidateVertexFinder.tracks=cms.InputTag("packedPFCandidates")
+      process.inclusiveCandidateVertexFinder.primaryVertices=cms.InputTag("offlineSlimmedPrimaryVertices")
+#    process.candidateVertexMerger.secondaryVertices = cms.InputTag("inclusiveCandidateVertexFinder")
+#    process.candidateVertexArbitrator.secondaryVertices = cms.InputTag("candidateVertexMerger")
+      process.candidateVertexArbitrator.primaryVertices=cms.InputTag("offlineSlimmedPrimaryVertice")
+      process.candidateVertexArbitrator.tracks = cms.InputTag("packedPFCandidates")
+      process.candidateVertexArbitrator.trackMinLayers = 0
+
+      process.OUT.outputCommands.append("keep *_pfCombinedInclusiveSecondaryVertexV2BJetTags_*_EX")
+      process.OUT.outputCommands.append("keep *_pfCombinedMVAV2BJetTags_*_EX")
+
+
+    ##processDumpFile = open('combined_cmssw.dump', 'w')
+    ##print >> processDumpFile, process.dumpPython()
+    
+
     return process
+
+
 
 # Called directly 
 # (luckily for us cmsRun also counts as direct call)
 if __name__ == "__main__":
     process = initialize()
-

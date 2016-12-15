@@ -6,7 +6,7 @@ import ROOT
 from PhysicsTools.Heppy.analyzers.objects.autophobj import *
 from PhysicsTools.HeppyCore.utils.deltar import deltaPhi, deltaR
 from VHbbAnalysis.Heppy.signedSip import qualityTrk
-from VHbbAnalysis.Heppy.leptonMVA import ptRelv2
+from VHbbAnalysis.Heppy.leptonMVA import ptRelv2, jetLepAwareJEC
 
 import copy, os
 
@@ -49,7 +49,7 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
     # TTH-id related variables
     NTupleVariable("mvaTTH",     lambda lepton : lepton.mvaValueTTH if hasattr(lepton,'mvaValueTTH') else -1, help="Lepton MVA (ttH version)"),
     NTupleVariable("jetOverlapIdx", lambda lepton : getattr(lepton, "jetOverlapIdx", -1), int, help="index of jet with overlapping PF constituents. If idx>=1000, then idx = idx-1000 and refers to discarded jets."),
-    NTupleVariable("jetPtRatio", lambda lepton : lepton.pt()/lepton.jet.pt() if hasattr(lepton,'jet') else -1, help="pt(lepton)/pt(nearest jet)"),
+    NTupleVariable("jetPtRatio", lambda lepton : lepton.pt()/jetLepAwareJEC(lepton).Pt() if hasattr(lepton,'jet') else -1, help="pt(lepton)/pt(nearest jet)"),
     NTupleVariable("jetBTagCSV", lambda lepton : lepton.jet.btag('pfCombinedInclusiveSecondaryVertexV2BJetTags') if hasattr(lepton,'jet') and hasattr(lepton.jet, 'btag') else -99, help="btag of nearest jet"),
     NTupleVariable("jetDR",      lambda lepton : deltaR(lepton.eta(),lepton.phi(),lepton.jet.eta(),lepton.jet.phi()) if hasattr(lepton,'jet') else -1, help="deltaR(lepton, nearest jet)"),
     NTupleVariable("mvaTTHjetPtRatio", lambda lepton : lepton.pt()/lepton.jet_leptonMVA.pt() if hasattr(lepton,'jet_leptonMVA') else -1, help="pt(lepton)/pt(nearest jet with pT > 25 GeV)"),
@@ -94,15 +94,18 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
 #    NTupleVariable("hadronFlavour", lambda x : x.hadronFlavour(), int,     mcOnly=True, help="hadron flavour (ghost matching to B/C hadrons)"),
     NTupleVariable("ctagVsL", lambda x : x.bDiscriminator('pfCombinedCvsLJetTags'), help="c-btag vs light jets"),
     NTupleVariable("ctagVsB", lambda x : x.bDiscriminator('pfCombinedCvsBJetTags'), help="c-btag vs light jets"),
-
     NTupleVariable("btagBDT", lambda x : getattr(x,"btagBDT",-99), help="combined super-btag"),
     NTupleVariable("btagProb", lambda x : x.btag('pfJetProbabilityBJetTags') , help="jet probability b-tag"),
     NTupleVariable("btagBProb", lambda x : x.btag('pfJetBProbabilityBJetTags') , help="jet b-probability b-tag"),
     NTupleVariable("btagSoftEl", lambda x : getattr(x, "btagSoftEl", -1000) , help="soft electron b-tag"),
     NTupleVariable("btagSoftMu", lambda x : getattr(x, "btagSoftMu", -1000) , help="soft muon b-tag"),
-    NTupleVariable("btagnew",   lambda x : getattr(x,"btagnew",-2), help="newest btag discriminator"),
+#see below
+#   NTupleVariable("btagHip",   lambda x : x.bDiscriminator("newpfCombinedInclusiveSecondaryVertexV2BJetTags"), help="pfCombinedInclusiveSVV2 with btv HIP mitigation"),
+#    NTupleVariable("btagHip2",   lambda x : getattr(x,"btagHip",-2), help="pfCombinedInclusiveSVV2 with btv HIP mitigation"),
+    NTupleVariable("btagCMVAV2",   lambda x : x.btag('newpfCombinedMVAV2BJetTags'), help="CMVAV2 with btv HIP mitigation"),
+#    NTupleVariable("btagHipCMVA2",   lambda x : getattr(x,"btagHip",-2), help="CMVAV2 with btv HIP mitigation"),
     NTupleVariable("btagCSVV0",   lambda x : x.bDiscriminator('pfCombinedSecondaryVertexV2BJetTags'), help="should be the old CSV discriminator with AVR vertices"),
-    NTupleVariable("btagCMVAV2",  lambda x : x.btag('pfCombinedMVAV2BJetTags'), help="CMVA V2 discriminator"),
+    NTupleVariable("btagCMVAV2NoHipMitigation",  lambda x : x.btag('pfCombinedMVAV2BJetTags'), help="CMVA V2 discriminator"),
    # NTupleVariable("mcMatchId",    lambda x : x.mcMatchId,   int, mcOnly=True, help="Match to source from hard scatter (25 for H, 6 for t, 23/24 for W/Z)"),
    # NTupleVariable("puId", lambda x : x.puJetIdPassed, int,     mcOnly=False, help="puId (full MVA, loose WP, 5.3.X training on AK5PFchs: the only thing that is available now)"),
    # NTupleVariable("id",    lambda x : x.jetID("POG_PFID") , int, mcOnly=False,help="POG Loose jet ID"),
@@ -151,8 +154,14 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("mcIdx",   lambda x : x.mcJet.index if hasattr(x,"mcJet") and x.mcJet is not None else -1, int, mcOnly=False,help="index of the matching gen jet"),
     #NTupleVariable("pt_reg",lambda x : getattr(x,"pt_reg",-99), help="Regression"),
     #NTupleVariable("pt_regVBF",lambda x : getattr(x,"pt_regVBF",-99), help="Regression for VBF"),
-    NTupleVariable("blike_VBF",lambda x : getattr(x,"blike_VBF",-2), help="VBF blikelihood for SingleBtag dataset")
+    NTupleVariable("blike_VBF",lambda x : getattr(x,"blike_VBF",-2), help="VBF blikelihood for SingleBtag dataset"),
+    NTupleVariable("pt_puppi",lambda x : puppiWeightedPt(x).pt(), help="pt of jet obtained reweighting the constituents with puppi weights"),
  ])
+
+jetType.removeVariable("btagCSV")
+jetTypeVHbb.addVariables([NTupleVariable("btagCSV", lambda x : x.bDiscriminator("newpfCombinedInclusiveSecondaryVertexV2BJetTags"), help="pfCombinedInclusiveSVV2 with btv HIP mitigation"),
+                          NTupleVariable("btagNoHipMitigation",lambda x : x.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"), help="pfCombinedInclusiveSVV2 without btv HIP mitigation")])
+
 
 # "" is the nominal rgression, the other refer to JEC/JER up/down
 for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
@@ -205,16 +214,17 @@ from leptonSF import LeptonSF
 
 jsonpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/leptonSF/"
 jsons = {    
+    #OLD
     'muEff_HLT_RunC' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15_eff.json' , 'runC_IsoMu20_OR_IsoTkMu20_PtEtaBins', 'abseta_pt_MC' ],
     'muEff_HLT_RunD4p2' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15_eff.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p2_PtEtaBins', 'abseta_pt_MC' ],
     'muEff_HLT_RunD4p3' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15_eff.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p3_PtEtaBins', 'abseta_pt_MC' ],
     'muSF_HLT_RunC' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15.json' , 'runC_IsoMu20_OR_IsoTkMu20_PtEtaBins', 'abseta_pt_ratio' ],
-    'muSF_HLT_RunD4p2' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p2_PtEtaBins', 'abseta_pt_ratio' ],
-    'muSF_HLT_RunD4p3' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p3_PtEtaBins', 'abseta_pt_ratio' ],
-    'muSF_IsoLoose' : [ jsonpath+'MuonIso_Z_RunCD_Reco76X_Feb15.json' , 'MC_NUM_LooseRelIso_DEN_LooseID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
-    'muSF_IsoTight' : [ jsonpath+'MuonIso_Z_RunCD_Reco76X_Feb15.json' , 'MC_NUM_TightRelIso_DEN_TightID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
-    'muSF_IdCutLoose' : [ jsonpath+'MuonID_Z_RunCD_Reco76X_Feb15.json' , 'MC_NUM_LooseID_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
-    'muSF_IdCutTight' : [ jsonpath+'MuonID_Z_RunCD_Reco76X_Feb15.json' , 'MC_NUM_TightIDandIPCut_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
+    #'muSF_HLT_RunD4p2' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p2_PtEtaBins', 'abseta_pt_ratio' ],
+    #'muSF_HLT_RunD4p3' : [ jsonpath+'SingleMuonTrigger_Z_RunCD_Reco76X_Feb15.json' , 'runD_IsoMu20_OR_IsoTkMu20_HLTv4p3_PtEtaBins', 'abseta_pt_ratio' ],
+    #'muSF_IsoLoose' : [ jsonpath+'MuonIso_Z_RunCD_Reco76X_Feb15.json' , 'MC_NUM_LooseRelIso_DEN_LooseID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
+    #'muSF_IsoTight' : [ jsonpath+'MuonIso_Z_RunCD_Reco76X_Feb15.json' , 'MC_NUM_TightRelIso_DEN_TightID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
+    #'muSF_IdCutLoose' : [ jsonpath+'MuonID_Z_RunCD_Reco76X_Feb15.json' , 'MC_NUM_LooseID_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
+    #'muSF_IdCutTight' : [ jsonpath+'MuonID_Z_RunCD_Reco76X_Feb15.json' , 'MC_NUM_TightIDandIPCut_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'] ,
     'muSF_IdMVALoose' : ['','',''], 
     'muSF_IdMVATight' : ['','',''], 
     'eleEff_HLT_RunC' : [jsonpath+'ScaleFactor_HLT_Ele23_WPLoose_Gsf_v.json','ScaleFactor_HLT_Ele23_WPLoose_Gsf_v', 'eta_pt_ratio'],
@@ -225,10 +235,19 @@ jsons = {
     'eleSF_HLT_RunD4p3' : [jsonpath+'ScaleFactor_HLT_Ele23_WPLoose_Gsf_v.json','ScaleFactor_HLT_Ele23_WPLoose_Gsf_v', 'eta_pt_ratio'],
     'eleSF_IdCutLoose' : [jsonpath+'CutBasedID_LooseWP.json', 'CutBasedID_LooseWP', 'abseta_pt_ratio'],
     'eleSF_IdCutTight' : [jsonpath+'CutBasedID_TightWP.json', 'CutBasedID_TightWP', 'abseta_pt_ratio'],
-    'eleSF_IdMVALoose' : [jsonpath+'ScaleFactor_GsfElectronToRECO_passingTrigWP80.json', 'ScaleFactor_GsfElectronToRECO_passingTrigWP80', 'eta_pt_ratio'],
-    'eleSF_IdMVATight' : [jsonpath+'ScaleFactor_GsfElectronToRECO_passingTrigWP90.json', 'ScaleFactor_GsfElectronToRECO_passingTrigWP90', 'eta_pt_ratio'],
+    'eleSF_IdMVALoose' : [jsonpath+'ScaleFactor_egammaEff_WP80.json', 'ScaleFactor_egammaEff_WP80', 'eta_pt_ratio'],
+    'eleSF_IdMVATight' : [jsonpath+'ScaleFactor_egammaEff_WP90.json', 'ScaleFactor_egammaEff_WP90', 'eta_pt_ratio'],
     'eleSF_IsoLoose' : ['','',''],
     'eleSF_IsoTight' : ['','',''],
+    'eleSF_trk_eta' : [jsonpath+'EleGSFTrk_80X.json','ScaleFactor_GsfTracking_80X','eta_ratio'],
+    #NEW
+    'muSF_HLT_RunD4p2' : [ jsonpath+'SingleMuonTrigger_Z_RunBCD_prompt80X_7p65.json' , 'IsoMu22_OR_IsoTkMu22_PtEtaBins_Run273158_to_274093', 'abseta_pt_DATA' ],
+    'muSF_HLT_RunD4p3' : [ jsonpath+'SingleMuonTrigger_Z_RunBCD_prompt80X_7p65.json' , 'IsoMu22_OR_IsoTkMu22_PtEtaBins_Run274094_to_276097', 'abseta_pt_DATA' ],
+    'muSF_IsoLoose' : [ jsonpath+'MuonIso_Z_RunBCD_prompt80X_7p65.json' , 'MC_NUM_LooseRelIso_DEN_TightID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
+    'muSF_IsoTight' : [ jsonpath+'MuonIso_Z_RunBCD_prompt80X_7p65.json' , 'MC_NUM_TightRelIso_DEN_TightID_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
+    'muSF_IdCutLoose' : [ jsonpath+'MuonID_Z_RunBCD_prompt80X_7p65.json' , 'MC_NUM_LooseID_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
+    'muSF_IdCutTight' : [ jsonpath+'MuonID_Z_RunBCD_prompt80X_7p65.json' , 'MC_NUM_TightIDandIPCut_DEN_genTracks_PAR_pt_spliteta_bin1', 'abseta_pt_ratio'],
+    'muSF_trk_eta' : [ jsonpath+'MuonTrkHIP_80X_Jul28.json' , 'ScaleFactor_MuonTrkHIP_80X_eta', 'eta_ratio' ],
     }
 
 correctors = {}
@@ -242,6 +261,15 @@ for cut in ["IsoLoose", "IsoTight", "IdCutLoose", "IdCutTight", "IdMVALoose", "I
                                                 )]
     leptonTypeVHbb.variables += [NTupleVariable("SFerr_"+cut, 
                                                 lambda x, muCorr=correctors["muSF_"+cut], eleCorr=correctors["eleSF_"+cut] : muCorr.get_2D(x.pt(), x.eta())[1] if abs(x.pdgId()) == 13 else eleCorr.get_2D(x.pt(), x.eta())[1], 
+                                                float, mcOnly=True, help="SF error for lepton "+cut
+                                                )]
+for cut in ["trk_eta"]:     
+    leptonTypeVHbb.variables += [NTupleVariable("SF_"+cut, 
+                                                lambda x, muCorr=correctors["muSF_"+cut], eleCorr=correctors["eleSF_"+cut] : muCorr.get_1D(x.eta())[0] if abs(x.pdgId()) == 13 else eleCorr.get_1D(x.eta())[0], 
+                                                float, mcOnly=True, help="SF for lepton "+cut
+                                                )]
+    leptonTypeVHbb.variables += [NTupleVariable("SFerr_"+cut, 
+                                                lambda x, muCorr=correctors["muSF_"+cut], eleCorr=correctors["eleSF_"+cut] : muCorr.get_1D(x.eta())[1] if abs(x.pdgId()) == 13 else eleCorr.get_1D(x.eta())[1], 
                                                 float, mcOnly=True, help="SF error for lepton "+cut
                                                 )]
 for cut in ["HLT_RunD4p3","HLT_RunD4p2","HLT_RunC"]:     
@@ -538,3 +566,6 @@ def ptRel(p4,axis):
     o=ROOT.TLorentzVector(p4.Px(),p4.Py(),p4.Pz(),p4.E())
     return o.Perp(a)
 
+def puppiWeightedPt(j):
+    return sum( [x.p4()*x.puppiWeight() for x in  j.daughterPtrVector()] ,  ROOT.reco.Particle.LorentzVector() )
+    
