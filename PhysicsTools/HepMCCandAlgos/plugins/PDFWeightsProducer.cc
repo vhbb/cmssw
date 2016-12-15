@@ -1,6 +1,6 @@
 /* \class PDFWeightsProducer
  *
- * \author Luca Lista, INFN
+ * \author Luca Perrozzi, ETHZ
  *
  * Convert PDF replicas in Hessian representation
  * Originally developed by Josh BEndavid, adapted by Luca Perrozzi
