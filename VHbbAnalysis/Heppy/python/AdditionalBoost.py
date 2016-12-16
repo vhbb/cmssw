@@ -17,7 +17,8 @@ from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
 from PhysicsTools.Heppy.physicsobjects.PhysicsObject import PhysicsObject
 from PhysicsTools.Heppy.physicsobjects.PhysicsObjects import Jet
 from PhysicsTools.Heppy.physicsutils.JetReCalibrator import JetReCalibrator
-
+from PhysicsTools.Heppy.physicsutils.JetReCalibrator import JetReCalibrator
+from PhysicsTools.Heppy.analyzers.objects.JetAnalyzer import cleanJetsAndLeptons
 
 # Fastjet-Contrib is not in the path per default.
 # We need it for n-subjettiness recalculation
@@ -1085,7 +1086,16 @@ class AdditionalBoost( Analyzer ):
 
         setattr(event, "ak08", map(PhysicsObject, self.handles["ak08"].product()))
         setattr(event, "ak08softdropsubjets", map(PhysicsObject, self.handles["ak08softdropsubjets"].product()))
+        
+        ########
+        #  clean from leptons
+        #######
+       
+        
+        
+        event.ak08, event.cleanButToThrowAwayCollectionLeptons =   cleanJetsAndLeptons([j for j in event.ak08 if abs(j.eta())<2.5],  [l for l in event.selectedLeptons if l.pt() > 100. and abs(l.eta())<2.5] , 0.8 , lambda jet,lepton: lepton)
 
+    
         do_calc_bb = False
         # Calc BB tag  
         # -- if there is a HTT candidate and at least one lepton
