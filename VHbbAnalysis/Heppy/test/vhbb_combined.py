@@ -37,7 +37,6 @@ genhfana=cfg.Analyzer(
 sequence.insert(sequence.index(VHbb),genhfana)
 
 
-
 treeProducer.collections["ak08"] = NTupleCollection("FatjetAK08ungroomed",  ak8FatjetType,  10,
                                                     help = "AK, R=0.8, pT > 200 GeV, no grooming, calibrated")
 
