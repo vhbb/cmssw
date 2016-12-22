@@ -1139,7 +1139,6 @@ class AdditionalBoost( Analyzer ):
 		jet.puppi_msoftdrop_raw   = puppi_softdrop_raw.M()
                 jet.puppi_msoftdrop_corrL2L3       = puppi_softdrop.M()*corr
 
-
             # bb-tag Inputs
             muonTagInfos = self.handles['ak08muonTagInfos'].product()[ij]
             elecTagInfos = self.handles['ak08elecTagInfos'].product()[ij]
