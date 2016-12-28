@@ -14,7 +14,7 @@ process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(1000)
+    input = cms.untracked.int32(10)
 )
 
 # Input source
@@ -34,26 +34,45 @@ process.configurationMetadata = cms.untracked.PSet(
 )
 
 
-#TFileService for output 
-process.TFileService = cms.Service("TFileService", 
-    fileName = cms.string("testpdf.root"),
-    closeFileFast = cms.untracked.bool(True)
+# #TFileService for output 
+# process.TFileService = cms.Service("TFileService", 
+    # fileName = cms.string("testpdf.root"),
+    # closeFileFast = cms.untracked.bool(True)
+# )
+
+process.out = cms.OutputModule( "PoolOutputModule",
+  fileName = cms.untracked.string( "PDFWeightsProducer.root" ),
+  outputCommands= cms.untracked.vstring(
+    # "drop *",
+    # "keep *_genParticles_*_*"
+  )
 )
+
 
 # Other statements
 from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
-process.testpdf = cms.EDAnalyzer("PDFWeightsTest",
+# process.testpdf = cms.EDAnalyzer(
+                                 # "PDFWeightsTest",
+process.testpdf = cms.EDProducer(
+                                 "PDFWeightsProducer",
                                  pdfWeightOffset = cms.uint32(10), #index of first mc replica weight (careful, this should not be the nominal weight, which is repeated in some mc samples).  The majority of run2 LO madgraph_aMC@NLO samples with 5fs matrix element and pdf would use index 10, corresponding to pdf set 263001, the first alternate mc replica for the nominal pdf set 263000 used for these samples
                                  nPdfWeights = cms.uint32(100), #number of input weights
                                  nPdfEigWeights = cms.uint32(60), #number of output weights
                                  mc2hessianCSV = cms.FileInPath('PhysicsTools/HepMCCandAlgos/data/NNPDF30_lo_as_0130_hessian_60.csv'), #MC2Hessian transformation matrix
                                  )
 
-process.ana = cms.Path(process.testpdf)
+# process.ana = cms.Path(process.testpdf)
 
 # Schedule definition
-process.schedule = cms.Schedule(process.ana)
+# process.schedule = cms.Schedule(process.ana)
 
+process.p = cms.Path(
+    process.testpdf
+)
+
+process.o = cms.EndPath(
+    process.out 
+)
 
