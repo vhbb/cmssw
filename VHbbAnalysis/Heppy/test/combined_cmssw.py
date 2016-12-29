@@ -567,6 +567,16 @@ def initialize(**kwargs):
  #           jetAlgorithm = cms.string("AntiKt")
  #       )
 
+        process.PDFWeightsProducer = cms.EDProducer("PDFWeightsProducer",
+          # mc2hessianCSV = cms.FileInPath('PhysicsTools/HepMCCandAlgos/data/NNPDF30_lo_as_0130_hessian_60.csv'), #MC2Hessian transformation matrix
+          mc2hessianCSV = cms.FileInPath('PhysicsTools/HepMCCandAlgos/data/NNPDF30_nlo_as_0118_hessian_60.csv'), #MC2Hessian transformation matrix
+          src = cms.InputTag("source"),
+          # putting to 0 at least one of the parameters below will enforce hard-coded settings based on the mc2hessianCSV input file
+          pdfWeightLHAnumber = cms.uint32(0), #index of first mc replica weight (careful, this should not be the nominal weight, which is repeated in some mc samples).  The majority of run2 LO madgraph_aMC@NLO samples with 5fs matrix element and pdf would use index 10, corresponding to pdf set 263001, the first alternate mc replica for the nominal pdf set 263000 used for these samples
+          nPdfWeights = cms.uint32(0), #number of input weights
+          nPdfEigWeights = cms.uint32(0), #number of output weights
+        )
+        process.OUT.outputCommands.append("keep *_PDFWeightsProducer_*_EX")
 
         # Plugin for analysing B hadrons
         # MUST use the same particle collection as in selectedHadronsAndPartons

@@ -8,7 +8,9 @@
 *
 */
 
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/one/EDProducer.h"
+// #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/Run.h"
@@ -28,7 +30,8 @@ using namespace edm;
 using namespace std;
 using namespace lhef;
 
-class PDFWeightsProducer : public edm::EDProducer {
+class PDFWeightsProducer : public edm::one::EDProducer<edm::BeginRunProducer,
+                                                        edm::EndRunProducer> {
 public:
   
   explicit PDFWeightsProducer( const ParameterSet & cfg ) :
@@ -40,7 +43,7 @@ public:
   nPdfEigWeights_(cfg.getParameter<unsigned int>("nPdfEigWeights"))
   {
     produces<std::vector<float>>("outputHessianWeights");
-    produces<unsigned int>("inputPDFset");
+    produces<unsigned int>("pdfWeightLHAnumber");
     mc2hessianCSV = cfg.getParameter<edm::FileInPath>("mc2hessianCSV");
   }
 
@@ -49,7 +52,7 @@ public:
 private:
   
   virtual void beginRunProduce(edm::Run & run, edm::EventSetup const& es);
-  virtual void endRun(edm::Run const& run, edm::EventSetup const& es);
+  virtual void endRunProduce(edm::Run & run, edm::EventSetup const& es);
   virtual void produce( edm::Event&, const edm::EventSetup&);
   virtual void beginJob();
   virtual void endJob();
@@ -78,10 +81,12 @@ PDFWeightsProducer::~PDFWeightsProducer(){
 }
 
 void PDFWeightsProducer::beginJob(){
+  cout << " wtf!!!!!! 0" << endl;
 }
 
 void PDFWeightsProducer::beginRunProduce(edm::Run & iRun, edm::EventSetup const& es) {
 
+  cout << " wtf!!!!!! 1" << endl;
   // Access LHERunInfoProduct (i.e. LHE header) to retrieve the list of weights in the sample
   iRun.getByLabel( edm::InputTag("externalLHEProducer"), run );
   TString mc2hessianCSV_str = mc2hessianCSV.fullPath();
@@ -93,7 +98,7 @@ void PDFWeightsProducer::beginRunProduce(edm::Run & iRun, edm::EventSetup const&
     for (unsigned int iLine = 0; iLine<lines.size(); iLine++) {
       TString line_tstr =lines.at(iLine).c_str();
       if (line_tstr.Contains("<weight id=")) {
-        // cout<<iLine<< " "<<line_tstr.Data()<<endl;
+        cout<<iLine<< " "<<line_tstr.Data()<<endl;
         line_tstr = line_tstr.ReplaceAll("\n","").ReplaceAll("<weight id=\"","").ReplaceAll("</weight>","");
         TObjArray *tx = line_tstr.Tokenize("> ");
         line_tstr = ((TObjString *)(tx->At(tx->GetEntries()-1)))->String();
@@ -102,7 +107,7 @@ void PDFWeightsProducer::beginRunProduce(edm::Run & iRun, edm::EventSetup const&
         if(pdfnumber%100==1){
           unsigned int LHEset = pdfnumber-1;
           unsigned int LHEposition = PDFweightsLHEorder_.size()-1;
-          // cout << LHEposition << " WEIGHT - PDF SET CANDIDATE FOR REWEIGHTING IN THIS SAMPLE= " << (LHEset) << endl;
+          cout << LHEposition << " WEIGHT - PDF SET CANDIDATE FOR REWEIGHTING IN THIS SAMPLE= " << (LHEset) << endl;
           PDFweightsLHEsets_.push_back(LHEset);
           PDFweightsLHEoffsetBuffer_.push_back(LHEposition);
           
@@ -123,17 +128,17 @@ void PDFWeightsProducer::beginRunProduce(edm::Run & iRun, edm::EventSetup const&
                 // 263000	NNPDF30_lo_as_0130	      101	
                 || (mc2hessianCSV_str.Contains("NNPDF30_lo_as_0130_hessian_60.csv") && (LHEset == 263000))
               ){
-              // cout << "Either pdfWeightLHAnumber_<1 or nPdfWeights_<1 or nPdfEigWeights_<1: using hardcoded settings for" << endl;
-              // cout << "mc2hessianCSV " << mc2hessianCSV_str << endl;
+              cout << "Either pdfWeightLHAnumber_<1 or nPdfWeights_<1 or nPdfEigWeights_<1: using hardcoded settings for" << endl;
+              cout << "mc2hessianCSV " << mc2hessianCSV_str << endl;
               pdfWeightLHAnumber_  = LHEset;
               PDFweightsLHEoffset_ = LHEposition;
               nPdfWeights_         = 100;
               nPdfEigWeights_      = 60;
-              // cout 
-              // << "LHEset= " << LHEset
-              // << " nPdfWeights= " << nPdfWeights_
-              // << " nPdfEigWeights= " << nPdfEigWeights_
-              // << endl;
+              cout 
+              << "LHEset= " << LHEset
+              << " nPdfWeights= " << nPdfWeights_
+              << " nPdfEigWeights= " << nPdfEigWeights_
+              << endl;
               break;
             }
           }else if (LHEset == pdfWeightLHAnumber_){
@@ -156,6 +161,8 @@ void PDFWeightsProducer::beginRunProduce(edm::Run & iRun, edm::EventSetup const&
 
 void PDFWeightsProducer::produce( edm::Event & evt, const edm::EventSetup & ){
 
+  cout << " wtf!!!!!! 2" << endl;
+  
   auto_ptr<std::vector<float>> pdfeigweights_ptr( new std::vector<float>() );
   // auto_ptr<unsigned int > pdfWeightLHAnumber_ptr( new unsigned int() );
   Handle<LHEEventProduct> lheInfo;
@@ -183,10 +190,10 @@ void PDFWeightsProducer::produce( edm::Event & evt, const edm::EventSetup & ){
       
     }
     
-    // cout << "weight " << ipdf << " --> " << inpdfweights.size() 
-    // << " --- PDFmap atoi " << PDFweightsLHEorder_[ipdf]
-    // << " --- lheInfo " << lheInfo->weights()[ipdf].wgt 
-    // << endl;
+    cout << "weight " << ipdf << " --> " << inpdfweights.size() 
+    << " --- PDFmap atoi " << PDFweightsLHEorder_[ipdf]
+    << " --- lheInfo " << lheInfo->weights()[ipdf].wgt 
+    << endl;
     
     if(inpdfweights.size() == nPdfWeights_) break;
   }
@@ -210,10 +217,12 @@ void PDFWeightsProducer::produce( edm::Event & evt, const edm::EventSetup & ){
 
 }
 
-void PDFWeightsProducer::endRun(edm::Run const& iRun, edm::EventSetup const& es){
+void PDFWeightsProducer::endRunProduce(edm::Run& run, edm::EventSetup const& es){
+  cout << " wtf!!!!!! 3" << endl;
 }
 
 void PDFWeightsProducer::endJob(){
+  cout << " wtf!!!!!! 4" << endl;
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
