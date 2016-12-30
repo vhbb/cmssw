@@ -43,7 +43,7 @@ public:
   nPdfEigWeights_(cfg.getParameter<unsigned int>("nPdfEigWeights"))
   {
     produces<std::vector<float>>("outputHessianWeights");
-    produces<unsigned int>("pdfWeightLHAnumber");
+    produces<unsigned int, edm::InRun>("pdfWeightLHAnumber");
     mc2hessianCSV = cfg.getParameter<edm::FileInPath>("mc2hessianCSV");
   }
 
@@ -51,9 +51,9 @@ public:
   
 private:
   
-  virtual void beginRunProduce(edm::Run & run, edm::EventSetup const& es);
-  virtual void endRunProduce(edm::Run & run, edm::EventSetup const& es);
-  virtual void produce( edm::Event&, const edm::EventSetup&);
+  virtual void beginRunProduce(edm::Run & run, edm::EventSetup const& es) override;
+  virtual void endRunProduce(edm::Run & run, edm::EventSetup const& es) override;
+  virtual void produce( edm::Event&, const edm::EventSetup&) override;
   virtual void beginJob();
   virtual void endJob();
   
@@ -81,12 +81,10 @@ PDFWeightsProducer::~PDFWeightsProducer(){
 }
 
 void PDFWeightsProducer::beginJob(){
-  cout << " wtf!!!!!! 0" << endl;
 }
 
 void PDFWeightsProducer::beginRunProduce(edm::Run & iRun, edm::EventSetup const& es) {
 
-  cout << " wtf!!!!!! 1" << endl;
   // Access LHERunInfoProduct (i.e. LHE header) to retrieve the list of weights in the sample
   iRun.getByLabel( edm::InputTag("externalLHEProducer"), run );
   TString mc2hessianCSV_str = mc2hessianCSV.fullPath();
@@ -98,7 +96,7 @@ void PDFWeightsProducer::beginRunProduce(edm::Run & iRun, edm::EventSetup const&
     for (unsigned int iLine = 0; iLine<lines.size(); iLine++) {
       TString line_tstr =lines.at(iLine).c_str();
       if (line_tstr.Contains("<weight id=")) {
-        cout<<iLine<< " "<<line_tstr.Data()<<endl;
+        // cout<<iLine<< " "<<line_tstr.Data()<<endl;
         line_tstr = line_tstr.ReplaceAll("\n","").ReplaceAll("<weight id=\"","").ReplaceAll("</weight>","");
         TObjArray *tx = line_tstr.Tokenize("> ");
         line_tstr = ((TObjString *)(tx->At(tx->GetEntries()-1)))->String();
@@ -161,8 +159,6 @@ void PDFWeightsProducer::beginRunProduce(edm::Run & iRun, edm::EventSetup const&
 
 void PDFWeightsProducer::produce( edm::Event & evt, const edm::EventSetup & ){
 
-  cout << " wtf!!!!!! 2" << endl;
-  
   auto_ptr<std::vector<float>> pdfeigweights_ptr( new std::vector<float>() );
   // auto_ptr<unsigned int > pdfWeightLHAnumber_ptr( new unsigned int() );
   Handle<LHEEventProduct> lheInfo;
@@ -190,10 +186,10 @@ void PDFWeightsProducer::produce( edm::Event & evt, const edm::EventSetup & ){
       
     }
     
-    cout << "weight " << ipdf << " --> " << inpdfweights.size() 
-    << " --- PDFmap atoi " << PDFweightsLHEorder_[ipdf]
-    << " --- lheInfo " << lheInfo->weights()[ipdf].wgt 
-    << endl;
+    // cout << "weight " << ipdf << " --> " << inpdfweights.size() 
+    // << " --- PDFmap atoi " << PDFweightsLHEorder_[ipdf]
+    // << " --- lheInfo " << lheInfo->weights()[ipdf].wgt 
+    // << endl;
     
     if(inpdfweights.size() == nPdfWeights_) break;
   }
@@ -218,11 +214,9 @@ void PDFWeightsProducer::produce( edm::Event & evt, const edm::EventSetup & ){
 }
 
 void PDFWeightsProducer::endRunProduce(edm::Run& run, edm::EventSetup const& es){
-  cout << " wtf!!!!!! 3" << endl;
 }
 
 void PDFWeightsProducer::endJob(){
-  cout << " wtf!!!!!! 4" << endl;
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
