@@ -35,6 +35,7 @@ class VHbbAnalyzer( Analyzer ):
             self.handles['pfCands'] =  AutoHandle( 'packedPFCandidates', 'std::vector<pat::PackedCandidate>' )
         if self.cfg_comp.isMC:
             self.handles['GenInfo'] = AutoHandle( ('generator','',''), 'GenEventInfoProduct' )
+            self.handles['PDFWeightsProducer'] = AutoHandle( ('PDFWeightsProducer'), 'std::vector<float>' )
     def addNewBTag(self,event):
         newtags =  self.handles['btag'].product()
         for i in xrange(0,len(newtags)) :
@@ -490,6 +491,7 @@ class VHbbAnalyzer( Analyzer ):
                getattr(self, "inputCounterWeightedLHEWeightScale").Fill(LHE_scale,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_scale[LHE_scale]).wgt) 
             for LHE_pdf in range(len(event.LHE_weights_pdf)): 
                getattr(self, "inputCounterWeightedLHEWeightPdf").Fill(LHE_pdf,copysign(1.0, genWeight)*event.puWeight*(event.LHE_weights_pdf[LHE_pdf]).wgt) 
+            event.PDFWeightsProducer = self.handles['PDFWeightsProducer'].product()
             if genWeight > 0:
                 self.inputCounterPosWeight.Fill(1)
             elif genWeight < 0:
