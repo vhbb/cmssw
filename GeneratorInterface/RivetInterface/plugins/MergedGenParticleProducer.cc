@@ -1,4 +1,4 @@
-#include "GeneratorInterface/RivetInterface/interface/MergedGenParticleProducer.hh"
+#include "../plugins/MergedGenParticleProducer.hh"
 #include <vector>
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
