@@ -735,11 +735,12 @@ class AdditionalBoost( Analyzer ):
         self.handles['rho'] = AutoHandle( ('fixedGridRhoFastjetAll',""), 'double' )
 
         self.handles['ak08']     = AutoHandle( ("slimmedJetsAK8",""), "std::vector<pat::Jet>")
-
         self.handles['ak08softdropsubjets'] = AutoHandle( ("slimmedJetsAK8PFCHSSoftDropPacked","SubJets"), "std::vector<pat::Jet>")
 
         self.handles['ak08bbtag'] = AutoHandle( ("slimmedJetsAK8pfBoostedDoubleSecondaryVertexBJetTags","","EX"), 
                                                 "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+  
+
         self.handles['ak08ipTagInfos']     = AutoHandle( ("slimmedJetsAK8ImpactParameterTagInfos","","EX"), "vector<reco::IPTagInfo<vector<edm::Ptr<reco::Candidate> >,reco::JetTagInfo> >")
 
         self.handles['ak08svTagInfos']     = AutoHandle( ("slimmedJetsAK8pfInclusiveSecondaryVertexFinderTagInfos", "","EX"), "vector<reco::TemplatedSecondaryVertexTagInfo<reco::IPTagInfo<vector<edm::Ptr<reco::Candidate> >,reco::JetTagInfo>,reco::VertexCompositePtrCandidate> >")
@@ -1201,9 +1202,9 @@ class AdditionalBoost( Analyzer ):
         # Loop over jets                        
         for ij, jet in enumerate(getattr(event, "ak08")):
 
-            # Fill bb-tag
-            for i in xrange(len(newtags)) :
-                if jet.physObj == newtags.key(i).get():
+           	 # Fill bb-tag
+            	for i in xrange(len(newtags)) :
+              	  if jet.physObj == newtags.key(i).get():
                     jet.bbtag = newtags.value(i)
 
                 tmp_jet = Jet(jet)
@@ -1213,6 +1214,27 @@ class AdditionalBoost( Analyzer ):
                 jet.JEC_L2L3Unc = tmp_jet.jetEnergyCorrUncertainty
 		jet.JEC_L1L2L3 = self.jetReCalibratorAK8L1L2L3.getCorrection(tmp_jet,rho)
                 jet.JEC_L1L2L3Unc = tmp_jet.jetEnergyCorrUncertainty
+		jet.puppi_pt             = jet.userFloat("ak8PFJetsPuppiValueMap:pt")
+                jet.puppi_mass       = jet.userFloat("ak8PFJetsPuppiValueMap:mass")
+                jet.puppi_eta           = jet.userFloat("ak8PFJetsPuppiValueMap:eta")
+                jet.puppi_phi           = jet.userFloat("ak8PFJetsPuppiValueMap:phi")
+                jet.puppi_tau1         = jet.userFloat("ak8PFJetsPuppiValueMap:NjettinessAK8PuppiTau1")
+	        jet.puppi_tau2         = jet.userFloat("ak8PFJetsPuppiValueMap:NjettinessAK8PuppiTau2")
+
+                puppi_softdrop= ROOT.TLorentzVector()
+		puppi_softdrop_raw= ROOT.TLorentzVector()
+                puppi_softdrop_subjet_raw=ROOT.TLorentzVector()	
+                puppi_softdrop_subjet=ROOT.TLorentzVector()
+                sbSubjetsPuppi = jet.subjets("SoftDropPuppi")
+                for it in sbSubjetsPuppi  :
+                       puppi_softdrop_subjet.SetPtEtaPhiM(it.pt(),it.eta(),it.phi(),it.mass())
+                       puppi_softdrop+=puppi_softdrop_subjet
+		       puppi_softdrop_subjet_raw.SetPtEtaPhiM(it.correctedP4(0).pt(),it.correctedP4(0).eta(),it.correctedP4(0).phi(),it.correctedP4(0).mass())
+                       puppi_softdrop_raw+=puppi_softdrop_subjet_raw
+
+                jet.puppi_msoftdrop       = puppi_softdrop.M()
+		jet.puppi_msoftdrop_raw   = puppi_softdrop_raw.M()
+                jet.puppi_msoftdrop_corrL2L3       = puppi_softdrop.M()*corr
 
             # bb-tag Inputs
             muonTagInfos = self.handles['ak08muonTagInfos'].product()[ij]
@@ -1223,7 +1245,6 @@ class AdditionalBoost( Analyzer ):
             orig_jet = self.handles["ak08"].product()[ij]
 
             
-            # Commented out so rest of code can run
             # TODO: FIX!
             #if do_calc_bb:
             #    calcBBTagVariables(jet, 
@@ -1288,6 +1309,7 @@ class AdditionalBoost( Analyzer ):
                 elecTagInfos = self.handles['ca15elecTagInfos'].product()[ij]
                 ipTagInfo    = self.handles['ca15ipTagInfos'].product()[ij]
                 svTagInfo    = self.handles['ca15svTagInfos'].product()[ij]
+
 
                 orig_jet = self.handles[prefix+'ungroomed'].product()[jet.original_index]
 
