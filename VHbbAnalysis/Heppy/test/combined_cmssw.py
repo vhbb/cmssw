@@ -332,7 +332,7 @@ def initialize(**kwargs):
         if fatjet_name == "slimmedJetsAK8":        
             delta_r = 0.8
             maxSVDeltaRToJet = 0.7
-            weightFile = 'RecoBTag/SecondaryVertex/data/BoostedDoubleSV_AK8_BDT_v3.weights.xml.gz'
+            weightFile = 'RecoBTag/SecondaryVertex/data/BoostedDoubleSV_AK8_BDT_v4.weights.xml.gz'
             jetAlgo = "AntiKt"
         elif fatjet_name == "ca15PFJetsCHS":        
             delta_r = 1.5
@@ -358,7 +358,7 @@ def initialize(**kwargs):
                 impact_info_name, 
                 process.pfImpactParameterTagInfos.clone(
                     primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices"),
-                    candidates = cms.InputTag("chs"),
+                    candidates = cms.InputTag("packedPFCandidates"),
                     computeProbabilities = cms.bool(False),
                     computeGhostTrack = cms.bool(False),
                     maxDeltaR = cms.double(delta_r),
