@@ -175,7 +175,6 @@ class GeneratorAnalyzer( Analyzer ):
 
         LHE_weights_scale = []
         LHE_weights_pdf = []
-        LHE_weights_pdf_eigen = []
 
         # https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW)
         for w in event.LHE_weights:
