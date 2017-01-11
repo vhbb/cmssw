@@ -90,7 +90,7 @@ class VHbbAnalyzer( Analyzer ):
         if len(event.jetsForVBF) < 4 or  event.jetsForVBF[0] < 70 or  event.jetsForVBF[1] < 55 or  event.jetsForVBF[2] < 35 or  event.jetsForVBF[3] < 20 :
             return
         event.jetsForVBF.sort(key=lambda x:x.pt(),reverse=True)
-        map(lambda x :x.qgl(),event.jetsForVBF[:6])
+        map(lambda x :x.qgl(),event.jetsForVBF[:9])
         event.jetsForVBF=event.jetsForVBF[:4]
 
 	#compute QGL here for VBF jets if passing VBF pre-selection 
@@ -530,8 +530,8 @@ class VHbbAnalyzer( Analyzer ):
                 return False
             if event.Vtype < 0 and not ( sum(x.pt() > 30 for x in event.jetsForHiggsAll) >= 4 or sum(x.pt() for x in event.jetsForHiggsAll[:4]) > self.cfg_ana.sumPtThreshold ):
                 return False
-        map(lambda x :x.qgl(),event.jetsForHiggs[:6])
-        map(lambda x :x.qgl(),(x for x in event.jetsForHiggs if x.pt() > 30) )
+        map(lambda x :x.qgl(),event.jetsForHiggsAll[:6])
+        map(lambda x :x.qgl(),(x for x in event.jetsForHiggsAll if x.pt() > 30) )
 
 	self.doHiggsHighCSV(event)
 	self.doHiggsHighCMVAV2(event)
