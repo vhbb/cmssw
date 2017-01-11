@@ -493,6 +493,7 @@ class VHbbAnalyzer( Analyzer ):
 	#print "Event number",event.iEv
         self.readCollections( event.input )
         self.inputCounter.Fill(1)
+        event.LHE_weights_pdf_eigen = []
         if self.cfg_comp.isMC:
             event.LHE_weights_pdf_eigen = self.handles['PDFWeightsProducer'].product()
             genWeight = self.handles['GenInfo'].product().weight()
