@@ -575,6 +575,31 @@ def initialize(**kwargs):
  #       )
 
 
+ 
+        # Add Higgs Template Cross Section categorization
+        process.mergedGenParticles = cms.EDProducer("MergedGenParticleProducer",
+            inputPruned = cms.InputTag("prunedGenParticles"),
+            inputPacked = cms.InputTag("packedGenParticles"),
+
+        )
+        process.OUT.outputCommands.append('keep *_mergedGenParticles_*_EX')
+        
+        process.myGenerator = cms.EDProducer("GenParticles2HepMCConverterHTXS",
+            genParticles = cms.InputTag("mergedGenParticles"),
+            genEventInfo = cms.InputTag("generator"),
+        )
+        process.OUT.outputCommands.append('keep *_myGenerator_*_EX')
+        
+        process.rivetProducerHTXS = cms.EDProducer('HTXSRivetProducer',
+          HepMCCollection = cms.InputTag('myGenerator','unsmeared'),
+          GenEventInfo = cms.InputTag('generator'),
+          LHEEventInfo = cms.InputTag('externalLHEProducer'),
+          LHERunInfo = cms.InputTag('externalLHEProducer'),
+          ProductionMode = cms.string('AUTO'),
+        )
+        process.OUT.outputCommands.append('keep *_rivetProducerHTXS_*_EX')
+
+        
         # Plugin for analysing B hadrons
         # MUST use the same particle collection as in selectedHadronsAndPartons
         from PhysicsTools.JetMCAlgos.GenHFHadronMatcher_cff import matchGenBHadron
