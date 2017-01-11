@@ -332,7 +332,7 @@ def initialize(**kwargs):
         if fatjet_name == "slimmedJetsAK8":        
             delta_r = 0.8
             maxSVDeltaRToJet = 0.7
-            weightFile = 'RecoBTag/SecondaryVertex/data/BoostedDoubleSV_AK8_BDT_v3.weights.xml.gz'
+            weightFile = 'RecoBTag/SecondaryVertex/data/BoostedDoubleSV_AK8_BDT_v4.weights.xml.gz'
             jetAlgo = "AntiKt"
         elif fatjet_name == "ca15PFJetsCHS":        
             delta_r = 1.5
@@ -348,6 +348,7 @@ def initialize(**kwargs):
         isv_info_name             = fatjet_name + "pfInclusiveSecondaryVertexFinderTagInfos"        
         sm_info_name              = fatjet_name + "softPFMuonsTagInfos"
         se_info_name              = fatjet_name + "softPFElectronsTagInfos"
+        bb_info_name              = fatjet_name + "pfBoostedDoubleSVTagInfos"
         bb_comp_name              = fatjet_name + "candidateBoostedDoubleSecondaryVertexComputer"
         tag_name                  = fatjet_name + "pfBoostedDoubleSecondaryVertexBJetTags"
 
@@ -357,7 +358,7 @@ def initialize(**kwargs):
                 impact_info_name, 
                 process.pfImpactParameterTagInfos.clone(
                     primaryVertex = cms.InputTag("offlineSlimmedPrimaryVertices"),
-                    candidates = cms.InputTag("chs"),
+                    candidates = cms.InputTag("packedPFCandidates"),
                     computeProbabilities = cms.bool(False),
                     computeGhostTrack = cms.bool(False),
                     maxDeltaR = cms.double(delta_r),
@@ -381,6 +382,12 @@ def initialize(**kwargs):
 
         # DOUBLE B COMPUTER
         setattr(process,
+                bb_info_name,
+                process.pfBoostedDoubleSVAK8TagInfos.clone(
+                   svTagInfos                    = cms.InputTag(isv_info_name),
+                ))
+        getattr(process, bb_info_name).trackSelection.jetDeltaRMax = cms.double(delta_r)
+        setattr(process,
                 bb_comp_name,                
                 cms.ESProducer("CandidateBoostedDoubleSecondaryVertexESProducer",
                                trackSelectionBlock,
@@ -400,8 +407,7 @@ def initialize(**kwargs):
                 tag_name, 
                 cms.EDProducer("JetTagProducer",
                                jetTagComputer = cms.string(bb_comp_name),
-                               tagInfos = cms.VInputTag(cms.InputTag(impact_info_name),
-                                                        cms.InputTag(isv_info_name)
+                               tagInfos = cms.VInputTag(cms.InputTag(bb_info_name),
                                                     )))
 
 
@@ -428,7 +434,8 @@ def initialize(**kwargs):
 
         # Produce the output
         for object_name in [impact_info_name, isv_info_name,
-                            sm_info_name, se_info_name,          
+                            sm_info_name, se_info_name,
+ 
                             bb_comp_name, tag_name]:
 
             process.OUT.outputCommands.append("keep *_{0}_*_EX".format(object_name))

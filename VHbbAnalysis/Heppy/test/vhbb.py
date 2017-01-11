@@ -110,6 +110,7 @@ treeProducer= cfg.Analyzer(
           "V"    : NTupleObject("V", fourVectorType, help="z or w"),
           "softActivityJets"    : NTupleObject("softActivity", softActivityType, help="VBF soft activity variables"),
           "softActivityVHJets"    : NTupleObject("softActivityVH", softActivityType, help="VH soft activity variables"),
+          "softActivityEWKJets"    : NTupleObject("softActivityEWK", softActivityType, help="EWK soft activity variables"),
           "l1MET"       : NTupleObject("l1MET",   twoVectorType , help="Stage-2 L1 trigger MET", mcOnly=False),        
        #   "l1MET2"       : NTupleObject("l1MET2",   twoVectorType , help="Stage-2 L1 trigger MET", mcOnly=False),   #l1MET2 is defined in "l1t::EtSum" but it is empty
           "l1MHT"       : NTupleObject("l1MHT",   twoVectorType , help="Stage-2 L1 trigger MHT", mcOnly=False),        
@@ -141,6 +142,7 @@ treeProducer= cfg.Analyzer(
                 "inclusiveTaus"  : NTupleCollection("TauGood", tauTypeVHbb, 25, help="Taus after the preselection"),
                 "softActivityJets"    : NTupleCollection("softActivityJets", fourVectorType, 5, help="jets made for soft activity"),
                 "softActivityVHJets"    : NTupleCollection("softActivityVHJets", fourVectorType, 5, help="jets made for soft activity VH version"),
+                "softActivityEWKJets"    : NTupleCollection("softActivityEWKJets", fourVectorType, 5, help="jets made for soft activity EWK version"),
                 "goodVertices"    : NTupleCollection("primaryVertices", primaryVertexType, 4, help="first four PVs"), 
 
 		#dump of gen objects
@@ -263,6 +265,7 @@ TauAna.inclusive_tauLooseID = "decayModeFindingNewDMs"
 from PhysicsTools.Heppy.analyzers.objects.JetAnalyzer import JetAnalyzer
 JetAna = JetAnalyzer.defaultConfig
 JetAna.calculateSeparateCorrections = True # CV: needed for ttH prompt lepton MVA
+JetAna.lepSelCut = lambda lep : (abs(lep.pdgId()) == 11 and lep.relIso03 < 0.4) or (abs(lep.pdgId()) == 13 and lep.relIso04 < 0.4)
 
 from PhysicsTools.Heppy.analyzers.gen.LHEAnalyzer import LHEAnalyzer 
 LHEAna = LHEAnalyzer.defaultConfig
@@ -310,10 +313,97 @@ JetAna.recalibrateJets=True
 JetAna.jecPath=os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/jec"
 #JetAna.mcGT="Fall15_25nsV2_MC"
 #JetAna.dataGT = "Fall15_25nsV2_DATA"
-JetAna.mcGT="Spring16_25nsV6_MC"
-JetAna.dataGT="Spring16_25nsV6_DATA"
+JetAna.mcGT="Spring16_23Sep2016V2_MC"
+JetAna.dataGT="Spring16_23Sep2016GV2_DATA"
 JetAna.addJECShifts=True
 JetAna.addJERShifts=True
+
+factorizedJetCorrections = [
+    "AbsoluteFlavMap",
+    "AbsoluteMPFBias",
+    "AbsoluteScale",
+    "AbsoluteStat",
+    "CorrelationGroupFlavor",
+    "CorrelationGroupIntercalibration",
+    "CorrelationGroupMPFInSitu",
+    "CorrelationGroupUncorrelated",
+    "CorrelationGroupbJES",
+    "FlavorPhotonJet",
+    "FlavorPureBottom",
+    "FlavorPureCharm",
+    "FlavorPureGluon",
+    "FlavorPureQuark",
+    "FlavorQCD",
+    "FlavorZJet",
+    "Fragmentation",
+    "PileUpDataMC",
+    "PileUpEnvelope",
+    "PileUpMuZero",
+    "PileUpPtBB",
+    "PileUpPtEC1",
+    "PileUpPtEC2",
+    "PileUpPtHF",
+    "PileUpPtRef",
+    "RelativeFSR",
+    "RelativeJEREC1",
+    "RelativeJEREC2",
+    "RelativeJERHF",
+    "RelativePtBB",
+    "RelativePtEC1",
+    "RelativePtEC2",
+    "RelativePtHF",
+    "RelativeStatEC",
+    "RelativeStatFSR",
+    "RelativeStatHF",
+    "SinglePionECAL",
+    "SinglePionHCAL",
+    "SubTotalAbsolute",
+    "SubTotalMC",
+    "SubTotalPileUp",
+    "SubTotalPt",
+    "SubTotalRelative",
+    "SubTotalScale",
+    "TimePtEta",
+    "TimeRunBCD",
+    "TimeRunE",
+    "TimeRunF",
+    "TimeRunGH",
+    "TotalNoFlavorNoTime",
+    "TotalNoFlavor",
+    "TotalNoTime",
+    "Total",
+]
+JetAna.factorizedJetCorrections = factorizedJetCorrections
+
+for jet_type in [jetTypeVHbb, patSubjetType, subjetcorrType]:
+        for jet_corr in factorizedJetCorrections:
+            for sdir in ["Up", "Down"]:
+                name = jet_corr + sdir
+                jet_type.variables += [
+                    NTupleVariable(
+                        "corr_{0}".format(name),
+                        lambda x, name = name: getattr(x, 'corr{0}'.format(name), -99),
+                        float,
+                        mcOnly=True,
+                        help=""
+                    )
+                ]
+# HTT Subjets
+for subjet in ["sjW1", "sjW2", "sjNonW"]:
+    for jet_corr in factorizedJetCorrections:
+        for sdir in ["Up", "Down"]:
+            name = jet_corr + sdir
+            httType.variables += [
+                NTupleVariable(
+                    "{0}_corr_{1}".format(subjet, name),
+                        lambda x, name = name: getattr( getattr(x,subjet), 'corr{0}'.format(name), -99),
+                    float,
+                    mcOnly=True,
+                    help=""
+                )
+            ]
+
+
 
 # delta-beta corrected isolation for muons:
 # https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2#Muon_Isolation
@@ -364,6 +454,7 @@ VHbb = cfg.Analyzer(
 #    higgsJetsPreSelectionVBF = lambda x: (( x.puJetId() > 0 and x.jetID('POG_PFID_Loose')) or abs(x.eta())>3.0 ) and x.pt() >  20,
     passall=False,
     doSoftActivityVH=True,
+    doSoftActivityEWK=True,
     doVBF=True,
     regressions = [
         {"weight":"ttbar-spring16-500k-13d-300t.weights.xml", "name":"jet0Regression", "vtypes":[0,1,2,3,4,5,-1]},
@@ -522,7 +613,7 @@ class TestFilter(logging.Filter):
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 10)
+    looper = Looper( 'Loop', config, nPrint = 0, nEvents = 10)
 
     import time
     import cProfile
