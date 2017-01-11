@@ -32,7 +32,7 @@ class VHbbAnalyzer( Analyzer ):
         self.handles['rhoN'] =  AutoHandle( 'fixedGridRhoFastjetCentralNeutral','double' )
         self.handles['rhoCHPU'] =  AutoHandle( 'fixedGridRhoFastjetCentralChargedPileUp','double' )
         self.handles['rhoCentral'] =  AutoHandle( 'fixedGridRhoFastjetCentral','double' )
-        if getattr(self.cfg_ana,"doSoftActivityVH", False) or getattr(self.cfg_ana,"doVBF", True):
+        if getattr(self.cfg_ana,"doSoftActivityVH", False) or getattr(self.cfg_ana,"doVBF", True) or getattr(self.cfg_ana, "doSoftActivityEWK", False):
             self.handles['pfCands'] =  AutoHandle( 'packedPFCandidates', 'std::vector<pat::PackedCandidate>' )
         if self.cfg_comp.isMC:
             self.handles['GenInfo'] = AutoHandle( ('generator','',''), 'GenEventInfoProduct' )
@@ -51,8 +51,9 @@ class VHbbAnalyzer( Analyzer ):
 
     def beginLoop(self,setup):
         super(VHbbAnalyzer,self).beginLoop(setup)
-        if "outputfile" in setup.services :
-            setup.services["outputfile"].file.cd()
+        outservice_name = "PhysicsTools.HeppyCore.framework.services.tfile.TFileService_outputfile"
+        if outservice_name in setup.services :
+            setup.services[outservice_name].file.cd()
             self.inputCounter = ROOT.TH1F("Count","Count",1,0,2)
             self.inputCounterFullWeighted = ROOT.TH1F("CountFullWeighted","Count with gen weight and pu weight",1,0,2)
             self.inputCounterWeighted = ROOT.TH1F("CountWeighted","Count with sign(gen weight) and pu weight",1,0,2)
@@ -149,6 +150,15 @@ class VHbbAnalyzer( Analyzer ):
         if event.isrJetVH >= 0 :
             excludedJets+=[event.cleanJetsAll[event.isrJetVH]]
         event.softActivityVHJets=[x for x in self.softActivity(event,j1,j2,excludedJets,-1000) if x.pt() > 2.0 ]
+
+    def doSoftActivityEWK(self,event) :
+        if not len(event.cleanJetsAll) >= 2 :
+           return
+        j1=event.cleanJetsAll[0]
+        j2=event.cleanJetsAll[1]
+        leadingPtJets = event.cleanJetsAll[0:2]
+        excludedJets=leadingPtJets+event.selectedElectrons+event.selectedMuons
+        event.softActivityEWKJets=self.softActivity(event,j1,j2,excludedJets,-1000)
 
 
     def addPullVector(self,event) :
@@ -420,10 +430,10 @@ class VHbbAnalyzer( Analyzer ):
 			      event.vLeptons =[zElectrons[0],zElectrons[i]]
 			      break
 	elif len(wElectrons) + len(wMuons) == 1: 
-		if abs(event.selectedLeptons[0].pdgId())==13 :
+		if len(wMuons)==1 :
 			event.Vtype = 2
 			event.vLeptons =wMuons
-		if abs(event.selectedLeptons[0].pdgId())==11 :
+		if len(wElectrons) == 1 :
 			event.Vtype = 3
 			event.vLeptons =wElectrons
         elif len(zElectrons) + len(zMuons) > 0 :
@@ -511,6 +521,7 @@ class VHbbAnalyzer( Analyzer ):
         event.hjidxDiJetPtByCSV = []
         event.softActivityJets=[]
         event.softActivityVHJets=[]
+        event.softActivityEWKJets=[]
         event.rhoN= -1
         event.rhoCHPU= -1
         event.rhoCentral= -1
@@ -575,6 +586,8 @@ class VHbbAnalyzer( Analyzer ):
 	    self.doVBF(event)
         if getattr(self.cfg_ana,"doSoftActivityVH", False) :
             self.doSoftActivityVH(event)
+        if getattr(self.cfg_ana,"doSoftActivityEWK", False) :
+            self.doSoftActivityEWK(event)
 
         self.doQuickTkMET(event)
 
