@@ -94,27 +94,34 @@ void HTXSRivetProducer::produce( edm::Event & iEvent, const edm::EventSetup & ) 
     // get HepMC GenEvent
     const HepMC::GenEvent *myGenEvent = evt->GetEvent();
     
-    if ( _prodMode == "AUTO" ) {
+    if ( _prodMode == "AUTO" || _prodMode == "VH") {
         
-        unsigned nWs_out = 0;
-        unsigned nZs_out = 0;
-        unsigned nTs_out = 0;
-        unsigned nHs_out = 0;
+        unsigned nWs = 0;
+        unsigned nZs = 0;
+        unsigned nTs = 0;
+        unsigned nHs = 0;
         
         HepMC::GenVertex *HSvtx = myGenEvent->signal_process_vertex();
 
         for (auto ptcl:particles(HSvtx,HepMC::children)) {
-            if (ptcl->pdg_id() == 24 || ptcl->pdg_id() == -24) ++nWs_out;
-            if (ptcl->pdg_id() == 23) ++nZs_out;
-            if (abs(ptcl->pdg_id()) == 6) ++nTs_out;
-            if (ptcl->pdg_id() == 25) ++nHs_out;
+            if (ptcl->pdg_id() == 24 || ptcl->pdg_id() == -24) ++nWs;
+            if (ptcl->pdg_id() == 23) ++nZs;
+            if (abs(ptcl->pdg_id()) == 6) ++nTs;
+            if (ptcl->pdg_id() == 25) ++nHs;
         }
 
-        if (nZs_out==1 && nHs_out==1 && (nWs_out+nTs_out)==0) {
+        if (_prodMode == "VH" && nZs == 0 && nWs == 0) {
+            throw cms::Exception("HTXSRivetProducer") << "ProductionMode set to ZH but no W or Z is found ";
+        }
+        if (_prodMode == "VH" && nZs > 0 && nWs > 0) {
+            throw cms::Exception("HTXSRivetProducer") << "ProductionMode set to ZH and both Ws and Zs are found ";
+        }
+
+        if (nZs==1 && nHs==1 && (nWs+nTs)==0) {
             m_HiggsProdMode = HTXS::QQ2ZH;
-        } else if (nWs_out==1 && nHs_out==1 && (nZs_out+nTs_out)==0) {
+        } else if (nWs==1 && nHs==1 && (nZs+nTs)==0) {
             m_HiggsProdMode = HTXS::WH; 
-        } else if (nTs_out==2 && nHs_out==1) {
+        } else if (nTs==2 && nHs==1) {
             m_HiggsProdMode = HTXS::TTH; 
         }
 
@@ -147,27 +154,7 @@ void HTXSRivetProducer::produce( edm::Event & iEvent, const edm::EventSetup & ) 
 
     }
 
-    if ( _prodMode == "VH" ) {
-        unsigned nWs = 0;
-        unsigned nZs = 0;
-        HepMC::GenVertex *HSvtx = myGenEvent->signal_process_vertex();
-        for (auto ptcl:particles(HSvtx,HepMC::children)) {
-            if (ptcl->pdg_id() == 24 || ptcl->pdg_id() == -24) ++nWs;
-            if (ptcl->pdg_id() == 23) ++nZs;
-        }
-        if (nZs == 0 && nWs == 0) {
-            throw cms::Exception("HTXSRivetProducer") << "ProductionMode set to ZH but no W or Z is found ";
-        } else if (nZs > 0 && nWs > 0) {
-            throw cms::Exception("HTXSRivetProducer") << "ProductionMode set to ZH and both Ws and Zs are found ";
-        } else if (nZs > 0) {
-            m_HiggsProdMode = HTXS::QQ2ZH; // No GG2ZH until we look at NNLO samples
-        } else if (nWs > 0) {
-            m_HiggsProdMode = HTXS::WH; 
-        }
-    }
-
     // classify the event
-    //cout<<"HTXSRivetProducer categorize... "<<endl;
     HiggsClassification cat = _HTXS->classifyEvent(*myGenEvent,m_HiggsProdMode);
 
     // print out some results
@@ -233,11 +220,30 @@ void HTXSRivetProducer::beginRun(edm::Run const& iRun, edm::EventSetup const& es
             std::vector<std::string> lines = iter->lines();
             for (unsigned int iLine = 0; iLine<lines.size(); iLine++) {
                 std::string line=lines.at(iLine);
+                //std::cout<<iLine<< " "<<line<<std::endl;
+                // POWHEG
                 if (strstr(line.c_str(),"gg_H_quark-mass-effects")) {
                     std::cout<<iLine<< " "<<line<<std::endl;
                     m_HiggsProdMode = HTXS::GGF;
                     break;
                 }
+                if (strstr(line.c_str(),"VBF_H")) {
+                    std::cout<<iLine<< " "<<line<<std::endl;
+                    m_HiggsProdMode = HTXS::VBF;
+                    break;
+                }
+                // MC@NLO
+                if (strstr(line.c_str(),"ggh012j")) {
+                    std::cout<<iLine<< " "<<line<<std::endl;
+                    m_HiggsProdMode = HTXS::GGF;
+                    break;
+                }
+                if (strstr(line.c_str(),"vbfh")) {
+                    std::cout<<iLine<< " "<<line<<std::endl;
+                    m_HiggsProdMode = HTXS::VBF;
+                    break;
+                }
+
             }
               
             if ( m_HiggsProdMode != HTXS::UNKNOWN) break;
