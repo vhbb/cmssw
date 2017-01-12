@@ -22,8 +22,8 @@ FlagsAna.processName='RECO'
 TrigAna.triggerBits = triggerTableData
 L1TriggerAna.processName = 'RECO'
 
-import code
-code.interact(local=locals())
+#import code
+#code.interact(local=locals())
 
 
 # and the following runs the process directly 
