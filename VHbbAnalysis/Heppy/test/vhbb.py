@@ -195,7 +195,7 @@ for algo in ["CSV", "CMVAV2"]:
 	for syst in ["central", "up_jes", "down_jes", "up_lf", "down_lf", "up_hf", "down_hf", "up_hfstats1", "down_hfstats1", "up_hfstats2", "down_hfstats2", "up_lfstats1", "down_lfstats1", "up_lfstats2", "down_lfstats2", "up_cferr1", "down_cferr1", "up_cferr2", "down_cferr2"]:
 		syst_name = "" if syst=="central" else ("_"+syst) 
 		btag_weights["btagWeight"+algo+syst_name] = NTupleVariable("btagWeight"+algo+syst_name,
-									   lambda ev, get_event_SF=get_event_SF, syst=syst, algo=algo, btag_calibrators=btag_calibrators : get_event_SF(ev.cleanJetsAll, syst, algo, btag_calibrators)
+									   lambda ev, get_event_SF=get_event_SF, syst=syst, algo=algo, btagSFhandle=btagSFhandle : get_event_SF(ev.cleanJetsAll, syst, algo, btagSFhandle)
 									   , float, mcOnly=True, help="b-tag "+algo+"continuous  weight, variating "+syst
 									   )
 treeProducer.globalVariables += list(btag_weights.values())
@@ -591,9 +591,8 @@ sample = cfg.MCComponent(
 		#"root://xrootd.ba.infn.it//store/mc/RunIISpring16MiniAODv1/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/00000/0899BDA9-AE01-E611-A239-008CFA05EA2C.root"
 #		"root://eoscms.cern.ch//eos/cms/store/relval/CMSSW_8_1_0_pre9/RelValTTbar_13/MINIAODSIM/PU25ns_81X_mcRun2_asymptotic_v2_hip0p8_mtoff-v1/10000/2A7336F1-D851-E611-AA11-003048D15D48.root"
 #/store/mc/RunIISpring16MiniAODv2/GluGluToBulkGravitonToHHTo4B_M-550_narrow_13TeV-madgraph/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v2/90000/4E40D2E2-9E3A-E611-8C5B-00259081FB18.root"
-		#"root://stormgf1.pi.infn.it:1094//store/mc/RunIISpring16MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext4-v1/00000/E8090432-8628-E611-8713-001EC9ADFDC9.root",
-		#"root://t3dcachedb.psi.ch:1094///pnfs/psi.ch/cms/trivcat/store/mc/RunIISpring16MiniAODv2/WW_TuneCUETP8M1_13TeV-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/50000/0AF21AF1-121B-E611-B652-549F35AE4F88.root"
-		"root://t3dcachedb.psi.ch:1094///pnfs/psi.ch/cms/trivcat/store/mc/RunIISpring16MiniAODv2/TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1//00000/04FB4BAA-3A33-E611-BC64-008CFA197A90.root"
+		"E8090432-8628-E611-8713-001EC9ADFDC9.root"
+#root://stormgf1.pi.infn.it:1094//store/mc/RunIISpring16MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext4-v1/00000/E8090432-8628-E611-8713-001EC9ADFDC9.root",
                 ],
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
     name="ZHLL125", isEmbed=False,

@@ -3,30 +3,38 @@ import os
 
 debug_btagSF = False
 
+class BTagSFHandle:
+    def __init__(self) :
+        self.initialized=False
+    
+btagSFhandle=BTagSFHandle()
+
+def initBTagSF () :
 # load the BTagCalibrationStandalone.cc macro from https://twiki.cern.ch/twiki/bin/view/CMS/BTagCalibration
-csvpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/csv/"
-ROOT.gSystem.Load(csvpath+'/BTagCalibrationStandalone.so')
+    btagSFhandle.initialized=True
+    csvpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/csv/"
+    ROOT.gSystem.Load(csvpath+'/BTagCalibrationStandalone.so')
 
 # CSVv2
-calib_csv = ROOT.BTagCalibration("csvv2", csvpath+"/CSVv2_ichep.csv")
+    btagSFhandle.calib_csv = ROOT.BTagCalibration("csvv2", csvpath+"/CSVv2_ichep.csv")
 
 # cMVAv2
-calib_cmva = ROOT.BTagCalibration("cmvav2", csvpath+"/cMVAv2_ichep.csv")
+    btagSFhandle.calib_cmva = ROOT.BTagCalibration("cmvav2", csvpath+"/cMVAv2_ichep.csv")
 
 
-calib_csv_reweight = ROOT.BTagCalibration("csvv2", csvpath+"/ttH_BTV_CSVv2_13TeV_2016BCD_12p9_2016_09_7.csv")
+    btagSFhandle.calib_csv_reweight = ROOT.BTagCalibration("csvv2", csvpath+"/ttH_BTV_CSVv2_13TeV_2016BCD_12p9_2016_09_7.csv")
 # cMVAv2
-calib_cmva_reweight = ROOT.BTagCalibration("cmvav2", csvpath+"/ttH_BTV_cMVAv2_13TeV_2016BCD_12p9_2016_09_7.csv")
+    btagSFhandle.calib_cmva_reweight = ROOT.BTagCalibration("cmvav2", csvpath+"/ttH_BTV_cMVAv2_13TeV_2016BCD_12p9_2016_09_7.csv")
 
 # map between algo/flavour and measurement type
-sf_type_map = {
+    btagSFhandle.sf_type_map = {
     "CSV" : {
-        "file" : calib_csv,
+        "file" : btagSFhandle.calib_csv,
         "bc" : "comb",
         "l" : "incl",
         },
     "CMVAV2" : {
-        "file" : calib_cmva,
+        "file" : btagSFhandle.calib_cmva,
         "bc" : "ttbar",
         "l" : "incl",
         },
@@ -34,35 +42,35 @@ sf_type_map = {
 
 
 
-sf_type_map_reweight = {
+    btagSFhandle.sf_type_map_reweight = {
     "CSV" : {
-        "file" : calib_csv_reweight,
+        "file" : btagSFhandle.calib_csv_reweight,
         },
     "CMVAV2" : {
-        "file" : calib_cmva_reweight,
+        "file" : btagSFhandle.calib_cmva_reweight,
         },
     }
 
 
 
 # map of calibrators. E.g. btag_calibrators["CSVM_nominal_bc"], btag_calibrators["CSVM_up_l"], ...
-btag_calibrators = {}
-for algo in ["CSV", "CMVAV2"]:
-    for wp in [ [0, "L"],[1, "M"], [2,"T"] ]:
-        for syst in ["central", "up", "down"]:
-            for fl in ["bc", "l"]:
-                print "[btagSF]: Loading calibrator for algo:", algo, ", WP:", wp[1], ", systematic:", syst, ", flavour:", fl
-#                btag_calibrators[algo+wp[1]+"_"+syst+"_"+fl].load(sf_type_map[algo]["file"], fl_enum[fl], sf_type_map[algo][fl])
-                btag_calibrators[algo+wp[1]+"_"+syst+"_"+fl] = ROOT.BTagCalibrationReader(wp[0], syst)
-                for i in [0,1,2] :
-                    btag_calibrators[algo+wp[1]+"_"+syst+"_"+fl].load(sf_type_map[algo]["file"], i,sf_type_map[algo][fl])
+    btagSFhandle.btag_calibrators = {}
+    for algo in ["CSV", "CMVAV2"]:
+	for wp in [ [0, "L"],[1, "M"], [2,"T"] ]:
+	    for syst in ["central", "up", "down"]:
+		for fl in ["bc", "l"]:
+		    print "[btagSF]: Loading calibrator for algo:", algo, ", WP:", wp[1], ", systematic:", syst, ", flavour:", fl
+    #                btag_calibrators[algo+wp[1]+"_"+syst+"_"+fl].load(sf_type_map[algo]["file"], fl_enum[fl], sf_type_map[algo][fl])
+		    btagSFhandle.btag_calibrators[algo+wp[1]+"_"+syst+"_"+fl] = ROOT.BTagCalibrationReader(wp[0], syst)
+		    for i in [0,1,2] :
+			btagSFhandle.btag_calibrators[algo+wp[1]+"_"+syst+"_"+fl].load(btagSFhandle.sf_type_map[algo]["file"], i,btagSFhandle.sf_type_map[algo][fl])
 
-for algo in ["CSV", "CMVAV2"]:
-    for syst in ["central", "up_jes", "down_jes", "up_lf", "down_lf", "up_hf", "down_hf", "up_hfstats1", "down_hfstats1", "up_hfstats2", "down_hfstats2", "up_lfstats1", "down_lfstats1", "up_lfstats2", "down_lfstats2", "up_cferr1", "down_cferr1", "up_cferr2", "down_cferr2"]:
-        print "[btagSF]: Loading calibrator for algo:", algo, "systematic:", syst
-        btag_calibrators[algo+"_iterative_"+syst] = ROOT.BTagCalibrationReader( 3 ,  syst)
-        for i in [0,1,2]:
-          btag_calibrators[algo+"_iterative_"+syst].load(sf_type_map_reweight[algo]["file"], i , "iterativefit")
+    for algo in ["CSV", "CMVAV2"]:
+	for syst in ["central", "up_jes", "down_jes", "up_lf", "down_lf", "up_hf", "down_hf", "up_hfstats1", "down_hfstats1", "up_hfstats2", "down_hfstats2", "up_lfstats1", "down_lfstats1", "up_lfstats2", "down_lfstats2", "up_cferr1", "down_cferr1", "up_cferr2", "down_cferr2"]:
+	    print "[btagSF]: Loading calibrator for algo:", algo, "systematic:", syst
+	    btagSFhandle.btag_calibrators[algo+"_iterative_"+syst] = ROOT.BTagCalibrationReader( 3 ,  syst)
+	    for i in [0,1,2]:
+	      btagSFhandle.btag_calibrators[algo+"_iterative_"+syst].load(btagSFhandle.sf_type_map_reweight[algo]["file"], i , "iterativefit")
 
 # depending on flavour, only a sample of systematics matter
 def applies( flavour, syst ):
@@ -77,8 +85,9 @@ def applies( flavour, syst ):
 
 
 # function that reads the SF
-def get_SF(pt=30., eta=0.0, fl=5, val=0.0, syst="central", algo="CSV", wp="M", shape_corr=False, btag_calibrators=btag_calibrators):
-
+def get_SF(pt=30., eta=0.0, fl=5, val=0.0, syst="central", algo="CSV", wp="M", shape_corr=False, btagSFhandle=btagSFhandle):
+    if not btagSFhandle.initialized :
+	initBTagSF()
     # no SF for pT<20 GeV or pt>1000 or abs(eta)>2.4
     if abs(eta)>2.4 or pt>1000. or pt<20.:
         return 1.0
@@ -91,11 +100,11 @@ def get_SF(pt=30., eta=0.0, fl=5, val=0.0, syst="central", algo="CSV", wp="M", s
 
     if shape_corr:
         if applies(fl,syst):
-            sf = btag_calibrators[algo+"_iterative_"+syst].eval(fl_index ,eta, pt, val)
+            sf = btagSFhandle.btag_calibrators[algo+"_iterative_"+syst].eval(fl_index ,eta, pt, val)
             #print sf
             return sf
         else:
-            sf = btag_calibrators[algo+"_iterative_central"].eval(fl_index ,eta, pt, val)
+            sf = btagSFhandle.btag_calibrators[algo+"_iterative_central"].eval(fl_index ,eta, pt, val)
             #print sf
             return sf 
 
@@ -111,22 +120,22 @@ def get_SF(pt=30., eta=0.0, fl=5, val=0.0, syst="central", algo="CSV", wp="M", s
             out_of_range = True        
         pt = min(pt, pt_range_high_bc)
         pt = max(pt, pt_range_low_bc)
-        sf = btag_calibrators[algo+wp+"_"+syst+"_bc"].eval(fl_index ,eta, pt)
+        sf = btagSFhandle.btag_calibrators[algo+wp+"_"+syst+"_bc"].eval(fl_index ,eta, pt)
         # double the error for pt out-of-range
         if out_of_range and syst in ["up","down"]:
-            sf = max(2*sf - btag_calibrators[algo+wp+"_central_bc"].eval(fl_index ,eta, pt), 0.)
+            sf = max(2*sf - btagSFhandle.btag_calibrators[algo+wp+"_central_bc"].eval(fl_index ,eta, pt), 0.)
         #print sf
         return sf
     # light jets
     else:
-        sf = btag_calibrators[algo+wp+"_"+syst+"_l"].eval( fl_index ,eta, pt)
+        sf = btagSFhandle.btag_calibrators[algo+wp+"_"+syst+"_l"].eval( fl_index ,eta, pt)
         #print sf
         return  sf
 
-def get_event_SF(jets=[], syst="central", algo="CSV", btag_calibrators=btag_calibrators):
+def get_event_SF(jets=[], syst="central", algo="CSV", btagSFhandle=btagSFhandle):
     weight = 1.0
     for jet in jets:
-        weight *= get_SF(pt=jet.pt(), eta=jet.eta(), fl=jet.hadronFlavour(), val=(jet.btag("newpfCombinedInclusiveSecondaryVertexV2BJetTags") if algo=="CSV" else jet.btag('newpfCombinedMVAV2BJetTags')), syst=syst, algo=algo, wp="", shape_corr=True, btag_calibrators=btag_calibrators)
+        weight *= get_SF(pt=jet.pt(), eta=jet.eta(), fl=jet.hadronFlavour(), val=(jet.btag("newpfCombinedInclusiveSecondaryVertexV2BJetTags") if algo=="CSV" else jet.btag('newpfCombinedMVAV2BJetTags')), syst=syst, algo=algo, wp="", shape_corr=True, btagSFhandle=btagSFhandle)
     return weight                             
 
 if debug_btagSF:
