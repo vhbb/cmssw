@@ -39,8 +39,8 @@ gtmap={}
 gtmap["Run2016B"]='Spring16_23Sep2016BCDV2_DATA'
 gtmap["Run2016C"]='Spring16_23Sep2016BCDV2_DATA'
 gtmap["Run2016D"]='Spring16_23Sep2016BCDV2_DATA'
-gtmap["Run2016E"]='Spring16_23Sep2016EV2_DATA'
-gtmap["Run2016F"]='Spring16_23Sep2016FV2_DATA'
+gtmap["Run2016E"]='Spring16_23Sep2016EFV2_DATA'
+gtmap["Run2016F"]='Spring16_23Sep2016EFV2_DATA'
 gtmap["Run2016G"]='Spring16_23Sep2016GV2_DATA'
 gtmap["Run2016H"]='Spring16_23Sep2016HV2_DATA'
 
