@@ -95,8 +95,9 @@ void PDFWeightsProducer::beginRunProduce(edm::Run & iRun, edm::EventSetup const&
     std::vector<std::string> lines = iter->lines();
     for (unsigned int iLine = 0; iLine<lines.size(); iLine++) {
       TString line_tstr =lines.at(iLine).c_str();
+      // cout<<"before weight id= " << iLine<< " "<<line_tstr.ReplaceAll("\n","").Data()<<endl;
       if (line_tstr.Contains("<weight id=")) {
-        // cout<<iLine<< " "<<line_tstr.Data()<<endl;
+        // cout<<iLine<< " "<<line_tstr.ReplaceAll("\n","").Data()<<endl;
         line_tstr = line_tstr.ReplaceAll("\n","").ReplaceAll("<weight id=\"","").ReplaceAll("</weight>","");
         TObjArray *tx = line_tstr.Tokenize("> ");
         line_tstr = ((TObjString *)(tx->At(tx->GetEntries()-1)))->String();
