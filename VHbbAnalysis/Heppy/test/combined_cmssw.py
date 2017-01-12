@@ -574,7 +574,42 @@ def initialize(**kwargs):
  #           jetAlgorithm = cms.string("AntiKt")
  #       )
 
+        process.PDFWeightsProducer = cms.EDProducer("PDFWeightsProducer",
+          # mc2hessianCSV = cms.FileInPath('PhysicsTools/HepMCCandAlgos/data/NNPDF30_lo_as_0130_hessian_60.csv'), #MC2Hessian transformation matrix
+          mc2hessianCSV = cms.FileInPath('PhysicsTools/HepMCCandAlgos/data/NNPDF30_nlo_as_0118_hessian_60.csv'), #MC2Hessian transformation matrix
+          src = cms.InputTag("source"),
+          # putting to 0 at least one of the parameters below will enforce hard-coded settings based on the mc2hessianCSV input file
+          pdfWeightLHAnumber = cms.uint32(0), #index of first mc replica weight (careful, this should not be the nominal weight, which is repeated in some mc samples).  The majority of run2 LO madgraph_aMC@NLO samples with 5fs matrix element and pdf would use index 10, corresponding to pdf set 263001, the first alternate mc replica for the nominal pdf set 263000 used for these samples
+          nPdfWeights = cms.uint32(0), #number of input weights
+          nPdfEigWeights = cms.uint32(0), #number of output weights
+        )
+        process.OUT.outputCommands.append("keep *_PDFWeightsProducer_*_EX")
 
+ 
+        # Add Higgs Template Cross Section categorization
+        process.mergedGenParticles = cms.EDProducer("MergedGenParticleProducer",
+            inputPruned = cms.InputTag("prunedGenParticles"),
+            inputPacked = cms.InputTag("packedGenParticles"),
+
+        )
+        process.OUT.outputCommands.append('keep *_mergedGenParticles_*_EX')
+        
+        process.myGenerator = cms.EDProducer("GenParticles2HepMCConverterHTXS",
+            genParticles = cms.InputTag("mergedGenParticles"),
+            genEventInfo = cms.InputTag("generator"),
+        )
+        process.OUT.outputCommands.append('keep *_myGenerator_*_EX')
+        
+        process.rivetProducerHTXS = cms.EDProducer('HTXSRivetProducer',
+          HepMCCollection = cms.InputTag('myGenerator','unsmeared'),
+          GenEventInfo = cms.InputTag('generator'),
+          LHEEventInfo = cms.InputTag('externalLHEProducer'),
+          LHERunInfo = cms.InputTag('externalLHEProducer'),
+          ProductionMode = cms.string('AUTO'),
+        )
+        process.OUT.outputCommands.append('keep *_rivetProducerHTXS_*_EX')
+
+        
         # Plugin for analysing B hadrons
         # MUST use the same particle collection as in selectedHadronsAndPartons
         from PhysicsTools.JetMCAlgos.GenHFHadronMatcher_cff import matchGenBHadron
