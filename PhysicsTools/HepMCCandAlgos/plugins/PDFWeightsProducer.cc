@@ -100,7 +100,7 @@ void PDFWeightsProducer::beginRunProduce(edm::Run & iRun, edm::EventSetup const&
         line_tstr = line_tstr.ReplaceAll("\n","").ReplaceAll("<weight id=\"","").ReplaceAll("</weight>","");
         TObjArray *tx = line_tstr.Tokenize("> ");
         line_tstr = ((TObjString *)(tx->At(tx->GetEntries()-1)))->String();
-        unsigned int pdfnumber = line_tstr.ReplaceAll("PDF set = ","").Atoi();
+        unsigned int pdfnumber = line_tstr.ReplaceAll("PDF set = ","").ReplaceAll("pdfset=","").Atoi();
         PDFweightsLHEorder_.push_back(pdfnumber);
         if(pdfnumber%100==1){
           unsigned int LHEset = pdfnumber-1;
@@ -147,6 +147,9 @@ void PDFWeightsProducer::beginRunProduce(edm::Run & iRun, edm::EventSetup const&
         }
       }
     }
+  }
+  if(pdfWeightLHAnumber_<1 || nPdfWeights_<1 || nPdfEigWeights_<1){
+    cout << "NO SUITABLE SET FOUND FOR MC2HESSIAN PDF CONVERSION!" << endl;
   }
 
   pdfweightshelper_.Init(nPdfWeights_,nPdfEigWeights_,mc2hessianCSV);
