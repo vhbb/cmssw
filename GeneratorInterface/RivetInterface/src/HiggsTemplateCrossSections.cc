@@ -7,7 +7,8 @@
 #include "Rivet/Projections/FastJets.hh"
 
 // Definition of the StatusCode and Category enums
-#include "HiggsTemplateCrossSections.h"
+//#include "HiggsTemplateCrossSections.h"
+#include "SimDataFormats/HTXS/interface/HiggsTemplateCrossSections.h"
 
 namespace Rivet {
   

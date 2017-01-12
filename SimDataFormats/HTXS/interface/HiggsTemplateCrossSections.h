@@ -1,5 +1,8 @@
-#ifndef TRUTHRIVETTOOLS_HIGGSTEMPLATECROSSSECTIONS_H
-#define TRUTHRIVETTOOLS_HIGGSTEMPLATECROSSSECTIONS_H 1
+#ifndef SimDataFormats_GeneratorProducts_HiggsTemplateCrossSections_h
+#define SimDataFormats_GeneratorProducts_HiggsTemplateCrossSections_h
+
+#include "DataFormats/Math/interface/LorentzVector.h"
+#include <vector>
 
 /// Higgs Template Cross Section namespace
 namespace HTXS {
@@ -82,9 +85,9 @@ namespace HTXS {
   } // namespace Stage1
 
   
-#ifdef ROOT_TLorentzVector
-
-    typedef TLorentzVector TLV;
+//#ifdef ROOT_TLorentzVector
+    //typedef TLorentzVector TLV;
+    typedef math::XYZTLorentzVectorD TLV;
     typedef std::vector<TLV> TLVs;
     
     template <class vec4>
@@ -139,7 +142,7 @@ namespace HTXS {
       return cat;    
     }
     
-#endif 
+//#endif 
 
 } // namespace HTXS
 
