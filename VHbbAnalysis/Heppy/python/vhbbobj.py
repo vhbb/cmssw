@@ -199,14 +199,14 @@ for algo in ["CSV", "CMVAV2"]:
     for wp in [ "L", "M", "T" ]:
         for syst in ["central", "up", "down"]:
             syst_name = "" if syst=="central" else ("_"+syst) 
-            jetTypeVHbb.variables += [ NTupleVariable("btag"+algo+wp+"_SF"+syst_name,  lambda x, get_SF=get_SF, syst=syst, algo=algo, wp=wp, btag_calibrators=btag_calibrators : 
-                                                      get_SF(x.pt(), x.eta(), x.hadronFlavour(), 0.0, syst, algo, wp, False, btag_calibrators)
+            jetTypeVHbb.variables += [ NTupleVariable("btag"+algo+wp+"_SF"+syst_name,  lambda x, get_SF=get_SF, syst=syst, algo=algo, wp=wp, btagSFhandle=btagSFhandle : 
+                                                      get_SF(x.pt(), x.eta(), x.hadronFlavour(), 0.0, syst, algo, wp, False, btagSFhandle)
                                                       , float, mcOnly=True, help="b-tag "+algo+wp+" POG scale factor, "+syst  )]
 
     for syst in ["central", "up_jes", "down_jes", "up_lf", "down_lf", "up_hf", "down_hf", "up_hfstats1", "down_hfstats1", "up_hfstats2", "down_hfstats2", "up_lfstats1", "down_lfstats1", "up_lfstats2", "down_lfstats2", "up_cferr1", "down_cferr1", "up_cferr2", "down_cferr2"]:
         syst_name = "" if syst=="central" else ("_"+syst) 
-        jetTypeVHbb.variables += [ NTupleVariable("btagWeight"+algo+syst_name,  lambda x, get_SF=get_SF, syst=syst, algo=algo, wp=wp, btag_calibrators=btag_calibrators : 
-                                                      get_SF(x.pt(), x.eta(), x.hadronFlavour(), (x.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") if algo=="CSV" else x.btag('pfCombinedMVAV2BJetTags')), syst, algo, wp, True, btag_calibrators)
+        jetTypeVHbb.variables += [ NTupleVariable("btagWeight"+algo+syst_name,  lambda x, get_SF=get_SF, syst=syst, algo=algo, wp=wp, btagSFhandle=btagSFhandle : 
+                                                      get_SF(x.pt(), x.eta(), x.hadronFlavour(), (x.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") if algo=="CSV" else x.btag('pfCombinedMVAV2BJetTags')), syst, algo, wp, True, btagSFhandle)
                                                       , float, mcOnly=True, help="b-tag "+algo+" continuous POG scale factor, "+syst  )]
         
 #add per-lepton SF
