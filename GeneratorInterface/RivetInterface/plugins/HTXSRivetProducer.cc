@@ -16,7 +16,8 @@
 
 #include "Rivet/AnalysisHandler.hh"
 #include "GeneratorInterface/RivetInterface/src/HiggsTemplateCrossSections.cc"
-#include "GeneratorInterface/RivetInterface/src/HiggsTemplateCrossSections.h"
+//#include "GeneratorInterface/RivetInterface/src/HiggsTemplateCrossSections.h"
+#include "SimDataFormats/HTXS/interface/HiggsTemplateCrossSections.h"
 
 #include <vector>
 #include <stdio.h>
@@ -48,7 +49,7 @@ public:
         produces<int>("njets").setBranchAlias("njets");
         produces<float>("pTH").setBranchAlias("pTH");
         produces<float>("pTV").setBranchAlias("pTV");
-        produces<HiggsClassification>("HiggsClassification").setBranchAlias("HiggsClassification");
+        produces<HTXS::HiggsClassification>("HiggsClassification").setBranchAlias("HiggsClassification");
     }
     ~HTXSRivetProducer();
     
@@ -76,7 +77,7 @@ private:
     int njets_;
     float pTH_;
     float pTV_;
-    HiggsClassification cat_;
+    HTXS::HiggsClassification cat_;
     
 };
 
@@ -157,46 +158,47 @@ void HTXSRivetProducer::produce( edm::Event & iEvent, const edm::EventSetup & ) 
     }
 
     // classify the event
-    cat_ = _HTXS->classifyEvent(*myGenEvent,m_HiggsProdMode);
+    Rivet::HiggsClassification rivet_cat = _HTXS->classifyEvent(*myGenEvent,m_HiggsProdMode);
+    cat_ = HTXS::Rivet2Root(rivet_cat);
 
     // print out some results
-    //cout<<"HTXSRivetProducer cat_.prodMode "<<cat_.prodMode <<endl;
-    //cout<<"HTXSRivetProducer cat_.errorCode "<< cat_.errorCode <<endl;
-    //cout<<"HTXSRivetProducer cat_.stage0_cat "<< cat_.stage0_cat <<endl;
-    //cout<<"HTXSRivetProducer cat_.stage1_cat_pTjet30GeV "<< cat_.stage1_cat_pTjet30GeV <<endl;
-    //cout<<"HTXSRivetProducer njets30 " << cat_.jets30.size() <<endl;
-    //for (unsigned int i=0; i<cat_.jets30.size(); i++) {
-    //    cout<<"pTj"<<i<<" "<< cat_.jets30[i].momentum().pt()<<" eta "<<cat_.jets30[i].momentum().eta()<<endl;
-    //    Rivet::Particles &jetparticles = cat_.jets30[i].particles();
+    //cout<<"HTXSRivetProducer rivet_cat.prodMode "<<rivet_cat.prodMode <<endl;
+    //cout<<"HTXSRivetProducer rivet_cat.errorCode "<< rivet_cat.errorCode <<endl;
+    //cout<<"HTXSRivetProducer rivet_cat.stage0_cat "<< rivet_cat.stage0_cat <<endl;
+    //cout<<"HTXSRivetProducer rivet_cat.stage1_rivet_catpTjet30GeV "<< rivet_cat.stage1_cat_pTjet30GeV <<endl;
+    //cout<<"HTXSRivetProducer njets30 " << rivet_cat.jets30.size() <<endl;
+    //for (unsigned int i=0; i<rivet_cat.jets30.size(); i++) {
+    //    cout<<"pTj"<<i<<" "<< rivet_cat.jets30[i].momentum().pt()<<" eta "<<rivet_cat.jets30[i].momentum().eta()<<endl;
+    //    Rivet::Particles &jetparticles = rivet_cat.jets30[i].particles();
     //    for ( auto p:jetparticles ) {
     //        cout<<p.pdgId()<<" "<<p.pt()<<" "<<p.eta()<<endl; 
     //    }
     //}
-    //if (cat_.jets30.size()>=2) {
-    //    const Rivet::FourMomentum &j1=cat_.jets30[0].momentum(), &j2=cat_.jets30[1].momentum();
+    //if (rivet_cat.jets30.size()>=2) {
+    //    const Rivet::FourMomentum &j1=rivet_cat.jets30[0].momentum(), &j2=rivet_cat.jets30[1].momentum();
     //    cout<<"mass "<<(j1+j2).mass()<<" delta_rap: "<<std::abs(j1.rapidity()-j2.rapidity())<<endl;
-    //    cout<<"pthjj: "<<(j1+j2+cat_.higgs.momentum()).pt()<<endl;
+    //    cout<<"pthjj: "<<(j1+j2+rivet_cat.higgs.momentum()).pt()<<endl;
     //}
 
     stage0cat_ = cat_.stage0_cat;
     stage1cat_ = cat_.stage1_cat_pTjet30GeV;
     njets_ = cat_.jets30.size();
-    pTH_ = cat_.higgs.momentum().pt();
-    pTV_ = cat_.V.momentum().pt();
+    pTH_ = cat_.higgs.Pt();
+    pTV_ = cat_.V.Pt();
 
-    unique_ptr<HiggsClassification> cat( new HiggsClassification( cat_ ) );
     unique_ptr<int> stage0cat( new int( stage0cat_ ) );
     unique_ptr<int> stage1cat( new int( stage1cat_ ) );
     unique_ptr<int> njets( new int( njets_ ) );
     unique_ptr<float> pTH( new float( pTH_ ) );
     unique_ptr<float> pTV( new float( pTV_ ) );
+    unique_ptr<HTXS::HiggsClassification> cat( new HTXS::HiggsClassification( cat_ ) ); 
 
-    iEvent.put(std::move(cat),"HiggsClassification");
     iEvent.put(std::move(stage0cat),"stage0cat");
     iEvent.put(std::move(stage1cat),"stage1cat");
     iEvent.put(std::move(njets),"njets");
     iEvent.put(std::move(pTH),"pTH");
     iEvent.put(std::move(pTV),"pTV");
+    iEvent.put(std::move(cat),"HiggsClassification");
 
 }
 
