@@ -495,7 +495,10 @@ class VHbbAnalyzer( Analyzer ):
         self.inputCounter.Fill(1)
         event.LHE_weights_pdf_eigen = []
         if self.cfg_comp.isMC:
-            event.LHE_weights_pdf_eigen = self.handles['PDFWeightsProducer'].product()
+            try:
+                event.LHE_weights_pdf_eigen = self.handles['PDFWeightsProducer'].product()
+            except Exception:
+                pass
             genWeight = self.handles['GenInfo'].product().weight()
             self.inputCounterWeighted.Fill(1,copysign(1.0,genWeight)*event.puWeight)
             self.inputCounterFullWeighted.Fill(1,genWeight*event.puWeight)
