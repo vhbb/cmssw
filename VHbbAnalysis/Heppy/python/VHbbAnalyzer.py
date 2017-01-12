@@ -31,7 +31,7 @@ class VHbbAnalyzer( Analyzer ):
         self.handles['rhoN'] =  AutoHandle( 'fixedGridRhoFastjetCentralNeutral','double' )
         self.handles['rhoCHPU'] =  AutoHandle( 'fixedGridRhoFastjetCentralChargedPileUp','double' )
         self.handles['rhoCentral'] =  AutoHandle( 'fixedGridRhoFastjetCentral','double' )
-        if getattr(self.cfg_ana,"doSoftActivityVH", False) or getattr(self.cfg_ana,"doVBF", True):
+        if getattr(self.cfg_ana,"doSoftActivityVH", False) or getattr(self.cfg_ana,"doVBF", True) or getattr(self.cfg_ana, "doSoftActivityEWK", False):
             self.handles['pfCands'] =  AutoHandle( 'packedPFCandidates', 'std::vector<pat::PackedCandidate>' )
         if self.cfg_comp.isMC:
             self.handles['GenInfo'] = AutoHandle( ('generator','',''), 'GenEventInfoProduct' )
@@ -90,7 +90,7 @@ class VHbbAnalyzer( Analyzer ):
         if len(event.jetsForVBF) < 4 or  event.jetsForVBF[0] < 70 or  event.jetsForVBF[1] < 55 or  event.jetsForVBF[2] < 35 or  event.jetsForVBF[3] < 20 :
             return
         event.jetsForVBF.sort(key=lambda x:x.pt(),reverse=True)
-        map(lambda x :x.qgl(),event.jetsForVBF[:6])
+        map(lambda x :x.qgl(),event.jetsForVBF[:9])
         event.jetsForVBF=event.jetsForVBF[:4]
 
 	#compute QGL here for VBF jets if passing VBF pre-selection 
@@ -112,6 +112,15 @@ class VHbbAnalyzer( Analyzer ):
         if event.isrJetVH >= 0 :
             excludedJets+=[event.cleanJetsAll[event.isrJetVH]]
         event.softActivityVHJets=[x for x in self.softActivity(event,j1,j2,excludedJets,-1000) if x.pt() > 2.0 ]
+
+    def doSoftActivityEWK(self,event) :
+        if not len(event.cleanJetsAll) >= 2 :
+           return
+        j1=event.cleanJetsAll[0]
+        j2=event.cleanJetsAll[1]
+        leadingPtJets = event.cleanJetsAll[0:2]
+        excludedJets=leadingPtJets+event.selectedElectrons+event.selectedMuons
+        event.softActivityEWKJets=self.softActivity(event,j1,j2,excludedJets,-1000)
 
 
     def addPullVector(self,event) :
@@ -474,6 +483,7 @@ class VHbbAnalyzer( Analyzer ):
         event.hjidxDiJetPtByCSV = []
         event.softActivityJets=[]
         event.softActivityVHJets=[]
+        event.softActivityEWKJets=[]
         event.rhoN= -1
         event.rhoCHPU= -1
         event.rhoCentral= -1
@@ -520,8 +530,8 @@ class VHbbAnalyzer( Analyzer ):
                 return False
             if event.Vtype < 0 and not ( sum(x.pt() > 30 for x in event.jetsForHiggsAll) >= 4 or sum(x.pt() for x in event.jetsForHiggsAll[:4]) > self.cfg_ana.sumPtThreshold ):
                 return False
-        map(lambda x :x.qgl(),event.jetsForHiggs[:6])
-        map(lambda x :x.qgl(),(x for x in event.jetsForHiggs if x.pt() > 30) )
+        map(lambda x :x.qgl(),event.jetsForHiggsAll[:6])
+        map(lambda x :x.qgl(),(x for x in event.jetsForHiggsAll if x.pt() > 30) )
 
 	self.doHiggsHighCSV(event)
 	self.doHiggsHighCMVAV2(event)
@@ -538,6 +548,8 @@ class VHbbAnalyzer( Analyzer ):
 	    self.doVBF(event)
         if getattr(self.cfg_ana,"doSoftActivityVH", False) :
             self.doSoftActivityVH(event)
+        if getattr(self.cfg_ana,"doSoftActivityEWK", False) :
+            self.doSoftActivityEWK(event)
 
         self.doQuickTkMET(event)
 
