@@ -196,7 +196,7 @@ for algo in ["CSV", "CMVAV2"]:
 	for syst in ["central", "up_jes", "down_jes", "up_lf", "down_lf", "up_hf", "down_hf", "up_hfstats1", "down_hfstats1", "up_hfstats2", "down_hfstats2", "up_lfstats1", "down_lfstats1", "up_lfstats2", "down_lfstats2", "up_cferr1", "down_cferr1", "up_cferr2", "down_cferr2"]:
 		syst_name = "" if syst=="central" else ("_"+syst) 
 		btag_weights["btagWeight"+algo+syst_name] = NTupleVariable("btagWeight"+algo+syst_name,
-									   lambda ev, get_event_SF=get_event_SF, syst=syst, algo=algo, btag_calibrators=btag_calibrators : get_event_SF(ev.cleanJetsAll, syst, algo, btag_calibrators)
+									   lambda ev, get_event_SF=get_event_SF, syst=syst, algo=algo, btagSFhandle=btagSFhandle : get_event_SF(ev.cleanJetsAll, syst, algo, btagSFhandle)
 									   , float, mcOnly=True, help="b-tag "+algo+"continuous  weight, variating "+syst
 									   )
 treeProducer.globalVariables += list(btag_weights.values())
@@ -266,6 +266,7 @@ TauAna.inclusive_tauLooseID = "decayModeFindingNewDMs"
 from PhysicsTools.Heppy.analyzers.objects.JetAnalyzer import JetAnalyzer
 JetAna = JetAnalyzer.defaultConfig
 JetAna.calculateSeparateCorrections = True # CV: needed for ttH prompt lepton MVA
+JetAna.lepSelCut = lambda lep : (abs(lep.pdgId()) == 11 and lep.relIso03 < 0.4) or (abs(lep.pdgId()) == 13 and lep.relIso04 < 0.4)
 
 from PhysicsTools.Heppy.analyzers.gen.LHEAnalyzer import LHEAnalyzer 
 LHEAna = LHEAnalyzer.defaultConfig
@@ -313,8 +314,8 @@ JetAna.recalibrateJets=True
 JetAna.jecPath=os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/jec"
 #JetAna.mcGT="Fall15_25nsV2_MC"
 #JetAna.dataGT = "Fall15_25nsV2_DATA"
-JetAna.mcGT="Spring16_25nsV6_MC"
-JetAna.dataGT="Spring16_25nsV6_DATA"
+JetAna.mcGT="Spring16_23Sep2016V2_MC"
+JetAna.dataGT="Spring16_23Sep2016GV2_DATA"
 JetAna.addJECShifts=True
 JetAna.addJERShifts=True
 
@@ -323,7 +324,18 @@ factorizedJetCorrections = [
     "AbsoluteMPFBias",
     "AbsoluteScale",
     "AbsoluteStat",
+    "CorrelationGroupFlavor",
+    "CorrelationGroupIntercalibration",
+    "CorrelationGroupMPFInSitu",
+    "CorrelationGroupUncorrelated",
+    "CorrelationGroupbJES",
+    "FlavorPhotonJet",
+    "FlavorPureBottom",
+    "FlavorPureCharm",
+    "FlavorPureGluon",
+    "FlavorPureQuark",
     "FlavorQCD",
+    "FlavorZJet",
     "Fragmentation",
     "PileUpDataMC",
     "PileUpEnvelope",
@@ -334,7 +346,6 @@ factorizedJetCorrections = [
     "PileUpPtHF",
     "PileUpPtRef",
     "RelativeFSR",
-    "RelativeStatFSR",
     "RelativeJEREC1",
     "RelativeJEREC2",
     "RelativeJERHF",
@@ -343,27 +354,57 @@ factorizedJetCorrections = [
     "RelativePtEC2",
     "RelativePtHF",
     "RelativeStatEC",
-    #"RelativeStatEC2", #Does not exist in Spring16
+    "RelativeStatFSR",
     "RelativeStatHF",
     "SinglePionECAL",
     "SinglePionHCAL",
-    "TimeEta",
-    "TimePt",
-    "Total"
+    "SubTotalAbsolute",
+    "SubTotalMC",
+    "SubTotalPileUp",
+    "SubTotalPt",
+    "SubTotalRelative",
+    "SubTotalScale",
+    "TimePtEta",
+    "TimeRunBCD",
+    "TimeRunE",
+    "TimeRunF",
+    "TimeRunGH",
+    "TotalNoFlavorNoTime",
+    "TotalNoFlavor",
+    "TotalNoTime",
+    "Total",
 ]
 JetAna.factorizedJetCorrections = factorizedJetCorrections
-for jet_corr in factorizedJetCorrections:
-    for sdir in ["Up", "Down"]:
-        name = jet_corr + sdir
-        jetTypeVHbb.variables += [
-            NTupleVariable(
-                "corr_{0}".format(name),
-                lambda x, name = name: getattr(x, 'corr{0}'.format(name), -99),
-                float,
-                mcOnly=True,
-                help=""
-            )
-        ]
+
+for jet_type in [jetTypeVHbb, patSubjetType, subjetcorrType]:
+        for jet_corr in factorizedJetCorrections:
+            for sdir in ["Up", "Down"]:
+                name = jet_corr + sdir
+                jet_type.variables += [
+                    NTupleVariable(
+                        "corr_{0}".format(name),
+                        lambda x, name = name: getattr(x, 'corr{0}'.format(name), -99),
+                        float,
+                        mcOnly=True,
+                        help=""
+                    )
+                ]
+# HTT Subjets
+for subjet in ["sjW1", "sjW2", "sjNonW"]:
+    for jet_corr in factorizedJetCorrections:
+        for sdir in ["Up", "Down"]:
+            name = jet_corr + sdir
+            httType.variables += [
+                NTupleVariable(
+                    "{0}_corr_{1}".format(subjet, name),
+                        lambda x, name = name: getattr( getattr(x,subjet), 'corr{0}'.format(name), -99),
+                    float,
+                    mcOnly=True,
+                    help=""
+                )
+            ]
+
+
 
 # delta-beta corrected isolation for muons:
 # https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2#Muon_Isolation
@@ -538,10 +579,15 @@ sequence = [
 from PhysicsTools.Heppy.utils.miniAodFiles import miniAodFiles
 sample = cfg.MCComponent(
 	files = [
-		# "root://stormgf1.pi.infn.it:1094//store/mc/RunIISpring16MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext4-v1/00000/E8090432-8628-E611-8713-001EC9ADFDC9.root",
-		"root://cmsxrootd.fnal.gov///store/mc/RunIISummer16MiniAODv2/GluGluHToBB_M125_13TeV_powheg_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/184FBB8C-45C8-E611-B5C5-001EC9ADC726.root",
-    ],
-    # files = ["cmsswPreProcessing.root"],
+		#"root://xrootd.ba.infn.it//store/mc/RunIIFall15MiniAODv1/TT_TuneCUETP8M1_13TeV-powheg-scaledown-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/30000/045996FE-A19D-E511-B76D-D4AE526A0B47.root" ##ttbar
+		#"root://xrootd.ba.infn.it//store/mc/RunIISpring16MiniAODv1/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/00000/0899BDA9-AE01-E611-A239-008CFA05EA2C.root"
+#		"root://eoscms.cern.ch//eos/cms/store/relval/CMSSW_8_1_0_pre9/RelValTTbar_13/MINIAODSIM/PU25ns_81X_mcRun2_asymptotic_v2_hip0p8_mtoff-v1/10000/2A7336F1-D851-E611-AA11-003048D15D48.root"
+#/store/mc/RunIISpring16MiniAODv2/GluGluToBulkGravitonToHHTo4B_M-550_narrow_13TeV-madgraph/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v2/90000/4E40D2E2-9E3A-E611-8C5B-00259081FB18.root"
+		"E8090432-8628-E611-8713-001EC9ADFDC9.root"
+#root://stormgf1.pi.infn.it:1094//store/mc/RunIISpring16MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext4-v1/00000/E8090432-8628-E611-8713-001EC9ADFDC9.root",
+		#"root://t3dcachedb.psi.ch:1094///pnfs/psi.ch/cms/trivcat/store/mc/RunIISpring16MiniAODv2/WW_TuneCUETP8M1_13TeV-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/50000/0AF21AF1-121B-E611-B652-549F35AE4F88.root"
+                ],
+    #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
     name="ZHLL125", isEmbed=False,
     puFileMC="puMC.root",
     puFileData="puData.root", 
