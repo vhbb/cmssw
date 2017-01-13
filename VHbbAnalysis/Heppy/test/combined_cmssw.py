@@ -679,7 +679,7 @@ def initialize(**kwargs):
 
 
     #######################################
-    ## BTV HIP mitigation  
+    ## BTV Deep CSV  
     #######################################
     # recreate slimmedJets collection
     process.load("Configuration.StandardSequences.MagneticField_cff")
@@ -689,9 +689,9 @@ def initialize(**kwargs):
       process,
       jetSource = cms.InputTag('slimmedJets','','PAT') if isMC else  cms.InputTag('slimmedJets','','RECO'),
       jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None'),
-      btagDiscriminators = ['pfCombinedInclusiveSecondaryVertexV2BJetTags','pfCombinedMVAV2BJetTags'],
-      runIVF=True,
-      btagPrefix = 'new' # optional, in case interested in accessing both the old and new discriminator values
+      btagDiscriminators = ['deepFlavourCMVAJetTags:probudsg','deepFlavourCMVAJetTags:probb', 'deepFlavourCMVAJetTags:probc', 'deepFlavourCMVAJetTags:probbb', 'deepFlavourCMVAJetTags:probcc','deepFlavourJetTags:probudsg', 'deepFlavourJetTags:probb', 'deepFlavourJetTags:probc', 'deepFlavourJetTags:probbb', 'deepFlavourJetTags:probcc'],
+#     runIVF=True,
+#     btagPrefix = 'new' # optional, in case interested in accessing both the old and new discriminator values
     )
     process.slimmedJets = process.slimmedJets=process.updatedPatJetsTransientCorrected.clone()
     process.OUT.outputCommands.append("keep *_slimmedJets_*_EX")
