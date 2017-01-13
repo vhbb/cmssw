@@ -10,7 +10,7 @@ class AdditionalBTag( Analyzer ):
 
     def declareHandles(self):
         super(AdditionalBTag, self).declareHandles()
-        self.handles['btagHip'] = AutoHandle( ("pfCombinedInclusiveSecondaryVertexV2BJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+        #self.handles['btagHip'] = AutoHandle( ("pfCombinedInclusiveSecondaryVertexV2BJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
         #self.handles['btagcsv'] = AutoHandle( ("combinedSecondaryVertexBJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
         self.handles['btagSoftEl'] = AutoHandle( ("softPFElectronBJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
         self.handles['btagSoftMu'] = AutoHandle( ("softPFMuonBJetTags","","EX"), "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
