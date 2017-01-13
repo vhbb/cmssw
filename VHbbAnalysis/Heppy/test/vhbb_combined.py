@@ -129,7 +129,7 @@ btagana=cfg.Analyzer(
     class_object=AdditionalBTag,
 )
 sequence.insert(sequence.index(VHbb),btagana)
-VHbb.btagDiscriminator=lambda x: x.btag("newpfCombinedInclusiveSecondaryVertexV2BJetTags")
+#VHbb.btagDiscriminator=lambda x: x.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
 
 # Add Information on generator level hadronic tau decays
 if sample.isMC:   
