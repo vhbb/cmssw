@@ -200,6 +200,14 @@ for algo in ["CSV", "CMVAV2"]:
 									   )
 treeProducer.globalVariables += list(btag_weights.values())
 
+ZllKinFitResults = {}
+for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
+	name = "ZllKinFit"+("" if analysis=="" else "_")+analysis
+	ZllKinFitResults[name+"_mass"] =  NTupleVariable(name+"_mass", lambda ev, name=name : getattr(ev, name+"_mass", -99.), float, mcOnly=False, help="Zll kin fit mass (=mass of the HCSV jets after kinematic fit) for analysis "+analysis) 
+	ZllKinFitResults[name+"_njet"] =  NTupleVariable(name+"_njet", lambda ev, name=name : getattr(ev, name+"_njet", -99), int, mcOnly=False, help="Zll kin fit njet (=number of jets used for kinematic fit) for analysis "+analysis) 
+	ZllKinFitResults[name+"_status"] =  NTupleVariable(name+"_status", lambda ev, name=name : getattr(ev, name+"_status", -99), int, mcOnly=False, help="Zll kin fit status (=0 if success, =1 otherwise) for analysis "+analysis) 
+treeProducer.globalVariables += list(ZllKinFitResults.values())
+
 '''
 
 for syst in ["JES", "LF", "HF", "HFStats1", "HFStats2", "LFStats1", "LFStats2", "cErr1", "cErr2"]:
@@ -454,6 +462,7 @@ VHbb = cfg.Analyzer(
 #    higgsJetsPreSelectionVBF = lambda x: (( x.puJetId() > 0 and x.jetID('POG_PFID_Loose')) or abs(x.eta())>3.0 ) and x.pt() >  20,
     passall=False,
     doSoftActivityVH=True,
+    doZllKinematicFit=True,
     doSoftActivityEWK=True,
     doVBF=True,
     regressions = [
