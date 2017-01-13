@@ -121,7 +121,7 @@ if not boostana.skip_ca15:
                                                                  httType,
                                                                  10,
                                                                  help="OptimalR HEPTopTagger Candidates")
-
+		
 
 # Add b-Tagging Information
 btagana=cfg.Analyzer(
@@ -141,6 +141,8 @@ if sample.isMC:
     sequence.insert(sequence.index(VHbb),TauGenJet)
 
     treeProducer.collections["tauGenJets"] = NTupleCollection("GenHadTaus", genTauJetType, 15, help="Generator level hadronic tau decays")
+    
+    treeProducer.collections["LHE_weights_pdf_eigen"] = NTupleCollection("LHE_weights_pdf_eigen", objectFloat , 60, help="LHE weights for pdf variation (NNPDF) in eigenvector form through MC2Hessian")
 
 # Switch MET inputs to newly created slimmedMETs collection with PFMET significance matrix added
 for ic in range(len(config.sequence)):
