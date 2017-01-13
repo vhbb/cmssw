@@ -58,14 +58,6 @@ process.rivetProducerHTXS = cms.EDProducer('HTXSRivetProducer',
   ProductionMode = cms.string('AUTO'),
 )
 
-
-# AOD
-#process.myGenerator = cms.EDProducer("GenParticles2HepMCConverterHTXS",
-#    genParticles = cms.InputTag("genParticles"),
-#    genEventInfo = cms.InputTag("generator"),
-#)
-#process.p = cms.Path(process.myGenerator*process.rivetProducerHTXS)
-
 #MINIAOD
 process.mergedGenParticles = cms.EDProducer("MergedGenParticleProducer",
     inputPruned = cms.InputTag("prunedGenParticles"),
@@ -77,10 +69,15 @@ process.myGenerator = cms.EDProducer("GenParticles2HepMCConverterHTXS",
 )
 process.p = cms.Path(process.mergedGenParticles*process.myGenerator*process.rivetProducerHTXS)
 
+# # AOD
+#process.myGenerator = cms.EDProducer("GenParticles2HepMCConverterHTXS",
+#    genParticles = cms.InputTag("genParticles"),
+#    genEventInfo = cms.InputTag("generator"),
+#)
+#process.p = cms.Path(process.myGenerator*process.rivetProducerHTXS)
+
 process.out = cms.OutputModule("PoolOutputModule",
     outputCommands = cms.untracked.vstring('drop *','keep *_*_*_runRivetAnalysis','keep *_generator_*_*','keep *_externalLHEProducer_*_*'),
-    #fileName = cms.untracked.string('testHTXSRivet_ggH4l_AOD_testMerger.root')
-    #fileName = cms.untracked.string('testHTXSRivet_ggH4l_MINIAOD_testMerger.root')
     fileName = cms.untracked.string('testHTXSRivet_ggH4l_MINIAOD_100k.root')
 )
 process.o = cms.EndPath( process.out )
