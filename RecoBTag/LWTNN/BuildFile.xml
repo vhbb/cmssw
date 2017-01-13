@@ -1,0 +1,7 @@
+<use   name="eigen"/>
+<use   name="boost"/>
+<use   name="boost_system"/>
+<use   name="classlib"/>
+<export>
+  <lib   name="1"/>
+</export>
