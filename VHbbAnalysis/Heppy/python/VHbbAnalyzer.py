@@ -6,6 +6,7 @@ from copy import deepcopy
 from math import *
 from JetRegression import JetRegression
 from VBFblikelihood import VBFblikelihood
+from ZllKinematicFit import ZllKinematicFit
 import itertools
 import ROOT
 def Boost(self,boost):
@@ -79,6 +80,43 @@ class VHbbAnalyzer( Analyzer ):
         blike=self.cfg_ana.VBFblikelihood
         print "Initialize VBF blikelihood ", blike
         self.blikelihood = VBFblikelihood(blike["weight"],blike["name"])
+        self.est = ZllKinematicFit() 
+
+    def doZllKinematicFit(self, event, analysis, debug=False):
+
+       jetsForKinFit = event.jetsForHiggs
+       Jet_pt_corrs = []
+       if "JEC" in analysis:
+          Jet_pt_corrs = [ (getattr(x, analysis)/getattr(x, "corr") if hasattr(x, "corr") and getattr(x, "corr")!=0 else 1.0) for x in jetsForKinFit]
+       elif "JER" in analysis:
+          Jet_pt_corrs = [ (getattr(x, analysis)/getattr(x, "corrJER") if hasattr(x, "corrJER") and getattr(x, "corrJER")!=0 else 1.0) for x in jetsForKinFit ]
+       else:
+          Jet_pt_corrs = [ 1.0 for x in jetsForKinFit ] 
+       Jet_pts = [ x.pt()*Jet_pt_corrs[jetsForKinFit.index(x)] for x in jetsForKinFit ]
+       Jet_pt_regs = [ getattr(x, "pt_reg"+analysis, -99) for x in jetsForKinFit ]
+       Jet_etas = [ x.eta() for x in jetsForKinFit ] 
+       Jet_phis = [ x.phi() for x in jetsForKinFit ] 
+       Jet_masss = [ x.mass() for x in jetsForKinFit ] 
+       Jet_hJCidxs = [ jetsForKinFit.index(x) for x in event.hJetsCSV ]
+
+       discriminate = self.est.discriminate_and_custompts(Jet_pts, Jet_pt_regs, Jet_etas, Jet_phis, Jet_masss, Jet_hJCidxs, print_discriminating_reasons=debug)
+       if not discriminate:
+          success = self.est.est_pts(Jet_pts, Jet_pt_regs, Jet_etas, Jet_phis, Jet_masss, Jet_hJCidxs, event.V.pt(), event.V.eta(), event.V.phi(), event.V.mass() )
+          self.est.mass(Jet_pts, Jet_pt_regs, Jet_etas, Jet_phis, Jet_masss, Jet_hJCidxs, event.V.pt(), event.V.eta(), event.V.phi(), event.V.mass())
+          setattr(event, "ZllKinFit"+("" if analysis=="" else "_")+analysis+"_mass", self.est.estimated_mass)
+          setattr(event, "ZllKinFit"+("" if analysis=="" else "_")+analysis+"_njet", len(jetsForKinFit))
+          setattr(event, "ZllKinFit"+("" if analysis=="" else "_")+analysis+"_status", 0 if success else 1)
+          if debug:
+             print "[ZllKinematicFit]:"
+             print "\tJet_pt_corrs = ", Jet_pt_corrs
+             print "\tJet_pts = ", Jet_pts
+             print "\tJet_etas = ", Jet_etas
+             print "\tJet_pt_regs = ", Jet_pt_regs
+             print "\tJet_hJCidxs = ", Jet_hJCidxs
+             print "\tsuccess: " , success
+             print "\tEstimated mass:", self.est.estimated_mass 
+             print "\tMeasured mass:", self.est.measured_mass, "from event.HCSV=", event.HCSV.mass()
+             print "\tMeasured mass (regression):", self.est.measured_mass_reg
 
 
     def doVBF(self,event) :
@@ -552,6 +590,12 @@ class VHbbAnalyzer( Analyzer ):
             self.doSoftActivityEWK(event)
 
         self.doQuickTkMET(event)
+
+        # kinematic fit for Zll
+        if self.cfg_ana.doZllKinematicFit and event.Vtype in [0,1]:
+           for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
+              self.doZllKinematicFit(event, analysis=analysis, debug=False)
+
 
     #    event.jee = list(self.handles['jee'].product())
 	#for j in list(jets)[0:3]:

@@ -200,6 +200,14 @@ for algo in ["CSV", "CMVAV2"]:
 									   )
 treeProducer.globalVariables += list(btag_weights.values())
 
+ZllKinFitResults = {}
+for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
+	name = "ZllKinFit"+("" if analysis=="" else "_")+analysis
+	ZllKinFitResults[name+"_mass"] =  NTupleVariable(name+"_mass", lambda ev, name=name : getattr(ev, name+"_mass", -99.), float, mcOnly=False, help="Zll kin fit mass (=mass of the HCSV jets after kinematic fit) for analysis "+analysis) 
+	ZllKinFitResults[name+"_njet"] =  NTupleVariable(name+"_njet", lambda ev, name=name : getattr(ev, name+"_njet", -99), int, mcOnly=False, help="Zll kin fit njet (=number of jets used for kinematic fit) for analysis "+analysis) 
+	ZllKinFitResults[name+"_status"] =  NTupleVariable(name+"_status", lambda ev, name=name : getattr(ev, name+"_status", -99), int, mcOnly=False, help="Zll kin fit status (=0 if success, =1 otherwise) for analysis "+analysis) 
+treeProducer.globalVariables += list(ZllKinFitResults.values())
+
 '''
 
 for syst in ["JES", "LF", "HF", "HFStats1", "HFStats2", "LFStats1", "LFStats2", "cErr1", "cErr2"]:
@@ -454,6 +462,7 @@ VHbb = cfg.Analyzer(
 #    higgsJetsPreSelectionVBF = lambda x: (( x.puJetId() > 0 and x.jetID('POG_PFID_Loose')) or abs(x.eta())>3.0 ) and x.pt() >  20,
     passall=False,
     doSoftActivityVH=True,
+    doZllKinematicFit=True,
     doSoftActivityEWK=True,
     doVBF=True,
     regressions = [
@@ -584,7 +593,6 @@ sample = cfg.MCComponent(
 #/store/mc/RunIISpring16MiniAODv2/GluGluToBulkGravitonToHHTo4B_M-550_narrow_13TeV-madgraph/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14-v2/90000/4E40D2E2-9E3A-E611-8C5B-00259081FB18.root"
 		"E8090432-8628-E611-8713-001EC9ADFDC9.root"
 #root://stormgf1.pi.infn.it:1094//store/mc/RunIISpring16MiniAODv2/TT_TuneCUETP8M1_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0_ext4-v1/00000/E8090432-8628-E611-8713-001EC9ADFDC9.root",
-		#"root://t3dcachedb.psi.ch:1094///pnfs/psi.ch/cms/trivcat/store/mc/RunIISpring16MiniAODv2/WW_TuneCUETP8M1_13TeV-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_miniAODv2_v0-v1/50000/0AF21AF1-121B-E611-B652-549F35AE4F88.root"
                 ],
     #files = ["226BB247-A565-E411-91CF-00266CFF0AF4.root"],
     name="ZHLL125", isEmbed=False,
