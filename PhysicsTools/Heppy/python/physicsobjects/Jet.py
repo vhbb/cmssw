@@ -33,13 +33,13 @@ _btagWPs = {
     "CMVAM": ("pfCombinedMVABJetTags", 0.732), # for same b-jet efficiency of CSVv2IVFM on ttbar MC, jet pt > 30
     "CMVAT": ("pfCombinedMVABJetTags", 0.813), # for same b-jet efficiency of CSVv2IVFT on ttbar MC, jet pt > 30
     "CMVAv2M": ("pfCombinedMVAV2BJetTags", 0.185), # for same b-jet efficiency of CSVv2IVFM on ttbar MC, jet pt > 30
-###https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80X
-    "CSVv2IVFL": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.460),
-    "CSVv2IVFM": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.800),
-    "CSVv2IVFT": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.935),
-    "CMVAv2L": ("pfCombinedMVAV2BJetTags", -0.715), # for same b-jet efficiency of CSVv2IVFL on ttbar MC, jet pt > 30
-    "CMVAv2M": ("pfCombinedMVAV2BJetTags", 0.185),  # for same b-jet efficiency of CSVv2IVFM on ttbar MC, jet pt > 30
-    "CMVAv2T": ("pfCombinedMVAV2BJetTags", 0.875),  # for same b-jet efficiency of CSVv2IVFT on ttbar MC, jet pt > 30
+###https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
+    "CSVv2IVFL": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.5426),
+    "CSVv2IVFM": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.8484),
+    "CSVv2IVFT": ("pfCombinedInclusiveSecondaryVertexV2BJetTags", 0.9535),
+    "CMVAv2L": ("pfCombinedMVAV2BJetTags", -0.5884), # for same b-jet efficiency of CSVv2IVFL on ttbar MC, jet pt > 30
+    "CMVAv2M": ("pfCombinedMVAV2BJetTags", 0.443),  # for same b-jet efficiency of CSVv2IVFM on ttbar MC, jet pt > 30
+    "CMVAv2T": ("pfCombinedMVAV2BJetTags", 0.9432),  # for same b-jet efficiency of CSVv2IVFT on ttbar MC, jet pt > 30
 
 }
 
@@ -120,10 +120,12 @@ class Jet(PhysicsObject):
             elif self.jetID("POG_PFID_Loose")  : return 1;
             else                               : return 0;
         
-        # jetID from here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID#Recommendations_for_13_TeV_data
-        if name == "POG_PFID_Loose":    return ((eta<3.0 and ((npr>1 and phf<0.99 and nhf<0.99) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or (eta>3.0 and (phf<0.90 and npn>10)));
-        if name == "POG_PFID_Medium":   return (npr>1 and phf<0.95 and nhf<0.95 and muf < 0.8) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0));
-        if name == "POG_PFID_Tight":    return ((eta<3.0 and ((npr>1 and phf<0.90 and nhf<0.90) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or (eta>3.0 and (phf<0.90 and npn>10)));
+        # jetID from here: https://twiki.cern.ch/twiki/bin/view/CMS/JetID13TeVRun2016
+
+        if name == "POG_PFID_Loose":    return ((eta<2.7 and ((npr>1 and phf<0.99 and nhf<0.99) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or (eta>3.0 and (phf<0.90 and npn>10)) and (eta>2.7 and eta<3.0 and (nhf<0.98 and phf>0.01 and npn>2)));
+        if name == "POG_PFID_Medium":   return ((npr>1 and phf<0.95 and nhf<0.95 and muf < 0.8) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)) and (eta>2.7 and eta<3.0 and (nhf<0.98 and phf>0.01 and npn>2))); 
+        #medium is not supported
+        if name == "POG_PFID_Tight":    return ((eta<2.7 and ((npr>1 and phf<0.90 and nhf<0.90) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or (eta>3.0 and (phf<0.90 and npn>10)) and (eta>2.7 and eta<3.0 and (nhf<0.98 and phf>0.01 and npn>2)));
         if name == "VBFHBB_PFID_Loose":  return (npr>1 and phf<0.99 and nhf<0.99);
         if name == "VBFHBB_PFID_Medium": return (npr>1 and phf<0.99 and nhf<0.99) and ((eta<=2.4 and nhf<0.9 and phf<0.9 and elf<0.99 and muf<0.99 and chf>0 and chm>0) or eta>2.4);
         if name == "VBFHBB_PFID_Tight":  return (npr>1 and phf<0.99 and nhf<0.99) and ((eta<=2.4 and nhf<0.9 and phf<0.9 and elf<0.70 and muf<0.70 and chf>0 and chm>0) or eta>2.4);
