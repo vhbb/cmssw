@@ -129,7 +129,7 @@ btagana=cfg.Analyzer(
     class_object=AdditionalBTag,
 )
 sequence.insert(sequence.index(VHbb),btagana)
-VHbb.btagDiscriminator=lambda x: x.btag("newpfCombinedInclusiveSecondaryVertexV2BJetTags")
+#VHbb.btagDiscriminator=lambda x: x.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags")
 
 # Add Information on generator level hadronic tau decays
 if sample.isMC:   
@@ -156,7 +156,7 @@ preprocessor = CmsswPreprocessor("combined_cmssw.py", options = {"isMC":sample.i
 config.preprocessor=preprocessor
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 0, nEvents = 2000)
+    looper = Looper( 'Loop', config, nPrint = 0, nEvents = 20)
     import time
     import cProfile
     p = cProfile.Profile(time.clock)
