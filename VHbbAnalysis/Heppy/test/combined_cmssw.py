@@ -689,7 +689,7 @@ def initialize(**kwargs):
       process,
       jetSource = cms.InputTag('slimmedJets','','PAT') if isMC else  cms.InputTag('slimmedJets','','RECO'),
       jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None'),
-      btagDiscriminators = ['deepFlavourCMVAJetTags:probudsg','deepFlavourCMVAJetTags:probb', 'deepFlavourCMVAJetTags:probc', 'deepFlavourCMVAJetTags:probbb', 'deepFlavourCMVAJetTags:probcc','deepFlavourJetTags:probudsg', 'deepFlavourJetTags:probb', 'deepFlavourJetTags:probc', 'deepFlavourJetTags:probbb', 'deepFlavourJetTags:probcc'],
+      btagDiscriminators = ['deepFlavourCMVAJetTags:probudsg','deepFlavourCMVAJetTags:probb', 'deepFlavourCMVAJetTags:probc', 'deepFlavourCMVAJetTags:probbb', 'deepFlavourCMVAJetTags:probcc','deepFlavourJetTags:probudsg', 'deepFlavourJetTags:probb', 'deepFlavourJetTags:probc', 'deepFlavourJetTags:probbb', 'deepFlavourJetTags:probcc','softPFElectronBJetTags','softPFMuonBJetTags'],
 #     runIVF=True,
 #     btagPrefix = 'new' # optional, in case interested in accessing both the old and new discriminator values
     )
