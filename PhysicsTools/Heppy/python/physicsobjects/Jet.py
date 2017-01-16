@@ -122,10 +122,19 @@ class Jet(PhysicsObject):
         
         # jetID from here: https://twiki.cern.ch/twiki/bin/view/CMS/JetID13TeVRun2016
 
-        if name == "POG_PFID_Loose":    return ((eta<2.7 and ((npr>1 and phf<0.99 and nhf<0.99) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or (eta>3.0 and (phf<0.90 and npn>10)) and (eta>2.7 and eta<3.0 and (nhf<0.98 and phf>0.01 and npn>2)));
-        if name == "POG_PFID_Medium":   return ((npr>1 and phf<0.95 and nhf<0.95 and muf < 0.8) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)) and (eta>2.7 and eta<3.0 and (nhf<0.98 and phf>0.01 and npn>2))); 
+        if name == "POG_PFID_Loose":    return ((eta<2.7 and ((npr>1 and phf<0.99 and nhf<0.99) 
+						and (eta>2.4 or (elf<0.99 and chf>0 and chm>0))))
+						and (eta>2.7 and eta<3.0 and (nhf<0.98 and phf>0.01 and npn>2))
+						or (eta>3.0 and (phf<0.90 and npn>10)));
+ 	if name == "POG_PFID_Medium":   return ((eta<2.7 and ((npr>1 and phf<0.99 and nhf<0.99) 
+						and (eta>2.4 or (elf<0.99 and chf>0 and chm>0))))
+						and (eta>2.7 and eta<3.0 and (nhf<0.98 and phf>0.01 and npn>2))
+						or (eta>3.0 and (phf<0.90 and npn>10)));
         #medium is not supported
-        if name == "POG_PFID_Tight":    return ((eta<2.7 and ((npr>1 and phf<0.90 and nhf<0.90) and (eta>2.4 or (elf<0.99 and chf>0 and chm>0)))) or (eta>3.0 and (phf<0.90 and npn>10)) and (eta>2.7 and eta<3.0 and (nhf<0.98 and phf>0.01 and npn>2)));
+        if name == "POG_PFID_Tight":    return ((eta<2.7 and ((npr>1 and phf<0.90 and nhf<0.90) 
+						and (eta>2.4 or (elf<0.99 and chf>0 and chm>0))))
+						and (eta>2.7 and eta<3.0 and (nhf<0.98 and phf>0.01 and npn>2))
+						or (eta>3.0 and (phf<0.90 and npn>10)));
         if name == "VBFHBB_PFID_Loose":  return (npr>1 and phf<0.99 and nhf<0.99);
         if name == "VBFHBB_PFID_Medium": return (npr>1 and phf<0.99 and nhf<0.99) and ((eta<=2.4 and nhf<0.9 and phf<0.9 and elf<0.99 and muf<0.99 and chf>0 and chm>0) or eta>2.4);
         if name == "VBFHBB_PFID_Tight":  return (npr>1 and phf<0.99 and nhf<0.99) and ((eta<=2.4 and nhf<0.9 and phf<0.9 and elf<0.70 and muf<0.70 and chf>0 and chm>0) or eta>2.4);
