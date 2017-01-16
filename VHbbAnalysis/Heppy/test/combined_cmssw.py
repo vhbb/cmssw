@@ -321,7 +321,10 @@ def initialize(**kwargs):
 
     process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
     from Configuration.AlCa.GlobalTag import GlobalTag
-    process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc')
+    if isMC:
+        process.GlobalTag = GlobalTag(process.GlobalTag, '80X_mcRun2_asymptotic_2016_TrancheIV_v6')
+    else:
+        process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016SeptRepro_v6')
 
     for fatjet_name in ["slimmedJetsAK8", "ca15PFJetsCHS"]:
 

@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_D25_004'
-config.General.workArea = 'crab_projects_D25_004'
+config.General.requestName = 'VHBB_D25_005'
+config.General.workArea = 'crab_projects_D25_005'
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -37,7 +37,7 @@ config.JobType.inputFiles = ['heppy_config.py',
                               #"../VBF-spring15.weights.xml",
                               #"../ttbar-fall15_TargetGenOverPt_GenPtCut0.weights.xml",
 			      #'../ttbar-spring16-80X.weights.xml',
-			      '../ttbar-spring16-500k-13d-300t.weights.xml',	
+			      '../ttbar-pumoriond17--500k-13d-300t.weights.xml',	
 			      '../TMVA_blikelihood_vbf_cmssw76_h21trained.weights.xml'
 ]
 #config.JobType.outputFiles = ['tree.root']
