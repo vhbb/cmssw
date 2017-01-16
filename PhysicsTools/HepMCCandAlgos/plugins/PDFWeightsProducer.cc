@@ -85,9 +85,9 @@ void PDFWeightsProducer::beginJob(){
 
 void PDFWeightsProducer::beginRunProduce(edm::Run & iRun, edm::EventSetup const& es) {
 
-  cout << "TEST 2: "<< endl;
   // Access LHERunInfoProduct (i.e. LHE header) to retrieve the list of weights in the sample
-  if( iRun.getByLabel( edm::InputTag("externalLHEProducer"), run ) == false ){
+  bool product_exists = iRun.getByLabel( edm::InputTag("externalLHEProducer"), run );
+  if( product_exists ){
     TString mc2hessianCSV_str = mc2hessianCSV.fullPath();
 
     typedef std::vector<LHERunInfoProduct::Header>::const_iterator headers_const_iterator;
@@ -167,8 +167,8 @@ void PDFWeightsProducer::produce( edm::Event & evt, const edm::EventSetup & ){
   auto_ptr<std::vector<float>> pdfeigweights_ptr( new std::vector<float>() );
   // auto_ptr<unsigned int > pdfWeightLHAnumber_ptr( new unsigned int() );
   Handle<LHEEventProduct> lheInfo;
-  cout << "TEST 1" << endl;
-  if( evt.getByLabel( edm::InputTag("externalLHEProducer"), lheInfo ) ){
+  bool product_exists = evt.getByLabel(edm::InputTag("externalLHEProducer"), lheInfo );
+  if( product_exists ){
     
     // cout << "lheInfo->weights().size()= " << lheInfo->weights().size() << endl;
     // cout << "PDFweightsLHEorder_.size()= " << PDFweightsLHEorder_.size() << endl;
