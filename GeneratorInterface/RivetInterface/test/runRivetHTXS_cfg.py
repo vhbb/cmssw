@@ -51,8 +51,6 @@ process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 
 process.rivetProducerHTXS = cms.EDProducer('HTXSRivetProducer',
   HepMCCollection = cms.InputTag('myGenerator','unsmeared'),
-  GenEventInfo = cms.InputTag('generator'),
-  LHEEventInfo = cms.InputTag('externalLHEProducer'),
   LHERunInfo = cms.InputTag('externalLHEProducer'),
   #ProductionMode = cms.string('GGF'),
   ProductionMode = cms.string('AUTO'),
