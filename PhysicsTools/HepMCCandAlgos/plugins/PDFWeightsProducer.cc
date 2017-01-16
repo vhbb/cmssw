@@ -31,7 +31,7 @@ using namespace std;
 using namespace lhef;
 
 class PDFWeightsProducer : public edm::one::EDProducer<edm::BeginRunProducer,
-                                                        edm::EndRunProducer> {
+edm::EndRunProducer> {
 public:
   
   explicit PDFWeightsProducer( const ParameterSet & cfg ) :
@@ -85,80 +85,81 @@ void PDFWeightsProducer::beginJob(){
 
 void PDFWeightsProducer::beginRunProduce(edm::Run & iRun, edm::EventSetup const& es) {
 
+  cout << "TEST 2: "<< endl;
   // Access LHERunInfoProduct (i.e. LHE header) to retrieve the list of weights in the sample
-  iRun.getByLabel( edm::InputTag("externalLHEProducer"), run );
-  TString mc2hessianCSV_str = mc2hessianCSV.fullPath();
+  if( iRun.getByLabel( edm::InputTag("externalLHEProducer"), run ) == false ){
+    TString mc2hessianCSV_str = mc2hessianCSV.fullPath();
 
-  typedef std::vector<LHERunInfoProduct::Header>::const_iterator headers_const_iterator;
-  LHERunInfoProduct myLHERunInfoProduct = *(run.product());
-  for (headers_const_iterator iter=myLHERunInfoProduct.headers_begin(); iter!=myLHERunInfoProduct.headers_end(); iter++){
-    std::vector<std::string> lines = iter->lines();
-    for (unsigned int iLine = 0; iLine<lines.size(); iLine++) {
-      TString line_tstr =lines.at(iLine).c_str();
-      // cout<<"before weight id= " << iLine<< " "<<line_tstr.ReplaceAll("\n","").Data()<<endl;
-      if (line_tstr.Contains("<weight id=")) {
-        // cout<<iLine<< " "<<line_tstr.ReplaceAll("\n","").Data()<<endl;
-        line_tstr = line_tstr.ReplaceAll("\n","").ReplaceAll("<weight id=\"","").ReplaceAll("</weight>","");
-        TObjArray *tx = line_tstr.Tokenize("> ");
-        line_tstr = ((TObjString *)(tx->At(tx->GetEntries()-1)))->String();
-        unsigned int pdfnumber = line_tstr.ReplaceAll("PDF set = ","").ReplaceAll("pdfset=","").Atoi();
-        PDFweightsLHEorder_.push_back(pdfnumber);
-        if(pdfnumber%100==1){
-          unsigned int LHEset = pdfnumber-1;
-          unsigned int LHEposition = PDFweightsLHEorder_.size()-1;
-          cout << LHEposition << " WEIGHT - PDF SET CANDIDATE FOR REWEIGHTING IN THIS SAMPLE= " << (LHEset) << endl;
-          PDFweightsLHEsets_.push_back(LHEset);
-          PDFweightsLHEoffsetBuffer_.push_back(LHEposition);
-          
-          // Unless details are specified in the cfg, check whether the sample actually contains 
-          // the weights of the appropriate PDF set to be converted to Hessian.
-          // A check is performed on the NLO NNPDF samples to catch the _pdfas PDF set in case is used
-          if(pdfWeightLHAnumber_<1 || nPdfWeights_<1 || nPdfEigWeights_<1){
+    typedef std::vector<LHERunInfoProduct::Header>::const_iterator headers_const_iterator;
+    LHERunInfoProduct myLHERunInfoProduct = *(run.product());
+    for (headers_const_iterator iter=myLHERunInfoProduct.headers_begin(); iter!=myLHERunInfoProduct.headers_end(); iter++){
+      std::vector<std::string> lines = iter->lines();
+      for (unsigned int iLine = 0; iLine<lines.size(); iLine++) {
+        TString line_tstr =lines.at(iLine).c_str();
+        // cout<<"before weight id= " << iLine<< " "<<line_tstr.ReplaceAll("\n","").Data()<<endl;
+        if (line_tstr.Contains("<weight id=")) {
+          // cout<<iLine<< " "<<line_tstr.ReplaceAll("\n","").Data()<<endl;
+          line_tstr = line_tstr.ReplaceAll("\n","").ReplaceAll("<weight id=\"","").ReplaceAll("</weight>","");
+          TObjArray *tx = line_tstr.Tokenize("> ");
+          line_tstr = ((TObjString *)(tx->At(tx->GetEntries()-1)))->String();
+          unsigned int pdfnumber = line_tstr.ReplaceAll("PDF set = ","").ReplaceAll("pdfset=","").Atoi();
+          PDFweightsLHEorder_.push_back(pdfnumber);
+          if(pdfnumber%100==1){
+            unsigned int LHEset = pdfnumber-1;
+            unsigned int LHEposition = PDFweightsLHEorder_.size()-1;
+            cout << LHEposition << " WEIGHT - PDF SET CANDIDATE FOR REWEIGHTING IN THIS SAMPLE= " << (LHEset) << endl;
+            PDFweightsLHEsets_.push_back(LHEset);
+            PDFweightsLHEoffsetBuffer_.push_back(LHEposition);
             
-            if(
-                // 260000	NNPDF30_nlo_as_0118	      101
-                // 292200	NNPDF30_nlo_nf_5_pdfas	  103	
-                (mc2hessianCSV_str.Contains("NNPDF30_nlo_as_0118_hessian_60.csv") && (LHEset == 260000 || LHEset == 292200))
-                // 260400	NNPDF30_nlo_as_0118_nf_4	101	
-                // 292000	NNPDF30_nlo_nf_4_pdfas	  103	
-                || (mc2hessianCSV_str.Contains("NNPDF30_nlo_as_0118_nf_4_hessian_60.csv") && (LHEset == 260400 || LHEset == 292000))
-                // 263400	NNPDF30_lo_as_0130_nf_4	  101	
-                || (mc2hessianCSV_str.Contains("NNPDF30_lo_as_0130_nf_4_hessian_60.csv") && (LHEset == 263400))
-                // 263000	NNPDF30_lo_as_0130	      101	
-                || (mc2hessianCSV_str.Contains("NNPDF30_lo_as_0130_hessian_60.csv") && (LHEset == 263000))
-              ){
-              cout << "Either pdfWeightLHAnumber_<1 or nPdfWeights_<1 or nPdfEigWeights_<1: using hardcoded settings for" << endl;
-              cout << "mc2hessianCSV " << mc2hessianCSV_str << endl;
-              pdfWeightLHAnumber_  = LHEset;
+            // Unless details are specified in the cfg, check whether the sample actually contains 
+            // the weights of the appropriate PDF set to be converted to Hessian.
+            // A check is performed on the NLO NNPDF samples to catch the _pdfas PDF set in case is used
+            if(pdfWeightLHAnumber_<1 || nPdfWeights_<1 || nPdfEigWeights_<1){
+              
+              if(
+                  // 260000	NNPDF30_nlo_as_0118	      101
+                  // 292200	NNPDF30_nlo_nf_5_pdfas	  103	
+                  (mc2hessianCSV_str.Contains("NNPDF30_nlo_as_0118_hessian_60.csv") && (LHEset == 260000 || LHEset == 292200))
+                  // 260400	NNPDF30_nlo_as_0118_nf_4	101	
+                  // 292000	NNPDF30_nlo_nf_4_pdfas	  103	
+                  || (mc2hessianCSV_str.Contains("NNPDF30_nlo_as_0118_nf_4_hessian_60.csv") && (LHEset == 260400 || LHEset == 292000))
+                  // 263400	NNPDF30_lo_as_0130_nf_4	  101	
+                  || (mc2hessianCSV_str.Contains("NNPDF30_lo_as_0130_nf_4_hessian_60.csv") && (LHEset == 263400))
+                  // 263000	NNPDF30_lo_as_0130	      101	
+                  || (mc2hessianCSV_str.Contains("NNPDF30_lo_as_0130_hessian_60.csv") && (LHEset == 263000))
+                  ){
+                cout << "Either pdfWeightLHAnumber_<1 or nPdfWeights_<1 or nPdfEigWeights_<1: using hardcoded settings for" << endl;
+                cout << "mc2hessianCSV " << mc2hessianCSV_str << endl;
+                pdfWeightLHAnumber_  = LHEset;
+                PDFweightsLHEoffset_ = LHEposition;
+                nPdfWeights_         = 100;
+                nPdfEigWeights_      = 60;
+                cout 
+                << "LHEset= " << LHEset
+                << " nPdfWeights= " << nPdfWeights_
+                << " nPdfEigWeights= " << nPdfEigWeights_
+                << endl;
+                break;
+              }
+            }else if (LHEset == pdfWeightLHAnumber_){
               PDFweightsLHEoffset_ = LHEposition;
-              nPdfWeights_         = 100;
-              nPdfEigWeights_      = 60;
-              cout 
-              << "LHEset= " << LHEset
-              << " nPdfWeights= " << nPdfWeights_
-              << " nPdfEigWeights= " << nPdfEigWeights_
-              << endl;
               break;
             }
-          }else if (LHEset == pdfWeightLHAnumber_){
-            PDFweightsLHEoffset_ = LHEposition;
-            break;
+            
           }
-          
         }
       }
     }
-  }
-  if(pdfWeightLHAnumber_<1 || nPdfWeights_<1 || nPdfEigWeights_<1){
-    cout << "NO SUITABLE SET FOUND FOR MC2HESSIAN PDF CONVERSION!" << endl;
-  }
+    if(pdfWeightLHAnumber_<1 || nPdfWeights_<1 || nPdfEigWeights_<1){
+      cout << "NO SUITABLE SET FOUND FOR MC2HESSIAN PDF CONVERSION!" << endl;
+    }
 
-  pdfweightshelper_.Init(nPdfWeights_,nPdfEigWeights_,mc2hessianCSV);
+    pdfweightshelper_.Init(nPdfWeights_,nPdfEigWeights_,mc2hessianCSV);
 
-  auto_ptr<unsigned int > p(new unsigned int() );
-  *p = pdfWeightLHAnumber_;
-  iRun.put(p, "pdfWeightLHAnumber");
-  
+    auto_ptr<unsigned int > p(new unsigned int() );
+    *p = pdfWeightLHAnumber_;
+    iRun.put(p, "pdfWeightLHAnumber");
+  }
 }
 
 void PDFWeightsProducer::produce( edm::Event & evt, const edm::EventSetup & ){
@@ -166,55 +167,57 @@ void PDFWeightsProducer::produce( edm::Event & evt, const edm::EventSetup & ){
   auto_ptr<std::vector<float>> pdfeigweights_ptr( new std::vector<float>() );
   // auto_ptr<unsigned int > pdfWeightLHAnumber_ptr( new unsigned int() );
   Handle<LHEEventProduct> lheInfo;
-  evt.getByLabel( edm::InputTag("externalLHEProducer"), lheInfo );
-  
-  // cout << "lheInfo->weights().size()= " << lheInfo->weights().size() << endl;
-  // cout << "PDFweightsLHEorder_.size()= " << PDFweightsLHEorder_.size() << endl;
-
-  double nomlheweight = lheInfo->weights()[0].wgt;
-  Handle<GenEventInfoProduct> genInfo;
-  evt.getByToken( srcTokenGen_, genInfo );
-  
-  weight_ = genInfo->weight();
-  
-  //get the original mc replica weights
-  std::vector<double> inpdfweights;
-  // for (unsigned int ipdf=0; ipdf<lheInfo->weights().size();ipdf++){
-  for (unsigned int ipdf=PDFweightsLHEoffset_; ipdf<PDFweightsLHEoffset_+nPdfWeights_;ipdf++){
+  cout << "TEST 1" << endl;
+  if( evt.getByLabel( edm::InputTag("externalLHEProducer"), lheInfo ) ){
     
-    if( PDFweightsLHEorder_[ipdf] > pdfWeightLHAnumber_
-        && PDFweightsLHEorder_[ipdf] <= pdfWeightLHAnumber_+nPdfWeights_ ){
+    // cout << "lheInfo->weights().size()= " << lheInfo->weights().size() << endl;
+    // cout << "PDFweightsLHEorder_.size()= " << PDFweightsLHEorder_.size() << endl;
 
-      //this is the raw weight to be fed to the mc2hessian convertor
-      inpdfweights.push_back(lheInfo->weights()[ipdf].wgt);
+    double nomlheweight = lheInfo->weights()[0].wgt;
+    Handle<GenEventInfoProduct> genInfo;
+    evt.getByToken( srcTokenGen_, genInfo );
+    
+    weight_ = genInfo->weight();
+    
+    //get the original mc replica weights
+    std::vector<double> inpdfweights;
+    // for (unsigned int ipdf=0; ipdf<lheInfo->weights().size();ipdf++){
+    for (unsigned int ipdf=PDFweightsLHEoffset_; ipdf<PDFweightsLHEoffset_+nPdfWeights_;ipdf++){
       
+      if( PDFweightsLHEorder_[ipdf] > pdfWeightLHAnumber_
+          && PDFweightsLHEorder_[ipdf] <= pdfWeightLHAnumber_+nPdfWeights_ ){
+
+        //this is the raw weight to be fed to the mc2hessian convertor
+        inpdfweights.push_back(lheInfo->weights()[ipdf].wgt);
+        
+      }
+      
+      // cout << "weight " << ipdf << " --> " << inpdfweights.size() 
+      // << " --- PDFmap atoi " << PDFweightsLHEorder_[ipdf]
+      // << " --- lheInfo " << lheInfo->weights()[ipdf].wgt 
+      // << endl;
+      
+      if(inpdfweights.size() == nPdfWeights_) break;
     }
     
-    // cout << "weight " << ipdf << " --> " << inpdfweights.size() 
-    // << " --- PDFmap atoi " << PDFweightsLHEorder_[ipdf]
-    // << " --- lheInfo " << lheInfo->weights()[ipdf].wgt 
-    // << endl;
+    std::vector<double> outpdfweights(nPdfEigWeights_);
+    //do the actual conversion, where the nominal lhe weight is needed as the reference point for the linearization
+    pdfweightshelper_.DoMC2Hessian(nomlheweight,inpdfweights.data(),outpdfweights.data());
     
-    if(inpdfweights.size() == nPdfWeights_) break;
-  }
-  
-  std::vector<double> outpdfweights(nPdfEigWeights_);
-  //do the actual conversion, where the nominal lhe weight is needed as the reference point for the linearization
-  pdfweightshelper_.DoMC2Hessian(nomlheweight,inpdfweights.data(),outpdfweights.data());
-  
-  for (unsigned int iwgt=0; iwgt<nPdfEigWeights_; ++iwgt){
-    double wgtval = outpdfweights[iwgt];
+    for (unsigned int iwgt=0; iwgt<nPdfEigWeights_; ++iwgt){
+      double wgtval = outpdfweights[iwgt];
+      
+      //the is the weight to be used for evaluating uncertainties with hessian weights
+      pdfeigweights_ptr->push_back(wgtval*weight_/nomlheweight);
+      // cout << "weight " << pdfeigweights_ptr->size() << " value " << (wgtval*weight_/nomlheweight) << endl;
+    }
+
+    // *pdfWeightLHAnumber_ptr = pdfWeightLHAnumber_;
     
-    //the is the weight to be used for evaluating uncertainties with hessian weights
-    pdfeigweights_ptr->push_back(wgtval*weight_/nomlheweight);
-    // cout << "weight " << pdfeigweights_ptr->size() << " value " << (wgtval*weight_/nomlheweight) << endl;
+    evt.put( pdfeigweights_ptr, "outputHessianWeights" );
+    // evt.put( pdfWeightLHAnumber_ptr, "inputPDFset" );
+
   }
-
-  // *pdfWeightLHAnumber_ptr = pdfWeightLHAnumber_;
-  
-  evt.put( pdfeigweights_ptr, "outputHessianWeights" );
-  // evt.put( pdfWeightLHAnumber_ptr, "inputPDFset" );
-
 }
 
 void PDFWeightsProducer::endRunProduce(edm::Run& run, edm::EventSetup const& es){
