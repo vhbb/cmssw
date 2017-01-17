@@ -39,8 +39,10 @@ public:
         
         _isFirstEvent = true;
         _prodMode = cfg.getParameter<string>("ProductionMode");
-        m_HiggsProdMode = HTXS::UNKNOWN;
-        
+        m_HiggsProdMode = HTXS::UNKNOWN;        
+
+        produces<int>("stage0cat").setBranchAlias("stage0cat");
+        produces<int>("stage1cat").setBranchAlias("stage1cat");
         produces<HTXS::HiggsClassification>("HiggsClassification").setBranchAlias("HiggsClassification");
 
     }
@@ -65,6 +67,8 @@ private:
     std::string _prodMode;
     HTXS::HiggsProdMode m_HiggsProdMode;
     
+    int stage0cat_;
+    int stage1cat_;
     HTXS::HiggsClassification cat_;
     
 };
@@ -159,8 +163,15 @@ void HTXSRivetProducer::produce( edm::Event & iEvent, const edm::EventSetup & ) 
     Rivet::HiggsClassification rivet_cat = _HTXS->classifyEvent(*myGenEvent,m_HiggsProdMode);
     cat_ = HTXS::Rivet2Root(rivet_cat);
 
-    unique_ptr<HTXS::HiggsClassification> cat( new HTXS::HiggsClassification( cat_ ) ); 
+    stage0cat_ = cat_.stage0_cat;
+    stage1cat_ = cat_.stage1_cat_pTjet30GeV;
 
+    unique_ptr<HTXS::HiggsClassification> cat( new HTXS::HiggsClassification( cat_ ) ); 
+    unique_ptr<int> stage0cat( new int( stage0cat_ ) );
+    unique_ptr<int> stage1cat( new int( stage1cat_ ) );
+
+    iEvent.put(std::move(stage0cat),"stage0cat");
+    iEvent.put(std::move(stage1cat),"stage1cat");
     iEvent.put(std::move(cat),"HiggsClassification");
 
 }
