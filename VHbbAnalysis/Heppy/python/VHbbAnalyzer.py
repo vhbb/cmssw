@@ -37,6 +37,8 @@ class VHbbAnalyzer( Analyzer ):
         if self.cfg_comp.isMC:
             self.handles['GenInfo'] = AutoHandle( ('generator','',''), 'GenEventInfoProduct' )
             self.handles['PDFWeightsProducer'] = AutoHandle( ('PDFWeightsProducer','outputHessianWeights','EX'), 'std::vector<float>' )
+            self.handles['HTXSRivetProducer_cat0'] = AutoHandle( ('rivetProducerHTXS','stage0cat','EX'), 'int' )
+            self.handles['HTXSRivetProducer_cat1'] = AutoHandle( ('rivetProducerHTXS','stage1cat','EX'), 'int' )    
     def addNewBTag(self,event):
         newtags =  self.handles['btag'].product()
         for i in xrange(0,len(newtags)) :
@@ -532,11 +534,15 @@ class VHbbAnalyzer( Analyzer ):
         self.readCollections( event.input )
         self.inputCounter.Fill(1)
         event.LHE_weights_pdf_eigen = []
+        HTXSRivetProducer_cat0 = []
+        HTXSRivetProducer_cat1 = []
         if self.cfg_comp.isMC:
             try:
                 event.LHE_weights_pdf_eigen = self.handles['PDFWeightsProducer'].product()
             except Exception:
                 pass
+            event.HTXSRivetProducer_cat0 = self.handles['HTXSRivetProducer_cat0'].product()
+            event.HTXSRivetProducer_cat1 = self.handles['HTXSRivetProducer_cat1'].product()            
             genWeight = self.handles['GenInfo'].product().weight()
             self.inputCounterWeighted.Fill(1,copysign(1.0,genWeight)*event.puWeight)
             self.inputCounterFullWeighted.Fill(1,genWeight*event.puWeight)
