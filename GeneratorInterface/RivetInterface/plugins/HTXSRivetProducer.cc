@@ -98,12 +98,14 @@ void HTXSRivetProducer::produce( edm::Event & iEvent, const edm::EventSetup & ) 
             
             HepMC::GenVertex *HSvtx = myGenEvent->signal_process_vertex();
             
-            for (auto ptcl:particles(HSvtx,HepMC::children)) {
-                if (ptcl->pdg_id() == 24 || ptcl->pdg_id() == -24) ++nWs;
-                if (ptcl->pdg_id() == 23) ++nZs;
-                if (abs(ptcl->pdg_id()) == 6) ++nTs;
-                if (abs(ptcl->pdg_id()) == 5) ++nBs;
-                if (ptcl->pdg_id() == 25) ++nHs;
+            if(HSvtx){
+              for (auto ptcl:particles(HSvtx,HepMC::children)) {
+                  if (ptcl->pdg_id() == 24 || ptcl->pdg_id() == -24) ++nWs;
+                  if (ptcl->pdg_id() == 23) ++nZs;
+                  if (abs(ptcl->pdg_id()) == 6) ++nTs;
+                  if (abs(ptcl->pdg_id()) == 5) ++nBs;
+                  if (ptcl->pdg_id() == 25) ++nHs;
+              }
             }
                         
             if (nZs==1 && nHs==1 && (nWs+nTs)==0) {
@@ -146,7 +148,7 @@ void HTXSRivetProducer::produce( edm::Event & iEvent, const edm::EventSetup & ) 
 
         // at this point the production mode must be known
         if (m_HiggsProdMode == HTXS::UNKNOWN) {
-            throw cms::Exception("HTXSRivetProducer") << "HiggsProduction mode is UNKNOWN";
+            cout << "HTXSRivetProducer WARNING: HiggsProduction mode is UNKNOWN" << endl;
         }            
 
         // initialize rivet analysis
