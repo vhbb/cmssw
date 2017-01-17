@@ -165,10 +165,6 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("pt_puppi",lambda x : puppiWeightedPt(x).pt(), help="pt of jet obtained reweighting the constituents with puppi weights"),
  ])
 
-jetType.removeVariable("btagCSV")
-jetTypeVHbb.addVariables([NTupleVariable("btagCSV", lambda x : x.bDiscriminator("newpfCombinedInclusiveSecondaryVertexV2BJetTags"), help="pfCombinedInclusiveSVV2 with btv HIP mitigation"),
-                          NTupleVariable("btagNoHipMitigation",lambda x : x.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"), help="pfCombinedInclusiveSVV2 without btv HIP mitigation")])
-
 
 # "" is the nominal rgression, the other refer to JEC/JER up/down
 for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
