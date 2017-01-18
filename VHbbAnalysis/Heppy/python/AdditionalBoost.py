@@ -659,7 +659,8 @@ class AdditionalBoost( Analyzer ):
         GT        = cfg_ana.GT if hasattr(cfg_ana,'GT')   else "Summer15_25nsV6_DATA"
         jecPath   = cfg_ana.jecPath if hasattr(cfg_ana,'jecPath') else "."
         isMC      = cfg_ana.isMC if hasattr(cfg_ana,'isMC') else False
-
+        facJEC    = cfg_ana.facJEC if hasattr(cfg_ana,'facJEC') else ["Total"]
+        
         self.skip_ca15 = skip_ca15
 
         # Prepare re-calibrator
@@ -694,38 +695,7 @@ class AdditionalBoost( Analyzer ):
                                                   doResidual, 
                                                   jecPath,
                                                   skipLevel1=False,
-                                                  factorizedJetCorrections  = ["AbsoluteFlavMap",
-                                                                               "AbsoluteMPFBias",
-                                                                               "AbsoluteScale",
-                                                                               "AbsoluteStat",
-                                                                               "FlavorQCD",
-                                                                               "Fragmentation",
-                                                                               "PileUpDataMC",
-                                                                               "PileUpEnvelope",
-                                                                               "PileUpMuZero",
-                                                                               "PileUpPtBB",
-                                                                               "PileUpPtEC1",
-                                                                               "PileUpPtEC2",
-                                                                               "PileUpPtHF",
-                                                                               "PileUpPtRef",
-                                                                               "RelativeFSR",
-                                                                               "RelativeStatFSR",
-                                                                               "RelativeJEREC1",
-                                                                               "RelativeJEREC2",
-                                                                               "RelativeJERHF",
-                                                                               "RelativePtBB",
-                                                                               "RelativePtEC1",
-                                                                               "RelativePtEC2",
-                                                                               "RelativePtHF",
-                                                                               "RelativeStatEC",
-                                                                               #"RelativeStatEC2", #Does not exist in Spring16
-                                                                               "RelativeStatHF",
-                                                                               "SinglePionECAL",
-                                                                               "SinglePionHCAL",
-                                                                               "TimeEta",
-                                                                               "TimePt",
-                                                                               "Total"
-                                                                           ])
+                                                  factorizedJetCorrections  = facJEC)
 
 
 
