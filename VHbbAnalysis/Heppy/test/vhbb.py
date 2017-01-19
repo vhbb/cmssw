@@ -10,7 +10,7 @@ import PhysicsTools.HeppyCore.framework.config as cfg
 from VHbbAnalysis.Heppy.vhbbobj import *
 from PhysicsTools.HeppyCore.utils.deltar import deltaPhi
 from PhysicsTools.Heppy.analyzers.core.AutoFillTreeProducer  import * 
-
+from VHbbAnalysis.Heppy.btagSF import btagSFhandle, get_event_SF
 
 import logging
 logging.basicConfig(level=logging.ERROR)
