@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_HEPPY_C25'
-config.General.workArea = 'crab_projects_C25'
+config.General.requestName = 'VHBB_HEPPY_E25'
+config.General.workArea = 'crab_projects_E25'
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -14,7 +14,7 @@ import os
 os.system("tar czf python.tar.gz --directory $CMSSW_BASE python `find $CMSSW_BASE/src -name python | perl -pe s#$CMSSW_BASE/## `")
 
 #os.system("tar czf python.tar.gz --dereference --directory $CMSSW_BASE python")
-config.JobType.maxMemoryMB = 3000
+config.JobType.maxMemoryMB = 2500
 config.JobType.inputFiles = ['heppy_config.py',
                              'heppy_crab_script.py',
                              'python.tar.gz',
@@ -51,9 +51,9 @@ config.Data.splitting = 'LumiBased'
 #config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 5
 config.Data.totalUnits = 20
-config.Data.outLFNDirBase = '/store/user/cvernier/VHBBHeppyC25/'
+config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyE25/'
 config.Data.publication = True
-config.Data.outputDatasetTag = 'VHBB_HEPPY_C25'
+config.Data.outputDatasetTag = 'VHBB_HEPPY_E25'
 #only for data
 #config.Data.lumiMask = 'json.txt'
 

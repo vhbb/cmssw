@@ -13,7 +13,7 @@ from PhysicsTools.Heppy.analyzers.core.AutoFillTreeProducer  import *
 
 
 import logging
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.WARNING)
 
 import os
 
