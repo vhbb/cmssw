@@ -734,6 +734,21 @@ def initialize(**kwargs):
     process.slimmedJets = process.slimmedJets=process.updatedPatJetsTransientCorrected.clone()
     process.OUT.outputCommands.append("keep *_slimmedJets_*_EX")
 
+    #Muon rereco issue
+    process.badGlobalMuonTagger = cms.EDFilter("BadGlobalMuonTagger",
+        muons = cms.InputTag("slimmedMuons"),
+        vtx   = cms.InputTag("offlineSlimmedPrimaryVertices"),
+        muonPtCut = cms.double(20),
+        selectClones = cms.bool(False),
+      )
+    process.cloneGlobalMuonTagger = process.badGlobalMuonTagger.clone(
+        selectClones = True
+      )
+
+    process.noBadGlobalMuons = cms.Path(~process.cloneGlobalMuonTagger + ~process.badGlobalMuonTagger)
+    process.OUT.outputCommands.append("keep *_TriggerResults_*_EX")
+
+
     if False :
     # As tracks are not stored in miniAOD, and b-tag fwk for CMSSW < 72X does not accept candidates
       process.load('RecoBTag.Configuration.RecoBTag_cff')
@@ -761,9 +776,6 @@ def initialize(**kwargs):
       process.OUT.outputCommands.append("keep *_pfCombinedMVAV2BJetTags_*_EX")
 
 
-    ##processDumpFile = open('combined_cmssw.dump', 'w')
-    ##print >> processDumpFile, process.dumpPython()
-    
 
     return process
 

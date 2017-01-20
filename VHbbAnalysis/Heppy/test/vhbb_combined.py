@@ -10,6 +10,17 @@ from VHbbAnalysis.Heppy.AdditionalBTag import AdditionalBTag
 from VHbbAnalysis.Heppy.AdditionalBoost import AdditionalBoost
 from VHbbAnalysis.Heppy.GenHFHadronMatcher import GenHFHadronMatcher
 
+#Add Rereco muon filter
+MuonBitAna = cfg.Analyzer(
+    verbose = False,
+    class_object = TriggerBitAnalyzer,
+    triggerBits =     {"MUON" : [
+        "noBadGlobalMuons",
+    ]},
+   processName = 'EX'
+   )
+sequence.insert(sequence.index(TrigAna),MuonBitAna)
+
 
 # Add Boosted Information
 boostana=cfg.Analyzer(
