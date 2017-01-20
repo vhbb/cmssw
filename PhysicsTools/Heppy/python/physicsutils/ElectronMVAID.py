@@ -13,6 +13,7 @@ class ElectronMVAID:
         if type == "TrigCSA14":     self.etype = self.estimator.kTrigCSA14;
         if type == "NonTrigCSA14":  self.etype = self.estimator.kNonTrigCSA14;
         if type == "NonTrigPhys14":  self.etype = self.estimator.kNonTrigPhys14;
+        if type == "GenSpring16":  self.etype = "GenSprint16";
         if self.etype == -1: raise RuntimeError("Unknown type %s" % type)
         self._init = False
     def __call__(self,ele,vtx,rho,full5x5=False,debug=False):
@@ -20,6 +21,12 @@ class ElectronMVAID:
             self.estimator.initialize(self.name,self.etype,True,self.sxmls)
             self._init = True
         return self.estimator.mvaValue(ele,vtx,rho,full5x5,debug)
+
+ElectronMVAID_GeneralPurpose_Spring16 = ElectronMVAID("BDT", "GenSpring16", 
+        "RecoEgamma/ElectronIdentification/data/Spring16_GeneralPurpose_V1/electronID_mva_Spring16_GeneralPurpose_V1_EB1_10.weights.xml",
+        "RecoEgamma/ElectronIdentification/data/Spring16_GeneralPurpose_V1/electronID_mva_Spring16_GeneralPurpose_V1_EB2_10.weights.xml",
+        "RecoEgamma/ElectronIdentification/data/Spring16_GeneralPurpose_V1/electronID_mva_Spring16_GeneralPurpose_V1_EE_10.weights.xml"
+)
 
 ElectronMVAID_Trig = ElectronMVAID("BDT", "Trig", 
         "EgammaAnalysis/ElectronTools/data/Electrons_BDTG_TrigV0_Cat1.weights.xml.gz",
@@ -78,6 +85,7 @@ ElectronMVAID_NonTrigPhys14 = ElectronMVAID("BDT", "NonTrigPhys14",
 )
 
 ElectronMVAID_ByName = {
+    'GenSpring16':ElectronMVAID_GeneralPurpose_Spring16,
     'Trig':ElectronMVAID_Trig,
     'NonTrig':ElectronMVAID_NonTrig,
     'TrigNoIP':ElectronMVAID_TrigNoIP,
