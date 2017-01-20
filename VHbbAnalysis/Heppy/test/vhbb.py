@@ -438,9 +438,9 @@ trigemu = cfg.Analyzer(
     verbose = False,
     class_object = TriggerEmulationAnalyzer,
     calibrationFile="triggerEmulation.root",
-    slEleSelection = lambda x : x.pt() > 25 and getattr(x,"mvaIdSpring16GeneralPurposePOG80",False) and ele_mvaEleID_Trig_preselection(x),
+    slEleSelection = lambda x : x.pt() > 25 and getattr(x,"mvaIdSpring16GeneralPurposePOG90",False) and ele_mvaEleID_Trig_preselection(x),
     slMuSelection = lambda x : x.pt() > 25 and x.muonID("POG_ID_Tight") and mu_pfRelIso04(x) < 0.15,
-    dlEleSelection = lambda x : x.pt() > 15 and getattr(x,"mvaIdSpring16GeneralPurposePOG90",False) and ele_mvaEleID_Trig_preselection(x),
+    dlEleSelection = lambda x : x.pt() > 15 and getattr(x,"mvaIdSpring16GeneralPurposePOG80",False) and ele_mvaEleID_Trig_preselection(x),
     dlMuSelection = lambda x : x.pt() > 15 and x.muonID("POG_ID_Loose") and mu_pfRelIso04(x) < 0.25,
 )
 
