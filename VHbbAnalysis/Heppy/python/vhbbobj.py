@@ -479,7 +479,7 @@ httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variabl
     NTupleVariable("sjW1masscal", lambda x : x.sjW1masscal, help = "Leading W Subjet mass (calibrated)"),
     NTupleVariable("sjW1mass", lambda x : x.sjW1mass, help = "Leading W Subjet mass"),
     NTupleVariable("sjW1btag", lambda x : x.sjW1btag, help = "Leading W Subjet btag"),
-    NTupleVariable("sjW1corr", lambda x : x.sjW1.corr if hasattr(x, "corr") else -1. ),
+    NTupleVariable("sjW1corr", lambda x : x.sjW1.corr if hasattr(x.sjW1, "corr") else -1. ),
     # Second W Subjet (pt)
     NTupleVariable("sjW2ptcal", lambda x : x.sjW2ptcal,help = "Second Subjet pT (calibrated)"),
     NTupleVariable("sjW2pt",   lambda x : x.sjW2pt,   help = "Second Subjet pT"),
@@ -488,7 +488,7 @@ httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variabl
     NTupleVariable("sjW2masscal", lambda x : x.sjW2masscal, help = "Second Subjet mass (calibrated)"),
     NTupleVariable("sjW2mass", lambda x : x.sjW2mass, help = "Second Subjet mass"),
     NTupleVariable("sjW2btag", lambda x : x.sjW2btag, help = "Second Subjet btag"),
-    NTupleVariable("sjW2corr", lambda x : x.sjW2.corr if hasattr(x, "corr") else -1.),
+    NTupleVariable("sjW2corr", lambda x : x.sjW2.corr if hasattr(x.sjW2, "corr") else -1.),
     # Non-W Subjet
     NTupleVariable("sjNonWptcal",lambda x : x.sjNonWptcal,help = "Non-W Subjet pT (calibrated)"),
     NTupleVariable("sjNonWpt",   lambda x : x.sjNonWpt,   help = "Non-W Subjet pT"),
@@ -497,7 +497,7 @@ httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variabl
     NTupleVariable("sjNonWmasscal", lambda x : x.sjNonWmasscal, help = "Non-W Subjet mass (calibrated)"),
     NTupleVariable("sjNonWmass", lambda x : x.sjNonWmass, help = "Non-W Subjet mass"),
     NTupleVariable("sjNonWbtag", lambda x : x.sjNonWbtag, help = "Non-W Subjet btag"),
-    NTupleVariable("sjNonWcorr", lambda x : x.sjNonW.corr if hasattr(x, "corr") else -1.),
+    NTupleVariable("sjNonWcorr", lambda x : x.sjNonW.corr if hasattr(x.sjNonW, "corr") else -1.),
     ])
    
 
