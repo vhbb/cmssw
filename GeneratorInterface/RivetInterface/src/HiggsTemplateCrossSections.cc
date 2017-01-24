@@ -165,14 +165,12 @@ namespace Rivet {
       if ( prodMode==HTXS::TTH || prodMode==HTXS::TH ){
 	// loop over particles produced in hard-scatter vertex
       	for ( auto ptcl : particles(HSvtx,HepMC::children) ) {
-            MSG_INFO("HSvtx id: "<<ptcl->pdg_id());
       	  if ( !PID::isTop(ptcl->pdg_id()) ) continue;
 	  ++nTop;
 	  Particle top = getLastInstance(Particle(ptcl));
 	  if ( top.genParticle()->end_vertex() ) 
           for (auto child:top.children()) {
               if ( PID::isW(child.pdgId()) ) Ws += child;
-            MSG_INFO("Topvtx id: "<<child.pdgId());
           }
         }
       }
