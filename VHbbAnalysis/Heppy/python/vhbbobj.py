@@ -165,10 +165,6 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("pt_puppi",lambda x : puppiWeightedPt(x).pt(), help="pt of jet obtained reweighting the constituents with puppi weights"),
  ])
 
-jetType.removeVariable("btagCSV")
-jetTypeVHbb.addVariables([NTupleVariable("btagCSV", lambda x : x.bDiscriminator("newpfCombinedInclusiveSecondaryVertexV2BJetTags"), help="pfCombinedInclusiveSVV2 with btv HIP mitigation"),
-                          NTupleVariable("btagNoHipMitigation",lambda x : x.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"), help="pfCombinedInclusiveSVV2 without btv HIP mitigation")])
-
 
 # "" is the nominal rgression, the other refer to JEC/JER up/down
 for analysis in ["","corrJECUp", "corrJECDown", "corrJERUp", "corrJERDown"]:
@@ -340,7 +336,7 @@ ak8FatjetType = NTupleObjectType("ak8fatjet",  baseObjectTypes = [ fourVectorTyp
     NTupleVariable("JEC_L1L2L3Unc",    lambda x : x.JEC_L1L2L3Unc,    help="Unc L1+L2+L3 correction factor for ungroomed pt"),
 
     NTupleVariable("bbtag",  lambda x : x.bbtag, help="Hbb b-tag score"),
-    NTupleVariable("id_Tight",  lambda x : (x.numberOfDaughters()>1 and x.neutralEmEnergyFraction() <0.90 and x.neutralHadronEnergyFraction()<0.90 and x.muonEnergyFraction()  < 0.8) and (abs(x.eta)>2.4 or (x.chargedEmEnergyFraction()<0.90 and x.chargedHadronEnergyFraction()>0 and x.chargedMultiplicity()>0)) , help="POG Tight jet ID lep veto"),
+    NTupleVariable("id_Tight",  lambda x : (x.numberOfDaughters()>1 and x.neutralEmEnergyFraction() <0.90 and x.neutralHadronEnergyFraction()<0.90 and x.muonEnergyFraction()  < 0.8) and (abs(x.eta())>2.4 or (x.chargedEmEnergyFraction()<0.90 and x.chargedHadronEnergyFraction()>0 and x.chargedMultiplicity()>0)) , help="POG Tight jet ID lep veto"),
   # ID variables
     NTupleVariable("numberOfDaughters",  lambda x : x.numberOfDaughters(), help = "numberOfDaughters" ),
     NTupleVariable("neutralEmEnergyFraction",  lambda x : x.neutralEmEnergyFraction(), help = "neutralEmEnergyFraction" ),
@@ -483,7 +479,7 @@ httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variabl
     NTupleVariable("sjW1masscal", lambda x : x.sjW1masscal, help = "Leading W Subjet mass (calibrated)"),
     NTupleVariable("sjW1mass", lambda x : x.sjW1mass, help = "Leading W Subjet mass"),
     NTupleVariable("sjW1btag", lambda x : x.sjW1btag, help = "Leading W Subjet btag"),
-    NTupleVariable("sjW1corr", lambda x : x.sjW1.corr),
+    NTupleVariable("sjW1corr", lambda x : x.sjW1.corr if hasattr(x, "corr") else -1. ),
     # Second W Subjet (pt)
     NTupleVariable("sjW2ptcal", lambda x : x.sjW2ptcal,help = "Second Subjet pT (calibrated)"),
     NTupleVariable("sjW2pt",   lambda x : x.sjW2pt,   help = "Second Subjet pT"),
@@ -492,7 +488,7 @@ httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variabl
     NTupleVariable("sjW2masscal", lambda x : x.sjW2masscal, help = "Second Subjet mass (calibrated)"),
     NTupleVariable("sjW2mass", lambda x : x.sjW2mass, help = "Second Subjet mass"),
     NTupleVariable("sjW2btag", lambda x : x.sjW2btag, help = "Second Subjet btag"),
-    NTupleVariable("sjW2corr", lambda x : x.sjW2.corr),
+    NTupleVariable("sjW2corr", lambda x : x.sjW2.corr if hasattr(x, "corr") else -1.),
     # Non-W Subjet
     NTupleVariable("sjNonWptcal",lambda x : x.sjNonWptcal,help = "Non-W Subjet pT (calibrated)"),
     NTupleVariable("sjNonWpt",   lambda x : x.sjNonWpt,   help = "Non-W Subjet pT"),
@@ -501,7 +497,7 @@ httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variabl
     NTupleVariable("sjNonWmasscal", lambda x : x.sjNonWmasscal, help = "Non-W Subjet mass (calibrated)"),
     NTupleVariable("sjNonWmass", lambda x : x.sjNonWmass, help = "Non-W Subjet mass"),
     NTupleVariable("sjNonWbtag", lambda x : x.sjNonWbtag, help = "Non-W Subjet btag"),
-    NTupleVariable("sjNonWcorr", lambda x : x.sjNonW.corr),
+    NTupleVariable("sjNonWcorr", lambda x : x.sjNonW.corr if hasattr(x, "corr") else -1.),
     ])
    
 

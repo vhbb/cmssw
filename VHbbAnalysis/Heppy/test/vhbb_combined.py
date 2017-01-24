@@ -10,6 +10,17 @@ from VHbbAnalysis.Heppy.AdditionalBTag import AdditionalBTag
 from VHbbAnalysis.Heppy.AdditionalBoost import AdditionalBoost
 from VHbbAnalysis.Heppy.GenHFHadronMatcher import GenHFHadronMatcher
 
+#Add Rereco muon filter
+MuonBitAna = cfg.Analyzer(
+    verbose = False,
+    class_object = TriggerBitAnalyzer,
+    triggerBits =     {"MUON" : [
+        "noBadGlobalMuons",
+    ]},
+   processName = 'EX'
+   )
+sequence.insert(sequence.index(TrigAna),MuonBitAna)
+
 
 # Add Boosted Information
 boostana=cfg.Analyzer(
@@ -18,10 +29,11 @@ boostana=cfg.Analyzer(
 )
 
 #boostana.GT = "Fall15_25nsV2_DATA" 
-boostana.GT = "Spring16_25nsV6_DATA" # we do L2L3 for MC and L2L3Res for data. Can therefor use data GT for both
+boostana.GT = "Spring16_23Sep2016GV2_DATA" # we do L2L3 for MC and L2L3Res for data. Can therefor use data GT for both
 boostana.jecPath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/jec"
 boostana.isMC = sample.isMC
 boostana.skip_ca15 = False
+boostana.facJEC = factorizedJetCorrections
 sequence.insert(sequence.index(VHbb),boostana)
 
 #used freshly computed MVA ID variables
@@ -156,7 +168,7 @@ preprocessor = CmsswPreprocessor("combined_cmssw.py", options = {"isMC":sample.i
 config.preprocessor=preprocessor
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 0, nEvents = 20)
+    looper = Looper( 'Loop', config, nPrint = 0, nEvents = 100)
     import time
     import cProfile
     p = cProfile.Profile(time.clock)
