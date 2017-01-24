@@ -168,7 +168,7 @@ void PDFWeightsProducer::produce( edm::Event & evt, const edm::EventSetup & ){
   // auto_ptr<unsigned int > pdfWeightLHAnumber_ptr( new unsigned int() );
   Handle<LHEEventProduct> lheInfo;
   bool product_exists = evt.getByLabel(edm::InputTag("externalLHEProducer"), lheInfo );
-  if( product_exists ){
+  if( product_exists && !(pdfWeightLHAnumber_<1 || nPdfWeights_<1 || nPdfEigWeights_<1)){
     
     // cout << "lheInfo->weights().size()= " << lheInfo->weights().size() << endl;
     // cout << "PDFweightsLHEorder_.size()= " << PDFweightsLHEorder_.size() << endl;
