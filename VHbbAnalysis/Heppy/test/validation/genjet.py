@@ -15,11 +15,17 @@ components = [
 def validate_genjet(fn):
     tf = ROOT.TFile.Open(fn)
     tree = tf.Get("vhbb/tree")
+    of = ROOT.TFile("out.root", "RECREATE")
+    h = ROOT.TH1D("h", "h", 100, 0, 300)
     for ev in tree:
-        print "nGenJet", ev.nGenJet
+    #    for iGenJet in range(ev.nGenJet):
+    #        print "gen", ev.GenJet_pt[iGenJet], iGenJet
         for iJet in range(ev.nJet):
             mcIdx = ev.Jet_mcIdx[iJet]
-            print ev.Jet_pt[iJet], mcIdx
+            if mcIdx >= ev.nGenJet:
+                h.Fill(ev.Jet_pt[iJet])
+    of.Write()
+    of.Close()
     tf.Close()
 
 if __name__ == '__main__':
