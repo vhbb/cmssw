@@ -36,6 +36,8 @@ class Electron( Lepton ):
         elif id == "POG_MVA_ID_Spring15_NonTrig_VLooseIdEmu":   return self.mvaIDRun2("NonTrigSpring15MiniAOD","VLooseIdEmu")
         elif id == "POG_MVA_ID_Spring15_NonTrig_VLooseIdIsoEmu":   return self.mvaIDRun2("NonTrigSpring15MiniAOD","VLooseIdIsoEmu")
         elif id == "POG_MVA_ID_Spring15_NonTrig_Tight":    return self.mvaIDRun2("NonTrigSpring15MiniAOD","Tight")
+        elif id == "POG_MVA_ID_Spring16_GeneralPurpose_WP80":    return self.mvaIDRun2("Spring16GeneralPurpose","POG80")
+        elif id == "POG_MVA_ID_Spring16_GeneralPurpose_WP90":    return self.mvaIDRun2("Spring16GeneralPurpose","POG90")
         elif id == "MVA_ID_NonTrig_Phys14Fix_HZZ":     return self.mvaIDRun2("NonTrigPhys14Fix","HZZ")
         elif id == "MVA_ID_NonTrig_Spring15_HZZ":     return self.mvaIDRun2("NonTrigSpring15MiniAOD","HZZ")
         elif id.startswith("POG_Cuts_ID_"):
@@ -200,6 +202,9 @@ class Electron( Lepton ):
 
     def mvaRun2( self, name, debug = False ):
         if name not in self._mvaRun2:
+            if name == "Spring16GeneralPurpose" and self.physObj.hasUserFloat("ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values"):
+                self._mvaRun2[name] =  self.physObj.userFloat("ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values")
+                return self._mvaRun2[name]
             if name == "NonTrigSpring15MiniAOD" and self.physObj.hasUserFloat("ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Values"):
                 self._mvaRun2[name] =  self.physObj.userFloat("ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Values")
                 return self._mvaRun2[name]
@@ -312,6 +317,15 @@ class Electron( Lepton ):
                         elif eta < 1.479: return self.mvaRun2(name) > -0.235222
                         else: return self.mvaRun2(name) > -0.67099
                 else: raise RuntimeError, "Ele MVA ID Working point not found"
+            elif name in ("Spring16GeneralPurpose"):
+                if wp == "POG90":
+                    if   (eta < 0.8)  : return self.mvaRun2(name) > 0.836695742607;
+                    elif (eta < 1.479): return self.mvaRun2(name) > 0.715337944031;
+                    else              : return self.mvaRun2(name) > 0.356799721718;
+                elif wp == "POG80":
+                    if   (eta < 0.8)  : return self.mvaRun2(name) > 0.940962684155;
+                    elif (eta < 1.479): return self.mvaRun2(name) > 0.899208843708;
+                    else              : return self.mvaRun2(name) > 0.758484721184;
             else: raise RuntimeError, "Ele MVA ID type not found"
 
 
