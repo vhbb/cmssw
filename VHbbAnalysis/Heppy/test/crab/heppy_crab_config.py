@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_E25_005'
-config.General.workArea = 'crab_projects_E25_005'
+config.General.requestName = 'VHBB_F25_008'
+config.General.workArea = '/scratch/arizzi/crab_sub/crab_projects_F25_008a'
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -20,7 +20,7 @@ config.JobType.maxJobRuntimeMin = 2000
 config.JobType.inputFiles = ['heppy_config.py',
                              'heppy_crab_script.py',
                              'python.tar.gz',
-                             'MVAJetTags_620SLHCX_Phase1And2Upgrade.db',
+                             #'MVAJetTags_620SLHCX_Phase1And2Upgrade.db',
                              'combined_cmssw.py',
                              '../vhbb.py',
                               '../vhbb_combined.py',
@@ -49,9 +49,9 @@ config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 1
 config.Data.totalUnits = 10
 config.Data.allowNonValidInputDataset = True # to run on datasets in PRODUCTION
-config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyE25/'
+config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyF25/'
 config.Data.publication = True
-config.Data.outputDatasetTag = 'VHBB_HEPPY_E25'
+config.Data.outputDatasetTag = 'VHBB_HEPPY_F25'
 
 config.section_("Site")
 config.Site.storageSite = "T2_IT_Pisa"

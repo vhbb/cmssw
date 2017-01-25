@@ -137,6 +137,9 @@ class LeptonAnalyzer( Analyzer ):
             self.handles['eleMVAIdSpring15NonTrigMedium'] = AutoHandle( self.cfg_ana.eleMVAIdSpring15NonTrigMedium, 'edm::ValueMap<bool>')
             self.handles['eleMVAIdSpring15NonTrigTight'] = AutoHandle( self.cfg_ana.eleMVAIdSpring15NonTrigTight, 'edm::ValueMap<bool>')
             self.handles['eleMVArawSpring15NonTrig'] = AutoHandle( self.cfg_ana.eleMVArawSpring15NonTrig, 'edm::ValueMap<float>')
+            self.handles['eleMVAIdSpring16GeneralPurposePOG80'] = AutoHandle( self.cfg_ana.eleMVAIdSpring16GeneralPurposePOG80, 'edm::ValueMap<bool>')
+            self.handles['eleMVAIdSpring16GeneralPurposePOG90'] = AutoHandle( self.cfg_ana.eleMVAIdSpring16GeneralPurposePOG90, 'edm::ValueMap<bool>')
+            self.handles['eleMVArawSpring16GeneralPurpose']     = AutoHandle( self.cfg_ana.eleMVArawSpring16GeneralPurpose, 'edm::ValueMap<float>')
 
         if self.doMiniIsolation or self.doIsolationScan:
             self.handles['packedCandidates'] = AutoHandle( self.cfg_ana.packedCandidates, 'std::vector<pat::PackedCandidate>')
@@ -462,6 +465,9 @@ class LeptonAnalyzer( Analyzer ):
             eleMVAIdSpring15NonTrigMedium = self.handles['eleMVAIdSpring15NonTrigMedium'].product()
             eleMVAIdSpring15NonTrigTight  = self.handles['eleMVAIdSpring15NonTrigTight'].product()
             eleMVArawSpring15NonTrig = self.handles['eleMVArawSpring15NonTrig'].product()
+            eleMVAIdSpring16GeneralPurposePOG80 = self.handles['eleMVAIdSpring16GeneralPurposePOG80'].product()
+            eleMVAIdSpring16GeneralPurposePOG90 = self.handles['eleMVAIdSpring16GeneralPurposePOG90'].product()
+            eleMVArawSpring16GeneralPurpose = self.handles['eleMVArawSpring16GeneralPurpose'].product()
             for ie, ele in enumerate(allelectrons):
                 ele.mvaIdSpring15TrigMedium = eleMVAIdSpring15TrigMedium.get(ie)
                 ele.mvaIdSpring15TrigTight = eleMVAIdSpring15TrigTight.get(ie)
@@ -469,6 +475,9 @@ class LeptonAnalyzer( Analyzer ):
                 ele.mvaIdSpring15NonTrigMedium = eleMVAIdSpring15NonTrigMedium.get(ie)
                 ele.mvaIdSpring15NonTrigTight = eleMVAIdSpring15NonTrigTight.get(ie)
                 ele.mvaRawSpring15NonTrig = eleMVArawSpring15NonTrig.get(ie)
+                ele.mvaIdSpring16GeneralPurposePOG80 = eleMVAIdSpring16GeneralPurposePOG80.get(ie)
+                ele.mvaIdSpring16GeneralPurposePOG90 = eleMVAIdSpring16GeneralPurposePOG90.get(ie)
+                ele.mvaRawSpring16GeneralPurpose     = eleMVArawSpring16GeneralPurpose.get(ie)
         
         return allelectrons 
 
@@ -762,6 +771,9 @@ setattr(LeptonAnalyzer,"defaultConfig",cfg.Analyzer(
     eleMVAIdSpring15NonTrigMedium = "egmGsfElectronIDs:mvaEleID-Spring15-25ns-nonTrig-V1-wp90",
     eleMVAIdSpring15NonTrigTight = "egmGsfElectronIDs:mvaEleID-Spring15-25ns-nonTrig-V1-wp80",
     eleMVArawSpring15NonTrig = "electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Values",
+    eleMVAIdSpring16GeneralPurposePOG80 = "egmGsfElectronIDs:mvaEleID-Spring16-GeneralPurpose-V1-wp80",
+    eleMVAIdSpring16GeneralPurposePOG90 = "egmGsfElectronIDs:mvaEleID-Spring16-GeneralPurpose-V1-wp90",
+    eleMVArawSpring16GeneralPurpose     = "electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values",
     # muon isolation correction method (can be "rhoArea" or "deltaBeta")
     mu_isoCorr = "rhoArea" ,
     mu_effectiveAreas = "Spring15_25ns_v1", #(can be 'Data2012' or 'Phys14_25ns_v1' or 'Spring15_25ns_v1')

@@ -9,6 +9,7 @@
 import ROOT
 import numpy as np
 from numpy.linalg import inv
+import os
 
 def cut_off_one_element(array, higgsind):
     result = [[],[]]
@@ -160,7 +161,7 @@ def LagrangianSolver(A, L, V,  R, jet_pts):
 class ZllKinematicFit():
     def __init__(self):
 
-        self.Resolutions = ROOT.TFile.Open("../data/tf/V21_SigmasFits_fixedNames.root", "READ")
+        self.Resolutions = ROOT.TFile.Open(os.environ["CMSSW_BASE"] + "/src/VHbbAnalysis/Heppy/data/tf/V21_SigmasFits_fixedNames.root", "READ")
         if self.Resolutions!=None and not self.Resolutions.IsZombie():
             print "[ZllKinematicFit]: resolutions successfully loaded"
             self.resolutions_found = True

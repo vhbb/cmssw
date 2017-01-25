@@ -31,6 +31,8 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
     NTupleVariable("eleMVAIdSpring15Trig", lambda x : max(x.mvaIdSpring15TrigMedium, 2*x.mvaIdSpring15TrigTight) if abs(x.pdgId()) == 11 and hasattr(x,"mvaIdSpring15TrigMedium") else -1, int, help="EGamma POG MVA ID for triggering electrons (0=none, 1=WP90, 2=WP80, Spring15 training); 1 for muons"),
     NTupleVariable("eleMVArawSpring15NonTrig", lambda x : getattr(x,"mvaRawSpring15NonTrig",-2) if abs(x.pdgId()) == 11 else -1, help="EGamma POG MVA ID for non-triggering electrons (raw MVA value, Spring15 training); 1 for muons"),
     NTupleVariable("eleMVAIdSpring15NonTrig", lambda x : max(x.mvaIdSpring15NonTrigMedium, 2*x.mvaIdSpring15NonTrigTight) if abs(x.pdgId()) == 11 and hasattr(x,"mvaIdSpring15NonTrigMedium")  else -1, int, help="EGamma POG MVA ID for non-triggering electrons (0=none, 1=WP90, 2=WP80, Spring15 training); 1 for muons"),
+    NTupleVariable("eleMVArawSpring16GenPurp", lambda x : getattr(x,"mvaRawSpring16GeneralPurpose",-2) if abs(x.pdgId()) == 11 else -1, help="EGamma POG MVA ID for non-triggering electrons (raw MVA value, Spring15 training); 1 for muons"),
+    NTupleVariable("eleMVAIdSppring16GenPurp", lambda x : max(x.mvaIdSpring16GeneralPurposePOG90, 2*x.mvaIdSpring16GeneralPurposePOG80) if abs(x.pdgId()) == 11 and hasattr(x,"mvaIdSpring16GeneralPurposePOG90")  else -1, int, help="EGamma POG MVA ID for non-triggering electrons (0=none, 1=WP90, 2=WP80, Spring15 training); 1 for muons"),
     ##NTupleVariable("tightCharge",  lambda lepton : ( lepton.isGsfCtfScPixChargeConsistent() + lepton.isGsfScPixChargeConsistent() ) if abs(lepton.pdgId()) == 11 else 2*(lepton.innerTrack().ptError()/lepton.innerTrack().pt() < 0.2), int, help="Tight charge criteria"),
     # Muon-speficic info
     NTupleVariable("nStations",    lambda lepton : lepton.numberOfMatchedStations() if abs(lepton.pdgId()) == 13 else 4, help="Number of matched muons stations (4 for electrons)"),
@@ -196,7 +198,7 @@ jetTypeVHbb.variables += [NTupleVariable("bTagWeight",
 '''
 
 # add the POG SF
-from btagSF import *
+from VHbbAnalysis.Heppy.btagSF import btagSFhandle, get_SF
 
 for algo in ["CSV", "CMVAV2"]:
     for wp in [ "L", "M", "T" ]:
@@ -479,7 +481,7 @@ httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variabl
     NTupleVariable("sjW1masscal", lambda x : x.sjW1masscal, help = "Leading W Subjet mass (calibrated)"),
     NTupleVariable("sjW1mass", lambda x : x.sjW1mass, help = "Leading W Subjet mass"),
     NTupleVariable("sjW1btag", lambda x : x.sjW1btag, help = "Leading W Subjet btag"),
-    NTupleVariable("sjW1corr", lambda x : x.sjW1.corr if hasattr(x, "corr") else -1. ),
+    NTupleVariable("sjW1corr", lambda x : x.sjW1.corr if hasattr(x.sjW1, "corr") else -1. ),
     # Second W Subjet (pt)
     NTupleVariable("sjW2ptcal", lambda x : x.sjW2ptcal,help = "Second Subjet pT (calibrated)"),
     NTupleVariable("sjW2pt",   lambda x : x.sjW2pt,   help = "Second Subjet pT"),
@@ -488,7 +490,7 @@ httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variabl
     NTupleVariable("sjW2masscal", lambda x : x.sjW2masscal, help = "Second Subjet mass (calibrated)"),
     NTupleVariable("sjW2mass", lambda x : x.sjW2mass, help = "Second Subjet mass"),
     NTupleVariable("sjW2btag", lambda x : x.sjW2btag, help = "Second Subjet btag"),
-    NTupleVariable("sjW2corr", lambda x : x.sjW2.corr if hasattr(x, "corr") else -1.),
+    NTupleVariable("sjW2corr", lambda x : x.sjW2.corr if hasattr(x.sjW2, "corr") else -1.),
     # Non-W Subjet
     NTupleVariable("sjNonWptcal",lambda x : x.sjNonWptcal,help = "Non-W Subjet pT (calibrated)"),
     NTupleVariable("sjNonWpt",   lambda x : x.sjNonWpt,   help = "Non-W Subjet pT"),
@@ -497,7 +499,7 @@ httType = NTupleObjectType("htt",  baseObjectTypes = [ fourVectorType ], variabl
     NTupleVariable("sjNonWmasscal", lambda x : x.sjNonWmasscal, help = "Non-W Subjet mass (calibrated)"),
     NTupleVariable("sjNonWmass", lambda x : x.sjNonWmass, help = "Non-W Subjet mass"),
     NTupleVariable("sjNonWbtag", lambda x : x.sjNonWbtag, help = "Non-W Subjet btag"),
-    NTupleVariable("sjNonWcorr", lambda x : x.sjNonW.corr if hasattr(x, "corr") else -1.),
+    NTupleVariable("sjNonWcorr", lambda x : x.sjNonW.corr if hasattr(x.sjNonW, "corr") else -1.),
     ])
    
 

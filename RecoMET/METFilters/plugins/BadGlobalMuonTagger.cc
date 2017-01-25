@@ -23,20 +23,20 @@ class BadGlobalMuonTagger : public edm::stream::EDFilter<> {
         edm::EDGetTokenT<edm::View<reco::Muon>> muons_;            
         edm::EDGetTokenT<std::vector<reco::Vertex>> vtx_;            
         double ptCut_;
-        bool   selectClones_, verbose_;
+        bool   selectClones_, taggingMode_, verbose_;
 
         bool outInOnly(const reco::Muon &mu) const {
             const reco::Track &tk = *mu.innerTrack();
             return tk.algoMask().count() == 1 && tk.isAlgoInMask(reco::Track::muonSeededStepOutIn);
         }
         bool preselection(const reco::Muon &mu) const { 
-            return mu.isGlobalMuon() && (!selectClones_ || outInOnly(mu));
+            return (!selectClones_ || outInOnly(mu));
         }
         bool tighterId(const reco::Muon &mu) const { 
             return muon::isMediumMuon(mu) && mu.numberOfMatchedStations() >= 2; 
         }
         bool tightGlobal(const reco::Muon &mu) const {
-            return (mu.globalTrack()->hitPattern().muonStationsWithValidHits() >= 3 && mu.globalTrack()->normalizedChi2() <= 20);
+            return mu.isGlobalMuon() && (mu.globalTrack()->hitPattern().muonStationsWithValidHits() >= 3 && mu.globalTrack()->normalizedChi2() <= 20);
         }
         bool safeId(const reco::Muon &mu) const { 
             if (mu.muonBestTrack()->ptError() > 0.2 * mu.muonBestTrack()->pt()) { return false; }
@@ -51,7 +51,9 @@ BadGlobalMuonTagger::BadGlobalMuonTagger(const edm::ParameterSet & iConfig) :
     muons_(consumes<edm::View<reco::Muon>>(iConfig.getParameter<edm::InputTag>("muons"))),
     vtx_(consumes<std::vector<reco::Vertex>>(iConfig.getParameter<edm::InputTag>("vtx"))),
     ptCut_(iConfig.getParameter<double>("muonPtCut")),
-    selectClones_(iConfig.getParameter<bool>("selectClones"))
+    selectClones_(iConfig.getParameter<bool>("selectClones")),
+    taggingMode_(iConfig.getParameter<bool> ("taggingMode")),
+    verbose_(iConfig.getUntrackedParameter<bool> ("verbose",true))
 {
     produces<edm::PtrVector<reco::Muon>>("bad");
 }
@@ -120,7 +122,7 @@ BadGlobalMuonTagger::filter(edm::Event & iEvent, const edm::EventSetup & iSetup)
     }
 
     iEvent.put(std::move(out), "bad");
-    return found;
+    return taggingMode_ || found;
 }
 
 
