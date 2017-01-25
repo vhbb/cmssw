@@ -742,8 +742,10 @@ def initialize(**kwargs):
         vtx   = cms.InputTag("offlineSlimmedPrimaryVertices"),
         muonPtCut = cms.double(20),
         selectClones = cms.bool(False),
+        taggingMode = cms.bool(False),
       )
     process.cloneGlobalMuonTagger = process.badGlobalMuonTagger.clone(
+        taggingMode = cms.bool(False),
         selectClones = True
       )
 

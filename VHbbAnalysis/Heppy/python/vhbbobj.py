@@ -198,7 +198,7 @@ jetTypeVHbb.variables += [NTupleVariable("bTagWeight",
 '''
 
 # add the POG SF
-from btagSF import *
+from VHbbAnalysis.Heppy.btagSF import btagSFhandle, get_SF
 
 for algo in ["CSV", "CMVAV2"]:
     for wp in [ "L", "M", "T" ]:
