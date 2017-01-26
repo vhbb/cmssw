@@ -398,6 +398,9 @@ for jet_type in [jetTypeVHbb, patSubjetType, subjetcorrType]:
                         help=""
                     )
                 ]
+
+        
+        
 # HTT Subjets
 for subjet in ["sjW1", "sjW2", "sjNonW"]:
     for jet_corr in factorizedJetCorrections:
@@ -406,7 +409,7 @@ for subjet in ["sjW1", "sjW2", "sjNonW"]:
             httType.variables += [
                 NTupleVariable(
                     "{0}_corr_{1}".format(subjet, name),
-                        lambda x, name = name: getattr( getattr(x,subjet), 'corr{0}'.format(name), -99),
+                        lambda x, name=name, subjet=subjet : getattr( getattr(x,subjet), 'corr{0}'.format(name), -99),
                     float,
                     mcOnly=True,
                     help=""
