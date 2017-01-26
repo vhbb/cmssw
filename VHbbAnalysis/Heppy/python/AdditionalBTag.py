@@ -46,8 +46,9 @@ class AdditionalBTag( Analyzer ):
     def addNewBTag(self,event):
 #        self.readTag(event, "btagHip")
         #self.readTag(event, "btagcsv")
-        self.readTag(event, "btagSoftEl")
-        self.readTag(event, "btagSoftMu")
+        #self.readTag(event, "btagSoftEl")
+        #self.readTag(event, "btagSoftMu")
+        return
 
     def normalize(self, varname):
         v = getattr(self, varname)
@@ -64,8 +65,8 @@ class AdditionalBTag( Analyzer ):
             self.Jet_CSVIVF[0]=j.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") 
             self.Jet_JP[0]=j.btag("pfJetProbabilityBJetTags") 
             self.Jet_JBP[0]=j.btag("pfJetBProbabilityBJetTags") 
-            self.Jet_SoftMu[0]=j.btagSoftMu
-            self.Jet_SoftEl[0]=j.btagSoftEl
+            self.Jet_SoftMu[0]=j.bDiscriminator("softPFMuonBJetTags")
+            self.Jet_SoftEl[0]=j.bDiscriminator("softPFElectronBJetTags")
             
             for var in self.bdtVars:
                 self.normalize(var)
