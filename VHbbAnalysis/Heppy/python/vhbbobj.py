@@ -99,8 +99,10 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("btagBDT", lambda x : getattr(x,"btagBDT",-99), help="combined super-btag"),
     NTupleVariable("btagProb", lambda x : x.btag('pfJetProbabilityBJetTags') , help="jet probability b-tag"),
     NTupleVariable("btagBProb", lambda x : x.btag('pfJetBProbabilityBJetTags') , help="jet b-probability b-tag"),
-    NTupleVariable("btagSoftEl", lambda x : getattr(x, "btagSoftEl", -1000) , help="soft electron b-tag"),
-    NTupleVariable("btagSoftMu", lambda x : getattr(x, "btagSoftMu", -1000) , help="soft muon b-tag"),
+    #NTupleVariable("btagSoftEl", lambda x : getattr(x, "btagSoftEl", -1000) , help="soft electron b-tag"),
+    #NTupleVariable("btagSoftMu", lambda x : getattr(x, "btagSoftMu", -1000) , help="soft muon b-tag"),
+    NTupleVariable("btagSoftEl",  lambda x : x.bDiscriminator("softPFElectronBJetTags") , help="soft electron b-tag"),
+    NTupleVariable("btagSoftMu",  lambda x : x.bDiscriminator("softPFMuonBJetTags")  , help="soft muon b-tag"),
 #see below
     NTupleVariable("btagDeepCSVdusg",   lambda x : x.bDiscriminator("newdeepFlavourJetTags:probudsg"), help="deepCSV dusg"),
     NTupleVariable("btagDeepCSVb",   lambda x : x.bDiscriminator("newdeepFlavourJetTags:probb"), help="deepCSV b"),
