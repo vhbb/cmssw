@@ -483,7 +483,7 @@ class VHbbAnalyzer( Analyzer ):
     def doQuickTkMET(self,event) :
 	if not hasattr(event,"pfCands") :
 	        event.pfCands = list(self.handles['pfCands'].product())
-        event.quickTkMET=sum([x.p4() for x in event.pfCands if x.charge() != 0 and x.dz() < 0.1 and  x.dz() > -0.1],ROOT.reco.Particle.LorentzVector())
+        event.quickTkMET=-sum([x.p4() for x in event.pfCands if x.charge() != 0 and x.dz() < 0.1 and  x.dz() > -0.1],ROOT.reco.Particle.LorentzVector())
 
     def initOutputs (self,event) : 
         event.hJets = []
