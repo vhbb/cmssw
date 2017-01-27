@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_F25_008'
-config.General.workArea = '/scratch/arizzi/crab_sub/crab_projects_F25_008a'
+config.General.requestName = 'VHBB_F25_009'
+config.General.workArea = '/scratch/arizzi/crab_sub/crab_projects_F25_009'
 config.General.transferLogs=True
 
 config.section_("JobType")
