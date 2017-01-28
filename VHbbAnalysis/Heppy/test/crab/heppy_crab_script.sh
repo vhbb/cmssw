@@ -1,6 +1,6 @@
 #s -lR
 tar xvzf python.tar.gz --directory $CMSSW_BASE 
-ls -lR .
+#ls -lR .
 echo "ENV..................................."
 env 
 echo "VOMS"
@@ -12,15 +12,15 @@ echo $PWD
 cp lib/slc*/* $CMSSW_BASE/lib/slc*
 cp lib/slc*/.* $CMSSW_BASE/lib/slc*
 echo "AFTER COPY content of $CMSSW_BASE/lib/slc*"
-ls -lR  $CMSSW_BASE/lib/slc*
+#ls -lR  $CMSSW_BASE/lib/slc*
 
 cp -r interface/* $CMSSW_BASE/interface/
 echo "AFTER COPY content of $CMSSW_BASE/interface"
-ls -lR  $CMSSW_BASE/interface/
+#ls -lR  $CMSSW_BASE/interface/
 
 cp -r src/* $CMSSW_BASE/src/
 echo "AFTER COPY content of $CMSSW_BASE/src"
-ls -lR  $CMSSW_BASE/src/
+#ls -lR  $CMSSW_BASE/src/
 
 PROXYFILE=`grep "BEGIN CERTIFICATE" * | perl -pe 's/:.*//'  | grep -v heppy | tail -n 1`
 export X509_USER_PROXY=$PWD/$PROXYFILE
@@ -69,5 +69,5 @@ export ROOT_INCLUDE_PATH=.:./src:$ROOT_INCLUDE_PATH
 python heppy_crab_script.py $1
 echo "======================== CMSRUN LOG ============================"
 head -n 30 Output/cmsRun.log 
-echo "=== SNIP ==="
-tail -n 500 Output/cmsRun.log 
+echo "=== SNIP HEPPY ==="
+tail -n 800 Output/cmsRun.log 
