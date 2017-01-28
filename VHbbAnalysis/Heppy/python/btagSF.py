@@ -24,7 +24,7 @@ def initBTagSF () :
 
     btagSFhandle.calib_csv_reweight = ROOT.BTagCalibration("csvv2", csvpath+"/ttH_BTV_CSVv2_13TeV_2016All_36p5_2017_1_10.csv")
 # cMVAv2
-    btagSFhandle.calib_cmva_reweight = ROOT.BTagCalibration("cmvav2", csvpath+"/ttH_BTV_cMVAv2_13TeV_2016All_36p5_2017_1_10.csv")
+    btagSFhandle.calib_cmva_reweight = ROOT.BTagCalibration("cmvav2", csvpath+"/ttH_BTV_cMVAv2_13TeV_2016All_36p5_2017_1_26.csv")
 
 # map between algo/flavour and measurement type
     btagSFhandle.sf_type_map = {
