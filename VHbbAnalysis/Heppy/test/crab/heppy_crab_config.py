@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_F25_009'
-config.General.workArea = '/scratch/arizzi/crab_sub/crab_projects_F25_009'
+config.General.requestName = 'VHBB_G25_009'
+config.General.workArea = '/scratch/arizzi/crab_sub/crab_projects_G25_001'
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -45,13 +45,14 @@ config.JobType.inputFiles = ['heppy_config.py',
 config.section_("Data")
 config.Data.inputDataset = '/ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'
 config.Data.inputDBS = 'global'
-config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 1
-config.Data.totalUnits = 10
+#config.Data.splitting = 'FileBased'
+config.Data.splitting = 'EventAwareLumiBased'
+config.Data.unitsPerJob = 10000
+config.Data.totalUnits = 800000
 config.Data.allowNonValidInputDataset = True # to run on datasets in PRODUCTION
-config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyF25/'
+config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyG25/'
 config.Data.publication = True
-config.Data.outputDatasetTag = 'VHBB_HEPPY_F25'
+config.Data.outputDatasetTag = 'VHBB_HEPPY_G25'
 
 config.section_("Site")
 config.Site.storageSite = "T2_IT_Pisa"
