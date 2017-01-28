@@ -469,10 +469,10 @@ VHbb = cfg.Analyzer(
     doSoftActivityEWK=True,
     doVBF=True,
     regressions = [
-        {"weight":"ttbar-pumoriond17--500k-13d-300t.weights.xml", "name":"jet0Regression", "vtypes":[0,1,2,3,4,5,-1]},
+        {"weight":"ttbar-G25-500k-13d-300t.weights.xml", "name":"jet0Regression", "vtypes":[0,1,2,3,4,5,-1]},
     ],
     regressionVBF = [
-        {"weight":"ttbar-pumoriond17--500k-13d-300t.weights.xml", "name":"jet0Regression_vbf", "vtypes":[0,1,2,3,4,5,-1]}
+        {"weight":"ttbar-G25-500k-13d-300t.weights.xml", "name":"jet0Regression_vbf", "vtypes":[0,1,2,3,4,5,-1]}
     ],
     VBFblikelihood = {"weight":"TMVA_blikelihood_vbf_cmssw76_h21trained.weights.xml", "name":"BDGT"}
 )
