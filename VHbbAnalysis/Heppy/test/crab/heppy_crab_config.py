@@ -2,8 +2,8 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_("General")
-config.General.requestName = 'VHBB_V25_001'
-config.General.workArea = '/scratch/arizzi/crab_sub/crab_projects_V25_001'
+config.General.requestName = 'VHBB_V25_002'
+config.General.workArea = '/scratch/arizzi/crab_sub/crab_projects_V25_002'
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -51,7 +51,7 @@ config.Data.splitting = 'EventAwareLumiBased'
 config.Data.unitsPerJob = 50000
 #config.Data.totalUnits = 8000
 config.Data.allowNonValidInputDataset = True # to run on datasets in PRODUCTION
-config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyV25/'
+config.Data.outLFNDirBase = '/store/group/phys_higgs/hbb/ntuples/V25/'
 config.Data.publication = True
 config.Data.outputDatasetTag = 'VHBB_HEPPY_V25'
 
