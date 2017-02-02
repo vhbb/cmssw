@@ -29,7 +29,7 @@ L1TriggerAna.processName = 'RECO'
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 1000)
+    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 20000)
 
     import time
     import cProfile

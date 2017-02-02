@@ -3,7 +3,7 @@ config = Configuration()
 
 config.section_("General")
 config.General.requestName = 'VHBB_HEPPY_V25'
-config.General.workArea = '/scratch/arizzi/crab_sub/crab_projects_V25'
+config.General.workArea = '/scratch/arizzi/crab_sub/crab_projects_V25_1'
 config.General.transferLogs=True
 
 config.section_("JobType")
