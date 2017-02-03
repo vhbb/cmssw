@@ -11,14 +11,28 @@ JobNumber=sys.argv[1]
 crabFiles=PSet.process.source.fileNames
 print crabFiles
 firstInput = crabFiles[0]
+tested=False
+forceaaa=False
 print "--------------- using edmFileUtil to convert PFN to LFN -------------------------"
 for i in xrange(0,len(crabFiles)) :
-     if os.getenv("GLIDECLIENT_Group","") != "overflow" and  os.getenv("GLIDECLIENT_Group","") != "overflow_conservative" :
+     if os.getenv("GLIDECLIENT_Group","") != "overflow" and  os.getenv("GLIDECLIENT_Group","") != "overflow_conservative" and not forceaaa:
        print "Data is local"
        pfn=os.popen("edmFileUtil -d %s"%(crabFiles[i])).read() 
        pfn=re.sub("\n","",pfn)
        print crabFiles[i],"->",pfn
        crabFiles[i]=pfn
+       if not tested:
+         print "Testing file open"
+         import ROOT
+         testfile=ROOT.TFile.Open(crabFiles[i])
+         if testfile and testfile.IsOpen() :
+            print "Test OK"
+         else :
+            print "Test open failed, forcing AAA"
+            crabFiles[i]="root://cms-xrd-global.cern.ch/"+crabFiles[i]
+            forceaaa=True
+
+
      else:
        print "Data is not local, using AAA/xrootd"
        crabFiles[i]="root://cms-xrd-global.cern.ch/"+crabFiles[i]
@@ -61,9 +75,9 @@ looper.loop()
 looper.write()
 
 #print PSet.process.output.fileName
-os.system("ls -lR")
+#os.system("ls -lR")
 os.rename("Output/tree.root", "tree.root")
-os.system("ls -lR")
+#os.system("ls -lR")
 
 import ROOT
 f=ROOT.TFile.Open('tree.root')
