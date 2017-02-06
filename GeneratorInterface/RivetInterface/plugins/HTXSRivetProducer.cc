@@ -186,8 +186,19 @@ void HTXSRivetProducer::beginRun(edm::Run const& iRun, edm::EventSetup const& es
             std::vector<std::string> lines = iter->lines();
             for (unsigned int iLine = 0; iLine<lines.size(); iLine++) {
                 std::string line=lines.at(iLine);
+                //std::cout<<iLine<< " "<<line<<std::endl;
                 // POWHEG
                 if (strstr(line.c_str(),"gg_H_quark-mass-effects")) {
+                    std::cout<<iLine<< " "<<line<<std::endl;
+                    m_HiggsProdMode = HTXS::GGF;
+                    break;
+                }
+                if (strstr(line.c_str(),"Process: HJ")) { // MiNLO HJ
+                    std::cout<<iLine<< " "<<line<<std::endl;
+                    m_HiggsProdMode = HTXS::GGF;
+                    break;
+                }
+                if (strstr(line.c_str(),"Process: HJJ")) { // MiNLO HJJ
                     std::cout<<iLine<< " "<<line<<std::endl;
                     m_HiggsProdMode = HTXS::GGF;
                     break;
