@@ -20,17 +20,21 @@ for i in xrange(0,len(crabFiles)) :
        pfn=os.popen("edmFileUtil -d %s"%(crabFiles[i])).read() 
        pfn=re.sub("\n","",pfn)
        print crabFiles[i],"->",pfn
-       crabFiles[i]=pfn
        if not tested:
          print "Testing file open"
          import ROOT
-         testfile=ROOT.TFile.Open(crabFiles[i])
+         testfile=ROOT.TFile.Open(pfn)
          if testfile and testfile.IsOpen() :
             print "Test OK"
+       	    crabFiles[i]=pfn
+            testfile.Close()
+            #tested=True
          else :
             print "Test open failed, forcing AAA"
             crabFiles[i]="root://cms-xrd-global.cern.ch/"+crabFiles[i]
             forceaaa=True
+       else :
+	    crabFiles[i]=pfn
 
 
      else:
