@@ -197,6 +197,16 @@ void HTXSRivetProducer::beginRun(edm::Run const& iRun, edm::EventSetup const& es
                       m_HiggsProdMode = HTXS::GGF;
                       break;
                   }
+                  if (strstr(line.c_str(),"Process: HJ")) { // MiNLO HJ
+                      std::cout<<iLine<< " "<<line<<std::endl;
+                      m_HiggsProdMode = HTXS::GGF;
+                      break;
+                  }
+                  if (strstr(line.c_str(),"Process: HJJ")) { // MiNLO HJJ
+                      std::cout<<iLine<< " "<<line<<std::endl;
+                      m_HiggsProdMode = HTXS::GGF;
+                      break;
+                  }
                   if (strstr(line.c_str(),"VBF_H")) {
                       std::cout<<iLine<< " "<<line<<std::endl;
                       m_HiggsProdMode = HTXS::VBF;
@@ -239,7 +249,6 @@ void HTXSRivetProducer::beginRun(edm::Run const& iRun, edm::EventSetup const& es
         }
       }
     }
-    
 }
 
 
