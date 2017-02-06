@@ -178,7 +178,9 @@ void HTXSRivetProducer::beginRun(edm::Run const& iRun, edm::EventSetup const& es
     if (_prodMode == "AUTO") {    
 
         edm::Handle<LHERunInfoProduct> run;
-        iRun.getByLabel( edm::InputTag("externalLHEProducer"), run );
+
+        bool product_exists = iRun.getByLabel( edm::InputTag("externalLHEProducer"), run );
+        if( product_exists ){
         
         typedef std::vector<LHERunInfoProduct::Header>::const_iterator headers_const_iterator;
         LHERunInfoProduct myLHERunInfoProduct = *(run.product());
@@ -243,8 +245,9 @@ void HTXSRivetProducer::beginRun(edm::Run const& iRun, edm::EventSetup const& es
               
             if ( m_HiggsProdMode != HTXS::UNKNOWN) break;
         }
+        }
+
     }
-    
 }
 
 
