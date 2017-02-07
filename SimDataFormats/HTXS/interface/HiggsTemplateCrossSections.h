@@ -14,9 +14,11 @@ namespace HTXS {
     PRODMODE_DEFINED = 1,      ///< production mode not defined
     MOMENTUM_CONSERVATION = 2, ///< failed momentum conservation
     HIGGS_IDENTIFICATION = 3,  ///< failed to identify Higgs boson
-    HS_VTX_IDENTIFICATION = 4, ///< failed to identify hard scatter vertex
-    VH_IDENTIFICATION = 5,     ///< failed to identify associated vector boson
-    TOP_W_IDENTIFICATION = 6   ///< failed to identify top decay
+    HIGGS_DECAY_IDENTIFICATION = 4,  ///< failed to identify Higgs boson decay products
+    HS_VTX_IDENTIFICATION = 5, ///< failed to identify hard scatter vertex
+    VH_IDENTIFICATION = 6,     ///< failed to identify associated vector boson
+    VH_DECAY_IDENTIFICATION = 7,     ///< failed to identify associated vector boson decay products
+    TOP_W_IDENTIFICATION = 8   ///< failed to identify top decay
   };
 
   /// Higgs production modes, corresponding to input sample
@@ -25,6 +27,9 @@ namespace HTXS {
     GGF = 1, VBF = 2, WH = 3, QQ2ZH = 4, GG2ZH = 5,
     TTH = 6, BBH = 7, TH = 8 
   };
+  
+  /// Additional identifier flag for TH production modes
+  enum tH_type { noTH=0, THQB=1, TWH=2 };
   
   ///   Two digit number of format PF
   ///   P is digit for the physics process
@@ -142,7 +147,54 @@ namespace HTXS {
       return cat;    
     }
     
-//#endif 
+
+    
+    inline int HTXSstage1_to_HTXSstage1FineIndex(HTXS::Stage1::Category stage1, 
+						 HiggsProdMode prodMode, tH_type tH) {
+
+      if(stage1==HTXS::Stage1::Category::UNKNOWN) return 0;
+      int P = (int)(stage1 / 100);
+      int F = (int)(stage1 % 100);
+      // 1.a spit tH categories
+      if (prodMode==HiggsProdMode::TH) {
+	// check that tH splitting is valid for Stage-1 FineIndex
+	// else return unknown category
+	if(tH==tH_type::noTH) return 0;
+	// check if forward tH
+	int fwdH = F==0?0:1;
+	return (49 + 2*(tH-1) +fwdH);
+      }
+      // 1.b QQ2HQQ --> split into VBF, WH, ZH -> HQQ
+      // offset vector 1: input is the Higgs prodMode 
+      // first two indicies are dummies, given that this is only called for prodMode=2,3,4 
+      std::vector<int> pMode_offset = {0,0,13,19,25};
+      if (P==2) return (F + pMode_offset[prodMode]);
+      // 1.c remaining categories
+      // offset vector 2: input is the Stage-1 category P 
+      // third index is dummy, given that this is called for category P=0,1,3,4,5,6,7
+      std::vector<int> catP_offset = {0,1,0,31,36,41,45,47};
+      return (F + catP_offset[P]);
+    }
+
+    inline int HTXSstage1_to_HTXSstage1FineIndex(const HiggsClassification &stxs, 
+						 tH_type tH=noTH, bool jets_pT25 = false) {
+      HTXS::Stage1::Category stage1 = 
+	jets_pT25==false?stxs.stage1_cat_pTjet30GeV:
+	stxs.stage1_cat_pTjet25GeV;
+      return HTXSstage1_to_HTXSstage1FineIndex(stage1,stxs.prodMode,tH);
+    }
+    
+    inline int HTXSstage1_to_index(HTXS::Stage1::Category stage1) {
+      // the Stage-1 categories
+      int P = (int)(stage1 / 100);
+      int F = (int)(stage1 % 100);    
+      std::vector<int> offset{0,1,13,19,24,29,33,35,37,39};
+      // convert to linear values
+      return ( F + offset[P] );
+    }
+
+     
+// #endif 
 
 } // namespace HTXS
 
