@@ -14,7 +14,7 @@ namespace Rivet {
   
   /// @class HiggsTemplateCrossSections 
   /// @brief  Rivet routine for classifying MC events according to the Higgs template cross section categories
-  /// @author Jim Lacey (Carleton University) <james.lacey@cern.ch,jlacey@physics.carleton.ca>
+  /// @author Jim Lacey (DESY) <james.lacey@cern.ch,jlacey@desy.de>
   /// @author Dag Gillberg (Carleton University) <dag.gillberg@cern.ch>
   class HiggsTemplateCrossSections : public Analysis {
   public:
@@ -125,12 +125,10 @@ namespace Rivet {
 
         // a) Reject all non-Higgs particles
         if ( !PID::isHiggs(ptcl->pdg_id()) ) continue;
-
         // b) select only the final Higgs boson copy, prior to decay
         if ( ptcl->end_vertex() && !hasChild(ptcl,PID::HIGGS) ) {
           cat.higgs = Particle(ptcl); ++Nhiggs;
         }
-
         // c) if HepMC::signal_proces_vertex is missing
         //    set hard-scatter vertex based on first Higgs boson
         if ( HSvtx==nullptr && ptcl->production_vertex() && !hasParent(ptcl,PID::HIGGS) )
@@ -138,9 +136,12 @@ namespace Rivet {
       }
 
       // Make sure things are in order so far
-      if (Nhiggs!=1||cat.higgs.children().size()<2) 
+      if (Nhiggs!=1) 
 	return error(cat,HTXS::HIGGS_IDENTIFICATION,
 		     "Current event has "+std::to_string(Nhiggs)+" Higgs bosons. There must be only one.");
+      if (cat.higgs.children().size()<2) 
+	return error(cat,HTXS::HIGGS_DECAY_IDENTIFICATION,
+		     "Could not identify Higgs boson decay products.");
 
       if (HSvtx == nullptr) 
 	return error(cat,HTXS::HS_VTX_IDENTIFICATION,"Cannot find hard-scatter vertex of current event.");
@@ -151,15 +152,43 @@ namespace Rivet {
        */
  
       // Find associated vector bosons
+      bool is_uncatdV = false;
+      Particles uncatV_decays;
+      FourMomentum uncatV_p4(0,0,0,0);
+      FourVector uncatV_v4(0,0,0,0);
       int nWs=0, nZs=0, nTop=0;
       if ( isVH(prodMode) ) {
 	for (auto ptcl:particles(HSvtx,HepMC::children)) {
 	  if (PID::isW(ptcl->pdg_id())) { ++nWs; cat.V=Particle(ptcl); }
 	  if (PID::isZ(ptcl->pdg_id())) { ++nZs; cat.V=Particle(ptcl); }
 	}
-	cat.V = getLastInstance(cat.V);	
+	if(nWs+nZs>0) cat.V = getLastInstance(cat.V);
+	else {
+	  for (auto ptcl:particles(HSvtx,HepMC::children)) {
+	    if (!PID::isHiggs(ptcl->pdg_id())) {
+	      uncatV_decays += Particle(ptcl);
+	      uncatV_p4 += Particle(ptcl).momentum();
+	      uncatV_v4 += Particle(ptcl).origin();
+	    }
+	  }
+	  is_uncatdV = true; cat.V = Particle(24,uncatV_p4,uncatV_v4);
+	}
       }
+      
+      if ( !is_uncatdV ){
 
+	if ( isVH(prodMode) && !cat.V.genParticle()->end_vertex() )
+	  return error(cat,HTXS::VH_DECAY_IDENTIFICATION,"Vector boson does not decay!");
+
+	if ( isVH(prodMode) && cat.V.children().size()<2 )
+	  return error(cat,HTXS::VH_DECAY_IDENTIFICATION,"Vector boson does not decay!");
+	
+	if ( ( prodMode==HTXS::WH && (nZs>0||nWs!=1) ) ||
+	     ( (prodMode==HTXS::QQ2ZH||prodMode==HTXS::GG2ZH) && (nZs!=1||nWs>0) ) ) 
+	  return error(cat,HTXS::VH_IDENTIFICATION,"Found "+std::to_string(nWs)+" W-bosons and "+
+		       std::to_string(nZs)+" Z-bosons. Inconsitent with VH expectation.");
+      }
+      
       // Find and store the W-bosons from ttH->WbWbH
       Particles Ws;
       if ( prodMode==HTXS::TTH || prodMode==HTXS::TH ){
@@ -169,24 +198,15 @@ namespace Rivet {
 	  ++nTop;
 	  Particle top = getLastInstance(Particle(ptcl));
 	  if ( top.genParticle()->end_vertex() ) 
-          for (auto child:top.children()) {
-              if ( PID::isW(child.pdgId()) ) Ws += child;
-          }
-        }
+	    for (auto child:top.children())
+	      if ( PID::isW(child.pdgId()) ) Ws += child;
+	}
       }
 
       // Make sure result make sense
       if ( (prodMode==HTXS::TTH && Ws.size()<2) || (prodMode==HTXS::TH && Ws.size()<1 ) )
 	return error(cat,HTXS::TOP_W_IDENTIFICATION,"Failed to identify W-boson(s) from t-decay!");
 
-      if ( isVH(prodMode) && ( !cat.V.genParticle()->end_vertex()||cat.V.children().size()<2 ) )
-	return error(cat,HTXS::TOP_W_IDENTIFICATION,"Vector boson does not decay!");
-
-      if ( ( prodMode==HTXS::WH && (nZs>0||nWs!=1) ) ||
-	   ( (prodMode==HTXS::QQ2ZH||prodMode==HTXS::GG2ZH) && (nZs!=1||nWs>0) ) ) 
-	return error(cat,HTXS::TOP_W_IDENTIFICATION,"Found "+std::to_string(nWs)+" W-bosons and "+
-		     std::to_string(nZs)+" Z-bosons. Inconsitent with VH expectation.");
-      
       /*****
        * Step 3.
        *   Build jets
@@ -197,7 +217,9 @@ namespace Rivet {
       // Either the vector boson produced in association with the Higgs boson,
       // or the ones produced from decays of top quarks produced with the Higgs
       Particles leptonicVs;
-      if ( isVH(prodMode) && !quarkDecay(cat.V) ) leptonicVs += cat.V;
+      if ( !is_uncatdV ){
+	if ( isVH(prodMode) && !quarkDecay(cat.V) ) leptonicVs += cat.V;
+      }else leptonicVs = uncatV_decays;
       for ( auto W:Ws ) if ( W.genParticle()->end_vertex() && !quarkDecay(W) ) leptonicVs += W;
 
       // Obtain all stable, final-state particles
@@ -210,13 +232,13 @@ namespace Rivet {
 	// ignore particles from the Higgs boson
 	if ( originateFrom(p,cat.higgs) ) { hSum += p.momentum(); continue; }
 	// Cross-check the V decay products for VH
-	if ( isVH(prodMode) && originateFrom(p,Ws) ) vSum += p.momentum();
+	if ( isVH(prodMode) && !is_uncatdV && originateFrom(p,Ws) ) vSum += p.momentum();
 	// ignore final state particles from leptonic V decays
 	if ( leptonicVs.size() && originateFrom(p,leptonicVs) ) continue;
 	// All particles reaching here are considered hadrons and will be used to build jets
 	hadrons += p;
       }
-
+      
       cat.p4decay_higgs = hSum;
       cat.p4decay_V = vSum;
 
@@ -228,12 +250,16 @@ namespace Rivet {
       cat.jets30 = jets.jetsByPt( Cuts::pT > 30.0 );
  
       // check that four mometum sum of all stable particles satisfies momentum consevation
-      /*
+/*
       if ( sum.pt()>0.1 )
 	return error(cat,HTXS::MOMENTUM_CONSERVATION,"Four vector sum does not amount to pT=0, m=E=sqrt(s), but pT="+
 		     std::to_string(sum.pt())+" GeV and m = "+std::to_string(sum.mass())+" GeV");
-      */
-
+*/      
+      // check if V-boson was not included in the event record but decay particles were
+      // EFT contact interaction: return UNKNOWN for category but set all event/particle kinematics
+      if(is_uncatdV) 
+	return error(cat,HTXS::VH_IDENTIFICATION,"Failed to identify associated V-boson!");
+       
       /*****
        * Step 4.
        *   Classify and save output
