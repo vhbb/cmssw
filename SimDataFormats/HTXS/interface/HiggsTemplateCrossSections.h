@@ -4,9 +4,6 @@
 #include "DataFormats/Math/interface/LorentzVector.h"
 #include <vector>
 
-#ifndef TRUTHRIVETTOOLS_HIGGSTEMPLATECROSSSECTIONS_H
-#define TRUTHRIVETTOOLS_HIGGSTEMPLATECROSSSECTIONS_H 1
-
 /// Higgs Template Cross Section namespace
 namespace HTXS {
 
