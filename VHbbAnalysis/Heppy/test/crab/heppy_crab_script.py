@@ -129,5 +129,8 @@ fwkreport='''<FrameworkJobReport>
 
 </FrameworkJobReport>''' % (firstInput,entries)
 
-f1=open('./FrameworkJobReport.xml', 'w+')
-f1.write(fwkreport)
+
+os.system("perl -pe 's/.*cmsswPreProcessing.root.*/\<PFN\>tree.root\<\/PFN\>/' -i ./FrameworkJobReport.xml")
+
+#f1=open('./FrameworkJobReport.xml', 'w+')
+#f1.write(fwkreport)

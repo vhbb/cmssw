@@ -1,9 +1,12 @@
 from WMCore.Configuration import Configuration
 config = Configuration()
 
+version="A26"
+submission="_002"
+
 config.section_("General")
-config.General.requestName = 'VHBB_HEPPY_V25_v3'
-config.General.workArea = '/scratch/arizzi/crab_sub/crab_projects_V25_v3'
+config.General.requestName = 'VHBB_HEPPY_'+version+submission
+config.General.workArea = '/scratch/arizzi/crab_sub/crab_projects_'+version+submission
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -49,11 +52,11 @@ config.Data.inputDataset = '/ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pyth
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'LumiBased'
 #config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 30
-#config.Data.totalUnits = 20
-config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyV25/'
+config.Data.unitsPerJob = 2 #30
+config.Data.totalUnits = 2
+config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppy%s/'%version
 config.Data.publication = True
-config.Data.outputDatasetTag = 'VHBB_HEPPY_V25'
+config.Data.outputDatasetTag = 'VHBB_HEPPY_%s'%version
 #only for data
 #config.Data.lumiMask = 'json.txt'
 
