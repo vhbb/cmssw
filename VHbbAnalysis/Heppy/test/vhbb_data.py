@@ -4,13 +4,13 @@ sample.isMC=False
 sample.isData=True
 sample.files=[
 # "file:00EA1DB2-90AA-E511-AEEE-0025905C2CE6.root"
- "92BD390B-5687-E611-A336-FA163E174AB7.root"
+ "F0B09550-7DEA-E611-A445-B8CA3A70A5E8.root"
 #"root://cms-xrd-global.cern.ch//store/data/Run2016B/JetHT/MINIAOD/PromptReco-v2/000/273/150/00000/66051AAF-D819-E611-BD3D-02163E011D55.root"
 #/store/data/Run2015B/SingleMuon/MINIAOD/PromptReco-v1/000/251/162/00000/160C08A3-4227-E511-B829-02163E01259F.root"
 ]
 sample.json="json.txt"
 
-TriggerObjectsAna.triggerObjectInputTag = ('selectedPatTrigger','','RECO')
+TriggerObjectsAna.triggerObjectInputTag = ('selectedPatTrigger','','PAT')
 FlagsAna.processName='RECO'
 TrigAna.triggerBits = triggerTableData
 L1TriggerAna.processName = 'RECO'
@@ -18,7 +18,7 @@ L1TriggerAna.processName = 'RECO'
 # and the following runs the process directly 
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
-    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 200000)
+    looper = Looper( 'Loop', config, nPrint = 1, nEvents = 20)
 
     import time
     import cProfile

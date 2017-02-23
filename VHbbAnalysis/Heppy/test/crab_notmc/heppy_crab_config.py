@@ -1,8 +1,8 @@
 from WMCore.Configuration import Configuration
 config = Configuration()
 
-version="A26"
-submission="_002"
+version="V25b"
+submission="_004"
 
 config.section_("General")
 config.General.requestName = 'VHBB_HEPPY_'+version+submission
@@ -17,7 +17,9 @@ import os
 os.system("tar czf python.tar.gz --directory $CMSSW_BASE python `find $CMSSW_BASE/src -name python | perl -pe s#$CMSSW_BASE/## `")
 
 #os.system("tar czf python.tar.gz --dereference --directory $CMSSW_BASE python")
-#config.JobType.maxMemoryMB = 2800
+config.JobType.maxMemoryMB = 2400
+config.JobType.maxJobRuntimeMin = 2000
+
 config.JobType.inputFiles = ['heppy_config.py',
                              'heppy_crab_script.py',
                              'python.tar.gz',
@@ -50,10 +52,10 @@ config.JobType.inputFiles = ['heppy_config.py',
 config.section_("Data")
 config.Data.inputDataset = '/ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pythia8/RunIISpring15DR74-Asympt25ns_MCRUN2_74_V9-v1/MINIAODSIM'
 config.Data.inputDBS = 'global'
-config.Data.splitting = 'LumiBased'
+config.Data.splitting = 'EventAwareLumiBased'
 #config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 2 #30
-config.Data.totalUnits = 2
+config.Data.unitsPerJob = 50000 #30
+#onfig.Data.totalUnits = 2
 config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppy%s/'%version
 config.Data.publication = True
 config.Data.outputDatasetTag = 'VHBB_HEPPY_%s'%version

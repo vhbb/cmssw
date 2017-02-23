@@ -13,11 +13,11 @@ from vhbb_combined import *
 sample.json="json.txt"
 sample.files=[
     #"root://xrootd.ba.infn.it//store/data/Run2015D/BTagCSV/MINIAOD/16Dec2015-v1/50000/00AF8EB4-70AB-E511-9271-00266CFAE7AC.root"
-    "root://cms-xrd-global.cern.ch//store/data/Run2016B/SingleMuon/MINIAOD/23Sep2016-v1/70000/3AB8DCD4-7387-E611-B30C-0025904CF766.root"
+    "F0B09550-7DEA-E611-A445-B8CA3A70A5E8.root"
     #"root://131.169.191.218:1094//store/data/Run2016B/SingleMuon//MINIAOD/PromptReco-v2/000/273/537/00000/6EDA3436-A91F-E611-83EA-02163E014736.root"
     ]
 
-TriggerObjectsAna.triggerObjectInputTag = ('selectedPatTrigger','','RECO')
+TriggerObjectsAna.triggerObjectInputTag = ('selectedPatTrigger','','PAT')
 FlagsAna.processName='RECO'
 TrigAna.triggerBits = triggerTableData
 L1TriggerAna.processName = 'RECO'
