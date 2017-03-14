@@ -213,7 +213,6 @@ class AutoFillTreeProducer( TreeAnalyzerNumpy ):
             anclass += "        event.{0} = {0}.make_obj(event.input)\n".format(coll.name)
         
         for v in self.globalVariables:
-            print v, v.mcOnly
             if v.mcOnly and not isMC:
                 print "skipping", coll
                 continue
