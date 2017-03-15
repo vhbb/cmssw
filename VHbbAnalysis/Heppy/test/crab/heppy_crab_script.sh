@@ -68,6 +68,6 @@ export ROOT_INCLUDE_PATH=.:./src:$ROOT_INCLUDE_PATH
 
 python heppy_crab_script.py $1
 echo "======================== CMSRUN LOG ============================"
-head -n 30 Output/cmsRun.log 
+head -n 300 Output/cmsRun.log 
 echo "=== SNIP HEPPY ==="
-tail -n 800 Output/cmsRun.log 
+tail -n 3800 Output/cmsRun.log 

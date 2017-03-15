@@ -14,17 +14,21 @@ def initBTagSF () :
     btagSFhandle.initialized=True
     csvpath = os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/csv/"
     ROOT.gSystem.Load(csvpath+'/BTagCalibrationStandalone.so')
-
+    print "BTAG SF lib loaded"
 # CSVv2
     btagSFhandle.calib_csv = ROOT.BTagCalibration("csvv2", csvpath+"/CSVv2_ichep.csv")
+    print "BTAG SF CSV loaded"
 
 # cMVAv2
     btagSFhandle.calib_cmva = ROOT.BTagCalibration("cmvav2", csvpath+"/cMVAv2_ichep.csv")
+    print "BTAG SF CMVA loaded"
 
 
     btagSFhandle.calib_csv_reweight = ROOT.BTagCalibration("csvv2", csvpath+"/ttH_BTV_CSVv2_13TeV_2016All_36p5_2017_1_10.csv")
+    print "BTAG SF weights CSV loaded"
 # cMVAv2
     btagSFhandle.calib_cmva_reweight = ROOT.BTagCalibration("cmvav2", csvpath+"/ttH_BTV_cMVAv2_13TeV_2016All_36p5_2017_1_26.csv")
+    print "BTAG SF weights CMVA loaded"
 
 # map between algo/flavour and measurement type
     btagSFhandle.sf_type_map = {

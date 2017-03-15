@@ -1,9 +1,12 @@
 from WMCore.Configuration import Configuration
 config = Configuration()
 
+version="A26"
+submission="_002"
+
 config.section_("General")
-config.General.requestName = 'VHBB_HEPPY_V25'
-config.General.workArea = '/scratch/arizzi/crab_sub/crab_projects_V25'
+config.General.requestName = 'VHBB_HEPPY_'+version+submission
+config.General.workArea = '/scratch/arizzi/crab_sub/crab_projects_'+version+submission
 config.General.transferLogs=True
 
 config.section_("JobType")
@@ -14,7 +17,7 @@ import os
 os.system("tar czf python.tar.gz --directory $CMSSW_BASE python `find $CMSSW_BASE/src -name python | perl -pe s#$CMSSW_BASE/## `")
 
 #os.system("tar czf python.tar.gz --dereference --directory $CMSSW_BASE python")
-config.JobType.maxMemoryMB = 2500
+#config.JobType.maxMemoryMB = 2800
 config.JobType.inputFiles = ['heppy_config.py',
                              'heppy_crab_script.py',
                              'python.tar.gz',
@@ -49,15 +52,16 @@ config.Data.inputDataset = '/ZH_HToBB_ZToLL_M125_13TeV_amcatnloFXFX_madspin_pyth
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'LumiBased'
 #config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 30
-#config.Data.totalUnits = 20
-config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppyV25/'
+config.Data.unitsPerJob = 2 #30
+config.Data.totalUnits = 2
+config.Data.outLFNDirBase = '/store/user/arizzi/VHBBHeppy%s/'%version
 config.Data.publication = True
-config.Data.outputDatasetTag = 'VHBB_HEPPY_V25'
+config.Data.outputDatasetTag = 'VHBB_HEPPY_%s'%version
 #only for data
 #config.Data.lumiMask = 'json.txt'
 
 config.section_("Site")
 config.Site.storageSite = "T2_IT_Pisa"
+config.Site.blacklist = ['T2_FR_CCIN2P3','T1_FR_CCIN2P3','T2_BR_SPRACE','T2_ES_CIEMAT']
 
 #config.Data.ignoreLocality = True

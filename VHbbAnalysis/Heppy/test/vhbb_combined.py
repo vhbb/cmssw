@@ -164,7 +164,7 @@ for ic in range(len(config.sequence)):
         obj.metCollection = "slimmedMETs::EX"
 
 # Run Everything
-preprocessor = CmsswPreprocessor("combined_cmssw.py", options = {"isMC":sample.isMC})
+preprocessor = CmsswPreprocessor("combined_cmssw.py", command="cmsRun -e", options = {"isMC":sample.isMC})
 config.preprocessor=preprocessor
 if __name__ == '__main__':
     from PhysicsTools.HeppyCore.framework.looper import Looper 
