@@ -45,6 +45,11 @@ leptonTypeVHbb = NTupleObjectType("leptonTypeVHbb", baseObjectTypes = [ leptonTy
     NTupleVariable("jetPtRatio", lambda lepton : lepton.pt()/lepton.jet.pt() if hasattr(lepton,'jet') else -1, help="pt(lepton)/pt(nearest jet)"),
     NTupleVariable("jetBTagCSV", lambda lepton : lepton.jet.btag('combinedSecondaryVertexBJetTags') if hasattr(lepton,'jet') and hasattr(lepton.jet, 'btag') else -99, help="btag of nearest jet"),
     NTupleVariable("jetDR",      lambda lepton : deltaR(lepton.eta(),lepton.phi(),lepton.jet.eta(),lepton.jet.phi()) if hasattr(lepton,'jet') else -1, help="deltaR(lepton, nearest jet)"),
+    NTupleVariable("pfRelIso03",      lambda ele : (ele.pfIsolationVariables().sumChargedHadronPt + max(ele.pfIsolationVariables().sumNeutralHadronEt + ele.pfIsolationVariables().sumPhotonEt - 0.5 * ele.pfIsolationVariables().sumPUPt,0.0)) / ele.pt()  if abs(ele.pdgId()) == 11 else -1, help="0.3 particle based iso"),
+    NTupleVariable("pfRelIso04",      lambda mu : (mu.pfIsolationR04().sumChargedHadronPt + max( mu.pfIsolationR04().sumNeutralHadronEt + mu.pfIsolationR04().sumPhotonEt - 0.5 * mu.pfIsolationR04().sumPUPt,0.0)) / mu.pt() if abs(mu.pdgId()) == 13 else -1, help="0.4 particle based iso"),
+    NTupleVariable("etaSc", lambda x : x.superCluster().eta() if abs(x.pdgId())==11 else -100, help="Electron supercluster pseudorapidity"),
+    NTupleVariable("eleExpMissingInnerHits", lambda x : x.gsfTrack().hitPattern().numberOfHits(ROOT.reco.HitPattern.MISSING_INNER_HITS) if abs(x.pdgId())==11 else -1, help="Electron expected missing inner hits"),
+    NTupleVariable("eleooEmooP", lambda x : abs(1.0/x.ecalEnergy() - x.eSuperClusterOverP()/x.ecalEnergy()) if abs(x.pdgId())==11 and x.ecalEnergy()>0.0 else 9e9 , help="Electron 1/E - 1/P"),
     # MC-match info
 #    NTupleVariable("mcMatchId",  lambda x : x.mcMatchId, int, mcOnly=True, help="Match to source from hard scatter (25 for H, 6 for t, 23/24 for W/Z)"),
 #    NTupleVariable("mcMatchAny",  lambda x : x.mcMatchAny, int, mcOnly=True, help="Match to any final state leptons: -mcMatchId if prompt, 0 if unmatched, 1 if light flavour, 2 if heavy flavour (b)"),
@@ -70,6 +75,8 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("btagBDT", lambda x : getattr(x,"btagBDT",-99), help="btag"),
     NTupleVariable("btagProb", lambda x : x.btag('jetProbabilityBJetTags') , help="btag"),
     NTupleVariable("btagBProb", lambda x : x.btag('jetBProbabilityBJetTags') , help="btag"),
+    NTupleVariable("btagSoftEl", lambda x : x.btag('softPFElectronBJetTags') , help="soft electron b-tag"),
+    NTupleVariable("btagSoftMu", lambda x : x.btag('softPFMuonBJetTags') , help="soft muon b-tag"),
     NTupleVariable("btagnew",   lambda x : getattr(x,"btagnew",-2), help="newest btag discriminator"),
     NTupleVariable("btagCSVV0",   lambda x : getattr(x,"btagcsv",-2), help="should be the old CSV discriminator"),
    # NTupleVariable("mcMatchId",    lambda x : x.mcMatchId,   int, mcOnly=True, help="Match to source from hard scatter (25 for H, 6 for t, 23/24 for W/Z)"),
@@ -80,7 +87,7 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("chEmEF", lambda x : x.chargedEmEnergyFraction(), float, mcOnly = False,help="chargedEmEnergyFraction (relative to uncorrected jet energy)"),
     NTupleVariable("neEmEF", lambda x : x.neutralEmEnergyFraction(), float, mcOnly = False,help="neutralEmEnergyFraction (relative to uncorrected jet energy)"),
     NTupleVariable("chMult", lambda x : x.chargedMultiplicity(), int, mcOnly = False,help="chargedMultiplicity from PFJet.h"),
-    NTupleVariable("leadTrackPt", lambda x : x.leadTrackPt() , float, mcOnly = False, help="pt of the leading track in the jet"),   
+    NTupleVariable("leadTrackPt", lambda x : x.leadTrackPt() , float, mcOnly = False, help="pt of the leading track in the jet"), 
     NTupleVariable("mcEta",   lambda x : x.mcJet.eta() if getattr(x,"mcJet",None) else 0., mcOnly=True, help="eta of associated gen jet"),
     NTupleVariable("mcPhi",   lambda x : x.mcJet.phi() if getattr(x,"mcJet",None) else 0., mcOnly=True, help="phi of associated gen jet"),
     NTupleVariable("mcM",   lambda x : x.mcJet.p4().M() if getattr(x,"mcJet",None) else 0., mcOnly=True, help="mass of associated gen jet"),
@@ -102,7 +109,24 @@ jetTypeVHbb = NTupleObjectType("jet",  baseObjectTypes = [ jetType ], variables 
     NTupleVariable("ptd",   lambda x : getattr(x,'ptd', 0), float, mcOnly=False,help="QG input variable: ptD"),
     NTupleVariable("axis2",   lambda x : getattr(x,'axis2', 0) , float, mcOnly=False,help="QG input variable: axis2"),
     NTupleVariable("mult",   lambda x : getattr(x,'mult', 0) , int, mcOnly=False,help="QG input variable: total multiplicity"),
+    NTupleVariable("numberOfDaughters",   lambda x : x.numberOfDaughters(), int, mcOnly=False,help="number of daughters"),
  ])
+
+#add per-jet b-tag systematic weight
+from PhysicsTools.Heppy.physicsutils.BTagWeightCalculator import BTagWeightCalculator
+bweightcalc = BTagWeightCalculator("csv/csv_rwt_hf_IT_FlatSF.root", "csv/csv_rwt_lf_IT_FlatSF.root")
+for syst in ["JES", "LF", "HF", "Stats1", "Stats2"]:
+    for sdir in ["Up", "Down"]:
+        jetTypeVHbb.variables += [NTupleVariable("bTagWeight"+syst+sdir,
+            lambda jet, sname=syst+sdir,bweightcalc=bweightcalc: bweightcalc.calcJetWeight(
+                jet, kind="final", systematic=sname
+            ), float, mcOnly=True, help="b-tag CSV weight, variating "+syst + " "+sdir
+        )]
+jetTypeVHbb.variables += [NTupleVariable("bTagWeight",
+    lambda jet, bweightcalc=bweightcalc: bweightcalc.calcJetWeight(
+        jet, kind="final", systematic="nominal",
+    ), float, mcOnly=True, help="b-tag CSV weight, nominal"
+)]
  
 ##------------------------------------------  
 ## FAT JET
@@ -200,12 +224,25 @@ primaryVertexType = NTupleObjectType("primaryVertex", variables = [
     NTupleVariable("x",    lambda x : x.x()),
     NTupleVariable("y",   lambda x : x.y()),
     NTupleVariable("z",   lambda x : x.z()),
+    NTupleVariable("isFake",   lambda x : x.isFake()),
+    NTupleVariable("ndof",   lambda x : x.ndof()),
+    NTupleVariable("Rho",   lambda x : x.position().Rho()),
 #    NTupleVariable("score",  lambda x : x.mass()), # to be added for 74X
 ])
 
 genTauJetType = NTupleObjectType("genTauJet", baseObjectTypes = [ genParticleType ], variables = [
     NTupleVariable("decayMode", lambda x : x.decayMode, int, mcOnly=True, help="Generator level tau decay mode"),
 ])
+
+genJetType = NTupleObjectType("genJet", baseObjectTypes = [ genParticleType ], variables = [
+    NTupleVariable("numBHadrons", lambda x : x.numBHadronsBeforeTop, int, mcOnly=True, help="number of matched b hadrons before top quark decay"),
+    NTupleVariable("numCHadrons", lambda x : x.numCHadronsBeforeTop, int, mcOnly=True, help="number of matched c hadrons before top quark decay"),
+    NTupleVariable("numBHadronsFromTop", lambda x : x.numBHadronsFromTop, int, mcOnly=True, help="number of matched b hadrons from top quark decay"),
+    NTupleVariable("numCHadronsFromTop", lambda x : x.numCHadronsFromTop, int, mcOnly=True, help="number of matched c hadrons from top quark decay"),
+    NTupleVariable("numBHadronsAfterTop", lambda x : x.numBHadronsAfterTop, int, mcOnly=True, help="number of matched b hadrons after top quark decay"),
+    NTupleVariable("numCHadronsAfterTop", lambda x : x.numCHadronsAfterTop, int, mcOnly=True, help="number of matched c hadrons after top quark decay"),
+])
+
 
 def ptRel(p4,axis):
     a=ROOT.TVector3(axis.Vect().X(),axis.Vect().Y(),axis.Vect().Z())

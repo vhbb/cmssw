@@ -144,6 +144,62 @@ process.ca15PFTrimmedJetsCHS = process.ca15PFJetsCHS.clone(
     trimPtFracMin = cms.double(0.06),
     useExplicitGhosts = cms.bool(True))
 
+###
+### GenHFHadronMatcher
+###
+process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
+
+genParticleCollection = 'prunedGenParticles'
+genJetInputParticleCollection = 'packedGenParticles'
+
+from RecoJets.JetProducers.ak4GenJets_cfi import ak4GenJets
+process.ak4GenJetsCustom = ak4GenJets.clone(
+    src = genJetInputParticleCollection,
+    rParam = cms.double(0.4),
+    jetAlgorithm = cms.string("AntiKt")
+)
+genJetCollection = "ak4GenJetsCustom"
+
+# Ghost particle collection used for Hadron-Jet association
+# MUST use proper input particle collection
+from PhysicsTools.JetMCAlgos.HadronAndPartonSelector_cfi import selectedHadronsAndPartons
+process.selectedHadronsAndPartons = selectedHadronsAndPartons.clone(
+    particles = genParticleCollection
+)
+
+# Input particle collection for matching to gen jets (partons + leptons)
+# MUST use use proper input jet collection: the jets to which hadrons should be associated
+# rParam and jetAlgorithm MUST match those used for jets to be associated with hadrons
+# More details on the tool: https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideBTagMCTools#New_jet_flavour_definition
+from PhysicsTools.JetMCAlgos.sequences.GenHFHadronMatching_cff import genJetFlavourPlusLeptonInfos
+process.genJetFlavourPlusLeptonInfos = genJetFlavourPlusLeptonInfos.clone(
+    jets = genJetCollection,
+    rParam = cms.double(0.4),
+    jetAlgorithm = cms.string("AntiKt")
+)
+
+
+# Plugin for analysing B hadrons
+# MUST use the same particle collection as in selectedHadronsAndPartons
+from PhysicsTools.JetMCAlgos.sequences.GenHFHadronMatching_cff import matchGenBHadron
+process.matchGenBHadron = matchGenBHadron.clone(
+    genParticles = genParticleCollection
+)
+
+# Plugin for analysing C hadrons
+# MUST use the same particle collection as in selectedHadronsAndPartons
+from PhysicsTools.JetMCAlgos.sequences.GenHFHadronMatching_cff import matchGenCHadron
+process.matchGenCHadron = matchGenCHadron.clone(
+    genParticles = genParticleCollection
+)
+
+
+process.OUT.outputCommands.append("keep *_matchGenBHadron__EX")
+process.OUT.outputCommands.append("keep *_matchGenCHadron__EX")
+process.OUT.outputCommands.append("keep *_matchGenBHadron_*_EX")
+process.OUT.outputCommands.append("keep *_matchGenCHadron_*_EX")
+process.OUT.outputCommands.append("keep *_ak4GenJetsCustom_*_EX")
+
 process.OUT.outputCommands.append("keep *_ca15PFJetsCHS_*_EX")
 process.OUT.outputCommands.append("keep *_ca15PFJetsCHSNSubjettiness_*_EX")
 process.OUT.outputCommands.append("keep *_ca15PFTrimmedJetsCHS_*_EX")
