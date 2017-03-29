@@ -218,6 +218,7 @@ class GeneratorAnalyzer( Analyzer ):
         event.vh_genHiggsBosons = []
         event.vh_genHiggsSisters = []
         event.vh_genleps    = []
+        event.vh_genlepsprompt    = []
         event.vh_gentauleps = []
         event.vh_gentaus    = []
         event.vh_genlepsRecovered    = []
@@ -241,7 +242,10 @@ class GeneratorAnalyzer( Analyzer ):
         )
         event.vh_gengluonfromt = filter(lambda x: x.p4().Pt>20, event.vh_gengluonfromt)
         event.vh_gengluonfromb = filter(lambda x: x.p4().Pt>20, event.vh_gengluonfromb)
-
+        event.vh_genlepsprompt = sorted(
+            [p for p in event.genParticles if abs(p.pdgId()) in [11,13] and (p.isPromptFinalState() or p.isDirectPromptTauDecayProductFinalState())],
+            key=lambda x: x.p4().Pt()
+        )
         #event.vh_genHiggsToBB = [ p for p in event.genParticles if abs(p.pdgId())==25 and p.numberOfDaughters()==2 and abs(p.daughter(0).pdgId()) == 5 ] 
 
         #event.vh_genvbosonsToLL = [ p for p in event.genParticles if abs(p.pdgId()) in [23,24] and abs(p.mother().pdgId()) in [23,24] and p.numberOfDaughters()==2 and abs(p.daughter(0).pdgId()) in [11,13,15] ]
