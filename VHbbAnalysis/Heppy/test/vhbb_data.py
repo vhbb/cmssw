@@ -10,10 +10,7 @@ sample.files=[
 ]
 sample.json="json.txt"
 
-TriggerObjectsAna.triggerObjectInputTag = ('selectedPatTrigger','','RECO')
-FlagsAna.processName='RECO'
 TrigAna.triggerBits = triggerTableData
-L1TriggerAna.processName = 'RECO'
 
 # and the following runs the process directly 
 if __name__ == '__main__':
