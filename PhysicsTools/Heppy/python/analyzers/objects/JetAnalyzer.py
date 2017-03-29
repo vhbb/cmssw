@@ -310,7 +310,7 @@ class JetAnalyzer( Analyzer ):
         
         ## Associate jets to leptons
         incleptons = event.inclusiveLeptons if hasattr(event, 'inclusiveLeptons') else event.selectedLeptons
-        jlpairs = matchObjectCollection(incleptons, self.allJets, self.jetLepDR**2)
+        jlpairs = matchObjectCollection(incleptons, self.allJets, self.jetLepDR)
 
         for jet in self.allJets:
             jet.leptons = [l for l in jlpairs if jlpairs[l] == jet ]
@@ -322,7 +322,7 @@ class JetAnalyzer( Analyzer ):
                 setattr(lep,"jet"+self.cfg_ana.collectionPostFix,jet)
         ## Associate jets to taus 
         taus = getattr(event,'selectedTaus',[])
-        jtaupairs = matchObjectCollection( taus, self.allJets, self.jetLepDR**2)
+        jtaupairs = matchObjectCollection( taus, self.allJets, self.jetLepDR)
 
         for jet in self.allJets:
             jet.taus = [l for l in jtaupairs if jtaupairs[l] == jet ]
@@ -344,7 +344,7 @@ class JetAnalyzer( Analyzer ):
 
 	    if getattr(self.cfg_ana, 'attachNeutrinos', True) and hasattr(self.cfg_ana,"genNuSelection") :
 		jetNus=[x for x in event.genParticles if abs(x.pdgId()) in [12,14,16] and self.cfg_ana.genNuSelection(x) ]
-	 	pairs= matchObjectCollection (jetNus, self.genJets, 0.4**2)
+	 	pairs= matchObjectCollection (jetNus, self.genJets, 0.4)
                 
 		for (nu,genJet) in pairs.iteritems() :
 		     if genJet is not None :
