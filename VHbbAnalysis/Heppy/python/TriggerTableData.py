@@ -216,23 +216,26 @@ triggerTable = {
         "HLT_DoubleJet90_Double30_TripleBTagCSV_p087_v*",
     ],
     "ttH_SL_el" : [
-        "HLT_Ele27_eta2p1_WPTight_Gsf_v*",
+        "HLT_Ele27_WPTight_Gsf_v*",
     ],
     "ttH_SL_mu" : [
-        "HLT_IsoMu22_v*",
-        "HLT_IsoTkMu22_v*",
+        "HLT_IsoMu24_v*",
+        "HLT_IsoTkMu24_v*",
     ],
     "ttH_DL_mumu" : [
+        "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_v*",
+        "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_v*",
         "HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_v*",
         "HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ_v*",
     ],
     "ttH_DL_elmu" : [
         "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
         "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_v*",
+        "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*",
+        "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ_v*",
     ],
     "ttH_DL_elel" : [
         "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ_v*",
-        "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_v*",
     ],
     "ttH_FH" : [
         "HLT_PFHT450_SixJet40_BTagCSV_p056_v*",
