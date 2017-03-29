@@ -139,7 +139,9 @@ class LeptonAnalyzer( Analyzer ):
             self.handles['eleMVArawSpring15NonTrig'] = AutoHandle( self.cfg_ana.eleMVArawSpring15NonTrig, 'edm::ValueMap<float>')
             self.handles['eleMVAIdSpring16GeneralPurposePOG80'] = AutoHandle( self.cfg_ana.eleMVAIdSpring16GeneralPurposePOG80, 'edm::ValueMap<bool>')
             self.handles['eleMVAIdSpring16GeneralPurposePOG90'] = AutoHandle( self.cfg_ana.eleMVAIdSpring16GeneralPurposePOG90, 'edm::ValueMap<bool>')
-            self.handles['eleMVArawSpring16GeneralPurpose']     = AutoHandle( self.cfg_ana.eleMVArawSpring16GeneralPurpose, 'edm::ValueMap<float>')
+            self.handles['eleMVArawSpring16GeneralPurpose'] = AutoHandle( self.cfg_ana.eleMVArawSpring16GeneralPurpose, 'edm::ValueMap<float>')
+            self.handles['eleMVAIdSpring16HZZ'] = AutoHandle( self.cfg_ana.eleMVAIdSpring16HZZ, 'edm::ValueMap<bool>')
+            self.handles['eleMVArawSpring16HZZ'] = AutoHandle( self.cfg_ana.eleMVArawSpring16HZZ, 'edm::ValueMap<float>')
 
         if self.doMiniIsolation or self.doIsolationScan:
             self.handles['packedCandidates'] = AutoHandle( self.cfg_ana.packedCandidates, 'std::vector<pat::PackedCandidate>')
@@ -314,7 +316,7 @@ class LeptonAnalyzer( Analyzer ):
               elif aeta < 2.000: mu.EffectiveArea03 = 0.0465
               elif aeta < 2.200: mu.EffectiveArea03 = 0.0433
               else:              mu.EffectiveArea03 = 0.0577
-              mu.EffectiveArea04 = 0 # not computed
+              mu.EffectiveArea04 = 0 # not computed          
           else: raise RuntimeError,  "Unsupported value for mu_effectiveAreas: can only use Data2012 (rho: ?) and Phys14_25ns_v1 or Spring15_25ns_v1 (rho: fixedGridRhoFastjetAll)"
         # Attach the vertex to them, for dxy/dz calculation
         goodVertices = getattr(event, self.vertexChoice)
@@ -414,6 +416,18 @@ class LeptonAnalyzer( Analyzer ):
               else:              ele.EffectiveArea03 = 0.2687
               # warning: EAs not computed for cone DR=0.4 yet. Do not correct
               ele.EffectiveArea04 = 0.0
+          elif self.eleEffectiveArea == "Spring16_25ns_v1":
+              SCEta = abs(ele.superCluster().eta())
+              ## ----- https://github.com/ikrav/cmssw/blob/egm_id_747_v2/RecoEgamma/ElectronIdentification/data/Spring15/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_25ns.txt
+              if   SCEta < 1.000: ele.EffectiveArea03 = 0.1703
+              elif SCEta < 1.479: ele.EffectiveArea03 = 0.1715
+              elif SCEta < 2.000: ele.EffectiveArea03 = 0.1213
+              elif SCEta < 2.200: ele.EffectiveArea03 = 0.1230
+              elif SCEta < 2.300: ele.EffectiveArea03 = 0.1635
+              elif SCEta < 2.400: ele.EffectiveArea03 = 0.1937
+              else:              ele.EffectiveArea03 = 0.2393
+              # warning: EAs not computed for cone DR=0.4 yet. Do not correct
+              ele.EffectiveArea04 = 0.0
           else: raise RuntimeError,  "Unsupported value for ele_effectiveAreas: can only use Data2012 (rho: ?), Phys14_v1 and Spring15_v1 (rho: fixedGridRhoFastjetAll)"
 
         # Electron scale calibrations
@@ -425,6 +439,10 @@ class LeptonAnalyzer( Analyzer ):
         goodVertices = getattr(event, self.vertexChoice)
         for ele in allelectrons:
             ele.associatedVertex = goodVertices[0] if len(goodVertices)>0 else event.vertices[0]
+
+        # Attach the event (for MVA Id)
+        for ele in allelectrons:
+            ele.event = event.input.object()    
 
         # Compute relIso with R=0.3 and R=0.4 cones
         for ele in allelectrons:
@@ -449,7 +467,8 @@ class LeptonAnalyzer( Analyzer ):
                  ele.tightIdResult = -1 + 1*ele.electronID("POG_Cuts_ID_PHYS14_25ns_v1_ConvVetoDxyDz_Veto_full5x5") + 1*ele.electronID("POG_Cuts_ID_PHYS14_25ns_v1_ConvVetoDxyDz_Loose_full5x5") + 1*ele.electronID("POG_Cuts_ID_PHYS14_25ns_v1_ConvVetoDxyDz_Medium_full5x5") + 1*ele.electronID("POG_Cuts_ID_PHYS14_25ns_v1_ConvVetoDxyDz_Tight_full5x5")
             elif self.cfg_ana.ele_tightId=="Cuts_SPRING15_25ns_v1_ConvVetoDxyDz" :
                  ele.tightIdResult = -1 + 1*ele.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Veto_full5x5") + 1*ele.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Loose_full5x5") + 1*ele.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Medium_full5x5") + 1*ele.electronID("POG_Cuts_ID_SPRING15_25ns_v1_ConvVetoDxyDz_Tight_full5x5")
-
+            elif self.cfg_ana.ele_tightId=="Cuts_SPRING16_25ns_v1_ConvVetoDxyDz" :
+                 ele.tightIdResult = -1 + 1*ele.electronID("POG_Cuts_ID_SPRING16_25ns_v1_ConvVetoDxyDz_Veto") + 1*ele.electronID("POG_Cuts_ID_SPRING16_25ns_v1_ConvVetoDxyDz_Loose") + 1*ele.electronID("POG_Cuts_ID_SPRING16_25ns_v1_ConvVetoDxyDz_Medium") + 1*ele.electronID("POG_Cuts_ID_SPRING16_25ns_v1_ConvVetoDxyDz_Tight")
             else :
                  try:
                      ele.tightIdResult = ele.electronID(self.cfg_ana.ele_tightId)
@@ -468,6 +487,8 @@ class LeptonAnalyzer( Analyzer ):
             eleMVAIdSpring16GeneralPurposePOG80 = self.handles['eleMVAIdSpring16GeneralPurposePOG80'].product()
             eleMVAIdSpring16GeneralPurposePOG90 = self.handles['eleMVAIdSpring16GeneralPurposePOG90'].product()
             eleMVArawSpring16GeneralPurpose = self.handles['eleMVArawSpring16GeneralPurpose'].product()
+            eleMVAIdSpring16HZZ = self.handles['eleMVAIdSpring16HZZ'].product()
+            eleMVArawSpring16HZZ = self.handles['eleMVArawSpring16HZZ'].product()
             for ie, ele in enumerate(allelectrons):
                 ele.mvaIdSpring15TrigMedium = eleMVAIdSpring15TrigMedium.get(ie)
                 ele.mvaIdSpring15TrigTight = eleMVAIdSpring15TrigTight.get(ie)
@@ -477,7 +498,13 @@ class LeptonAnalyzer( Analyzer ):
                 ele.mvaRawSpring15NonTrig = eleMVArawSpring15NonTrig.get(ie)
                 ele.mvaIdSpring16GeneralPurposePOG80 = eleMVAIdSpring16GeneralPurposePOG80.get(ie)
                 ele.mvaIdSpring16GeneralPurposePOG90 = eleMVAIdSpring16GeneralPurposePOG90.get(ie)
-                ele.mvaRawSpring16GeneralPurpose     = eleMVArawSpring16GeneralPurpose.get(ie)
+                ele.mvaRawSpring16GeneralPurpose = eleMVArawSpring16GeneralPurpose.get(ie)
+                ele.mvaIdSpring16GPVLoose = ele.electronID("MVA_ID_NonTrig_Spring16_VLoose")
+                ele.mvaIdSpring16GPVLooseEmu = ele.electronID("MVA_ID_NonTrig_Spring16_VLooseIdEmu")
+                ele.mvaIdSpring16GPTight = ele.electronID("MVA_ID_NonTrig_Spring16_Tight")
+                ele.mvaRawSpring16GP = ele.mvaRun2("Spring16GP")
+                ele.mvaIdSpring16HZZ = eleMVAIdSpring16HZZ.get(ie)
+                ele.mvaRawSpring16HZZ = eleMVArawSpring16HZZ.get(ie)
         
         return allelectrons 
 
@@ -774,13 +801,15 @@ setattr(LeptonAnalyzer,"defaultConfig",cfg.Analyzer(
     eleMVAIdSpring16GeneralPurposePOG80 = "egmGsfElectronIDs:mvaEleID-Spring16-GeneralPurpose-V1-wp80",
     eleMVAIdSpring16GeneralPurposePOG90 = "egmGsfElectronIDs:mvaEleID-Spring16-GeneralPurpose-V1-wp90",
     eleMVArawSpring16GeneralPurpose     = "electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16GeneralPurposeV1Values",
+    eleMVAIdSpring16HZZ = "egmGsfElectronIDs:mvaEleID-Spring16-HZZ-V1-wpLoose",
+    eleMVArawSpring16HZZ = "electronMVAValueMapProducer:ElectronMVAEstimatorRun2Spring16HZZV1Values",
     # muon isolation correction method (can be "rhoArea" or "deltaBeta")
     mu_isoCorr = "rhoArea" ,
     mu_effectiveAreas = "Spring15_25ns_v1", #(can be 'Data2012' or 'Phys14_25ns_v1' or 'Spring15_25ns_v1')
     mu_tightId = "POG_ID_Tight" ,
     # electron isolation correction method (can be "rhoArea" or "deltaBeta")
     ele_isoCorr = "rhoArea" ,
-    ele_effectiveAreas = "Spring15_25ns_v1" , #(can be 'Data2012' or 'Phys14_25ns_v1', or 'Spring15_50ns_v1' or 'Spring15_25ns_v1')
+    ele_effectiveAreas = "Spring16_25ns_v1" , #(can be 'Data2012' or 'Phys14_25ns_v1', or 'Spring15_50ns_v1' or 'Spring15_25ns_v1')
     ele_tightId = "Cuts_2012" ,
     # minimum deltaR between a loose electron and a loose muon (on overlaps, discard the electron)
     min_dr_electron_muon = 0.02,

@@ -2,6 +2,7 @@ from PhysicsTools.Heppy.physicsobjects.Lepton import Lepton
 from PhysicsTools.Heppy.physicsutils.ElectronMVAID import *
 from PhysicsTools.HeppyCore.utils.deltar import deltaR
 import ROOT
+import sys
 
 class Electron( Lepton ):
 
@@ -40,6 +41,10 @@ class Electron( Lepton ):
         elif id == "POG_MVA_ID_Spring16_GeneralPurpose_WP90":    return self.mvaIDRun2("Spring16GeneralPurpose","POG90")
         elif id == "MVA_ID_NonTrig_Phys14Fix_HZZ":     return self.mvaIDRun2("NonTrigPhys14Fix","HZZ")
         elif id == "MVA_ID_NonTrig_Spring15_HZZ":     return self.mvaIDRun2("NonTrigSpring15MiniAOD","HZZ")
+        elif id == "MVA_ID_NonTrig_Spring16_HZZ":     return self.mvaIDRun2("Spring16","HZZ")
+        elif id == "MVA_ID_NonTrig_Spring16_VLoose":   return self.mvaIDRun2("Spring16","VLoose")
+        elif id == "MVA_ID_NonTrig_Spring16_VLooseIdEmu":   return self.mvaIDRun2("Spring16","VLooseIdEmu")
+        elif id == "MVA_ID_NonTrig_Spring16_Tight": return self.mvaIDRun2("Spring16","Tight")
         elif id.startswith("POG_Cuts_ID_"):
                 return self.cutBasedId(id.replace("POG_Cuts_ID_","POG_"))
         for ID in self.electronIDs():
@@ -102,7 +107,12 @@ class Electron( Lepton ):
             'POG_SPRING15_25ns_v1_Loose'  :  [('dEtaIn', [0.01050, 0.00814]), ('dPhiIn', [0.1150, 0.1820]), ('sigmaIEtaIEta', [0.0103, 0.0301]), ('H/E', [0.1040, 0.0897]), ('1/E-1/p', [0.1020, 0.12600])],
             'POG_SPRING15_25ns_v1_Medium' :  [('dEtaIn', [0.01030, 0.00733]), ('dPhiIn', [0.0336, 0.1140]), ('sigmaIEtaIEta', [0.0101, 0.0283]), ('H/E', [0.0876, 0.0678]), ('1/E-1/p', [0.0174, 0.08980])],
             'POG_SPRING15_25ns_v1_Tight'  :  [('dEtaIn', [0.00926, 0.00724]), ('dPhiIn', [0.0336, 0.0918]), ('sigmaIEtaIEta', [0.0101, 0.0279]), ('H/E', [0.0597, 0.0615]), ('1/E-1/p', [0.0120, 0.00999])],
-
+            ## ------- https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Working_points_for_2016_data_for
+            'POG_SPRING16_25ns_v1_Veto'   :  [('dEtaIn', [0.00749, 0.00895]), ('dPhiIn', [0.2280, 0.2130]), ('sigmaIEtaIEta', [0.01150, 0.0370]), ('H/E', [0.3560, 0.2110]), ('1/E-1/p', [0.2990, 0.15])],
+            'POG_SPRING16_25ns_v1_Loose'  :  [('dEtaIn', [0.00477, 0.00868]), ('dPhiIn', [0.2220, 0.2130]), ('sigmaIEtaIEta', [0.01100, 0.0314]), ('H/E', [0.2980, 0.1010]), ('1/E-1/p', [0.2410, 0.14])],
+            'POG_SPRING16_25ns_v1_Medium' :  [('dEtaIn', [0.00311, 0.00609]), ('dPhiIn', [0.1030, 0.0450]), ('sigmaIEtaIEta', [0.00998, 0.0298]), ('H/E', [0.2530, 0.0878]), ('1/E-1/p', [0.1340, 0.13])],
+            'POG_SPRING16_25ns_v1_Tight'  :  [('dEtaIn', [0.00308, 0.00605]), ('dPhiIn', [0.0816, 0.0394]), ('sigmaIEtaIEta', [0.00998, 0.0292]), ('H/E', [0.0414, 0.0641]), ('1/E-1/p', [0.0129, 0.0129])],
+            'POG_SPRING16_25ns_v1_HLT'    :  [('dEtaIn', [0.004, 999]), ('dPhiIn', [0.020, 999]), ('sigmaIEtaIEta', [0.011, 0.031]), ('H/E', [0.060, 0.065]), ('1/E-1/p', [0.013, 0.013]), ('chi2', [sys.float_info.max, 3.0]), ('ECALPFIsoEA', [0.160, 0.120]), ('HCALPFIsoEA', [0.120, 0.120]), ('trkIso', [0.08, 0.08])],
         }
         WP_conversion_veto = {
             # missing Hits incremented by 1 because we return False if >=, note the '='
@@ -134,6 +144,11 @@ class Electron( Lepton ):
             'POG_SPRING15_25ns_v1_ConvVeto_Loose'  :  WP['POG_SPRING15_25ns_v1_Loose' ]+[('conversionVeto', [True, True]), ('missingHits', [3, 2])],
             'POG_SPRING15_25ns_v1_ConvVeto_Medium' :  WP['POG_SPRING15_25ns_v1_Medium']+[('conversionVeto', [True, True]), ('missingHits', [3, 2])],
             'POG_SPRING15_25ns_v1_ConvVeto_Tight'  :  WP['POG_SPRING15_25ns_v1_Tight' ]+[('conversionVeto', [True, True]), ('missingHits', [3, 2])],
+            ## ------- https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Working_points_for_2016_data_for
+            'POG_SPRING16_25ns_v1_ConvVeto_Veto'   :  WP['POG_SPRING16_25ns_v1_Veto'  ]+[('conversionVeto', [True, True]), ('missingHits', [3, 4])],
+            'POG_SPRING16_25ns_v1_ConvVeto_Loose'  :  WP['POG_SPRING16_25ns_v1_Loose' ]+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
+            'POG_SPRING16_25ns_v1_ConvVeto_Medium' :  WP['POG_SPRING16_25ns_v1_Medium']+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
+'POG_SPRING16_25ns_v1_ConvVeto_Tight' : WP['POG_SPRING16_25ns_v1_Tight' ]+[('conversionVeto', [True, True]), ('missingHits', [2, 2])],
         }
 
         WP.update(WP_conversion_veto)
@@ -209,13 +224,17 @@ class Electron( Lepton ):
                 self._mvaRun2[name] =  self.physObj.userFloat("ElectronMVAEstimatorRun2Spring15NonTrig25nsV1Values")
                 return self._mvaRun2[name]
             if name not in ElectronMVAID_ByName: raise RuntimeError, "Unknown electron run2 mva id %s (known ones are: %s)\n" % (name, ElectronMVAID_ByName.keys())
-            if self.associatedVertex == None: raise RuntimeError, "You need to set electron.associatedVertex before calling any MVA"
-            if self.rho              == None: raise RuntimeError, "You need to set electron.rho before calling any MVA"
-            # -v---- below is correct in Heppy 74X, but probably not functional anyway
-            self._mvaRun2[name] = ElectronMVAID_ByName[name](self.physObj, self.associatedVertex, self.rho, True, debug)
-            # -v---- below would be correct for CMGTools 74X witht the updated Spring15 MVA electron ID
-            #if self.event            == None: raise RuntimeError, "You need to set electron.event before calling any MVA"
-            #self._mvaRun2[name] = ElectronMVAID_ByName[name](self.physObj, self.associatedVertex, self.event, self.rho, True, debug)
+            if name in ("Spring16HZZ","Spring16GP"):
+                if self.event == None: raise RuntimeError, "You need to set electron.event before calling any new MVA"
+                self._mvaRun2[name] = ElectronMVAID_ByName[name](self.physObj, self.event, self.associatedVertex, self.rho, debug)
+            else:
+                if self.associatedVertex == None: raise RuntimeError, "You need to set electron.associatedVertex before calling any MVA"
+                if self.rho              == None: raise RuntimeError, "You need to set electron.rho before calling any MVA"
+                # -v---- below is correct in Heppy 74X, but probably not functional anyway
+                self._mvaRun2[name] = ElectronMVAID_ByName[name](self.physObj, self.associatedVertex, self.rho, True, debug)
+                # -v---- below would be correct for CMGTools 74X witht the updated Spring15 MVA electron ID
+                #if self.event            == None: raise RuntimeError, "You need to set electron.event before calling any MVA"
+                #self._mvaRun2[name] = ElectronMVAID_ByName[name](self.physObj, self.associatedVertex, self.event, self.rho, True, debug)
         return self._mvaRun2[name]
 
     def mvaIDTight(self, full5x5=False):
@@ -317,6 +336,42 @@ class Electron( Lepton ):
                         elif eta < 1.479: return self.mvaRun2(name) > -0.235222
                         else: return self.mvaRun2(name) > -0.67099
                 else: raise RuntimeError, "Ele MVA ID Working point not found"
+            elif name == "Spring16":
+                smooth_cut = False
+                if wp == "HZZ":
+                    if self.pt() <= 10:
+                        if   eta < 0.8  : return self.mvaRun2(name+'HZZ') > -0.211;
+                        elif eta < 1.479: return self.mvaRun2(name+'HZZ') > -0.396;
+                        else            : return self.mvaRun2(name+'HZZ') > -0.215;
+                    else:
+                        if   eta < 0.8  : return self.mvaRun2(name+'HZZ') > -0.870;
+                        elif eta < 1.479: return self.mvaRun2(name+'HZZ') > -0.838;
+                        else            : return self.mvaRun2(name+'HZZ') > -0.763;
+                elif wp=="VLoose":
+                    smooth_cut = True
+                    _vlow = [0.46,-0.03,0.06]
+                    _low = [-0.48,-0.67,-0.49]
+                    _high = [-0.85,-0.91,-0.83]
+                elif wp=="VLooseIdEmu":
+                    smooth_cut = True
+                    _vlow = [-0.30,-0.46,-0.63]
+                    _low = [-0.86,-0.85,-0.81]
+                    _high = [-0.96,-0.96,-0.95]
+                elif wp=="Tight":
+                    smooth_cut = True
+                    _low = [0.77,0.56,0.48]
+                    _vlow = _low
+                    _high = [0.52,0.11,-0.01]
+                if not smooth_cut: raise RuntimeError, "Ele MVA ID Working point not found"
+                val = self.mvaRun2(name+'GP') if self.pt()>10 else self.mvaRun2(name+'HZZ')
+                if self.pt()<=10:
+                    return (val > _vlow[(eta>=0.8)+(eta>=1.479)])
+                else: # _low below 15 GeV, _high above 25 GeV, interpolation in between
+                    a = _low[(eta>=0.8)+(eta>=1.479)]
+                    b = _high[(eta>=0.8)+(eta>=1.479)]
+                    c = (a-b)/10
+                    cut = min(a,max(b,a-c*(self.pt()-15))) # warning: the _high WP must be looser than the _low one
+                    return (val>cut)                
             elif name in ("Spring16GeneralPurpose"):
                 if wp == "POG90":
                     if   (eta < 0.8)  : return self.mvaRun2(name) > 0.836695742607;

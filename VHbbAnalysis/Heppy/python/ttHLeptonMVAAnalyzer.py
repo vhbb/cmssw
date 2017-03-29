@@ -9,8 +9,10 @@ import os
 class ttHLeptonMVAAnalyzer( Analyzer ):
     def __init__(self, cfg_ana, cfg_comp, looperName ):
         super(ttHLeptonMVAAnalyzer,self).__init__(cfg_ana,cfg_comp,looperName)
-        self.leptonMVAKindTTH = getattr(self.cfg_ana, "leptonMVAKindTTH", "forMoriond16")
-        self.leptonMVAPathTTH = getattr(self.cfg_ana, "leptonMVAPathTTH", "VHbbAnalysis/Heppy/data/leptonMVA/tth/%s_BDTG.weights.xml")
+        #self.leptonMVAKindTTH = getattr(self.cfg_ana, "leptonMVAKindTTH", "forMoriond16")
+        #self.leptonMVAPathTTH = getattr(self.cfg_ana, "leptonMVAPathTTH", "VHbbAnalysis/Heppy/data/leptonMVA/tth/%s_BDTG_2016.weights.xml")
+        self.leptonMVAKindTTH = getattr(self.cfg_ana, "leptonMVAKindTTH", "forMoriond17")
+        self.leptonMVAPathTTH = getattr(self.cfg_ana, "leptonMVAPathTTH", "VHbbAnalysis/Heppy/data/leptonMVA/tth/%s_BDTG_2016rereco.weights.xml")
         if self.leptonMVAPathTTH[0] != "/": self.leptonMVAPathTTH = "%s/src/%s" % ( os.environ['CMSSW_BASE'], self.leptonMVAPathTTH)
         self.leptonMVATTH = LeptonMVA(self.leptonMVAKindTTH, self.leptonMVAPathTTH, self.cfg_comp.isMC)
 

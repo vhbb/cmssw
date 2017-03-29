@@ -702,6 +702,8 @@ def initialize(**kwargs):
         setupAllVIDIdsInModule(process, eleid, setupVIDElectronSelection)
     for eleid in ["RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring16_GeneralPurpose_V1_cff"]:
         setupAllVIDIdsInModule(process, eleid, setupVIDElectronSelection)
+    for eleid in ["RecoEgamma.ElectronIdentification.Identification.mvaElectronID_Spring16_HZZ_V1_cff"]:
+        setupAllVIDIdsInModule(process, eleid, setupVIDElectronSelection)
     process.OUT.outputCommands.append("keep *_electronMVAValueMapProducer_*_EX")
     process.OUT.outputCommands.append("keep *_egmGsfElectronIDs_*_EX")
 
