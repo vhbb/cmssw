@@ -213,7 +213,7 @@ class AutoFillTreeProducer( TreeAnalyzerNumpy ):
             anclass += "        event.{0} = {0}.make_obj(event.input)\n".format(coll.name)
         
         for v in self.globalVariables:
-            if coll.mcOnly and not isMC:
+            if v.mcOnly and not isMC:
                 continue
             anclass += "        event.{0} = getattr(event.input, \"{0}\", None)\n".format(v.name) 
         
