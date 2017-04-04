@@ -46,6 +46,41 @@ def deltaR2(a, b):
     
     return pow(abs(abs(phi1 - phi2) - math.pi) - math.pi, 2) + pow(eta1 - eta2, 2)
 
+
+# Test if the jet passes the loose JetID criteria defined at
+# https://twiki.cern.ch/twiki/bin/view/CMS/JetID#Recommendations_for_13_TeV_data
+# Furthermore we require:
+#   - pT > 20 GeV
+#   - |eta| < 2.4
+def passesJetId(jet):
+    
+    if jet.pt() <= 20:
+        return False
+    
+    if abs(jet.eta()) >= 2.4:
+        return False
+
+    if jet.neutralHadronEnergyFraction() >= 0.99:
+        return False
+    
+    if jet.neutralEmEnergyFraction() >= 0.99:
+        return False
+
+    if jet.chargedMultiplicity()+jet.neutralMultiplicity() <= 1:
+        return False
+    
+    if jet.chargedHadronEnergyFraction() <= 0:
+        return False
+        
+    if jet.chargedMultiplicity() <= 0:
+        return False
+    
+    if  jet.chargedEmEnergyFraction() >= 0.99:
+        return False
+
+    return True
+
+
 def etaRelToTauAxis( vertex, tauAxis, tau_trackEtaRel) :
   direction = ROOT.Math.XYZVector(tauAxis.px(), tauAxis.py(), tauAxis.pz())
   tracks = vertex.daughterPtrVector()
@@ -692,12 +727,20 @@ class AdditionalBoost( Analyzer ):
 
             self.handles['ca15elecTagInfos']     = AutoHandle( ("ca15PFJetsCHSsoftPFElectronsTagInfos", "","EX"), "vector<reco::TemplatedSoftLeptonTagInfo<edm::Ptr<reco::Candidate> > >")
 
-            self.handles['ca15ungroomed']     = AutoHandle( ("ca15PFJetsCHS","","EX"), "std::vector<reco::PFJet>")
-            self.handles['ca15trimmed']       = AutoHandle( ("ca15PFTrimmedJetsCHS","","EX"), "std::vector<reco::PFJet>")
-            self.handles['ca15softdrop']      = AutoHandle( ("ca15PFSoftdropJetsCHS","","EX"), "std::vector<reco::PFJet>")
-            self.handles['ca15softdropz2b1']  = AutoHandle( ("ca15PFSoftdropZ2B1JetsCHS","","EX"), "std::vector<reco::PFJet>")
-            self.handles['ca15pruned']        = AutoHandle( ("ca15PFPrunedJetsCHS","","EX"), "std::vector<reco::BasicJet>")
-            self.handles['ca15prunedsubjets'] = AutoHandle( ("ca15PFPrunedJetsCHS","SubJets","EX"), "std::vector<reco::PFJet>")
+            self.handles['ca15ungroomed']           = AutoHandle( ("ca15PFJetsCHS","","EX"), "std::vector<reco::PFJet>")
+            self.handles['ca15trimmed']             = AutoHandle( ("ca15PFTrimmedJetsCHS","","EX"), "std::vector<reco::PFJet>")
+            self.handles['ca15pruned']              = AutoHandle( ("ca15PFPrunedJetsCHS","","EX"), "std::vector<reco::BasicJet>")
+            self.handles['ca15softdrop']            = AutoHandle( ("ca15PFSoftdropJetsCHS","","EX"), "std::vector<reco::BasicJet>")
+            self.handles['ca15softdropz2b1']        = AutoHandle( ("ca15PFSoftdropZ2B1JetsCHS","","EX"), "std::vector<reco::BasicJet>")
+
+            self.handles['ca15subjetfiltered']        = AutoHandle( ("ca15PFSubjetFilterCHS","filtercomp","EX"), "std::vector<reco::BasicJet>")
+
+            self.handles['ca15prunedsubjets']       = AutoHandle( ("ca15PFPrunedJetsCHS","SubJets","EX"), "std::vector<reco::PFJet>")
+            self.handles['ca15softdropsubjets']     = AutoHandle( ("ca15PFSoftdropJetsCHS","SubJets","EX"), "std::vector<reco::PFJet>")
+            self.handles['ca15softdropz2b1subjets'] = AutoHandle( ("ca15PFSoftdropZ2B1JetsCHS","SubJets","EX"), "std::vector<reco::PFJet>")
+
+            # we call them subjets, even though they are technically the filterjets in BDRS lingo
+            self.handles['ca15subjetfilteredsubjets']  = AutoHandle( ("ca15PFSubjetFilterCHS","filter","EX"), "std::vector<reco::PFJet>")
 
             self.handles['ca15tau1'] = AutoHandle( ("ca15PFJetsCHSNSubjettiness","tau1","EX"), "edm::ValueMap<float>")
             self.handles['ca15tau2'] = AutoHandle( ("ca15PFJetsCHSNSubjettiness","tau2","EX"), "edm::ValueMap<float>")
@@ -720,6 +763,16 @@ class AdditionalBoost( Analyzer ):
 
             self.handles['ca15prunedsubjetbtag'] = AutoHandle( ("ca15PFPrunedJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags","","EX"), 
                                                                "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+
+            self.handles['ca15softdropsubjetbtag'] = AutoHandle( ("ca15PFSoftdropJetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags","","EX"), 
+                                                               "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+
+            self.handles['ca15softdropz2b1subjetbtag'] = AutoHandle( ("ca15PFSoftdropZ2B1JetsCHSpfCombinedInclusiveSecondaryVertexV2BJetTags","","EX"), 
+                                                               "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+
+            self.handles['ca15subjetfilteredsubjetbtag'] = AutoHandle( ("ca15PFSubjetFilterCHSpfCombinedInclusiveSecondaryVertexV2BJetTags","","EX"), 
+                                                                       "edm::AssociationVector<edm::RefToBaseProd<reco::Jet>,vector<float>,edm::RefToBase<reco::Jet>,unsigned int,edm::helper::AssociationIdenticalKeyReference>")
+
 
     def process(self, event):
  
@@ -766,7 +819,7 @@ class AdditionalBoost( Analyzer ):
         # Groomed Uncalibrated Fatjets
         ########
 
-        for fj_name in ['ca15trimmed', 'ca15softdrop', 'ca15pruned']:            
+        for fj_name in ['ca15trimmed', 'ca15softdrop', 'ca15pruned', 'ca15subjetfiltered']:            
                 setattr(event, fj_name, map(PhysicsObject, self.handles[fj_name].product()))
 
 #
@@ -810,23 +863,67 @@ class AdditionalBoost( Analyzer ):
 #
 #        setattr(event, 'ak08prunedcal', pruned_cal_jets)
 #
+
+
+
             
         ######## 
         # Subjets 
         ########
 
-        for fj_name in ['ca15pruned']:
+        for fj_name in ['ca15pruned', 'ca15softdrop', 'ca15softdropz2b1', 'ca15subjetfiltered']:
 
             if self.skip_ca15 and ("ca15" in fj_name):
                 continue
 
+            # Get the 4-vectors
             setattr(event, fj_name + "subjets", map(PhysicsObject, self.handles[fj_name+"subjets"].product()))
             
+            # Add b-tag information
             newtags =  self.handles[fj_name+'subjetbtag'].product()
             for i in xrange(0,len(newtags)) :
                 for j in getattr(event, fj_name+"subjets"):
                     if  j.physObj == newtags.key(i).get():
-                        j.btag = newtags.value(i)
+                        j.btag = newtags.value(i)                        
+                        # Map dummy value to -0.1
+                        if j.btag == -10.:
+                            j.btag = -0.1
+                            
+            # Add jetID information
+            for j in getattr(event, fj_name+"subjets"):
+                j.jetID = passesJetId(j)
+                        
+            # Add information from which FJ the subjet comes
+            # Loop over subjets
+            for j in getattr(event, fj_name+"subjets"):
+
+                j.fromFJ = -1
+
+                # Loop over fatjets
+                for i_fj, fj in enumerate(getattr(event, fj_name)):
+
+                    # Loop over daughters (and see if they correspond to the subjet)
+                    # (Unfortunately the object == fails, so we have to use kinematics)
+                    for i_daughter in range(fj.numberOfDaughters()):
+
+                        if not fj_name == "ca15subjetfiltered":
+                            daughter = fj.daughter(i_daughter)
+                        else:
+                            daughter = fj.daughterPtr(i_daughter).get()                            
+
+                        if (daughter.pt() == j.pt() and 
+                            daughter.eta() == j.eta() and 
+                            daughter.phi() == j.phi() and
+                            daughter.mass() == j.mass()):
+
+                            j.fromFJ = i_fj
+                            break
+
+                    if j.fromFJ > -1:
+                        break
+            
+            # Sort subjets by pT
+            setattr(event, fj_name + "subjets", sorted(getattr(event, fj_name + "subjets"), key = lambda x:-x.pt()))
 
 
         ######## 
@@ -850,6 +947,9 @@ class AdditionalBoost( Analyzer ):
                 # HTT return the subjet-pair closest to the W-mass as W-subjets
                 # Could be improved by b-tagging if we run into a problem
                 [sj_w1, sj_w2, sj_nonw] = [con.__deref__() for con in candJets[i].getJetConstituents() if not con.isNull()]
+
+                # Do all subjets pass the JetID requirements
+                event.httCandidates[i].subjetIDPassed = all([passesJetId(x) for x in [sj_w1, sj_w2, sj_nonw]])
 
                 # Calibrate the subjets: W1
                 sj_w1_uncal = Jet(sj_w1)        
@@ -911,6 +1011,10 @@ class AdditionalBoost( Analyzer ):
                 for ib in xrange(0, len(sjbtags)) :
                     if  sj_w1 == sjbtags.key(ib).get():
                         event.httCandidates[i].sjW1btag = sjbtags.value(ib)
+                        # Map dummy for -10 to -0.1 
+                        if event.httCandidates[i].sjW1btag == -10.:
+                            event.httCandidates[i].sjW1btag = -0.1
+                            
 
                 # Store SJ W2 Variables
                 event.httCandidates[i].sjW2ptcal   = sj_w2_cal.pt()
@@ -924,6 +1028,10 @@ class AdditionalBoost( Analyzer ):
                 for ib in xrange(0, len(sjbtags)) :
                     if  sj_w2 == sjbtags.key(ib).get():
                         event.httCandidates[i].sjW2btag = sjbtags.value(ib)
+                        # Map dummy for -10 to -0.1 
+                        if event.httCandidates[i].sjW2btag == -10.:
+                            event.httCandidates[i].sjW2btag = -0.1
+
 
                 # Store SJ Non W Variables
                 event.httCandidates[i].sjNonWptcal   = sj_nonw_cal.pt()  
@@ -937,6 +1045,10 @@ class AdditionalBoost( Analyzer ):
                 for ib in xrange(0, len(sjbtags)) :
                     if  sj_nonw == sjbtags.key(ib).get():
                         event.httCandidates[i].sjNonWbtag = sjbtags.value(ib)
+                        # Map dummy for -10 to -0.1 
+                        if event.httCandidates[i].sjNonWbtag == -10.:
+                            event.httCandidates[i].sjNonWbtag = -0.1
+
 
         ######## 
         # AK8 Jets from MiniAOD + Subjet btags
@@ -1001,6 +1113,10 @@ class AdditionalBoost( Analyzer ):
         # Ungroomed Fatjets + NSubjettiness + Hbb Tagging
         ########
 
+        # So far only applied to ungroomed CA15 jet 
+        # TODO: also add for other collections
+        max_fatjet_eta = 2.0
+
         for prefix in ["ca15"]:
 
             if self.skip_ca15 and ("ca15" in prefix):
@@ -1015,8 +1131,14 @@ class AdditionalBoost( Analyzer ):
             newtags =  self.handles[prefix+'bbtag'].product()
                 
             # Four Vector
-            setattr(event, prefix+"ungroomed", map(PhysicsObject, self.handles[prefix+'ungroomed'].product()))
-
+            tmp = map(PhysicsObject, self.handles[prefix+'ungroomed'].product())
+            # assign the original index (so we can do a proper lookup of original jet even after eta cut)
+            for ij, j in enumerate(tmp):
+                j.original_index = ij
+                
+            # And apply eta cut
+            setattr(event, prefix+"ungroomed", [x for x in tmp if abs(x.eta()) < max_fatjet_eta])
+                
             # Loop over jets                        
             for ij, jet in enumerate(getattr(event, prefix+"ungroomed")):
 
@@ -1036,7 +1158,7 @@ class AdditionalBoost( Analyzer ):
                 ipTagInfo    = self.handles['ca15ipTagInfos'].product()[ij]
                 svTagInfo    = self.handles['ca15svTagInfos'].product()[ij]
 
-                orig_jet = self.handles[prefix+'ungroomed'].product()[ij]
+                orig_jet = self.handles[prefix+'ungroomed'].product()[jet.original_index]
 
                 if do_calc_bb:
                     calcBBTagVariables(jet, 
