@@ -303,8 +303,8 @@ class Component( CFG ):
 
 class DataComponent( Component ):
 
-    def __init__(self, name, files, intLumi=None, triggers=[], json=None):
-        super(DataComponent, self).__init__(name, files, triggers=triggers)
+    def __init__(self, name, files, intLumi=None, triggers=[], json=None, **kwargs):
+        super(DataComponent, self).__init__(name, files, triggers=triggers, **kwargs)
         self.isData = True
         self.intLumi = intLumi
         self.json = json

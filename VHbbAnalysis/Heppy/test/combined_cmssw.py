@@ -94,10 +94,7 @@ def initialize(**kwargs):
     process.chsTmp2 =  cms.EDProducer("CandPtrProjector", src = cms.InputTag("chsTmp1"), veto = cms.InputTag("selectedMuons"))
     process.chs = cms.EDProducer("CandPtrProjector", src = cms.InputTag("chsTmp2"), veto = cms.InputTag("selectedElectrons"))
 
-    if isMC:
-        process.OUT.outputCommands.append("keep *_slimmedJetsAK8_*_PAT")
-    else:
-        process.OUT.outputCommands.append("keep *_slimmedJetsAK8_*_RECO")
+    process.OUT.outputCommands.append("keep *_slimmedJetsAK8_*_PAT")
 
     if not skip_ca15:
         # CA, R=1.5, pT > 200 GeV
@@ -321,10 +318,11 @@ def initialize(**kwargs):
 
     process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
     from Configuration.AlCa.GlobalTag import GlobalTag
+    #not sure setting the GT here actually does anything, as we're processing MiniAOD
     if isMC:
-        process.GlobalTag = GlobalTag(process.GlobalTag, '80X_mcRun2_asymptotic_2016_TrancheIV_v6')
+        process.GlobalTag = GlobalTag(process.GlobalTag, '80X_mcRun2_asymptotic_2016_TrancheIV_v8')
     else:
-        process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016SeptRepro_v6')
+        process.GlobalTag = GlobalTag(process.GlobalTag, '80X_dataRun2_2016SeptRepro_v7')
 
     for fatjet_name in ["slimmedJetsAK8", "ca15PFJetsCHS"]:
 
@@ -727,7 +725,7 @@ def initialize(**kwargs):
     from PhysicsTools.PatAlgos.tools.jetTools import updateJetCollection
     updateJetCollection(
       process,
-      jetSource = cms.InputTag('slimmedJets','','PAT') if isMC else  cms.InputTag('slimmedJets','','RECO'),
+      jetSource = cms.InputTag('slimmedJets','','PAT'),
       jetCorrections = ('AK4PFchs', cms.vstring(['L1FastJet', 'L2Relative', 'L3Absolute']), 'None'),
       btagDiscriminators = ['deepFlavourCMVAJetTags:probudsg','deepFlavourCMVAJetTags:probb', 'deepFlavourCMVAJetTags:probc', 'deepFlavourCMVAJetTags:probbb', 'deepFlavourCMVAJetTags:probcc','deepFlavourJetTags:probudsg', 'deepFlavourJetTags:probb', 'deepFlavourJetTags:probc', 'deepFlavourJetTags:probbb', 'deepFlavourJetTags:probcc'],
 #     runIVF=True,
