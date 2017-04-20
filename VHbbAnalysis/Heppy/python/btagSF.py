@@ -16,15 +16,15 @@ def initBTagSF () :
     ROOT.gSystem.Load(csvpath+'/BTagCalibrationStandalone.so')
 
 # CSVv2
-    btagSFhandle.calib_csv = ROOT.BTagCalibration("csvv2", csvpath+"/ttH_BTV_CSVv2_13TeV_2016All_2017_3_30.csv")
+    btagSFhandle.calib_csv = ROOT.BTagCalibration("csvv2", csvpath+"/CSVv2_ichep.csv")
 
 # cMVAv2
-    btagSFhandle.calib_cmva = ROOT.BTagCalibration("cmvav2", csvpath+"/ttH_BTV_cMVAv2_13TeV_2016All_2017_3_30.csv")
+    btagSFhandle.calib_cmva = ROOT.BTagCalibration("cmvav2", csvpath+"/cMVAv2_ichep.csv")
 
 
-    btagSFhandle.calib_csv_reweight = ROOT.BTagCalibration("csvv2", csvpath+"/ttH_BTV_CSVv2_13TeV_2016All_36p5_2017_1_10.csv")
+    btagSFhandle.calib_csv_reweight = ROOT.BTagCalibration("csvv2", csvpath+"/ttH_BTV_CSVv2_13TeV_2016All_2017_3_30.csv")
 # cMVAv2
-    btagSFhandle.calib_cmva_reweight = ROOT.BTagCalibration("cmvav2", csvpath+"/ttH_BTV_cMVAv2_13TeV_2016All_36p5_2017_1_26.csv")
+    btagSFhandle.calib_cmva_reweight = ROOT.BTagCalibration("cmvav2", csvpath+"/ttH_BTV_cMVAv2_13TeV_2016All_2017_3_30.csv")
 
 # map between algo/flavour and measurement type
     btagSFhandle.sf_type_map = {
@@ -136,7 +136,7 @@ def get_event_SF(jets=[], syst="central", algo="CSV", btagSFhandle=btagSFhandle)
     weight = 1.0
     for jet in jets:
         weight *= get_SF(pt=jet.pt(), eta=jet.eta(), fl=jet.hadronFlavour(), val=(jet.btag("pfCombinedInclusiveSecondaryVertexV2BJetTags") if algo=="CSV" else jet.btag('pfCombinedMVAV2BJetTags')), syst=syst, algo=algo, wp="", shape_corr=True, btagSFhandle=btagSFhandle)
-    return weight                             
+    return weight
 
 if debug_btagSF:
     print "POG WP:"
