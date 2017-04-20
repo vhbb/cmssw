@@ -324,8 +324,8 @@ JetAna.jecPath=os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/jec"
 #JetAna.mcGT="Fall15_25nsV2_MC"
 #JetAna.dataGT = "Fall15_25nsV2_DATA"
 
-JetAna.mcGT="Summer16_23Sep2016V3_MC"
-JetAna.dataGT="Summer16_23Sep2016GV3_DATA"
+JetAna.mcGT="Summer16_23Sep2016V4_MC"
+JetAna.dataGT="Summer16_23Sep2016BCDV4_DATA"
 JetAna.addJECShifts=True
 JetAna.addJERShifts=True
 
@@ -463,7 +463,7 @@ VHbb = cfg.Analyzer(
     higgsJetsPreSelection = lambda x: (( x.puJetId() > 0 and x.jetID('POG_PFID_Loose')) or abs(x.eta())>3.0 ) and x.pt() >  20 ,
     higgsJetsPreSelectionVBF = lambda x: x.pt() >  20 ,
 #    higgsJetsPreSelectionVBF = lambda x: (( x.puJetId() > 0 and x.jetID('POG_PFID_Loose')) or abs(x.eta())>3.0 ) and x.pt() >  20,
-    passall=False,
+    passall=True,
     doSoftActivityVH=True,
     doZllKinematicFit=True,
     doSoftActivityEWK=True,
@@ -606,7 +606,7 @@ sample = cfg.MCComponent(
 		# "root://cmsxrootd.fnal.gov///store/mc/RunIISummer16MiniAODv2/TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/3E7EED14-C5B6-E611-BC04-484D7E8DF0C6.root",
 		# "root://cmsxrootd.fnal.gov///store/mc/RunIISummer16MiniAODv2/TTTo2L2Nu_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/04643CD6-CFC2-E611-9FD8-0CC47AD98F6E.root",
 		# "root://cmsxrootd.fnal.gov///store/mc/RunIISummer16MiniAODv2/TT_TuneEE5C_13TeV-powheg-herwigpp/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/60000/02656FC1-B0B5-E611-B2F9-44A842CFCA27.root",
-		"root://cmsxrootd.fnal.gov///store/mc/RunIISummer16MiniAODv2/WH_HToBB_WToLNu_M125_13TeV_amcatnloFXFX_madspin_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/120000/7C89D7C0-B7D0-E611-AB35-0CC47A4C8EE8.root",
+		"root://cmsxrootd.fnal.gov///store/mc/RunIISummer16MiniAODv2/ttHTobb_M125_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/50000/44949CF4-96C6-E611-B9A0-0025905A6122.root",
 		# "root://cmsxrootd.fnal.gov///store/mc/RunIISummer16MiniAODv2/ggZH_HToBB_ZToLL_M125_13TeV_powheg_pythia8_CUETP8M1Up/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/80000/D466A5FE-11CC-E611-AA18-842B2B17E3BA.root",
 		# "root://cmsxrootd.fnal.gov///store/mc/RunIISummer16MiniAODv2/ZH_HToBB_ZToLL_M125_13TeV_powheg_pythia8/MINIAODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/60000/28CA6CC9-FEC2-E611-BF37-008CFA5D2758.root",
     ],

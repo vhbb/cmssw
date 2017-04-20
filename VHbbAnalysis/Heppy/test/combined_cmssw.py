@@ -751,6 +751,20 @@ def initialize(**kwargs):
     process.OUT.outputCommands.append("keep *_TriggerResults_*_EX")
 
 
+    #MET filters
+    #https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2?rev=108#How_to_run_the_Bad_Charged_Hadro
+    #process.load("RecoMET.METFilters.BadPFMuonFilter_cfi")
+    #process.BadPFMuonFilter.muons        = cms.InputTag("slimmedMuons") 
+    #process.BadPFMuonFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+    #process.load("RecoMET.METFilters.BadChargedCandidateFilter_cfi")
+    #process.BadChargedCandidateFilter.muons        = cms.InputTag("slimmedMuons") 
+    #process.BadChargedCandidateFilter.PFCandidates = cms.InputTag("packedPFCandidates")
+    #process.load("RecoMET.METFilters.badGlobalMuonTaggersMiniAOD_cff")
+    #process.badGlobalMuonTaggerMAOD.muons         = cms.InputTag("slimmedMuons")
+    #process.badGlobalMuonTaggerMAOD.taggingMode   = cms.bool(True)
+    #process.cloneGlobalMuonTaggerMAOD.muons       = cms.InputTag("slimmedMuons")
+    #process.cloneGlobalMuonTaggerMAOD.taggingMode = cms.bool(True)
+
     if False :
     # As tracks are not stored in miniAOD, and b-tag fwk for CMSSW < 72X does not accept candidates
       process.load('RecoBTag.Configuration.RecoBTag_cff')
