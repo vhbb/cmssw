@@ -502,7 +502,7 @@ TrigAna = cfg.Analyzer(
     class_object = TriggerBitAnalyzer,
     triggerBits = triggerTable,  #default is MC, use the triggerTableData in -data.py files
    processName = 'HLT',
-   fallbackProcessName = 'HLT2',
+#   fallbackProcessName = 'HLT2',
 #   outprefix = 'HLT'
    )
 

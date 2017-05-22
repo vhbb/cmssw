@@ -1,4 +1,5 @@
 import math, os
+import numpy as np
 from PhysicsTools.Heppy.analyzers.core.Analyzer import Analyzer
 from PhysicsTools.Heppy.analyzers.core.AutoHandle import AutoHandle
 from PhysicsTools.Heppy.physicsobjects.PhysicsObjects import Jet
@@ -47,25 +48,38 @@ def cleanJetsAndLeptons(jets,leptons,deltaR,arbitration):
              [ l for (il,l) in enumerate(leptons) if goodlep[il] == True ] )
 
 
-
-def shiftJERfactor(JERShift, aeta):
-    factor = 1.122 + JERShift*0.026
-    if   aeta > 3.2: factor = 1.226 + JERShift * 0.145
-    elif aeta > 3.0: factor = 0.998 + JERShift * 0.066
-    elif aeta > 2.8: factor = 1.595 + JERShift * 0.175
-    elif aeta > 2.5: factor = 1.266 + JERShift * 0.132
-    elif aeta > 2.3: factor = 1.168 + JERShift * 0.120
-    elif aeta > 2.1: factor = 1.094 + JERShift * 0.093
-    elif aeta > 1.9: factor = 1.167 + JERShift * 0.086
-    elif aeta > 1.7: factor = 1.041 + JERShift * 0.062
-    elif aeta > 1.3: factor = 1.115 + JERShift * 0.030
-    elif aeta > 1.1: factor = 1.029 + JERShift * 0.066
-    elif aeta > 0.8: factor = 1.168 + JERShift * 0.046
-    elif aeta > 0.5: factor = 1.167 + JERShift * 0.048
+# https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
+def shiftJERfactor(JERShift, aeta): # 80X (2016, BCD+GH PromtReco) DATA/MC SFs
+    factor = 1.109 + JERShift*0.008
+    if   aeta > 3.2: factor = 1.160 + JERShift * 0.029
+    elif aeta > 3.0: factor = 1.328 + JERShift * 0.022
+    elif aeta > 2.8: factor = 1.857 + JERShift * 0.071
+    elif aeta > 2.5: factor = 1.364 + JERShift * 0.039
+    elif aeta > 2.3: factor = 1.177 + JERShift * 0.041
+    elif aeta > 2.1: factor = 1.067 + JERShift * 0.053
+    elif aeta > 1.9: factor = 1.140 + JERShift * 0.047
+    elif aeta > 1.7: factor = 1.082 + JERShift * 0.035
+    elif aeta > 1.3: factor = 1.084 + JERShift * 0.011
+    elif aeta > 1.1: factor = 1.123 + JERShift * 0.024
+    elif aeta > 0.8: factor = 1.114 + JERShift * 0.013
+    elif aeta > 0.5: factor = 1.138 + JERShift * 0.013
     return factor 
 
-
-
+def getJERsigma(aeta):
+    sigma = 0.008
+    if   aeta > 3.2: sigma = 0.029
+    elif aeta > 3.0: sigma = 0.022
+    elif aeta > 2.8: sigma = 0.071
+    elif aeta > 2.5: sigma = 0.039
+    elif aeta > 2.3: sigma = 0.041
+    elif aeta > 2.1: sigma = 0.053
+    elif aeta > 1.9: sigma = 0.047
+    elif aeta > 1.7: sigma = 0.035
+    elif aeta > 1.3: sigma = 0.011
+    elif aeta > 1.1: sigma = 0.024
+    elif aeta > 0.8: sigma = 0.013
+    elif aeta > 0.5: sigma = 0.013
+    return sigma
 
 class JetAnalyzer( Analyzer ):
     """Taken from RootTools.JetAnalyzer, simplified, modified, added corrections    """
@@ -485,8 +499,23 @@ class JetAnalyzer( Analyzer ):
                    factorJERDown= shiftJERfactor(-1, aeta)
                    ptscaleJERDown = max(0.0, (jetpt + (factorJERDown-1)*(jetpt-genpt))/jetpt)
                    setattr(jet, "corrJERDown", ptscaleJERDown)
-
-
+            else: #jet is unmatched, use stochastic smearing: https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
+                jetpt, aeta = jet.pt(), abs(jet.eta())
+                factor = shiftJERfactor(self.shiftJER, aeta)
+                sigma = getJERsigma(aeta)
+                norm = np.random.normal(0.0, sigma)
+                norm_sigma = norm * np.sqrt(max(0.0, factor*factor-1))
+                ptscale = max(0.0, 1 + norm_sigma)
+                if (self.shiftJER==0) and (self.addJERShifts):
+                    setattr(jet, "corrJER", ptscale )
+                    factorUp= shiftJERfactor(1, aeta)
+                    norm_sigmaUp = norm * np.sqrt(max(0.0, factorUp*factorUp-1))
+                    ptscaleUp = max(0.0, 1 + norm_sigmaUp)
+                    setattr(jet, "corrJERUp", ptscaleUp)
+                    factorDown= shiftJERfactor(-1, aeta)
+                    norm_sigmaDown = norm * np.sqrt(max(0.0, factorDown*factorDown-1))
+                    ptscaleDown = max(0.0, 1 + norm_sigmaDown)
+                    setattr(jet, "corrJERDown", ptscaleDown)
 
 
 
