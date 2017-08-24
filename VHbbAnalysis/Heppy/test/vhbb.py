@@ -324,8 +324,8 @@ JetAna.jecPath=os.environ['CMSSW_BASE']+"/src/VHbbAnalysis/Heppy/data/jec"
 #JetAna.mcGT="Fall15_25nsV2_MC"
 #JetAna.dataGT = "Fall15_25nsV2_DATA"
 
-JetAna.mcGT="Summer16_23Sep2016V3_MC"
-JetAna.dataGT="Summer16_23Sep2016GV3_DATA"
+JetAna.mcGT="Summer16_23Sep2016V4_MC"
+JetAna.dataGT="Summer16_23Sep2016GV4_DATA"
 JetAna.addJECShifts=True
 JetAna.addJERShifts=True
 
