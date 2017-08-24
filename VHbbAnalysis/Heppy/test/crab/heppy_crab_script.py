@@ -60,7 +60,7 @@ gtmap["Run2016D"]='Summer16_23Sep2016BCDV4_DATA'
 gtmap["Run2016E"]='Summer16_23Sep2016EFV4_DATA'
 gtmap["Run2016F"]='Summer16_23Sep2016EFV4_DATA'
 gtmap["Run2016G"]='Summer16_23Sep2016GV4_DATA'
-gtmap["Run2016H"]='Summer16_23Sep2016HV4_DATA '
+gtmap["Run2016H"]='Summer16_23Sep2016HV4_DATA'
 
 for x in config.sequence :
   if x.name == "PhysicsTools.Heppy.analyzers.objects.JetAnalyzer.JetAnalyzer_1" :
